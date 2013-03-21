@@ -24,35 +24,18 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.jdbc.ErrorType;
-import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
-import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author $author$

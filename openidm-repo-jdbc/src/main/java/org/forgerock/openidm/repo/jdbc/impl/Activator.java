@@ -44,36 +44,36 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting", context);
          
-         JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
-         
-         if (repoConfig != null) {
-             logger.info("Bootstrapping JDBC repository");
-             // Only take the configuration strictly needed for bootstrapping the repository
-             // Also, bootstrap property keys are lower case, Repo expects camel case
-             /*Map<String,Object> bootConfig = new HashMap<String,Object>();
-
-             bootConfig.put(JDBCRepoService.CONFIG_JNDI_NAME, repoConfig.get(JDBCRepoService.CONFIG_JNDI_NAME.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_JTA_NAME, repoConfig.get(JDBCRepoService.CONFIG_JTA_NAME.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_TYPE, repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_DRIVER, repoConfig.get(JDBCRepoService.CONFIG_DB_DRIVER.toLowerCase()));             
-             bootConfig.put(JDBCRepoService.CONFIG_DB_URL, repoConfig.get(JDBCRepoService.CONFIG_DB_URL.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_USER, repoConfig.get(JDBCRepoService.CONFIG_USER.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_PASSWORD, repoConfig.get(JDBCRepoService.CONFIG_PASSWORD.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_SCHEMA, repoConfig.get(JDBCRepoService.CONFIG_DB_SCHEMA.toLowerCase()));*/
-
-             // Init the bootstrap repo
-             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(repoConfig, context);
-             
-             // Register bootstrap repo
-             Hashtable<String, String> prop = new Hashtable<String, String>();
-             prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
-             prop.put("openidm.router.prefix", "bootrepo");
-             prop.put("db.type", "JDBC");
-             context.registerService(RepoBootService.class.getName(), bootSvc, prop);
-             logger.info("Registered bootstrap repository service");
-         } else {
-             logger.debug("No JDBC configuration detected");
-         }
+//         JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
+//         
+//         if (repoConfig != null) {
+//             logger.info("Bootstrapping JDBC repository");
+//             // Only take the configuration strictly needed for bootstrapping the repository
+//             // Also, bootstrap property keys are lower case, Repo expects camel case
+//             /*Map<String,Object> bootConfig = new HashMap<String,Object>();
+//
+//             bootConfig.put(JDBCRepoService.CONFIG_JNDI_NAME, repoConfig.get(JDBCRepoService.CONFIG_JNDI_NAME.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_JTA_NAME, repoConfig.get(JDBCRepoService.CONFIG_JTA_NAME.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_DB_TYPE, repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_DB_DRIVER, repoConfig.get(JDBCRepoService.CONFIG_DB_DRIVER.toLowerCase()));             
+//             bootConfig.put(JDBCRepoService.CONFIG_DB_URL, repoConfig.get(JDBCRepoService.CONFIG_DB_URL.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_USER, repoConfig.get(JDBCRepoService.CONFIG_USER.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_PASSWORD, repoConfig.get(JDBCRepoService.CONFIG_PASSWORD.toLowerCase()));
+//             bootConfig.put(JDBCRepoService.CONFIG_DB_SCHEMA, repoConfig.get(JDBCRepoService.CONFIG_DB_SCHEMA.toLowerCase()));*/
+//
+//             // Init the bootstrap repo
+//             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(repoConfig, context);
+//            
+//             // Register bootstrap repo
+//             Hashtable<String, String> prop = new Hashtable<String, String>();
+//             prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
+//             prop.put("openidm.router.prefix", "bootrepo");
+//             prop.put("db.type", "JDBC");
+//             context.registerService(RepoBootService.class.getName(), bootSvc, prop);
+//             logger.info("Registered bootstrap repository service");
+//         } else {
+//             logger.debug("No JDBC configuration detected");
+//         }
          logger.debug("JDBC bundle started", context);
      }
 

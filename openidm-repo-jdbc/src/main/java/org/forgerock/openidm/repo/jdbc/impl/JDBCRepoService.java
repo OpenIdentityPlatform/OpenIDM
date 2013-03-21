@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -50,31 +49,42 @@ import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
-import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.Patch;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -87,7 +97,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author aegloff
  */
-@Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
+		enabled = true)
 @Service
 // Omit the RepoBootService interface from the managed service
 @Properties({
@@ -96,7 +107,8 @@ import org.slf4j.LoggerFactory;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{partition}*"),
         @Property(name = "db.type", value = "JDBC")
 })
-public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvider */ {
+public class JDBCRepoService implements RequestHandler {
+	
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
@@ -132,39 +144,46 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     JsonValue config;
-
-    /**
-     * Gets an object from the repository by identifier. The returned object is not validated
-     * against the current schema and may need processing to conform to an updated schema.
-     * <p/>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} to enable optimistic concurrency supported by OrientDB and OpenIDM.
-     *
-     * @param fullId the identifier of the object to retrieve from the object set.
-     * @return the requested object.
-     * @throws NotFoundException   if the specified object could not be found.
-     * @throws ForbiddenException  if access to the object is forbidden.
-     * @throws BadRequestException if the passed identifier is invalid
-     */
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
+    
+	@Override
+	public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+		try {
+            handler.handleResult(read(request));
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
+        }
+	}
+    
+	/**
+	 * Reads a resource from the repository based on the supplied read request.
+	 * 
+	 * @param request the read request.
+	 * @return the requested resource.
+	 * @throws ResourceException if an error was encountered during the read.
+	 */
+    public Resource read(ReadRequest request) throws ResourceException {
+        // Parse the remaining resourceName
+    	String fullId = request.getResourceName();
+        String[] resourceName = ResourceUtil.parseResourceName(fullId);
+        if (resourceName == null) {
+            throw new BadRequestException(
+                    "The repository requires clients to supply an identifier for the object to read.");
+        }
+        
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
 
-        if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: "
-                    + fullId + " local identifier: " + localId);
-        } else if (type == null) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
-        }
-
         Connection connection = null;
-        Map<String, Object> result = null;
+        Resource result = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(true); // Ensure this does not get transaction isolation handling
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw new ObjectSetException("No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+                		"No handler configured for resource type " + type);
             }
             result = handler.read(fullId, type, localId, connection);
         } catch (SQLException ex) {
@@ -173,8 +192,8 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
-        } catch (ObjectSetException ex) {
-            logger.debug("ObjectSetException in read of {}", fullId, ex);
+        } catch (ResourceException ex) {
+            logger.debug("ResourceException in read of {}", fullId, ex);
             throw ex;
         } catch (IOException ex) {
             logger.debug("IO Exception in read of {}", fullId, ex);
@@ -182,40 +201,50 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
         } finally {
             CleanupHelper.loggedClose(connection);
         }
-
+        
         return result;
     }
-
+	
+	@Override
+	public void handleCreate(ServerContext context, CreateRequest request,
+			ResultHandler<Resource> handler) {
+		try {
+            handler.handleResult(create(request));
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
+        }
+	}
+    
     /**
-     * Creates a new object in the object set.
-     * <p/>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version (For optimistic concurrency)
-     *
-     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param obj    the contents of the object to create in the object set.
-     * @throws NotFoundException           if the specified id could not be resolved.
-     * @throws ForbiddenException          if access to the object or object set is forbidden.
-     * @throws PreconditionFailedException if an object with the same ID already exists.
+     * Creates a new resource in the repository.
+     * 
+     * @param request the create request
+     * @return the created resource
+     * @throws ResourceException if an error was encountered during creation
      */
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+	public Resource create(CreateRequest request) throws ResourceException {
+		// Parse the remaining resourceName
+    	String fullId = request.getResourceName();
+        String[] resourceName = ResourceUtil.parseResourceName(fullId);
+        if (resourceName == null) {
+            throw new BadRequestException(
+                    "The repository requires clients to supply an identifier for the object to read.");
+        }
+        
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-
-        if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: "
-                    + fullId + " local identifier: " + localId);
-        } else if (type == null) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
-        }
-
+        Map<String, Object> obj = request.getContent().asMap();
+		
         Connection connection = null;
         boolean retry = false;
         int tryCount = 0;
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw new ObjectSetException("No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+                		"No handler configured for resource type " + type);
             }
             retry = false;
             ++tryCount;
@@ -249,8 +278,8 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                     throw new InternalServerErrorException("Creating object failed "
                             + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")" + ex.getMessage(), ex);
                 }
-            } catch (ObjectSetException ex) {
-                logger.debug("ObjectSetException in create of {}", fullId, ex);
+            } catch (ResourceException ex) {
+                logger.debug("ResourceException in create of {}", fullId, ex);
                 rollback(connection);
                 throw ex;
             } catch (java.io.IOException ex) {
@@ -265,35 +294,45 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                 CleanupHelper.loggedClose(connection);
             }
         } while (retry);
-    }
-
-    /**
-     * Updates the specified object in the object set.
-     * <p/>
-     * This implementation requires MVCC and hence enforces that clients state what revision they expect
-     * to be updating
-     * <p/>
-     * If successful, this method updates metadata properties within the passed object,
-     * including: a new {@code _rev} value for the revised object's version
-     *
-     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
-     * @param rev    the version of the object to update; or {@code null} if not provided.
-     * @param obj    the contents of the object to put in the object set.
-     * @throws ConflictException           if version is required but is {@code null}.
-     * @throws ForbiddenException          if access to the object is forbidden.
-     * @throws NotFoundException           if the specified object could not be found.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     * @throws BadRequestException         if the passed identifier is invalid
-     */
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-
+                
+        // Return the newly created resource
+        return read(Requests.newReadRequest(fullId));
+	
+	}
+	
+	@Override
+	public void handleUpdate(ServerContext context, UpdateRequest request,
+			ResultHandler<Resource> handler) {
+		try {
+            handler.handleResult(update(request));
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
+        }
+	}
+	
+	/**
+	 * Updates a resource in the repository
+	 * 
+	 * @param request the update request
+	 * @return the updated resource
+	 * @throws ResourceException if an error was encountered while updating
+	 */
+	public Resource update(UpdateRequest request) throws ResourceException {
+		// Parse the remaining resourceName
+    	String fullId = request.getResourceName();
+        String[] resourceName = ResourceUtil.parseResourceName(fullId);
+        if (resourceName == null) {
+            throw new BadRequestException(
+                    "The repository requires clients to supply an identifier for the object to read.");
+        }
+        
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-
-        if (rev == null) {
-            throw new ConflictException("Object passed into update does not have revision it expects set.");
-        }
-
+        Map<String, Object> obj = request.getNewContent().asMap();
+        String rev = request.getRevision();
+        
         Connection connection = null;
         Integer previousIsolationLevel = null;
         boolean retry = false;
@@ -301,7 +340,8 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw new ObjectSetException("No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+                		"No handler configured for resource type " + type);
             }
             retry = false;
             ++tryCount;
@@ -330,8 +370,8 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                 if (!retry) {
                    throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
                 }
-            } catch (ObjectSetException ex) {
-                logger.debug("ObjectSetException in update of {}", fullId, ex);
+            } catch (ResourceException ex) {
+                logger.debug("ResourceException in update of {}", fullId, ex);
                 rollback(connection);
                 throw ex;
             } catch (java.io.IOException ex) {
@@ -355,23 +395,37 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                 }
             }
         } while (retry);
-    }
-
-    /**
-     * Deletes the specified object from the object set.
-     *
-     * @param fullId the identifier of the object to be deleted.
-     * @param rev    the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException           if the specified object could not be found.
-     * @throws ForbiddenException          if access to the object is forbidden.
-     * @throws ConflictException           if version is required but is {@code null}.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */
-    public void delete(String fullId, String rev) throws ObjectSetException {
-
+        
+        // Return the newly created resource
+        return read(Requests.newReadRequest(fullId));
+	}
+	
+	@Override
+	public void handleDelete(ServerContext context, DeleteRequest request,
+			ResultHandler<Resource> handler) {
+		try {
+            handler.handleResult(delete(request));
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
+        }
+	}
+	
+	public Resource delete(DeleteRequest request) throws ResourceException {
+		// Parse the remaining resourceName
+		Resource result = null;
+    	String fullId = request.getResourceName();
+        String[] resourceName = ResourceUtil.parseResourceName(fullId);
+        if (resourceName == null) {
+            throw new BadRequestException(
+                    "The repository requires clients to supply an identifier for the object to read.");
+        }
+        
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-
+        String rev = request.getRevision();
+        
         if (rev == null) {
             throw new ConflictException("Object passed into delete does not have revision it expects set.");
         }
@@ -382,13 +436,19 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw new ObjectSetException("No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+                		"No handler configured for resource type " + type);
             }
+            
+            
             retry = false;
             ++tryCount;
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
+            
+                // Read in the resource before deleting
+                result = handler.read(fullId, type, localId, connection);
 
                 handler.delete(fullId, type, localId, rev, connection);
 
@@ -413,8 +473,8 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                 if (!retry) {
                     throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
                 }
-            } catch (ObjectSetException ex) {
-                logger.debug("ObjectSetException in delete of {}", fullId, ex);
+            } catch (ResourceException ex) {
+                logger.debug("ResourceException in delete of {}", fullId, ex);
                 rollback(connection);
                 throw ex;
             } catch (RuntimeException ex) {
@@ -425,91 +485,73 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
                 CleanupHelper.loggedClose(connection);
             }
         } while (retry);
-    }
+        
+		return result;
+	}
+	
+	@Override
+	public void handlePatch(ServerContext context, PatchRequest request,
+			ResultHandler<Resource> handler) {
+		final ResourceException e = new NotSupportedException("Patch operations are not supported");
+        handler.handleError(e);
+	}
+	
+	@Override
+	public void handleQuery(ServerContext context, QueryRequest request,
+			QueryResultHandler handler) {
+		try {
+	    	String fullId = request.getResourceName();
+			String type = fullId;
+	        logger.trace("Full id: {} Extracted type: {}", fullId, type);
+            Map<String, Object> params =
+                    new HashMap<String, Object>(request.getAdditionalQueryParameters());
 
-    /**
-     * Currently not supported by this implementation.
-     * <p/>
-     * Applies a patch (partial change) to the specified object in the object set.
-     *
-     * @param id    the identifier of the object to be patched.
-     * @param rev   the version of the object to patch or {@code null} if not provided.
-     * @param patch the partial change to apply to the object.
-     * @throws ConflictException           if patch could not be applied object state or if version is required.
-     * @throws ForbiddenException          if access to the object is forbidden.
-     * @throws NotFoundException           if the specified object could not be found.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new UnsupportedOperationException();
-    }
+	        Connection connection = null;
+	        try {
+	            TableHandler tableHandler = getTableHandler(type);
+	            if (tableHandler == null) {
+	                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+	                		"No handler configured for resource type " + type);
+	            }
+	            connection = getConnection();
+	            connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
 
-    /**
-     * Performs the query on the specified object and returns the associated results.
-     * <p/>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
-     * <p/>
-     * The returned map is structured as follow:
-     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
-     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
-     *
-     * @param fullId identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException   if the specified object could not be found.
-     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     *                             configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException  if access to the object or specified query is forbidden.
-     */
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO: replace with common utility
-        String type = fullId;
-        logger.trace("Full id: {} Extracted type: {}", fullId, type);
+	            List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
+	            
+	            for (Map<String, Object> resultMap : docs) {
+	            	String id = (String)resultMap.get("_id");
+	            	String rev = (String)resultMap.get("_rev");
+	            	JsonValue value = new JsonValue(resultMap);
+	            	Resource resultResource = new Resource(id, rev, value);
+	            	handler.handleResource(resultResource);
+	            }
 
-        Map<String, Object> result = new HashMap<String, Object>();
-        Connection connection = null;
-        try {
-            TableHandler handler = getTableHandler(type);
-            if (handler == null) {
-                throw new ObjectSetException("No handler configured for resource type " + type);
-            }
-            connection = getConnection();
-            connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
-
-            long start = System.currentTimeMillis();
-            List<Map<String, Object>> docs = handler.query(type, params, connection);
-            long end = System.currentTimeMillis();
-            result.put(QueryConstants.QUERY_RESULT, docs);
-            // TODO: split out conversion time
-            //result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
-
-            result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end - start));
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
-                        new Object[]{((List) result.get(QueryConstants.QUERY_RESULT)).size(),
-                                result.get(QueryConstants.STATISTICS_QUERY_TIME),
-                                result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
-            }
-        } catch (SQLException ex) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
-                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
-            }
-            throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
-        } catch (ObjectSetException ex) {
-            logger.debug("ObjectSetException in query of {}", fullId, ex);
-            throw ex;
-        }  finally {
-            CleanupHelper.loggedClose(connection);
+	            handler.handleResult(new QueryResult());
+	        } catch (SQLException ex) {
+	            if (logger.isDebugEnabled()) {
+	                logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
+	                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+	            }
+	            throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
+	        } catch (ResourceException ex) {
+	            logger.debug("ResourceException in query of {}", fullId, ex);
+	            throw ex;
+	        }  finally {
+	            CleanupHelper.loggedClose(connection);
+	        }
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
         }
-        return result;
-    }
+	}
 
-    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
-        throw new UnsupportedOperationException("JDBC repository does not support action");
-    }
+	@Override
+	public void handleAction(ServerContext context, ActionRequest request,
+			ResultHandler<JsonValue> handler) {
+		final ResourceException e = new NotSupportedException("Action operations are not supported");
+        handler.handleError(e);
+	}
 
     // Utility method to cleanly roll back including logging
     private void rollback(Connection connection) {
@@ -583,11 +625,11 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
      * @param context
      * @return the boot repository service. This newBuilder is not managed by SCR and needs to be manually registered.
      */
-    static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) {
+    /*static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) {
         JDBCRepoService bootRepo = new JDBCRepoService();
         bootRepo.init(repoConfig, context);
         return bootRepo;
-    }
+    }*/
 
     /**
      * Activates the JDBC Repository Service

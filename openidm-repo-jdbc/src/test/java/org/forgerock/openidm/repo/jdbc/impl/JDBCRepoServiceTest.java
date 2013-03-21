@@ -23,16 +23,14 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import javax.naming.InitialContext;
+
 import org.dbunit.database.QueryDataSet;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.operation.DatabaseOperation;
-import org.forgerock.openidm.objset.NotFoundException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import javax.naming.InitialContext;
 
 /**
  * @author $author$
