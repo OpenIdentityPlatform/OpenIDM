@@ -54,6 +54,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
@@ -155,6 +157,10 @@ public class ActivitiServiceImpl implements RequestHandler {
     private String workflowDir;
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private PersistenceConfig persistenceConfig;
+    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
+    RouteService repositoryRoute;
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    CryptoService cryptoService;
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
@@ -241,8 +247,8 @@ public class ActivitiServiceImpl implements RequestHandler {
                             configuration.setDataSource(jdbcDataSource);
                         } else {
                             configuration.setDataSource(dataSource);
-                            //configuration.setIdentityService(identityService);
                         }
+                        configuration.setIdentityService(identityService);
 
                         configuration.setTransactionManager(transactionManager);
                         configuration.setTransactionsExternallyManaged(true);
@@ -404,14 +410,22 @@ public class ActivitiServiceImpl implements RequestHandler {
         logger.info("ProcessEngine stopped.");
     }
 
+    protected void bindRouteService(RouteService route) {
+        repositoryRoute = route;
+        this.identityService.setRouter(route);
+    }
+
+    protected void unbindRouteService(RouteService route) {
+        repositoryRoute = null;
+        this.identityService.setRouter(null);
+    }
+
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
-        //this.identityService.setRouter(router);
     }
 
     protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(null);
-        //this.identityService.setRouter(null);
     }
 
     protected void bindPersistenceConfig(PersistenceConfig config) {
@@ -454,5 +468,15 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     public void unbindDataSource(DataSource dataSource) {
         this.dataSource = null;
+    }
+
+    public void bindCryptoService(final CryptoService service) {
+        cryptoService = service;
+        identityService.setCryptoService(service);
+    }
+
+    public void unbindCryptoService(final CryptoService service) {
+        cryptoService = null;
+        identityService.setCryptoService(null);
     }
 }

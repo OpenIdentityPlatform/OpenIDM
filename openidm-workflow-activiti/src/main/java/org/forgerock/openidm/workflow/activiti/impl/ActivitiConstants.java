@@ -43,7 +43,7 @@ public class ActivitiConstants {
     public static final String REVISION = ServerConstants.OBJECT_PROPERTY_REV;
     public static final String REQUEST_PARAMS = "params";
     public static final String REQUEST_BODY = "value";
-    public static final String QUERY_ALL_IDS = "query-all-ids";
+    public static final String QUERY_ALL_IDS = ServerConstants.QUERY_ALL_IDS;
     public static final String QUERY_FILTERED = "filtered-query";
     public static final String QUERY_TASKDEF = "query-taskdefinition";
     public static final String VARIABLE_QUERY_PREFIX = "_var-";
