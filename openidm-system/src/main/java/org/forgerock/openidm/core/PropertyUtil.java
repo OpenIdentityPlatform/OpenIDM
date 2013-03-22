@@ -137,7 +137,7 @@ public class PropertyUtil {
                         if (null != substValue) {
                             return substValue;
                         } else {
-                            propertyStack.peek().append(delimiter.getStartChar()).append(variable)
+                            propertyStack.peek().append(delimiter.getStartString()).append(variable)
                                     .append(DELIM_STOP);
                             return propertyStack.peek().toString();
                         }
@@ -147,7 +147,7 @@ public class PropertyUtil {
                         if (null != substValue) {
                             propertyStack.peek().append(substValue);
                         } else {
-                            propertyStack.peek().append(delimiter.getStartChar()).append(variable)
+                            propertyStack.peek().append(delimiter.getStartString()).append(variable)
                                     .append(DELIM_STOP);
                         }
                     }
