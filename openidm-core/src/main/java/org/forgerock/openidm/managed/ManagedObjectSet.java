@@ -667,6 +667,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
             DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
             deleteRequest.setResourceName(repoId(resourceId));
+            if (deleteRequest.getRevision() == null) {
+                deleteRequest.setRevision(resource.getRevision());
+            }
             Resource deletedResource = context.getConnection().delete(context, deleteRequest);
             // TODO Fix the Auditing
             logActivity(context, resourceId, null, resource.getContent(), null);
