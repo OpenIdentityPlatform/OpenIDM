@@ -103,11 +103,11 @@
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
             <version>${openidm.version}</version>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-script</artifactId>
@@ -155,17 +155,18 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-salesforce</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-rest2ldap</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
-            <!-- To satisfy both maven unit tests and OSGi packaging
-                 this embedded jar is included as a dependency for maven
-                 purposes, but explicitly excluded for the OSGi packaging -->
-            <exclusions>
-                <exclusion>  
-                    <groupId>com.googlecode.disruptor</groupId>
-                    <artifactId>disruptor</artifactId>
-                </exclusion>
-            </exclusions> 
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -414,7 +415,6 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.1.1</version>
         </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
@@ -528,14 +528,15 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m
+                    -Xmx1024m -Dlogback.configurationFile=conf/logging-config.groovy
                 </openidm.options>
             </properties>
             <dependencies>
                 <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                    <version>${slf4j.version}</version>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                    <version>1.0.10</version>
+                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>
@@ -548,14 +549,15 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Dlogback.configurationFile=conf/logging-config.xml
+                    -Xmx1024m -Dlogback.configurationFile=conf/logging-config.groovy
                 </openidm.options>
             </properties>
             <dependencies>
                 <dependency>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
-                    <version>1.0.9</version>
+                    <version>1.0.10</version>
+                    <scope>compile</scope>
                 </dependency>
             </dependencies>
         </profile>

@@ -26,6 +26,7 @@ package org.forgerock.openidm.script;
 
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.Map;
 
 import javax.script.Bindings;
@@ -46,6 +47,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
@@ -66,11 +68,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A NAME does ...
+ * An AbstractScriptedService does ...
  * 
  * @author Laszlo Hordos
  */
-
 @Component(componentAbstract = true)
 public abstract class AbstractScriptedService implements ScriptCustomizer, ScriptListener {
 
@@ -116,13 +117,13 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     /**
      * Operation mask for supported operation.
      */
-    protected final int mask;
+    protected final EnumSet<RequestType> mask;
 
     protected AbstractScriptedService() {
-        mask = CREATE | READ | UPDATE | PATCH | QUERY | DELETE | ACTION;
+        mask = EnumSet.allOf(RequestType.class);
     }
 
-    protected AbstractScriptedService(int mask) {
+    protected AbstractScriptedService(EnumSet<RequestType> mask) {
         this.mask = mask;
     }
 
@@ -272,7 +273,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleAction(final ServerContext context, final ActionRequest request,
             final Bindings handler) throws ResourceException {
-        if ((ACTION & mask) == 0) {
+        if (mask.contains(RequestType.ACTION)) {
             throw new NotSupportedException("Actions are not supported for resource instances");
         }
         handleRequest(context, request, handler);
@@ -280,7 +281,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleCreate(final ServerContext context, final CreateRequest request,
             final Bindings handler) throws ResourceException {
-        if ((CREATE & mask) == 0) {
+        if (!mask.contains(RequestType.CREATE)) {
             throw new NotSupportedException("Create operations are not supported");
         }
         handleRequest(context, request, handler);
@@ -288,7 +289,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleDelete(final ServerContext context, final DeleteRequest request,
             final Bindings handler) throws ResourceException {
-        if ((DELETE & mask) == 0) {
+        if (!mask.contains(RequestType.DELETE)) {
             throw new NotSupportedException("Delete operations are not supported");
         }
         handleRequest(context, request, handler);
@@ -296,7 +297,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handlePatch(final ServerContext context, final PatchRequest request,
             final Bindings handler) throws ResourceException {
-        if ((PATCH & mask) == 0) {
+        if (!mask.contains(RequestType.PATCH)) {
             throw new NotSupportedException("Patch operations are not supported");
         }
         handleRequest(context, request, handler);
@@ -304,7 +305,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final Bindings handler) throws ResourceException {
-        if ((QUERY & mask) == 0) {
+        if (!mask.contains(RequestType.QUERY)) {
             throw new NotSupportedException("Query operations are not supported");
         }
         handleRequest(context, request, handler);
@@ -313,7 +314,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     public void handleRead(final ServerContext context, final ReadRequest request,
             final Bindings handler) throws ResourceException {
 
-        if ((READ & mask) == 0) {
+        if (!mask.contains(RequestType.READ)) {
             throw new NotSupportedException("Read operations are not supported");
         }
         handleRequest(context, request, handler);
@@ -321,7 +322,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final Bindings handler) throws ResourceException {
-        if ((UPDATE & mask) == 0) {
+        if (!mask.contains(RequestType.UPDATE)) {
             throw new NotSupportedException("Update operations are not supported");
         }
         handleRequest(context, request, handler);

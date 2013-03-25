@@ -34,7 +34,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.repo.RepositoryService;
 

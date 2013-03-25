@@ -68,8 +68,8 @@ public class DocumentUtil  {
         Map<String, Object> result = toMap(doc, fieldFilters, true);
         if (null != result) {
             result.put("_vertex", doc.getIdentity().toString());
-            return new Resource((String) result.get(ServerConstants.OBJECT_PROPERTY_ID),
-                    (String) result.get(ServerConstants.OBJECT_PROPERTY_REV), new JsonValue(result));
+            return new Resource((String) result.get(Resource.FIELD_CONTENT_ID),
+                    (String) result.get(Resource.FIELD_CONTENT_REVISION), new JsonValue(result));
         }
         return null;
     }
@@ -93,11 +93,11 @@ public class DocumentUtil  {
                 if (key.equals(ORIENTDB_PRIMARY_KEY)) {
                     logger.trace("Setting primary key to value {}", value);
                     String id = String.valueOf(value);
-                    result.put(ServerConstants.OBJECT_PROPERTY_ID, id);
+                    result.put(Resource.FIELD_CONTENT_ID, id);
 
                     String revision = Integer.toString(doc.getVersion());
                     logger.trace("Setting revision to {}", revision);
-                    result.put(ServerConstants.OBJECT_PROPERTY_REV, revision);
+                    result.put(Resource.FIELD_CONTENT_REVISION, revision);
                 } else {
                     // TODO: optimization switch: if we know that no embedded ODocuments are used 
                     // (i.e. only embedded Maps, Lists) then we would not need to traverse the whole graph
@@ -247,7 +247,7 @@ public class DocumentUtil  {
             for (Map.Entry<String, Object> entry : objModel.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                if (entry.getKey().equals(ServerConstants.OBJECT_PROPERTY_ID)) {
+                if (entry.getKey().equals(Resource.FIELD_CONTENT_ID)) {
                     // OpenIDM ID mapping
                     if (topLevel) {
                         if (!result.containsField(ORIENTDB_PRIMARY_KEY) 
@@ -256,10 +256,10 @@ public class DocumentUtil  {
                             result.field(ORIENTDB_PRIMARY_KEY, value);
                         }
                     }
-                } else if (key.equals(ServerConstants.OBJECT_PROPERTY_REV)) {
+                } else if (key.equals(Resource.FIELD_CONTENT_REVISION)) {
                     // OpenIDM revision to document version mapping
                     if (topLevel) {
-                        String revString = (String) objModel.get(ServerConstants.OBJECT_PROPERTY_REV);
+                        String revString = (String) objModel.get(Resource.FIELD_CONTENT_REVISION);
                         if (revString != null) {
                             int rev = parseVersion(revString);
                             logger.trace("Setting version to {}", rev);

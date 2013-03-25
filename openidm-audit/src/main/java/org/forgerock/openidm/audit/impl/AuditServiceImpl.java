@@ -59,13 +59,12 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.AuditService;
-import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -226,7 +225,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
         // Generate an ID if there is none
         if (localId == null || localId.isEmpty()) {
             localId = UUID.randomUUID().toString();
-            request.getContent().put(ServerConstants.OBJECT_PROPERTY_ID, localId);
+            request.getContent().put(Resource.FIELD_CONTENT_ID, localId);
             logger.debug("Assigned id {}", localId);
         }
         String id = type + "/" + localId;
@@ -242,12 +241,12 @@ public class AuditServiceImpl implements CollectionResourceProvider {
                 //TODO UPDATE
                 auditLogger.create(id,request.getContent().asMap());
             } catch (ResourceException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] { id,
-                    auditLogger.toString(), ex.getMessage() });
+                logger.warn("Failure writing audit log: {} with logger {}", id,
+                    auditLogger.toString(), ex.getMessage() );
                 handler.handleError(ex);
             } catch (RuntimeException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] { id,
-                    auditLogger.toString(), ex.getMessage() });
+                logger.warn("Failure writing audit log: {} with logger {}",  id,
+                    auditLogger.toString(), ex.getMessage() );
                 throw ex;
             }
         }
@@ -595,7 +594,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
             if (!filterActions.isNull()) {
                 List<String> filter = new ArrayList<String>();
                 for (JsonValue action : filterActions) {
-                    Enum actionEnum = action.asEnum(Action.class);
+                    Enum actionEnum = action.asEnum(RequestType.class);
                     filter.add(actionEnum.toString());
                 }
                 configFilters.put(eventTypeName, filter);
@@ -626,7 +625,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
                         // Loop through the trigger's actions
                         for (JsonValue triggerAction : trigger) {
                             // Add action to list
-                            Enum actionEnum = triggerAction.asEnum(Action.class);
+                            Enum actionEnum = triggerAction.asEnum(RequestType.class);
                             triggerActions.add(actionEnum.toString());
                         }
                         // Add list of actions to map of trigger's actions

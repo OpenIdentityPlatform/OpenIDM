@@ -548,7 +548,7 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
     public void actionInstance(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
         try {
-            if ("reauthenticate".equalsIgnoreCase(request.getActionId())) {
+            if ("reauthenticate".equalsIgnoreCase(request.getAction())) {
                 try {
                     if (context.containsContext(HttpContext.class)
                             && context.containsContext(SecurityContext.class)) {
@@ -569,7 +569,7 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
                     handler.handleError(new ForbiddenException("Reauthentication failed", ex));
                 }
             } else {
-                handler.handleError(new BadRequestException("Action " + request.getActionId()
+                handler.handleError(new BadRequestException("Action " + request.getAction()
                         + " on authentication service not supported"));
             }
         } catch (Exception e) {

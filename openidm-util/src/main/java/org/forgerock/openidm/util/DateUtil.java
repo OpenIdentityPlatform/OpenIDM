@@ -16,6 +16,7 @@
 package org.forgerock.openidm.util;
 
 
+import org.forgerock.openidm.core.ServerConstants;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -173,6 +174,6 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(new DateUtil("UTC").now());
+        System.out.println(new DateUtil(ServerConstants.TIME_ZONE_UTC).now());
     }
 }

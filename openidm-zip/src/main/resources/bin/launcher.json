@@ -13,6 +13,7 @@
                 "location":"bundle",
                 "includes":[
                     "**/org.apache.servicemix.transaction-*.jar",
+                    "**/org.apache.felix.configadmin*.jar",
                     "**/openidm-security-jetty*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
@@ -28,6 +29,7 @@
                     "**/openidm-system-*.jar",
                     "**/javax.transaction-*.jar",
                     "**/org.apache.servicemix.transaction-*.jar",
+                    "**/org.apache.felix.configadmin*.jar",
                     "**/openidm-security-jetty*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",

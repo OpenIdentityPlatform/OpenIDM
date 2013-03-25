@@ -239,7 +239,7 @@
 
         <!-- version management -->
         <openidm.version>2.2.0-SNAPSHOT</openidm.version>
-        <slf4j.version>1.7.2</slf4j.version>
+        <slf4j.version>1.7.4</slf4j.version>
         <orientdb.version>1.4.0-SNAPSHOT</orientdb.version>
         <jackson.version>1.9.12</jackson.version>
         <restlet.version>2.1.2</restlet.version>
@@ -295,13 +295,15 @@
         <module>openidm-policy</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-provisioner</module>
-        <!--module>openidm-repo-jdbc</module-->
+        <module>openidm-repo-jdbc</module>
         <module>openidm-repo-orientdb</module>
         <module>openidm-repo</module>
+        <module>openidm-rest2ldap</module>
         <module>openidm-filter</module>
+        <module>openidm-salesforce</module>
         <module>openidm-servlet</module>
         <module>openidm-servletfilter-registrator</module>
-        <!--module>openidm-quartz-fragment</module-->
+        <module>openidm-quartz-fragment</module>
         <!--<module>openidm-scheduler</module>-->
         <module>openidm-script</module>
         <module>openidm-security-jetty</module>
@@ -676,6 +678,13 @@
             <version>1.7R4</version>
             </dependency-->
 
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.1.2</version>
+            </dependency>
+
             <!-- Jackson JSON parser -->
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
@@ -761,6 +770,18 @@
                 <groupId>org.codehaus.jstestrunner</groupId>
                 <artifactId>jstestrunner-junit</artifactId>
                 <version>1.0.2</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-jcl</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.10</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

@@ -135,7 +135,7 @@ public class ObjectClassInfoHelper {
         boolean returnResource = false;
         if (null != fieldFilters) {
             for (JsonPointer field : fieldFilters) {
-                if (field.isEmpty() || returnResource || !ServerConstants.OBJECT_PROPERTY_ID.equals(field.leaf()) || !ServerConstants.OBJECT_PROPERTY_REV.equals(field.leaf())){
+                if (field.isEmpty() || returnResource || !Resource.FIELD_CONTENT_ID.equals(field.leaf()) || !Resource.FIELD_CONTENT_REVISION.equals(field.leaf())){
                     returnResource = true;
                 }
                 if (field.isEmpty()) {
@@ -177,7 +177,7 @@ public class ObjectClassInfoHelper {
         if (null == nameValue) {
             JsonValue o = content.get(nameAttribute);
             if (o.isNull()) {
-                o = content.get(ServerConstants.OBJECT_PROPERTY_ID);
+                o = content.get(Resource.FIELD_CONTENT_ID);
             }
             if (o.isString()) {
                 nameValue = o.asString();
@@ -267,10 +267,10 @@ public class ObjectClassInfoHelper {
             }
         }
         Uid uid = source.getUid();
-        result.put(ServerConstants.OBJECT_PROPERTY_ID, uid.getUidValue());
+        result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
         if (null != uid.getRevision()) {
             //System supports Revision
-            result.put(ServerConstants.OBJECT_PROPERTY_REV, uid.getRevision());
+            result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
         }
         return new Resource(uid.getUidValue(), uid.getRevision(), result );
     }

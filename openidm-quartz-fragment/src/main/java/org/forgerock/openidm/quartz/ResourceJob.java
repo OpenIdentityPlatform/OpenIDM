@@ -26,28 +26,30 @@ package org.forgerock.openidm.quartz;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.FutureResult;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
-//import org.forgerock.openidm.util.LogUtil;
-import org.quartz.Job;
+import org.forgerock.openidm.util.ResourceUtil;
+import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * A ResourceJob invokes a {@link Request} with given {@link ServerContext}.
  * 
  * @author Laszlo Hordos
  */
-//@PersistJobDataAfterExecution
-//@DisallowConcurrentExecution
-public class ResourceJob implements Job {
+// @PersistJobDataAfterExecution
+// @DisallowConcurrentExecution
+public class ResourceJob implements InterruptableJob {
 
     /**
      * Setup logging for the {@link ResourceJob}.
@@ -55,7 +57,7 @@ public class ResourceJob implements Job {
     final static Logger logger = LoggerFactory.getLogger(ResourceJob.class);
 
     // Default to INFO
-    //private LogUtil.LogLevel logLevel = LogUtil.LogLevel.INFO;
+    // private LogUtil.LogLevel logLevel = LogUtil.LogLevel.INFO;
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -69,7 +71,7 @@ public class ResourceJob implements Job {
                 (PersistenceConfig) data.get(CommonJobFactory.PERSISTENCE_CONFIG);
 
         String invokeLogLevel = data.getString("scheduler.invokeLogLevel");
-        //logLevel = LogUtil.asLogLevel(invokeLogLevel);
+        // logLevel = LogUtil.asLogLevel(invokeLogLevel);
 
         // Restore Context
         JsonValue savedContext = (JsonValue) data.get("scheduler.invokeContext");
@@ -81,35 +83,44 @@ public class ResourceJob implements Job {
 
             // Matt adds the method to restore the request
             // Request request = Requests.loadFromJson(savedRequest);
-            Request request = Requests.newActionRequest("/test", "test");
+            Request request = ResourceUtil.requestFromJsonValue(savedRequest);
             try {
 
-
-                //LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getDescription());
-                if (request instanceof ActionRequest) {
-
-                    //Shall we wait for the response
+                // LogUtil.logAtLevel(logger, logLevel,
+                // "Scheduled service \"{}\" found, invoking.",
+                // context.getJobDetail().getDescription());
+                switch (request.getRequestType()) {
+                case ACTION: {
+                    // Shall we wait for the response
                     if (context.getJobDetail().isPersistJobDataAfterExecution()) {
                         serverContext.getConnection()
                                 .action(serverContext, (ActionRequest) request);
                     } else {
-                        serverContext.getConnection().actionAsync(serverContext,
-                                (ActionRequest) request, new ResultHandler<JsonValue>() {
-                                    @Override
-                                    public void handleError(ResourceException error) {
+                        FutureResult<JsonValue> result =
+                                serverContext.getConnection().actionAsync(serverContext,
+                                        (ActionRequest) request, new ResultHandler<JsonValue>() {
+                                            @Override
+                                            public void handleError(ResourceException error) {
 
-                                    }
+                                            }
 
-                                    @Override
-                                    public void handleResult(JsonValue result) {
+                                            @Override
+                                            public void handleResult(JsonValue result) {
 
-                                    }
-                                });
+                                            }
+                                        });
+                        try {
+                            result.get();
+                        } catch (InterruptedException e) {
+
+                        }
                     }
-                } else {
-                    // TODO add them later
                 }
-                //LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context .getJobDetail().getDescription());
+
+                }
+                // LogUtil.logAtLevel(logger, logLevel,
+                // "Scheduled service \"{}\" invoke completed successfully.",
+                // context .getJobDetail().getDescription());
             } catch (ResourceException e) {
                 logger.error("Failed load ServerContext", e);
                 throw new JobExecutionException(e);
@@ -119,5 +130,13 @@ public class ResourceJob implements Job {
             logger.error("Failed load ServerContext", e);
             throw new JobExecutionException(e);
         }
+    }
+
+    private final ResultHandler<?> handler = null;
+
+    @Override
+    public void interrupt() throws UnableToInterruptJobException {
+        // TODO What?
+        //handler.handleError(new ServiceUnavailableException("Job is interrupt"));
     }
 }

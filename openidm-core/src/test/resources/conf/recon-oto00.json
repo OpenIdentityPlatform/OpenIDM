@@ -1,0 +1,198 @@
+{
+    "relation": "one-to-one",
+    "source": {
+        "comment": "we should use the meta-data later",
+        "caseSensitiveId": false,
+
+
+        "resourceName": "/managed/user",
+        "queryFilter": "!(userName eq \"N/A\")",
+        "pageSize": 100,
+        "fields": [
+            "_id",
+            "_rev",
+            "userName"
+        ],
+        "-onLink": {
+            "name": "oto-link-source.groovy",
+            "type": "groovy",
+            "comment": "Used to generate the link for ONE-TO-MANY or if not Links"
+        },
+        "-onConfirmation": {
+            "name": "oto-confirmation.groovy",
+            "type": "groovy",
+            "comment": "Used to confirm the one of the multiple target resources"
+        },
+        "correlationQuery": {
+            "comment": "query or script",
+            "queryFilter": "userName eq \"${source.content.userName}\"",
+            "-queryExpression": "SELECT from account",
+
+            "-name": "oto-correlation.groovy",
+            "-type": "groovy"
+        }
+    },
+    "target": {
+        "comment": "we should use the meta-data later",
+        "caseSensitiveId": false,
+
+
+        "requestType": "query",
+        "resourceName": "/system/OpenDJ/account",
+        "queryFilter": "!(userName eq \"N/A\")",
+        "pageSize": 100,
+        "fields": [
+            "_id",
+            "_rev",
+            "userName"
+        ],
+        "-onLink": {
+            "name": "oto-links-target.groovy",
+            "type": "groovy",
+            "comment": "Used to generate the link if the links are not preloaded"
+        }
+    },
+    "link": {
+        "reverse": false,
+
+        "resourceName": "/repo/link/account",
+        "queryFilter": "!(userName eq \"N/A\")",
+        "-queryExpression": "SELECT from account",
+
+        "queryForSource": {
+            "resourceName": "/repo/link/account",
+            "queryFilter": "firstId eq \"${source._id}\"",
+            "-queryExpression": "SELECT from account where firstId='${source.id}'"
+        },
+        "queryForTarget": {
+            "resourceName": "/repo/link/account",
+            "queryFilter": "secondId eq \"${target._id}\"",
+            "-queryExpression": "SELECT from account where secondId='${target.id}'"
+        }
+    },
+    "policies": {
+        "ALL_GONE": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        },
+        "ABSENT": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onCreate",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "LINK_ONLY": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        },
+        "MISSING": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onUpdate",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "link": "${link}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "UNASSIGNED": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "FOUND": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "SOURCE_MISSING": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "link": "${link}",
+                    "target": "${target}"
+
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "CONFIRMED": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "link": "${link}",
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "UNKNOWN": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        }
+    },
+    "properties": {
+        "comment": "Properties passed along with the property substitution and all script scope"
+    }
+}

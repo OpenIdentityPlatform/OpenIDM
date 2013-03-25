@@ -634,7 +634,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             JsonValue _new = decrypt(request.getNewContent());
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-            for (JsonPointer pointer: request.getFieldFilters()) {
+            for (JsonPointer pointer: request.getFields()) {
                 readRequest.addField(pointer);
             }
             Resource resource = context.getConnection().read(context, readRequest);
@@ -810,15 +810,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         logger.debug("action name={} id={}", name, request.getResourceName());
 
         try {
-            Action action = Action.valueOf(request.getActionId());
-            logActivity(context, request.getResourceName(), "Action: " + request.getActionId(),
+            Action action = Action.valueOf(request.getAction());
+            logActivity(context, request.getResourceName(), "Action: " + request.getAction(),
                     null, null);
             switch (action) {
             case patch:
                 handler.handleResult(patchAction(context, request));
             }
         } catch (IllegalArgumentException e) {
-            handler.handleError(new BadRequestException("Action:" + request.getActionId()
+            handler.handleError(new BadRequestException("Action:" + request.getAction()
                     + " is not supported for resource collection", e));
         } catch (ResourceException e) {
             handler.handleError(e);

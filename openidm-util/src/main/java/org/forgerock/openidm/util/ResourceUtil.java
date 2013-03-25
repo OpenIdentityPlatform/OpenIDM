@@ -47,6 +47,8 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.SecurityContext;
@@ -307,24 +309,43 @@ public class ResourceUtil {
         }
     }
 
+    public static Resource resourceFromJsonValue(JsonValue resource) {
+        if (null != resource && !resource.isNull()) {
+            return new Resource(resource.expect(Map.class).get(Resource.FIELD_ID).required()
+                    .asString(), resource.get(Resource.FIELD_REVISION).asString(), resource
+                    .get(Resource.FIELD_CONTENT));
+        } else {
+            return null;
+        }
+    }
+
+    public static JsonValue resourceToJsonValue(Resource resource) {
+        final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
+        wrapper.add(Resource.FIELD_ID, resource.getId());
+        if (null != resource.getRevision()) {
+            wrapper.add(Resource.FIELD_REVISION, resource.getRevision());
+        }
+        if (null != resource.getContent()) {
+            wrapper.add(Resource.FIELD_CONTENT, resource.getContent().getObject());
+        }
+        return wrapper;
+    }
+
     public static Request requestFromJsonValue(JsonValue request) {
         Request result = null;
-        if (null != request && request.isMap()) {
-            // TODO Unit test if the methods value is not correct
-            String resourceName = request.get("resourceName").required().asString();
-            switch (request.get("method").asEnum(RequestType.class)) {
-            case CREATE:
-                result =
-                        Requests.newCreateRequest(resourceName, request.get("newResourceId")
-                                .asString(), request.get("content"));
-                break;
+        if (null != request) {
+            String resourceName =
+                    request.required().expect(Map.class).get(Request.FIELD_RESOURCE_NAME)
+                            .required().asString();
+            switch (request.get("requestType").required().asEnum(RequestType.class)) {
             case READ:
                 result = Requests.newReadRequest(resourceName);
                 break;
             case UPDATE:
                 UpdateRequest ur =
-                        Requests.newUpdateRequest(resourceName, request.get("newContent"));
-                ur.setRevision(request.get("revision").asString());
+                        Requests.newUpdateRequest(resourceName, request.get(
+                                UpdateRequest.FIELD_NEW_CONTENT).required());
+                ur.setRevision(request.get(UpdateRequest.FIELD_REVISION).asString());
                 result = ur;
                 break;
             case PATCH:
@@ -332,65 +353,79 @@ public class ResourceUtil {
                 // break;
             case QUERY:
                 QueryRequest qr = Requests.newQueryRequest(resourceName);
-                if (request.isDefined("filter") ^ request.isDefined("queryId")
-                        ^ request.isDefined("queryExpression")) {
-                    if (request.isDefined("filter")) {
-                        qr.setQueryFilter(QueryFilter.valueOf(request.get("filter").required()
-                                .asString()));
-                    } else if (request.isDefined("queryId")) {
-                        qr.setQueryId(request.get("queryId").required().asString());
-                    } else if (request.isDefined("queryExpression")) {
-                        qr.setQueryExpression(request.get("queryExpression").required().asString());
+                if (request.isDefined(QueryRequest.FIELD_QUERY_FILTER)
+                        ^ request.isDefined(QueryRequest.FIELD_QUERY_ID)
+                        ^ request.isDefined(QueryRequest.FIELD_QUERY_EXPRESSION)) {
+                    if (request.isDefined(QueryRequest.FIELD_QUERY_FILTER)) {
+                        qr.setQueryFilter(QueryFilter.valueOf(request.get(
+                                QueryRequest.FIELD_QUERY_FILTER).required().asString()));
+                    } else if (request.isDefined(QueryRequest.FIELD_QUERY_ID)) {
+                        qr.setQueryId(request.get(QueryRequest.FIELD_QUERY_ID).required()
+                                .asString());
+                    } else if (request.isDefined(QueryRequest.FIELD_QUERY_EXPRESSION)) {
+                        qr.setQueryExpression(request.get(QueryRequest.FIELD_QUERY_EXPRESSION)
+                                .required().asString());
                     }
 
-                    if (request.isDefined("sortKeys")) {
-                        for (JsonValue sortKey : request.get("sortKeys")) {
+                    if (request.isDefined(QueryRequest.FIELD_SORT_KEYS)) {
+                        for (JsonValue sortKey : request.get(QueryRequest.FIELD_SORT_KEYS)) {
                             qr.addSortKey(sortKey.asString());
                         }
                     }
-                    if (request.isDefined("pagedResultsCookie")) {
-                        qr.setPagedResultsCookie(request.get("pagedResultsCookie").asString());
+                    if (request.isDefined(QueryRequest.FIELD_PAGED_RESULTS_COOKIE)) {
+                        qr.setPagedResultsCookie(request.get(
+                                QueryRequest.FIELD_PAGED_RESULTS_COOKIE).asString());
                     }
-                    if (request.isDefined("pagedResultsOffset")) {
-                        qr.setPagedResultsOffset(request.get("pagedResultsOffset").asInteger());
+                    if (request.isDefined(QueryRequest.FIELD_PAGED_RESULTS_OFFSET)) {
+                        qr.setPagedResultsOffset(request.get(
+                                QueryRequest.FIELD_PAGED_RESULTS_OFFSET).asInteger());
                     }
-                    if (request.isDefined("pageSize")) {
-                        qr.setPageSize(request.get("pageSize").asInteger());
+                    if (request.isDefined(QueryRequest.FIELD_PAGE_SIZE)) {
+                        qr.setPageSize(request.get(QueryRequest.FIELD_PAGE_SIZE).asInteger());
                     }
                 } else {
-                    throw new JsonValueException(request,
-                            "The query request must contain only one of queryId, filter, queryExpression");
+                    StringBuilder sb =
+                            new StringBuilder("The query request must contain only one of [");
+                    sb.append(QueryRequest.FIELD_QUERY_ID).append(",").append(
+                            QueryRequest.FIELD_QUERY_EXPRESSION).append(",").append(
+                            QueryRequest.FIELD_QUERY_FILTER).append("]");
+                    throw new JsonValueException(request, sb.toString());
                 }
                 result = qr;
                 break;
             case DELETE:
                 DeleteRequest dr = Requests.newDeleteRequest(resourceName);
-                dr.setRevision(request.get("revision").asString());
+                dr.setRevision(request.get(DeleteRequest.FIELD_REVISION).asString());
                 result = dr;
                 break;
             case ACTION:
-                // TODO Should we convert it to CreateRequest?
-                ActionRequest ar =
-                        Requests.newActionRequest(resourceName, request.get("actionId").required()
-                                .asString());
-                ar.setContent(request.get("content"));
-                JsonValue params = request.get("additionalActionParameters");
-                for (String key : params.keys()) {
-                    ar.setAdditionalActionParameter(key, params.get(key).asString());
+                String action = request.get(ActionRequest.FIELD_ACTION).required().asString();
+                if (!ActionRequest.ACTION_ID_CREATE.equalsIgnoreCase(action)) {
+                    ActionRequest ar = Requests.newActionRequest(resourceName, action);
+                    ar.setContent(request.get(ActionRequest.FIELD_CONTENT));
+                    JsonValue params =
+                            request.get(ActionRequest.FIELD_ADDITIONAL_ACTION_PARAMETERS);
+                    for (String key : params.keys()) {
+                        ar.setAdditionalActionParameter(key, params.get(key).asString());
+                    }
+                    result = ar;
+                    break;
                 }
-                result = ar;
+            case CREATE:
+                result =
+                        Requests.newCreateRequest(resourceName, request.get(
+                                CreateRequest.FIELD_NEW_RESOURCE_ID).asString(), request
+                                .get(CreateRequest.FIELD_CONTENT));
                 break;
             default:
-                throw new JsonValueException(request.get("method"), "Unknown request method type");
+                throw new JsonValueException(request.get("requestType"), "Unknown requestType");
             }
-            JsonValue _fields = request.get("fieldFilters");
+            JsonValue _fields = request.get(Request.FIELD_FIELDS);
             if (_fields.isList()) {
                 for (JsonValue field : _fields) {
                     result.addField(field.asPointer());
                 }
             }
-        } else {
-            throw new IllegalArgumentException("Invalid input request");
         }
         return result;
     }
@@ -400,7 +435,7 @@ public class ResourceUtil {
             throw new NullPointerException();
         }
         JsonValue result = new JsonValue(new LinkedHashMap<String, Object>());
-        result.put("method", request.getRequestType().name());
+        result.put("requestType", request.getRequestType().name());
         parseCommonParameter(result, request);
         switch (request.getRequestType()) {
         case READ: {
@@ -412,15 +447,15 @@ public class ResourceUtil {
         case UPDATE: {
             UpdateRequest ur = (UpdateRequest) request;
             if (null != ur.getRevision()) {
-                result.put("revision", ur.getRevision());
+                result.put(UpdateRequest.FIELD_REVISION, ur.getRevision());
             }
-            result.put("newContent", ur.getNewContent().getObject());
+            result.put(UpdateRequest.FIELD_NEW_CONTENT, ur.getNewContent().getObject());
             break;
         }
         case DELETE: {
             DeleteRequest dr = (DeleteRequest) request;
             if (null != dr.getRevision()) {
-                result.put("revision", dr.getRevision());
+                result.put(DeleteRequest.FIELD_REVISION, dr.getRevision());
             }
             break;
         }
@@ -429,50 +464,59 @@ public class ResourceUtil {
             if (null != qr.getQueryFilter() ^ null != qr.getQueryId()
                     ^ null != qr.getQueryExpression()) {
                 if (null != qr.getQueryFilter()) {
-                    result.put("filter", qr.getQueryFilter().toString());
+                    result.put(QueryRequest.FIELD_QUERY_FILTER, qr.getQueryFilter().toString());
                 } else if (null != qr.getQueryId()) {
-                    result.put("queryId", qr.getQueryId());
+                    result.put(QueryRequest.FIELD_QUERY_ID, qr.getQueryId());
                 } else if (null != qr.getQueryExpression()) {
-                    result.put("queryExpression", qr.getQueryExpression());
+                    result.put(QueryRequest.FIELD_QUERY_EXPRESSION, qr.getQueryExpression());
                 }
                 if (null != qr.getSortKeys() && !qr.getSortKeys().isEmpty()) {
                     List<String> _sortKeys = new ArrayList<String>(qr.getSortKeys().size());
                     for (SortKey sortKey : qr.getSortKeys()) {
                         _sortKeys.add(sortKey.toString());
                     }
-                    result.put("sortKeys", _sortKeys);
+                    result.put(QueryRequest.FIELD_SORT_KEYS, _sortKeys);
                 }
                 if (null != qr.getPagedResultsCookie()) {
-                    result.put("pagedResultsCookie", qr.getPagedResultsCookie());
+                    result.put(QueryRequest.FIELD_PAGED_RESULTS_COOKIE, qr.getPagedResultsCookie());
                 }
-                result.put("pagedResultsOffset", qr.getPagedResultsOffset());
-                result.put("pageSize", qr.getPageSize());
+                result.put(QueryRequest.FIELD_PAGED_RESULTS_OFFSET, qr.getPagedResultsOffset());
+                result.put(QueryRequest.FIELD_PAGE_SIZE, qr.getPageSize());
             } else {
-                throw new IllegalArgumentException(
-                        "The query request must contain only one of queryId, filter, queryExpression");
+                StringBuilder sb =
+                        new StringBuilder("The query request must contain only one of [");
+                sb.append(QueryRequest.FIELD_QUERY_ID).append(",").append(
+                        QueryRequest.FIELD_QUERY_EXPRESSION).append(",").append(
+                        QueryRequest.FIELD_QUERY_FILTER).append("]");
+                throw new JsonValueException(result, sb.toString());
             }
             break;
         }
         case ACTION: {
-            // TODO Should we convert it to CreateRequest
             ActionRequest ar = (ActionRequest) request;
-            parseCommonParameter(result, request);
-            result.put("actionId", ar.getActionId());
+            if (!ActionRequest.ACTION_ID_CREATE.equalsIgnoreCase(ar.getAction())) {
 
-            if (null != ar.getAdditionalActionParameters()
-                    && !ar.getAdditionalActionParameters().isEmpty()) {
-                result.put("additionalActionParameters", ar.getAdditionalActionParameters());
-            }
+                result.put(ActionRequest.FIELD_ACTION, ar.getAction());
 
-            if (null != ar.getContent() && !ar.getContent().isNull()) {
-                result.put("content", ar.getContent().getObject());
+                if (null != ar.getAdditionalActionParameters()
+                        && !ar.getAdditionalActionParameters().isEmpty()) {
+                    result.put(ActionRequest.FIELD_ADDITIONAL_ACTION_PARAMETERS, ar
+                            .getAdditionalActionParameters());
+                }
+
+                if (null != ar.getContent() && !ar.getContent().isNull()) {
+                    result.put(ActionRequest.FIELD_CONTENT, ar.getContent().getObject());
+                }
+                break;
+            } else {
+                result.put(CreateRequest.FIELD_CONTENT, ar.getContent().getObject());
+                result.put("requestType", RequestType.CREATE.name());
             }
-            break;
         }
         case CREATE: {
             CreateRequest cr = (CreateRequest) request;
-            result.put("newResourceId", cr.getNewResourceId());
-            result.put("content", cr.getContent().getObject());
+            result.put(CreateRequest.FIELD_NEW_RESOURCE_ID, cr.getNewResourceId());
+            result.put(CreateRequest.FIELD_CONTENT, cr.getContent().getObject());
             break;
         }
         default:
@@ -482,13 +526,37 @@ public class ResourceUtil {
     }
 
     private static void parseCommonParameter(final JsonValue json, final Request request) {
-        json.put("resourceName", request.getResourceName());
-        if (null != request.getFieldFilters() && !request.getFieldFilters().isEmpty()) {
-            List<String> _fields = new ArrayList<String>(request.getFieldFilters().size());
-            for (JsonPointer pointer : request.getFieldFilters()) {
+        json.put(Request.FIELD_RESOURCE_NAME, request.getResourceName());
+        if (null != request.getFields() && !request.getFields().isEmpty()) {
+            List<String> _fields = new ArrayList<String>(request.getFields().size());
+            for (JsonPointer pointer : request.getFields()) {
                 _fields.add(pointer.toString());
             }
-            json.put("fieldFilters", _fields);
+            json.put(Request.FIELD_FIELDS, _fields);
         }
+    }
+
+    /**
+     * Adapts a {@code Throwable} to a {@code ResourceException}. If the
+     * {@code Throwable} is an JSON {@code JsonValueException} then an
+     * appropriate {@code ResourceException} is returned, otherwise an
+     * {@code InternalServerErrorException} is returned.
+     * 
+     * @param t
+     *            The {@code Throwable} to be converted.
+     * @return The equivalent resource exception.
+     */
+    public static ResourceException adapt(final Throwable t) {
+        int resourceResultCode;
+        try {
+            throw t;
+        } catch (final ResourceException e) {
+            return e;
+        } catch (final JsonValueException e) {
+            resourceResultCode = ResourceException.BAD_REQUEST;
+        } catch (final Throwable tmp) {
+            resourceResultCode = ResourceException.INTERNAL_ERROR;
+        }
+        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
     }
 }

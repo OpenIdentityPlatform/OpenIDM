@@ -19,14 +19,6 @@ import org.forgerock.json.resource.UpdateRequest;
  */
 public interface ScriptCustomizer {
 
-    public static final int CREATE = 1;
-    public static final int READ = 2;
-    public static final int UPDATE = 4;
-    public static final int PATCH = 8;
-    public static final int QUERY = 16;
-    public static final int DELETE = 32;
-    public static final int ACTION = 64;
-
     void handleCreate(ServerContext context, CreateRequest request, Bindings handler)
             throws ResourceException;
 

@@ -70,7 +70,7 @@ public class ObjectClassInfoHelperTest {
 
         ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
         JsonValue source = new JsonValue(new HashMap<String, Object>());
-        source.put(ServerConstants.OBJECT_PROPERTY_ID, "ID_NAME");
+        source.put(Resource.FIELD_CONTENT_ID, "ID_NAME");
         source.put("__NAME__", "NAME_NAME");
 
         ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source, null);

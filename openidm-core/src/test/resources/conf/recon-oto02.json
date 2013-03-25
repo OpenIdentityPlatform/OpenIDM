@@ -1,0 +1,159 @@
+{
+    "relation": "one-to-one",
+    "source": {
+        "comment": "we should use the meta-data later",
+        "caseSensitiveId": false,
+
+
+        "resourceName": "/managed/user",
+        "queryFilter": "!(userName eq \"N/A\")",
+        "fields": [
+            "_id",
+            "_rev",
+            "userName"
+        ],
+        "correlationQuery": {
+            "queryFilter": "userName eq \"${source.content.userName}\""
+        }
+    },
+    "target": {
+        "comment": "Read the target one-by-one",
+        "caseSensitiveId": false,
+
+        "requestType": "read",
+        "resourceName": "/system/OpenDJ/account",
+        "fields": [
+            "_id",
+            "_rev",
+            "userName"
+        ]
+    },
+    "link": {
+        "comment": "Links are generated with the same ID"
+    },
+    "policies": {
+        "ALL_GONE": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        },
+        "ABSENT": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onCreate",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "LINK_ONLY": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        },
+        "MISSING": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onUpdate",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "link": "${link}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "UNASSIGNED": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "FOUND": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "SOURCE_MISSING": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "link": "${link}",
+                    "target": "${target}"
+
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "CONFIRMED": [
+            {
+                "requestType": "action",
+                "resourceName": "/sync",
+                "action": "onDelete",
+                "additionalActionParameters": {
+                    "situation": "${situation}"
+                },
+                "content": {
+                    "source": "${source}",
+                    "link": "${link}",
+                    "target": "${target}"
+                }
+            },
+            {
+                "name": "audit.groovy",
+                "type": "groovy"
+            }
+        ],
+        "UNKNOWN": {
+            "name": "audit.groovy",
+            "type": "groovy"
+        }
+    },
+    "properties": {
+        "comment": "Properties passed along with the property substitution and all script scope"
+    }
+}

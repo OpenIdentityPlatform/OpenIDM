@@ -24,6 +24,7 @@
 package org.forgerock.openidm.info.internal;
 
 import java.util.Dictionary;
+import java.util.EnumSet;
 
 import javax.script.Bindings;
 
@@ -39,6 +40,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.EnhancedConfig;
@@ -87,7 +89,7 @@ public class InfoService extends AbstractScriptedService {
     private ComponentContext context;
 
     public InfoService() {
-        super(READ);
+        super(EnumSet.of(RequestType.READ));
     }
 
     @Activate

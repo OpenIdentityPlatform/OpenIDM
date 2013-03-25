@@ -53,6 +53,24 @@
         </dependency>
 
         <dependency>
+            <groupId>com.tinkerpop.gremlin.osgi</groupId>
+            <artifactId>gremlin-groovy</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-extender</artifactId>
             <version>1.6.0</version>

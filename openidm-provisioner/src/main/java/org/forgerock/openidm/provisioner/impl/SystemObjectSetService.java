@@ -88,7 +88,7 @@ public class SystemObjectSetService implements SingletonResourceProvider {
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        if ("CREATECONFIGURATION".equalsIgnoreCase(request.getActionId())) {
+        if ("CREATECONFIGURATION".equalsIgnoreCase(request.getAction())) {
             if (null != configurationService) {
             try {
                 handler.handleResult(configurationService.configure(request.getContent()));
@@ -100,7 +100,7 @@ public class SystemObjectSetService implements SingletonResourceProvider {
                 handler.handleError(new ServiceUnavailableException("The required service is not available"));
             }
         }   else {
-            handler.handleError(new BadRequestException("Unsupported actionId: " + request.getActionId()));
+            handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
         }
     }
 

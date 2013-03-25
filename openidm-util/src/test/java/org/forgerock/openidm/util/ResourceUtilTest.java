@@ -77,12 +77,14 @@ public class ResourceUtilTest {
         Assert.assertEquals(p0.index(), 0);
         Assert.assertEquals(p0.value(), "resourceName");
         Assert.assertEquals(p0.resourceCollection(), "/");
+        Assert.assertEquals(p0.resourceName(), "/resourceName");
         Assert.assertEquals(p0.first(), p0);
 
         ResourceUtil.URLParser p1 = p0.next();
         Assert.assertEquals(p1.index(), 1);
         Assert.assertEquals(p1.value(), "resourceId");
         Assert.assertEquals(p1.resourceCollection(), "/resourceName");
+        Assert.assertEquals(p1.resourceName(), "/resourceName/resourceId");
         Assert.assertEquals(p1.first(), p0);
         Assert.assertEquals(p0.last(), p1);
         Assert.assertEquals(p1.last(), p1);
@@ -91,6 +93,7 @@ public class ResourceUtilTest {
         Assert.assertEquals(p0.index(), 0);
         Assert.assertEquals(p0.value(), "resourceName");
         Assert.assertEquals(p0.resourceCollection(), "/");
+        Assert.assertEquals(p0.resourceName(), "/resourceName");
         Assert.assertEquals(p0.first(), p0);
 
         p1 = p0.next();
@@ -100,6 +103,7 @@ public class ResourceUtilTest {
         Assert.assertEquals(p0.index(), 0);
         Assert.assertEquals(p0.value(), "");
         Assert.assertEquals(p0.resourceCollection(), "/");
+        Assert.assertEquals(p0.resourceName(), "/");
         Assert.assertEquals(p0.first(), p0);
 
         p1 = p0.next();
