@@ -31,17 +31,12 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.servlet.HttpServlet;
 import org.forgerock.json.resource.servlet.HttpServletContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
@@ -56,37 +51,35 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * A NAME does ...
  * 
  * @author Laszlo Hordos
  */
-@Component(name = "org.forgerock.openidm.servlet", immediate = true, policy = ConfigurationPolicy.IGNORE)
+@Component(name = "org.forgerock.openidm.servlet", immediate = true,
+        policy = ConfigurationPolicy.IGNORE)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST HttpServlet"),
     @Property(name = EventConstants.EVENT_TOPIC, value = { "org/forgerock/openidm/servlet/*" }) })
 public class ServletComponent implements EventHandler {
+
+    /**
+     * Setup logging for the {@link ServletComponent}.
+     */
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
 
-    //@Reference(policy = ReferencePolicy.DYNAMIC, target = "(org.forgerock.openidm.servlet=true)")
-    protected HttpServletContextFactory httpServletContextFactory = null;
+    @Reference(policy = ReferencePolicy.DYNAMIC,
+            target = "(service.pid=org.forgerock.openidm.router)")
+    protected ConnectionFactory connectionFactory;
 
-    ServiceRegistration serviceRegistration = null;
-    ComponentContext context = null;
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)//, target = "(org.forgerock.openidm.servlet=true)")
-    protected Router router;
-
-    private void bindRouter(final Router service) {
-        router = service;
+    private void bindConnectionFactory(final ConnectionFactory service) {
+        connectionFactory = service;
     }
 
-    private void unbindRouter(final Router service) {
-        router = null;
+    private void unbindConnectionFactory(final ConnectionFactory service) {
+        connectionFactory = null;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -100,19 +93,24 @@ public class ServletComponent implements EventHandler {
         servletContextFactory = null;
     }
 
+    private ServiceRegistration serviceRegistration = null;
+
+    private ComponentContext context = null;
+
     @Activate
     protected void activate(ComponentContext context) {
-        HttpServlet servlet =
-                new HttpServlet(Resources.newInternalConnectionFactory(router),
-                        servletContextFactory);
+        this.context = context;
+        HttpServlet servlet = new HttpServlet(connectionFactory, servletContextFactory);
         // TODO Read these from configuraton
-        Dictionary<String,Object> properties = new Hashtable<String,Object>();
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("alias", "/openidm");
         properties.put("httpContext.id", "openidm");
         properties.put("servletNames", "OpenIDM REST");
 
-        // All WebApplication elements must be registered with the same
-        // BundleContext
+        /*
+         * All WebApplication elements must be registered with the same
+         * BundleContext
+         */
         serviceRegistration =
                 FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext()
                         .registerService(javax.servlet.http.HttpServlet.class, servlet, properties);
@@ -124,11 +122,13 @@ public class ServletComponent implements EventHandler {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
         }
+        this.context = null;
     }
 
     @Override
     public void handleEvent(Event event) {
-        //TODO: receive the OpenIDM started event and enable the full HTTP service
+        // TODO: receive the OpenIDM started event and enable the full HTTP
+        // service
         if (event.getTopic().equals("org/forgerock/openidm/servlet/ACTIVATE")) {
             activate(context);
         } else if (event.getTopic().equals("org/forgerock/openidm/servlet/DEACTIVATE")) {

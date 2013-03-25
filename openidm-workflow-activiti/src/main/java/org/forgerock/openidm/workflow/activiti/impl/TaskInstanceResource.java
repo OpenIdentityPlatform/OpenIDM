@@ -80,15 +80,15 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             if (task == null) {
                 handler.handleError(new NotFoundException());
             } else {
-                if ("claim".equals(request.getActionId())) {
+                if ("claim".equals(request.getAction())) {
                     taskService.claim(resourceId, request.getContent().expect(Map.class).asMap().get("userId").toString());
-                } else if ("complete".equals(request.getActionId())) {
+                } else if ("complete".equals(request.getAction())) {
                     taskService.complete(resourceId, request.getContent().expect(Map.class).asMap());
                 } else {
                     handler.handleError(new BadRequestException("Unknown action"));
                 }
                 Map<String, String> result = new HashMap<String, String>(1);
-                result.put("Task action performed", request.getActionId());
+                result.put("Task action performed", request.getAction());
                 handler.handleResult(new JsonValue(result));
             }
         } catch (Exception ex) {

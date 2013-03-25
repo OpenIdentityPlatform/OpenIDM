@@ -1,0 +1,49 @@
+{
+   "filters" :
+      [
+         {
+            "pattern" : ".*",
+            "methods" :
+               [
+                  "create",
+                  "update",
+                  "read",
+                  "delete",
+                  "query",
+                  "action"
+               ],
+            "condition" :
+               {
+                  "type" : "groovy",
+                  "source" : "id==id"
+               },
+            "onRequest" :
+               {
+                  "type" : "groovy",
+                  "source" : "println 'Before: ' + request.requestType + '\\nId: ' + request.resourceName"
+               },
+            "onResponse" :
+               {
+                  "type" : "text/javascript",
+                  "source" : "println 'After: ' + request.requestType + '\\nId: ' + request.resourceName"
+               }
+         },
+         {
+            "pattern" : "^managed/user/.*",
+            "methods" :
+               [
+                  "create",
+                  "update",
+                  "read",
+                  "delete",
+                  "query",
+                  "action"
+               ],
+            "-onResponse" :
+               {
+                  "type" : "groovy",
+                  "source" : "println 'After: ' + method + '\\nId: ' + id + '\\nObject: [object]\\nParams: [query,action]\\nResult: [result]');"
+               }
+         }
+      ]
+}

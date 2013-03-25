@@ -92,6 +92,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tinkerpop.blueprints.Graph;
+
 /**
  * 
  * @author Laszlo Hordos
@@ -113,6 +115,9 @@ import org.slf4j.LoggerFactory;
     @Reference(name = "ScriptEngineFactoryReference",
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
             unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC),
+    @Reference(name = "GraphReference", referenceInterface = Graph.class, bind = "bindGraph",
+            unbind = "unbindGraph", cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "FunctionReference", referenceInterface = Function.class,
             bind = "bindFunction", unbind = "unbindFunction",
@@ -162,9 +167,32 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
+    // TODO Implement optional dependency on this class
+    protected void bindGraph(final Graph service) {
+        openidm.put("graph", service);
+    }
+
+    protected void unbindGraph(final Graph service) {
+        openidm.remove("graph");
+    }
+
     @Activate
     protected void activate(ComponentContext context) {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+
+        if (configuration.get("Groovy").isMap()) {
+            try {
+                com.tinkerpop.gremlin.groovy.Gremlin.load();
+                configuration.get("Groovy").put(
+                        org.codehaus.groovy.control.customizers.ImportCustomizer.class
+                                .getCanonicalName(),
+                        com.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine
+                                .getImportCustomizer());
+            } catch (Throwable e) {
+                logger.info("Groovy Gremlin is not initialised!");
+            }
+        }
+
         setConfiguration(configuration.required().asMap());
 
         HashMap<String, Object> identityServer = new HashMap<String, Object>();
@@ -209,7 +237,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         setConfiguration(configuration.required().asMap());
         propertiesCache.clear();
         Set<String> keys =
-                null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections.<String> emptySet();
+                null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections
+                        .<String> emptySet();
         keys.remove(PROP_OPENIDM);
         keys.remove(PROP_IDENTITY_SERVER);
         JsonValue properties = configuration.get("properties");
@@ -454,7 +483,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         try {
             Matcher matcher = scriptNamePattern.matcher(request.getResourceName());
             if (matcher.matches()) {
-                if ("eval".equals(request.getActionId())) {
+                if ("eval".equals(request.getAction())) {
                     ScriptName name = new ScriptName(matcher.group(3), matcher.group(1));
                     ScriptEntry entry = takeScript(name);
                     if (entry.isActive()) {
@@ -465,13 +494,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                         throw new ServiceUnavailableException();
                     }
 
-                } else if ("batch".equals(request.getActionId())) {
+                } else if ("batch".equals(request.getAction())) {
                     ScriptName name = new ScriptName(matcher.group(3), matcher.group(1));
                     ScriptEntry entry = takeScript(name);
 
                 } else {
                     throw new NotSupportedException("Unrecognized action ID '"
-                            + request.getActionId() + "'. Supported action IDs: [eval, batch]");
+                            + request.getAction() + "'. Supported action IDs: [eval, batch]");
                 }
             } else {
                 final ResourceException e =
@@ -531,8 +560,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             throws NotFoundException {
         if (ScriptEntry.Visibility.PUBLIC.equals(entry.getVisibility())) {
             JsonValue resource = new JsonValue(new HashMap<String, Object>());
-            resource.put(ServerConstants.OBJECT_PROPERTY_ID, name.getName());
-            resource.put(ServerConstants.OBJECT_PROPERTY_REV, "0");
+            resource.put(Resource.FIELD_CONTENT_ID, name.getName());
+            resource.put(Resource.FIELD_CONTENT_REVISION, "0");
             resource.put("active", entry.isActive());
             return new Resource(name.getName(), "0", resource);
         } else if (isRead) {

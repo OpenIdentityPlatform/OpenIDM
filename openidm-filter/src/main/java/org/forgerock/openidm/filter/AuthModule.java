@@ -128,7 +128,7 @@ public class AuthModule {
             actionRequest.setAdditionalActionParameter("password", password);
             try {
                 JsonValue result = context.getConnection().action(context, actionRequest);
-                authenticated = result.isDefined(ServerConstants.OBJECT_PROPERTY_ID);
+                authenticated = result.isDefined(Resource.FIELD_CONTENT_ID);
                 if (authenticated) {
                     // This is what I was talking about. We don't have a way to
                     // populate this. Use script to overcome it

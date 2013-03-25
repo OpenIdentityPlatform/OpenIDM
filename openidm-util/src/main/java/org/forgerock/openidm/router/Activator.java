@@ -31,6 +31,7 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionProvider;
 import org.forgerock.json.resource.InMemoryBackend;
 import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
@@ -54,7 +55,7 @@ public class Activator implements BundleActivator {
     private AnonymousClass a = null;
 
     private ServiceRegistration factoryServiceRegistration = null;
-    private ServiceRegistration<Router> routerServiceRegistration = null;
+    private ServiceRegistration<RequestHandler> routerServiceRegistration = null;
     private ServiceRegistration<PersistenceConfig> persistenceConfigRegistration = null;
 
     @Override
@@ -71,8 +72,9 @@ public class Activator implements BundleActivator {
         properties = new Hashtable<String, Object>(5);
         properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
+        properties.put("org.forgerock.openidm.router", "true");
 
-        routerServiceRegistration = context.registerService(Router.class,a.getInternalRouter(),properties);
+        routerServiceRegistration = context.registerService(RequestHandler.class,a.getInternalRouter(),properties);
 
         final Connection connection = Resources.newInternalConnection(a.getInternalRouter());
 

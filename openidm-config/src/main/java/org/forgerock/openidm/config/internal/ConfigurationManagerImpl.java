@@ -501,7 +501,7 @@ public class ConfigurationManagerImpl
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigs.entrySet()) {
             if (true) {
                 JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
-                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                content.put(Resource.FIELD_CONTENT_ID, entry.getValue().getPID()
                         .getShortCanonicalName());
                 content.put(LOCATION, "delayed");
                 handler.handleResource(new Resource(entry.getValue().getPID()
@@ -515,7 +515,7 @@ public class ConfigurationManagerImpl
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigsToEncrypt.entrySet()) {
             if (true) {
                 JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
-                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                content.put(Resource.FIELD_CONTENT_ID, entry.getValue().getPID()
                         .getShortCanonicalName());
                 content.put(LOCATION, "delayedEncryption");
                 handler.handleResource(new Resource(entry.getValue().getPID()
@@ -529,7 +529,7 @@ public class ConfigurationManagerImpl
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigsToInstall.entrySet()) {
             if (true) {
                 JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
-                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                content.put(Resource.FIELD_CONTENT_ID, entry.getValue().getPID()
                         .getShortCanonicalName());
                 content.put(LOCATION, "delayedInstall");
                 handler.handleResource(new Resource(entry.getValue().getPID()
@@ -548,7 +548,7 @@ public class ConfigurationManagerImpl
                     PID pid = getConfigurationPID(configuration);
                     if (true) {
                         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
-                        content.put(ServerConstants.OBJECT_PROPERTY_ID, pid.getShortCanonicalName());
+                        content.put(Resource.FIELD_CONTENT_ID, pid.getShortCanonicalName());
                         content.put(LOCATION, "installed");
                         handler.handleResource(new Resource(pid.getShortCanonicalName(), null,
                                 content));
@@ -1142,7 +1142,7 @@ public class ConfigurationManagerImpl
             this.persistentIdentifier = persistentIdentifier;
             this.configuration = configuration;
             this.sensitiveAttributes = null;
-            configuration.put(ServerConstants.OBJECT_PROPERTY_ID, persistentIdentifier
+            configuration.put(Resource.FIELD_CONTENT_ID, persistentIdentifier
                     .getShortCanonicalName());
         }
 
@@ -1181,10 +1181,10 @@ public class ConfigurationManagerImpl
 
         public static Resource convert(final PID persistentIdentifier, final JsonValue configuration) {
             JsonValue config = configuration.copy();
-            config.put(ServerConstants.OBJECT_PROPERTY_ID, persistentIdentifier
+            config.put(Resource.FIELD_CONTENT_ID, persistentIdentifier
                     .getShortCanonicalName());
             String revision = null;
-            config.put(ServerConstants.OBJECT_PROPERTY_REV, revision);
+            config.put(Resource.FIELD_CONTENT_REVISION, revision);
 
             if (null != persistentIdentifier.getRoles()) {
                 config.put(PID.OBJECT_PROPERTY_ROLES, persistentIdentifier.getRoles());

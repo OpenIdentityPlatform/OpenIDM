@@ -268,7 +268,7 @@ public class RepoPersistenceManager /*implements PersistenceManager*/ {
 //                            Set<Resource> result = new HashSet<Resource>();
 //                            QueryRequest request = Requests.newQueryRequest("config");
 //                            request.setQueryId(QueryConstants.QUERY_ALL_IDS);
-//                            request.addField(ServerConstants.OBJECT_PROPERTY_ID);
+//                            request.addField(Resource.FIELD_CONTENT_ID);
 //                            QueryResult queryResult = repo.query(context, request, result);
 //
 //                            dbIter = result.iterator();

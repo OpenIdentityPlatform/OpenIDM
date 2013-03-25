@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import org.forgerock.json.resource.Resource;
 import org.forgerock.openidm.core.ServerConstants;
 
 /**
@@ -39,8 +40,8 @@ public class ActivitiConstants {
     public static final String TASKINSTANCE_ID_PATTERN = "/?taskinstance/.+$";
     public static final String TASKDEFINITION_PATTERN = "/?taskdefinition.*";
     public static final String TASKDEFINITION_ID_PATTERN = "/?taskdefinition/.+$";
-    public static final String ID = ServerConstants.OBJECT_PROPERTY_ID;
-    public static final String REVISION = ServerConstants.OBJECT_PROPERTY_REV;
+    public static final String ID = Resource.FIELD_CONTENT_ID;
+    public static final String REVISION = Resource.FIELD_CONTENT_REVISION;
     public static final String REQUEST_PARAMS = "params";
     public static final String REQUEST_BODY = "value";
     public static final String QUERY_ALL_IDS = ServerConstants.QUERY_ALL_IDS;

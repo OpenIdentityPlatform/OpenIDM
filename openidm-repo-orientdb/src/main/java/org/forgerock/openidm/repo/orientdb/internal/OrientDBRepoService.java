@@ -26,7 +26,9 @@ package org.forgerock.openidm.repo.orientdb.internal;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +69,13 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.util.ResourceUtil.URLParser;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +100,8 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OCommandExecutorSQLDelegate;
 import com.orientechnologies.orient.core.sql.query.OSQLAsynchQuery;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
-import org.forgerock.openidm.core.PropertyUtil;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 /**
  * Repository service implementation using OrientDB
@@ -246,7 +251,7 @@ public class OrientDBRepoService implements RequestHandler {
                 throw new NotFoundException("Object repo/" + localId + " not found in "
                         + orientClassName);
             }
-            result = DocumentUtil.toMap(doc, request.getFieldFilters());
+            result = DocumentUtil.toMap(doc, request.getFields());
             logger.trace("Completed get for orientType: {}, id: {}, result: {}", new Object[] {
                 orientClassName, localId, result });
         } finally {
@@ -281,7 +286,7 @@ public class OrientDBRepoService implements RequestHandler {
                         // Use the Document Database
                         URLParser url = URLParser.parse(request.getResourceName()).last();
                         String iClassName =
-                                resourceCollectionToOrientClassName(url.resourceName(), "/");
+                                resourceCollectionToOrientClassName(url.resourceName(), null);
                         if (gdb.getVertexType(iClassName) == null) {
                             OClass ce = gdb.createEdgeType(iClassName);
                             ce.createProperty("label", OType.STRING);
@@ -358,7 +363,7 @@ public class OrientDBRepoService implements RequestHandler {
         // + fullId);
         // }
 
-        // request.getContent().put(ServerConstants.OBJECT_PROPERTY_ID,
+        // request.getContent().put(Resource.FIELD_CONTENT_ID,
         // localId);
 
         // TODO ODocument instances always refer to the thread-local database
@@ -367,7 +372,7 @@ public class OrientDBRepoService implements RequestHandler {
             // Rather than using MVCC for insert, rely on primary key uniqueness
             // constraints to detect duplicate create
             Map<String, Object> newContent = request.getContent().asMap();
-            newContent.put(ServerConstants.OBJECT_PROPERTY_ID, request.getNewResourceId());
+            newContent.put(Resource.FIELD_CONTENT_ID, request.getNewResourceId());
             ODocument newDoc =
                     DocumentUtil.toDocument(request.getContent().asMap(), null, orientClassName);
             // TODO Fix the logging
@@ -375,7 +380,7 @@ public class OrientDBRepoService implements RequestHandler {
             // newDoc);
             newDoc.save();
 
-            // request.getContent().put(ServerConstants.OBJECT_PROPERTY_REV,
+            // request.getContent().put(Resource.FIELD_CONTENT_REVISION,
             // Integer.toString(newDoc.getVersion()));
             if (logger.isTraceEnabled()) {
                 logger.trace(
@@ -418,10 +423,10 @@ public class OrientDBRepoService implements RequestHandler {
     private Resource getResource(String resourceId, ODocument newDoc) {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
         // _ID
-        content.put(ServerConstants.OBJECT_PROPERTY_ID, resourceId);
+        content.put(Resource.FIELD_CONTENT_ID, resourceId);
         // _REV
         String rev = Integer.toString(newDoc.getVersion());
-        content.put(ServerConstants.OBJECT_PROPERTY_REV, Integer.toString(newDoc.getVersion()));
+        content.put(Resource.FIELD_CONTENT_REVISION, Integer.toString(newDoc.getVersion()));
         // _VERTEX
         // String vid = String.format("#%d:%d",
         // newDoc.getIdentity().getClusterId(),
@@ -517,7 +522,7 @@ public class OrientDBRepoService implements RequestHandler {
 
             if (!StringUtils.isBlank(request.getRevision())) {
                 updatedDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
-                // request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV,
+                // request.getNewContent().put(Resource.FIELD_CONTENT_REVISION,
                 // request.getRevision());
             }
             logger.trace("Updated doc for orientType: {}, resourceName: {}, to save {}",
@@ -627,14 +632,14 @@ public class OrientDBRepoService implements RequestHandler {
             if (!StringUtils.isBlank(request.getRevision())) {
                 // State the version we expect to delete for MVCC check
                 existingDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
-                // request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV,
+                // request.getNewContent().put(Resource.FIELD_CONTENT_REVISION,
                 // request.getRevision());
             }
 
             db.delete(existingDoc);
             db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
-            return DocumentUtil.toMap(existingDoc, request.getFieldFilters());
+            return DocumentUtil.toMap(existingDoc, request.getFields());
         } catch (OConcurrentModificationException ex) {
             db.rollback();
             throw new PreconditionFailedException(
@@ -721,7 +726,9 @@ public class OrientDBRepoService implements RequestHandler {
                     // TODO How to submit and make is async if the DB supports
                     // it?
                     OSQLAsynchQuery<ODocument> query =
-                            new OSQLAsynchQuery(((String)PropertyUtil.substVars(queryExpression, new OrientSQLPropertyAccessor(params), PropertyUtil.Delimiter.DOLLAR, true))) {
+                            new OSQLAsynchQuery(((String) PropertyUtil.substVars(queryExpression,
+                                    new OrientSQLPropertyAccessor(params),
+                                    PropertyUtil.Delimiter.DOLLAR, true))) {
                                 @Override
                                 public List run(Object... iArgs) {
                                     super.run(iArgs);
@@ -745,7 +752,7 @@ public class OrientDBRepoService implements RequestHandler {
                         public boolean result(Object iRecord) {
                             final Resource r =
                                     DocumentUtil.toMap((ODocument) iRecord, request
-                                            .getFieldFilters());
+                                            .getFields());
                             boolean accepted = handler.handleResource(r);
                             if (accepted) {
                                 lastRecord.set((OIdentifiable) iRecord);
@@ -869,6 +876,8 @@ public class OrientDBRepoService implements RequestHandler {
         return false;
     }
 
+    private ServiceRegistration<Graph> graphServiceRegistration = null;
+
     @Activate
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
@@ -885,6 +894,17 @@ public class OrientDBRepoService implements RequestHandler {
         embeddedServer.activate(existingConfig);
 
         init(existingConfig);
+
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(Constants.SERVICE_DESCRIPTION, "Repository Service using OrientDB");
+        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
+
+        graphServiceRegistration =
+                compContext.getBundleContext()
+                        .registerService(
+                                Graph.class,
+                                new OrientGraph(OGraphDatabasePool.global().acquire(dbURL, user,
+                                        password)), properties);
 
         logger.info("Repository started.");
     }
@@ -930,6 +950,11 @@ public class OrientDBRepoService implements RequestHandler {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
+        if (null != graphServiceRegistration) {
+            graphServiceRegistration.unregister();
+            graphServiceRegistration = null;
+        }
+
         cleanup();
         if (embeddedServer != null) {
             embeddedServer.deactivate();
@@ -993,7 +1018,6 @@ public class OrientDBRepoService implements RequestHandler {
         DBHelper.closePools();
     }
 
-
     /**
      * Set the pre-configured queries, which are identified by a query
      * identifier and can be invoked using this identifier
@@ -1010,10 +1034,9 @@ public class OrientDBRepoService implements RequestHandler {
      */
     protected void setConfiguredQueries(JsonValue queries) {
         Map<String, String> prepQueries = new HashMap<String, String>();
-        
+
         // Query all IDs is a mandatory query, default it and allow override.
-        prepQueries.put(QueryConstants.QUERY_ALL_IDS,
-                "select _openidm_id from ${_resource}");
+        prepQueries.put(QueryConstants.QUERY_ALL_IDS, "select _openidm_id from ${_resource}");
 
         // Populate/Override with Queries configured
         if (queries != null && !queries.isNull()) {

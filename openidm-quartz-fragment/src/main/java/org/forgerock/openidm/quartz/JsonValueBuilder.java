@@ -33,16 +33,21 @@ import static org.quartz.SimpleScheduleBuilder.*;
 import static org.quartz.TriggerBuilder.*;
 
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.Resource;
+import org.quartz.Calendar;
 import org.quartz.CalendarIntervalScheduleBuilder;
 import org.quartz.CalendarIntervalTrigger;
 import org.quartz.CronScheduleBuilder;
@@ -54,6 +59,7 @@ import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.JobPersistenceException;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.SimpleTrigger;
@@ -456,5 +462,4 @@ public  class JsonValueBuilder {
         }
         jv.put(tokens[tokens.length - 1], object);
     }
-
 }

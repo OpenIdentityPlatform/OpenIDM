@@ -89,8 +89,8 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (Map<String, Object> object : testInput) {
             String id = "system/xml/account/";
             JsonValue result = getService().handle(buildRequest("create", id, null, null, object));
-            assertThat(result.get(ServerConstants.OBJECT_PROPERTY_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
-            String newID = (String) object.get(ServerConstants.OBJECT_PROPERTY_ID);
+            assertThat(result.get(Resource.FIELD_CONTENT_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            String newID = (String) object.get(Resource.FIELD_CONTENT_ID);
             objectIDs.add(id + newID);
         }
     }
@@ -100,7 +100,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (String id : objectIDs) {
             JsonValue connectorObject = getService().handle(buildRequest("read", id, null, null, null));
             Assert.assertNotNull(connectorObject);
-            assertThat(connectorObject.get(ServerConstants.OBJECT_PROPERTY_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            assertThat(connectorObject.get(Resource.FIELD_CONTENT_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
             //assertThat(connectorObject).includes(MapAssert.entry("_id", id));
         }
     }
@@ -121,7 +121,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
             assertThat(connectorObject.asMap()).includes(MapAssert.entry("__DESCRIPTION__", "Test Description"));
             assertThat(connectorObject.asMap()).includes(MapAssert.entry("firstname", "Darth"));
             //assertThat(connectorObject).includes(MapAssert.entry("lastname-first-letter", null));
-            assertThat(connectorObject.get(ServerConstants.OBJECT_PROPERTY_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            assertThat(connectorObject.get(Resource.FIELD_CONTENT_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
 
             //assertThat(connectorObject.keySet()).excludes("__PASSWORD__", "secret-pin", "jpegPhoto", "yearly-wage");
             Assert.assertNotNull(connectorObject);

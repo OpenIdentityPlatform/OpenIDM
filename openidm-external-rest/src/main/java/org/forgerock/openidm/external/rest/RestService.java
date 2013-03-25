@@ -151,11 +151,11 @@ public class RestService implements SingletonResourceProvider {
     public void actionInstance(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
         try {
-            logger.debug("Action invoked on {} with {}", request.getActionId(), request);
+            logger.debug("Action invoked on {} with {}", request.getAction(), request);
 
             if (request.getAdditionalActionParameters().isEmpty()) {
                 handler.handleError(new BadRequestException("Invalid action call on "
-                        + request.getResourceName() + "/" + request.getActionId()
+                        + request.getResourceName() + "/" + request.getAction()
                         + " : missing parameters to define what to invoke."));
                 return;
             }

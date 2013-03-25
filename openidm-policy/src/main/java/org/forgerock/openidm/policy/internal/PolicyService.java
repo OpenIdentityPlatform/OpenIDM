@@ -26,6 +26,7 @@ package org.forgerock.openidm.policy.internal;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -75,7 +77,7 @@ public class PolicyService extends AbstractScriptedService {
     private ComponentContext context;
 
     public PolicyService() {
-        super(ACTION);
+        super(EnumSet.of(RequestType.ACTION));
     }
 
     @Activate

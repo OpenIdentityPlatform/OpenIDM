@@ -29,6 +29,10 @@ import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.internal.recon.ReconciliationExecutorService;
+import org.forgerock.openidm.internal.recon.ReconciliationService;
+import org.forgerock.openidm.internal.router.JsonResourceRouterService;
+import org.forgerock.openidm.internal.sync.SynchronizationService;
 import org.forgerock.openidm.managed.ManagedObjectService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
@@ -62,6 +66,18 @@ public class ConfigMeta implements MetaDataProvider {
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (ManagedObjectService.PID.equalsIgnoreCase(pidOrFactory)) {
+            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
+            return Collections.emptyList();
+        } else if (ReconciliationService.PID.equalsIgnoreCase(pidOrFactory)) {
+            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
+            return Collections.emptyList();
+        } else if (ReconciliationExecutorService.PID.equalsIgnoreCase(pidOrFactory)) {
+            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
+            return Collections.emptyList();
+        } else if (JsonResourceRouterService.PID.equalsIgnoreCase(pidOrFactory)) {
+            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
+            return Collections.emptyList();
+        } else if (SynchronizationService.PID.equalsIgnoreCase(pidOrFactory)) {
             logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
             return Collections.emptyList();
         }

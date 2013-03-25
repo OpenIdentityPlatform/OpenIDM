@@ -86,7 +86,7 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
 
     protected Map<String, Object> getEmptyScript() {
         Map<String, Object> result = new HashMap<String, Object>(4);
-        result.put(ServerConstants.ACTION_NAME, "script");
+        result.put(ActionRequest.FIELD_ACTION, "script");
         return result;
     }
 

@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -91,20 +91,34 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-groovy</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>2.5.10</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <configuration>
-
-                  <!--  org.forgerock.openidm.script.impl.*,
-                    org.forgerock.openidm.sync.impl.*-->
-                    <sourceExcludes>
-                        **/script/**,**/sync/**,**/internal/**
-                    </sourceExcludes>
-                </configuration>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
@@ -115,31 +129,25 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/script/**</exclude>
-                        <exclude>**/sync/**</exclude>
-                        <exclude>**/recon/**</exclude>
-                        <exclude>**/router/**</exclude>
-                    </excludes>
-                </configuration>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateTestStubs</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <providerSelection>2.0</providerSelection>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <!--<Export-Package>
-                            org.forgerock.openidm.managed;version=${project.version},
-                            org.forgerock.openidm.router;version=${project.version},
-                            org.forgerock.openidm.sync;version=${project.version}
-                        </Export-Package>-->
-                        <!--Private-Package>org.forgerock.openidm.internal.*</Private-Package-->
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

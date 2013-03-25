@@ -1,0 +1,56 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "sourceIdsCaseSensitive" : false,
+            "target" : "managed/user",
+            "properties" : [
+                { "source" : "cn", "target" : "displayName" },
+                { "source" : "description", "target" : "description" },
+                { "source" : "givenName", "target" : "givenName" },
+                { "source" : "mail", "target" : "email" },
+                { "source" : "sn", "target" : "familyName" },
+                { "source" : "uid", "target" : "userName" }
+            ],
+            "policies" : [
+                { "situation" : "CONFIRMED", "action" : "UPDATE" },
+                { "situation" : "FOUND", "action" : "IGNORE" },
+                { "situation" : "ABSENT", "action" : "CREATE" },
+                { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
+                { "situation" : "MISSING", "action" : "IGNORE" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
+                { "situation" : "UNQUALIFIED", "action" : "DELETE" },
+                { "situation" : "UNASSIGNED", "action" : "IGNORE" }
+            ]
+        },
+        {
+            "name" : "managedUser_systemADAccounts",
+            "source" : "managed/user",
+            "target" : "system/ad/account",
+            "targetIdsCaseSensitive" : false,
+            "properties" : [
+                { "source" : "givenName", "target" : "givenName" },
+                { "source" : "familyName", "target" : "sn" },
+                { "source" : "displayName", "target" : "cn" },
+                { "source" : "userName", "target" : "uid" },
+                { "source" : "description", "target" : "description" },
+                { "source" : "email", "target" : "mail" }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
+            },
+            "policies" : [
+                { "situation" : "CONFIRMED", "action" : "UPDATE" },
+                { "situation" : "FOUND", "action" : "IGNORE" },
+                { "situation" : "ABSENT", "action" : "CREATE" },
+                { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
+                { "situation" : "MISSING", "action" : "IGNORE" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
+                { "situation" : "UNQUALIFIED", "action": "DELETE" },
+                { "situation" : "UNASSIGNED", "action" : "IGNORE" }
+            ]
+        }        
+    ]
+}

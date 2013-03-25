@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,28 +28,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class ActivityLog {
+
+    /**
+     * Setup logging for the {@link ActivityLog}.
+     */
     final static Logger logger = LoggerFactory.getLogger(ActivityLog.class);
 
     private final static boolean suspendException;
@@ -96,9 +93,8 @@ public class ActivityLog {
         return result;
     }
 
-    public static void log(ServerContext router, Request request, String message,
-            String objectId, JsonValue before, JsonValue after, Status status)
-            throws ResourceException {
+    public static void log(ServerContext router, Request request, String message, String objectId,
+            JsonValue before, JsonValue after, Status status) throws ResourceException {
         if (request == null) {
             throw new NullPointerException("Request can not be null when audit.");
         }
@@ -121,33 +117,18 @@ public class ActivityLog {
     private static Map<String, Object> buildLog(Context context, Request request, String message,
             String objectId, JsonValue before, JsonValue after, Status status) {
         String rev = null;
-        if (after != null && after.get(ServerConstants.OBJECT_PROPERTY_REV).isString()) {
-            rev = after.get(ServerConstants.OBJECT_PROPERTY_REV).asString();
-        } else if (before != null && before.get(ServerConstants.OBJECT_PROPERTY_REV).isString()) {
-            rev = before.get(ServerConstants.OBJECT_PROPERTY_REV).asString();
+        if (after != null && after.get(Resource.FIELD_CONTENT_REVISION).isString()) {
+            rev = after.get(Resource.FIELD_CONTENT_REVISION).asString();
+        } else if (before != null && before.get(Resource.FIELD_CONTENT_REVISION).isString()) {
+            rev = before.get(Resource.FIELD_CONTENT_REVISION).asString();
         }
 
-        String method;
-        if (request instanceof CreateRequest) {
-            method = "create";
-        } else if (request instanceof ReadRequest) {
-            method = "read";
-        } else if (request instanceof UpdateRequest) {
-            method = "update";
-        } else if (request instanceof QueryRequest) {
-            method = "query";
-        } else if (request instanceof PatchRequest) {
-            method = "patch";
-        } else if (request instanceof DeleteRequest) {
-            method = "delete";
-        } else if (request instanceof ActionRequest) {
-            method = "action";
-        } else {
-            method = "unknown";
-        }
+        String method = request.getRequestType().name();
 
         // TODO: make configurable
-        if (method != null && (method.equalsIgnoreCase("read") || method.equalsIgnoreCase("query"))) {
+        if (method != null
+                && (RequestType.READ.equals(request.getRequestType()) || RequestType.QUERY
+                        .equals(request.getRequestType()))) {
             before = null;
             after = null;
         }
@@ -166,7 +147,7 @@ public class ActivityLog {
         activity.put(ROOT_ACTION_ID, root.getId());
         activity.put(PARENT_ACTION_ID, parent.getId());
         // TODO: UPGRADE (Get the Requester)
-        //activity.put(REQUESTER, getRequester(request));
+        // activity.put(REQUESTER, getRequester(request));
         activity.put(BEFORE, JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
         activity.put(AFTER, JsonUtil.jsonIsNull(after) ? null : after.getWrappedObject());
         activity.put(STATUS, status == null ? null : status.toString());
