@@ -39,5 +39,11 @@ public enum ClusterEventType {
     /**
      * A instance has failed
      */
-    INSTANCE_FAILED
+    INSTANCE_FAILED,
+    
+    /**
+     * A instance is up and running
+     */
+    INSTANCE_RUNNING
+    
 }

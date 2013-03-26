@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -38,8 +38,12 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.cluster.ClusterEvent;
+import org.forgerock.openidm.cluster.ClusterEventListener;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
@@ -64,11 +68,11 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM Health Service", immediate = true)
-@Service()
+@Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service")})
-public class HealthService implements HealthInfo {
+public class HealthService implements HealthInfo, ClusterEventListener {
 
     public static final String PID = "org.forgerock.openidm.health";
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
@@ -85,11 +89,16 @@ public class HealthService implements HealthInfo {
 
     ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
+    @Reference
+    ClusterManagementService cluster;
+    
     // Whether we consider the underlying framework as started
     private volatile boolean frameworkStarted = false;
     // Flag to help in processing state during start-up. 
     // For clients to query application state, use the state detail instead
     private volatile boolean appStarting = true; 
+    // Whether the cluster management thread is up in the "running" state
+    private volatile boolean clusterUp = false;
 
     private volatile StateDetail stateDetail = 
             new StateDetail(AppState.STARTING, "OpenIDM starting");
@@ -258,6 +267,8 @@ public class HealthService implements HealthInfo {
         context.getBundleContext().addBundleListener(bundleListener);
         context.getBundleContext().addFrameworkListener(frameworkListener);
         
+        cluster.register("healthService", this);
+        
         logger.info("OpenIDM Health Service component is activated.");
     }
     
@@ -370,12 +381,18 @@ public class HealthService implements HealthInfo {
         // Ensure state is up to date
         AppState updatedAppState = null;
         String updatedShortDesc = null;
-        if (bundleFailures.size() > 0 || fragmentFailures.size() > 0) { 
+        if (bundleFailures.size() > 0 || fragmentFailures.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Not all modules started " + bundleFailures + " " + fragmentFailures;
         } else if (missingServices.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
+        } else if (!clusterUp) {
+            if (!cluster.isStarted()) {
+                cluster.startClusterManagement();
+            }
+            updatedAppState = AppState.ACTIVE_NOT_READY;
+            updatedShortDesc = "This node can not yet join the cluster";
         } else {
             updatedAppState = AppState.ACTIVE_READY;
             updatedShortDesc = "OpenIDM ready";
@@ -524,6 +541,21 @@ public class HealthService implements HealthInfo {
         protected JsonValue toJsonValue() {
             return jsonState;
         } 
+    }
+
+    @Override
+    public boolean handleEvent(ClusterEvent event) {
+        switch (event.getType()) {
+        case INSTANCE_FAILED:
+            clusterUp = false;
+            checkState();
+            break;
+        case INSTANCE_RUNNING:
+            clusterUp = true;
+            checkState();
+            break;
+        }
+        return true;
     }
 }
 

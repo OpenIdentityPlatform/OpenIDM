@@ -17,13 +17,15 @@ public class ClusterConfig {
     private final static String INSTANCE_RECOVERY_TIMEOUT = "instanceRecoveryTimeout";
     private final static String INSTANCE_CHECK_IN_INTERVAL = "instanceCheckInInterval";
     private final static String INSTANCE_CHECK_IN_OFFSET = "instanceCheckInOffset";
+    private final static String ENABLED = "enabled";
     
     private String instanceId = null;
     private long instanceTimeout = 30000;
     private long instanceRecoveryTimeout = 30000;
     private long instanceCheckInInterval = 5000;
     private long instanceCheckInOffset = 0;
-
+    private boolean enabled = true;
+    
     public ClusterConfig(JsonValue config) {
         if (!config.isNull()) {
             JsonValue value = config.get(INSTANCE_ID);
@@ -45,6 +47,12 @@ public class ClusterConfig {
             value = config.get(INSTANCE_CHECK_IN_OFFSET);
             if (!value.isNull()) {
                 setInstanceCheckInOffset(Long.parseLong(value.asString()));
+            }
+            value = config.get(ENABLED);
+            if (!value.isNull() && value.isBoolean()) {
+                setEnabled(value.asBoolean());
+            } else if (!value.isNull() && value.isString()) {
+                setEnabled(Boolean.parseBoolean(value.asString()));
             }
         }
     }
@@ -97,5 +105,13 @@ public class ClusterConfig {
 
     public void setInstanceCheckInOffset(long instanceCheckInOffset) {
         this.instanceCheckInOffset = instanceCheckInOffset;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
