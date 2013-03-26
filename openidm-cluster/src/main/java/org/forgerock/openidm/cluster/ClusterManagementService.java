@@ -47,4 +47,20 @@ public interface ClusterManagementService {
      * @param instanceId the ID of the instance being recovered
      */
     public void renewRecoveryLease(String instanceId);
+    
+    /**
+     * Starts the cluster management thread.
+     */
+    public void startClusterManagement();
+    
+    /**
+     * Stops the cluster management thread.
+     */
+    public void stopClusterManagement();
+    
+    /**
+     * Returns true if the cluster mangement thread has started, false
+     * otherwise.
+     */
+    public boolean isStarted();
 }

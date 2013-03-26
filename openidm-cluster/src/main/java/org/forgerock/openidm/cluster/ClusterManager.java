@@ -84,7 +84,8 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
 
     private final static Logger logger = LoggerFactory.getLogger(ClusterManager.class);
     
-    private final static Object lock = new Object();
+    private final static Object repoLock = new Object();
+    private final static Object startupLock = new Object();
     
     public static final String PID = "org.forgerock.openidm.cluster";
     
@@ -112,7 +113,14 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
     
     private ClusterConfig clusterConfig;
     
+    /**
+     * The current state of this instance
+     */
+    private InstanceState currentState = null;
+    
     private boolean firstCheckin = true;
+    
+    private boolean failed = false;
     
     /** Internal object set router service. */
     @Reference(
@@ -141,16 +149,18 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         clusterConfig = clstrCfg;
         instanceId = clusterConfig.getInstanceId();
         
-        clusterManagerThread = new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(), 
-                clusterConfig.getInstanceCheckInOffset());
-        clusterManagerThread.startup();
+        if (clusterConfig.isEnabled()) {
+            clusterManagerThread = new ClusterManagerThread(
+                    clusterConfig.getInstanceCheckInInterval(),
+                    clusterConfig.getInstanceCheckInOffset());
+        }
     }
     
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Cluster Management Service {}", compContext);
         clusterManagerThread.shutdown();
-        synchronized (lock) {
+        synchronized (repoLock) {
             try {
                 InstanceState state = getInstanceState(instanceId);
                 state.updateShutdown();
@@ -160,6 +170,34 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
                 logger.warn("Failed to update instance shutdown timestamp", e);
             }
         }    
+    }
+
+    @Override
+    public void startClusterManagement() {
+        synchronized (startupLock) {
+            if (clusterConfig.isEnabled() && !clusterManagerThread.isRunning()) {
+                // Start thread
+                logger.info("Starting Cluster Management");
+                clusterManagerThread.startup();
+            }
+        }
+    }
+
+    @Override
+    public void stopClusterManagement() {
+        synchronized (startupLock) {
+            if (clusterConfig.isEnabled() && clusterManagerThread.isRunning()) {
+                logger.info("Stopping Cluster Management");
+                // Start thread
+                clusterManagerThread.shutdown();
+                checkOut();
+            }
+        }
+    }
+    
+    @Override
+    public boolean isStarted() {
+        return clusterManagerThread.isRunning();
     }
     
     @Override
@@ -220,7 +258,7 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
             break;
         case InstanceState.STATE_DOWN:
             instanceInfo.put("state", "down");
-            if (!state.hasShutdown()) {
+            if (!state.hasShutdown() && state.getRecoveryAttempts() > 0) {
                 recoveryMap.put("recoveredBy", state.getRecoveringInstanceId());
                 recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
                 recoveryMap.put("recoveryStarted", 
@@ -230,7 +268,7 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
                 recoveryMap.put("detectedDown", 
                         dateUtil.formatDateTime(new Date(state.getDetectedDown())));
                 instanceInfo.put("recovery", recoveryMap);
-            } else {
+            } else if (state.getRecoveryAttempts() > 0) {
                 instanceInfo.put("shutdown", dateUtil.formatDateTime(new Date(state.getShutdown())));
             }
             break;
@@ -277,7 +315,7 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
     }
     
     public void renewRecoveryLease(String instanceId) {
-        synchronized (lock) {
+        synchronized (repoLock) {
             try {
                 InstanceState state = getInstanceState(instanceId);
                 // Update the recovery timestamp
@@ -306,7 +344,7 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
      */
     private void updateInstanceState(String instanceId, InstanceState instanceState) 
             throws JsonResourceException {
-        synchronized (lock) {
+        synchronized (repoLock) {
             if (accessor == null) {
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
             }
@@ -317,14 +355,14 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
     }
     
     private InstanceState getInstanceState(String instanceId) throws JsonResourceException {
-        synchronized (lock) {
+        synchronized (repoLock) {
             return new InstanceState(instanceId, getOrCreateRepo(getInstanceStateRepoId(instanceId)));
         }
     }
     
     private Map<String, Object> getOrCreateRepo(String repoId) 
             throws JsonResourceException {
-        synchronized (lock) {
+        synchronized (repoLock) {
             if (accessor == null) {
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
             }
@@ -401,6 +439,37 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         return state;
     }
     
+    private void checkOut() {
+        logger.debug("checkOut()");
+        InstanceState state = null;
+        try {
+            logger.debug("Getting instance state for {}", instanceId);
+            state = getInstanceState(instanceId);
+            switch (state.getState()) {
+            case InstanceState.STATE_RUNNING:
+                // just update the timestamp
+                state.setState(InstanceState.STATE_DOWN);
+                updateInstanceState(instanceId, state);
+                logger.debug("Instance {} state updated successfully");
+                break;
+            case InstanceState.STATE_DOWN:
+                // Already down
+                break;
+            case InstanceState.STATE_PROCESSING_DOWN:
+                // Some other instance is processing this down state
+                // Leave in this state
+                break;
+            }
+        } catch (JsonResourceException e) {
+            if (e.getCode() != JsonResourceException.CONFLICT) {
+                logger.warn("Error checking out instance", e);
+            } else {
+                // MVCC failure, return null
+                logger.info("Failed to set this instance state to {}", state.getState());
+            }
+        }
+    }
+    
     /**
      * Returns a list of all instances who have timed out.
      * 
@@ -475,15 +544,8 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         }
         
         // Then, attempt recovery
-        boolean success = true;
-        for (String listenerId : listeners.keySet()) {
-            logger.debug("Notifying listener {} that instance {} recovery has been initiated", 
-                    new Object[]{listenerId, instanceId});
-            ClusterEventListener listener = listeners.get(listenerId);
-            if (listener != null && !listener.handleEvent(new ClusterEvent(ClusterEventType.RECOVERY_INITIATED, instanceId))) {
-                success = false;
-            }
-        }
+        boolean success = sendEventToListeners(new ClusterEvent(ClusterEventType.RECOVERY_INITIATED, instanceId));
+        
         if (success) {
             logger.info("Instance {} recovered successfully", instanceId);
             try {
@@ -508,6 +570,25 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
     }
     
     /**
+     * Sends a ClusterEvent to all registered listeners
+     * 
+     * @param event the ClusterEvent to handle
+     * @return true if the event was handled appropriately, false otherwise
+     */
+    private boolean sendEventToListeners(ClusterEvent event) {
+        boolean success = true;
+        for (String listenerId : listeners.keySet()) {
+            logger.debug("Notifying listener {} of event {} for instance {}", 
+                    new Object[]{listenerId, event.getType(), instanceId});
+            ClusterEventListener listener = listeners.get(listenerId);
+            if (listener != null && !listener.handleEvent(event)) {
+                success = false;
+            }
+        }
+        return success;
+    }
+    
+    /**
      * A thread for managing this instance's lease and detecting cluster events.
      */
     class ClusterManagerThread {
@@ -516,19 +597,45 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         private long checkinOffset;
         private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         private ScheduledFuture handler;
+        private boolean running = false;
         
         public ClusterManagerThread(long checkinInterval, long checkinOffset) {
             this.checkinInterval = checkinInterval;
         }
         
         public void startup() {
+            running = true;
             logger.info("Starting the cluster manager thread");
             handler = scheduler.scheduleAtFixedRate(new Runnable() {
                 public void run() {
                     try {
                         // Check in this instance
                         logger.debug("Instance check-in");
-                        checkIn();
+                        InstanceState state = checkIn();
+                        if (state == null) {
+                            if (!failed) {
+                                logger.debug("This instance has failed");
+                                failed = true;
+                                // Notify listeners that this instance has failed
+                                sendEventToListeners(new ClusterEvent(ClusterEventType.INSTANCE_FAILED, instanceId));
+                                // Set current state to null
+                                currentState = null;
+                            }
+                            return;
+                        } else if (failed) {
+                            logger.debug("This instance is no longer failed");
+                            failed = false;
+                        }
+                        
+                        // If transitioning to a "running" state, send events
+                        if (state.getState() == InstanceState.STATE_RUNNING) {
+                            if (currentState == null || currentState.getState() != InstanceState.STATE_RUNNING) {
+                                sendEventToListeners(new ClusterEvent(ClusterEventType.INSTANCE_RUNNING, instanceId));
+                            }
+                        }
+                        
+                        // set current state
+                        currentState = state;
 
                         // Find failed instances
                         logger.debug("Finding failed instances");
@@ -551,7 +658,14 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         
         public void shutdown() {
             logger.info("Shutting down the cluster manager thread");
-            handler.cancel(true);
+            if (handler != null) {
+                handler.cancel(true);
+            }
+            running = false;
+        }
+        
+        public boolean isRunning() {
+            return running;
         }
     }
 }
