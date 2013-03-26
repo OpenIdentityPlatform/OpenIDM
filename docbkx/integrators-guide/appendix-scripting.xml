@@ -887,6 +887,10 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                             <term>Scripts inside properties</term>
                             <listitem>
                                 <para>condition, transform</para>
+                                <para><literal>sync.json</literal> supports only one script
+                                    per hook. If multiple scripts are defined for the same hook, only the last
+                                    one is kept.
+                                </para>
                             </listitem>
                         </varlistentry>
                     </variablelist>
@@ -900,7 +904,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                     <para>onCreate, onRead, onUpdate, onDelete, onValidate,
                         onRetrieve and onStore
                     </para>
-                    <para>Note that <literal>managed.json</literal> supports only one script
+                    <para><literal>managed.json</literal> supports only one script
                         per hook. If multiple scripts are defined for the same hook, only the last
                         one is kept.
                     </para>
