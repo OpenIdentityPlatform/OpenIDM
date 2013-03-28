@@ -125,7 +125,7 @@ var httpAccessConfig =
             "pattern"   : "system/*",
             "roles"     : "openidm-admin",
             "methods"   : "action",
-            "actions"   : "createconfiguration,liveSync"
+            "actions"   : "test,testConfig,createconfiguration,liveSync"
         },
         
         // Additional checks for authenticated users

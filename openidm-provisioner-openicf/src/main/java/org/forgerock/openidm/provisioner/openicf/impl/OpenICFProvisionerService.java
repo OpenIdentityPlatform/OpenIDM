@@ -192,7 +192,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 serviceAvailable = true;
             } catch (Throwable e) {
                 logger.error("OpenICF connector test of {} failed!", systemIdentifier, e);
-                throw new ComponentException("OpenICF connector test failed.", e);
+                //throw new ComponentException("OpenICF connector test failed.", e);
             }
         } else if (null == facade) {
             logger.warn("OpenICF ConnectorFacade of {} is not available", connectorReference);
@@ -278,6 +278,58 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         return result;
     }
 
+    
+    public Map<String, Object> testConfig(JsonValue config) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        JsonValue jv = new JsonValue(result);
+        jv.add("name", systemIdentifier.getName());
+        jv.add("ok", false);
+        SimpleSystemIdentifier systemIdentifier = null;
+        ConnectorReference connectorReference = null;
+        try {
+            systemIdentifier = new SimpleSystemIdentifier(config);
+            connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
+        } catch (JsonValueException e) {
+            jv.add("error", "OpenICF Provisioner Service configuration has errors: " + e.getMessage());
+            return result;
+        }
+        
+        ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
+        if (null != connectorInfo) {
+            ConnectorFacade facade = null;
+            try {
+                OperationHelperBuilder ohb = new OperationHelperBuilder(systemIdentifier.getName(), config,
+                        connectorInfo.createDefaultAPIConfiguration());
+                ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
+                facade = connectorFacadeFactory.newInstance(ohb.getRuntimeAPIConfiguration());
+            } catch (Exception e) {
+                e.printStackTrace();
+                jv.add("error", "OpenICF connector configuration has errors: " +  e.getMessage());
+                return result;
+            }
+            
+            if (null != facade && facade.getSupportedOperations().contains(TestApiOp.class)) {
+                try {
+                    facade.test();
+                } catch (UnsupportedOperationException e) {
+                    jv.put("reason", "TEST UnsupportedOperation");
+                } catch (Throwable e) {
+                    jv.put("error", e.getMessage());
+                    return result;
+                }
+                jv.put("ok", true);
+            } else if (null == facade) {
+                jv.add("error", "OpenICF ConnectorFacade of " + connectorReference + " is not available");
+            } else {
+                jv.add("error", "OpenICF connector of " + connectorReference + " does not support test.");
+            }
+        } else if (connectorReference.getConnectorLocation().equals(ConnectorReference.ConnectorLocation.LOCAL)) {
+            jv.add("error", "OpenICF ConnectorInfo can not be loaded for " + connectorReference + " from #LOCAL");
+        } else {
+            jv.add("error", "OpenICF ConnectorInfo for " + connectorReference + " is not available yet.");
+        }
+        return result;
+    }
 
     /**
      * TODO: Description.

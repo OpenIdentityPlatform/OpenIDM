@@ -24,7 +24,20 @@
  */
 package org.forgerock.openidm.provisioner.impl;
 
-import org.apache.felix.scr.annotations.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
@@ -42,9 +55,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 // JSON Resource
 
@@ -68,6 +78,12 @@ public class SystemObjectSetService implements JsonResource,
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
     
     public final static String ROUTER_PREFIX = "system";
+
+    public final static String ACTION_CREATE_CONFIGURATION = "CREATECONFIGURATION";
+    public final static String ACTION_TEST_CONFIGURATION = "testConfig";
+    public final static String ACTION_TEST_CONNECTOR = "test";
+    public final static String ACTION_LIVE_SYNC = "liveSync";
+    public final static String ACTION_ACTIVE_SYNC = "activeSync";
 
     @Reference(referenceInterface = ProvisionerService.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -111,9 +127,34 @@ public class SystemObjectSetService implements JsonResource,
         JsonValue params = request.get("params");
         if ("action".equalsIgnoreCase(request.get("method").asString()) && !params.isNull()) {
             String action = params.get(ServerConstants.ACTION_NAME).asString();
-            if ("CREATECONFIGURATION".equalsIgnoreCase(action)) {
+            if (ACTION_CREATE_CONFIGURATION.equalsIgnoreCase(action)) {
                 return configurationService.configure(request.get("value"));
-            } else if(isLiveSyncAction(action)){
+            } else if (ACTION_TEST_CONFIGURATION.equalsIgnoreCase(action)) {
+                JsonValue config = request.get("value");
+                if (!request.get("id").isNull()) {
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST,  
+                            "A system ID must not be specified in the request");
+                }
+                ProvisionerService ps = locateServiceForTest(config.get("name"));
+                if (ps != null) {
+                    return new JsonValue(ps.testConfig(request.get("value")));
+                } else {
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
+                            "Invalid configuration to test: no 'name' specified");
+                }
+                
+            } else if (ACTION_TEST_CONNECTOR.equalsIgnoreCase(action)) {
+                ProvisionerService ps = locateServiceForTest(request.get("id"));
+                if (ps != null) {
+                    return new JsonValue(ps.getStatus());
+                } else {
+                    List<Object> list = new ArrayList<Object>();
+                    for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+                        list.add(entry.getValue().getStatus());
+                    }
+                    return new JsonValue(list);
+                }
+            } else if (isLiveSyncAction(action)) {
                 // Expose liveSync as callable in two ways
                 // Directly on system, taking a source param; matches the scheduler contract
                 // On the resource directly, e.g. system/ldap/account; RESTful contract
@@ -139,7 +180,7 @@ public class SystemObjectSetService implements JsonResource,
             return locateService(request).handle(request);
         }
     }
-
+    
     /**
      * Called when a source object has been created.
      *
@@ -243,7 +284,7 @@ public class SystemObjectSetService implements JsonResource,
      * @return true if the action string is to live sync
      */
     private boolean isLiveSyncAction(String action) {
-        return ("liveSync".equalsIgnoreCase(action) || "activeSync".equalsIgnoreCase(action));
+        return (ACTION_LIVE_SYNC.equalsIgnoreCase(action) || ACTION_ACTIVE_SYNC.equalsIgnoreCase(action));
     }
 
     /**
@@ -319,5 +360,22 @@ public class SystemObjectSetService implements JsonResource,
             }
         }
         throw new JsonResourceException(404, "System: " + identifier + " is not available.");
+    }
+    
+    private ProvisionerService locateServiceForTest(JsonValue requestId) throws JsonResourceException {
+        ProvisionerService ps = null;
+        if (!requestId.isNull()) {
+            Id id = new Id(requestId.asString() + "/test");
+            for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+                if (entry.getKey().is(id)) {
+                    ps = entry.getValue();
+                }
+            }
+            if (ps == null) {
+                throw new JsonResourceException(404, "System: " + requestId.asString() + " is not available.");
+            }
+            return ps;
+        }
+        return null;
     }
 }

@@ -57,6 +57,13 @@ public interface ProvisionerService extends JsonResource {
      * @return
      */
     public Map<String, Object> getStatus();
+    
+    /**
+     * Tests a configuration for a connector.
+     * @param config the config to test
+     * @return the result of the test.
+     */
+    public Map<String, Object> testConfig(JsonValue config);
 
     /**
      * Synchronise the changes from the end system for the given {@code objectType}.
