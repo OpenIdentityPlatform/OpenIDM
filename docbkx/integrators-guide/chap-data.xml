@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-data'
@@ -111,12 +111,8 @@
             Simple REST Client</link> for Chrome, or <link
             xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
             RESTClient</link> for Firefox. Alternatively you can use the
-            <command>curl</command> command-line utility that is included with most
-            operating systems. For more information about <command>curl</command>, see
-            <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>. If
-            you cannot locate the <command>curl</command> command on your system, you
-            can download it from
-            <link xlink:href="http://curl.haxx.se/download.html">http://curl.haxx.se/download.html</link>.
+            <link xlink:show="new" xlink:href="http://curl.haxx.se/"
+            ><command>curl</command></link> command-line utility.
         </para>
 
         <para>For a comprehensive overview of the REST API, see the

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-install'
@@ -171,7 +171,7 @@ Using OPENIDM_OPTS:   -Xmx1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
+OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 -> OpenIDM ready</screen>
       </step>
       <step>
@@ -183,7 +183,7 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
 "Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
-OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
+OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 -> OpenIDM ready
 -&gt;</screen>
       </step>
