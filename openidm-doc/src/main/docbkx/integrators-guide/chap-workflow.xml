@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-workflow'
@@ -199,7 +199,7 @@ script task using expression resolver: [
     <para>Download and unzip the Activiti zip file 
     (<filename>activiti-5.10.zip</filename>) from <link xlink:href=
     "http://activiti.org/download.html" xlink:show="new">
-    http://activiti.org/download.html</link>.</para>
+    Activiti Downloads</link> page.</para>
    </step>
    <step>
     <para>Edit the Activiti configuration file to avoid a port conflict with 
@@ -243,7 +243,7 @@ $ ant tomcat.stop
       <para>Copy the OpenIDM remote workflow WAR file to the Tomcat webapps 
       folder.</para>
       <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow
-$ cp openidm-workflow-remote-2.1.0-SNAPSHOT.war \
+$ cp openidm-workflow-remote-<?eval ${docTargetVersion}?>.war \
  /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/
       </screen>
      </listitem>
@@ -251,7 +251,7 @@ $ cp openidm-workflow-remote-2.1.0-SNAPSHOT.war \
       <para>Copy the OpenIDM workflow Activiti demo jar file to the Tomcat 
       Activiti Explorer library.</para>
      <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow/
-$ cp openidm-workflow-activiti-2.1.0-SNAPSHOT-jar-with-dependencies.jar \
+$ cp openidm-workflow-activiti-<?eval ${docTargetVersion}?>-jar-with-dependencies.jar \
  /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/activiti-explorer/WEB-INF/lib/
       </screen>
      </listitem>
@@ -469,7 +469,7 @@ $ ./startup.sh
     "enabled"  : "true",
     "location" : "remote",
     "engine" : {
-        "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
+        "url" : "http://localhost:9090/openidm-workflow-remote-<?eval ${docTargetVersion}?>",
         "username" : "youractivitiuser",
         "password" : "youractivitipassword"
     },
