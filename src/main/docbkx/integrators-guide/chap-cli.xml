@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-cli'
@@ -211,10 +211,10 @@ $ ./cli.sh configimport --replaceAll /tmp/conf
 Using boot properties at /openidm/conf/boot/boot.properties
 Dec 11, 2012 10:35:37 AM org.restlet.ext.httpclient.HttpClientHelper start
 INFO: Starting the HTTP client
-0. CSV File Connector version 1.1.0.1-SNAPSHOT
-1. LDAP Connector version 1.1.0.1-SNAPSHOT
-2. org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector version 1.1.0.1-SNAPSHOT
-3. XML Connector version 1.1.0.1-SNAPSHOT
+0. CSV File Connector version <?eval ${openicfBundleVersion}?>
+1. LDAP Connector version <?eval ${openicfBundleVersion}?>
+2. org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector version <?eval ${openicfBundleVersion}?>
+3. XML Connector version <?eval ${openicfBundleVersion}?>
 4. Exit
 Select [0..4]: 3
 Edit the configuration file and run the command again. The configuration was 

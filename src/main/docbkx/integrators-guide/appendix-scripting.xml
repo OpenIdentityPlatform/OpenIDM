@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <appendix xml:id="appendix-scripting"
@@ -1069,7 +1069,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                 <stepalternatives>
                     <step>
                         <para>Download and install Eclipse IDE for JavaScript Web Developers
-                            from the<link xlink:href="http://www.eclipse.org/downloads/"
+                            from the <link xlink:href="http://www.eclipse.org/downloads/"
                                           xlink:show="new">Eclipse download page</link>.
                         </para>
                     </step>
@@ -1113,7 +1113,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
 
                         <para>Here <literal>suspend=y</literal> prevents OpenIDM from starting
                             until the remote JavaScript debugger has connected. You might therefore
-                            choose to set this to<literal>suspend=n</literal>.
+                            choose to set this to <literal>suspend=n</literal>.
                         </para>
                     </step>
                     <step>
