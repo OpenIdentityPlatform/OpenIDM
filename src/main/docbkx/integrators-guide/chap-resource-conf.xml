@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-resource-conf'
@@ -1128,13 +1128,13 @@
    <procedure>
     <title>Installing the .NET Connector Server</title>
     <step>
-     <para>Download the Connector Server from <link xlink:show="new"
-     xlink:href="http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/"
-     >http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/</link>.
+     <para>Download the OPENICF .NET Connector Server from the OpenIDM download
+     page under the ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
+     xlink:show="new">Open Stack download page</link>.
      </para>
     </step>
     <step>
-     <para>Execute ServiceInstall-1.1.0.xxxx.msi. 
+     <para>Execute ServiceInstall-<?eval ${openicfBundleVersion}?>-dotnet.msi.
      </para>
     </step>
     <step>
@@ -1247,9 +1247,9 @@ initializeData="c:\connectorserver2.log" traceOutputOptions="DateTime"&gt;
       </note>
      </step>
      <step>
-      <para>Download the Active Directory Connector from <link xlink:show="new"
-      xlink:href="http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/"
-      >http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/</link>.
+      <para>Download the AD Connector from the OpenIDM download page under the
+      ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
+      xlink:show="new">Open Stack download page</link>.
       </para>
      </step>
      <step>
@@ -1434,9 +1434,10 @@ _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
    <procedure>
     <title>Installing a Standalone Connector Server for Unix/Linux</title>
       <step>
-       <para>Download the <filename>OpenICF Java zip</filename> file from 
-       <link xlink:show="new" xlink:href="http://forgerock.org/openicf.html"
-       >http://forgerock.org/openicf.html</link>.
+       <para>Download the OPENICF JAVA Connector Server from the OpenIDM
+       download page under the ForgeRock <link
+       xlink:href="http://forgerock.com/download-stack/"
+       xlink:show="new">Open Stack download page</link>.
        </para>
       </step>
       <step>
@@ -1444,7 +1445,7 @@ _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
        in the current folder, so make sure to move to the appropriate location prior to
        running the command.
        </para>
-       <screen>unzip openicf-1.1.0.1-SNAPSHOT-java.zip</screen>
+       <screen>unzip openicf-<?eval ${openicfBundleVersion}?>-java.zip</screen>
       </step>
       <step>
        <para>Change the directory to OpenICF using the following command:
@@ -1485,9 +1486,10 @@ org.identityconnectors.framework.server.Main -run -properties
      <procedure>
      <title>Installing a Standalone Connector Server for Windows</title>
       <step>
-       <para>Download the <filename>OpenICF Java zip</filename> file from 
-       <link xlink:show="new" xlink:href="http://forgerock.org/openicf.html"
-       >http://forgerock.org/openicf.html</link>. 
+       <para>Download the OPENICF JAVA Connector Server from the OpenIDM
+       download page under the ForgeRock <link xlink:show="new"
+       xlink:href="http://forgerock.com/download-stack/">Open Stack download
+       page</link>.
        </para>
       </step>
       <step>
@@ -1568,7 +1570,7 @@ org.identityconnectors.framework.server.Main -run -properties
          </step>
          <step>
           <para>Unpack the <filename>MySQL JDBC Driver</filename> and copy the 
-          <filename>mysql-connector-java-5.1.22-bin.jar</filename> to the 
+          <filename>mysql-connector-java-5.1.22-bin.jar</filename> to the
           <literal>openicf/lib</literal> directory.
           </para>
          </step>
@@ -1640,7 +1642,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
 	        "connectorHostRef" : "mysql", 
 	        "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql
 	        -connector", 
-	        "bundleVersion" : "1.1.0.0-SNAPSHOT", 
+	        "bundleVersion" : "<?eval ${openicfBundleVersion}?>",
 	        "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector" 
 	    }, 
 	    "producerBufferSize" : 100, 
@@ -1813,10 +1815,9 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
              </para>
            </listitem>
             <listitem>
-             <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
-             exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
-             on JCS <literal>/bundles</literal> (the name will be different for other
-             versions, e.g., <literal>1.1.0.1</literal>). Unpack the <literal>.jar</literal>
+             <para>The <filename>bundleVersion : <?eval ${openicfBundleVersion}?></filename> must be
+             exactly the same as <filename>openicf-scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar</filename>.
+             on JCS <literal>/bundles</literal>. Unpack the <literal>.jar</literal>
              file, open <filename>META-INF/MANIFEST.MF</filename>, and search for the
              <literal>Bundle-Version</literal> property.
              </para>
@@ -1963,7 +1964,7 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
     "connectorRef" : { 
         "connectorHostRef" : "xml", 
         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector", 
-        "bundleVersion" : "1.1.0.0-SNAPSHOT", 
+        "bundleVersion" : "<?eval ${openicfBundleVersion}?>",
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector" 
     }, 
     "producerBufferSize" : 100, 
@@ -2066,10 +2067,9 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
              </para>
            </listitem>
             <listitem>
-             <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
-             exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
-             on JCS <literal>/bundles</literal> (the name will be different for other
-             versions, e.g., <literal>1.1.0.1</literal>).
+             <para>The <filename>bundleVersion : <?eval ${openicfBundleVersion}?></filename> must be
+             exactly the same as <filename>openicf-scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar</filename>.
+             on JCS <literal>/bundles</literal>.
              </para>
            </listitem>
             <listitem>
