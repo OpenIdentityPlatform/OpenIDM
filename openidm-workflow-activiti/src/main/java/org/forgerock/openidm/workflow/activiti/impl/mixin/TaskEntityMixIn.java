@@ -34,7 +34,7 @@ import org.forgerock.openidm.workflow.activiti.impl.ActivitiConstants;
  * @author orsolyamebold
  */
 @JsonIgnoreProperties({"variableInstances", "execution", "taskDefinition", "candidates", "identityLinks", "variables",
-    "variablesLocal", "variableNames", "variableNamesLocal", "assignee", "persistentState"})
+    "variablesLocal", "variableNames", "variableNamesLocal", "assignee", "persistentState", "processInstance"})
 public class TaskEntityMixIn {
 
     @JsonProperty(ActivitiConstants.ID)

@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.form.DateFormType;
 import org.activiti.engine.impl.form.DefaultTaskFormHandler;
+import org.activiti.engine.impl.form.EnumFormType;
 import org.activiti.engine.impl.form.FormPropertyHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
@@ -37,6 +39,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskDefinitionMixIn;
 
 /**
@@ -51,6 +55,8 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
     static {
         mapper = new ObjectMapper();
         mapper.getSerializationConfig().addMixInAnnotations(TaskDefinition.class, TaskDefinitionMixIn.class);
+        mapper.getSerializationConfig().addMixInAnnotations(EnumFormType.class, EnumFormTypeMixIn.class);
+        mapper.getSerializationConfig().addMixInAnnotations(DateFormType.class, DateFormTypeMixIn.class);
         mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
@@ -101,7 +107,6 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                     Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
                     r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
                     List<Map> propertyList = new ArrayList<Map>();
-                    addFormHandlerData(propertyList, taskFormHandler.getFormPropertyHandlers());
                     r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
                     handler.handleResource(r);
                 }
@@ -125,7 +130,6 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
             r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
             List<Map> propertyList = new ArrayList<Map>();
-            addFormHandlerData(propertyList, taskFormHandler.getFormPropertyHandlers());
             r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
             handler.handleResult(r);
         } catch (Exception ex) {
@@ -136,33 +140,5 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
     @Override
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
         handler.handleError(new NotSupportedException("UpdateInstance on TaskDefinitionResource not supported."));
-    }
-
-    /**
-     * Add FormProperty related data to the map of task properties
-     *
-     * @param propertyList map containing the result
-     * @param handlers list of handlers to process
-     */
-    private void addFormHandlerData(List<Map> propertyList, List<FormPropertyHandler> handlers) {
-        for (FormPropertyHandler h : handlers) {
-            Map<String, Object> entry = new HashMap<String, Object>();
-            entry.put(ActivitiConstants.ID, h.getId());
-            entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
-            entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
-            entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
-            entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
-            Map<String, Object> type = new HashMap<String, Object>(3);
-            if (h.getType() != null) {
-                type.put(ActivitiConstants.ACTIVITI_NAME, h.getType().getName());
-                type.put(ActivitiConstants.ENUM_VALUES, h.getType().getInformation("values"));
-                type.put(ActivitiConstants.DATE_PATTERN, h.getType().getInformation("datePattern"));
-            }
-            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, type);
-            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
-            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, h.isRequired());
-            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
-            propertyList.add(entry);
-        }
     }
 }

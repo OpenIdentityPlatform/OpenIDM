@@ -32,7 +32,9 @@ import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.form.DateFormType;
 import org.activiti.engine.impl.form.DefaultStartFormHandler;
+import org.activiti.engine.impl.form.EnumFormType;
 import org.activiti.engine.impl.form.FormPropertyHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -41,6 +43,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.ProcessDefinitionMixIn;
 
 /**
@@ -56,6 +60,8 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     static {
         mapper = new ObjectMapper();
         mapper.getSerializationConfig().addMixInAnnotations(ProcessDefinitionEntity.class, ProcessDefinitionMixIn.class);
+        mapper.getSerializationConfig().addMixInAnnotations(EnumFormType.class, EnumFormTypeMixIn.class);
+        mapper.getSerializationConfig().addMixInAnnotations(DateFormType.class, DateFormTypeMixIn.class);
         mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }

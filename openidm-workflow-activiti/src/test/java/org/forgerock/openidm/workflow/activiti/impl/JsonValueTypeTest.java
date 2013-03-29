@@ -102,5 +102,10 @@ public class JsonValueTypeTest {
 
         public void setCachedValue(Object deserializedObject) {
         }
+
+        @Override
+        public void setByteArrayValue(byte[] bytes) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 }
