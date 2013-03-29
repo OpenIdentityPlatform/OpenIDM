@@ -81,7 +81,7 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <version>5.10</version>
+            <version>5.12</version>
             <exclusions>
                 <exclusion>
                     <artifactId>activation</artifactId>
@@ -96,7 +96,12 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-osgi</artifactId>
-            <version>5.10</version>
+            <version>5.12</version>
+        </dependency>
+        <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.enterprise</artifactId>
+                <version>4.2.0</version>
         </dependency>
 
         <!-- This enhances the felix system bundle with the full javax.transaction 1.1 classes to remedy the split package issue that would occur otherwise. Must be installed before the use of the package, e.g. the transaction manager -->

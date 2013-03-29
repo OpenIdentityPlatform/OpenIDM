@@ -29,7 +29,6 @@ import org.activiti.engine.identity.GroupQuery;
 import org.activiti.engine.identity.Picture;
 import org.activiti.engine.identity.User;
 import org.activiti.engine.identity.UserQuery;
-import org.activiti.engine.impl.identity.Account;
 import org.activiti.engine.impl.identity.Authentication;
 
 import java.net.URI;
@@ -326,32 +325,5 @@ public class SharedIdentityService implements IdentityService {
      * with a user
      */
     public void deleteUserInfo(String userId, String key) {
-    }
-
-    /**
-     * Store account information for a remote system
-     */
-    public void setUserAccount(String userId, String userPassword, String accountName, String accountUsername, String accountPassword, Map<String, String> accountDetails) {
-    }
-
-    /**
-     * Get account names associated with the given user
-     */
-    public List<String> getUserAccountNames(String userId) {
-        return null;
-    }
-
-    /**
-     * Get account information associated with a user
-     */
-    public Account getUserAccount(String userId, String userPassword, String accountName) {
-        return null;
-    }
-
-    /**
-     * Delete an entry of the generic extensibility key-value pairs associated
-     * with a user
-     */
-    public void deleteUserAccount(String userId, String accountName) {
     }
 }
