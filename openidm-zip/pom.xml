@@ -409,6 +409,23 @@
                             <overWriteSnapshots>false</overWriteSnapshots>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-connectors</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <artifactId>ldap-connector</artifactId>
+                                    <version>1.1.0.1</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/connectors</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

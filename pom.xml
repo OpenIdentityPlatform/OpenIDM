@@ -332,7 +332,6 @@
         <module>openidm-workflow-activiti</module>
         <module>openidm-workflow-remote</module>
         <module>openidm-zip</module>
-        <module>openidm-salesforce</module>
     </modules>
 
     <profiles>
