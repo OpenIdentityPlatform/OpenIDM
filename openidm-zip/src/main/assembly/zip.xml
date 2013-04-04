@@ -56,6 +56,10 @@
             <directory>${project.build.directory}/orientstudio/orientdb-${orientdb.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/connectors</directory>
+            <outputDirectory>/openidm/connectors</outputDirectory>
+        </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
             <directory>${project.build.directory}</directory>
