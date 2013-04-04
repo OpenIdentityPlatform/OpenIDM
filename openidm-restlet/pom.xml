@@ -34,6 +34,11 @@
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
