@@ -1430,7 +1430,8 @@ class ObjectMapping implements SynchronizationListener {
                         scope.put("source", sourceObjectOverride.asMap());
                     } else {
                         // TODO: This forced load into memory is necessary until we can do on demand get in script engine
-                        scope.put("source", getSourceObject().asMap());
+                        JsonValue sourceValue = getSourceObject();
+                        scope.put("source", null != sourceValue ? sourceValue.getObject() : null);
                     }
                     try {
                         Object o = validSource.exec(scope);
@@ -1494,7 +1495,8 @@ class ObjectMapping implements SynchronizationListener {
                 Map<String, Object> scope = service.newScope();
                 // TODO: Once script engine can do on-demand get replace these forced loads
                 if (getSourceObjectId() != null) {
-                    scope.put("source", getSourceObject().asMap());
+                    JsonValue source = getSourceObject();
+                    scope.put("source", null != source ? source.getObject() : null);
                 }
                 // Target may not have ID yet, e.g. an onCreate with the target object defined,
                 // but not stored/id assigned.
