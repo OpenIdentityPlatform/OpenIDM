@@ -49,6 +49,15 @@
             code directly in the configuration, or call an external file that contains
             the script.
         </para>
+        <para>
+            Custom scripts should be placed in the <literal>script/</literal> folder
+            for your project, for example <literal>path/to/openidm/script/</literal>.
+            Do not modify or remove the script files located in
+            <literal>path/to/openidm/bin/defaults/script/</literal>. This folder
+            contains the default scripts that are required to run specific services.
+            Scripts in this folder are not guaranteed to remain constant between
+            product releases.
+        </para>
 
         <programlisting language="javascript">
 {
