@@ -688,10 +688,14 @@
       <primary>Synchronization</primary>
       <secondary>Creating attributes</secondary>
      </indexterm>
-     <para>You can create attributes on the target as part of the
-     mapping. In the example, OpenIDM creates a
-     <literal>phoneExtension</literal> attribute with a default value of
-     <literal>0047</literal>.</para>
+     <para>You can create attributes on the target as part of the mapping. In
+     the preceding example, a <literal>phoneExtension</literal> attribute with
+     a default value of <literal>0047</literal> is created on the target. The
+     <literal>"default"</literal> property can also be used to specify the
+     value to assign to the target property if the <literal>"source"</literal>
+     property and the <literal>"transform"</literal> script yield a null value.
+     If no value is specified, the default value is null.
+     </para>
 
      <indexterm>
       <primary>Synchronization</primary>
