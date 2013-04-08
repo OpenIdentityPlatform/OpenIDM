@@ -212,12 +212,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>!*</Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -256,7 +250,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/resources/assemblyCfg.xml</descriptor>
+                                <descriptor>src/assemble/assemblyCfg.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
