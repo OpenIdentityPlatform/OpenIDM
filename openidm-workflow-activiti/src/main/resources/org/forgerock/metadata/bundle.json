@@ -1,3 +1,3 @@
 {
-    "metaDataProvider" : "org.forgerock.openidm.workflow.activiti.metadata.ConfigMeta"
+    "metaDataProvider" : "org.forgerock.openidm.workflow.activiti.internal.metadata.ConfigMeta"
 }
