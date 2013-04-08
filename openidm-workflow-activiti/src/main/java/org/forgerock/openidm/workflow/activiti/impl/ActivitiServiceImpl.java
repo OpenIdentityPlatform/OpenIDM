@@ -136,7 +136,7 @@ public class ActivitiServiceImpl implements RequestHandler {
     bind = "bindDataSource", unbind = "unbindDataSource",
     target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
-    private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
+    private final OpenIDMExpressionManager expressionManager = new OpenIDMExpressionManager();
     private final SharedIdentityService identityService = new SharedIdentityService();
     private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
     private ProcessEngineFactory processEngineFactory;
@@ -161,7 +161,7 @@ public class ActivitiServiceImpl implements RequestHandler {
     RouteService repositoryRoute;
     @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
-
+    
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         activitiResource.handleAction(context, request, handler);
@@ -260,7 +260,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                         }
                         customSessionFactories.add(idmSessionFactory);
                         configuration.setCustomSessionFactories(customSessionFactories);
-                        configuration.setExpressionManager(new OpenIDMExpressionManager());
+                        configuration.setExpressionManager(expressionManager);
 
                         configuration.setMailServerHost(mailhost);
                         configuration.setMailServerPort(mailport);
@@ -439,11 +439,11 @@ public class ActivitiServiceImpl implements RequestHandler {
     }
 
     public void bindService(JavaDelegate delegate, Map props) {
-        openIDMELResolver.bindService(delegate, props);
+        expressionManager.bindService(delegate, props);
     }
 
     public void unbindService(JavaDelegate delegate, Map props) {
-        openIDMELResolver.unbindService(delegate, props);
+        expressionManager.unbindService(delegate, props);
     }
 
     public void bindTransactionManager(TransactionManager manager) {
