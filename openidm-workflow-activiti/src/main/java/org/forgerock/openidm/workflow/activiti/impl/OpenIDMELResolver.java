@@ -27,7 +27,6 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
 import org.forgerock.json.resource.ServerContext;
-import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +59,10 @@ public class OpenIDMELResolver extends ELResolver {
     private PersistenceConfig persistenceConfig;
     private ScriptRegistry scriptRegistry;
 
+    public OpenIDMELResolver(Map<String, JavaDelegate> delegateMap) {
+        this.delegateMap = delegateMap;
+    }
+    
     @Override
     public Object getValue(ELContext context, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
@@ -67,6 +70,7 @@ public class OpenIDMELResolver extends ELResolver {
         scriptRegistry = session.getOpenIDMScriptRegistry();
         Map<String, String> scriptJson = new HashMap<String, String>(3);
         Bindings bindings = null;
+        String key = (String) property;
         try {
             JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, base, ActivitiConstants.OPENIDM_CONTEXT);
             ServerContext serverContext = ServerContext.loadFromJson(openidmContext, persistenceConfig);
@@ -84,7 +88,6 @@ public class OpenIDMELResolver extends ELResolver {
         }
         if (base == null) {
             // according to javadoc, can only be a String
-            String key = (String) property;
             if (bindings.containsKey(key)) {
                 context.setPropertyResolved(true);
                 return bindings.get(key);
@@ -97,21 +100,10 @@ public class OpenIDMELResolver extends ELResolver {
                 }
             }
         }
+        //fetching the openidmcontext sets it to true, we need to set it 
+        //to false again if the property was not found
+        context.setPropertyResolved(false);
         return null;
-    }
-
-    public void bindService(JavaDelegate delegate, Map props) {
-        String name = (String) props.get(ComponentConstants.COMPONENT_ID);
-        delegateMap.put(name, delegate);
-        LOGGER.info("added Activiti service to delegate cache " + name);
-    }
-
-    public void unbindService(JavaDelegate delegate, Map props) {
-        String name = (String) props.get(ComponentConstants.COMPONENT_ID);
-        if (delegateMap.containsKey(name)) {
-            delegateMap.remove(name);
-        }
-        LOGGER.info("removed Activiti service from delegate cache " + name);
     }
 
     @Override
