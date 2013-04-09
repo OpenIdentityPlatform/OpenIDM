@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -22,67 +22,65 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
+        <groupId>org.forgerock.openidm</groupId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-jetty-fragment</artifactId>
-    <name>OpenIDM Jetty Fragment</name>
+    <groupId>org.forgerock.openidm</groupId>
+    <artifactId>openidm-security</artifactId>
+    <name>OpenIDM Security Management Service</name>
     <packaging>bundle</packaging>
+
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-crypto</artifactId>
-            <version>${openidm.version}</version>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
-
-<!-- Not necessary when using dynamic import
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-jaas-loginmodule-repo</artifactId>
+            <artifactId>openidm-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
--->
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty-bundle</artifactId>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-jetty-fragment</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>1.46</version>
         </dependency>
 
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>META-INF/**/*</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!-- Avoid transient felix resolution issues with dynamic resolution -->
-                        <DynamicImport-Package>org.forgerock.openidm.jaas</DynamicImport-Package>
-                        <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
-                        <Export-Package>org.forgerock.openidm.jetty</Export-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.security;version="${openidm.version}"
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
