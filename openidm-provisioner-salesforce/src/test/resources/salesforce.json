@@ -1,0 +1,18 @@
+{
+    "configurationProperties": {
+        "clientId": "3MVG9A2kN3Bn17hvcdxMbGxoe6dMo7c62id3fVfsReO0Rl.AY6BgEQZ.ItNlt6LrrjSrWoQ_iKNgVVdd71Dvs",
+        "clientSecret": "7110691799021968227",
+        "Uusername": "laszlo1.hordos@forgerock.org",
+        "password": "Passw0rd",
+        "securityToken": "LqI1skjtyvLmECVH13MyHgiM9",
+        "refreshToken" : "5Aep861z80Xevi74eWEi7DVt9fvzKs9C8G_8UytO14SZpBDo8EpldkLlAq129N.jEZ3QONDLsdWsw="
+    },
+    "configurationProperties-DEMO": {
+        "clientId": "3MVG9y6x0357HlecBBjUmCRjwqwJvG8xIaUY3iZ3esbCtxCZlp0nwnLuZH5nOcZilwkYPYjOYtUGH7iYJDE30",
+        "clientSecret": "3401028757331031215",
+        "Uusername": "nick@npvtech.com",
+        "password": "Welcome1",
+        "securityToken": "PbqNeEOE7N7qjBsrM1zX4uFjH",
+        "refreshToken" : "5Aep861rEpScxnNE66fHSorXx5cECDefiIYe9.tuCwJp0TeQXGNYvJiO97IqMnx5F00mxZnmZs96g=="
+    }
+}
