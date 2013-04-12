@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -60,6 +61,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.forgerock.json.fluent.JsonValue;
@@ -97,6 +99,8 @@ public class SecurityManager extends SimpleJsonResource {
     @Activate
     void activate(ComponentContext compContext) throws ParseException {
         logger.debug("Activating Security Management Service {}", compContext);
+        // Add the Bouncy Castle provider
+        Security.addProvider(new BouncyCastleProvider());
     }
     
     @Deactivate
@@ -245,11 +249,7 @@ public class SecurityManager extends SimpleJsonResource {
                     Certificate cert = store.getStore().getCertificate(alias);
                     resultMap.put("_id", alias);
                     resultMap.put("type", cert.getType());
-                    Map<String, Object> publicKey = new HashMap<String, Object>();
-                    publicKey.put("algorithm", cert.getPublicKey().getAlgorithm());
-                    publicKey.put("format", cert.getPublicKey().getFormat());
-                    publicKey.put("encoded", cert.getPublicKey().getEncoded());
-                    resultMap.put("publicKey", publicKey);
+                    resultMap.put("publicKey", getPublicKeyResult(cert));
                 } else {
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
                             "A valid alias must be specified");
@@ -302,17 +302,7 @@ public class SecurityManager extends SimpleJsonResource {
                     // Populate response
                     resultMap.put("_id", alias);
                     resultMap.put("type", cert.getType());
-                    StringWriter sw = new StringWriter();
-                    PEMWriter pemWriter = new PEMWriter(sw);
-                    pemWriter.writeObject(cert);
-                    pemWriter.flush();
-                    pemWriter.close();
-                    Map<String, Object> publicKey = new HashMap<String, Object>();
-                    publicKey.put("algorithm", cert.getPublicKey().getAlgorithm());
-                    publicKey.put("format", cert.getPublicKey().getFormat());
-                    publicKey.put("encoded", cert.getPublicKey().getEncoded());
-                    publicKey.put("cert", sw.getBuffer().toString());
-                    resultMap.put("publicKey", publicKey);
+                    resultMap.put("publicKey", getPublicKeyResult(cert));
                 } else {
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
                             "A valid resource ID must be specified in the request");
@@ -358,6 +348,24 @@ public class SecurityManager extends SimpleJsonResource {
         }
     }
     
+    private Map<String, Object> getPublicKeyResult(Certificate cert) throws Exception {
+        Map<String, Object> publicKey = new HashMap<String, Object>();
+        PEMWriter pemWriter = null;
+        try {
+            StringWriter sw = new StringWriter();
+            pemWriter = new PEMWriter(sw);
+            pemWriter.writeObject(cert);
+            pemWriter.flush();
+            publicKey.put("algorithm", cert.getPublicKey().getAlgorithm());
+            publicKey.put("format", cert.getPublicKey().getFormat());
+            publicKey.put("encoded", cert.getPublicKey().getEncoded());
+            publicKey.put("cert", sw.getBuffer().toString());
+        } finally {
+            pemWriter.close();
+        }
+        return publicKey;
+    }
+    
     /**
      * Generates a certificate from a supplied string representation of one, and a supplied type.
      * 
@@ -367,8 +375,15 @@ public class SecurityManager extends SimpleJsonResource {
      * @throws Exception
      */
     private Certificate generateCertificate(String certString, String type) throws Exception {
-        ByteArrayInputStream bais = new ByteArrayInputStream(certString.getBytes());
-        return CertificateFactory.getInstance(type).generateCertificate(bais);
+        StringReader sr = new StringReader(certString);
+        PEMReader pw = new PEMReader(sr);
+        Object object = pw.readObject();
+        if (object instanceof X509Certificate) {
+            return (X509Certificate)object;
+        } else {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
+                    "Unsupported certificate format");
+        }
     }
     
     /**
@@ -380,7 +395,6 @@ public class SecurityManager extends SimpleJsonResource {
      */
     private Certificate generateCertificate(String domainName, String algorithm, int keySize, 
             String signatureAlgorithm, String validFrom, String validTo) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
         
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
         keyPairGenerator.initialize(keySize);  
