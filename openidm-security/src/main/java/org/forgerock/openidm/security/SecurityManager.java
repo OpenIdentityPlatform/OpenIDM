@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -59,12 +60,15 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.jetty.Param;
+import org.forgerock.openidm.util.DateUtil;
+import org.joda.time.DateTime;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -275,13 +279,20 @@ public class SecurityManager extends SimpleJsonResource {
                     StoreWrapper store = getStoreFromResourceId(id.asString());
                     String alias = getAlias(id.asString());
                     if (alias == null) {
-                        // alias could potentially be specified in the request data
-                        alias = value.get("alias").asString();
+                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
+                                "A valid resource ID must be specified in the request");
                     }
                     String domainName = value.get("domainName").required().asString();
+                    String algorithm = value.get("algorithm").defaultTo("RSA").asString();
+                    String signatureAlgorithm = value.get("signatureAlgorithm")
+                            .defaultTo("MD5WithRSAEncryption").asString();
+                    int keySize = value.get("keySize").defaultTo(1024).asInteger();
+                    String validFrom = value.get("validFrom").asString();
+                    String validTo = value.get("validTo").asString();
                     
                     // Generate the cert
-                    Certificate cert = generateCertificate(domainName);
+                    Certificate cert = generateCertificate(domainName, algorithm, keySize, 
+                            signatureAlgorithm, validFrom, validTo);
                     
                     // Add it to the store and reload
                     store.getStore().setCertificateEntry(alias, cert);
@@ -291,10 +302,16 @@ public class SecurityManager extends SimpleJsonResource {
                     // Populate response
                     resultMap.put("_id", alias);
                     resultMap.put("type", cert.getType());
+                    StringWriter sw = new StringWriter();
+                    PEMWriter pemWriter = new PEMWriter(sw);
+                    pemWriter.writeObject(cert);
+                    pemWriter.flush();
+                    pemWriter.close();
                     Map<String, Object> publicKey = new HashMap<String, Object>();
                     publicKey.put("algorithm", cert.getPublicKey().getAlgorithm());
                     publicKey.put("format", cert.getPublicKey().getFormat());
                     publicKey.put("encoded", cert.getPublicKey().getEncoded());
+                    publicKey.put("cert", sw.getBuffer().toString());
                     resultMap.put("publicKey", publicKey);
                 } else {
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
@@ -355,31 +372,57 @@ public class SecurityManager extends SimpleJsonResource {
     }
     
     /**
-     * Generates a certificate from a given domain name.
+     * Generates a self signed certificate from a given domain name.
      * 
      * @param domainName the domain name to use for the new certificate
      * @return  The generated certificate
      * @throws Exception
      */
-    private Certificate generateCertificate(String domainName) throws Exception {
+    private Certificate generateCertificate(String domainName, String algorithm, int keySize, 
+            String signatureAlgorithm, String validFrom, String validTo) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");  
-        keyPairGenerator.initialize(1024);  
-        KeyPair KPair = keyPairGenerator.generateKeyPair();
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
+        keyPairGenerator.initialize(keySize);  
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
         
         X509V3CertificateGenerator v3CertGen = new X509V3CertificateGenerator(); 
         
+        Date notBefore = null;
+        Date notAfter = null;
+        if (validFrom == null) {
+            notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
+        } else {
+            DateTime notBeforeDateTime = DateUtil.getDateUtil().parseIfDate(validFrom);
+            if (notBeforeDateTime == null) {
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,  
+                        "Invalid date format for 'validFrom' property");
+            } else {
+                notBefore = notBeforeDateTime.toDate();
+            }
+        }
+        if (validTo == null) {
+            notAfter = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365*10));   
+        } else {
+            DateTime notAfterDateTime = DateUtil.getDateUtil().parseIfDate(validTo);
+            if (notAfterDateTime == null) {
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,  
+                        "Invalid date format for 'validTo' property");
+            } else {
+                notAfter = notAfterDateTime.toDate();
+            }
+        }
+        
         v3CertGen.setSerialNumber(BigInteger.valueOf(Math.abs(new SecureRandom().nextLong())));  
         v3CertGen.setIssuerDN(new X509Principal("CN=" + domainName + ", OU=None, O=None L=None, C=None"));  
-        v3CertGen.setNotBefore(new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30));  
-        v3CertGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365*10)));  
+        v3CertGen.setNotBefore(notBefore);  
+        v3CertGen.setNotAfter(notAfter);  
         v3CertGen.setSubjectDN(new X509Principal("CN=" + domainName + ", OU=None, O=None L=None, C=None")); 
         
-        v3CertGen.setPublicKey(KPair.getPublic());  
-        v3CertGen.setSignatureAlgorithm("MD5WithRSAEncryption"); 
+        v3CertGen.setPublicKey(keyPair.getPublic());  
+        v3CertGen.setSignatureAlgorithm(signatureAlgorithm); 
         
-        X509Certificate cert = v3CertGen.generateX509Certificate(KPair.getPrivate()); 
+        X509Certificate cert = v3CertGen.generateX509Certificate(keyPair.getPrivate());
         
         return cert;
     }
