@@ -144,7 +144,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                         if ("CollaborationGroup".equals(type)) {
                             JsonValue members = request.get("value").get("member");
                             if (members.isList()) {
-                                updateGroupMemberships(id.substring(id.lastIndexOf('/') + 1),
+                                updateCollaborationGroupMemberships(id.substring(id.lastIndexOf('/') + 1),
                                         members.asList());
                             }
                         } else if ("Group".equals(type)) {
@@ -154,9 +154,9 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                                         members.asList());
                             }
                         } else if ("PermissionSet".equals(type)) {
-                            JsonValue members = request.get("value").get("member");
+                            JsonValue members = request.get("value").get("assignee");
                             if (members.isList()) {
-                                updateGroupMemberships(id.substring(id.lastIndexOf('/') + 1),
+                                updatePermissionSetAssignments(id.substring(id.lastIndexOf('/') + 1),
                                         members.asList());
                             }
                         }
@@ -286,7 +286,20 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
             if ("CollaborationGroup".equals(type)) {
                 JsonValue members = request.get("value").get("member");
                 if (members.isList()) {
-                    updateGroupMemberships(id.substring(id.lastIndexOf('/') + 1), members.asList());
+                    updateCollaborationGroupMemberships(id.substring(id.lastIndexOf('/') + 1),
+                            members.asList());
+                }
+            } else if ("Group".equals(type)) {
+                JsonValue members = request.get("value").get("member");
+                if (members.isList()) {
+                    updateGroupMemberships(id.substring(id.lastIndexOf('/') + 1),
+                            members.asList());
+                }
+            } else if ("PermissionSet".equals(type)) {
+                JsonValue members = request.get("value").get("assignee");
+                if (members.isList()) {
+                    updatePermissionSetAssignments(id.substring(id.lastIndexOf('/') + 1),
+                            members.asList());
                 }
             }
 
@@ -420,7 +433,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
 
     // Custom
 
-    private void updateGroupMemberships(String collaborationGroup, List<Object> members)
+    private void updateCollaborationGroupMemberships(String collaborationGroup, List<Object> members)
             throws JsonResourceException {
         JsonValue request = new JsonValue(new HashMap<String, Object>());
         Map<String, Object> params = new HashMap<String, Object>(1);
@@ -437,7 +450,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                     break;
                 }
                 logger.info(
-                        "Attempt to delete member: sobjects/user/{} from sobjects/CollaborationGroup/{}",
+                        "Attempt to delete member: sobjects/User/{} from sobjects/CollaborationGroup/{}",
                         item.get("MemberId").asString(), collaborationGroup);
                 request = new JsonValue(new HashMap<String, Object>());
                 request.put("id", "sobjects/CollaborationGroupMember/" + item.get("Id").asString());
@@ -446,7 +459,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                     delete(request);
                 } catch (JsonResourceException e) {
                     logger.error(
-                            "Failed to delete member: sobjects/user/{} from sobjects/CollaborationGroup/{}",
+                            "Failed to delete member: sobjects/User/{} from sobjects/CollaborationGroup/{}",
                             item.get("MemberId").asString(), collaborationGroup);
                 }
             }
@@ -454,7 +467,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
 
         for (Object newMember : members) {
             logger.info(
-                    "Attempt to add new member: sobjects/user/{} to sobjects/CollaborationGroup/{}",
+                    "Attempt to add new member: sobjects/User/{} to sobjects/CollaborationGroup/{}",
                     newMember, collaborationGroup);
             Map value = new HashMap<String, Object>();
             value.put("CollaborationGroupId", collaborationGroup);
@@ -468,8 +481,105 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                 create(request);
             } catch (JsonResourceException e) {
                 logger.info(
-                        "Failed to add new member: sobjects/user/{} to sobjects/CollaborationGroup/{}",
+                        "Failed to add new member: sobjects/User/{} to sobjects/CollaborationGroup/{}",
                         newMember, collaborationGroup);
+            }
+        }
+    }
+
+    private void updateGroupMemberships(String group, List<Object> members)
+            throws JsonResourceException {
+        JsonValue request = new JsonValue(new HashMap<String, Object>());
+        Map<String, Object> params = new HashMap<String, Object>(1);
+        params.put(QueryConstants.QUERY_EXPRESSION,
+                "SELECT Id, UserOrGroupId from GroupMember where GroupId = '"
+                        + group + "'");
+        request.put("params",params);
+        JsonValue response = query(request);
+
+        for (JsonValue item : response.get(QueryConstants.QUERY_RESULT)) {
+            if (!members.remove(members.contains(item.get("UserOrGroupId").asString()))) {
+                logger.info(
+                        "Attempt to delete member: sobjects/User/{} from sobjects/Group/{}",
+                        item.get("UserOrGroupId").asString(), group);
+                request = new JsonValue(new HashMap<String, Object>());
+                request.put("id", "sobjects/GroupMember/" + item.get("Id").asString());
+
+                try {
+                    delete(request);
+                } catch (JsonResourceException e) {
+                    logger.error(
+                            "Failed to delete member: sobjects/User/{} from sobjects/Group/{}",
+                            item.get("UserOrGroupId").asString(), group);
+                }
+            }
+        }
+
+        for (Object newMember : members) {
+            logger.info(
+                    "Attempt to add new member: sobjects/User/{} to sobjects/Group/{}",
+                    newMember, group);
+            Map value = new HashMap<String, Object>();
+            value.put("GroupId", group);
+            value.put("UserOrGroupId", newMember);
+            request = new JsonValue(new HashMap<String, Object>());
+            request.put("id", "sobjects/GroupMember");
+            request.put("value", value);
+            try {
+                create(request);
+            } catch (JsonResourceException e) {
+                logger.info(
+                        "Failed to add new member: sobjects/User/{} to sobjects/Group/{}",
+                        newMember, group);
+            }
+        }
+    }
+
+    private void updatePermissionSetAssignments(String permissionSet, List<Object> members)
+            throws JsonResourceException {
+        JsonValue request = new JsonValue(new HashMap<String, Object>());
+        Map<String, Object> params = new HashMap<String, Object>(1);
+        params.put(QueryConstants.QUERY_EXPRESSION,
+                "SELECT Id, AssigneeId from PermissionSetAssignment where PermissionSetId = '"
+                        + permissionSet + "'");
+        request.put("params",params);
+        JsonValue response = query(request);
+
+        for (JsonValue item : response.get(QueryConstants.QUERY_RESULT)) {
+            if (!members.remove(members.contains(item.get("AssigneeId").asString()))) {
+
+                logger.info(
+                        "Attempt to delete member: sobjects/User/{} from sobjects/PermissionSet/{}",
+                        item.get("AssigneeId").asString(), permissionSet);
+                request = new JsonValue(new HashMap<String, Object>());
+                request.put("id", "sobjects/PermissionSetAssignment/" + item.get("Id").asString());
+
+                try {
+                    delete(request);
+                } catch (JsonResourceException e) {
+                    logger.error(
+                            "Failed to delete member: sobjects/User/{} from sobjects/PermissionSet/{}",
+                            item.get("AssigneeId").asString(), permissionSet);
+                }
+            }
+        }
+
+        for (Object newMember : members) {
+            logger.info(
+                    "Attempt to add new member: sobjects/User/{} to sobjects/PermissionSet/{}",
+                    newMember, permissionSet);
+            Map value = new HashMap<String, Object>();
+            value.put("PermissionSetId", permissionSet);
+            value.put("AssigneeId", newMember);
+            request = new JsonValue(new HashMap<String, Object>());
+            request.put("id", "sobjects/PermissionSetAssignment");
+            request.put("value", value);
+            try {
+                create(request);
+            } catch (JsonResourceException e) {
+                logger.info(
+                        "Failed to add new member: sobjects/User/{} to sobjects/PermissionSet/{}",
+                        newMember, permissionSet);
             }
         }
     }

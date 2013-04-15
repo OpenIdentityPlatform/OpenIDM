@@ -36,7 +36,31 @@
     <artifactId>openidm-salesforce</artifactId>
     <name>OpenIDM Salesforce Endpoints Service</name>
     <packaging>bundle</packaging>
-
+    <repositories>
+        <repository>
+            <id>forgerock-staging-repository</id>
+            <name>ForgeRock Release Repository</name>
+            <url>http://maven.forgerock.org/repo/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>forgerock-snapshots-repository</id>
+            <name>ForgeRock Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>forgerock-plugins-repository</id>
+            <name>ForgeRock Plugin Repository</name>
+            <url>http://maven.forgerock.org/repo/repo</url>
+        </pluginRepository>
+    </pluginRepositories>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
