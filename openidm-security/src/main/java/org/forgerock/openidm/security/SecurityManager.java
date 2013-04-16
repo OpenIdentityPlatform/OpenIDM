@@ -24,7 +24,6 @@
 
 package org.forgerock.openidm.security;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -35,10 +34,11 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -291,18 +291,19 @@ public class SecurityManager extends SimpleJsonResource {
                     String validTo = value.get("validTo").asString();
                     
                     // Generate the cert
-                    Certificate cert = generateCertificate(domainName, algorithm, keySize, 
+                    CertificateWrapper certWrapper = generateCertificate(domainName, algorithm, keySize, 
                             signatureAlgorithm, validFrom, validTo);
                     
                     // Add it to the store and reload
-                    store.getStore().setCertificateEntry(alias, cert);
+                    store.addCert(alias, certWrapper.getCertificate());
+                    store.addPrivateKey(alias, certWrapper.getPrivateKey(), new Certificate[]{certWrapper.getCertificate()});
                     store.store();
                     store.reload();
                     
                     // Populate response
                     resultMap.put("_id", alias);
-                    resultMap.put("type", cert.getType());
-                    resultMap.put("publicKey", getPublicKeyResult(cert));
+                    resultMap.put("type", certWrapper.getCertificate().getType());
+                    resultMap.put("publicKey", getPublicKeyResult(certWrapper.getCertificate()));
                 } else {
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
                             "A valid resource ID must be specified in the request");
@@ -393,7 +394,7 @@ public class SecurityManager extends SimpleJsonResource {
      * @return  The generated certificate
      * @throws Exception
      */
-    private Certificate generateCertificate(String domainName, String algorithm, int keySize, 
+    private CertificateWrapper generateCertificate(String domainName, String algorithm, int keySize, 
             String signatureAlgorithm, String validFrom, String validTo) throws Exception {
         
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
@@ -436,9 +437,10 @@ public class SecurityManager extends SimpleJsonResource {
         v3CertGen.setPublicKey(keyPair.getPublic());  
         v3CertGen.setSignatureAlgorithm(signatureAlgorithm); 
         
-        X509Certificate cert = v3CertGen.generateX509Certificate(keyPair.getPrivate());
+        PrivateKey privateKey = keyPair.getPrivate();
+        X509Certificate cert = v3CertGen.generateX509Certificate(privateKey);
         
-        return cert;
+        return new CertificateWrapper(cert, privateKey);
     }
     
     /**
@@ -523,6 +525,10 @@ public class SecurityManager extends SimpleJsonResource {
         public void addCert(String alias, Certificate cert) throws Exception {
             store.setCertificateEntry(alias, cert);
         }
+        
+        public void addPrivateKey(String alias, PrivateKey privateKey, Certificate [] chain) throws Exception {
+            store.setEntry(alias, new PrivateKeyEntry(privateKey, chain), new KeyStore.PasswordProtection(password.toCharArray()));
+        }
    
         public void store() throws Exception {
             OutputStream out = new FileOutputStream(location);
@@ -540,6 +546,25 @@ public class SecurityManager extends SimpleJsonResource {
             SSLContext context = SSLContext.getInstance("SSL");
             context.init(null, managers, null);
             SSLContext.setDefault(context);
+        }
+    }
+    
+    private class CertificateWrapper {
+        
+        private Certificate certificate;
+        private PrivateKey privateKey;
+        
+        public CertificateWrapper(Certificate certificate, PrivateKey privateKey) {
+            this.certificate = certificate;
+            this.privateKey = privateKey;
+        }
+
+        public Certificate getCertificate() {
+            return certificate;
+        }
+
+        public PrivateKey getPrivateKey() {
+            return privateKey;
         }
     }
 }
