@@ -109,7 +109,7 @@
 
         <para>The following example (included in the <filename>sync.json</filename>
             file) returns <literal>true</literal> if the <literal>employeeType</literal>
-            is equal to<literal>external</literal>, otherwise returns
+            is equal to <literal>external</literal>, otherwise returns
             <literal>false</literal>. This script can be useful during reconciliation to
             establish whether the source object should be a part of the reconciliation,
             or ignored.
@@ -118,7 +118,7 @@
         <programlisting language="javascript">
 "validTarget": {
    "type" : "text/javascript",
-   "source": "object.employeeType == 'external'"
+   "source": "target.employeeType == 'external'"
 }
         </programlisting>
 
