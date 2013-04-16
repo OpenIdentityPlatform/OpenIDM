@@ -168,7 +168,7 @@ public class SalesforceConfiguration{
             throw new IllegalArgumentException("Parameter 'clientSecret' must not be blank.");
         }
 
-        if (StringUtils.isBlank(getRefreshToken())) {
+        if (null == getRefreshToken()) {
 
             if (StringUtils.isBlank(username)) {
                 throw new IllegalArgumentException("Parameter 'username' must not be blank.");
@@ -176,26 +176,26 @@ public class SalesforceConfiguration{
             if (StringUtils.isBlank(password)) {
                 throw new IllegalArgumentException("Parameter 'password' must not be blank.");
             }
+        } else if (StringUtils.isBlank(getRefreshToken())) {
+            throw new IllegalArgumentException("Parameter 'refreshToken' must not be blank.");
         }
     }
 
     public Form getAuthenticationForm() {
-
+        validate();
         Form form = new Form();
         form.add(SalesforceConnection.CLIENT_ID, getClientId());
         form.add(SalesforceConnection.CLIENT_SECRET, getClientSecret());
 
-        if (StringUtils.isNotBlank(getRefreshToken())) {
-            form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.REFRESH_TOKEN);
-            form.add(SalesforceConnection.REFRESH_TOKEN, refresh_token);
-        } else if (StringUtils.isNotBlank(getUsername()) && StringUtils.isNotBlank(getPassword())&& StringUtils.isNotBlank(getSecurityToken())) {
+        if (null == getRefreshToken()) {
             form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.PASSWORD);
 
             form.add(SalesforceConnection.USERNAME, getUsername());
             form.add(SalesforceConnection.PASSWORD, getPassword()+getSecurityToken());
-//            if (StringUtils.isNotBlank(scope)) {
-//                form.add(SalesforceConnection.SCOPE, scope);
-//            }
+        } else {
+            form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.REFRESH_TOKEN);
+
+            form.add(SalesforceConnection.REFRESH_TOKEN, refresh_token);
         }
 
         return form;
