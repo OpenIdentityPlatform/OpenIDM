@@ -101,6 +101,20 @@ public class SecurityManager extends SimpleJsonResource {
         logger.debug("Activating Security Management Service {}", compContext);
         // Add the Bouncy Castle provider
         Security.addProvider(new BouncyCastleProvider());
+        
+        // Set System properties
+        String keystoreLocation = System.getProperty("javax.net.ssl.keyStore");
+        String truststoreLocation = System.getProperty("javax.net.ssl.trustStore");
+        if (keystoreLocation == null) {
+            System.setProperty("javax.net.ssl.keyStore", Param.getKeystoreLocation());
+            System.setProperty("javax.net.ssl.keyStorePassword", Param.getKeystorePassword(false));
+            System.setProperty("javax.net.ssl.keyStoreType", Param.getKeystoreType());
+        }
+        if (truststoreLocation == null) {
+            System.setProperty("javax.net.ssl.trustStore", Param.getTruststoreLocation());
+            System.setProperty("javax.net.ssl.trustStorePassword", Param.getTruststorePassword(false));
+            System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
+        }
     }
     
     @Deactivate
