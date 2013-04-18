@@ -215,9 +215,16 @@ public class SalesforceConnection extends ClientResource {
             revoke.getReference().addQueryParameter("token", authentication.getAccessToken());
             revoke.setMethod(Method.GET);
             revoke.handle();
-            logger.info("AccessToken revocation status:{} response:{} ", revoke.getResponse().getStatus(), revoke.getResponse().getEntityAsText());
-            if (revoke.getResponse().getStatus().isError()) {  //TODO is it expired?
-                logger.error("Failed to revoke the token: {}" + revoke.getResponse().getEntityAsText());
+
+            if (revoke.getResponse().getStatus().isError()) {
+                // TODO is it expired?
+                logger.error("Failed to revoke token - status:{} response:{} ", revoke.getResponse()
+                        .getStatus(), null != revoke.getResponse().getEntity() ? revoke.getResponse()
+                        .getEntityAsText() : "");
+            } else {
+                logger.info("Succeed to revoke token - status:{} response:{} ", revoke.getResponse()
+                        .getStatus(), null != revoke.getResponse().getEntity() ? revoke.getResponse()
+                        .getEntityAsText() : "");
             }
         }
     }
