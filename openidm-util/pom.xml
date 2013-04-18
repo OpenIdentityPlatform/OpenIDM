@@ -33,7 +33,7 @@
     <name>OpenIDM utility classes</name>
     <packaging>bundle</packaging>
     <properties>
-        <openidm.osgi.import.defaults>org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
+        <!--<openidm.osgi.import.defaults>org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>-->
     </properties>
     <dependencies>
         <dependency>
@@ -148,6 +148,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <!-- Felix (with <=4.2.1) has some trouble attaching fragments if a bundle is already resolved. Start order doesn't always resolve this if resolution is triggered through references. To allow attaching fragments to the rhino script engine, we delay resolving it by accessing via dynamic import instead -->
+                        <DynamicImport-Package>
+                            org.eclipse.wst.jsdt.debug.rhino.debugger,
+                            org.mozilla.javascript,
+                            org.mozilla.javascript.tools.shell
+                        </DynamicImport-Package>
                         <Export-Package>
                             org.forgerock.openidm.audit.util;version=${openidm.version},
                             org.forgerock.openidm.crypto;version=${openidm.version},
