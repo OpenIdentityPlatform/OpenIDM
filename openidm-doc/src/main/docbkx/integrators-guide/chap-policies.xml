@@ -104,7 +104,7 @@
       that the value of a property must contain a certain number of capital 
       letters.</para>
       
-      <programlisting width="100" language="javascript">
+      <programlisting width="72" language="javascript">
 ...
             {   "policyId" : "at-least-X-capitals",
                 "clientValidation": true,
@@ -143,11 +143,11 @@ function atLeastXCapitalLetters(fullObject, value, params, property) {
         </para>
       
       <programlisting language="javascript">
-            {   "policyId" : "minimum-length",
-                "clientValidation": true,
-                "policyExec" : "propertyMinLength", 
-                "policyRequirements" : ["MIN_LENGTH"]
-            }     
+{   "policyId" : "minimum-length",
+    "clientValidation": true,
+    "policyExec" : "propertyMinLength",
+    "policyRequirements" : ["MIN_LENGTH"]
+}
       </programlisting>
       
       <simplelist>
@@ -357,28 +357,28 @@ function notNull(fullObject, value, params, property) {
     
      <programlisting language="javascript">
 ...
-            "properties" : [
-                {
-                    "name" : "password",
-                    "encryption" : {
-                        "key" : "openidm-sym-default"
-                    },
-                    "scope" : "private"
-                    "policies" : [
-                        {
-                            "policyId" : "required"
-                        },
-                        {
-                            "policyId" : "not-empty"
-                        },
-                        {
-                            "policyId" : "at-least-X-capitals",
-                            "params" : {
-                                "numCaps" : 1
-                            }
-                        }
-                     ]
-                  },
+"properties" : [
+    {
+        "name" : "password",
+        "encryption" : {
+            "key" : "openidm-sym-default"
+        },
+        "scope" : "private"
+        "policies" : [
+            {
+                "policyId" : "required"
+            },
+            {
+                "policyId" : "not-empty"
+            },
+            {
+                "policyId" : "at-least-X-capitals",
+                "params" : {
+                "numCaps" : 1
+                }
+            }
+        ]
+    },
 ...
     </programlisting>   
 
@@ -465,7 +465,7 @@ function notNull(fullObject, value, params, property) {
  --request GET
  "http://localhost:8080/openidm/policy/managed/user/*"</screen>
       
-      <screen width="86">
+      <screen>
 {
     "resource": "managed/user/*",
     "properties": [
