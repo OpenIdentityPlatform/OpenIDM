@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  * @author Laszlo Hordos
  */
 public class SalesforceConnectionTest {
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void testTest() throws Exception {
         URL configURL = SalesforceConnectionTest.class.getResource("/salesforce.json");
         Assert.assertNotNull(configURL);
@@ -50,9 +50,9 @@ public class SalesforceConnectionTest {
 
         Map<String, Object> config = mapper.readValue(configURL, Map.class);
 
-        SalesforceConnection connection =
-                new SalesforceConnection(mapper.convertValue(config.get("configurationProperties"),
-                        SalesforceConfiguration.class));
-        connection.test();
+        SalesforceConfiguration configuration = mapper.convertValue(config.get("configurationProperties"),
+                SalesforceConfiguration.class);
+
+        //SalesforceConnection connection = new SalesforceConnection(configuration);
     }
 }

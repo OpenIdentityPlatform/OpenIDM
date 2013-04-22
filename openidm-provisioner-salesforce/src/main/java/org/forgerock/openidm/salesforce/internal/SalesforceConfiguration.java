@@ -156,6 +156,162 @@ public class SalesforceConfiguration{
         this.refresh_token = refresh_token;
     }
 
+    // HTTP Connection
+
+    private int connectTimeout = 0;
+    private long idleCheckInterval = 0L;
+    private long idleTimeout = 10000L;
+    private int maxConnectionsPerHost = 10;
+    private int maxTotalConnections = 20;
+    private String proxyHost = null;
+    private int proxyPort = 3128;
+    private int socketTimeout = 0;
+    private int stopIdleTimeout = 1000;
+    private boolean tcpNoDelay = false;
+
+    /**
+     * Returns the connection timeout.
+     *
+     * @return The connection timeout.
+     */
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    /**
+     * Time in milliseconds between two checks for idle and expired connections.
+     * The check happens only if this property is set to a value greater than 0.
+     *
+     * @return A value indicating the idle connection check interval or 0 if a
+     *         value has not been provided
+     * @see #getIdleTimeout()
+     */
+    public long getIdleCheckInterval() {
+        return idleCheckInterval;
+    }
+
+    public void setIdleCheckInterval(long idleCheckInterval) {
+        this.idleCheckInterval = idleCheckInterval;
+    }
+
+    /**
+     * Returns the time in ms beyond which idle connections are eligible for
+     * reaping. The default value is 10000 ms.
+     *
+     * @return The time in millis beyond which idle connections are eligible for
+     *         reaping.
+     * @see #getIdleCheckInterval()
+     */
+    public long getIdleTimeout() {
+        return idleTimeout;
+    }
+
+    public void setIdleTimeout(long idleTimeout) {
+        this.idleTimeout = idleTimeout;
+    }
+
+    /**
+     * Returns the maximum number of connections that will be created for any
+     * particular host.
+     *
+     * @return The maximum number of connections that will be created for any
+     *         particular host.
+     */
+    public int getMaxConnectionsPerHost() {
+        return maxConnectionsPerHost;
+    }
+
+
+    public void setMaxConnectionsPerHost(int maxConnectionsPerHost) {
+        this.maxConnectionsPerHost = maxConnectionsPerHost;
+    }
+
+    /**
+     * Returns the maximum number of active connections.
+     *
+     * @return The maximum number of active connections.
+     */
+    public int getMaxTotalConnections() {
+        return maxTotalConnections;
+    }
+
+    public void setMaxTotalConnections(int maxTotalConnections) {
+        this.maxTotalConnections = maxTotalConnections;
+    }
+
+    /**
+     * Returns the host name of the HTTP proxy, if specified.
+     *
+     * @return the host name of the HTTP proxy, if specified.
+     */
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    /**
+     * Returns the port of the HTTP proxy, if specified, 3128 otherwise.
+     *
+     * @return the port of the HTTP proxy.
+     */
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    /**
+     * Returns the socket timeout value. A timeout of zero is interpreted as an
+     * infinite timeout.
+     *
+     * @return The read timeout value.
+     */
+    public int getSocketTimeout() {
+        return socketTimeout;
+    }
+
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    /**
+     * Returns the minimum idle time, in milliseconds, for connections to be
+     * closed when stopping the connector.
+     *
+     * @return The minimum idle time, in milliseconds, for connections to be
+     *         closed when stopping the connector.
+     */
+    public int getStopIdleTimeout() {
+        return stopIdleTimeout;
+    }
+
+    public void setStopIdleTimeout(int stopIdleTimeout) {
+        this.stopIdleTimeout = stopIdleTimeout;
+    }
+
+    /**
+     * Indicates if the protocol will use Nagle's algorithm
+     *
+     * @return True to enable TCP_NODELAY, false to disable.
+     * @see java.net.Socket#setTcpNoDelay(boolean)
+     */
+    public boolean getTcpNoDelay() {
+        return tcpNoDelay;
+    }
+
+    public void setTcpNoDelay(boolean tcpNoDelay) {
+        this.tcpNoDelay = tcpNoDelay;
+    }
 
     /**
      * {@inheritDoc}

@@ -388,6 +388,8 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
         final Response response = resource.getResponse();
         if (response.getStatus().isError()) {
 
+            JsonResourceException e = connection.getJsonResourceException(resource);
+
             if (tryReauth && Status.CLIENT_ERROR_UNAUTHORIZED.equals(response.getStatus())) {
                 // Re authenticate
                 ChallengeResponse cr =
@@ -399,7 +401,7 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
                     throw new JsonResourceException(401, "AccessToken can not be renewed");
                 }
             } else {
-                throw connection.getJsonResourceException(resource);
+                throw e;
             }
             // throw new ResourceException(response.getStatus());
         }
