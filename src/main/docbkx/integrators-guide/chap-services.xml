@@ -320,7 +320,7 @@ Stopping OpenIDM (454)</screen>
       <para>This information can be accessed over REST at 
       <literal>http://localhost:8080/openidm/info/ping</literal>. For example:
       </para>
-      <screen width="91"><?dbfo pgwide="1"?>$ curl
+      <screen><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
