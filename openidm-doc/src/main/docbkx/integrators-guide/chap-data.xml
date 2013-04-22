@@ -67,11 +67,9 @@
             configuration objects, and repository objects, as follows:</para>
 
         <programlisting language="javascript">
-            val = openidm.read("managed/organization/mysampleorg")
-
-            val = openidm.read("config/custom/mylookuptable")
-
-            val = openidm.read("repo/custom/mylookuptable")</programlisting>
+val = openidm.read("managed/organization/mysampleorg")
+val = openidm.read("config/custom/mylookuptable")
+val = openidm.read("repo/custom/mylookuptable")</programlisting>
 
         <para>For information about constructing an object ID, see <link
                 xlink:href="integrators-guide#rest-uri-scheme"
@@ -83,17 +81,15 @@
             function, as follows.</para>
 
         <programlisting language="javascript">
-            openidm.update("managed/organization/mysampleorg", mymap)
-
-            openidm.update("config/custom/mylookuptable", mymap)
-
-            openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
+openidm.update("managed/organization/mysampleorg", mymap)
+openidm.update("config/custom/mylookuptable", mymap)
+openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
         <para>For managed objects, you can partially update an object with the
             <literal>patch()</literal> function.</para>
 
         <programlisting language="javascript">
-            openidm.patch("managed/organization/mysampleorg", rev, value)
+openidm.patch("managed/organization/mysampleorg", rev, value)
         </programlisting>
 
         <para>The <literal>create()</literal>, <literal>delete()</literal>, and
@@ -168,9 +164,9 @@
                 the REST interface:</para>
 
             <screen>$ curl
-                --header "X-OpenIDM-Username: openidm-admin"
-                --header "X-OpenIDM-Password: openidm-admin"
-                "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
             </screen>
 
         </section>
@@ -198,9 +194,9 @@
                 <literal>_queryExpression</literal> keyword. For example:</para>
 
             <screen width="92">$ curl
-                --header "X-OpenIDM-Username: openidm-admin"
-                --header "X-OpenIDM-Password: openidm-admin"
-                "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
             </screen>
 
             <para>Unlike parameterized queries, native queries are not portable
