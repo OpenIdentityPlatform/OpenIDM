@@ -421,8 +421,10 @@ Stopping OpenIDM (454)</screen>
     </listitem>
     <listitem>
       <para>Any additional properties that are defined in the configuration 
-      file (<filename>openidm/samples/infoservice/conf/info-
-      <replaceable>name</replaceable>.json</filename>.)</para></listitem>
+      file (
+      <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>.)
+      </para>
+    </listitem>
   </itemizedlist> 
  </section>
 
