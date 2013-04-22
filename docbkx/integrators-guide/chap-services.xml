@@ -400,8 +400,9 @@ Stopping OpenIDM (454)</screen>
   </itemizedlist>
   
   <para>Additional properties can be passed to the script in this configuration 
-  file (<filename>openidm/samples/infoservice/conf/info-
-  <replaceable>name</replaceable>.json</filename>).</para>
+  file (
+  <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>).
+  </para>
   
   <para>Script files in <filename>openidm/samples/infoservice/script/info/</filename> 
   have access to the following objects:</para>
