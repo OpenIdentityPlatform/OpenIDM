@@ -1514,7 +1514,11 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized(lock) {
             String jobKey = getJobNameKey(jobDetail);
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
-            TriggerWrapper tw = new TriggerWrapper(getTriggerFromRepo(trigger.getGroup(), trigger.getName()).asMap());
+            JsonValue triggerValue = getTriggerFromRepo(trigger.getGroup(), trigger.getName());
+            TriggerWrapper tw = null;
+            if (triggerValue != null && !triggerValue.isNull()) {
+                tw = new TriggerWrapper(triggerValue.asMap());
+            }
             
             // Remove the acquired trigger (if acquired)
             removeAcquiredTrigger(trigger, instanceId);
