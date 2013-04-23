@@ -222,7 +222,7 @@
   </indexterm>
 
   <variablelist>
-   <para>OpenIDM sets up the following roles by default.</para>
+   <para>OpenIDM sets up the following roles by default:</para>
    <varlistentry>
     <term>openidm-reg</term>
     <listitem>
@@ -252,9 +252,12 @@
    </varlistentry>
   </variablelist>
   
-  <para>You configure the default roles that are assigned to successfully 
-  authenticated users by setting the <literal>defaultUserRoles</literal> 
-  property in <filename>openidm/conf/authentication.json</filename>, which 
+  <para>A user's roles are fetched <emphasis>after</emphasis> authentication.
+  If no roles are defined in the user profile, the
+  <literal>defaultUserRoles</literal> are applied. You can configure
+  the default roles that are assigned to successfully authenticated users by
+  setting the <literal>defaultUserRoles</literal> property in
+  <filename>openidm/conf/authentication.json</filename>, which
   takes a list. The default value is <literal>openidm-authorized</literal>.
   </para>
 
@@ -266,6 +269,12 @@
         <emphasis role="strong">"openidm-authorized"</emphasis>
     ]
 }</programlisting>
+   <para>A managed user who does not have a role of <literal>openidm-authorized</literal>
+   can authenticate but is unable to access certain system resources,
+   according to the access control configured in the <filename>access.js</filename>
+   file. Requests on a resource for which access is denied return a 403 error.
+   For more information, see the following section covering
+   <xref linkend="openidm-authorization" />.</para>
  </section>
  
  <section xml:id="openidm-authorization">
