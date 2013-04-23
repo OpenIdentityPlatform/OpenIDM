@@ -430,10 +430,12 @@ public class SalesforceRequestHandler extends SimpleJsonResource {
     // }
 
     private ClientResource getClientResource(String id) {
-        return connection.getChild(id == null ? "services/data/v27.0" : "services/data/v27.0/" + id);
+        return connection.getChild(id == null ? "services/data/" + connection.getVersion()
+                : "services/data/" + connection.getVersion() + "/" + id);
     }
 
     // Custom
+
 
     private void updateCollaborationGroupMemberships(String collaborationGroup, List<Object> members)
             throws JsonResourceException {

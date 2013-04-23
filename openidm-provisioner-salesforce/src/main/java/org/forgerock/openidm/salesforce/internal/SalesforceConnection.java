@@ -145,7 +145,7 @@ public class SalesforceConnection extends ClientResource {
 
     public SalesforceConnection(SalesforceConfiguration configuration0)
             throws JsonResourceException {
-        super(new Context(), SalesforceConfiguration.LOGIN_URL);
+        super(new Context(), configuration0.getLoginUrl());
         configuration0.validate();
         this.configuration = configuration0;
 
@@ -313,8 +313,12 @@ public class SalesforceConnection extends ClientResource {
     }
 
     public void test() throws JsonResourceException {
-        ClientResource resource = getChild("services/data/v27.0");
+        ClientResource resource = getChild("services/data/" + getVersion());
         test(resource, true);
+    }
+
+    String getVersion() {
+        return "v" + Double.toString(configuration.getVersion());
     }
 
     private void test(ClientResource resource, boolean tryReauth) throws JsonResourceException {
@@ -456,8 +460,8 @@ public class SalesforceConnection extends ClientResource {
                 log.fine("Scope at = " + scope);
             }
 
-            String instanceUrl = null;
-            if (answer.get(INSTANCE_URL) instanceof String) {
+            String instanceUrl = configuration.getInstanceUrl();
+            if (null == instanceUrl && answer.get(INSTANCE_URL) instanceof String) {
                 instanceUrl = (String) answer.get(INSTANCE_URL);
                 log.fine("InstanceUrl = " + instanceUrl);
             }

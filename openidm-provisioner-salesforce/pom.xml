@@ -74,7 +74,20 @@
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.httpclient</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.force.api</groupId>
             <artifactId>force-wsc</artifactId>
@@ -85,6 +98,11 @@
                     <artifactId>js</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.force.api</groupId>
+            <artifactId>force-metadata-api</artifactId>
+            <version>27.0.0</version>
         </dependency>
 
         <dependency>
@@ -130,7 +148,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>force-wsc</Embed-Dependency>
+                        <Embed-Dependency>force-wsc,force-metadata-api</Embed-Dependency>
                         <Embed-Directory>lib</Embed-Directory>
                         <Private-Package>org.forgerock.openidm.salesforce.internal*</Private-Package>
                         <!--Export-Package>

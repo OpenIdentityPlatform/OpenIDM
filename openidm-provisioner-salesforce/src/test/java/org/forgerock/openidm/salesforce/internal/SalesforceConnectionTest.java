@@ -53,6 +53,8 @@ public class SalesforceConnectionTest {
         SalesforceConfiguration configuration = mapper.convertValue(config.get("configurationProperties"),
                 SalesforceConfiguration.class);
 
+        Assert.assertEquals(Double.toString(configuration.getVersion()),"27.0", "API Version is not match");
+
         //SalesforceConnection connection = new SalesforceConnection(configuration);
     }
 }

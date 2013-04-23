@@ -37,7 +37,7 @@ import org.restlet.data.Form;
 public class SalesforceConfiguration{
 
 
-    public final static String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
+    private final static String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
 
     // Exposed configuration properties.
 
@@ -168,6 +168,39 @@ public class SalesforceConfiguration{
     private int socketTimeout = 0;
     private int stopIdleTimeout = 1000;
     private boolean tcpNoDelay = false;
+
+    // Service
+
+    private String loginUrl = null;
+
+    private String instanceUrl = null;
+
+    private double version = 27.0;
+
+
+    public String getLoginUrl() {
+        return loginUrl != null ? loginUrl : LOGIN_URL;
+    }
+
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
+    public String getInstanceUrl() {
+        return instanceUrl;
+    }
+
+    public void setInstanceUrl(String instanceUrl) {
+        this.instanceUrl = instanceUrl;
+    }
+
+    public double getVersion() {
+        return version;
+    }
+
+    public void setVersion(double version) {
+        this.version = version;
+    }
 
     /**
      * Returns the connection timeout.
