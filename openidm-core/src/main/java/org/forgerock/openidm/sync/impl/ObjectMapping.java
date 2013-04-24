@@ -1337,7 +1337,7 @@ class ObjectMapping implements SynchronizationListener {
                                 if (getSourceObject() != null && getTargetObject() != null) {
                                     JsonValue oldTarget = getTargetObject().copy();
                                     applyMappings(getSourceObject(), getTargetObject());
-                                    execScript("onUpdate", onUpdateScript);
+                                    execScript("onUpdate", onUpdateScript, oldTarget);
                                     if (JsonPatch.diff(oldTarget, getTargetObject())
                                             .size() > 0) { // only update if target changes
                                         updateTargetObject(getTargetObject());
@@ -1484,13 +1484,23 @@ class ObjectMapping implements SynchronizationListener {
         }
 
         /**
+         * @see #execScript with oldTarget null
+         */
+        private void execScript(String type, Script script) throws SynchronizationException {
+            execScript(type, script, null);
+        }
+        
+        /**
          * Executes the given script with the appropriate context information
          *
          * @param type The script hook name
          * @param script The script to execute
+         * @param oldTarget optional old target object before any mappings were applied, 
+         * such as before an update
+         * null if not applicable to this script hook
          * @throws SynchronizationException TODO.
          */
-        private void execScript(String type, Script script) throws SynchronizationException {
+        private void execScript(String type, Script script, JsonValue oldTarget) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = service.newScope();
                 // TODO: Once script engine can do on-demand get replace these forced loads
@@ -1503,6 +1513,9 @@ class ObjectMapping implements SynchronizationListener {
                 if (isTargetLoaded() || getTargetObjectId() != null) {
                     if (getTargetObject() != null) {
                         scope.put("target", getTargetObject().asMap());
+                        if (oldTarget != null) {
+                            scope.put("oldTarget", oldTarget.asMap());
+                        }
                     }
                 }
                 if (situation != null) {
