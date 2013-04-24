@@ -250,7 +250,7 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         
         <!-- Commons JSON versions -->
-        <commons.util.version>1.0.0</commons.util.version>
+        <commons.util.version>1.1.0-SNAPSHOT</commons.util.version>
         <commons.json-fluent.version>1.2.0</commons.json-fluent.version>
         <commons.json-patch.version>1.0.0</commons.json-patch.version>
         <commons.json-crypto.version>1.1.0</commons.json-crypto.version>
@@ -396,7 +396,7 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>org.forgerock.util</artifactId>
+                <artifactId>forgerock-util</artifactId>
                 <version>${commons.util.version}</version>
             </dependency>
             <dependency>
