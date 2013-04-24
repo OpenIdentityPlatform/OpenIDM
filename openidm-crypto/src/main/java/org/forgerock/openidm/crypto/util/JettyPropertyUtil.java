@@ -46,17 +46,22 @@ public class JettyPropertyUtil {
      */
     public static String getProperty(String propName, boolean obfuscated) {
         String prop = IdentityServer.getInstance().getProperty(propName);
-        if (obfuscated && prop != null) {
-            try {
-                String clear = new String(Main.unfold(prop));
-                prop = Main.obfuscate(prop);
-            } catch (GeneralSecurityException ex) {
-                throw new RuntimeException("Failed ot obtain property " + propName + " in Jetty obfuscated format.", ex);
+        if (prop == null) {
+            return null;
+        }
+        try {
+            String clear = new String(Main.unfold(prop));
+            if (obfuscated) {
+                prop = Main.obfuscate(clear);
+            } else {
+                prop = clear;
             }
+        } catch (GeneralSecurityException ex) {
+            throw new RuntimeException("Failed to obtain property " + propName + " in Jetty obfuscated format.", ex);
         }
         return prop;
     }
-    
+
     /**
      * Get a Jetty configuration property as qualified file path
      * 
