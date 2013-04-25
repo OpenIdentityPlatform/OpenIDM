@@ -430,29 +430,27 @@ function notNull(fullObject, value, params, property) {
       
       <para>The policy objects are returned in JSON format, with one object 
       for each defined policy ID, for example:</para>
-      
-      <screen width="100">
-{
-    "resources": [
-        {
-            "resource": "managed/user/*",
-            "properties": [
-                {
-                    "policies": [
-                        {
-                            "policyId": "required",
-                            "policyFunction": "function required(fullObject, value, params, propName) {
-                                 if (value === undefined) {
-                                     return [{"policyRequirement":"REQUIRED"}];
-                                 }
-                                   return [];
-                         }",
-                            "policyRequirements": [
-                                "REQUIRED"
-                            ]
-                        },
-                        ...       
-      </screen>
+
+<screen width="88">{
+  "resources": [
+    {
+      "resource": "managed/user/*",
+      "properties": [
+      {
+        "policies": [
+          {
+            "policyId": "required",
+            "policyFunction": "function required(fullObject, value, params, propName) {
+              if (value === undefined) {
+              return [{"policyRequirement":"REQUIRED"}];
+                      }
+              return [];
+            }",
+            "policyRequirements": [
+              "REQUIRED"
+            ]
+          },
+...</screen>
     
       <para>To display the policies that apply to a specific component, include 
       the component name in the URL. For example, the following REST call 
@@ -465,7 +463,7 @@ function notNull(fullObject, value, params, property) {
  --request GET
  "http://localhost:8080/openidm/policy/managed/user/*"</screen>
       
-      <screen>
+      <screen width="85">
 {
     "resource": "managed/user/*",
     "properties": [
@@ -507,8 +505,7 @@ function notNull(fullObject, value, params, property) {
                     ]
                 },
 ...
-}     
-      </screen>
+}</screen>
     </section>
     
     <section xml:id="policy-validate">
@@ -520,7 +517,7 @@ function notNull(fullObject, value, params, property) {
       <para>The following example verifies that a new managed user object is 
       acceptable in terms of the policy requirements.</para>
       
-      <screen>$ curl
+      <screen width="83">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST      
@@ -549,8 +546,7 @@ function notNull(fullObject, value, params, property) {
       "property":"password"
     }
   ]
-}
-      </screen>
+}</screen>
       
       <para>The result (<literal>false</literal>) indicates that the object 
       is not valid. The unfulfilled policy requirements are provided as part 
