@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,56 +25,52 @@ package org.forgerock.openidm.audit.impl;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
-
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-
 import org.forgerock.json.patch.JsonPatch;
-
-import org.forgerock.json.resource.JsonResource;
-
+import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
-import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
-import org.forgerock.openidm.util.DateUtil;
-import org.forgerock.openidm.util.JsonUtil;
-
-// Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.JsonUtil;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Audit module
@@ -96,6 +92,13 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     public final static String CONFIG_LOG_TYPE = "logType";
     public final static String CONFIG_LOG_TYPE_CSV = "csv";
     public final static String CONFIG_LOG_TYPE_REPO = "repository";
+    
+    public final static String TYPE_RECON = "recon";
+    public final static String TYPE_ACTIVITY = "activity";
+
+    public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
+    public final static String QUERY_BY_RECON_SITUATION = "audit-by-recon-id-situation";
+    public final static String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
@@ -104,6 +107,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     List<JsonPointer> watchFieldFilters;
     List<JsonPointer> passwordFieldFilters;
 
+    AuditLogger defaultLogger = null;
     List<AuditLogger> auditLoggers;
     JsonValue config; // Existing active configuration
     DateUtil dateUtil;
@@ -150,8 +154,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
+        logger.debug("Audit read called for {}", fullId);
+        AuditLogger auditLogger = getDefaultAuditLogger();
+        return auditLogger.read(fullId);
     }
 
     /**
@@ -387,8 +392,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
+        logger.debug("Audit query called for {} with {}", fullId, params);
+        AuditLogger auditLogger = getDefaultAuditLogger();
+        return auditLogger.query(fullId, params);
     }
 
     /**
@@ -397,6 +403,17 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     @Override
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
         throw new ForbiddenException("Not allowed on audit service");
+    }
+    
+    
+    public AuditLogger getDefaultAuditLogger() throws ObjectSetException {
+        if (defaultLogger != null) {
+            return defaultLogger;
+        } else if (auditLoggers.size() > 0) {
+            return auditLoggers.get(0);
+        } else {
+            throw new InternalServerErrorException("No audit loggers available");
+        }
     }
 
     // TODO: replace with common utility to handle ID, this is temporary
@@ -570,6 +587,12 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 auditLogger.setConfig(entry, compContext.getBundleContext());
                 logger.info("Audit configured to log to {}", logType);
                 configuredLoggers.add(auditLogger);
+                if (entry.containsKey("default")) {
+                    if ((Boolean)entry.get("default")) {
+                        logger.info("Default audit logger set to " + logType);
+                        defaultLogger = auditLogger;
+                    }
+                }
             }
         }
         return configuredLoggers;
@@ -586,5 +609,78 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             }
         }
         logger.info("Audit service stopped.");
+    }
+    
+    public static Map<String, Object> formatLogEntry(Map<String, Object> entry, String type) {
+        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+            return AuditServiceImpl.formatReconEntry(entry);
+        } else {
+            return entry;
+        }
+    }
+
+    /**
+     * Returns a audit log recon entry formatted based on the entryType (summary, start, recon entry).
+     * 
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    public static Map<String, Object> formatReconEntry(Map<String, Object> entry) {
+        Map<String, Object> formattedEntry = new HashMap<String, Object>();
+        formattedEntry.put("_id", entry.get("_id"));
+        formattedEntry.put("entryType", entry.get("entryType"));
+        formattedEntry.put("timestamp", entry.get("timestamp"));
+        formattedEntry.put("reconId", entry.get("reconId"));
+        formattedEntry.put("rootActionId", entry.get("rootActionId"));
+        formattedEntry.put("status", entry.get("status"));
+        if ("".equals(entry.get("entryType"))) {
+            // recon entry
+            formattedEntry.put("actionId", entry.get("actionId"));
+            formattedEntry.put("action", entry.get("action"));
+            formattedEntry.put("ambiguousTargetObjectIds", entry.get("ambiguousTargetObjectIds"));
+            formattedEntry.put("reconciling", entry.get("reconciling"));
+            formattedEntry.put("situation", entry.get("situation"));
+            formattedEntry.put("sourceObjectId", entry.get("sourceObjectId"));
+            formattedEntry.put("targetObjectId", entry.get("targetObjectId"));
+        } else {
+            // status or summary
+            formattedEntry.put("message", entry.get("message"));
+        }
+        return formattedEntry;
+    }
+    
+    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, String reconId) {
+        Map<String, Object> results = new HashMap<String, Object>();
+        List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
+        for (Map<String, Object> entry : entryList) {
+            if (reconId.equals(entry.get("reconId"))) {
+                if ("start".equals(entry.get("entryType"))) {
+                    results.put("start", AuditServiceImpl.formatReconEntry(entry));
+                } else if ("summary".equals(entry.get("entryType"))) {
+                    results.put("summary", AuditServiceImpl.formatReconEntry(entry));
+                } else {
+                    resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+                }
+            }
+        }
+        results.put("results", resultEntries);
+        return results;
+    }
+    
+    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
+        Map<String, Object> results = new HashMap<String, Object>();
+        results.put("results", entryList);
+        return results;
+    }
+    
+    protected static JsonValue parseJsonString(String stringified) {
+        JsonValue jsonValue = null;
+        try {
+            Map parsedValue = (Map) mapper.readValue(stringified, Map.class);
+            jsonValue = new JsonValue(parsedValue);
+        } catch (IOException ex) {
+            throw new JsonException("String passed into parsing is not valid JSON", ex);
+        }
+        return jsonValue;
     }
 }
