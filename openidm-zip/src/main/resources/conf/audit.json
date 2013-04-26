@@ -22,7 +22,8 @@
             "recordDelimiter" : ";"
         },
         {
-            "logType" : "repository"
+            "logType" : "repository",
+            "default" : true
         }
     ]
 }
