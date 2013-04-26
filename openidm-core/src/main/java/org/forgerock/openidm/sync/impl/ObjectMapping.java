@@ -1,19 +1,27 @@
-/*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
- *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
- *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
- *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
- */
-
+/**
+* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+*
+* Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+*
+* The contents of this file are subject to the terms
+* of the Common Development and Distribution License
+* (the License). You may not use this file except in
+* compliance with the License.
+*
+* You can obtain a copy of the License at
+* http://forgerock.org/license/CDDLv1.0.html
+* See the License for the specific language governing
+* permission and limitations under the License.
+*
+* When distributing Covered Code, include this CDDL
+* Header Notice in each file and include the License file
+* at http://forgerock.org/license/CDDLv1.0.html
+* If applicable, add the following below the CDDL Header,
+* with the fields enclosed by brackets [] replaced by
+* your own identifying information:
+* "Portions Copyrighted [year] [name of copyright owner]"
+*
+*/
 package org.forgerock.openidm.sync.impl;
 
 // Java SE
@@ -688,6 +696,7 @@ class ObjectMapping implements SynchronizationListener {
                                 op.getSourceObject().get("_id").asString());
                     }
                 }
+                entry.actionId = op.actionId;
                 logReconEntry(entry);
             }
             if (exception != null) {
@@ -814,6 +823,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (op.getSourceObjectId() != null) {
                         entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
                     }
+                    entry.actionId = op.actionId;
                     logReconEntry(entry);
                 }
             }
@@ -892,6 +902,7 @@ class ObjectMapping implements SynchronizationListener {
                 entry.status = Status.FAILURE;
             }
             entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
+            entry.actionId = op.actionId;
             logReconEntry(entry);
         }
     }
@@ -1057,6 +1068,7 @@ class ObjectMapping implements SynchronizationListener {
         public Situation situation;
         /** TODO: Description. */
         public Action action;
+        public String actionId;
         public boolean ignorePostAction = false;
         public Policy activePolicy = null;
 
@@ -1257,6 +1269,7 @@ class ObjectMapping implements SynchronizationListener {
                 case UNLINK:
                 case EXCEPTION:
                     try {
+                        actionId = ObjectSetContext.get().get("uuid").asString();
                         switch (getAction()) {
                             case CREATE:
                                 if (getSourceObject() == null) {
@@ -2031,6 +2044,8 @@ class ObjectMapping implements SynchronizationListener {
         public String reconciling;
         /** TODO: Description. */
         public String message;
+        /** TODO: Description. */
+        public String actionId;
 
         private DateUtil dateUtil;
 
@@ -2093,6 +2108,7 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
             jv.put("status", (status == null ? null : status.toString()));
             jv.put("message", message);
+            jv.put("actionId", actionId);
             return jv;
         }
     }

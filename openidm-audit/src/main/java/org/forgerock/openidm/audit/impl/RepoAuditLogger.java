@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,34 +23,32 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.repo.RepositoryService;
-
-// Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Audit logger that logs to a repository
@@ -82,10 +80,29 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
-        JsonResourceObjectSet svc = getRepoService();
-        Map<String, Object> result = null;
+        getRepoService();
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("_queryId", "query-all");
+        params.put("fields", "*");
+        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+        String type = split[0];
+        String id = split[1];
+        Map<String, Object> result = new HashMap<String, Object>();
         try {
-            result = svc.read(fullIdPrefix + fullId);
+            List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
+            if (id == null) {
+                Map<String, Object> queryResult = repo.query(fullIdPrefix + fullId, params);
+                for (Map<String, Object> entry : (List<Map<String, Object>>) queryResult.get(QueryConstants.QUERY_RESULT)) {
+                    entries.add(AuditServiceImpl.formatLogEntry(entry, type));
+                }
+                formatActivityList(entries);
+                result.put("entries", entries);
+            } else {
+                Map<String, Object> entry = repo.read(fullIdPrefix + fullId);
+                formatActivityEntry(entry);
+                result = AuditServiceImpl.formatLogEntry(entry, type);
+            }
+
         } catch (ObjectSetException ex) {
             throw ex;
         } catch (RuntimeException ex) {
@@ -100,17 +117,43 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        JsonResourceObjectSet svc = getRepoService();
-        Map<String, Object> result = null;
+        getRepoService();
+        String queryId = (String)params.get("_queryId");
+        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+        String type = split[0];
         try {
-            result = svc.query(fullIdPrefix + fullId, params);
-        } catch (ObjectSetException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            repo = null; // For unexpected exceptions start fresh
-            throw ex;
+            Map<String, Object> queryResults = repo.query(fullIdPrefix + fullId, params);
+        
+            if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+                return AuditServiceImpl.getReconResults((List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT), 
+                        (String)params.get("reconId"));
+            } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+                List<Map<String, Object>> entryList = (List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT);
+                formatActivityList(entryList);
+                return AuditServiceImpl.getActivityResults(entryList);
+            } else {
+                throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
+            }
+        } catch (Exception e) {
+            throw new BadRequestException(e);
         }
-        return result;
+    }
+    
+    public void formatActivityList(List<Map<String, Object>> entryList) {
+        for (Map<String, Object> entry : entryList) {
+            formatActivityEntry(entry);
+        }
+    }
+
+    public void formatActivityEntry(Map<String, Object> entry) {
+        Object beforeValue = entry.get("before");
+        Object afterValue = entry.get("after");
+        if (beforeValue != null) {
+            entry.put("before", AuditServiceImpl.parseJsonString((String)beforeValue).getObject());
+        }
+        if (afterValue != null) {
+            entry.put("after", AuditServiceImpl.parseJsonString((String)afterValue).getObject());
+        }
     }
     
     /**
