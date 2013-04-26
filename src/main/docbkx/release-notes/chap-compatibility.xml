@@ -134,7 +134,13 @@
         to authenticate against an access manager).</para>
       </listitem>
     </varlistentry>    
-    
+    <varlistentry>
+      <term>Name change for the <literal>query-id</literal> parameter</term>
+      <listitem>
+        <para>The <literal>query-id</literal> parameter has been renamed  
+        <literal>queryID</literal> for consistency across the API.</para>      
+      </listitem>   
+    </varlistentry>    
   </variablelist>
  </section> 
   
