@@ -24,30 +24,49 @@
 
 package org.forgerock.openidm.salesforce.internal;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.openidm.salesforce.internal.data.SObjectDescribe;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
-import java.net.URL;
+import java.util.regex.Matcher;
 
 /**
  * A NAME does ...
- *
+ * 
  * @author Laszlo Hordos
  */
-public class SObjectDescribeTest {
-    @Test
-    public void testIsCreateable() throws Exception {
-        URL configURL = SalesforceConnectionTest.class.getResource("/User.json");
-        Assert.assertNotNull(configURL);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().set (
-                DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+public class ServerContext {
 
-        SObjectDescribe describe = mapper.readValue(configURL, SObjectDescribe.class);
+    private static ThreadLocal<ServerContext> stack = new ThreadLocal<ServerContext>();
 
-        Assert.assertTrue(describe.isCreateable());
+    /**
+     * Returns the request on the top of the stack, or {@code null} if there is
+     * no request on the top of the stack.
+     */
+    public static void set(ServerContext context) {
+        stack.set(context);
+    }
+
+    public static ServerContext get() {
+        return stack.get();
+    }
+
+    /**
+     * Removes all of the requests in the stack.
+     */
+    public static void clear() {
+        stack.set(null);
+    }
+
+    public static ServerContext build(Matcher matcher) {
+        ServerContext sc = new ServerContext(matcher);
+        stack.set(sc);
+        return sc;
+    }
+
+    private final Matcher matcher;
+
+    private ServerContext(Matcher matcher) {
+        this.matcher = matcher;
+    }
+
+    public Matcher getMatcher() {
+        return matcher;
     }
 }
