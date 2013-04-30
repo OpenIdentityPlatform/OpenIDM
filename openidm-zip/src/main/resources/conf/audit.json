@@ -25,5 +25,9 @@
             "logType" : "repository",
             "default" : true
         }
-    ]
+    ],
+    "exceptionFormatter" : {
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    }
 }

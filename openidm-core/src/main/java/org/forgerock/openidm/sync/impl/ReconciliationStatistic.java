@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -24,7 +24,6 @@
 */
 package org.forgerock.openidm.sync.impl;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.util.DateUtil;
 
 /**
@@ -212,6 +212,13 @@ public class ReconciliationStatistic {
         return endFormatted;
     }
     
+    public boolean hasEnded() {
+        if (endTime == 0) {
+            return false;
+        }
+        return true;
+    }
+    
     public Map<String, Object> asMap() {
         Map<String, Object> results = new HashMap();
 
@@ -239,5 +246,12 @@ public class ReconciliationStatistic {
             sb.append(" ");
         }
         return sb.toString();
+    }
+    
+    public Map<String, Integer> getSituationSummary() {
+        Map<String, Integer> situationSummary = new ConcurrentHashMap<String, Integer>();
+        getSourceStat().updateSummary(situationSummary);
+        getTargetStat().updateSummary(situationSummary);
+        return situationSummary;
     }
 }
