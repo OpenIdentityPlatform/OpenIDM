@@ -1,17 +1,25 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 package org.forgerock.openidm.jetty;
 
@@ -30,21 +38,21 @@ public class Param {
      * @return Requested OpenIDM configuration property
      */
     public static String getProperty(String propertyName) {
-        return JettyPropertyUtil.getProperty(propertyName);
+        return JettyPropertyUtil.getProperty(propertyName, false);
     }
     
     /**
      * @return OpenIDM keystore type
      */
     public static String getKeystoreType() {
-        return JettyPropertyUtil.getProperty("openidm.keystore.type");
+        return JettyPropertyUtil.getProperty("openidm.keystore.type", false);
     }
 
     /**
      * @return OpenIDM keystore provider
      */
     public static String getKeystoreProvider() {
-        return JettyPropertyUtil.getProperty("openidm.keystore.provider");
+        return JettyPropertyUtil.getProperty("openidm.keystore.provider", false);
     }
     
     /**
@@ -59,7 +67,7 @@ public class Param {
      * @return OpenIDM keystore password, obfuscated in Jetty format.
      */
     public static String getKeystorePassword() {
-        return JettyPropertyUtil.getPropertyJettyObfuscated("openidm.keystore.password");
+        return getKeystorePassword(true);
     }
     
     /**
@@ -67,7 +75,7 @@ public class Param {
      * If no specific key password is set, the keystore password (if present) is used.
      */
     public static String getKeystoreKeyPassword() {
-        String obfPwd = JettyPropertyUtil.getPropertyJettyObfuscated("openidm.keystore.key.password");
+        String obfPwd = JettyPropertyUtil.getProperty("openidm.keystore.key.password", true);
         if (obfPwd == null) {
             obfPwd = getKeystorePassword();
         }
@@ -87,15 +95,52 @@ public class Param {
     }
     
     /**
-     * @return  the truststore password.
+     * @return the truststore location, as absolute path.
+     * If no truststore setting is set, the keystore setting (if present) is used.
+     */
+    public static String getTruststoreType() {
+        String trustType = JettyPropertyUtil.getProperty("openidm.truststore.type", false);
+        if (trustType == null) {
+            trustType = getKeystoreType();
+        }
+        return trustType;
+    }
+    
+    /**
+     * @return  the truststore password, obfuscated in Jetty format.
      * If no truststore setting is set, the keystore setting (if present) is used.
      */
     public static String getTruststorePassword() {
-        String obfPwd = JettyPropertyUtil.getPropertyJettyObfuscated("openidm.truststore.password");
+        String obfPwd = getTruststorePassword(true);
         if (obfPwd == null) {
             obfPwd = getKeystorePassword();
         }
         return obfPwd;
+    }
+    
+    /**
+     * Returns the truststore password in either clear text or obfuscated.
+     * If no truststore setting is set, the keystore setting (if present) is used.
+     * 
+     * @param   obfusctated if the password should be obfuscated.
+     * @return  the truststore password.
+     */
+    public static String getTruststorePassword(boolean obfuscated) {
+        String pwd = JettyPropertyUtil.getProperty("openidm.truststore.password", obfuscated);
+        if (pwd == null) {
+            pwd = getKeystorePassword(obfuscated);
+        }
+        return pwd;
+    }
+    
+    /**
+     * Returns the keystore password in either clear text or obfuscated.
+     * 
+     * @param   obfusctated if the password should be obfuscated.
+     * @return  the keystore password.
+     */
+    public static String getKeystorePassword(boolean obfuscated) {
+        return JettyPropertyUtil.getProperty("openidm.keystore.password", obfuscated);
     }
 }
 

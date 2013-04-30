@@ -273,7 +273,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void handleAction(final ServerContext context, final ActionRequest request,
             final Bindings handler) throws ResourceException {
-        if (mask.contains(RequestType.ACTION)) {
+        if (!mask.contains(RequestType.ACTION)) {
             throw new NotSupportedException("Actions are not supported for resource instances");
         }
         handleRequest(context, request, handler);

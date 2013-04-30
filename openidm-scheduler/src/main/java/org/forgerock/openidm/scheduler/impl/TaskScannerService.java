@@ -144,7 +144,7 @@ public class TaskScannerService implements SingletonResourceProvider{
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         JsonValue result = new JsonValue( new LinkedHashMap<String, Object>());
         
-        String action = request.getActionId();
+        String action = request.getAction();
         if (request.getResourceName() == "/") {
             try {
                 if ("execute".equalsIgnoreCase(action)) {

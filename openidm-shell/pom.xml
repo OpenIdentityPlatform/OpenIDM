@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -54,7 +54,7 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.restlet.jee</groupId>
+            <groupId>org.restlet.osgi</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
             <optional>true</optional>
         </dependency>
@@ -91,7 +91,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -120,7 +120,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.shell;version=${project.version}</Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.shell.felixgogo.Activator</Bundle-Activator>
                         <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>
                         <Main-Class>org.forgerock.openidm.shell.impl.Main</Main-Class>

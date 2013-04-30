@@ -52,6 +52,7 @@ import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.FutureResult;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -71,6 +72,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.graph.GraphConnectionFactory;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.util.ResourceUtil.URLParser;
@@ -751,8 +753,7 @@ public class OrientDBRepoService implements RequestHandler {
                         @Override
                         public boolean result(Object iRecord) {
                             final Resource r =
-                                    DocumentUtil.toMap((ODocument) iRecord, request
-                                            .getFields());
+                                    DocumentUtil.toMap((ODocument) iRecord, request.getFields());
                             boolean accepted = handler.handleResource(r);
                             if (accepted) {
                                 lastRecord.set((OIdentifiable) iRecord);
@@ -779,7 +780,7 @@ public class OrientDBRepoService implements RequestHandler {
                     handler.handleError(new BadRequestException("Query is invalid: "
                             + queryExpression + " " + ex.getMessage(), ex));
                 } catch (RuntimeException ex) {
-                    logger.warn("Unexpected failure during DB query: {}", ex.getMessage());
+                    logger.warn("Unexpected failure during DB query: {}", ex.getMessage(), ex);
                     handler.handleError(new InternalServerErrorException(ex));
                 } finally {
                     // measure.end();
@@ -876,7 +877,7 @@ public class OrientDBRepoService implements RequestHandler {
         return false;
     }
 
-    private ServiceRegistration<Graph> graphServiceRegistration = null;
+    private ServiceRegistration<GraphConnectionFactory> graphServiceRegistration = null;
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -900,11 +901,20 @@ public class OrientDBRepoService implements RequestHandler {
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
 
         graphServiceRegistration =
-                compContext.getBundleContext()
-                        .registerService(
-                                Graph.class,
-                                new OrientGraph(OGraphDatabasePool.global().acquire(dbURL, user,
-                                        password)), properties);
+                compContext.getBundleContext().registerService(GraphConnectionFactory.class,
+                        new GraphConnectionFactory() {
+                            @Override
+                            public Graph getConnection() throws ResourceException {
+                                return new OrientGraph(OGraphDatabasePool.global().acquire(dbURL,
+                                        user, password));
+                            }
+
+                            @Override
+                            public FutureResult<Graph> getConnectionAsync(
+                                    ResultHandler<Graph> handler) {
+                                return null;
+                            }
+                        }, properties);
 
         logger.info("Repository started.");
     }

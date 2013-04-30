@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -30,7 +30,7 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-jetty-fragment</artifactId>
-    <name>OpenIDM Jetty Fragment</name>
+    <name>OpenIDM jetty fragment</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
@@ -79,10 +79,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!-- Avoid transient felix resolution issues with dynamic resolution -->
-                        <DynamicImport-Package>org.forgerock.openidm.jaas</DynamicImport-Package>
                         <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
-                        <Export-Package></Export-Package>
+                        <Export-Package>org.forgerock.openidm.jetty</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

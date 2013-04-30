@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,13 +20,13 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.shell.felixgogo.debug;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
-import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -61,7 +61,7 @@ public class DebugCommands {
             context.addServiceListener(debugRouter, InteractiveObjectSetService.ROUTER_SERVICE_FILTER);
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put(ServerConstants.ROUTER_PREFIX, params.length > 0 ? params[0] : "debugrouter");
-            ServiceRegistration srv = context.registerService(JsonResource.class.getName(), debugRouter, props);
+            ServiceRegistration srv = context.registerService(RequestHandler.class.getName(), debugRouter, props);
             boolean run = true;
             while (run) {
                 try {

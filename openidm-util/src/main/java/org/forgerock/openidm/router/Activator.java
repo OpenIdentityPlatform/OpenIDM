@@ -29,7 +29,7 @@ import java.util.Hashtable;
 
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionProvider;
-import org.forgerock.json.resource.InMemoryBackend;
+import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;

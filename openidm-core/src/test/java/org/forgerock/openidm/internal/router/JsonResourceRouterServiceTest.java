@@ -36,7 +36,7 @@ import javax.script.SimpleBindings;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionProvider;
-import org.forgerock.json.resource.InMemoryBackend;
+import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
@@ -73,10 +73,10 @@ public class JsonResourceRouterServiceTest {
                 new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
 
         final Router requestHandler = new Router();
-        requestHandler.addRoute("/audit/recon", new InMemoryBackend());
-        requestHandler.addRoute("/managed/user", new InMemoryBackend());
-        requestHandler.addRoute("/system/OpenDJ/account", new InMemoryBackend());
-        requestHandler.addRoute("/system/AD/account", new InMemoryBackend());
+        requestHandler.addRoute("/audit/recon", new MemoryBackend());
+        requestHandler.addRoute("/managed/user", new MemoryBackend());
+        requestHandler.addRoute("/system/OpenDJ/account", new MemoryBackend());
+        requestHandler.addRoute("/system/AD/account", new MemoryBackend());
 
         Bindings globalScope = new SimpleBindings();
         globalScope.put("openidm", FunctionFactory.getResource());

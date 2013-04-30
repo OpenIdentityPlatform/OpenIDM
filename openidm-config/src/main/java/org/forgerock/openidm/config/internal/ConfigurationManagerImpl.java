@@ -997,7 +997,7 @@ public class ConfigurationManagerImpl
      *             if parsing failed for technical, possibly transient reasons
      */
     public JsonValue parse(Dictionary<String, Object> dict, String serviceName)
-            throws InvalidException, InternalErrorException {
+            throws InvalidException {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
 
         if (dict != null) {

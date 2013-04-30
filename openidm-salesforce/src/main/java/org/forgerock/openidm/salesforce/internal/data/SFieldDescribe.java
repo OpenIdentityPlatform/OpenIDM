@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.salesforce.internal;
+package org.forgerock.openidm.salesforce.internal.data;
 
 /**
  * A NAME does ...

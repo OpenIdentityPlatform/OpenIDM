@@ -38,6 +38,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
@@ -204,7 +205,10 @@ public class ObjectClassInfoHelper {
                     throw new BadRequestException("Required attribute {" + attributeInfo.getName()
                             + "} value is null");
                 }
-                result.put(attributeInfo.getAttributeInfo().getName(), attributeInfo.build(v, cryptoService));
+                Attribute a = attributeInfo.build(v, cryptoService);
+                if (null != a) {
+                    result.put(attributeInfo.getAttributeInfo().getName(), a);
+                }
             }
         }
         if (logger.isTraceEnabled()) {
@@ -227,14 +231,16 @@ public class ObjectClassInfoHelper {
             result.put(Name.NAME, newName);
         }
         for (AttributeInfoHelper attributeInfo : attributes) {
-            if (Name.NAME.equals(attributeInfo.getAttributeInfo().getName())
-                    || Uid.NAME.equals(attributeInfo.getAttributeInfo().getName())
+            if ( Uid.NAME.equals(attributeInfo.getAttributeInfo().getName())
                     || !keySet.contains(attributeInfo.getName())) {
                 continue;
             }
             if (attributeInfo.getAttributeInfo().isUpdateable()) {
                 Object v = newContent.get(attributeInfo.getName());
-                result.put(attributeInfo.getAttributeInfo().getName(), attributeInfo.build(v, cryptoService));
+                Attribute a = attributeInfo.build(v, cryptoService);
+                if (null != a) {
+                    result.put(attributeInfo.getAttributeInfo().getName(), a);
+                }
             }
         }
         if (logger.isTraceEnabled()) {

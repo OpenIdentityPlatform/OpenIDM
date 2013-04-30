@@ -401,6 +401,7 @@
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
                 <exclude>stax:*</exclude>
+                <exclude>snappy:*</exclude>
                 <exclude>colt:*</exclude>
                 <exclude>concurrent:concurrent</exclude>
                 <exclude>org.json:*</exclude>

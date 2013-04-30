@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -109,10 +109,6 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.apache.servicemix.bundles.quartz</Fragment-Host>
-                        <Private-Package>
-                            org.forgerock.openidm.quartz.internal,
-                            org.forgerock.openidm.quartz.impl
-                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

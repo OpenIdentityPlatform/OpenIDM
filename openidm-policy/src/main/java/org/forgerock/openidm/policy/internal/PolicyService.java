@@ -45,6 +45,7 @@ import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.script.AbstractScriptedService;
 import org.forgerock.openidm.util.FileUtil;
@@ -129,7 +130,7 @@ public class PolicyService extends AbstractScriptedService {
             List<String> list = new ArrayList<String>();
             for (JsonValue policy : additionalPolicies) {
                 try {
-                    list.add(FileUtil.readFile(policy.asFile()));
+                    list.add(FileUtil.readFile(IdentityServer.getFileForProjectPath(policy.asString())));
                 } catch (Exception e) {
                     logger.error("Error loading additional policy script " + policy.asString(), e);
                 }

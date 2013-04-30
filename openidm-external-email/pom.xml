@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -21,7 +21,7 @@
   ~ with the fields enclosed by brackets [] replaced by
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
-  -->
+  --> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4.5</version>
+            <version>1.4.7</version>
             <!-- JDK 1.6 has the activation jar, we don't want to package -->
             <exclusions>
                 <exclusion>
@@ -87,15 +87,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Private-Package>org.forgerock.openidm.external.email.impl.*</Private-Package>
-                        <!--Export-Package>
-                            org.forgerock.openidm.external.email.metadata;version=${project.version},
-                            org.forgerock.openidm.external.email;version="${project.version}"
-                        </Export-Package-->
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

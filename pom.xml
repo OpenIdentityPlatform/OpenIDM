@@ -91,7 +91,7 @@
             <name>Java.net Repository for Maven</name>
             <url>http://download.java.net/maven/2/</url>
         </repository>
-        <repository>
+        <!--repository>
             <id>ops4j</id>
             <name>OPS4J Maven Repository</name>
             <url>https://oss.sonatype.org/content/repositories/ops4j-releases</url>
@@ -101,7 +101,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository-->
         <!-- OrientDB -->
         <repository>
             <id>oss.sonatype.org</id>
@@ -143,11 +143,11 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository>
-        <repository>
+        <!--<repository>
             <id>codehaus-snapshots-repo</id>
             <name>Codehaus snapshots Repo</name>
             <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-        </repository>
+        </repository>-->
         <repository>
             <id>codehaus-release-repo</id>
             <name>Codehaus Release Repo</name>
@@ -169,11 +169,11 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </pluginRepository>
-        <pluginRepository>
+        <!--<pluginRepository>
             <id>codehaus-snapshots-repo</id>
             <name>Codehaus snapshots Repo</name>
             <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-        </pluginRepository>
+        </pluginRepository>-->
         <pluginRepository>
             <id>codehaus-release-repo</id>
             <name>Codehaus Release Repo</name>
@@ -239,7 +239,7 @@
 
         <!-- version management -->
         <openidm.version>2.2.0-SNAPSHOT</openidm.version>
-        <slf4j.version>1.7.4</slf4j.version>
+        <slf4j.version>1.7.5</slf4j.version>
         <orientdb.version>1.4.0-SNAPSHOT</orientdb.version>
         <jackson.version>1.9.12</jackson.version>
         <restlet.version>2.1.2</restlet.version>
@@ -303,11 +303,12 @@
         <module>openidm-salesforce</module>
         <module>openidm-servlet</module>
         <module>openidm-servletfilter-registrator</module>
-        <module>openidm-quartz-fragment</module>
-        <!--<module>openidm-scheduler</module>-->
+        <!--<module>openidm-quartz-fragment</module>
+        <module>openidm-scheduler</module>-->
         <module>openidm-script</module>
         <module>openidm-security-jetty</module>
-        <!--module>openidm-shell</module-->
+        <module>openidm-shell</module>
+	    <module>openidm-security</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
         <module>openidm-ui</module>
@@ -316,6 +317,9 @@
         <module>openidm-workflow-activiti</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
+        <module>openidm-graph</module>
+        <module>openidm-support</module>
+        <module>openidm-repo-dynamodb</module>
     </modules>
 
     <profiles>
@@ -431,7 +435,6 @@
                 <version>1.4.1-SNAPSHOT</version>
             </dependency>
 
-
             <!-- Commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -451,7 +454,7 @@
             <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
-                <version>1.2.2</version>
+                <version>1.3</version>
             </dependency>
 
             <!-- SLF4J -->
@@ -519,12 +522,12 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient-osgi</artifactId>
-                <version>4.2.2</version>
+                <version>4.2.4</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore-osgi</artifactId>
-                <version>4.2.3</version>
+                <version>4.2.4</version>
             </dependency>
 
             <!-- Core OSGi -->
@@ -572,7 +575,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>4.2.0</version>
+                <version>4.2.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -645,7 +648,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.8.0</version>
+                <version>1.9.0</version>
                 <!-- The anotation @Retention(RetentionPolicy.SOURCE) changed to @Retention(RetentionPolicy.CLASS) -->
                 <scope>provided</scope>
             </dependency>
@@ -664,7 +667,7 @@
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-                <version>2.1.6_1</version>
+                <version>2.1.7_1</version>
             </dependency>
             <!--dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -682,7 +685,7 @@
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
-                <version>2.1.2</version>
+                <version>2.1.3</version>
             </dependency>
 
             <!-- Jackson JSON parser -->
@@ -710,6 +713,17 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-csv</artifactId>
                 <version>2.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-json-org</artifactId>
+                <version>2.1.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.json</groupId>
+                        <artifactId>json</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
@@ -745,13 +759,13 @@
             <dependency>
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert-core</artifactId>
-                <version>2.0M8</version>
+                <version>2.0M10</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.8</version>
+                <version>6.8.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -781,7 +795,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.10</version>
+                <version>1.0.11</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

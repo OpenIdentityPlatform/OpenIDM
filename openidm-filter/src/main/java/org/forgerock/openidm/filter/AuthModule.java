@@ -202,41 +202,45 @@ public class AuthModule {
             String retrCredPropName = null;
             Object retrRoles = null;
             String retrRolesPropName = null;
-            JsonValue entry = result.iterator().next().getContent();
+            Resource resource = result.iterator().next();
 
             // If all of the required user parameters are defined
             // we can just fetch that info instead of iterating/requiring it in-order
             if (userIdProperty != null && userCredentialProperty != null) {
                 logger.debug("AuthModule using explicit role query");
-                retrId = entry.get(userIdProperty).asString();
+                if (Resource.FIELD_CONTENT_ID.equals(userIdProperty)){
+                    retrId = resource.getId();
+                } else {
+                    retrId = resource.getContent().get(userIdProperty).asString();
+                }
 
                 retrCredPropName = userCredentialProperty;
-                retrCred = cryptoService.decryptIfNecessary(entry.get(userCredentialProperty)).asString();
+                retrCred = cryptoService.decryptIfNecessary(resource.getContent().get(userCredentialProperty)).asString();
 
                 // Since userRoles are optional, check before we go to retrieve it
-                if (userRolesProperty != null && entry.isDefined(userRolesProperty)) {
+                if (userRolesProperty != null && resource.getContent().isDefined(userRolesProperty)) {
                     retrRolesPropName = userRolesProperty;
-                    retrRoles = entry.get(userRolesProperty).getObject();
+                    retrRoles = resource.getContent().get(userRolesProperty).getObject();
                 }
             } else {
                 logger.debug("AuthModule using default role query");
                 int nonInternalCount = 0;
                 // Repo supports returning the map entries in the order of the query,
                 // even though JSON itself does not guarantee order.
-                for (Map.Entry<String, Object> ordered : entry.asMap().entrySet()) {
+                for (Map.Entry<String, Object> ordered : resource.getContent().asMap().entrySet()) {
                     String key = ordered.getKey();
-                    if (key.equals("_id")) {
-                        retrId = entry.get(key).asString();
+                    if (key.equals(Resource.FIELD_CONTENT_ID)) {
+                        retrId = resource.getContent().get(key).asString();
                     } else if (!key.startsWith("_")) {
                         ++nonInternalCount;
                         if (nonInternalCount == 1) {
                             // By convention the first property is the cred
                             //decrypt if necessary
-                            retrCred = cryptoService.decryptIfNecessary(entry.get(key)).asString();
+                            retrCred = cryptoService.decryptIfNecessary(resource.getContent().get(key)).asString();
                             retrCredPropName = key;
                         } else if (nonInternalCount == 2) {
                             // By convention the second property can define roles
-                            retrRoles = entry.get(key).getObject();
+                            retrRoles = resource.getContent().get(key).getObject();
                             retrRolesPropName = key;
                         }
                     }

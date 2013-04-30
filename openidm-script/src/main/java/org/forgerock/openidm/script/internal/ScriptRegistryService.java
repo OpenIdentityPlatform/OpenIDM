@@ -75,6 +75,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.graph.GraphConnectionFactory;
+import org.forgerock.openidm.graph.GraphFunction;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptName;
@@ -116,8 +118,8 @@ import com.tinkerpop.blueprints.Graph;
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
             unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
             policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "GraphReference", referenceInterface = Graph.class, bind = "bindGraph",
-            unbind = "unbindGraph", cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+    @Reference(name = "GraphReference", referenceInterface = GraphConnectionFactory.class, bind = "bindGraphConnectionFactory",
+            unbind = "unbindGraphConnectionFactory", cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "FunctionReference", referenceInterface = Function.class,
             bind = "bindFunction", unbind = "unbindFunction",
@@ -168,11 +170,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
     // TODO Implement optional dependency on this class
-    protected void bindGraph(final Graph service) {
-        openidm.put("graph", service);
+    protected void bindGraphConnectionFactory(final GraphConnectionFactory service) {
+        openidm.put("graph", new GraphFunction(service));
     }
 
-    protected void unbindGraph(final Graph service) {
+    protected void unbindGraphConnectionFactory(final GraphConnectionFactory service) {
         openidm.remove("graph");
     }
 

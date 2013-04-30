@@ -24,26 +24,27 @@
 
 package org.forgerock.openidm.salesforce.internal;
 
+import java.net.URL;
+
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.openidm.salesforce.internal.data.SObjectDescribe;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.net.URL;
-
 /**
  * A NAME does ...
- *
+ * 
  * @author Laszlo Hordos
  */
 public class SObjectDescribeTest {
-    @Test
+    @Test(enabled = false)
     public void testIsCreateable() throws Exception {
         URL configURL = SalesforceConnectionTest.class.getResource("/User.json");
         Assert.assertNotNull(configURL);
         ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().set (
-                DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        mapper.getDeserializationConfig().set(
+                DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         SObjectDescribe describe = mapper.readValue(configURL, SObjectDescribe.class);
 

@@ -1,17 +1,25 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 package org.forgerock.openidm.crypto.util;
 
@@ -29,34 +37,34 @@ import org.forgerock.openidm.crypto.impl.Main;
 public class JettyPropertyUtil {
     
     /**
-     * Gets an OpenIDM configuration property in an obfuscated format, 
-     * compatible with Jetty obfuscation
+     * Gets a Jetty configuration property. If obfuscated is true, it will return
+     * a value obfuscated in Jetty format.
+     * 
+     * @param propName  name of the property.
+     * @param obfuscated if value should be obfuscated.
+     * @return the property value.
      */
-    public static String getPropertyJettyObfuscated(String name) {
-        String prop = IdentityServer.getInstance().getProperty(name);
-        if (prop != null) {
+    public static String getProperty(String propName, boolean obfuscated) {
+        String prop = IdentityServer.getInstance().getProperty(propName);
+        if (obfuscated && prop != null) {
             try {
                 String clear = new String(Main.unfold(prop));
                 prop = Main.obfuscate(prop);
             } catch (GeneralSecurityException ex) {
-                throw new RuntimeException("Failed ot obtain property " + name + " in Jetty obfuscated format.", ex);
+                throw new RuntimeException("Failed ot obtain property " + propName + " in Jetty obfuscated format.", ex);
             }
         }
         return prop;
     }
     
     /**
-     * Get a Jetty configuration property
-     */
-    public static String getProperty(String propName) {
-        return IdentityServer.getInstance().getProperty(propName);
-    }
-    
-    /**
      * Get a Jetty configuration property as qualified file path
+     * 
+     * @param propName  name of the property.
+     * @return the property value.
      */
     public static String getPathProperty(String propName) {
-        String loc = getProperty(propName);
+        String loc = getProperty(propName, false);
         if (loc != null) {
             loc = IdentityServer.getFileForInstallPath(loc).getAbsolutePath();
         }

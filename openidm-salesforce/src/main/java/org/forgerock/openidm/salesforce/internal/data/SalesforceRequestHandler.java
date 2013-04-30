@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.salesforce.internal;
+package org.forgerock.openidm.salesforce.internal.data;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -39,8 +39,6 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -67,12 +65,13 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.salesforce.internal.SalesforceConfiguration;
+import org.forgerock.openidm.salesforce.internal.SalesforceConnection;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.restlet.Response;
-import org.restlet.data.ChallengeResponse;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.EmptyRepresentation;
@@ -131,8 +130,8 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
         configuration.put(ServerConstants.CONFIG_FACTORY_PID, factoryPid);
 
         connection =
-                new SalesforceConnection(parseConfiguration(configuration.get(
-                        "configurationProperties").expect(Map.class)));
+                new SalesforceConnection(parseConfiguration(configuration
+                        .get("configurationProperties")));
         connection.test();
 
         sobjectsProviderRegistration =
@@ -151,7 +150,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     }
 
     @Deactivate
-    void deactivate(ComponentContext compContext) throws Exception {
+    void deactivate(ComponentContext context) throws Exception {
         if (null != connection) {
             connection.dispose();
             connection = null;
@@ -170,11 +169,9 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
         throw new ForbiddenException("Direct access without Router to this service is forbidden.");
     }
 
-    public SalesforceConfiguration parseConfiguration(JsonValue config) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().set(
-                DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.convertValue(config.asMap(), SalesforceConfiguration.class);
+    public static SalesforceConfiguration parseConfiguration(JsonValue config) {
+        return SalesforceConnection.mapper.convertValue(
+                config.required().expect(Map.class).asMap(), SalesforceConfiguration.class);
     }
 
     @Override
@@ -247,8 +244,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                 JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
                 JsonValue result = new JsonValue(rep.getObject());
                 if (result.isDefined("Id")) {
-                    result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required()
-                            .asString());
+                    result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required().asString());
                 }
                 handler.handleResult(new Resource(result.get("Id").asString(), result.get(
                         "Revision").asString(), result));
@@ -285,8 +281,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                             JsonValue result = new JsonValue(rep.getObject());
                             for (JsonValue record : result.get("records")) {
                                 Map<String, Object> r = new HashMap<String, Object>(1);
-                                r.put(Resource.FIELD_CONTENT_ID, record.get("Id")
-                                        .asString());
+                                r.put(Resource.FIELD_CONTENT_ID, record.get("Id").asString());
                                 // TODO Common method
                                 Resource resource =
                                         new Resource(record.get("Id").asString(), record.get(
@@ -464,18 +459,17 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
         final Response response = resource.getResponse();
         if (response.getStatus().isError()) {
 
+            ResourceException e = connection.getResourceException(resource);
+
             if (tryReauth && Status.CLIENT_ERROR_UNAUTHORIZED.equals(response.getStatus())) {
                 // Re authenticate
-                ChallengeResponse cr =
-                        connection.refreshAccessToken(resource.getChallengeResponse());
-                if (cr != null) {
-                    resource.setChallengeResponse(cr);
+                if (connection.refreshAccessToken(resource.getRequest())) {
                     handleRequest(resource, false);
                 } else {
                     throw ResourceException.getException(401, "AccessToken can not be renewed");
                 }
             } else {
-                throw connection.getResourceException(resource);
+                throw e;
             }
             // throw new ResourceException(response.getStatus());
         }
@@ -504,7 +498,8 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     // }
 
     private ClientResource getClientResource(String id) {
-        return connection.getChild("services/data/v26.0/" + id);
+        return connection.getChild(id == null ? "services/data/" + connection.getVersion()
+                : "services/data/" + connection.getVersion() + "/" + id);
     }
 
     // Custom
@@ -604,8 +599,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                                 new JacksonRepresentation<Map>(body, Map.class);
                         JsonValue result = new JsonValue(rep.getObject());
                         for (JsonValue record : result.get("records")) {
-                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id")
-                                    .asString());
+                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id").asString());
                             // TODO Common method
                             Resource resource =
                                     new Resource(record.get("Id").asString(), record

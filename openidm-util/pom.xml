@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -48,11 +48,6 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.util</artifactId>
-            <version>1.0.0</version>
-        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-system</artifactId>
@@ -64,17 +59,6 @@
             <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!--dependency>
-            <groupId>org.eclipse.wst.jsdt.debug</groupId>
-            <artifactId>rhino.debugger</artifactId>
-            <version>1.0.300.v201109150503</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
@@ -101,7 +85,7 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.1</version>
+            <version>2.2</version>
         </dependency>
 
         <dependency>
@@ -150,18 +134,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.forgerock.openidm.router.Activator</Bundle-Activator>
-                        <!--Export-Package>
-                            org.forgerock.openidm.audit.util;version=${project.version},
-                            org.forgerock.openidm.crypto;version=${project.version},
-                            org.forgerock.openidm.metadata;version=${project.version},
-                            org.forgerock.openidm.osgi;version=${project.version},
-                            org.forgerock.openidm.patch;version=${project.version},
-                            org.forgerock.openidm.scope;version=${project.version},
-                            org.forgerock.openidm.script;version=${project.version},
-                            org.forgerock.openidm.script.javascript;version=${project.version},
-                            org.forgerock.openidm.sync;version=${project.version},
-                            org.forgerock.openidm.util;version=${project.version}
-                        </Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>

@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -62,10 +62,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.main</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.proxy</artifactId>
@@ -167,12 +163,10 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.10</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.4</version>
         </dependency>
 
         <!-- OpenICF -->
@@ -365,7 +359,7 @@
                     <dependency>
                         <groupId>mysql</groupId>
                         <artifactId>mysql-connector-java</artifactId>
-                        <version>5.1.22</version>
+                        <version>5.1.24</version>
                     </dependency>
                 </dependencies>
             </plugin>
