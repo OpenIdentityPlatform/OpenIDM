@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -140,8 +139,12 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
     @Override
     protected JsonValue query(JsonValue request) throws JsonResourceException {
         JsonValue params = request.get("params");
+        StringBuilder sb =
+                new StringBuilder("services/data/").append(connection.getVersion()).append(
+                        "/query");
         if (params.isDefined(QueryConstants.QUERY_EXPRESSION)) {
-            ClientResource rc = getClientResource("query", null);
+
+            ClientResource rc = connection.getChild(sb.toString());
 
             rc.getReference().addQueryParameter(
                     "q",
@@ -172,7 +175,7 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                 Matcher matcher = ServerContext.get().getMatcher();
 
                 String type = matcher.group(1);
-                ClientResource rc = getClientResource("query", null);
+                ClientResource rc = connection.getChild(sb.toString());
 
                 rc.getReference().addQueryParameter("q", "SELECT id FROM " + type);
 

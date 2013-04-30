@@ -134,7 +134,10 @@ public class SalesforceRequestHandler implements JsonResource {
 
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
-        final String id = request.get("id").required().asString();
+        String id = request.get("id").required().asString();
+        if (id.endsWith("/")) {
+            id = id.substring(0, id.length() - 1);
+        }
         for (Map.Entry<Pattern, JsonResource> entry : routes.entrySet()) {
             Matcher matcher = entry.getKey().matcher(id);
             if (matcher.matches()) {
