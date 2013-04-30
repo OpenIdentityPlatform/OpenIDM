@@ -123,7 +123,7 @@ Verifying - Enter pass phrase for localhost.key:</screen>
                      created in the previous step, and save it to a file named
                      <filename>localhost.csr</filename>. Enter any required
                      information to create the DN for the request.</para>
-                     <screen>$ openssl req ­new ­key localhost.key ­out localhost.csr</screen>
+                     <screen>$ openssl req -new -key localhost.key -out localhost.csr</screen>
                      <para>This step creates a file, <filename>localhost.csr</filename>,
                      that contains the details of the certificate request.</para>
                  </step>
