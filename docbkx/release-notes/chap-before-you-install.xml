@@ -58,6 +58,7 @@
    <listitem>
     <para>You must install OpenIDM as a stand-alone service, using Apache Felix
     and Jetty as provided. Alternate containers are not supported.</para>
+    <para>This nightly build of OpenIDM bundles Jetty version 8.1.2.v20120308.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
