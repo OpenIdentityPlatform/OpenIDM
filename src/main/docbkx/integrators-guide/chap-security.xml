@@ -110,7 +110,7 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
                      <para>Generate an encrypted 1024-bit RSA key, and save it
                      to a file named <filename>localhost.key</filename>. Enter
                      a pass phrase for the key as requested.</para>
-                     <screen>$ openssl genrsa ­des3 ­out localhost.key 1024
+                     <screen>$ openssl genrsa -des3 -out localhost.key 1024
 Generating RSA private key, 1024 bit long modulus
 .........++++++
 .........................++++++
@@ -136,7 +136,7 @@ Verifying - Enter pass phrase for localhost.key:</screen>
                      Output will depend on the details that you entered in the
                      certificate request.</para>
                      <screen width="90">
-$ openssl x509 ­req ­days 365 ­in localhost.csr ­signkey localhost.key ­out localhost.crt
+$ openssl x509 -req -days 365 -in localhost.csr -signkey localhost.key -out localhost.crt
 Signature ok
 subject=/C=FR/ST=Il-DE-FRANCE/L=Paris/O=example.com
 Getting Private key
