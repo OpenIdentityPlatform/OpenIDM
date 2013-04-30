@@ -30,6 +30,21 @@ def response = [status: "ok", version: ServerConstants.getVersion(), revision: S
 
 try {
 
+    /*
+
+    Gremlin Example
+    def g = openidm.graph()
+
+	g.getRawGraph().createVertexType("Product");
+	g.getRawGraph().createVertexType("Customer");
+	g.getRawGraph().createEdgeType("Sell");
+
+    def v = g.addVertex("class:managed_user", [userName: "john_doe", active: true])
+    def u = g.addVertex("class:managed_user", [name: "jdoe", active: true])
+    g.addEdge(v, u, "hasAccount", [created: true])
+    g.commit()
+    */
+
     def org000 = openidm.create("/repo/managed/organization", "forgerock", [displayName: "ForgeRock"])
     def org100 = openidm.create("/repo/managed/organization", "oslo", [displayName: "ForgeRock Oslo"])
     def org110 = openidm.create("/repo/managed/organization", "bristol", [displayName: "ForgeRock Bristol"])

@@ -88,12 +88,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <!--Export-Package>org.forgerock.openidm.http;version="${project.version}"</Export-Package>
-                        <Include-Resource>{maven-resources}</Include-Resource-->
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

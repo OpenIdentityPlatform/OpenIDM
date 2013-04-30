@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.core.filter;
 
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
 import org.forgerock.json.resource.QueryResultHandler;

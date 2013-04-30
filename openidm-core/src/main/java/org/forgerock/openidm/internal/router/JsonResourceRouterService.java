@@ -61,7 +61,7 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.filter.ScriptedFilter;
+import org.forgerock.openidm.core.filter.ScriptedFilter;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.engine.Utils.Pair;
@@ -201,6 +201,11 @@ public class JsonResourceRouterService implements ConnectionFactory
     @Override
     public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
         return connectionFactory.getConnectionAsync(handler);
+    }
+
+    @Override
+    public void close() {
+        connectionFactory.close();
     }
 
     /**

@@ -82,7 +82,7 @@
                 <configuration>
                     <bytecodeInjections>
                         <bytecodeInjection>
-                            <expression>${project.version}</expression>
+                            <expression>${openidm.version}</expression>
                             <targetMembers>
                                 <constant>
                                     <className>org.forgerock.openidm.core.ServerConstants</className>
@@ -117,10 +117,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.forgerock.openidm.core.internal.Activator</Bundle-Activator>
-                        <Private-Package>org.forgerock.openidm.core.internal</Private-Package>
-                        <!--Export-Package>
-                            org.forgerock.openidm.core;version=${project.version}
-                        </Export-Package-->
                         <Bundle-Category>osgi</Bundle-Category>
                     </instructions>
                 </configuration>

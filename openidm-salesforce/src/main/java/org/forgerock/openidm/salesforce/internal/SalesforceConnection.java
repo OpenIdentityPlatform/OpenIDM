@@ -32,16 +32,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServiceUnavailableException;
 import org.restlet.Client;
 import org.restlet.Context;
-import org.restlet.data.ChallengeResponse;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.Uniform;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.data.MediaType;
 import org.restlet.data.Method;
@@ -60,6 +63,8 @@ import org.restlet.util.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sforce.ws.ConnectorConfig;
+
 /**
  * Class to represent a Salesforce Connection
  * http://wiki.restlet.org/docs_2.1/13-restlet/28-restlet/392-restlet.html
@@ -76,6 +81,14 @@ public class SalesforceConnection extends ClientResource {
      * Setup logging for the {@link SalesforceConnection}.
      */
     private static final Logger logger = LoggerFactory.getLogger(SalesforceConnection.class);
+
+    public static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.getDeserializationConfig().set(
+                DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     /**
      * Requests that the origin server accepts the entity enclosed in the
@@ -132,8 +145,53 @@ public class SalesforceConnection extends ClientResource {
     }
 
     public SalesforceConnection(SalesforceConfiguration configuration0) throws ResourceException {
-        super(new Context(), SalesforceConfiguration.LOGIN_URL);
+        super(new Context(), configuration0.getLoginUrl());
+        configuration0.validate();
         this.configuration = configuration0;
+
+        /*
+         * Time in milliseconds between two checks for idle and expired
+         * connections. The check happens only if this property is set to a
+         * value greater than 0.
+         */
+        getContext().getParameters().add("idleCheckInterval",
+                Long.toString(configuration.getIdleCheckInterval()));
+
+        /*
+         * The time in ms beyond which idle connections are eligible for
+         * reaping.
+         */
+        getContext().getParameters().add("idleTimeout",
+                Long.toString(configuration.getIdleTimeout()));
+        getContext().getParameters().add("maxConnectionsPerHost",
+                Integer.toString(configuration.getMaxConnectionsPerHost()));
+        getContext().getParameters().add("maxTotalConnections",
+                Integer.toString(configuration.getMaxTotalConnections()));
+        /*
+         * The socket timeout value. A timeout of zero is interpreted as an
+         * infinite timeout.
+         */
+        getContext().getParameters().add("socketTimeout",
+                Integer.toString(configuration.getSocketTimeout()));
+        /*
+         * The minimum idle time, in milliseconds, for connections to be closed
+         * when stopping the connector
+         */
+        getContext().getParameters().add("stopIdleTimeout",
+                Integer.toString(configuration.getStopIdleTimeout()));
+
+        /*
+         * if the protocol will use Nagle's algorithm
+         */
+        getContext().getParameters().add("tcpNoDelay",
+                Boolean.toString(configuration.getTcpNoDelay()));
+
+        /*
+         * The connection timeout in milliseconds. The default value is 0,
+         * meaning an infinite timeout
+         */
+        getContext().getParameters().add("socketConnectTimeoutMs",
+                Integer.toString(configuration.getConnectTimeout()));
 
         Client client = new Client(Protocol.HTTPS);
         client.setContext(getContext());
@@ -145,36 +203,69 @@ public class SalesforceConnection extends ClientResource {
         getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
 
         authenticate();
-
-        // Hack for Restlet 2.0 don't need with 2.1
-        // List<org.restlet.engine.security.AuthenticatorHelper> helpers =
-        // Engine.getInstance().getRegisteredAuthenticators();
-        // helpers.add(new AuthenticatorHelper(ChallengeScheme.HTTP_OAUTH, true,
-        // false) {
-        // @Override
-        // public String formatResponse(ChallengeResponse challenge, Request
-        // request,
-        // Series<Parameter> httpHeaders) {
-        // return challenge.getRawValue();
-        // }
-        // });
-        // Engine.getInstance().setRegisteredAuthenticators(helpers);
-
     }
 
-    public ChallengeResponse refreshAccessToken(ChallengeResponse expired) throws ResourceException {
+    public boolean refreshAccessToken(final ConnectorConfig config) throws ResourceException {
         // First check
-        if (authentication.getAuthorization().equals(expired.getRawValue())) {
+        final String expired = config.getSessionId();
+        if (authentication.getAccessToken().equals(expired)) {
             // Sync the threads
             synchronized (this) {
                 // Second check
-                if (authentication.getAuthorization().equals(expired.getRawValue())) {
+                if (authentication.getAccessToken().equals(expired)) {
                     authenticate();
-                    logger.info("Success re-authentication");
+                    if (authentication.getAccessToken().equals(expired)) {
+                        logger.warn("Expired token was not revoked and couldn't be refreshed");
+                        return false;
+                    } else {
+                        logger.info("Expired token was successfully refreshed");
+                    }
                 }
             }
         }
-        return new ChallengeResponse(ChallengeScheme.HTTP_OAUTH, null, authentication
+        config.setSessionId(authentication.getAccessToken());
+        return true;
+    }
+
+    public boolean refreshAccessToken(final Request request) throws ResourceException {
+        // First check
+        final String expired = fetchAccessToken(request);
+        if (authentication.getAuthorization().equals(expired)) {
+            // Sync the threads
+            synchronized (this) {
+                // Second check
+                if (authentication.getAuthorization().equals(expired)) {
+                    authenticate();
+                    if (authentication.getAuthorization().equals(expired)) {
+                        logger.warn("Expired token was not revoked and couldn't be refreshed");
+                        return false;
+                    } else {
+                        logger.info("Expired token was successfully refreshed");
+                    }
+                }
+            }
+        }
+        resetAccessToken(request);
+        return true;
+    }
+
+    private String fetchAccessToken(final Request result) {
+        Series<Header> additionalHeaders =
+                (Series<Header>) result.getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+        if (additionalHeaders != null) {
+            return additionalHeaders.getFirst(HeaderConstants.HEADER_AUTHORIZATION).getValue();
+        }
+        return null;
+    }
+
+    public void resetAccessToken(final Request result) {
+        Series<Header> additionalHeaders =
+                (Series<Header>) result.getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+        if (additionalHeaders == null) {
+            additionalHeaders = new Series<Header>(Header.class);
+            result.getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, additionalHeaders);
+        }
+        additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION, authentication
                 .getAuthorization());
     }
 
@@ -212,13 +303,41 @@ public class SalesforceConnection extends ClientResource {
             revoke.getReference().addQueryParameter("token", authentication.getAccessToken());
             revoke.setMethod(Method.GET);
             revoke.handle();
-            logger.info("AccessToken revocation status:{} response:{} ", revoke.getResponse()
-                    .getStatus(), revoke.getResponse().getEntityAsText());
+
             if (revoke.getResponse().getStatus().isError()) {
-                logger.error("Failed to revoke the token: {}"
-                        + revoke.getResponse().getEntityAsText());
+                // TODO is it expired?
+                logger.error("Failed to revoke token - status:{} response:{} ", revoke
+                        .getResponse().getStatus(),
+                        null != revoke.getResponse().getEntity() ? revoke.getResponse()
+                                .getEntityAsText() : "");
+            } else {
+                logger.info("Succeed to revoke token - status:{} response:{} ", revoke
+                        .getResponse().getStatus(),
+                        null != revoke.getResponse().getEntity() ? revoke.getResponse()
+                                .getEntityAsText() : "");
             }
         }
+    }
+
+    public ConnectorConfig getConnectorConfig(String api) {
+        if (StringUtils.isBlank(api)) {
+            throw new IllegalArgumentException();
+        }
+
+        ConnectorConfig config = new ConnectorConfig();
+
+        config.setConnectionTimeout(configuration.getConnectTimeout());
+        if (null != configuration.getProxyHost()) {
+            config.setProxy(configuration.getProxyHost(), configuration.getProxyPort());
+        }
+
+        config.setRestEndpoint(new Reference(getOAuthUser().getBaseReference(), new Reference(
+                "services/" + api + "/" + Double.toString(configuration.getVersion())))
+                .getTargetRef().toString());
+        config.setServiceEndpoint(config.getRestEndpoint());
+        config.setSessionId(getOAuthUser().getAccessToken());
+
+        return config;
     }
 
     public ResourceException getResourceException(ClientResource rc) {
@@ -258,25 +377,58 @@ public class SalesforceConnection extends ClientResource {
     }
 
     public void test() throws ResourceException {
-        Representation body = null;
-        ClientResource rc = getChild("services/data/v26.0");
+        ClientResource resource = getChild("services/data/" + getVersion());
+        test(resource, true);
+    }
+
+    public String getVersion() {
+        return "v" + Double.toString(configuration.getVersion());
+    }
+
+    private void test(ClientResource resource, boolean tryReauth) throws ResourceException {
         try {
-            body = rc.get();
+            resource.handle();
         } catch (Exception e) {
-            try {
-                logger.error("Test failed: {}", rc.getResponse().getEntity().getText());
-            } catch (IOException e1) {
-                /* ignore */
+            throw new InternalServerErrorException(e);
+        }
+        final Response response = resource.getResponse();
+        if (response.getStatus().isError()) {
+
+            ResourceException sfe = getResourceException(resource);
+
+            if (tryReauth && Status.CLIENT_ERROR_UNAUTHORIZED.equals(response.getStatus())) {
+                // Re authenticate
+                if (refreshAccessToken(resource.getRequest())) {
+                    try {
+                        resource.handle();
+                    } catch (Exception e) {
+                        throw new InternalServerErrorException(e);
+                    }
+                    test(resource, false);
+                } else {
+                    throw ResourceException.getException(401, "AccessToken can not be renewed");
+                }
+            } else {
+                throw sfe;
             }
-            throw new ServiceUnavailableException(e.getMessage(), e);
-        } finally {
-            if (body != null)
-                body.release();
+            // throw new ResourceException(response.getStatus());
+        } else {
+            if (null != response.getEntity()) {
+                response.getEntityAsText();
+            }
         }
     }
 
     public void dispose() {
         revokeAccessToken();
+        try {
+            Uniform next = getNext();
+            if (next instanceof Client) {
+                ((Client) next).stop();
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to stop Client", e);
+        }
     }
 
     /**
@@ -293,32 +445,11 @@ public class SalesforceConnection extends ClientResource {
             // -------------------------------------
             // Add user-defined extension headers
             // -------------------------------------
+            resetAccessToken(result.getRequest());
+
             Series<Header> additionalHeaders =
                     (Series<Header>) result.getRequest().getAttributes().get(
                             HeaderConstants.ATTRIBUTE_HEADERS);
-            if (additionalHeaders == null) {
-                additionalHeaders = new Series<Header>(Header.class);
-                result.getRequest().getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS,
-                        additionalHeaders);
-            }
-            additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION, authentication
-                    .getAuthorization());
-
-            /*
-             * Form additionalHeaders = null; Object o =
-             * result.getRequest().getAttributes
-             * ().get(HeaderConstants.ATTRIBUTE_HEADERS); if (o instanceof Form)
-             * { additionalHeaders = (Form) o; } else { additionalHeaders = new
-             * Form(); result.getRequest().getAttributes().put(HeaderConstants.
-             * ATTRIBUTE_HEADERS, additionalHeaders); }
-             * 
-             * result.setChallengeResponse(new
-             * ChallengeResponse(ChallengeScheme.HTTP_OAUTH,
-             * authentication.getAuthorization()));
-             */
-            // additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION,
-            // authentication.getAuthorization());
-
             additionalHeaders.add("X-PrettyPrint", "1");
         } else {
             // doError(Status.CLIENT_ERROR_BAD_REQUEST,
@@ -380,8 +511,8 @@ public class SalesforceConnection extends ClientResource {
                 log.fine("Scope at = " + scope);
             }
 
-            String instanceUrl = null;
-            if (answer.get(INSTANCE_URL) instanceof String) {
+            String instanceUrl = configuration.getInstanceUrl();
+            if (null == instanceUrl && answer.get(INSTANCE_URL) instanceof String) {
                 instanceUrl = (String) answer.get(INSTANCE_URL);
                 log.fine("InstanceUrl = " + instanceUrl);
             }

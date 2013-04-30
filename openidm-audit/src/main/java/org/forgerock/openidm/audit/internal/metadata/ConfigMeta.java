@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.audit.impl.metadata;
+package org.forgerock.openidm.audit.internal.metadata;
 
 import java.util.Collections;
 import java.util.List;

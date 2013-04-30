@@ -163,6 +163,8 @@ public class ConnectorUtil {
         typeMap.put(JAVA_TYPE_URI, URI.class);
     }
 
+    private static final String BUFFER_SIZE = "bufferSize";
+
 
     //Util Methods
 
@@ -452,6 +454,9 @@ public class ConnectorUtil {
         }
         JsonValue configurationProperties = source.get(OPENICF_CONFIGURATION_PROPERTIES);
         configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());
+        if (source.isDefined(BUFFER_SIZE)) {
+            target.setProducerBufferSize(source.get(BUFFER_SIZE).required().asInteger());
+        }
     }
 
     public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {

@@ -46,6 +46,11 @@
             <artifactId>openidm-script</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <!--dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-cluster</artifactId>
+            <version>${openidm.version}</version>
+        </dependency-->
 
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -88,14 +93,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Private-Package>org.forgerock.openidm.info.internal*</Private-Package>
-                        <!--<Export-Package>
-                            org.forgerock.openidm.info;version=${openidm.version},
-                        </Export-Package>-->
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

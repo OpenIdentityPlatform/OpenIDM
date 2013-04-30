@@ -221,9 +221,9 @@ Stopping OpenIDM (454)</screen>
            <para><literal>"config.properties"</literal> - takes either a path to 
            a configuration file (relative to the project location) or a list 
            of configuration properties and their values. The list must be in 
-           the format <literal>
-           <replaceable>"string"</replaceable>:<replaceable>"string"</replaceable>
-           </literal>, for example:</para>
+           the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>"string"</replaceable></literal>,
+           for example:</para>
            <programlisting language="javascript">
            "config.properties" :
  	           {
@@ -235,9 +235,9 @@ Stopping OpenIDM (454)</screen>
            <para><literal>"system.properties"</literal> - takes either a path to 
            a <filename>system.properties</filename> file (relative to the project 
            location) or a list of system properties and their values. The list 
-           must be in the format <literal>
-           <replaceable>"string"</replaceable>:<replaceable>"string"</replaceable>
-           </literal>, for example:</para>
+           must be in the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>"string"</replaceable></literal>,
+           for example:</para>
            <programlisting language="javascript">
            "system.properties" :
  	           {
@@ -249,9 +249,9 @@ Stopping OpenIDM (454)</screen>
            <para><literal>"boot.properties"</literal> - takes either a path to 
            a <filename>boot.properties</filename> file (relative to the project 
            location) or a list of boot properties and their values.The list 
-           must be in the format <literal>
-           <replaceable>"string"</replaceable>:<replaceable>object</replaceable>
-           </literal>, for example:</para>
+           must be in the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>object</replaceable></literal>,
+           for example:</para>
            <programlisting language="javascript">
            "boot.properties" :
  	           {
@@ -262,6 +262,45 @@ Stopping OpenIDM (454)</screen>
        </itemizedlist>
     </listitem>   
   </itemizedlist>
+     <para>By default, properties files are loaded in the following order,
+     and property values are resolved in the reverse order:</para>
+     <orderedlist>
+         <listitem>
+             <para><literal>system.properties</literal></para>
+         </listitem>
+         <listitem>
+             <para><literal>config.properties</literal></para>
+         </listitem>
+         <listitem>
+             <para><literal>boot.properties</literal></para>
+         </listitem>
+     </orderedlist>
+     <para>If both system and boot properties define the same attribute, the
+     property substitution process locates the attribute in
+     <literal>boot.properties</literal> and does not attempt to locate the
+     property in <literal>system.properties</literal>.</para>
+     <para>You can use variable substitution in any <literal>.json</literal>
+     configuration file with the install, working and project locations
+     described previously. Property substitution takes the following syntax:</para>
+     <programlisting language="javascript">
+"launcher.install.location"
+"launcher.install.url"
+"launcher.working.location"
+"launcher.working.url"
+"launcher.project.location"
+"launcher.project.url"
+     </programlisting>
+
+     <para>For example, to specify the location of the OrientDB database, you
+     can set the <literal>dbUrl</literal> property in <filename>repo.orientdb.json</filename>
+     as follows:</para>
+
+     <programlisting language="javascript">
+"dbUrl" : "local:&amp;{launcher.working.location}/db/openidm",
+     </programlisting>
+
+     <para>The database location is then relative to a working location
+     defined in the startup configuration.</para>
   
  </section>
  

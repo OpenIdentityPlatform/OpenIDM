@@ -165,7 +165,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
-        String pid = (String) compContext.getProperties().get("config.factory-pid");
+        String pid = (String) compContext.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
         if (pid != null) {
             logger.warn("Please rename the schedule configuration file for " + pid
                     + " to conform to the 'schedule-<name>.json' format");

@@ -24,9 +24,12 @@
 
 package org.forgerock.openidm.repo.orientdb.internal;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -54,6 +57,8 @@ public class DocumentUtil  {
      */
     final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
 
+    final static ObjectMapper mapper = new ObjectMapper();
+
     
     // Identifier in the DB representation
     public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id"; 
@@ -65,11 +70,24 @@ public class DocumentUtil  {
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
     public static Resource toMap(ODocument doc, List<JsonPointer> fieldFilters) {
-        Map<String, Object> result = toMap(doc, fieldFilters, true);
+        if (null == doc) {
+           return null;
+        }
+        Map<String, Object> result = null;
+        try {
+            result = mapper.readValue(doc.toJSON(), Map.class);
+        } catch (IOException e) {
+            result = toMap(doc, fieldFilters, true);
+        }
         if (null != result) {
             result.put("_vertex", doc.getIdentity().toString());
-            return new Resource((String) result.get(Resource.FIELD_CONTENT_ID),
-                    (String) result.get(Resource.FIELD_CONTENT_REVISION), new JsonValue(result));
+
+            String id = doc.field(ORIENTDB_PRIMARY_KEY, String.class);
+            if (id == null){
+                id = doc.getIdentity().toString();
+            }
+
+            return new Resource(id, Integer.toString(doc.getVersion()), new JsonValue(result));
         }
         return null;
     }
@@ -203,7 +221,44 @@ public class DocumentUtil  {
      */
     public static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, String orientDocClass)
             throws ConflictException {
-        return toDocument(objModel, docToPopulate, orientDocClass, false, true);
+        ODocument result = null;
+        if (docToPopulate == null) {
+            result = new ODocument(orientDocClass);
+        } else {
+            result = docToPopulate;
+        }
+
+        try {
+            result.fromJSON(mapper.writeValueAsString(objModel));
+
+            // OpenIDM ID mapping
+            Object value = objModel.get(Resource.FIELD_CONTENT_ID);
+
+            if (value instanceof String) {
+                if (!result.containsField(ORIENTDB_PRIMARY_KEY)
+                        || !result.field(ORIENTDB_PRIMARY_KEY).equals(value)) {
+                    logger.trace("Setting primary key to {}", value);
+                    result.field(ORIENTDB_PRIMARY_KEY, value);
+                }
+            }
+
+            // OpenIDM revision to document version mapping
+            value = objModel.get(Resource.FIELD_CONTENT_REVISION);
+            if (value instanceof String) {
+                String revString = (String) objModel.get(Resource.FIELD_CONTENT_REVISION);
+                if (revString != null) {
+                    int rev = parseVersion(revString);
+                    logger.trace("Setting version to {}", rev);
+                    if (result.getVersion() != rev) {
+                        result.setVersion(rev);
+                    }
+                }
+            }
+
+            return result;
+        } catch (JsonProcessingException e) {
+            return toDocument(objModel, docToPopulate, orientDocClass, false, true);
+        }        
     }
     
     /**

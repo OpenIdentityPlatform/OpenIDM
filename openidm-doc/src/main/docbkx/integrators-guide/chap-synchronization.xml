@@ -688,10 +688,14 @@
       <primary>Synchronization</primary>
       <secondary>Creating attributes</secondary>
      </indexterm>
-     <para>You can create attributes on the target as part of the
-     mapping. In the example, OpenIDM creates a
-     <literal>phoneExtension</literal> attribute with a default value of
-     <literal>0047</literal>.</para>
+     <para>You can create attributes on the target as part of the mapping. In
+     the preceding example, a <literal>phoneExtension</literal> attribute with
+     a default value of <literal>0047</literal> is created on the target. The
+     <literal>"default"</literal> property can also be used to specify the
+     value to assign to the target property if the <literal>"source"</literal>
+     property and the <literal>"transform"</literal> script yield a null value.
+     If no value is specified, the default value is null.
+     </para>
 
      <indexterm>
       <primary>Synchronization</primary>
@@ -826,18 +830,18 @@
    operations. You can prevent a specific mapping from participating in
    automatic synchronization by setting the <literal>"enableSync"</literal>
    property of that mapping to false. In the following example, automatic
-   synchronization is disabled. This means that changes to objects in the LDAP
-   directory are not automatically propagated to the internal repository.
-   To propagate the changes to the internal repository, reconciliation must be
-   launched manually.</para>
+   synchronization is disabled. This means that changes to objects in the internal
+   repository are not automatically propagated to the LDAP directory. To
+   propagate changes to the LDAP directory, reconciliation must be launched
+   manually.</para>
 
    <programlisting language="javascript">
 {
     "mappings" : [
         {
-            "name" : "systemLdapAccounts_managedUser",
-            "source" : "system/ldap/account",
-            "target" : "managed/user",
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
             "enableSync" : false,
              ....
 }
@@ -965,9 +969,7 @@
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
- --data '[{
-          "replace":"familyName","value": "Brown"
-         }]'
+ --data '[{"replace":"familyName","value": "Brown"}]'
  "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=joe"
    </screen>
 
@@ -1734,7 +1736,7 @@
       </programlisting>
 
       <para>The variables available to these scripts are described in
-      <link xlink:href="admin-guide#appendix-scripting"
+      <link xlink:href="integrators-guide#appendix-scripting"
       xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Variables Available in Scripts</citetitle></link> in the
       <citetitle>Scripting Appendix</citetitle>.</para>

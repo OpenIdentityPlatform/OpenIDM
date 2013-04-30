@@ -200,6 +200,13 @@ var httpAccessConfig =
             "methods"   : "patch,action",
             "actions"   : "patch",
             "customAuthz" : "isQueryOneOf({'managed/user': ['for-userName']}) && managedUserRestrictedToAllowedProperties('password')"
+        },
+        // Security Management
+        {
+            "pattern"   : "security/*",
+            "roles"     : "openidm-admin",
+            "methods"   : "read,create,update,delete",
+            "actions"   : ""
         }
     ] 
 };

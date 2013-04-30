@@ -142,14 +142,6 @@ public class ServerConstants {
 
 
     /**
-     * The default location relative to the openidm root of the boot properties
-     * file. Override by setting system property
-     * {@code CONFIG_BOOT_FILE_LOCATION}
-     */
-    public static final String DEFAULT_GLOBAL_BOOT_FILE_LOCATION =
-            "conf/boot/global.boot.properties";
-
-    /**
      * The name of the system property that can be used to specify the path to
      * the server root.
      */
@@ -194,32 +186,6 @@ public class ServerConstants {
 
     public static final String ROUTER_PREFIX = "openidm.router.prefix";
 
-    /**
-     * Unique identifier property name
-     * <p/>
-     * TODO: Description.
-     * <p/>
-     * {@code _id}
-     */
-    public static final String OBJECT_PROPERTY_ID = "_id";
-
-    /**
-     * Revision property name
-     * <p/>
-     * TODO: Description.
-     * <p/>
-     * {@code _rev}
-     */
-    public static final String OBJECT_PROPERTY_REV = "_rev";
-
-    /**
-     * Action property name
-     * <p/>
-     * TODO: Description.
-     * <p/>
-     * {@code _action}
-     */
-    public static final String ACTION_NAME = "_action";
 
     /**
      * Query input value for the QUERY_ID input key.

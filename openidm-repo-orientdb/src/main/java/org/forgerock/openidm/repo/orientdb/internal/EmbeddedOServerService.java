@@ -26,7 +26,6 @@ package org.forgerock.openidm.repo.orientdb.internal;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.orientechnologies.orient.graph.gremlin.OGremlinHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public class EmbeddedOServerService {
                 orientDBServer.startup(serverConfig);
                 orientDBServer.activate();
 
-                OGremlinHelper.global().create();
+                //com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().create();
                 //OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
                 //OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
                 //OGremlinHelper.global().create();
@@ -88,7 +87,7 @@ public class EmbeddedOServerService {
             orientDBServer.shutdown();
             logger.debug("Embedded DB server stopped.");
         }
-        OGremlinHelper.global().destroy();
+        //com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().destroy();
     }
 
     // TODO: make configurable

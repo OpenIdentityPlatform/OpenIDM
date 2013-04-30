@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,37 +20,41 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.shell.felixgogo.debug;
 
-
-import org.apache.felix.service.command.CommandSession;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
-import org.osgi.framework.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.apache.felix.service.command.CommandSession;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionProvider;
+import org.forgerock.json.resource.ResourceException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class InteractiveObjectSetService implements JsonResource, ServiceListener {
+public class InteractiveObjectSetService implements /* RequestHandler, */ServiceListener {
 
     private final static Logger TRACE = LoggerFactory.getLogger(InteractiveObjectSetService.class);
 
     public static final String ROUTER_SERVICE_FILTER = "(service.pid=org.forgerock.openidm.router)";
 
-    private JsonResource router = null;
+    private ConnectionProvider router = null;
 
     private CommandSession session;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -58,14 +62,17 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
     private final BundleContext context;
     private final Thread parent;
 
-    public InteractiveObjectSetService(final Thread parent, BundleContext context, CommandSession session) {
+    public InteractiveObjectSetService(final Thread parent, BundleContext context,
+            CommandSession session) {
         this.parent = parent;
         this.context = context;
         this.session = session;
         try {
-            ServiceReference[] ref = context.getServiceReferences(JsonResource.class.getName(), ROUTER_SERVICE_FILTER);
+            ServiceReference[] ref =
+                    context.getServiceReferences(ConnectionProvider.class.getName(),
+                            ROUTER_SERVICE_FILTER);
             if (null != ref && ref.length > 0) {
-                router = (JsonResource) context.getService(ref[0]);
+                router = (ConnectionProvider) context.getService(ref[0]);
             }
         } catch (InvalidSyntaxException e) {
         }
@@ -75,7 +82,7 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
     /**
      * {@inheritDoc}
      */
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
+    public JsonValue handle(JsonValue request) throws ResourceException {
         synchronized (this) {
             session.getConsole().println("Incoming request:");
             if (null == request) {
@@ -86,48 +93,50 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
                     mapper.writerWithDefaultPrettyPrinter().writeValue(wr, request.getObject());
                     session.getConsole().println(wr.toString());
                 } catch (IOException e) {
-                    session.getConsole().append("Input object serialization exception: ").println(e.getMessage());
+                    session.getConsole().append("Input object serialization exception: ").println(
+                            e.getMessage());
                 }
             }
             JsonValue response = null;
             Scanner input = new Scanner(session.getKeyboard());
             do {
                 switch (printInputHelp(input)) {
-                    case 1: {
-                        if (null != router) {
-                            return redirect(request, input);
-                        } else {
-                            session.getConsole().println("Router is not available, please select something else.");
-                        }
-                        break;
+                case 1: {
+                    if (null != router) {
+                        return redirect(request, input);
+                    } else {
+                        session.getConsole().println(
+                                "Router is not available, please select something else.");
                     }
-                    case 2: {
-                        break;
-                    }
-                    case 3: {
-                        response = loadFromConsole(input);
-                        break;
-                    }
-                    case 4: {
-                        return null;
-                    }
-                    case 5: {
-                        printExceptionHelp(input);
-                    }
-                    case 6: {
-                        parent.interrupt();
-                        return new JsonValue(new HashMap<String, Object>());
-                    }
-                    default: {
-                        session.getConsole().println("Your should select something [1..6]");
-                    }
+                    break;
+                }
+                case 2: {
+                    break;
+                }
+                case 3: {
+                    response = loadFromConsole(input);
+                    break;
+                }
+                case 4: {
+                    return null;
+                }
+                case 5: {
+                    printExceptionHelp(input);
+                }
+                case 6: {
+                    parent.interrupt();
+                    return new JsonValue(new HashMap<String, Object>());
+                }
+                default: {
+                    session.getConsole().println("Your should select something [1..6]");
+                }
                 }
             } while (null == response);
             return response;
         }
     }
 
-    private JsonResource getRouter() {
+    private ConnectionProvider getRouter() {
         return router;
     }
 
@@ -142,13 +151,12 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
         return input.nextInt();
     }
 
-
-    private JsonValue redirect(JsonValue request, Scanner input) throws JsonResourceException {
+    private JsonValue redirect(JsonValue request, Scanner input) throws ResourceException {
         session.getConsole().append("Current id: ").println(request.get("id").asString());
         session.getConsole().print("Type in the new id: ");
         String id = input.next();
         request.put("id", id);
-        return getRouter().handle(request);
+        return null;// getRouter().handle(request);
     }
 
     private JsonValue readFile(File inputFile) throws Exception {
@@ -158,7 +166,8 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
                 return new JsonValue(map);
             }
         } catch (Exception e) {
-            session.getConsole().format("Error reading file: %s. Exception: %s", inputFile.getAbsolutePath(), e.getMessage());
+            session.getConsole().format("Error reading file: %s. Exception: %s",
+                    inputFile.getAbsolutePath(), e.getMessage());
         }
         return new JsonValue(new HashMap());
     }
@@ -172,7 +181,7 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
         while (scanner.hasNext()) {
             input = scanner.next();
             if (null == input) {
-                //control-D pressed
+                // control-D pressed
                 break;
             } else {
                 stringBuilder.append(input);
@@ -182,36 +191,36 @@ public class InteractiveObjectSetService implements JsonResource, ServiceListene
             Object map = mapper.readValue(stringBuilder.toString(), Map.class);
             return new JsonValue(map);
         } catch (IOException e) {
-            session.getConsole().append("[Exception] Failed to read input from console. Reason: ").println(e);
+            session.getConsole().append("[Exception] Failed to read input from console. Reason: ")
+                    .println(e);
             return null;
         }
     }
 
-
-    private void printExceptionHelp(Scanner scanner) throws JsonResourceException {
+    private void printExceptionHelp(Scanner scanner) throws ResourceException {
         session.getConsole().println("Throw a JsonResourceException");
         session.getConsole().print("Type in the numeric code of the exception: ");
-        throw new JsonResourceException(scanner.nextInt(), "Test exception");
+        throw ResourceException.getException(scanner.nextInt(), "Test exception");
     }
 
     @Override
     public void serviceChanged(ServiceEvent event) {
         ServiceReference sr = event.getServiceReference();
         switch (event.getType()) {
-            case ServiceEvent.REGISTERED: {
-                router = (JsonResource) context.getService(sr);
-                break;
-            }
-            case ServiceEvent.MODIFIED: {
-                router = (JsonResource) context.getService(sr);
-                break;
-            }
-            case ServiceEvent.UNREGISTERING: {
-                router = null;
-                break;
-            }
-            default:
-                break;
+        case ServiceEvent.REGISTERED: {
+            router = (ConnectionProvider) context.getService(sr);
+            break;
+        }
+        case ServiceEvent.MODIFIED: {
+            router = (ConnectionProvider) context.getService(sr);
+            break;
+        }
+        case ServiceEvent.UNREGISTERING: {
+            router = null;
+            break;
+        }
+        default:
+            break;
         }
     }
 }

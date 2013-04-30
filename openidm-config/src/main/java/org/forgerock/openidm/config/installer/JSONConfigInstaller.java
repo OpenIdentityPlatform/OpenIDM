@@ -40,7 +40,10 @@ import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
+
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.ConfigurationManager;
 import org.forgerock.openidm.config.ConfigurationManager.PID;
@@ -75,7 +78,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      */
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper().configure(
+            JsonParser.Feature.ALLOW_COMMENTS, true);
 
     private static String fileEncoding = IdentityServer.getInstance()
             .getProperty("openidm.config.file.encoding", "UTF-8");

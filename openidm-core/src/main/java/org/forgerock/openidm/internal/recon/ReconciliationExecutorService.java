@@ -167,6 +167,7 @@ public class ReconciliationExecutorService implements CollectionResourceProvider
         configurationProvider.setTarget(configuration.get("target"));
         configurationProvider.setSource(configuration.get("source"));
         configurationProvider.setLink(configuration.get("link"));
+        configurationProvider.setPolicies(configuration.get("policies"));
         builder =
                 ExecutorPreferences.builder().scriptRegistry(scriptRegistry).configurationProvider(
                         configurationProvider);

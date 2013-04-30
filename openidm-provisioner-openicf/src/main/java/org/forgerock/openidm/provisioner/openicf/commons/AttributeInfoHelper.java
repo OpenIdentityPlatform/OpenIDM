@@ -51,6 +51,7 @@ import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
+import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.QualifiedUid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,6 +248,21 @@ public class AttributeInfoHelper {
 
     public Attribute build(AttributeInfo attributeInfo, Object source) {
         Attribute attribute;
+
+        if (OperationalAttributes.PASSWORD_NAME.equals(attributeInfo.getName())
+                || OperationalAttributes.CURRENT_PASSWORD_NAME.equals(attributeInfo.getName())) {
+            // check the value..
+            if (source == null /*|| value.size() != 1*/) {
+                final String MSG = "Must be a single value.";
+                //throw new IllegalArgumentException(MSG);
+                return null;
+            }
+            if (!(source instanceof GuardedString)) {
+                final String MSG = "Password value must be an instance of GuardedString";
+                //throw new IllegalArgumentException(MSG);
+            }
+        }
+
         if (null == source) {
             attribute = AttributeBuilder.build(attributeInfo.getName());
         } else {

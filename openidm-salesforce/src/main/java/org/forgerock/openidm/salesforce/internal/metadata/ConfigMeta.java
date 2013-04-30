@@ -24,9 +24,7 @@
 
 package org.forgerock.openidm.salesforce.internal.metadata;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
@@ -35,7 +33,7 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.salesforce.internal.SalesforceRequestHandler;
+import org.forgerock.openidm.salesforce.internal.data.SalesforceRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

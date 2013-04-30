@@ -58,7 +58,7 @@ import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.Patch;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -314,6 +314,12 @@ public class JDBCRepoService implements RequestHandler {
 	
 	/**
 	 * Updates a resource in the repository
+     * <p/>
+     * This implementation requires MVCC and hence enforces that clients state what revision they expect
+     * to be updating
+     * <p/>
+     * If successful, this method updates metadata properties within the passed object,
+     * including: a new {@code _rev} value for the revised object's version
 	 * 
 	 * @param request the update request
 	 * @return the updated resource
