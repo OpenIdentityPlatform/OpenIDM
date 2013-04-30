@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -264,6 +264,23 @@ public class ReconciliationContext {
     private void cleanupState() {
         sourceIds = null;
         targetIds = null;
+    }
+    
+    /**
+     * Returns a summary of the reconciliation run.
+     */
+    public Map<String, Object> getSummary() {
+        Map<String, Object> reconSummary = new LinkedHashMap<String, Object>();
+        reconSummary.put("_id", getReconId());
+        reconSummary.put("mapping", getMapping());
+        reconSummary.put("state", getState());
+        reconSummary.put("stage", getStage());
+        reconSummary.put("stageDescription", getStage().getDescription());
+        reconSummary.put("progress", getProgress());
+        reconSummary.put("situationSummary", getStatistics().getSituationSummary());
+        reconSummary.put("started", getStatistics().getStarted());
+        reconSummary.put("ended", getStatistics().getEnded());
+        return reconSummary;
     }
 
 }

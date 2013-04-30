@@ -19,6 +19,7 @@
         "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
         
         "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
+        "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
         "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
         "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionid = ${parentActionId}"
     },

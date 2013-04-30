@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,6 +25,8 @@ package org.forgerock.openidm.audit.impl;
 
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,8 +68,11 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.script.Script;
+import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +102,12 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     public final static String TYPE_ACTIVITY = "activity";
 
     public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
-    public final static String QUERY_BY_RECON_SITUATION = "audit-by-recon-id-situation";
+    public final static String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
+    public final static String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
     public final static String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
 
+    private static Script script = null;
+    
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     Map<String, List<String>> actionFilters;
@@ -468,7 +476,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
         return JsonPatch.diff(existingConfig, newConfig).size() > 0;
     }
-
+    
     private void setConfig(ComponentContext compContext) throws Exception {
         config = enhancedConfig.getConfigurationAsJson(compContext);
         auditLoggers = getAuditLoggers(config, compContext);
@@ -476,6 +484,11 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         triggerFilters = getTriggerFilters(config);
         watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
         passwordFieldFilters = getEventJsonPointerList(config, "activity", "passwordFields");
+        JsonValue efConfig = config.get("exceptionFormatter");
+        if (!efConfig.isNull()) {
+            script = Scripts.newInstance((String)compContext.getProperties().get(Constants.SERVICE_PID), efConfig);
+        }
+        
         logger.debug("Audit service filters enabled: {}", actionFilters);
     }
 
@@ -610,7 +623,35 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
         logger.info("Audit service stopped.");
     }
+
+    public static void preformatLogEntry(String type, Map<String, Object> entryMap) {
+        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+            Object exception = entryMap.get("exception");
+            try {
+                if (exception == null) {
+                    entryMap.put("exception", "");
+                } else if (!(exception instanceof String)) {
+                    entryMap.put("exception", AuditServiceImpl.formatException((Exception) exception));
+                }
+            } catch (Exception e) {
+                logger.warn("Error formatting Exception: " + e);
+            }
+        }
+    }
     
+    public static String formatException(Exception e) throws Exception {
+        if (e == null) {
+            return "";
+        }
+        String result = e.getMessage();
+        if (script != null) {
+            Map<String, Object> scope = new HashMap<String, Object>();
+            scope.put("exception", e);
+            result = (String) script.exec(scope);
+        }
+        return result;
+    }
+
     public static Map<String, Object> formatLogEntry(Map<String, Object> entry, String type) {
         if (type.equals(AuditServiceImpl.TYPE_RECON)) {
             return AuditServiceImpl.formatReconEntry(entry);
@@ -633,6 +674,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         formattedEntry.put("reconId", entry.get("reconId"));
         formattedEntry.put("rootActionId", entry.get("rootActionId"));
         formattedEntry.put("status", entry.get("status"));
+        formattedEntry.put("message", entry.get("message"));
+        formattedEntry.put("messageDetail", entry.get("messageDetail"));
+        formattedEntry.put("exception", entry.get("exception"));
         if ("".equals(entry.get("entryType"))) {
             // recon entry
             formattedEntry.put("actionId", entry.get("actionId"));
@@ -642,9 +686,6 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             formattedEntry.put("situation", entry.get("situation"));
             formattedEntry.put("sourceObjectId", entry.get("sourceObjectId"));
             formattedEntry.put("targetObjectId", entry.get("targetObjectId"));
-        } else {
-            // status or summary
-            formattedEntry.put("message", entry.get("message"));
         }
         return formattedEntry;
     }
@@ -663,7 +704,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 }
             }
         }
-        results.put("results", resultEntries);
+        if (resultEntries.size() > 0) {
+            results.put("results", resultEntries);
+        }
         return results;
     }
     

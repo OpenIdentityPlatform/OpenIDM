@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -162,7 +162,10 @@ public class RepoAuditLogger implements AuditLogger {
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
+        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+        String type = split[0];
         try {
+            AuditServiceImpl.preformatLogEntry(type, obj);
             createImpl(fullId, obj);
         } finally {
             measure.end();

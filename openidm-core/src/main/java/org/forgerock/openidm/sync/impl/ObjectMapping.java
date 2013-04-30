@@ -1,27 +1,26 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*
-*/
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.sync.impl;
 
 // Java SE
@@ -30,22 +29,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Future;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.JsonResourceContext;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -670,15 +663,7 @@ class ObjectMapping implements SynchronizationListener {
                         LOGGER.warn("Unexpected failure in performing action {}", params, se);
                     }
                 }
-                Throwable throwable = se;
-                while (throwable.getCause() != null) { // want message associated with original cause
-                    throwable = throwable.getCause();
-                }
-                if (se != throwable) {
-                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                } else {
-                    entry.message = throwable.getMessage();
-                }
+                setReconEntryMessage(entry, se);
             }
             if (reconId != null && !Action.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
@@ -807,15 +792,7 @@ class ObjectMapping implements SynchronizationListener {
                         entry.status = Status.FAILURE; // exception was not intentional
                         LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
                     }
-                    Throwable throwable = se;
-                    while (throwable.getCause() != null) { // want message associated with original cause
-                        throwable = throwable.getCause();
-                    }
-                    if (se != throwable) {
-                        entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                    } else {
-                        entry.message = throwable.getMessage();
-                    }
+                    setReconEntryMessage(entry, se);
                 }
                 if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                     entry.timestamp = new Date();
@@ -828,6 +805,7 @@ class ObjectMapping implements SynchronizationListener {
                 }
             }
             measureTarget.end();
+            reconContext.getStatistics().reconEnd();
             logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
@@ -836,7 +814,9 @@ class ObjectMapping implements SynchronizationListener {
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } finally {
             context.remove("trigger");
-            reconContext.getStatistics().reconEnd();
+            if (!reconContext.getStatistics().hasEnded()) {
+                reconContext.getStatistics().reconEnd();
+            }
         }
 
 // TODO: cleanup orphan link objects (no matching source or target) here
@@ -870,15 +850,7 @@ class ObjectMapping implements SynchronizationListener {
                 entry.status = Status.FAILURE; // exception was not intentional
                 LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
             }
-            Throwable throwable = se;
-            while (throwable.getCause() != null) { // want message associated with original cause
-                throwable = throwable.getCause();
-            }
-            if (se != throwable) {
-                entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-            } else {
-                entry.message = throwable.getMessage();
-            }
+            setReconEntryMessage(entry, se);
         }
         String[] targetIds = op.getTargetIds();
         for (String handledId : targetIds) {
@@ -887,7 +859,6 @@ class ObjectMapping implements SynchronizationListener {
             remainingTargetIds.remove(normalizedHandledId);
             LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
         }
-
         if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
             entry.timestamp = new Date();
             entry.reconciling = "source";
@@ -907,6 +878,26 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    public void setReconEntryMessage(ReconEntry entry, Exception se) {
+        JsonResourceException jre = null;
+        Throwable throwable = se;
+        entry.exception = se;
+        while (throwable.getCause() != null) { // want message associated with original cause
+            if (jre == null && throwable instanceof JsonResourceException) {
+                jre = (JsonResourceException)throwable;
+            }
+            throwable = throwable.getCause();
+        }
+        if (se != throwable) {
+            entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+        } else {
+            entry.message = throwable.getMessage();
+        }
+        if (jre != null) {
+            entry.messageDetail = ((JsonResourceException)jre).toJsonValue();           
+        }
+    }
+    
     /**
      * Wrapper to submit source recon for a given id for concurrent processing
      * @author aegloff
@@ -1019,6 +1010,7 @@ class ObjectMapping implements SynchronizationListener {
         reconEndEntry.reconId = reconContext.getReconId();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconEndEntry.message = simpleSummary;
+        reconEndEntry.messageDetail = new JsonValue(reconContext.getSummary());
         logReconEntry(reconEndEntry);
         LOGGER.info("Reconciliation completed. " + simpleSummary);
     }
@@ -2045,6 +2037,10 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String message;
         /** TODO: Description. */
+        public JsonValue messageDetail;
+        /** TODO: Description. */
+        public Exception exception;
+        /** TODO: Description. */
         public String actionId;
 
         private DateUtil dateUtil;
@@ -2108,7 +2104,9 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
             jv.put("status", (status == null ? null : status.toString()));
             jv.put("message", message);
+            jv.put("messageDetail", messageDetail);
             jv.put("actionId", actionId);
+            jv.put("exception", exception);
             return jv;
         }
     }

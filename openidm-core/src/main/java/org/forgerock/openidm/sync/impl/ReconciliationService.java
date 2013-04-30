@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -128,16 +128,7 @@ public class ReconciliationService extends ObjectSetJsonResource
         if (localId == null && type == null) {
             List<Map> runList = new ArrayList<Map>();
             for (ReconciliationContext entry : reconRuns.values()) {
-                Map<String, Object> reconListEntry = new LinkedHashMap<String, Object>();
-                reconListEntry.put("_id", entry.getReconId());
-                reconListEntry.put("mapping", entry.getMapping());
-                reconListEntry.put("state", entry.getState());
-                reconListEntry.put("stage", entry.getStage());
-                reconListEntry.put("stageDescription", entry.getStage().getDescription());
-                reconListEntry.put("progress", entry.getProgress());
-                reconListEntry.put("started", entry.getStatistics().getStarted());
-                reconListEntry.put("ended", entry.getStatistics().getEnded());
-                runList.add(reconListEntry);
+                runList.add(entry.getSummary());
             }
             result.put("reconciliations", runList);
         } else {
