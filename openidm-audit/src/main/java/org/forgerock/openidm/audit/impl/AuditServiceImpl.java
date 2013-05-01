@@ -102,6 +102,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     public final static String TYPE_ACTIVITY = "activity";
 
     public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
+    public final static String QUERY_BY_MAPPING = "audit-by-mapping";
     public final static String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
     public final static String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
     public final static String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
@@ -686,6 +687,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             formattedEntry.put("situation", entry.get("situation"));
             formattedEntry.put("sourceObjectId", entry.get("sourceObjectId"));
             formattedEntry.put("targetObjectId", entry.get("targetObjectId"));
+        } else {
+            formattedEntry.put("mapping", entry.get("mapping"));
         }
         return formattedEntry;
     }
@@ -693,15 +696,21 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, String reconId) {
         Map<String, Object> results = new HashMap<String, Object>();
         List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
-        for (Map<String, Object> entry : entryList) {
-            if (reconId.equals(entry.get("reconId"))) {
-                if ("start".equals(entry.get("entryType"))) {
-                    results.put("start", AuditServiceImpl.formatReconEntry(entry));
-                } else if ("summary".equals(entry.get("entryType"))) {
-                    results.put("summary", AuditServiceImpl.formatReconEntry(entry));
-                } else {
-                    resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+        if (reconId != null) {
+            for (Map<String, Object> entry : entryList) {
+                if (reconId.equals(entry.get("reconId"))) {
+                    if ("start".equals(entry.get("entryType"))) {
+                        results.put("start", AuditServiceImpl.formatReconEntry(entry));
+                    } else if ("summary".equals(entry.get("entryType"))) {
+                        results.put("summary", AuditServiceImpl.formatReconEntry(entry));
+                    } else {
+                        resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+                    }
                 }
+            }
+        } else {
+            for (Map<String, Object> entry : entryList) {
+                resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
             }
         }
         if (resultEntries.size() > 0) {
@@ -709,7 +718,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
         return results;
     }
-    
+
     public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
         Map<String, Object> results = new HashMap<String, Object>();
         results.put("results", entryList);

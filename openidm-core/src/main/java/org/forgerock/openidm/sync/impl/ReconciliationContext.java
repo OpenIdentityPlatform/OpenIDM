@@ -351,7 +351,7 @@ public class ReconciliationContext {
         reconSummary.put("_id", getReconId());
         reconSummary.put("mapping", getMapping());
         reconSummary.put("state", getState());
-        reconSummary.put("stage", getStage());
+        reconSummary.put("stage", getStage().toString());
         reconSummary.put("stageDescription", getStage().getDescription());
         reconSummary.put("progress", getProgress());
         reconSummary.put("situationSummary", getStatistics().getSituationSummary());

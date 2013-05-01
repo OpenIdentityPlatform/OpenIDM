@@ -1987,6 +1987,8 @@ class ObjectMapping implements SynchronizationListener {
         public Exception exception;
         /** TODO: Description. */
         public String actionId;
+        // Name of the mapping
+        public String mappingName;
 
         private DateUtil dateUtil;
 
@@ -2021,6 +2023,9 @@ class ObjectMapping implements SynchronizationListener {
             this.rootContext = rootContext;
             this.entryType = entryType;
             this.dateUtil = dateUtil;
+            if (!entryType.equals(RECON_ENTRY)) {
+                this.mappingName = name;
+            }
         }
 
         /**
@@ -2052,6 +2057,7 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("messageDetail", messageDetail);
             jv.put("actionId", actionId);
             jv.put("exception", exception);
+            jv.put("mapping", mappingName);
             return jv;
         }
     }
