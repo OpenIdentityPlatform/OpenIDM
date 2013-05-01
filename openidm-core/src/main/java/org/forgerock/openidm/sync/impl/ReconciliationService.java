@@ -46,6 +46,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -56,6 +57,7 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -88,6 +90,8 @@ public class ReconciliationService extends ObjectSetJsonResource
     final static Logger logger = LoggerFactory.getLogger(ReconciliationService.class);
 
     public static final String PID = "org.forgerock.openidm.recon";
+    
+    public enum ReconAction {recon, reconByQuery, reconById};
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
@@ -96,6 +100,24 @@ public class ReconciliationService extends ObjectSetJsonResource
             policy = ReferencePolicy.DYNAMIC
     )
     Mappings mappings;
+    
+    /** Object set router service. */
+    @Reference(
+        name = "ref_SynchronizationService_JsonResourceRouterService",
+        referenceInterface = JsonResource.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.DYNAMIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
+    )
+    private ObjectSet router;
+    protected void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
+    }
+    protected void unbindRouter(JsonResource router) {
+        this.router = null;
+    }
     
     /**
      * The thread pool for executing full reconciliation runs.
@@ -199,7 +221,7 @@ public class ReconciliationService extends ObjectSetJsonResource
         
         if (id == null) {
             // operation on collection
-            if ("recon".equalsIgnoreCase(action)) {
+            if ("recon".equalsIgnoreCase(action) || "reconById".equalsIgnoreCase(action)) {
                 try {
                     JsonValue mapping = paramsVal.get("mapping").required();
                     logger.debug("Reconciliation action of mapping {}", mapping);
@@ -210,7 +232,7 @@ public class ReconciliationService extends ObjectSetJsonResource
                     } else {
                         waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                     }
-                    result.put("_id", reconcile(mapping, waitForCompletion));
+                    result.put("_id", reconcile(mapping, waitForCompletion, paramsVal));
                 } catch (SynchronizationException se) {
                    throw new ConflictException(se);
                 }
@@ -238,14 +260,10 @@ public class ReconciliationService extends ObjectSetJsonResource
     }
     
     /**
-     * Full reconciliation
-     * @param mapping the 
-     * @param synchronous whether to synchrnously (TRUE) wait for the reconciliation run, or 
-     *  to return immediately (FALSE) with the recon id, which can then be used for subsequent
-     *  queries / actions on that reconciliation run.
+     * {@inheritDoc}
      */
-    public String reconcile(final JsonValue mapping, Boolean synchronous) throws SynchronizationException {
-        final ReconciliationContext reconContext = newReconContext(mapping);
+    public String reconcile(final JsonValue mapping, Boolean synchronous, JsonValue reconParams) throws SynchronizationException {
+        final ReconciliationContext reconContext = newReconContext(mapping, reconParams);
         if (Boolean.TRUE.equals(synchronous)) {
             reconcile(mapping, reconContext);
         } else {
@@ -274,7 +292,8 @@ public class ReconciliationService extends ObjectSetJsonResource
      * whilst we hand back the identifier to the caller.
      * @return a new reconciliation context
      */
-    private ReconciliationContext newReconContext(JsonValue mapping) throws SynchronizationException {
+    private ReconciliationContext newReconContext(JsonValue mapping, JsonValue reconParams) throws SynchronizationException {
+        ReconciliationContext reconContext = null;
         if (mappings == null) {
             throw new SynchronizationException("Unknown mapping type, no mappings configured");
         }
@@ -289,7 +308,12 @@ public class ReconciliationService extends ObjectSetJsonResource
         } else {
             throw new SynchronizationException("Unknown mapping type");
         }
-        ReconciliationContext reconContext = new ReconciliationContext(objMapping, context);
+        try {
+            reconContext = new ReconciliationContext(objMapping, context, reconParams, this);
+        } catch (BadRequestException ex) {
+            throw new SynchronizationException("Failure in initializing reconciliation: " 
+                    + ex.getMessage(), ex);
+        }
         return reconContext;
     }
     
@@ -417,4 +441,13 @@ public class ReconciliationService extends ObjectSetJsonResource
         logger.debug("Deactivating Service {}", compContext);
         logger.info("Reconciliation service stopped.");
     }
+    
+    /**
+     * Accessor to router
+     * @return handle to router accessor
+     */
+    ObjectSet getRouter() {
+        return router;
+    }
+
 }

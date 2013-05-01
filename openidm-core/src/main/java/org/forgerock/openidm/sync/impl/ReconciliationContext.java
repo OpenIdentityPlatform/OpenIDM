@@ -25,6 +25,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * Represents the information and functionality for a 
@@ -42,12 +45,16 @@ import org.forgerock.json.fluent.JsonValue;
  * @author aegloff
  */
 public class ReconciliationContext {
-
+    
     ObjectMapping mapping;
+    ReconciliationService service;
+    
+    JsonValue reconParams;
 
     private ReconStage stage = ReconStage.ACTIVE_INITIALIZED;
     private boolean canceled = false;
-    private String reconId; 
+    private String reconId;
+    private ReconTypeHandler reconTypeHandler;
     private final ReconciliationStatistic reconStat;
     
     // If set, the list of all queried source Ids
@@ -62,20 +69,60 @@ public class ReconciliationContext {
     /**
      * Creates the instance with info from the current call context
      * @param callingContext The resource call context
+     * @param reconParams configuration options for the recon
      */
-    public ReconciliationContext(ObjectMapping mapping, JsonValue callingContext) {
+    public ReconciliationContext(ObjectMapping mapping, JsonValue callingContext, JsonValue reconParams,
+            ReconciliationService service) throws BadRequestException {
         this.mapping = mapping;
         this.reconId = callingContext.get("uuid").required().asString();
         this.reconStat = new ReconciliationStatistic(this);
+        this.reconParams = reconParams;
+        this.service = service;
+        reconTypeHandler = createReconTypeHandler(reconParams);
     }
-    
+
+    /**
+     * Factory method for the recon type handlers
+     * @param reconParams the configuration parameters
+     * @return
+     */
+    private ReconTypeHandler createReconTypeHandler(JsonValue reconParams) throws BadRequestException {
+        ReconTypeHandler handler = null;
+        switch (reconParams.get("_action").asEnum(ReconciliationService.ReconAction.class)) {
+        case recon : 
+            handler = new ReconTypeFull(this); 
+            break;
+        case reconById : 
+            handler = new ReconTypeById(this); 
+            break;
+        //case "reconByQuery" : return new ReconTypeByQuery();
+        default: 
+            throw new BadRequestException("Unknown action " + reconParams.get("_action").asString());
+        }
+        return handler;
+    }
+
     /**
      * @return A unique identifier for the reconciliation run
      */
     public String getReconId() {
         return reconId;
     }
-    
+
+    /**
+     * @return the type of reconciliation
+     */
+    public ReconTypeHandler getReconHandler() {
+        return reconTypeHandler;
+    }
+
+    /**
+     * @return the reconciliation parameters
+     */
+    public JsonValue getReconParams() {
+        return reconParams;
+    }
+
     /**
      * Cancel the reconciliation run.
      * May not take immediate effect in stopping the reconciliation logic.
@@ -93,12 +140,23 @@ public class ReconciliationContext {
     }
 
     /**
+     * Check if a given reconciliation instance has requested to be canceled
+     * and throw an exception if it has
+     * @throws SynchronizationException if the reconciliation has been aborted
+     */
+    public void checkCanceled() throws SynchronizationException {
+        if (isCanceled()) {
+            throw new SynchronizationException("Reconciliation canceled: " + getReconId());
+        }
+    }
+
+    /**
      * @return Statistics about this reconciliation run
      */
     public ReconciliationStatistic getStatistics() {
         return reconStat; 
     }
-    
+
     /**
      * @return The name of the ObjectMapping associated 
      * with the reconciliation run
@@ -106,18 +164,18 @@ public class ReconciliationContext {
     public String getMapping() {
         return mapping.getName();
     }
-    
+
     /**
      * @return The ObjectMapping associated with the reconciliation run
      */
     public ObjectMapping getObjectMapping() {
         return mapping;
     }
-    
+
     public String getState() {
         return stage.getState();
     }
-    
+
     public ReconStage getStage() {
         return stage;
     }
@@ -166,7 +224,7 @@ public class ReconciliationContext {
 
         return progressDetail;
     }
-    
+
     /**
      * @return the executor for this recon, or null if no executor should be used
      */
@@ -180,7 +238,17 @@ public class ReconciliationContext {
     }
 
     /**
-     * @param sourceIds the list of all ids in the source object set
+     * @return the source ids to reconcile in this recon scope
+     * @throws SynchronizationException if getting the ids to reconcile failed
+     */
+    Iterator<String> querySourceIdsIter() throws SynchronizationException {
+        List<String> sourceIds = getReconHandler().querySourceIds();
+        setSourceIds(sourceIds);
+        return sourceIds.iterator();
+    }
+
+    /**
+     * @param sourceIds the list of all source object ids in the reconciliation scope
      */
     void setSourceIds(List<String> sourceIds) {
         // Choose a hash based collection as we need fast "contains" handling
@@ -188,7 +256,7 @@ public class ReconciliationContext {
         this.sourceIds.addAll(sourceIds);
         this.totalSourceEntries = Integer.valueOf(sourceIds.size());
     }
-    
+
     /**
      * @param targetIds the list of all ids in the target object set
      * If the target system IDs are case insensitive, the ids are kept in normalized (lower case) form
@@ -201,7 +269,7 @@ public class ReconciliationContext {
         }
         this.totalTargetEntries = Integer.valueOf(targetIds.size());
     }
-    
+
     /**
      * Set all pre-fetched links
      * Since pre-fetching all links is optional, links may be gotten individually rather than
@@ -215,7 +283,7 @@ public class ReconciliationContext {
     }
 
     /**
-     * @return the list of all ids in the source object set, 
+     * @return the list of all source object ids in the reconciliation scope, 
      * queried at the outset of reconciliation. 
      * Null if no bulk source id query was done.
      */
@@ -255,8 +323,7 @@ public class ReconciliationContext {
             reconStat.startStage(newStage);
         }
     }
-    
-    
+
     /**
      * Remove any state from memory that should not be kept 
      * past the completion of the reconciliation run
@@ -265,7 +332,7 @@ public class ReconciliationContext {
         sourceIds = null;
         targetIds = null;
     }
-    
+
     /**
      * Returns a summary of the reconciliation run.
      */
@@ -283,4 +350,11 @@ public class ReconciliationContext {
         return reconSummary;
     }
 
+    /**
+     * Accessor to service wrapping and registering the reconciliation capabilities
+     * @return handle to recon service
+     */
+    ReconciliationService getService() {
+        return service;
+    }
 }
