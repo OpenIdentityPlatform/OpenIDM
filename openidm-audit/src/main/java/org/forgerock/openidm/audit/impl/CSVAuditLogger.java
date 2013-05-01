@@ -47,13 +47,19 @@ import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.supercsv.cellprocessor.Optional;
+import org.supercsv.cellprocessor.constraint.NotNull;
+import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.io.CsvMapReader;
+import org.supercsv.io.ICsvMapReader;
+import org.supercsv.prefs.CsvPreference;
+import org.supercsv.util.CsvContext;
 
 /**
  * Comma delimited audit logger
@@ -143,21 +149,6 @@ public class CSVAuditLogger implements AuditLogger {
     }
     
     /**
-     * Parses a string of header fields and returns them as a list.
-     * 
-     * @param fieldsString a string containing header fields
-     * @return a list of header fields.
-     */
-    private List<String> parseFields(String fieldsString) {
-        List<String> list = new ArrayList();
-        String [] fields = fieldsString.substring(0, fieldsString.length() - 1).split(",");
-        for (String field : fields) {
-            list.add(field);
-        }
-        return list;
-    }
-    
-    /**
      * Parser the csv file corresponding the the specified type (recon, activity, etc) and returns a list
      * of all entries in it.
      * 
@@ -166,73 +157,72 @@ public class CSVAuditLogger implements AuditLogger {
      * @throws Exception
      */
     private List<Map<String, Object>> getEntryList(String type) throws Exception {
-        try {
-            List<Map<String, Object>> entriesList = new ArrayList<Map<String, Object>>();
-            File auditFile = getAuditLogFile(type);
-            if (auditFile.exists()) {
-
-                BufferedReader reader = new BufferedReader(new FileReader(auditFile));
-                List<String> fields = parseFields(reader.readLine());
-                String entryString = reader.readLine();
-                while (entryString != null) {
-                    Map<String, Object> entryMap = new HashMap<String, Object>();
-                    String [] rawValues = entryString.substring(0, entryString.length() - 1).split(",");
-                    List<String> values = new ArrayList<String>();
-                    StringBuilder sb = null;
-                    // Loop through values looking for complete values, partial values, empty values
-                    // trim starting " and ending " before adding to list
-                    for (String value : rawValues) {
-                        if (sb != null) {
-                            sb.append(",");
-                        } else {
-                            sb = new StringBuilder();
-                        }
-                        if (value.equals("\"\"")) {
-                            // empty value
-                            values.add("");
-                            sb = null;
-                        } else if (value.endsWith("\"") && !value.endsWith("\"\"")) {
-                            // complete value (may be the end of a partial value);
-                            sb.append(value);
-                            values.add(sb.toString().substring(1, sb.toString().lastIndexOf("\"")));
-                            sb = null;
-                        } else {
-                            // partial value
-                            sb.append(value);
-                        }
-                    }
-                    if (values.size() != fields.size()) {
-                        throw new InternalServerErrorException("Error parsing entries from " + type + " log");
-                    }
-                    for (int i = 0; i < fields.size(); i++) {
-                        // replace all "" with "
-                        String value = values.get(i).replaceAll("\"\"", "\"");
-                        JsonValue jv = null;
-                        // Check if value is JSON object
-                        if (value.startsWith("{") && value.endsWith("}")) {
-                            try {
-                                jv = AuditServiceImpl.parseJsonString(value);
-                            } catch (Exception e) {
-                                logger.debug("Error parsing JSON string: " + e.getMessage());
-                            }
-                        }
-                        if (jv == null) {
-                            entryMap.put(fields.get(i).replace("\"", ""), value);
-                        } else {
-                            entryMap.put(fields.get(i).replace("\"", ""), jv.asMap());
-                        }
-                    }
-                    entriesList.add(entryMap);
-                    entryString = reader.readLine();
-                }
-            } else {
-                return null;
-            }
-            return entriesList;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new BadRequestException(e);
+        List<Map<String, Object>> entryList = new ArrayList<Map<String, Object>>();
+        CellProcessor [] processors = null;
+        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+            processors = new CellProcessor[] {
+                    new NotNull(), // _id
+                    new Optional(), // action
+                    new Optional(), // actionId
+                    new Optional(), // ambiguousTargetObjectIds
+                    new Optional(), // entryType
+                    new Optional(), // exception
+                    new Optional(), // mapping
+                    new Optional(), // message
+                    new Optional(new ParseJsonValue()), // messageDetail
+                    new Optional(), // reconciling
+                    new NotNull(), // reconId
+                    new Optional(), // rootActionId
+                    new Optional(), // situation
+                    new Optional(), // sourceObjectId
+                    new Optional(), // status
+                    new Optional(), // targetObjectId
+                    new NotNull() // timestamp
+            };
+        } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+            processors = new CellProcessor[] {
+                    new NotNull(), // _id
+                    new Optional(), // action
+                    new Optional(), // activityId
+                    new Optional(new ParseJsonValue()), // after
+                    new Optional(new ParseJsonValue()), // before
+                    new Optional(), // changedFields
+                    new Optional(), // message
+                    new Optional(), // objectId
+                    new Optional(), // parentActionid
+                    new Optional(), // passwordChanged
+                    new Optional(), // requester
+                    new Optional(), // rev
+                    new Optional(), // rootActionId
+                    new Optional(), // status
+                    new NotNull() // timestamp
+            };
+        } else {
+            throw new InternalServerErrorException("Error parsing entries: unknown type " + type);
         }
+        
+        File auditFile = getAuditLogFile(type);
+        if (auditFile.exists()) {
+            ICsvMapReader reader = null;
+            try {
+                reader = new CsvMapReader(new FileReader(auditFile), new CsvPreference.Builder('"', ',', recordDelim).build());
+
+                // the header elements are used to map the values to the bean (names must match)
+                final String[] header = reader.getHeader(true);
+
+                Map<String, Object> entryMap;
+                while( (entryMap = reader.read(header, processors)) != null ) {
+                        entryList.add(entryMap);
+                }
+
+            }
+            finally {
+                if( reader != null ) {
+                    reader.close();
+                }
+            }
+        }
+        return entryList;
     }
 
     /**
@@ -252,6 +242,8 @@ public class CSVAuditLogger implements AuditLogger {
             String reconId = (String)params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
                 return AuditServiceImpl.getReconResults(reconEntryList, reconId);
+            } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
+                return getReconQueryResults(reconEntryList, reconId, "mapping", (String)params.get("mappingName"));
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
                 return getReconQueryResults(reconEntryList, reconId, "situation", (String)params.get("situation"));
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_TYPE.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
@@ -269,6 +261,7 @@ public class CSVAuditLogger implements AuditLogger {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new BadRequestException(e);
         }
     }
@@ -276,7 +269,7 @@ public class CSVAuditLogger implements AuditLogger {
     private Map<String, Object> getReconQueryResults(List<Map<String, Object>> list, String reconId, String param, String paramValue) {
         List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
         for (Map<String, Object> entry : list) {
-            if (entry.get("reconId").equals(reconId) && (param == null || entry.get(param).equals(paramValue))) {
+            if ((reconId == null || (entry.get("reconId").equals(reconId))) && (param == null || paramValue.equals(entry.get(param)))) {
                 rawEntryList.add(entry);
             }
         } 
@@ -369,6 +362,9 @@ public class CSVAuditLogger implements AuditLogger {
             Object value = obj.get(key);
             fileWriter.append("\"");
             if (value != null) {
+                if (value instanceof Map) {
+                    value = new JsonValue((Map)value).toString();
+                }
                 String rawStr = value.toString();
                 // Escape quotes with double quotes
                 String escapedStr = rawStr.replaceAll("\"", "\"\"");
@@ -464,5 +460,30 @@ public class CSVAuditLogger implements AuditLogger {
     @Override
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
         throw new ForbiddenException("Not allowed on audit service");
+    }
+    
+    
+    /**
+     * CellProcessor for parsing JsonValue objects from CSV file.
+     */
+    public class ParseJsonValue implements CellProcessor {
+
+        @Override
+        public Object execute(Object value, CsvContext context) {
+            JsonValue jv = null;
+            // Check if value is JSON object
+            if (((String)value).startsWith("{") && ((String)value).endsWith("}")) {
+                try {
+                    jv = AuditServiceImpl.parseJsonString(((String)value));
+                } catch (Exception e) {
+                    logger.debug("Error parsing JSON string: " + e.getMessage());
+                }
+            }
+            if (jv == null) {
+                return value;
+            } 
+            return jv.asMap();
+        }
+        
     }
 }
