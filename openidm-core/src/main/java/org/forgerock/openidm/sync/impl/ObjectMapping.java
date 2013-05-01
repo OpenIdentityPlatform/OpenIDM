@@ -407,7 +407,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
-        checkCanceled(reconContext); // Throws an exception if reconciliation was canceled
+        reconContext.checkCanceled(); // Throws an exception if reconciliation was canceled
         return ids;
     }
 
@@ -419,11 +419,12 @@ class ObjectMapping implements SynchronizationListener {
      * @return the list of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
      */
-    private Iterable<String> queryAllIdsIterable(final String objectSet, final ReconciliationContext reconContext)
+/*    private Iterable<String> queryAllIdsIterable(final String objectSet, final ReconciliationContext reconContext)
             throws SynchronizationException {
         // For now we pull all into memory immediately
         return queryAllIds(objectSet, reconContext);
     }
+*/
 
 // TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
@@ -738,21 +739,25 @@ class ObjectMapping implements SynchronizationListener {
             JsonValue rootContext = JsonResourceContext.getRootContext(context);
             logReconStart(reconId, rootContext, context);
 
-            // Get all the source and target identifiers before we assess the situations
+            // Get the relevant source (and optionally target) identifiers before we assess the situations
             reconContext.getStatistics().sourceQueryStart();
-            List sourceIds = queryAllIds(sourceObjectSet, reconContext);
-            Iterator<String> sourceIdsIter = sourceIds.iterator();
-            reconContext.setSourceIds(sourceIds); // TODO: consider if query/recon functionality should go in that class
+            Iterator<String> sourceIdsIter = reconContext.querySourceIdsIter();
             reconContext.getStatistics().sourceQueryEnd();
             if (!sourceIdsIter.hasNext()) {
                 throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
             }
 
-            reconContext.getStatistics().targetQueryStart();
-            Collection<String> remainingTargetIds = queryAllIds(targetObjectSet, reconContext,
-                    Collections.synchronizedList(new ArrayList<String>()), linkType.isTargetCaseSensitive());
-            reconContext.setTargetIds(new ArrayList(remainingTargetIds));
-            reconContext.getStatistics().targetQueryEnd();
+            // If we will handle a target phase, pre-load all relevant target identifiers
+            Collection<String> remainingTargetIds = null;
+            if (reconContext.getReconHandler().isRunTargetPhase()) {
+                reconContext.getStatistics().targetQueryStart();
+                remainingTargetIds = queryAllIds(targetObjectSet, reconContext,
+                        Collections.synchronizedList(new ArrayList<String>()), linkType.isTargetCaseSensitive());
+                reconContext.setTargetIds(new ArrayList(remainingTargetIds));
+                reconContext.getStatistics().targetQueryEnd();
+            } else {
+                remainingTargetIds = new ArrayList<String>();
+            }
 
             // Optionally get all links up front as well
             Map<String, Link> allLinks = null;
@@ -775,42 +780,45 @@ class ObjectMapping implements SynchronizationListener {
 
             LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
 
-            EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-            reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
-            for (String targetId : remainingTargetIds) {
-                checkCanceled(reconContext);
-                TargetSyncOperation op = new TargetSyncOperation();
-                op.reconContext = reconContext;
-                ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-                entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
-                op.reconId = reconId;
-                try {
-                    op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
-                    op.sync();
-                } catch (SynchronizationException se) {
-                    if (op.action != Action.EXCEPTION) {
-                        entry.status = Status.FAILURE; // exception was not intentional
-                        LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
+            if (reconContext.getReconHandler().isRunTargetPhase()) {
+                EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
+                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
+                for (String targetId : remainingTargetIds) {
+                    reconContext.checkCanceled();
+                    TargetSyncOperation op = new TargetSyncOperation();
+                    op.reconContext = reconContext;
+                    ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+                    entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
+                    op.reconId = reconId;
+                    try {
+                        op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
+                        op.sync();
+                    } catch (SynchronizationException se) {
+                        if (op.action != Action.EXCEPTION) {
+                            entry.status = Status.FAILURE; // exception was not intentional
+                            LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
+                        }
+                        setReconEntryMessage(entry, se);
                     }
-                    setReconEntryMessage(entry, se);
-                }
-                if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
-                    entry.timestamp = new Date();
-                    entry.reconciling = "target";
-                    if (op.getSourceObjectId() != null) {
-                        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
+                    if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+                        entry.timestamp = new Date();
+                        entry.reconciling = "target";
+                        if (op.getSourceObjectId() != null) {
+                            entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
+                        }
+                        entry.actionId = op.actionId;
+                        logReconEntry(entry);
                     }
-                    entry.actionId = op.actionId;
-                    logReconEntry(entry);
                 }
+                measureTarget.end();
             }
-            measureTarget.end();
+            
             reconContext.getStatistics().reconEnd();
             logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
         } catch (InterruptedException ex) {
-            checkCanceled(reconContext);
+            reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } finally {
             context.remove("trigger");
@@ -956,10 +964,6 @@ class ObjectMapping implements SynchronizationListener {
             return new SourceReconTask(sourceId, reconContext, parentContext, rootContext, 
                     allLinks, remainingTargetIds);
         }
-        @Override
-        void checkCanceled() throws SynchronizationException {
-            ObjectMapping.this.checkCanceled(reconContext);
-        }
     }
 
     /**
@@ -968,18 +972,6 @@ class ObjectMapping implements SynchronizationListener {
      */
     int getTaskThreads() {
         return taskThreads;
-    }
-
-    /**
-     * Check if a given reconciliaiton instance has requested to be canceled.
-     * The run should be aborted as soon as possible.
-     * @param reconContext the specific recon run
-     * @throws SynchronizationException if the reconciliation has been aborted
-     */
-    private void checkCanceled(ReconciliationContext reconContext) throws SynchronizationException {
-        if (reconContext.isCanceled()) {
-            throw new SynchronizationException("Reconciliation canceled: " + reconContext.getReconId());
-        }
     }
 
     /**
@@ -1565,53 +1557,6 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
-/*
-    public static class SyncRunnable implements Callable<Void> {
-        
-        SyncOperation syncOp;
-        JsonValue parentContext;
-        public SyncRunnable(SyncOperation syncOp, JsonValue parentContext) {
-            this.syncOp = syncOp;
-            this.parentContext = parentContext;
-        }
-        public Void call() throws SynchronizationException {
-            ObjectSetContext.push(JsonResourceContext.newContext("resource", parentContext));
-            try {
-                syncOp.sync();
-            } finally {
-                ObjectSetContext.pop();
-            }
-            return null;
-        }
-    }
-
-    public void feedSync(int feedSize) {
-        
-        
-        
-        // Each time one completes, feed another.
-        
-        //Collection<Callable<Result>> workItems = ...
-        //        ExecutorService executor = Executors.newSingleThreadExecutor();
-        CompletionService<Void> completionService = new ExecutorCompletionService<Void>(executor);
-
-        // Pre-load configured number of items
-        for (int i = 0; i < feedSize; ++i) {
-          completionService.submit(new SyncRunnable(...));
-        }
-
-        // Each time one completes, feed another.
-        for (int i = 0; i < totalTasks; ++i) {
-            Future<Void> future = completionService.take(); 
-            // Get any exceptions
-            Void result = future.get();
-            completionService.submit(new SyncRunnable(...));
-            // TODO: exception handling
-        }
-    }
-*/
-    
-    
     /**
      * TODO: Description.
      */
