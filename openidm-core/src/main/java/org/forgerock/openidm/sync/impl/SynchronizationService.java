@@ -287,17 +287,28 @@ public class SynchronizationService extends ObjectSetJsonResource
         try {
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
-            if ("reconcile".equals(action)) { // "action": "reconcile"
+            
+            // "reconcile" in schedule config is the legacy equivalent of the action "recon"
+            if ("reconcile".equals(action) 
+                    || ReconciliationService.ReconAction.isReconAction(action)) { 
                 JsonValue mapping = params.get("mapping");
                 ObjectSetContext.push(newFauxContext(mapping));
+                
+                // Legacy support for spelling recon action as reconcile
+                if ("reconcile".equals(action)) {
+                    params.put("_action", ReconciliationService.ReconAction.recon.toString());
+                } else {
+                    params.put("_action", action);
+                }
+                
                 try {
                     reconService.reconcile(mapping, Boolean.TRUE, params);
                 } finally {
                     ObjectSetContext.pop();
                 }
             } else {
-                throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
-                        + "valid action(s) are: 'reconcile'");
+                throw new ExecutionException("Action '" + action + 
+                        "' configured in schedule not supported.");
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
