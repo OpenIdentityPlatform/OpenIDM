@@ -119,14 +119,18 @@ public class RepoAuditLogger implements AuditLogger {
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         getRepoService();
         String queryId = (String)params.get("_queryId");
+        boolean formatted = true;
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
         try {
+            if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
+                formatted = false;
+            }
             Map<String, Object> queryResults = repo.query(fullIdPrefix + fullId, params);
         
             if (type.equals(AuditServiceImpl.TYPE_RECON)) {
                 return AuditServiceImpl.getReconResults((List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT), 
-                        (String)params.get("reconId"));
+                        (String)params.get("reconId"), formatted);
             } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
                 List<Map<String, Object>> entryList = (List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT);
                 formatActivityList(entryList);
