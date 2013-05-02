@@ -82,7 +82,24 @@ public class ReconciliationService extends ObjectSetJsonResource
 
     public static final String PID = "org.forgerock.openidm.recon";
     
-    public enum ReconAction {recon, reconByQuery, reconById};
+    public enum ReconAction {
+        recon, reconByQuery, reconById;
+    
+        /**
+         * Convenience helper that checks if a given string 
+         * is contained in this enum
+         * @param action the stringified action to check
+         * @return true if it is contained in this enum, false if not
+         */
+        public static boolean isReconAction(String action) {
+            try {
+                valueOf(action);
+                return true;
+            } catch (IllegalArgumentException ex) {
+                return false;
+            }
+        }
+    };
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
@@ -227,7 +244,7 @@ public class ReconciliationService extends ObjectSetJsonResource
         
         if (id == null) {
             // operation on collection
-            if ("recon".equalsIgnoreCase(action) || "reconById".equalsIgnoreCase(action)) {
+            if (ReconciliationService.ReconAction.isReconAction(action)) {
                 try {
                     JsonValue mapping = paramsVal.get("mapping").required();
                     logger.debug("Reconciliation action of mapping {}", mapping);
