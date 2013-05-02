@@ -26,11 +26,11 @@ package org.forgerock.openidm.sync.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,25 +38,20 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.osgi.OsgiName;
-import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
@@ -64,11 +59,7 @@ import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.sync.SynchronizationException;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,22 +134,37 @@ public class ReconciliationService extends ObjectSetJsonResource
      */
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
-
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = null;
+        result = new LinkedHashMap<String, Object>();
         
-        if (localId == null && type == null) {
+        if (localId == null) {
             List<Map> runList = new ArrayList<Map>();
             for (ReconciliationContext entry : reconRuns.values()) {
                 runList.add(entry.getSummary());
             }
             result.put("reconciliations", runList);
         } else {
-            // TODO: support
-            throw new ForbiddenException("Operation not supported"); // really "not supported"
-            // NotFoundException
-        }
+            Map<String, Object> summaryMap = null;
+            // First try and get it from in memory
+            for (ReconciliationContext entry : reconRuns.values()) {
+                if (entry.getReconId().equals(localId)) {
+                    return entry.getSummary();
+                }
+            }
+            // Next, if not in memory, try and get it from audit log
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("_queryId", "audit-by-recon-id-type");
+            params.put("reconId", localId);
+            params.put("entryType", "summary");
+            Map<String, Object> queryResult = getRouter().query("audit/recon", params);
+            summaryMap = (Map<String, Object>)queryResult.get("summary");
 
+            if (summaryMap == null) {
+                throw new NotFoundException();
+            }
+            result = (Map<String, Object>)summaryMap.get("messageDetail");
+            result.put("_id", localId);
+        }
         return result;
     }
 
@@ -377,7 +383,9 @@ public class ReconciliationService extends ObjectSetJsonResource
         if (id != null) {
             int lastSlashPos = id.lastIndexOf("/");
             if (lastSlashPos > -1) {
-                localId = id.substring(id.lastIndexOf("/") + 1);
+                localId = id.substring(0, id.lastIndexOf("/"));
+            } else {
+                localId = id;
             }
             logger.trace("Full id: {} Extracted local id: {}", id, localId);
         }
@@ -385,17 +393,12 @@ public class ReconciliationService extends ObjectSetJsonResource
     }
 
     // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectType(String id) {
+    private String getObjectField(String id) {
         String type = null;
         if (id != null) {
-            int lastSlashPos = id.lastIndexOf("/");
-            if (lastSlashPos > -1) {
-                int startPos = 0;
-                // This should not be necessary as relative URI should not start with slash
-                if (id.startsWith("/")) {
-                    startPos = 1;
-                }
-                type = id.substring(startPos, lastSlashPos);
+            int slashPos = id.indexOf("/");
+            if (slashPos > -1) {
+                type = id.substring(slashPos+1, id.length());
                 logger.trace("Full id: {} Extracted type: {}", id, type);
             }
         }
