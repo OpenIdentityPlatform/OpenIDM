@@ -29,7 +29,8 @@
         "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
         "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
         "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
-        "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionid = ${parentActionId}"
+        "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionid = ${parentActionId}",
+        "audit-last-recon-for-all-mappings" : "SELECT max(messageDetail.started) AS last_started,  max(messageDetail.ended) AS last_ended, mapping from audit_recon where entryType='summary' group by mapping"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -193,7 +194,17 @@
                         "indexType" : "unique"
                     }
                 ]
-            }
+            },
+            "audit_recon" : {
+                "index" : [
+                    {
+                        "propertyName" : "reconId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "audit_activity" : {}
         }
     },
     "embeddedServer" : {

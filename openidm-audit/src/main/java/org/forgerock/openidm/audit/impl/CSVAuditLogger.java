@@ -231,9 +231,14 @@ public class CSVAuditLogger implements AuditLogger {
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         String queryId = (String)params.get("_queryId");
+        boolean formatted = true;
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
         try {
+            if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
+                formatted = false;
+            }
+            
             List<Map<String, Object>> reconEntryList = getEntryList(type); 
             if (reconEntryList == null) {
                 throw new NotFoundException(type + " audit log not found");
@@ -241,13 +246,13 @@ public class CSVAuditLogger implements AuditLogger {
 
             String reconId = (String)params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return AuditServiceImpl.getReconResults(reconEntryList, reconId);
+                return AuditServiceImpl.getReconResults(reconEntryList, reconId, formatted);
             } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "mapping", (String)params.get("mappingName"));
+                return getReconQueryResults(reconEntryList, reconId, "mapping", (String)params.get("mappingName"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "situation", (String)params.get("situation"));
+                return getReconQueryResults(reconEntryList, reconId, "situation", (String)params.get("situation"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_TYPE.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "entryType", (String)params.get("entryType"));
+                return getReconQueryResults(reconEntryList, reconId, "entryType", (String)params.get("entryType"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_ACTIVITY_PARENT_ACTION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
                 String actionId = (String)params.get("parentActionId");
                 List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
@@ -266,14 +271,14 @@ public class CSVAuditLogger implements AuditLogger {
         }
     }
     
-    private Map<String, Object> getReconQueryResults(List<Map<String, Object>> list, String reconId, String param, String paramValue) {
+    private Map<String, Object> getReconQueryResults(List<Map<String, Object>> list, String reconId, String param, String paramValue, boolean formatted) {
         List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
         for (Map<String, Object> entry : list) {
             if ((reconId == null || (entry.get("reconId").equals(reconId))) && (param == null || paramValue.equals(entry.get(param)))) {
                 rawEntryList.add(entry);
             }
         } 
-        return AuditServiceImpl.getReconResults(rawEntryList, reconId);
+        return AuditServiceImpl.getReconResults(rawEntryList, reconId, formatted);
     }
     
     /**

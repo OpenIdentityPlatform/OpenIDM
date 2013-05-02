@@ -693,28 +693,32 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         return formattedEntry;
     }
     
-    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, String reconId) {
+    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, String reconId, boolean formatted) {
         Map<String, Object> results = new HashMap<String, Object>();
         List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
-        if (reconId != null) {
-            for (Map<String, Object> entry : entryList) {
-                if (reconId.equals(entry.get("reconId"))) {
-                    if ("start".equals(entry.get("entryType"))) {
-                        results.put("start", AuditServiceImpl.formatReconEntry(entry));
-                    } else if ("summary".equals(entry.get("entryType"))) {
-                        results.put("summary", AuditServiceImpl.formatReconEntry(entry));
-                    } else {
-                        resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+        if (formatted) {
+            if (reconId != null) {
+                for (Map<String, Object> entry : entryList) {
+                    if (reconId.equals(entry.get("reconId"))) {
+                        if ("start".equals(entry.get("entryType"))) {
+                            results.put("start", AuditServiceImpl.formatReconEntry(entry));
+                        } else if ("summary".equals(entry.get("entryType"))) {
+                            results.put("summary", AuditServiceImpl.formatReconEntry(entry));
+                        } else {
+                            resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+                        }
                     }
                 }
+            } else {
+                for (Map<String, Object> entry : entryList) {
+                    resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
+                }
+            }
+            if (resultEntries.size() > 0) {
+                results.put("results", resultEntries);
             }
         } else {
-            for (Map<String, Object> entry : entryList) {
-                resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
-            }
-        }
-        if (resultEntries.size() > 0) {
-            results.put("results", resultEntries);
+            results.put("results", entryList);
         }
         return results;
     }
@@ -734,5 +738,15 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             throw new JsonException("String passed into parsing is not valid JSON", ex);
         }
         return jsonValue;
+    }
+    
+    protected static boolean getBoolValue(Object bool) {
+        if (bool instanceof String) {
+            return Boolean.valueOf((String)bool);
+        } else if (bool instanceof Boolean) {
+            return Boolean.valueOf((Boolean)bool);
+        } else {
+            return false;
+        }
     }
 }
