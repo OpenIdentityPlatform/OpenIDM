@@ -576,16 +576,18 @@ CRYPT:a8b5a01ba48a306f300b62a1541734c7</screen>
       </listitem>
       <listitem>
           <para>Paste the obfuscated password into the
-          <filename>conf/boot/boot.properties</filename> file:</para>
+          <filename>conf/boot/boot.properties</filename> file. Comment out
+          the regular keystore password and remove the comment tag from the
+          line that contains the obfuscated password:</para>
 
           <screen>$ more conf/boot/boot.properties
 ...
    # Keystore password, adjust to match your keystore and protect this file
-   openidm.keystore.password=changeit
+   # openidm.keystore.password=changeit
    openidm.truststore.password=changeit
 
    # optionally use the cli encrypt to obfuscate the password and set
-   #openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
+     openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
    #openidm.keystore.password=CRYPT:
 ...</screen>
       </listitem>
