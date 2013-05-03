@@ -239,10 +239,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             try {
                 auditLogger.create(id, obj);
             } catch (ObjectSetException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
+                logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger.toString(), ex});
                 throw ex;
             } catch (RuntimeException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
+                logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger.toString(), ex});
                 throw ex;
             }
         }
