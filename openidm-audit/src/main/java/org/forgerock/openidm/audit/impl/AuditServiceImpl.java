@@ -715,17 +715,17 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 }
             }
             if (resultEntries.size() > 0) {
-                results.put("results", resultEntries);
+                results.put("result", resultEntries);
             }
         } else {
-            results.put("results", entryList);
+            results.put("result", entryList);
         }
         return results;
     }
 
     public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
         Map<String, Object> results = new HashMap<String, Object>();
-        results.put("results", entryList);
+        results.put("result", entryList);
         return results;
     }
     
