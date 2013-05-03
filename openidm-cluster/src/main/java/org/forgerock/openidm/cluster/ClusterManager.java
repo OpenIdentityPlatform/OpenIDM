@@ -122,6 +122,8 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
     
     private boolean failed = false;
     
+    private boolean enabled = false;
+    
     /** Internal object set router service. */
     @Reference(
         name = "ref_ClusterManager_RepositoryService",
@@ -150,6 +152,7 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         instanceId = clusterConfig.getInstanceId();
         
         if (clusterConfig.isEnabled()) {
+            enabled = true;
             clusterManagerThread = new ClusterManagerThread(
                     clusterConfig.getInstanceCheckInInterval(),
                     clusterConfig.getInstanceCheckInOffset());
@@ -170,6 +173,16 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
                 logger.warn("Failed to update instance shutdown timestamp", e);
             }
         }    
+    }
+    
+    @Override
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

@@ -19,7 +19,7 @@ public class ClusterConfig {
     private final static String INSTANCE_CHECK_IN_OFFSET = "instanceCheckInOffset";
     private final static String ENABLED = "enabled";
     
-    private String instanceId = null;
+    private String instanceId = "instance0";
     private long instanceTimeout = 30000;
     private long instanceRecoveryTimeout = 30000;
     private long instanceCheckInInterval = 5000;
