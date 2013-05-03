@@ -48,8 +48,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.BadRequestException;
@@ -156,6 +156,9 @@ public class SchedulerService extends ObjectSetJsonResource {
 
     @Reference
     RepositoryService repo;
+    
+    @Reference
+    ClusterManagementService clusterManager;
 
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {
@@ -659,7 +662,7 @@ public class SchedulerService extends ObjectSetJsonResource {
     public void initPersistentScheduler(ComponentContext compContext) throws SchedulerException {
         boolean alreadyConfigured = (schedulerConfig != null);
         JsonValue configValue = enhancedConfig.getConfigurationAsJson(compContext);
-        schedulerConfig = new SchedulerConfig(configValue);
+        schedulerConfig = new SchedulerConfig(configValue, clusterManager.getInstanceId());
         if (alreadyConfigured) {
             // Close current scheduler
             if (persistentScheduler != null && persistentScheduler.isStarted()) {

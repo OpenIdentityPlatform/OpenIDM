@@ -51,7 +51,6 @@ public class SchedulerConfig {
     private final static String THREAD_COUNT = "threadCount";
     
     // Scheduler objects
-    private final static String INSTANCE_ID = "instanceId";
     private final static String EXECUTE_PERSISTENT_SCHEDULES = "executePersistentSchedules";
     
     private String threadCount = null;
@@ -60,7 +59,7 @@ public class SchedulerConfig {
     
     private Properties props;
     
-    public SchedulerConfig(JsonValue config) {
+    public SchedulerConfig(JsonValue config, String instanceId) {
         if (config != null && !config.isNull()) {
             setThreadpoolConfig(config.get(THREADPOOL));
             setSchedulerConfig(config.get(SCHEDULER));
@@ -69,6 +68,7 @@ public class SchedulerConfig {
             logger.debug("Config is null, defaults will be used");
             props = new Properties();
         }
+        setInstanceId(instanceId);
     }
 
     private void setThreadpoolConfig(JsonValue config) {
@@ -82,11 +82,7 @@ public class SchedulerConfig {
 
     private void setSchedulerConfig(JsonValue config) {
         if (!config.isNull()) {
-            JsonValue value = config.get(INSTANCE_ID);
-            if (!value.isNull()) {
-                instanceId = value.asString();
-            }
-            value = config.get(EXECUTE_PERSISTENT_SCHEDULES);
+            JsonValue value = config.get(EXECUTE_PERSISTENT_SCHEDULES);
             if (!value.isNull()) {
                 if (value.isString()) {
                     executePersistentSchedules = Boolean.parseBoolean(value.asString());

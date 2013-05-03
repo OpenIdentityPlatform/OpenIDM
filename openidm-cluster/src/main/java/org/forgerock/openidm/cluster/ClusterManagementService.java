@@ -63,4 +63,14 @@ public interface ClusterManagementService {
      * otherwise.
      */
     public boolean isStarted();
+    
+    /**
+     * Returns true if clustering is enabled, false otherwise.
+     */
+    public boolean isEnabled();
+    
+    /**
+     * Returns the node's instance ID
+     */
+    public String getInstanceId();
 }
