@@ -118,8 +118,27 @@
  <section xml:id="limitations">
   <title>Limitations</title>
 
-  <para>A conditional GET request, with the <literal>If-None-Match</literal> 
-  request header, is not currently supported.</para>
+  <itemizedlist>
+      <listitem>
+          <para>A conditional GET request, with the <literal>If-None-Match</literal>
+              request header, is not currently supported.</para>
+      </listitem>
+      <listitem>
+          <para>The keystore password, the truststore password and the secret
+          key passwords must all be set to the same value. If you use different
+          passwords, OpenIDM is unable to read the required keys and certificates.</para>
+      </listitem>
+      <listitem>
+          <para>Connectors generally use the global JVM settings for keystore
+          and truststore, rather than the settings that are specified in the
+          <filename>boot.properties</filename> file. You can work around this
+          by specifying a path to the keystore or truststore in the
+          <filename>conf/system.properties</filename> file. For example:</para>
+          <screen># Set the truststore
+javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
+      </listitem>
+  </itemizedlist>
+
 
  </section>
 
