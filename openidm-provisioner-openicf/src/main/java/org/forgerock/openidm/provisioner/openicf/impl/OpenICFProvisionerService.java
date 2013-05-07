@@ -565,7 +565,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
                 attributeSet = new HashSet<Attribute>();
                 for (Attribute attribute : connectorObject.getAttributes()) {
-                    if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
+                    if (attribute.is(Uid.NAME)) {
                         continue;
                     }
                     attributeSet.add(attribute);
