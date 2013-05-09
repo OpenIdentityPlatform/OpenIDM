@@ -102,5 +102,9 @@ public class JsonValueTypeTest {
 
         public void setCachedValue(Object deserializedObject) {
         }
+
+        @Override
+        public void setByteArrayValue(byte[] bytes) {
+        }
     }
 }
