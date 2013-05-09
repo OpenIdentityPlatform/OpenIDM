@@ -24,23 +24,43 @@
 
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.delegate.VariableScope;
 import org.activiti.engine.impl.bpmn.data.ItemInstance;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.el.VariableScopeElResolver;
 import org.activiti.engine.impl.javax.el.*;
+import org.osgi.service.component.ComponentConstants;
 
 /**
  * Custom ExpressionManager for resolving 'openidm' variable in expressions
  * @author orsolyamebold
  */
 public class OpenIDMExpressionManager extends ExpressionManager {
+    private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
+    
+    public void bindService(JavaDelegate delegate, Map props) {
+        String name = (String) props.get(ComponentConstants.COMPONENT_NAME);
+
+        if (name != null) {
+            delegateMap.put(name, delegate);
+        }
+    }
+
+    public void unbindService(JavaDelegate delegate, Map props) {
+        String name = (String) props.get(ComponentConstants.COMPONENT_NAME);
+        if (delegateMap.containsKey(name)) {
+            delegateMap.remove(name);
+        }
+    }
 
     @Override
     protected ELResolver createElResolver(VariableScope variableScope) {
         CompositeELResolver compositeElResolver = new CompositeELResolver();
         compositeElResolver.add(new VariableScopeElResolver(variableScope));
-        compositeElResolver.add(new OpenIDMELResolver());
+        compositeElResolver.add(new OpenIDMELResolver(delegateMap));
         compositeElResolver.add(new ArrayELResolver());
         compositeElResolver.add(new ListELResolver());
         compositeElResolver.add(new MapELResolver());
