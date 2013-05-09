@@ -71,18 +71,13 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-provisioner</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
