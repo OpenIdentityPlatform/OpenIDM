@@ -58,7 +58,7 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <version>5.10</version>
+            <version>5.12</version>
             <exclusions>
                 <exclusion>
                     <artifactId>activation</artifactId>

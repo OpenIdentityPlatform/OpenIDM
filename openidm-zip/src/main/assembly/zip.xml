@@ -391,7 +391,8 @@
             <scope>runtime</scope>
             <excludes>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
-                <exclude>org.osgi:*</exclude>
+                <exclude>org.osgi:org.osgi.core</exclude>
+                <exclude>org.osgi:org.osgi.compendium</exclude>
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>

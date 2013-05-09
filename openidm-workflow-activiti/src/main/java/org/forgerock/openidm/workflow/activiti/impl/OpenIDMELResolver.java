@@ -26,7 +26,6 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
-import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +51,10 @@ public class OpenIDMELResolver extends ELResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
     private ObjectSet router;
+    
+    public OpenIDMELResolver(Map<String, JavaDelegate> delegateMap) {
+        this.delegateMap = delegateMap;
+    }
 
     public Object getValue(ELContext context, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
@@ -73,20 +76,6 @@ public class OpenIDMELResolver extends ELResolver {
         }
 
         return null;
-    }
-
-    public void bindService(JavaDelegate delegate, Map props) {
-        String name = (String) props.get(ComponentConstants.COMPONENT_ID);
-        delegateMap.put(name, delegate);
-        LOGGER.info("added Activiti service to delegate cache " + name);
-    }
-
-    public void unbindService(JavaDelegate delegate, Map props) {
-        String name = (String) props.get(ComponentConstants.COMPONENT_ID);
-        if (delegateMap.containsKey(name)) {
-            delegateMap.remove(name);
-        }
-        LOGGER.info("removed Activiti service from delegate cache " + name);
     }
 
     public boolean isReadOnly(ELContext context, Object base, Object property) {
