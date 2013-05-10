@@ -40,6 +40,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -49,18 +50,21 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.forgerock.openidm.util.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handling of tables in a generic (not object specific) layout
+ *
  * @author aegloff
+ * @author brmiller
  */
 public class MappedTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(MappedTableHandler.class);
 
     SQLExceptionHandler sqlExceptionHandler;
-    
+
     final String tableName;
     String dbSchemaName;
 
@@ -80,14 +84,22 @@ public class MappedTableHandler implements TableHandler {
     String updateQueryStr;
     String deleteQueryStr;
     
-    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler) {
+    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonValue queriesConfig,
+                              SQLExceptionHandler sqlExceptionHandler, Accessor<CryptoService> cryptoServiceAccessor)
+            throws InternalServerErrorException {
+
+        // TODO Replace this with a "guarantee" somewhere when/if the provision of this 
+        // accessor becomes more automatic
+        if (cryptoServiceAccessor == null)
+            throw new InternalServerErrorException("No CryptoServiceAccessor found!");
+
         this.tableName = tableName;
         this.dbSchemaName = dbSchemaName;
         // Maintain a stable ordering
         this.rawMappingConfig = new LinkedHashMap<String, String>();
         this.rawMappingConfig.putAll(mapping);
-        
-        explicitMapping = new Mapping(tableName, new JsonValue(rawMappingConfig));
+
+        explicitMapping = new Mapping(tableName, new JsonValue(rawMappingConfig), cryptoServiceAccessor);
         logger.debug("Explicit mapping: {}", explicitMapping);
         
         if (sqlExceptionHandler == null) {
@@ -95,7 +107,7 @@ public class MappedTableHandler implements TableHandler {
         } else {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
-        
+
         queries = new TableQueries(new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, null);
         
@@ -138,7 +150,7 @@ public class MappedTableHandler implements TableHandler {
      */
     @Override
     public Map<String, Object> read(String fullId, String type, String localId, Connection connection) 
-                    throws NotFoundException, SQLException, IOException {
+                    throws NotFoundException, SQLException, IOException, InternalServerErrorException {
         JsonValue result = null;
         PreparedStatement readStatement = null;
         ResultSet rs = null;
@@ -263,7 +275,7 @@ public class MappedTableHandler implements TableHandler {
      * @return the next column position if further populating is desired
      */
     int populatePrepStatementColumns(PreparedStatement prepStatement, JsonValue objVal, List<JsonPointer> tokenPointers) 
-            throws SQLException{
+            throws IOException, SQLException {
         int colPos = 1;
         for (JsonPointer propPointer : tokenPointers) {
             // TODO: support explicit column types/conversion specified in column mapping
@@ -278,7 +290,7 @@ public class MappedTableHandler implements TableHandler {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Value for col {} from {} is getting Stringified from type {} to store in a STRING column as value: {}", new Object[] {colPos, propPointer, rawValue.getClass(), rawValue});
                 }
-                propValue = rawValue.getObject().toString(); 
+                propValue = mapper.writeValueAsString(rawValue.getObject());
             }
 
             prepStatement.setString(colPos, propValue);
@@ -434,8 +446,8 @@ class ExplicitQueryResultMapper implements QueryResultMapper {
         this.explicitMapping = explicitMapping;
     }
     
-    public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries) 
-            throws SQLException {
+    public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries)
+            throws SQLException, InternalServerErrorException {
         
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         Set names = Mapping.getColumnNames(rs);
@@ -455,11 +467,14 @@ class Mapping {
     final static Logger logger = LoggerFactory.getLogger(Mapping.class);
 
     String tableName;
+    Accessor<CryptoService> cryptoServiceAccessor;
     List<ColumnMapping> columnMappings = new ArrayList();
-    ColumnMapping revMapping; // Quick access to mapping for MVCC revision 
-    
-    public Mapping(String tableName, JsonValue mappingConfig) {
+    ColumnMapping revMapping; // Quick access to mapping for MVCC revision
+    ObjectMapper mapper = new ObjectMapper();
+
+    public Mapping(String tableName, JsonValue mappingConfig, Accessor<CryptoService> cryptoServiceAccessor) {
         this.tableName = tableName;
+        this.cryptoServiceAccessor = cryptoServiceAccessor;
         for (Map.Entry<String, Object> entry : mappingConfig.asMap().entrySet()) {
             String key = entry.getKey();
             JsonValue value = mappingConfig.get(key);
@@ -471,7 +486,8 @@ class Mapping {
         }
     }
     
-    public JsonValue mapToJsonValue(ResultSet rs, Set columnNames) throws SQLException {
+    public JsonValue mapToJsonValue(ResultSet rs, Set columnNames)
+        throws SQLException, InternalServerErrorException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
         
         for (ColumnMapping entry: columnMappings) {
@@ -479,6 +495,16 @@ class Mapping {
             if (columnNames.contains(entry.dbColName)) {
                 if ("STRING".equals(entry.dbColType)) { 
                     value = rs.getString(entry.dbColName);
+                    if (cryptoServiceAccessor != null || cryptoServiceAccessor.access() != null) {
+                        throw new InternalServerErrorException("CryptoService unavailable");
+                    }
+                    if (cryptoServiceAccessor.access().isEncrypted((String) value)) {
+                        try {
+                            value = new JsonValue((Map) mapper.readValue((String) value, Map.class));
+                        } catch (IOException e) {
+                            throw new InternalServerErrorException("Unable to map encrypted value for "+entry.dbColName, e);
+                        }
+                    }
                 } else {
                     // TODO: support for more complex type conversions
                     value = rs.getObject(entry.dbColName);
