@@ -61,6 +61,13 @@ public class IdTest {
         Assert.assertEquals(id.getSystemName(), "Active Directory");
         Assert.assertEquals(id.getObjectType(), "User type");
         Assert.assertEquals(id.getLocalId(), "<GUID=500ac9a4c732df45bde6e5dbc784de04>");
+
+        idString = "system/custom/sobjects/User/describe";
+
+        id = new Id(idString);
+        Assert.assertEquals(id.getSystemName(), "custom");
+        Assert.assertEquals(id.getObjectType(), "sobjects");
+        Assert.assertEquals(id.getLocalId(), "User");
     }
 
     @Test
