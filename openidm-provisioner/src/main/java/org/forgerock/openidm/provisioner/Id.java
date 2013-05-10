@@ -25,11 +25,6 @@
  */
 package org.forgerock.openidm.provisioner;
 
-import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.resource.JsonResourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
@@ -37,15 +32,20 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.resource.JsonResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Id is a util class to work with the {@code id} property in the {@link org.forgerock.json.resource.JsonResource}
- * interface.
+ * Id is a util class to work with the {@code id} property in the
+ * {@link org.forgerock.json.resource.JsonResource} interface.
  * <p/>
- * A valid ID MAY start with {@code system} and followed by the name of the end system, type of the
- * object. The last token is always the local identifier of the object instance.
+ * A valid ID MAY start with {@code system} and followed by the name of the end
+ * system, type of the object. The third token may be the local identifier of
+ * the object instance.
  * <p/>
- * Valid identifiers:
- * {@code
+ * Valid identifiers: {@code
  * system/LDAP/account
  * LDAP/account
  * system/LDAP/account/
@@ -54,15 +54,16 @@ import java.net.URLEncoder;
  * LDAP/account/ead738c0-7641-11e0-a1f0-0800200c9a66
  * system/Another+OpenIDM/account/http%3a%2f%2fopenidm%2fopenidm%2fmanaged%2fuser%2fead738c0-7641-11e0-a1f0-0800200c9a66
  * Another+OpenIDM/account/http%3a%2f%2fopenidm%2fopenidm%2fmanaged%2fuser%2fead738c0-7641-11e0-a1f0-0800200c9a66
- * }
- * Invalid identifiers:
- * {@code
+ * } Invalid identifiers: {@code
  * /system/LDAP
  * system/account
  * }
  *
  * @author $author$
  * @version $Revision$ $Date$
+ * @deprecated
+ * @see <a
+ *      href="https://svn.forgerock.org/openidm/branches/2.1.x-CREST/openidm-util/src/main/java/org/forgerock/openidm/util/ResourceUtil.java">ResourceUtil.URLParser</a>
  */
 public class Id {
 
@@ -131,7 +132,7 @@ public class Id {
         }
         try {
             String[] segments = relativeId.split("\\/");
-            if (2 <= segments.length && segments.length <= 3) {
+            if (2 <= segments.length) {
                 switch (segments.length > 2 ? 3 : segments.length) {
                     case 3:
                         localId = URLDecoder.decode(segments[2], CHARACTER_ENCODING_UTF_8);
@@ -167,8 +168,11 @@ public class Id {
 
     public Id expectObjectId() throws JsonResourceException {
         if (StringUtils.isBlank(localId)) {
-            JsonResourceException ex = new JsonResourceException(400, "This id instance does not qualified to identify a single unique object");
-            TRACE.error("Unqualified id: systemName={}, objectType={}, localId={}", new Object[]{systemName, objectType, localId}, ex);
+            JsonResourceException ex =
+                    new JsonResourceException(400,
+                            "This id instance does not qualified to identify a single unique object");
+            TRACE.error("Unqualified id: systemName={}, objectType={}, localId={}", new Object[] {
+                systemName, objectType, localId }, ex);
             throw ex;
         }
         return this;
@@ -208,9 +212,9 @@ public class Id {
         }
     }
 
-
     private URI getObjectSetId() throws UnsupportedEncodingException {
-        return baseURI.resolve(URLEncoder.encode(systemName, CHARACTER_ENCODING_UTF_8) + "/").resolve(URLEncoder.encode(objectType, CHARACTER_ENCODING_UTF_8) + "/");
+        return baseURI.resolve(URLEncoder.encode(systemName, CHARACTER_ENCODING_UTF_8) + "/")
+                .resolve(URLEncoder.encode(objectType, CHARACTER_ENCODING_UTF_8) + "/");
     }
 
     @Override
@@ -228,8 +232,10 @@ public class Id {
      *
      * @param uid
      * @return
-     * @throws IllegalArgumentException if the {@code uid} is blank
-     * @throws NullPointerException     if the {@code uid} is null
+     * @throws IllegalArgumentException
+     *             if the {@code uid} is blank
+     * @throws NullPointerException
+     *             if the {@code uid} is null
      */
     public static String escapeUid(String uid) {
         if (StringUtils.isBlank(uid)) {
@@ -248,8 +254,10 @@ public class Id {
      *
      * @param uid
      * @return
-     * @throws IllegalArgumentException if the {@code uid} is blank
-     * @throws NullPointerException     if the {@code uid} is null
+     * @throws IllegalArgumentException
+     *             if the {@code uid} is blank
+     * @throws NullPointerException
+     *             if the {@code uid} is null
      */
     public static String unescapeUid(String uid) {
         if (StringUtils.isBlank(uid)) {
