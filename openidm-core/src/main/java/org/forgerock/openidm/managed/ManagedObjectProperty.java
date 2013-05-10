@@ -181,17 +181,24 @@ class ManagedObjectProperty {
     void onStore(JsonValue value) throws InternalServerErrorException {
         execScript("onStore", onStore, value);
         if (encryptor != null && value.isDefined(name)) {
-            try {
-                value.put(name, new JsonCrypto(encryptor.getType(),
-                    encryptor.encrypt(value.get(name))).toJsonValue().getObject());
-            } catch (JsonCryptoException jce) {
-                String msg = name + " property encryption exception";
-                LOGGER.debug(msg, jce);
-                throw new InternalServerErrorException(msg, jce);
-            } catch (JsonException je) {
-                String msg = name + " property transformation exception";
-                LOGGER.debug(msg, je);
-                throw new InternalServerErrorException(msg, je);
+            if (service.getCryptoService() == null) {
+                String msg = name + "property encryption service not available";
+                LOGGER.debug(msg);
+                throw new InternalServerErrorException(msg);
+            }
+            if (!service.getCryptoService().isEncrypted(value)) {
+                try {
+                    value.put(name, new JsonCrypto(encryptor.getType(),
+                        encryptor.encrypt(value.get(name))).toJsonValue().getObject());
+                } catch (JsonCryptoException jce) {
+                    String msg = name + " property encryption exception";
+                    LOGGER.debug(msg, jce);
+                    throw new InternalServerErrorException(msg, jce);
+                } catch (JsonException je) {
+                    String msg = name + " property transformation exception";
+                    LOGGER.debug(msg, je);
+                    throw new InternalServerErrorException(msg, je);
+                }
             }
         }
     }

@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -46,6 +45,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
@@ -54,6 +54,7 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -72,6 +73,7 @@ import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
+import org.forgerock.openidm.util.Accessor;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -82,6 +84,7 @@ import org.slf4j.LoggerFactory;
  * Repository service implementation using JDBC
  *
  * @author aegloff
+ * @author brmiller
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service(value = {RepositoryService.class, JsonResource.class})
@@ -96,6 +99,10 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
+
+    /** CryptoService for detecting whether a value is encrypted */
+    @Reference
+    protected CryptoService cryptoService;
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -809,8 +816,10 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
         } catch (NamingException ex) {
             throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
+        } catch (InternalServerErrorException ex) {
+            throw new InvalidException("Could not initialize mapped table handler, can not start JDBC repository.", ex);
         }
-
+        
         Connection testConn = null;
         try {
             // Check if we can get a connection
@@ -889,7 +898,15 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
     }
 
     MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig, String table,
-            Map objectToColumn, String dbSchemaName, JsonValue explicitQueries, int maxBatchSize) {
+            Map objectToColumn, String dbSchemaName, JsonValue explicitQueries, int maxBatchSize)
+        throws InternalServerErrorException {
+
+        final Accessor<CryptoService> cryptoServiceAccessor =
+                new Accessor<CryptoService>() {
+                    public CryptoService access() {
+                        return cryptoService;
+                    }
+                };
 
         MappedTableHandler handler = null;
 
@@ -901,7 +918,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new DB2SQLExceptionHandler());
+                        new DB2SQLExceptionHandler(),
+                        cryptoServiceAccessor);
                 break;
             case ORACLE:
                 handler = new MappedTableHandler(
@@ -909,7 +927,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new DefaultSQLExceptionHandler());
+                        new DefaultSQLExceptionHandler(),
+                        cryptoServiceAccessor);
                 break;
             case POSTGRESQL:
                 handler = new MappedTableHandler(
@@ -917,7 +936,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new DefaultSQLExceptionHandler());
+                        new DefaultSQLExceptionHandler(),
+                        cryptoServiceAccessor);
                 break;
             case MYSQL:
                 handler = new MappedTableHandler(
@@ -925,7 +945,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new MySQLExceptionHandler());
+                        new MySQLExceptionHandler(),
+                        cryptoServiceAccessor);
                 break;
             case SQLSERVER:
                 handler = new MSSQLMappedTableHandler(
@@ -933,7 +954,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new DefaultSQLExceptionHandler());
+                        new DefaultSQLExceptionHandler(),
+                        cryptoServiceAccessor);
                 break;
             default:
                 handler = new MappedTableHandler(
@@ -941,7 +963,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         objectToColumn,
                         dbSchemaName,
                         explicitQueries,
-                        new DefaultSQLExceptionHandler());
+                        new DefaultSQLExceptionHandler(),
+                        cryptoServiceAccessor);
         }
         return handler;
     }

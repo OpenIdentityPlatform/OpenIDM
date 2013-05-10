@@ -29,6 +29,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.openidm.objset.ObjectSetException;
+
+
 /**
  * Handles the conversion of query resultsets into Object set result
  * 
@@ -36,5 +39,5 @@ import java.util.Map;
  */
 public interface QueryResultMapper {
     List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params, TableQueries tableQueries) 
-            throws SQLException, IOException;
+            throws SQLException, IOException, ObjectSetException;
 }
