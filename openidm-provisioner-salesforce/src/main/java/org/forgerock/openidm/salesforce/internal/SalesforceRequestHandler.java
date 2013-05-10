@@ -25,7 +25,6 @@
 package org.forgerock.openidm.salesforce.internal;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,9 +41,6 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.salesforce.internal.async.AbstractAsyncResourceProvider;
 import org.forgerock.openidm.salesforce.internal.async.AsyncBatchResourceProvider;
 import org.forgerock.openidm.salesforce.internal.async.AsyncBatchResultResourceProvider;
@@ -52,7 +48,6 @@ import org.forgerock.openidm.salesforce.internal.async.AsyncJobResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.GenericResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.QueryResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.SObjectsResourceProvider;
-import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -65,11 +60,12 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = SalesforceRequestHandler.PID, immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
-@Service(value = { ProvisionerService.class })
+@Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Salesforce sample") })
-public class SalesforceRequestHandler implements ProvisionerService {
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Salesforce sample"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "salesforce") })
+public class SalesforceRequestHandler implements JsonResource {
 
     public static final String PID = "org.forgerock.openidm.salesforce";
 
@@ -140,9 +136,7 @@ public class SalesforceRequestHandler implements ProvisionerService {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         String id = request.get("id").required().asString();
         if (id.endsWith("/")) {
-            id = id.substring(11, id.length() - 1);
-        } else {
-            id = id.substring(11);
+            id = id.substring(0, id.length() - 1);
         }
         for (Map.Entry<Pattern, JsonResource> entry : routes.entrySet()) {
             Matcher matcher = entry.getKey().matcher(id);
@@ -156,60 +150,5 @@ public class SalesforceRequestHandler implements ProvisionerService {
             }
         }
         throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Route not found: " + id);
-    }
-
-    private static final String ID = "salesforce";
-
-    @Override
-    public SystemIdentifier getSystemIdentifier() {
-        return new SystemIdentifier() {
-            @Override
-            public boolean is(SystemIdentifier other) {
-                return false;
-            }
-
-            @Override
-            public boolean is(Id id) {
-                return ID.equals(id.getSystemName());
-            }
-        };
-    }
-
-    @Override
-    public Map<String, Object> getStatus() {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        try {
-            result.put("name", ID);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(2));
-            request.put("id", "salesforce/connect/organization");
-            request.put("method", "read");
-            handle(request);
-            result.put("ok", true);
-        } catch (Throwable e) {
-            result.put("error", e.getMessage());
-            result.put("ok", false);
-        }
-        return result;
-    }
-
-    @Override
-    public Map<String, Object> testConfig(JsonValue config) {
-        Map<String, Object> jv = new LinkedHashMap<String, Object>();
-        jv.put("name", ID);
-        try {
-            parseConfiguration(config.get("configurationProperties")).validate();
-            jv.put("ok", true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            jv.put("ok", false);
-            jv.put("error", e.getMessage());
-        }
-        return jv;
-    }
-
-    @Override
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage,
-            SynchronizationListener synchronizationListener) throws JsonResourceException {
-        return previousStage;
     }
 }
