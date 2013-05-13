@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,5 +28,5 @@ package org.forgerock.openidm.repo.jdbc;
  * @version $Revision$ $Date$
  */
 public enum DatabaseType {
-    SQLSERVER, MYSQL, POSTGRESQL, ORACLE, DB2, ANSI_SQL99, ODBC;
+    SQLSERVER, MYSQL, POSTGRESQL, ORACLE, DB2, H2, ANSI_SQL99, ODBC;
 }

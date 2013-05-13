@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -880,6 +880,14 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                 break;
             case SQLSERVER:
                 handler = new MSSQLTableHandler(
+                        tableConfig,
+                        dbSchemaName,
+                        queries,
+                        maxBatchSize,
+                        new DefaultSQLExceptionHandler());
+                break;
+            case H2:
+                handler = new H2TableHandler(
                         tableConfig,
                         dbSchemaName,
                         queries,
