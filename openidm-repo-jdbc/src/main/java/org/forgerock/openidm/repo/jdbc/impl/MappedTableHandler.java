@@ -495,7 +495,7 @@ class Mapping {
             if (columnNames.contains(entry.dbColName)) {
                 if ("STRING".equals(entry.dbColType)) { 
                     value = rs.getString(entry.dbColName);
-                    if (cryptoServiceAccessor != null || cryptoServiceAccessor.access() != null) {
+                    if (cryptoServiceAccessor == null || cryptoServiceAccessor.access() == null) {
                         throw new InternalServerErrorException("CryptoService unavailable");
                     }
                     if (cryptoServiceAccessor.access().isEncrypted((String) value)) {
