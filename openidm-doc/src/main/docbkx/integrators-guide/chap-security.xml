@@ -247,7 +247,7 @@ SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
 
   <para>OpenIDM also supports encryption of data stored in the repository,
   using a symmetric key. This protects against some attacks on the data
-  store.</para>
+  store. Explicit table mapping is supported for encrypted string values.</para>
 
   <para>OpenIDM automatically encrypts sensitive data in configuration files,
   such as passwords. OpenIDM replaces clear text values when the system first
