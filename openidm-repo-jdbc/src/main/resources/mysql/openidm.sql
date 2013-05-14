@@ -2,7 +2,7 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
-CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
+CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin ;
 USE `openidm` ;
 
 -- -----------------------------------------------------
@@ -162,6 +162,10 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `activity` VARCHAR(24) NULL ,
   `status` VARCHAR(7) NULL ,
   `message` TEXT NULL ,
+  `actionid` VARCHAR(511) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
@@ -217,6 +221,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
 -- Table `openidm`.`schedulerobjects`
 -- -----------------------------------------------------
@@ -269,6 +274,44 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `requesterId` VARCHAR(38) NULL ,
   `notificationSubtype` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`clusterobjects`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjects` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `idx-clusterobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  INDEX `fk_clusterobjects_objectypes` (`objecttypes_id` ASC) ,
+  CONSTRAINT `fk_clusterobjects_objectypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`clusterobjectproperties`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
+  `clusterobjects_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(32) NULL ,
+  `propvalue` TEXT NULL ,
+  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `proptype`(23) ASC) ,
+  INDEX `fk_clusterobjectproperties_clusterobjects` (`clusterobjects_id` ASC) ,
+  CONSTRAINT `fk_clusterobjectproperties_clusterobjects`
+    FOREIGN KEY (`clusterobjects_id` )
+    REFERENCES `openidm`.`clusterobjects` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
