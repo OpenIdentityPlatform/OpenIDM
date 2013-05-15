@@ -116,7 +116,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     List<JsonPointer> watchFieldFilters;
     List<JsonPointer> passwordFieldFilters;
 
-    AuditLogger defaultLogger = null;
+    AuditLogger queryLogger = null;
     List<AuditLogger> auditLoggers;
     JsonValue config; // Existing active configuration
     DateUtil dateUtil;
@@ -164,7 +164,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         logger.debug("Audit read called for {}", fullId);
-        AuditLogger auditLogger = getDefaultAuditLogger();
+        AuditLogger auditLogger = getQueryAuditLogger();
         return auditLogger.read(fullId);
     }
 
@@ -402,7 +402,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         logger.debug("Audit query called for {} with {}", fullId, params);
-        AuditLogger auditLogger = getDefaultAuditLogger();
+        AuditLogger auditLogger = getQueryAuditLogger();
         return auditLogger.query(fullId, params);
     }
 
@@ -415,9 +415,15 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
     
     
-    public AuditLogger getDefaultAuditLogger() throws ObjectSetException {
-        if (defaultLogger != null) {
-            return defaultLogger;
+    /**
+     * Returns the logger to use for reads/queries.
+     *
+     * @return an AuditLogger to use for queries.
+     * @throws ObjectSetException on failure to find an appropriate logger.
+     */
+    public AuditLogger getQueryAuditLogger() throws ObjectSetException {
+        if (queryLogger != null) {
+            return queryLogger;
         } else if (auditLoggers.size() > 0) {
             return auditLoggers.get(0);
         } else {
@@ -601,10 +607,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 auditLogger.setConfig(entry, compContext.getBundleContext());
                 logger.info("Audit configured to log to {}", logType);
                 configuredLoggers.add(auditLogger);
-                if (entry.containsKey("default")) {
-                    if ((Boolean)entry.get("default")) {
-                        logger.info("Default audit logger set to " + logType);
-                        defaultLogger = auditLogger;
+                if (entry.containsKey("useForQueries")) {
+                    if ((Boolean)entry.get("useForQueries")) {
+                        logger.info("Audit logger used for queries set to " + logType);
+                        queryLogger = auditLogger;
                     }
                 }
             }
