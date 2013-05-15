@@ -70,6 +70,14 @@
             <artifactId>jul-to-slf4j</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
+
+        <!-- As of Activiti 5.12, it still depends on version 2.4 of commons-lang. Since a newer version (2.6) exists and we use it in other optional modules that get plugged in, force it to include and package the newer version instead -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
