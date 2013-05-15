@@ -23,7 +23,7 @@
         },
         {
             "logType" : "repository",
-            "default" : true
+            "useForQueries" : true
         }
     ],
     "exceptionFormatter" : {
