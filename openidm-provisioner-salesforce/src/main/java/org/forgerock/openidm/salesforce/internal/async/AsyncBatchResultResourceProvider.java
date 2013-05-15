@@ -44,9 +44,9 @@ import com.sforce.async.Result;
 /**
  * An AsyncBatchResultResourceProvider handles all the requests for
  * {code}async/job/{jobId}/batch/{batchId}/result/{id} {code}
- * 
+ *
  * {code}(\Qasync/job/\E([^/]+)\Q/batch/\E([^/]+)\Q/result/\E).*{code}
- * 
+ *
  * @author Laszlo Hordos
  */
 public class AsyncBatchResultResourceProvider extends AbstractAsyncResourceProvider {
@@ -133,6 +133,7 @@ public class AsyncBatchResultResourceProvider extends AbstractAsyncResourceProvi
         final ServerContext context = ServerContext.get();
         if (context.getMatcher().groupCount() == 3) {
             final ResultHandler handler = new ResultHandler();
+            handler.handleResource(null);
             String queryId = request.get("params").get("_queryId").required().asString();
             queryCollection(context, queryId, handler);
             return handler.getResult();

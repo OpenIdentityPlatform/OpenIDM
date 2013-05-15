@@ -33,7 +33,7 @@ import org.forgerock.json.resource.JsonResourceException;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public final class ResultHandler {
@@ -43,7 +43,7 @@ public final class ResultHandler {
 
     /**
      * Invoked when the asynchronous request has failed.
-     * 
+     *
      * @param error
      *            The resource exception indicating why the asynchronous request
      *            has failed.
@@ -54,7 +54,7 @@ public final class ResultHandler {
 
     /**
      * Invoked when the asynchronous request has completed successfully.
-     * 
+     *
      * @param result
      *            The result of the asynchronous request.
      */
@@ -71,7 +71,7 @@ public final class ResultHandler {
         } else {
             results = result.get("result").required().asList();
         }
-        return results.add(resource.getObject());
+        return null != resource ? results.add(resource.getObject()) : false;
     }
 
     public JsonValue getResult() throws JsonResourceException {

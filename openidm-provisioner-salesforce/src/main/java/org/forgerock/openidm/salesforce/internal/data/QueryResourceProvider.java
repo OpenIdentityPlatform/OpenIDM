@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class QueryResourceProvider extends SimpleJsonResource {
@@ -54,6 +54,7 @@ public class QueryResourceProvider extends SimpleJsonResource {
         Representation body = rc.getResponse().getEntity();
 
         ResultHandler handler = new ResultHandler();
+        handler.handleResource(null);
 
         if (null != body && body instanceof EmptyRepresentation == false) {
             JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
