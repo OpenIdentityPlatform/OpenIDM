@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.felix:org.apache.felix.scr.annotations:1.6.0" level="project" />
+    <orderEntry type="module" module-name="openidm-filter" />
+    <orderEntry type="module" module-name="openidm-core" />
+    <orderEntry type="module" module-name="openidm-enhanced-config" />
+    <orderEntry type="module" module-name="openidm-crypto" />
+    <orderEntry type="module" module-name="openidm-util" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:json-patch:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:json-fluent:1.2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:org.forgerock.util:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:json-crypto-core:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.7" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-core-asl:1.9.10" level="project" />
+    <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.10" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:org.forgerock.json.resource:1.3.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock.commons:forgerock-util:1.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="openidm-system" />
+    <orderEntry type="library" name="Maven: org.apache.servicemix.bundles:org.apache.servicemix.bundles.rhino:1.7R2_3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.felix:org.apache.felix.framework:4.0.3" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.felix:org.osgi.compendium:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.1" level="project" />
+    <orderEntry type="library" name="Maven: joda-time:joda-time:2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.2" level="project" />
+    <orderEntry type="module" module-name="openidm-repo" />
+    <orderEntry type="module" module-name="openidm-quartz-fragment" />
+    <orderEntry type="module" module-name="openidm-cluster" />
+    <orderEntry type="module" module-name="openidm-config" />
+    <orderEntry type="library" name="Maven: org.apache.servicemix.bundles:org.apache.servicemix.bundles.quartz:1.8.4_2" level="project" />
+    <orderEntry type="module" module-name="openidm-smartevent" />
+    <orderEntry type="library" name="Maven: com.googlecode.disruptor:disruptor:2.10.3" level="project" />
+    <orderEntry type="module" module-name="openidm-httpcontext" />
+    <orderEntry type="library" name="Maven: org.ops4j.pax.web:pax-web-jetty-bundle:2.1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock:forgerock-jaspi-container:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.glassfish:javax.security.auth.message:3.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.3.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.beanshell:bsh:2.0b4" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.12" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.yaml:snakeyaml:1.6" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-all:1.9.5" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock:forgerock-jaspi-osgi-config:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock:forgerock-jaspi-iwa-module:0.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.forgerock:forgerock-jaspi-filter:0.1.0" level="project" />
+  </component>
+</module>
+

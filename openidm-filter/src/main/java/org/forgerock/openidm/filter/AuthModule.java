@@ -26,6 +26,11 @@ import java.util.Map;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceAccessor;
+import org.forgerock.json.resource.JsonResourceContext;
+import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.filter.AuthFilter.AuthData;
 import org.forgerock.openidm.http.ContextRegistrator;
@@ -35,6 +40,7 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.json.fluent.JsonValue;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
@@ -57,6 +63,7 @@ public class AuthModule {
     String userIdProperty;
     String userCredentialProperty;
     String userRolesProperty;
+    String passThroughAuth;
     List<String> defaultRoles;
 
     // configuration conf/authentication.json
@@ -64,6 +71,7 @@ public class AuthModule {
     public AuthModule(JsonValue config) {
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = config.get("queryId").defaultTo("credential-query").asString();
+        passThroughAuth = config.get("passThroughAuth").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
@@ -92,13 +100,56 @@ public class AuthModule {
      * Authenticate the given username and password
      * @param authData The current authentication data to validate and augment, with the username supplied
      * @param password The supplied password to validate
-     * @param resource
      * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
      * carried by the status property 
      */
     public AuthData authenticate(AuthData authData, String password) {
+        //boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
+//
+        boolean authenticated = false;
+        if (passThroughAuth instanceof String && !"anonymous".equals(authData.username)) {
+            JsonResource router = getJsonResource();
+            if (null != router) {
+                JsonResourceAccessor accessor = new JsonResourceAccessor(router, JsonResourceContext.getContext(JsonResourceContext.newRootContext(),"resource"));
+                // queryId = system/AD/user
+                JsonValue params = new JsonValue(new HashMap<String, Object>());
+                params.put(ServerConstants.ACTION_NAME, "authenticate");
+                params.put("username", authData.username);
+                params.put("password", password);
+                try {
+                    JsonValue result  = accessor.action(passThroughAuth ,params, null);
+                    authenticated = result.isDefined(ServerConstants.OBJECT_PROPERTY_ID);
+                    if (authenticated) {
+                        //This is what I was talking about. We don't have a way to populate this. Use script to overcome it
+                        //authData.roles = Arrays.asList(new String[]{"openidm-admin", "openidm-authorized"});
+                        authData.resource = passThroughAuth;
+                        authData.userId = result.get(ServerConstants.OBJECT_PROPERTY_ID).required().asString();
+                        authData.status = authenticated;
 
-        boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
+                        result  = accessor.read(passThroughAuth+"/"+authData.userId);
+                        
+                        if (userRolesProperty != null && result.isDefined(userRolesProperty)) {
+                            
+                            authData.roles = (List) result.get(userRolesProperty).getObject();
+                            if (authData.roles.size() == 0) {
+                                authData.roles.addAll(defaultRoles);
+                            }
+                        }
+                        
+                        return authData;
+                    }
+                } catch (JsonResourceException e) {
+                    logger.trace("Failed pass-through authentication of {} on {}.",
+                            authData.username, passThroughAuth, e);
+                    //authentication failed 
+                }
+            }
+        } 
+        if (!authenticated) {
+            authenticated =
+                    authPass(queryId, queryOnResource, authData.username, password, authData);
+        }
+//        
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
             authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
@@ -283,6 +334,18 @@ public class AuthModule {
         ServiceReference cryptoRef = ctx.getServiceReference(CryptoService.class.getName());
         CryptoService crypto = (CryptoService) ctx.getService(cryptoRef);
         return crypto;
+    }
+
+    JsonResource getJsonResource() {
+        // TODO: switch to service trackers
+        BundleContext ctx = ContextRegistrator.getBundleContext();
+        Collection<ServiceReference<JsonResource>> routers = null;
+        try {
+            routers = ctx.getServiceReferences(JsonResource.class, "(openidm.restlet.path=/)");
+        } catch (InvalidSyntaxException e) {
+            /* ignore, the filter is tested */
+        }
+        return routers.size() > 0 ? ctx.getService(routers.iterator().next()) : null;
     }
 }
 

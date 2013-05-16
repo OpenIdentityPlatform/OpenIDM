@@ -1,0 +1,42 @@
+{
+    "server-auth-config" : {
+        "iwa-ad-passthrough" : {
+            "auth-module" : {
+                "class-name" : "org.forgerock.openidm.jaspi.module.IWAADPassthroughModule",
+                "servicePrincipal" : "HTTP/ubuntu0.internal.forgerock.com@INTERNAL.FORGEROCK.COM",
+                "keytabFileName" : "/Users/Phill/openam/ubuntu0.HTTP.keytab",
+                "kerberosRealm" : "INTERNAL.FORGEROCK.COM",
+                "kerberosServerName" : "ActiveDirectory.internal.forgerock.com",
+                "passThroughAuth" : "system/AD/account",
+                "queryId" : "credential-query",
+                "queryOnResource" : "managed/user",
+                "propertyMapping" : {
+                    "userId" : "_id",
+                    "userCredential" : "password",
+                    "userRoles" : "memberOf"
+                },
+                "defaultUserRoles" : [
+                    "openidm-reg"
+                ],
+                "allowedGroups" : [ ]
+            }
+        },
+        "ad-passthrough-only" : {
+            "auth-module" : {
+                "class-name" : "org.forgerock.openidm.jaspi.module.ADPassthroughModule",
+                "passThroughAuth" : "system/AD/account",
+                "queryId" : "credential-query",
+                "queryOnResource" : "managed/user",
+                "propertyMapping" : {
+                    "userId" : "_id",
+                    "userCredential" : "password",
+                    "userRoles" : "memberOf"
+                },
+                "defaultUserRoles" : [
+                    "openidm-reg"
+                ],
+                "allowedGroups" : [ ]
+            }
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "initParams" : {
+        "moduleChain" : "ad-passthrough-only"
+    },
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "script/authnPopulateContext.js"
+        }
+    },
+    "urlPatterns" : [
+        "/openidm/*"
+    ],
+    "filterClass" : "org.forgerock.jaspi.filter.AuthNFilter"
+}
