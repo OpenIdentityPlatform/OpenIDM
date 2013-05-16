@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -49,7 +50,8 @@ public class ReconciliationContext {
     private boolean canceled = false;
     private String reconId; 
     private final ReconciliationStatistic reconStat;
-    
+    private ExecutorService executor;    
+
     // If set, the list of all queried source Ids
     private Set<String> sourceIds; 
     // If set, the list of all queried target Ids
@@ -67,6 +69,14 @@ public class ReconciliationContext {
         this.mapping = mapping;
         this.reconId = callingContext.get("uuid").required().asString();
         this.reconStat = new ReconciliationStatistic(this);
+
+	// Initialize the executor for this recon, or null if no executor should be used
+	int noOfThreads = mapping.getTaskThreads();
+	if (noOfThreads > 0) {
+            executor = Executors.newFixedThreadPool(noOfThreads);
+	} else {
+	    executor = null;
+        }
     }
     
     /**
@@ -171,12 +181,7 @@ public class ReconciliationContext {
      * @return the executor for this recon, or null if no executor should be used
      */
     Executor getExcecutor() {
-        int noOfThreads = mapping.getTaskThreads();
-        if (noOfThreads > 0) {
-            return Executors.newFixedThreadPool(noOfThreads);
-        } else {
-            return null;
-        }
+	return executor;  
     }
 
     /**
@@ -261,9 +266,13 @@ public class ReconciliationContext {
      * Remove any state from memory that should not be kept 
      * past the completion of the reconciliation run
      */
-    private void cleanupState() {
+    private synchronized void cleanupState() {
         sourceIds = null;
         targetIds = null;
+        if (executor != null) {
+            executor.shutdown();
+            executor = null;
+        }
     }
 
 }
