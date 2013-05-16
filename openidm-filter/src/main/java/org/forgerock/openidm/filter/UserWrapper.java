@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Jamie Nelson
  * @author Paul C. Bryan
  */
-class UserWrapper extends HttpServletRequestWrapper {
+public class UserWrapper extends HttpServletRequestWrapper {
 
     /** The user principal name, as provided by the authentication filter. */
     private final String username;

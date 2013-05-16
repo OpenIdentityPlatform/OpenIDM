@@ -29,8 +29,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -43,7 +41,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -57,18 +54,13 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.util.DateUtil;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -81,10 +73,7 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 
-@Component(
-    name = "org.forgerock.openidm.authentication", immediate = true,
-    policy = ConfigurationPolicy.REQUIRE
-)
+@Component(name = "org.forgerock.openidm.authentication", immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service(value = {AuthFilterService.class, JsonResource.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -92,7 +81,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = "openidm.router.prefix", value = "authentication")
 })
 public class AuthFilter 
-        implements Filter, AuthFilterService, JsonResource {
+        implements AuthFilterService, JsonResource {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
@@ -128,6 +117,13 @@ public class AuthFilter
     static String logClientIPHeader = null;
     private static DateUtil dateUtil;
 
+    public AuthFilter() {
+    }
+
+    public AuthFilter(JsonValue config) {
+        setConfig(config);
+    }
+
     public enum Action {
         authenticate, logout
     }
@@ -157,8 +153,7 @@ public class AuthFilter
           logger.info("Authentication disabled on ports: {}", clientAuthOnly);
     }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-                                                        throws IOException, ServletException {
+    public UserWrapper authenticate(ServletRequest request, ServletResponse response) throws IOException, ServletException, AuthException {
         if (router == null) {
             throw new ServletException("Internal services not ready to process requests.");
         }
@@ -177,7 +172,8 @@ public class AuthFilter
                     session.invalidate();
                 }
                 res.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                return;
+                // SEND_SUCCESS
+                return null;
               // if we see the certficate port this request is for client auth only
             } else if (allowClientCertOnly(req)) {
                 authData = hasClientCert(req);
@@ -196,20 +192,22 @@ public class AuthFilter
                 authData.roles = (List<String>) session.getAttribute(ROLES_ATTRIBUTE);
                 authData.resource = (String)session.getAttribute(RESOURCE_ATTRIBUTE);
             } else {
-                authFailed(req, res, authData.username);
-                return;
+                // SEND_FAILURE
+                throw new AuthException(authData.username);
             }
         } catch (AuthException s) {
             authFailed(req, res, s.getMessage());
-            return;
+            // SEND_FAILURE
+            throw s;
         }
         logger.debug("Found valid session for {} id {} with roles {}", new Object[] {authData.username, authData.userId, authData.roles});
         req.setAttribute(USERID_ATTRIBUTE, authData.userId);
         req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
         req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
         req.setAttribute(OPENIDM_AUTHINVOKED, "openidmfilter");
- 
-        chain.doFilter(new UserWrapper(req, authData.username, authData.userId, authData.roles), res);
+
+        // SUCCESS
+        return new UserWrapper(req, authData.username, authData.userId, authData.roles);
     }
 
     private void authFailed(HttpServletRequest req, HttpServletResponse res, String username) throws IOException {
@@ -426,36 +424,12 @@ public class AuthFilter
         this.router = null;
     }
 
-    /** TODO: Description. */
-    private ComponentContext context;
-
-    /** TODO: Description. */
-    private ServiceRegistration serviceRegistration;
-
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
-        this.context = context;
         logger.info("Activating Auth Filter with configuration {}", context.getProperties());
         setConfig(context);
         // TODO make this configurable
         dateUtil = DateUtil.getDateUtil("UTC");
-
-        /*String urlPatterns[] = {"/openidm/*"};
-        String servletNames[] = null;
-
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, urlPatterns);
-        props.put(ExtenderConstants.PROPERTY_SERVLET_NAMES, servletNames);
-        props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "openidm");
-        serviceRegistration = context.getBundleContext().registerService(Filter.class.getName(), this, props);*/
-
-        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
-        filterMapping.setFilter(this);
-        filterMapping.setHttpContextId("openidm");
-        filterMapping.setServletNames("OpenIDM REST");//, "OpenIDM Web");
-        filterMapping.setUrlPatterns("/openidm/*");//, "/openidmui/*");
-        //filterMapping.setInitParams(null);
-        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
     }
 
     @Modified
@@ -466,20 +440,12 @@ public class AuthFilter
 
     private void setConfig(ComponentContext context) {
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        logClientIPHeader = (String) config.get("clientIPHeader").asString();
-        authModule = new AuthModule(config);
+        setConfig(config);
     }
 
-    @Deactivate
-    protected synchronized void deactivate(ComponentContext context) {
-        if (serviceRegistration != null) {
-            try {
-                serviceRegistration.unregister();
-                logger.info("Unregistered authentication filter.");
-            } catch (Exception ex) {
-                logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
-            }
-        }
+    private void setConfig(JsonValue config) {
+        logClientIPHeader = config.get("clientIPHeader").asString();
+        authModule = new AuthModule(config);
     }
 
     /**
