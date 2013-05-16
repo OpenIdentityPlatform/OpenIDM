@@ -381,7 +381,6 @@
     </variablelist>
    </section>
 
-      <!--
    <section xml:id="querying-recon-logs">
        <title>Querying the Reconciliation Audit Log</title>
        <para>Reconciliation operations are logged in the file
@@ -389,20 +388,30 @@
        repository. You can read and query the reconciliation audit logs over
        the REST interface as outlined in the following examples.</para>
 
+       <para>By default all <literal>audit/recon</literal> query responses are
+       formatted based on the <literal>entryType</literal> of the entry. Fields
+       that are not required for the specific entry type are stripped away from
+       the response. For example, a <literal>summary</literal> entry would not
+       need to include a null <literal>targetObjectId</literal> field, as this
+       field would not make sense in the context of a summary. You can specify
+       that this auto-formatting be disabled and return the full entry for all
+       entry types. To disable entry formatting, include
+       <literal>formatted=false</literal> as a query parameter in the request.</para>
+
        <para>To return all reconciliation operations logged in the audit log,
        run a RESTful GET on the <literal>audit/recon</literal> endpoint. For
        example:</para>
 
        <screen>$ curl
- -header "X-OpenIDM-Username: openidm-admin"
- -header "X-OpenIDM-Password: openidm-admin"
- -request GET
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
  "http://localhost:8080/openidm/audit/recon"</screen>
 
        <para>The following code sample shows an extract of the audit log
        after the first reconciliation operation in Sample 1.</para>
 
-       <screen width="87">{
+       <programlisting language="javascript">{
   "entries": [
     {
       "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
@@ -507,29 +516,28 @@
         "mapping": "systemXmlfileAccounts_managedUser"
       }
     ]
-}</screen>
+}</programlisting>
 
        <para>Most of the fields in this audit log are self-explanatory. Each
        distinct reconciliation operation is identified by its
        <literal>reconId</literal>. Each entry in the log is identified by a
        unique <literal>_id</literal>. The first log entry indicates the status
        for the complete reconciliation operation. Successive entries indicate
-       the status for each record affected by the reconciliation. Each entry
-       in the audit log has its own unique <literal>_id</literal>.</para>
+       the status for each record affected by the reconciliation.</para>
 
        <para>To obtain information on a specific audit log entry, include its
        entry <literal>_id</literal> in the endpoint. For example:</para>
 
-       <screen>$ curl
- -header "X-OpenIDM-Username: openidm-admin"
- -header "X-OpenIDM-Password: openidm-admin"
- -request GET
+       <screen width="80">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
  "http://localhost:8080/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"</screen>
 
        <para>The following sample output shows the results of a read operation
        on a specific reconciliation audit entry.</para>
 
-       <screen>{
+       <programlisting language="javascript">{
  "messageDetail": null,
  "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
  "situation": "ABSENT",
@@ -546,17 +554,191 @@
  "timestamp": "2013-05-08T07:58:33.791Z",
  "message": null,
  "sourceObjectId": "system/xmlfile/account/scarter"
-}</screen>
+}</programlisting>
 
-       <para>To obtain audit information for a particular reconciliation
-       operation, use the <literal>audit-by-recon-id</literal> keyword to
-       query the reconciliation ID as follows:</para>
+       <para>To query the audit log for a particular reconciliation operation,
+       use the <literal>audit-by-recon-id</literal> keyword, specifying the
+       reconciliation ID, as follows:</para>
 
-       <screen>$ curl
- -header "X-OpenIDM-Username: openidm-admin"
- -header "X-OpenIDM-Password: openidm-admin"
- -request GET
- "http://localhost:8080/openidm/audit/recon/?_queryId=audit-by-recon-id&amp;reconId=5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f"</screen>
+       <screen width="91">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/audit/recon/?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"</screen>
+
+       <para>Output similar to the following is returned, for the specified
+       reconciliation operation:</para>
+
+       <programlisting language="javascript">{
+  "start": {
+    "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+    "messageDetail": null,
+    "message": "Reconciliation initiated by openidm-admin",
+    "timestamp": "2013-05-14T08:20:41.343Z",
+    "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+    "entryType": "start",
+    "_id": "ce58ef39-425d-4711-94b9-a9c77df23001",
+    "status": "SUCCESS",
+    "exception": "",
+    "mapping": "systemXmlfileAccounts_managedUser"
+  },
+  "result": [
+    {
+      "messageDetail": null,
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+      "situation": "ABSENT",
+      "actionId": "1a391fe8-201b-4f59-ad05-92ee804488a8",
+      "targetObjectId": "managed/user/scarter",
+      "action": "CREATE",
+      "entryType": "",
+      "_id": "6dc0a18a-826d-487d-a29f-5cd8d2f55465",
+      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+      "status": "SUCCESS",
+      "exception": "",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "timestamp": "2013-05-14T08:20:41.763Z",
+      "message": null,
+      "sourceObjectId": "system/xmlfile/account/scarter"
+    },
+    {
+      "messageDetail": null,
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+      "situation": "ABSENT",
+      "actionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "targetObjectId": "managed/user/bjensen",
+      "action": "CREATE",
+      "entryType": "",
+      "_id": "1cda457e-54e2-451b-8a40-ef93dec7e60c",
+      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+      "status": "SUCCESS",
+      "exception": "",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "timestamp": "2013-05-14T08:20:41.760Z",
+      "message": null,
+      "sourceObjectId": "system/xmlfile/account/bjensen"
+    }
+  ],
+  "summary": {
+    "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+    "messageDetail": {
+      "ended": "2013-05-14T08:20:41.783Z",
+      "started": "2013-05-14T08:20:41.342Z",
+      "situationSummary": {
+        "SOURCE_MISSING": 0,
+        "FOUND": 0,
+        "SOURCE_IGNORED": 0,
+        "UNQUALIFIED": 0,
+        "UNASSIGNED": 0,
+        "TARGET_IGNORED": 0,
+        "CONFIRMED": 0,
+        "AMBIGUOUS": 0,
+        "ABSENT": 2,
+        "MISSING": 0
+      },
+      "progress": {
+        "links": {
+          "created": 2,
+          "existing": {
+            "total": "0",
+            "processed": 0
+          }
+        },
+        "target": {
+          "created": 2,
+          "existing": {
+            "total": "0",
+            "processed": 0
+          }
+        },
+        "source": {
+          "existing": {
+            "total": "2",
+            "processed": 2
+          }
+        }
+      },
+      "stageDescription": "reconciling target entries",
+      "stage": "ACTIVE_RECONCILING_TARGET",
+      "state": "ACTIVE",
+      "mapping": "systemXmlfileAccounts_managedUser"
+    },
+    "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
+       CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 ",
+    "timestamp": "2013-05-14T08:20:41.783Z",
+    "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+    "entryType": "summary",
+    "_id": "94c5893c-4ea8-4464-aff2-5533d6369722",
+    "status": "SUCCESS",
+    "exception": "",
+    "mapping": "systemXmlfileAccounts_managedUser"
+  }
+}</programlisting>
+
+       <para>Note that the response structure of a read request on <literal>audit/recon</literal>
+       differs from the response structure of a query by <literal>recon-id</literal>.
+       The read response contains a flat list of entries. The query response
+       separates the <literal>summary</literal> and <literal>start</literal>
+       event type entries. Other entries are listed under the <literal>result</literal>
+       entry.</para>
+
+       <para>To query the audit log for a specific reconciliation situation,
+       use the <literal>audit-by-recon-id-situation</literal> keyword, specifying
+       the reconciliation ID and the situation that you want to query. For
+       example, the following query returns all ABSENT records found during
+       the specified reconciliation operation:</para>
+
+       <screen width="92">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=
+ ABSENT&amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</screen>
+
+       <para>Output similar to the following is returned, with one entry for
+       each record that matches the situation queried:</para>
+
+       <programlisting language="javascript">{
+  "result": [
+    {
+      "messageDetail": null,
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+      "situation": "ABSENT",
+      "actionId": "1a391fe8-201b-4f59-ad05-92ee804488a8",
+      "targetObjectId": "managed/user/scarter",
+      "action": "CREATE",
+      "entryType": "",
+      "_id": "6dc0a18a-826d-487d-a29f-5cd8d2f55465",
+      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+      "status": "SUCCESS",
+      "exception": "",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "timestamp": "2013-05-14T08:20:41.763Z",
+      "message": null,
+      "sourceObjectId": "system/xmlfile/account/scarter"
+    },
+    {
+      "messageDetail": null,
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+      "situation": "ABSENT",
+      "actionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "targetObjectId": "managed/user/bjensen",
+      "action": "CREATE",
+      "entryType": "",
+      "_id": "1cda457e-54e2-451b-8a40-ef93dec7e60c",
+      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
+      "status": "SUCCESS",
+      "exception": "",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "timestamp": "2013-05-14T08:20:41.760Z",
+      "message": null,
+      "sourceObjectId": "system/xmlfile/account/bjensen"
+    }
+  ]
+}</programlisting>
 
        <para>The activity logs track all operations on internal (managed) and
        external (system) objects. Entries in the activity log contain
@@ -567,57 +749,219 @@
        <para>You can access the activity logs over REST with the following call:</para>
 
        <screen>$ curl
- -header "X-OpenIDM-Username: openidm-admin"
- -header "X-OpenIDM-Password: openidm-admin"
- -request GET
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
  "http://localhost:8080/openidm/audit/activity"</screen>
 
-       <para>The following sample output shows the creation of a new user entry
-       for <literal>scarter</literal>. The output shows the record before the
-       change (<literal>null</literal> in this case, and the record after the change.</para>
+       <para>The following extract of the activity log shows the last entry in
+       the log, which was a password change for user bjensen.</para>
 
        <screen>{
   "entries": [
     {
-      "_id": "5f34a6c5-5d04-45c7-8af8-3925af891875",
-      "_rev": "0",
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
       "action": "create",
-      "activityId": "661706bc-f39b-41d0-8cc7-fa933ae64e23",
-      "after": {
-        "_id": "scarter",
-        "_rev": "0",
-        "accountStatus": "active",
-        "address1": "",
-        ...
-      },
+      "objectId": "managed/user/bjensen",
+      "_rev": "0",
+      "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
+      "timestamp": "2013-05-14T08:20:41.712Z",
+      "message": null,
+      "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
+      "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "requester": "openidm-admin",
+      "rev": "0",
+      "passwordChanged": true,
+      "status": "SUCCESS",
       "before": null,
       "changedFields": [
         "/password"
       ],
-      "message": null,
-      "objectId": "managed/user/scarter",
-      "parentActionId": "a2e82c19-1019-4e18-9b39-386ecd963b8b",
-      "passwordChanged": true,
-      "requester": "openidm-admin",
-      "rev": "0",
-      "rootActionId": "1a2a38dc-7784-41db-84ac-1e2fa20bf80b",
-      "status": "SUCCESS",
-      "timestamp": "2013-04-24T18:02:03.188Z"
-    }
-  ]
-}</screen>
+      "after": {
+        "securityAnswer": {
+          "$crypto": {
+            "type": "x-simple-encryption",
+            "value": {
+              "key": "openidm-sym-default",
+              "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
+              "cipher": "AES/CBC/PKCS5Padding",
+              "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
+            }
+          }
+        },
+       ...</screen>
 
        <para>To return activity information for a specific action, include the
-       entry <literal>_id</literal> in the endpoint, for example:</para>
+       <literal>_id</literal> of the action in the endpoint, for example:</para>
 
        <screen width="85">$ curl
- -header "X-OpenIDM-Username: openidm-admin"
- -header "X-OpenIDM-Password: openidm-admin"
- -request GET
- "http://localhost:8080/openidm/audit/activity/5f34a6c5-5d04-45c7-8af8-3925af891875"</screen>
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"</screen>
 
-       <para>For audit logs in the repository, you can define custom queries
-       in addition to the three that are provided.</para>
+       <para>Results similar to the following are returned:</para>
+
+       <programlisting language="javascript">{
+  "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+  "action": "create",
+  "objectId": "managed/user/bjensen",
+  "timestamp": "2013-05-14T08:20:41.712Z",
+  "message": null,
+  "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
+  "after": {
+    "securityAnswer": {
+      "$crypto": {
+        "type": "x-simple-encryption",
+        "value": {
+          "key": "openidm-sym-default",
+          "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
+          "cipher": "AES/CBC/PKCS5Padding",
+          "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
+        }
+      }
+    },
+    "stateProvince": "",
+    "userName": "bjensen@example.com",
+    "roles": "openidm-authorized",
+    "description": "Created By XML1",
+    "accountStatus": "active",
+    "password": {
+      "$crypto": {
+        "type": "x-simple-encryption",
+        "value": {
+          "key": "openidm-sym-default",
+          "iv": "bqhRyLW1lI+KZROcpgyukg==",
+          "cipher": "AES/CBC/PKCS5Padding",
+          "data": "qO8A76GqNqftVVwOlasyPw=="
+        }
+      }
+    },
+    "securityQuestion": "1",
+    "givenName": "Barbara",
+    "address2": "",
+    "lastPasswordAttempt": "Tue May 14 2013 10:20:41 GMT+0200 (SAST)",
+    "address1": "",
+    "familyName": "Jensen",
+    "passwordAttempts": "0",
+    "country": "",
+    "city": "",
+    "_rev": "0",
+    "lastPasswordSet": "",
+    "postalCode": "",
+    "phoneNumber": "1234567",
+    "_id": "bjensen",
+    "email": "bjensen@example.com"
+  },
+  "changedFields": [
+    "/password"
+  ],
+  "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
+  "_rev": "0",
+  "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+  "requester": "openidm-admin",
+  "rev": "0",
+  "passwordChanged": true,
+  "status": "SUCCESS",
+  "before": null
+}</programlisting>
+
+       <para>Each action in the activity log has a <literal>rootActionId</literal>
+       and a <literal>parentActionId</literal>. The <literal>rootActionId</literal>
+       is the ID that was assigned to the incoming or initiating request. The
+       <literal>parentActionId</literal> is the ID that is associated with the
+       overall action. So, for example, if an HTTP request invokes a script that
+       changes a user's password, the HTTP request is assigned the
+       <literal>rootActionId</literal> and the action taken by the script is
+       assigned the <literal>parentActionId</literal>. You can query the activity
+       log for the details of a specific action by including the
+       <literal>parentActionID</literal> in the query. For example:</para>
+
+       <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;
+           parentActionId=90ce7473-98c7-4747-bfbb-32bfa3ce5d92"</screen>
+
+       <para>The following sample output shows the result of a query that requests
+       details of the password change for bjensen.</para>
+
+       <programlisting language="javascript">{
+  "result": [
+    {
+      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
+      "action": "create",
+      "objectId": "managed/user/bjensen",
+      "_rev": "0",
+      "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
+      "timestamp": "2013-05-14T08:20:41.712Z",
+      "message": null,
+      "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
+      "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "requester": "openidm-admin",
+      "rev": "0",
+      "passwordChanged": true,
+      "status": "SUCCESS",
+      "before": null,
+      "changedFields": [
+        "/password"
+      ],
+      "after": {
+        "securityAnswer": {
+          "$crypto": {
+            "type": "x-simple-encryption",
+            "value": {
+              "key": "openidm-sym-default",
+              "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
+              "cipher": "AES/CBC/PKCS5Padding",
+              "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
+            }
+          }
+        },
+        "stateProvince": "",
+        "userName": "bjensen@example.com",
+        "roles": "openidm-authorized",
+        "description": "Created By XML1",
+        "accountStatus": "active",
+        "password": {
+          "$crypto": {
+            "type": "x-simple-encryption",
+            "value": {
+              "key": "openidm-sym-default",
+              "iv": "bqhRyLW1lI+KZROcpgyukg==",
+              "cipher": "AES/CBC/PKCS5Padding",
+              "data": "qO8A76GqNqftVVwOlasyPw=="
+            }
+          }
+        },
+        "securityQuestion": "1",
+        "givenName": "Barbara",
+        "address2": "",
+        "lastPasswordAttempt": "Tue May 14 2013 10:20:41 GMT+0200 (SAST)",
+        "address1": "",
+        "familyName": "Jensen",
+        "passwordAttempts": "0",
+        "country": "",
+        "city": "",
+        "_rev": "0",
+        "lastPasswordSet": "",
+        "postalCode": "",
+        "phoneNumber": "1234567",
+        "_id": "bjensen",
+        "email": "bjensen@example.com"
+      }
+    }
+  ]
+}</programlisting>
+
+       <note>
+         <para>For audit logs in the repository, you can define custom queries
+         using the parameterized query mechanism. For more information, see
+         the section on <link xlink:href="integrators-guide#parameterized-queries"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized Queries</citetitle></link>
+         </para>
+       </note>
 
        <para>For more information about the entries in these logs, see
        the chapter that covers <link xlink:href="integrators-guide#chap-auditing"
@@ -626,7 +970,7 @@
 
    </section>
 
-   -->
+
   </section>
   <section xml:id="livesync-over-rest">
       <title>Triggering LiveSync Over REST</title>
