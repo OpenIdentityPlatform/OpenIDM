@@ -421,7 +421,7 @@ function allow() {
 }
 
 // Load the access configuration script (httpAccessConfig obj)
-load(identityServer.getProjectLocation() + "/script/access.js");
+load.call(this, identityServer.getProjectLocation() + "/script/access.js");
 
 if (!allow()) {
 //    java.lang.System.out.println(request);
