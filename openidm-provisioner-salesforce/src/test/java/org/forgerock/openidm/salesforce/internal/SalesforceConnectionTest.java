@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class SalesforceConnectionTest {
@@ -55,6 +55,7 @@ public class SalesforceConnectionTest {
 
         Assert.assertEquals(Double.toString(configuration.getVersion()),"27.0", "API Version is not match");
 
+        Assert.assertTrue(configuration.getPredefinedQueries().containsKey("active-only"));
         //SalesforceConnection connection = new SalesforceConnection(configuration);
     }
 }

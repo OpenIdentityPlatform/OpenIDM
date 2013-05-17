@@ -23,19 +23,21 @@
  */
 package org.forgerock.openidm.salesforce.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.restlet.data.Form;
-
 
 /**
  *
  * @author $author$
  * @version $Revision$ $Date$
- * @see <a herf="http://wiki.developerforce.com/page/Digging_Deeper_into_OAuth_2.0_on_Force.com">
- *      Digging Deeper into OAuth 2.0 on Force.com</a>
+ * @see <a herf=
+ *      "http://wiki.developerforce.com/page/Digging_Deeper_into_OAuth_2.0_on_Force.com"
+ *      > Digging Deeper into OAuth 2.0 on Force.com</a>
  */
-public class SalesforceConfiguration{
-
+public class SalesforceConfiguration {
 
     private final static String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
 
@@ -76,14 +78,13 @@ public class SalesforceConfiguration{
      */
     private String password = null;
 
-
-
     /**
      * The Password to authenticate with.
      * <p/>
-     * When accessing salesforce.com from outside of your company’s trusted networks, you must add a security token
-     * to your password to log in to a desktop client, such as Connect for Outlook, Connect Offline, Connect for Office,
-     * Connect for Lotus Notes, or the Data Loader.
+     * When accessing salesforce.com from outside of your company’s trusted
+     * networks, you must add a security token to your password to log in to a
+     * desktop client, such as Connect for Outlook, Connect Offline, Connect for
+     * Office, Connect for Lotus Notes, or the Data Loader.
      */
     private String security_token = null;
 
@@ -177,7 +178,6 @@ public class SalesforceConfiguration{
 
     private double version = 27.0;
 
-
     public String getLoginUrl() {
         return loginUrl != null ? loginUrl : LOGIN_URL;
     }
@@ -210,7 +210,6 @@ public class SalesforceConfiguration{
     public int getConnectTimeout() {
         return connectTimeout;
     }
-
 
     public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
@@ -258,7 +257,6 @@ public class SalesforceConfiguration{
     public int getMaxConnectionsPerHost() {
         return maxConnectionsPerHost;
     }
-
 
     public void setMaxConnectionsPerHost(int maxConnectionsPerHost) {
         this.maxConnectionsPerHost = maxConnectionsPerHost;
@@ -346,6 +344,17 @@ public class SalesforceConfiguration{
         this.tcpNoDelay = tcpNoDelay;
     }
 
+    private final Map<String, String> predefinedQueries = new HashMap<String, String>();
+
+    public Map<String, String> getPredefinedQueries() {
+        return predefinedQueries;
+    }
+
+    public void setPredefinedQueries(Map<String, String> queries) {
+        predefinedQueries.clear();
+        predefinedQueries.putAll(queries);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -380,7 +389,7 @@ public class SalesforceConfiguration{
             form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.PASSWORD);
 
             form.add(SalesforceConnection.USERNAME, getUsername());
-            form.add(SalesforceConnection.PASSWORD, getPassword()+getSecurityToken());
+            form.add(SalesforceConnection.PASSWORD, getPassword() + getSecurityToken());
         } else {
             form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.REFRESH_TOKEN);
 

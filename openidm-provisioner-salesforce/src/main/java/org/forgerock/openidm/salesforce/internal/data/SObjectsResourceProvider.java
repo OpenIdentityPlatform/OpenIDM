@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 
@@ -140,8 +140,8 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
     protected JsonValue query(JsonValue request) throws JsonResourceException {
         JsonValue params = request.get("params");
         StringBuilder sb =
-                new StringBuilder("services/data/").append(connection.getVersion()).append(
-                        "/query");
+                new StringBuilder("services/data/").append(connection.getVersion())
+                        .append("/query");
         if (params.isDefined(QueryConstants.QUERY_EXPRESSION)) {
 
             ClientResource rc = connection.getChild(sb.toString());
@@ -163,21 +163,24 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                 JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
                 JsonValue result = new JsonValue(rep.getObject());
                 for (JsonValue record : result.get("records")) {
-                    record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+                    if (record.isDefined("Id")) {
+                        record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+                    }
                     queryResult.add(record.asMap());
                 }
             }
             return searchResult;
         } else {
             String queryId = params.get(QueryConstants.QUERY_ID).required().asString();
-            if (QueryConstants.QUERY_ALL_IDS.equals(queryId)) {
-                // String id = request.get("id").required().asString();
-                Matcher matcher = ServerContext.get().getMatcher();
-
-                String type = matcher.group(1);
+            String queryExpression = connection.getQueryExpression(queryId);
+            if (QueryConstants.QUERY_ALL_IDS.equals(queryId) || null != queryExpression) {
+                if (null == queryExpression) {
+                    Matcher matcher = ServerContext.get().getMatcher();
+                    queryExpression = "SELECT id FROM " + matcher.group(1);
+                }
                 ClientResource rc = connection.getChild(sb.toString());
 
-                rc.getReference().addQueryParameter("q", "SELECT id FROM " + type);
+                rc.getReference().addQueryParameter("q", queryExpression);
 
                 rc.setMethod(org.restlet.data.Method.GET);
                 handleRequest(rc, true);
@@ -192,16 +195,25 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                             new JacksonRepresentation<Map>(body, Map.class);
                     JsonValue result = new JsonValue(rep.getObject());
                     for (JsonValue record : result.get("records")) {
-                        Map<String, Object> r = new HashMap<String, Object>(1);
-                        r.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
-                        queryResult.add(r);
+                        if (QueryConstants.QUERY_ALL_IDS.equals(queryId)) {
+                            Map<String, Object> r = new HashMap<String, Object>(1);
+                            r.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+                            queryResult.add(r);
+                        } else {
+                            if (record.isDefined("Id")) {
+                                record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id")
+                                        .asString());
+                            }
+                            queryResult.add(record.asMap());
+
+                        }
                     }
                 }
                 return searchResult;
 
             }
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
-                    "Unsupported QueryID");
+                    "Unsupported queryId");
         }
     }
 

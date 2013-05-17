@@ -12,6 +12,9 @@
         "proxyPort": 3128,
         "socketTimeout": 0,
         "stopIdleTimeout": 1000,
-        "tcpNoDelay": false
+        "tcpNoDelay": false,
+        "predefinedQueries": {
+            "active-only": "select Id from User where IsActive = true"
+        }
     }
 }

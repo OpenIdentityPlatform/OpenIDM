@@ -70,7 +70,7 @@ import com.sforce.ws.ConnectorConfig;
  * http:/
  * /boards.developerforce.com/t5/REST-API-Integration/Having-trouble-getting
  * -Access-Token-with-username-password/td-p/278305
- * 
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
@@ -94,7 +94,7 @@ public class SalesforceConnection extends ClientResource {
      * Requests that the origin server accepts the entity enclosed in the
      * request as a new subordinate of the resource identified by the request
      * URI.
-     * 
+     *
      * @see <a href="http://www.w3.org/Protocols/rfc2068/rfc2068">HTTP PATCH
      *      method</a>
      */
@@ -316,6 +316,10 @@ public class SalesforceConnection extends ClientResource {
         }
     }
 
+    public String getQueryExpression(String queryId) {
+        return null != queryId ? configuration.getPredefinedQueries().get(queryId) : null;
+    }
+
     public ConnectorConfig getConnectorConfig(String api) {
         if (StringUtils.isBlank(api)) {
             throw new IllegalArgumentException();
@@ -477,7 +481,7 @@ public class SalesforceConnection extends ClientResource {
 
     /**
      * Converts successful JSON token body responses to OAuthUser.
-     * 
+     *
      * @param body
      *            Representation containing a successful JSON body element.
      * @return OAuthUser object containing accessToken, refreshToken and
