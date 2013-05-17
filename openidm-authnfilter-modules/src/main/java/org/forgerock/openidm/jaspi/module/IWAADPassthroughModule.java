@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.jaspi.module;
 
 import org.forgerock.jaspi.modules.IWAModule;
 import org.slf4j.Logger;
@@ -92,7 +92,7 @@ public class IWAADPassthroughModule implements ServerAuthModule {
 
             AuthStatus authStatus;
             try {
-                LOGGER.debug("IWAADPassthroughModule: Calling IWA modules");
+                LOGGER.debug("IWAADPassthroughModule: Calling IWA module");
                 authStatus = iwaModule.validateRequest(messageInfo, clientSubject, serviceSubject);
             } catch (AuthException e) {
                 // fallback to AD passthrough
