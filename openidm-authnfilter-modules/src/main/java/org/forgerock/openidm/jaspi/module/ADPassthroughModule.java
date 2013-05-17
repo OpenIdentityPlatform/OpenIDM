@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.jaspi.module;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
+ * Authentication Filter module for the JASPI common Authentication Filter. Validates client requests by passing though
  * to Active Directory.
  */
 @Component(name = "org.forgerock.openidm.jaspi.ADPassthroughModule", immediate = true, policy = ConfigurationPolicy.IGNORE)      //TODO is this needed?? I don't think so
