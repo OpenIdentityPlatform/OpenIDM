@@ -768,7 +768,7 @@
       "timestamp": "2013-05-14T08:20:41.712Z",
       "message": null,
       "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
-      "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
       "requester": "openidm-admin",
       "rev": "0",
       "passwordChanged": true,
@@ -858,7 +858,7 @@
   ],
   "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
   "_rev": "0",
-  "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+  "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
   "requester": "openidm-admin",
   "rev": "0",
   "passwordChanged": true,
@@ -875,7 +875,7 @@
        <literal>rootActionId</literal> and the action taken by the script is
        assigned the <literal>parentActionId</literal>. You can query the activity
        log for the details of a specific action by including the
-       <literal>parentActionID</literal> in the query. For example:</para>
+       <literal>parentActionId</literal> in the query. For example:</para>
 
        <screen width="90">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -898,7 +898,7 @@
       "timestamp": "2013-05-14T08:20:41.712Z",
       "message": null,
       "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
-      "parentActionid": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
+      "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
       "requester": "openidm-admin",
       "rev": "0",
       "passwordChanged": true,
