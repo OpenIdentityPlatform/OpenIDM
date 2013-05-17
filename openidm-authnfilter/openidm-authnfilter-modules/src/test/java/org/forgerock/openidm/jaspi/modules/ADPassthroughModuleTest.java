@@ -14,11 +14,10 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.jaspi.module;
+package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.openidm.filter.AuthFilter;
 import org.forgerock.openidm.filter.UserWrapper;
-import org.forgerock.openidm.jaspi.module.ADPassthroughModule;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
