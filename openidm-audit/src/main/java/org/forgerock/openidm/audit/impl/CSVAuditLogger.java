@@ -189,7 +189,7 @@ public class CSVAuditLogger implements AuditLogger {
                     new Optional(), // changedFields
                     new Optional(), // message
                     new Optional(), // objectId
-                    new Optional(), // parentActionid
+                    new Optional(), // parentActionId
                     new Optional(), // passwordChanged
                     new Optional(), // requester
                     new Optional(), // rev
@@ -257,7 +257,7 @@ public class CSVAuditLogger implements AuditLogger {
                 String actionId = (String)params.get("parentActionId");
                 List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
                 for (Map<String, Object> entry : reconEntryList) {
-                    if (entry.get("parentActionid").equals(actionId)) {
+                    if (entry.get("parentActionId").equals(actionId)) {
                         rawEntryList.add(entry);
                     }
                 }

@@ -53,7 +53,7 @@ public class ActivityLog {
     public final static String REVISION = "rev";
     public final static String ACTIVITY_ID = "activityId";
     public final static String ROOT_ACTION_ID = "rootActionId";
-    public final static String PARENT_ACTION_ID = "parentActionid";
+    public final static String PARENT_ACTION_ID = "parentActionId";
     public final static String REQUESTER = "requester";
     public final static String BEFORE = "before";
     public final static String AFTER = "after";
