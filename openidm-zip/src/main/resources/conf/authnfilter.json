@@ -2,7 +2,7 @@
     "server-auth-config" : {
         "iwa-ad-passthrough" : {
             "auth-module" : {
-                "class-name" : "org.forgerock.openidm.jaspi.module.IWAADPassthroughModule",
+                "class-name" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
                 "servicePrincipal" : "HTTP/ubuntu0.internal.forgerock.com@INTERNAL.FORGEROCK.COM",
                 "keytabFileName" : "/Users/Phill/openam/ubuntu0.HTTP.keytab",
                 "kerberosRealm" : "INTERNAL.FORGEROCK.COM",
@@ -23,7 +23,7 @@
         },
         "ad-passthrough-only" : {
             "auth-module" : {
-                "class-name" : "org.forgerock.openidm.jaspi.module.ADPassthroughModule",
+                "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
                 "passThroughAuth" : "system/AD/account",
                 "queryId" : "credential-query",
                 "queryOnResource" : "managed/user",
