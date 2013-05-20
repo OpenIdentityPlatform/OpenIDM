@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.jaspi.module;
+package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -43,14 +43,14 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Authentication Filter module for the JASPI common Authentication Filter. Validates client requests by passing though
+ * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
  * to Active Directory.
  */
-@Component(name = "org.forgerock.openidm.jaspi.ADPassthroughModule", immediate = true, policy = ConfigurationPolicy.IGNORE)      //TODO is this needed?? I don't think so
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM JASPI Authentication Filter AD Passthrough Module")
-})
+//@Component(name = "org.forgerock.openidm.jaspi.ADPassthroughModule", immediate = true, policy = ConfigurationPolicy.IGNORE)      //TODO is this needed?? I don't think so
+//@Properties({
+//        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+//        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM JASPI Authentication Filter AD Passthrough Module")
+//})
 public class ADPassthroughModule implements ServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ADPassthroughModule.class);

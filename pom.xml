@@ -320,7 +320,7 @@
         <module>openidm-repo</module>
         <module>openidm-restlet</module>
         <module>openidm-filter</module>
-        <module>openidm-authnfilter-modules</module>
+        <module>openidm-authnfilter</module>
         <module>openidm-servletfilter-registrator</module>
         <module>openidm-quartz-fragment</module>
         <module>openidm-scheduler</module>
@@ -414,11 +414,6 @@
             <dependency>
                 <groupId>org.forgerock</groupId>
                 <artifactId>forgerock-jaspi-container</artifactId>
-                <version>${authnfilter.common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock</groupId>
-                <artifactId>forgerock-jaspi-osgi-config</artifactId>
                 <version>${authnfilter.common.version}</version>
             </dependency>
             <dependency>
