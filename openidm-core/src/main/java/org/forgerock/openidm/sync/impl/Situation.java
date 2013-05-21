@@ -39,6 +39,15 @@ enum Situation {
 
     /**
      * The mapping qualifies for a target object, there is no link to a target object, and
+     * there is a single correlated target object to link; however, that target already is 
+     * linked to another source record.
+     * Detected during source object
+     * changes and reconciliation. Default action: {@code EXCEPTION}.
+     */
+    FOUND_ALREADY_LINKED(Action.EXCEPTION),
+
+    /**
+     * The mapping qualifies for a target object, there is no link to a target object, and
      * there is no correlated target object to link. Detected during source object changes
      * and reconciliation. Default action: {@code CREATE}.
      */
