@@ -1752,7 +1752,17 @@ class ObjectMapping implements SynchronizationListener {
                     } else if (results.size() == 1) {
                         JsonValue resultValue = results.get((Integer) 0).required();
                         targetObjectAccessor = getCorrelatedTarget(resultValue);
-                        situation = Situation.FOUND;
+                        
+                        Link checkExistingLink = new Link(ObjectMapping.this);
+                        checkExistingLink.getLinkForTarget(targetObjectAccessor.getLocalId());
+                        if (checkExistingLink._id == null || checkExistingLink.sourceId == null) {
+                            situation = Situation.FOUND;
+                        } else {
+                            situation = Situation.FOUND_ALREADY_LINKED;
+                            // TODO: consider enhancements:
+                            // For reporting, should it log existing link and source
+                            // What actions should be available for a found, already linked
+                        }
                     } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
                     } else {
