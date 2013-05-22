@@ -25,53 +25,28 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java SE
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// OSGi
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-
-// JSON Fluent
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPointer;
-
-// JSON Resource
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceContext;
-
-// OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.scope.ScopeFactory;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.SynchronizationListener;
-
-// Deprecated
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
@@ -79,6 +54,15 @@ import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.scope.ScopeFactory;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Description.
@@ -110,8 +94,8 @@ public class SynchronizationService extends ObjectSetJsonResource
     private final static Logger logger = LoggerFactory.getLogger(SynchronizationService.class);
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
-    private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
-
+    private volatile ArrayList<ObjectMapping> mappings = null;
+    
     /** TODO: Description. */
     private ComponentContext context;
 
@@ -158,12 +142,8 @@ public class SynchronizationService extends ObjectSetJsonResource
         this.context = context;
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
-            for (JsonValue jv : config.get("mappings").expect(List.class)) {
-                mappings.add(new ObjectMapping(this, jv)); // throws JsonValueException
-            }
-            for (ObjectMapping mapping : mappings) {
-                mapping.initRelationships(this, mappings);
-            }
+            mappings = new ArrayList<ObjectMapping>();
+            initMappings(mappings, config);
         } catch (JsonValueException jve) {
             throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
         }
@@ -171,10 +151,32 @@ public class SynchronizationService extends ObjectSetJsonResource
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        mappings.clear();
+        mappings = null;
         this.context = null;
     }
+    
+    @Modified
+    protected void modified(ComponentContext context) {
+        this.context = context;
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+        ArrayList<ObjectMapping> newMappings = new ArrayList<ObjectMapping>();
+        try {
+            initMappings(newMappings, config);
+            mappings = newMappings;
+        } catch (JsonValueException jve) {
+            throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
+        }
+    }
 
+    private void initMappings(ArrayList<ObjectMapping> mappingList, JsonValue config) {
+        for (JsonValue jv : config.get("mappings").expect(List.class)) {
+            mappingList.add(new ObjectMapping(this, jv)); // throws JsonValueException
+        }
+        for (ObjectMapping mapping : mappingList) {
+            mapping.initRelationships(this, mappingList);
+        }
+    }
+    
     /**
      * TODO: Description.
      *
