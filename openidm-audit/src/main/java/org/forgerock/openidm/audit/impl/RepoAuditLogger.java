@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * Audit logger that logs to a repository
  * @author aegloff
  */
-public class RepoAuditLogger implements AuditLogger {
+public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
     
     /**
@@ -69,6 +69,7 @@ public class RepoAuditLogger implements AuditLogger {
     String fullIdPrefix = AuditService.ROUTER_PREFIX + "/";
     
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
+        super.setConfig(config, ctx);
         this.ctx = ctx;
     }
     

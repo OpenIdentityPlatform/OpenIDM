@@ -66,7 +66,7 @@ import org.supercsv.util.CsvContext;
  *
  * @author aegloff
  */
-public class CSVAuditLogger implements AuditLogger {
+public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);
 
     public final static String CONFIG_LOG_LOCATION = "location";
@@ -86,6 +86,7 @@ public class CSVAuditLogger implements AuditLogger {
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         String location = null;
         try {
+            super.setConfig(config, ctx);
             location = (String) config.get(CONFIG_LOG_LOCATION);
             auditLogDir = IdentityServer.getFileForWorkingPath(location);
             logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());

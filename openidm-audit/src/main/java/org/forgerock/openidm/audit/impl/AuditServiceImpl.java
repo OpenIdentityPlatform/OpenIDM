@@ -116,8 +116,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     List<JsonPointer> watchFieldFilters;
     List<JsonPointer> passwordFieldFilters;
 
-    AuditLogger queryLogger = null;
-    List<AuditLogger> auditLoggers;
+    List<AuditLogger> globalAuditLoggers;
+    Map<String,List<AuditLogger>> eventAuditLoggers;
     JsonValue config; // Existing active configuration
     DateUtil dateUtil;
 
@@ -163,8 +163,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
+        String[] splitTypeAndId = splitFirstLevel(fullId);
+        String type = splitTypeAndId[0];
         logger.debug("Audit read called for {}", fullId);
-        AuditLogger auditLogger = getQueryAuditLogger();
+        AuditLogger auditLogger = getQueryAuditLogger(type);
         return auditLogger.read(fullId);
     }
 
@@ -235,7 +237,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
 
         logger.debug("Create audit entry for {} with {}", id, obj);
-        for (AuditLogger auditLogger : auditLoggers) {
+        for (AuditLogger auditLogger : getAuditLoggerForEvent(type)) {
             try {
                 auditLogger.create(id, obj);
             } catch (ObjectSetException ex) {
@@ -401,8 +403,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
+        String[] splitTypeAndId = splitFirstLevel(fullId);
+        String type = splitTypeAndId[0];
         logger.debug("Audit query called for {} with {}", fullId, params);
-        AuditLogger auditLogger = getQueryAuditLogger();
+        AuditLogger auditLogger = getQueryAuditLogger(type);
         return auditLogger.query(fullId, params);
     }
 
@@ -414,20 +418,78 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         throw new ForbiddenException("Not allowed on audit service");
     }
     
-    
     /**
      * Returns the logger to use for reads/queries.
      *
+     * @param type the event type for which to return the query logger
      * @return an AuditLogger to use for queries.
      * @throws ObjectSetException on failure to find an appropriate logger.
      */
-    public AuditLogger getQueryAuditLogger() throws ObjectSetException {
-        if (queryLogger != null) {
-            return queryLogger;
-        } else if (auditLoggers.size() > 0) {
-            return auditLoggers.get(0);
-        } else {
-            throw new InternalServerErrorException("No audit loggers available");
+    private AuditLogger getQueryAuditLogger(String type) throws ObjectSetException {
+        // look for a query logger for this eventtype
+        if (eventAuditLoggers != null
+                && eventAuditLoggers.containsKey(type)) {
+            AuditLogger auditLogger = getQueryAuditLogger(eventAuditLoggers.get(type));
+            if (auditLogger != null) {
+                return auditLogger;
+            }
+        }
+        
+        // look for a global query logger
+        if (globalAuditLoggers.size() > 0) {
+            AuditLogger auditLogger = getQueryAuditLogger(globalAuditLoggers);
+            if (auditLogger != null) {
+                return auditLogger;
+            }
+        }
+
+        // pick first available eventtype logger
+        if (eventAuditLoggers != null 
+                && eventAuditLoggers.containsKey(type)
+                && eventAuditLoggers.get(type).size() > 0) {
+            return eventAuditLoggers.get(type).get(0);
+        } 
+        
+        // pick first global logger
+        if (globalAuditLoggers != null
+                && globalAuditLoggers.size() > 0) {
+            return globalAuditLoggers.get(0);
+        }
+
+        // give up
+        throw new InternalServerErrorException("No audit loggers available");
+    }
+
+    /**
+     * Return the first audit logger in <tt>auditLoggers</tt> that is configured for queries.
+     *
+     * @param auditLoggers a <tt>List</tt> of <tt>AuditLoggers</tt> to inspect
+     * @return an AuditLogger configured for queries, null if one does not exist in the list
+     */
+    private AuditLogger getQueryAuditLogger(List<AuditLogger> auditLoggers) {
+        for (AuditLogger auditLogger : auditLoggers) {
+            if (auditLogger.isUsedForQueries()) {
+                return auditLogger;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return the configured <tt>AuditLoggers</tt> for an event type.
+     *
+     * @param type the event type
+     * @return the confiugred AuditLoggers for this event type
+     */
+    private List<AuditLogger> getAuditLoggerForEvent(String type) {
+        // defer to event-specific audit loggers first if there are any
+        if (eventAuditLoggers != null 
+                && eventAuditLoggers.containsKey(type)
+                && eventAuditLoggers.get(type).size() > 0) {
+            return eventAuditLoggers.get(type);
+        }
+        else {
+            return globalAuditLoggers;
         }
     }
 
@@ -486,7 +548,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     
     private void setConfig(ComponentContext compContext) throws Exception {
         config = enhancedConfig.getConfigurationAsJson(compContext);
-        auditLoggers = getAuditLoggers(config, compContext);
+        globalAuditLoggers = getGlobalAuditLoggers(config, compContext);
+        eventAuditLoggers = getEventAuditLoggers(config, compContext);
         actionFilters = getActionFilters(config);
         triggerFilters = getTriggerFilters(config);
         watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
@@ -589,28 +652,46 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         return fieldList;
     }
 
-    List<AuditLogger> getAuditLoggers(JsonValue config, ComponentContext compContext) {
-        List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
-        List logTo = config.get(CONFIG_LOG_TO).asList();
-        for (Map entry : (List<Map>)logTo) {
-            String logType = (String) entry.get(CONFIG_LOG_TYPE);
-            // TDDO: make pluggable
-            AuditLogger auditLogger = null;
-            if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
-                auditLogger = new CSVAuditLogger();
-            } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                auditLogger = new RepoAuditLogger();
-            } else {
-                throw new InvalidException("Configured audit logType is unknown: " + logType);
+    Map<String, List<AuditLogger>> getEventAuditLoggers(JsonValue config, ComponentContext compContext) {
+        Map<String, List<AuditLogger>> configuredLoggers = new HashMap<String, List<AuditLogger>>();
+
+        JsonValue eventTypes = config.get("eventTypes");
+        if (!eventTypes.isNull()) {
+            Set<String> eventTypesKeys = eventTypes.keys();
+            // Loop through event types ("activity", "recon", etc..)
+            for (String eventTypeKey : eventTypesKeys) {
+                JsonValue eventType = eventTypes.get(eventTypeKey);
+                configuredLoggers.put(eventTypeKey, getAuditLoggers(eventType.get(CONFIG_LOG_TO).asList(), compContext));
             }
-            if (auditLogger != null) {
-                auditLogger.setConfig(entry, compContext.getBundleContext());
-                logger.info("Audit configured to log to {}", logType);
-                configuredLoggers.add(auditLogger);
-                if (entry.containsKey("useForQueries")) {
-                    if ((Boolean)entry.get("useForQueries")) {
+        }
+
+        return configuredLoggers;
+    }
+
+    List<AuditLogger> getGlobalAuditLoggers(JsonValue config, ComponentContext compContext) {
+        return getAuditLoggers(config.get(CONFIG_LOG_TO).asList(), compContext);
+    }
+
+    List<AuditLogger> getAuditLoggers(List logTo, ComponentContext compContext) {
+        List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
+        if (logTo != null) {
+            for (Map entry : (List<Map>)logTo) {
+                String logType = (String) entry.get(CONFIG_LOG_TYPE);
+                // TDDO: make pluggable
+                AuditLogger auditLogger = null;
+                if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
+                    auditLogger = new CSVAuditLogger();
+                } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
+                    auditLogger = new RepoAuditLogger();
+                } else {
+                    throw new InvalidException("Configured audit logType is unknown: " + logType);
+                }
+                if (auditLogger != null) {
+                    auditLogger.setConfig(entry, compContext.getBundleContext());
+                    logger.info("Audit configured to log to {}", logType);
+                    configuredLoggers.add(auditLogger);
+                    if (auditLogger.isUsedForQueries()) {
                         logger.info("Audit logger used for queries set to " + logType);
-                        queryLogger = auditLogger;
                     }
                 }
             }
@@ -621,11 +702,20 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
-        for (AuditLogger auditLogger : auditLoggers) {
+        for (AuditLogger auditLogger : globalAuditLoggers) {
             try {
                 auditLogger.cleanup();
             } catch (Exception ex) {
                 logger.info("AuditLogger cleanup reported failure", ex);
+            }
+        }
+        for (List<AuditLogger> auditLoggers : eventAuditLoggers.values()) {
+            for (AuditLogger auditLogger : auditLoggers) {
+                try {
+                    auditLogger.cleanup();
+                } catch (Exception ex) {
+                    logger.info("AuditLogger cleanup reported failure", ex);
+                }
             }
         }
         logger.info("Audit service stopped.");
