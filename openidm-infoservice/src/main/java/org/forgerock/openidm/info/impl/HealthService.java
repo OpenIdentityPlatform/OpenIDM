@@ -39,6 +39,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.cluster.ClusterEvent;
@@ -76,6 +77,8 @@ public class HealthService implements HealthInfo, ClusterEventListener {
 
     public static final String PID = "org.forgerock.openidm.health";
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
+    
+    private static final String LISTENER_ID = "healthService";
 
     /**
      * Application states
@@ -89,8 +92,19 @@ public class HealthService implements HealthInfo, ClusterEventListener {
 
     ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    @Reference
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            bind = "bindClusterManagementService",
+            unbind = "unbindClusterManagementService")
     ClusterManagementService cluster;
+    protected void bindClusterManagementService(ClusterManagementService clusterManagementService) {
+        cluster = clusterManagementService;
+        cluster.register(LISTENER_ID, this);
+    }
+    protected void unbindClusterManagementService(ClusterManagementService clusterManagementService) {
+        cluster.unregister(LISTENER_ID);
+        cluster = null;
+    }
     
     // Whether we consider the underlying framework as started
     private volatile boolean frameworkStarted = false;
@@ -267,8 +281,6 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         context.getBundleContext().addBundleListener(bundleListener);
         context.getBundleContext().addFrameworkListener(frameworkListener);
         
-        cluster.register("healthService", this);
-        
         logger.info("OpenIDM Health Service component is activated.");
     }
     
@@ -314,7 +326,6 @@ public class HealthService implements HealthInfo, ClusterEventListener {
                 checkState();
                 if (!stateDetail.state.equals(AppState.ACTIVE_READY)) {
                     logger.error("OpenIDM failure during startup, {}: {}", stateDetail.state, stateDetail.shortDesc);
-                    System.out.println("OpenIDM failure during startup, " + stateDetail.state + ": " + stateDetail.shortDesc);
                 } else {
                     logger.debug("Startup check found ready state");
                 }
