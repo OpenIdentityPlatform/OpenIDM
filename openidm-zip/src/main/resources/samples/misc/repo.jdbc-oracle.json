@@ -7,7 +7,8 @@
         "username" : "oracleuser",
         "password" : "oracleuser",
         "maxBatchSize" : 100,
-        "maxTxRetry" : 5
+        "maxTxRetry" : 5,
+        "connectionTimeoutInMs" : 30000
     },
     "queries" : {
         "genericTables" : {
