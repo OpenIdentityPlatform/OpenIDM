@@ -18,7 +18,8 @@
         },
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
-        "defaultCatalog" : "openidm"
+        "defaultCatalog" : "openidm",
+        "connectionTimeoutInMs" : 30000
     },
     "queries" : {
         "genericTables" : {
