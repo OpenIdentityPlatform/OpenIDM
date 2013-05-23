@@ -9,7 +9,8 @@
         "defaultCatalog" : "openidm",
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
-        "enableConnectionPool" : true
+        "enableConnectionPool" : true,
+        "connectionTimeoutInMs" : 30000
     },
     "queries" : {
         "genericTables" : {
@@ -44,7 +45,7 @@
             "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId}",
             "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
             "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
-            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentActionid = ${parentActionId}",
+            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
         }
     },

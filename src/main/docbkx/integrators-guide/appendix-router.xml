@@ -245,7 +245,7 @@ responseFilter 1
       <para>The resource-request context, which has one or more parent contexts.
       Provided in the scope of <literal>"condition"</literal>,
       <literal>"onRequest"</literal>, <literal>"onResponse"</literal> and
-      <literal>"onException"</literal> scripts.</para>
+      <literal>"onFailure"</literal> scripts.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -264,7 +264,7 @@ responseFilter 1
       <para>exception object</para>
       <para>The exception value that was thrown as a result of processing the
       request. Only provided in the scope of the
-      <literal>"onException"</literal> script.</para>
+      <literal>"onFailure"</literal> script.</para>
      </listitem>
     </varlistentry>
    </variablelist>

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,6 +32,7 @@ import org.osgi.framework.BundleContext;
 /**
  * OpenIDM audit logger
  * @author aegloff
+ * @author brmiller
  */
 public interface AuditLogger extends ObjectSet {
     
@@ -47,4 +48,12 @@ public interface AuditLogger extends ObjectSet {
      * Cleanup called when auditlogger no longer needed
      */
     void cleanup();
+
+    /**
+     * Whether this audit logger is used for reads/queries, when multiple
+     * loggers are configured.
+     *
+     * @return whether to use this logger for reads/queries.
+     */
+    boolean isUsedForQueries();
 }
