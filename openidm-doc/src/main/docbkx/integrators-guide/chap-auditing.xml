@@ -360,12 +360,11 @@
   you installed OpenIDM. The default <filename>conf/audit.json</filename> file
   contains the following object.</para>
 
-  <programlisting language="javascript">
-{
-    "eventTypes": {
-        "activity": {
-            "filter": {
-                "actions": [
+  <programlisting language="javascript">{
+    "eventTypes" : {
+        "activity" : {
+            "filter" : {
+                "actions" : [
                     "create",
                     "update",
                     "delete",
@@ -376,18 +375,23 @@
             "watchedFields" : [ ],
             "passwordFields" : [ "password" ]
         },
-        "recon": {}
+        "recon" : { }
     },
-    "logTo": [
+    "logTo" : [
         {
-            "logType": "csv",
-            "location": "audit",
-            "recordDelimiter": ";"
+            "logType" : "csv",
+            "location" : "audit",
+            "recordDelimiter" : ";"
         },
         {
-            "logType": "repository"
+            "logType" : "repository",
+            "useForQueries" : true
         }
-    ]
+    ],
+    "exceptionFormatter" : {
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    }
 }</programlisting>
 
   <section xml:id="audit-eventtypes">
@@ -499,42 +503,79 @@
    <literal>true</literal> in the audit log. Fields are listed in 
    comma-separated format, for example:</para>
    <screen>"passwordFields" : [ "password", "username" ]</screen>
+  </section>
+  <section xml:id="audit-logto">
+      <title>Log To List</title>
 
-   <variablelist>
-    <para>The <literal>logTo</literal> list enables you to specify where 
-    OpenIDM writes the log.</para>
+    <variablelist>
+    <para>The <literal>logTo</literal> list enables you to specify the
+    format of the log, where it is written, and various parameters for each
+    log type.</para>
     <varlistentry>
-     <term><literal>csv</literal></term>
-     <listitem>
-      <para>Write to a comma-separated variable format file in the location
-      specified, relative to the directory in which you installed OpenIDM.</para>
-      <para>Audit file names are fixed, <filename>access.csv</filename>,
-      <filename>activity.csv</filename>, and
-      <filename>recon.csv</filename>.</para>
-      <para>The <literal>"recordDelimiter"</literal> property enables you to 
-      specify the separator between each record.</para>
-     </listitem>
+     <term><literal>logType</literal></term>
+        <listitem><para>The format of the audit log. The log type can be one
+            of the following:</para>
+            <itemizedlist>
+                <listitem>
+                    <para><literal>csv</literal> - write to a comma-separated
+                    variable format file.</para>
+                    <para>The <literal>"location"</literal> property indicates
+                    the name of the directory in which the file should be written,
+                    relative to the directory in which you installed OpenIDM.</para>
+                    <para>Audit file names are fixed, <filename>access.csv</filename>,
+                    <filename>activity.csv</filename>, and <filename>recon.csv</filename>.
+                    </para>
+                    <para>The <literal>"recordDelimiter"</literal> property
+                    enables you to specify the separator between each record.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para><literal>repository</literal> - write to the OpenIDM
+                    database repository.</para>
+                    <para>OpenIDM stores entries under the
+                    <literal>/openidm/repo/audit/</literal> context. Such entries
+                    appear as <literal>audit/access/<replaceable>_id</replaceable></literal>,
+                    <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
+                    <literal>audit/recon/<replaceable>_id</replaceable></literal>,
+                    where the <replaceable>_id</replaceable> is the UUID of the
+                    entry, such as <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.
+                    </para>
+                    <para>In the OrientDB repository, OpenIDM stores log records in the
+                    <literal>audit_access</literal>, <literal>audit_activity</literal>,
+                    and <literal>audit_recon</literal> tables.</para>
+                    <para>In a JDBC repository, OpenIDM stores records in the
+                    <literal>auditaccess</literal>, <literal>auditactivity</literal>,
+                    and <literal>auditrecon</literal> tables.</para>
+                    <para>The <literal>"useForQueries"</literal> boolean property
+                    indicates whether the repository logger should be used to service
+                    reads and query requests. The value is <literal>true</literal>
+                    by default. If <literal>"useForQueries"</literal> is set to
+                    <literal>false</literal>, the CSV file is used to service read
+                    and query requests.</para>
+                </listitem>
+                <!-- Not yet committed:
+                <listitem>
+                    <para><literal>router</literal> - enables log events to be
+                    directed to any endpoint in the system, for example,
+                    <literal>system/scriptedsql</literal> or <literal>endpoint/myhandler</literal>.
+                    </para>
+                </listitem>
+                -->
+            </itemizedlist>
+        </listitem>
     </varlistentry>
-    <varlistentry>
-     <term><literal>repository</literal></term>
-     <listitem>
-      <para>Write to the OpenIDM database repository.</para>
-      <para>OpenIDM stores entries under the
-      <literal>/openidm/repo/audit/</literal> context. Such entries appear as
-      <literal>audit/access/<replaceable>_id</replaceable></literal>,
-      <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
-      <literal>audit/recon/<replaceable>_id</replaceable></literal>, where
-      the <replaceable>_id</replaceable> is the UUID of the entry, such as
-      <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.</para>
-      <para>In the OrientDB repository, OpenIDM stores records in
-      <literal>audit_access</literal>, <literal>audit_activity</literal>,
-      and <literal>audit_recon</literal> tables.</para>
-      <para>In a JDBC repository, OpenIDM stores records in
-      <literal>auditaccess</literal>, <literal>auditactivity</literal>, and
-      <literal>auditrecon</literal> tables.</para>
-     </listitem>
-    </varlistentry>
-   </variablelist>
+    </variablelist>
+  </section>
+
+  <section xml:id="audit-exception-formatter">
+      <title>Exception Formatter</title>
+      <para>The <literal>exceptionFormatter</literal> property specifies
+      the name and type of file that handles the formatting and display of
+      exceptions thrown by the audit logger. Currently,
+      <literal>"text/javascript"</literal> is the only supported type.</para>
+      <para>The <literal>"file"</literal> property provides the path to the
+      script file that performs the formatting. The default exception formatter
+      is <literal>"bin/defaults/script/audit/stacktraceFormatter.js"</literal>.</para>
   </section>
  </section>
 

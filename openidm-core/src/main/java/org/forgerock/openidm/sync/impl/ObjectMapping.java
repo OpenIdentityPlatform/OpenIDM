@@ -591,7 +591,16 @@ class ObjectMapping implements SynchronizationListener {
      *
      *     };
      * </pre>
-     * @param params
+     * @param params the input parameters to proceed with the pre-assessed job
+     * includes state from previous pre-assessment (source or target sync operation),
+     * plus instructions of what to execute. Specifically beyond the pre-asessed state
+     * it expects changes to params
+     * - action: the desired action to execute 
+     * - situation (optional): the situation to expect before executing the action. 
+     * To enforce that the action is only executed if the situation didn't change, 
+     * supply the situation from the pre-assessment. 
+     * To attempt execution of the action without enforcing the situation check,
+     * supply no situation param
      * @throws SynchronizationException
      */
     public void performAction(JsonValue params) throws SynchronizationException {
@@ -648,12 +657,17 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     top.assessSituation();
                 }
-                Situation situation = params.get("situation").required().asEnum(Situation.class);
-                op.action = action;
-                if (!situation.equals(op.situation)) {
-                    exception = new SynchronizationException(  "Expected situation does not match. Expect: " + situation.name() + " Found: " + op.situation.name());
-                    throw  exception;
+                // IF an expected situation is supplied, compare and reject if current situation changed
+                if (params.isDefined("situation")) {
+                    Situation situation = params.get("situation").required().asEnum(Situation.class);
+                    if (!situation.equals(op.situation)) {
+                        exception = new SynchronizationException(
+                                "Expected situation does not match. Expect: " + situation.name() 
+                                + " Found: " + op.situation.name());
+                        throw exception;
+                    }
                 }
+                op.action = action;
                 op.performAction();
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
@@ -1738,7 +1752,17 @@ class ObjectMapping implements SynchronizationListener {
                     } else if (results.size() == 1) {
                         JsonValue resultValue = results.get((Integer) 0).required();
                         targetObjectAccessor = getCorrelatedTarget(resultValue);
-                        situation = Situation.FOUND;
+                        
+                        Link checkExistingLink = new Link(ObjectMapping.this);
+                        checkExistingLink.getLinkForTarget(targetObjectAccessor.getLocalId());
+                        if (checkExistingLink._id == null || checkExistingLink.sourceId == null) {
+                            situation = Situation.FOUND;
+                        } else {
+                            situation = Situation.FOUND_ALREADY_LINKED;
+                            // TODO: consider enhancements:
+                            // For reporting, should it log existing link and source
+                            // What actions should be available for a found, already linked
+                        }
                     } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
                     } else {

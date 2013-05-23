@@ -66,7 +66,7 @@ import org.supercsv.util.CsvContext;
  *
  * @author aegloff
  */
-public class CSVAuditLogger implements AuditLogger {
+public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);
 
     public final static String CONFIG_LOG_LOCATION = "location";
@@ -86,6 +86,7 @@ public class CSVAuditLogger implements AuditLogger {
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         String location = null;
         try {
+            super.setConfig(config, ctx);
             location = (String) config.get(CONFIG_LOG_LOCATION);
             auditLogDir = IdentityServer.getFileForWorkingPath(location);
             logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());
@@ -189,7 +190,7 @@ public class CSVAuditLogger implements AuditLogger {
                     new Optional(), // changedFields
                     new Optional(), // message
                     new Optional(), // objectId
-                    new Optional(), // parentActionid
+                    new Optional(), // parentActionId
                     new Optional(), // passwordChanged
                     new Optional(), // requester
                     new Optional(), // rev
@@ -257,7 +258,7 @@ public class CSVAuditLogger implements AuditLogger {
                 String actionId = (String)params.get("parentActionId");
                 List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
                 for (Map<String, Object> entry : reconEntryList) {
-                    if (entry.get("parentActionid").equals(actionId)) {
+                    if (entry.get("parentActionId").equals(actionId)) {
                         rawEntryList.add(entry);
                     }
                 }

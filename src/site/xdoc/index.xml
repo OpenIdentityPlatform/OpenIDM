@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <document
@@ -38,6 +38,11 @@
     business process handling and compliance. A flexible user interface
     combined with a robust workflow engine make OpenIDM ready for any
     identity management project.</p>
+    
+   <p>See the <a
+    href="https://wikis.forgerock.org/confluence/display/openidm/OpenIDM+Roadmap"
+    >OpenIDM Roadmap</a> for our plans to add standard, core, and cloud
+    features in upcoming deliveries.</p>
   </section>
   <section name="Welcome Users">
    <p>The OpenIDM community shares an interest in improving and extending
