@@ -38,8 +38,6 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.cluster.ClusterEvent;
@@ -48,17 +46,22 @@ import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
+import org.forgerock.openidm.osgi.ServiceTrackerListener;
+import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +76,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service")})
-public class HealthService implements HealthInfo, ClusterEventListener {
+public class HealthService implements HealthInfo, ClusterEventListener, ServiceTrackerListener {
 
     public static final String PID = "org.forgerock.openidm.health";
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
@@ -89,22 +92,12 @@ public class HealthService implements HealthInfo, ClusterEventListener {
     FrameworkListener frameworkListener;
     ServiceListener svcListener;
     BundleListener bundleListener;
+    
+    static ServiceTracker tracker;
 
     ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    @Reference(
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-            bind = "bindClusterManagementService",
-            unbind = "unbindClusterManagementService")
     ClusterManagementService cluster;
-    protected void bindClusterManagementService(ClusterManagementService clusterManagementService) {
-        cluster = clusterManagementService;
-        cluster.register(LISTENER_ID, this);
-    }
-    protected void unbindClusterManagementService(ClusterManagementService clusterManagementService) {
-        cluster.unregister(LISTENER_ID);
-        cluster = null;
-    }
     
     // Whether we consider the underlying framework as started
     private volatile boolean frameworkStarted = false;
@@ -157,7 +150,8 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         "org.forgerock.openidm.repo-jdbc",
         "org.forgerock.openidm.repo-orientdb",
         "org.forgerock.openidm.config",
-        "org.forgerock.openidm.crypto"
+        "org.forgerock.openidm.crypto",
+        "org.forgerock.openidm.cluster"
         // For now, default to not check for the workflow engine
         //"org.activiti.engine",
         //"org.activiti.osgi",
@@ -190,7 +184,8 @@ public class HealthService implements HealthInfo, ClusterEventListener {
             "org.forgerock.openidm.router",
             "org.forgerock.openidm.scheduler",
             "org.forgerock.openidm.scope",
-            "org.forgerock.openidm.taskscanner"
+            "org.forgerock.openidm.taskscanner",
+            "org.forgerock.openidm.cluster"
             //"org.forgerock.openidm.bootrepo.orientdb",
             //"org.forgerock.openidm.bootrepo.jdbc",
             //"org.forgerock.openidm.workflow.activiti.engine",
@@ -205,6 +200,10 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         requiredServices = new ArrayList<String>();
         requiredServices.addAll(Arrays.asList(defaultRequiredServices));
         applyPropertyConfig();
+        
+        // Set up tracker
+        BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
+        tracker = initServiceTracker(ctx);
 
         // Handle framework changes
         frameworkListener = new FrameworkListener() {
@@ -346,6 +345,48 @@ public class HealthService implements HealthInfo, ClusterEventListener {
     }
 
     /**
+     * Initialize the service tracker and open it.
+     * 
+     * @param context the BundleContext
+     * @return the ServiceTracker
+     */
+    private ServiceTracker initServiceTracker(BundleContext context) {
+        ServiceTracker tracker = new ServiceTrackerNotifier(context, ClusterManagementService.class.getName(), null, this);
+        tracker.open();
+        return tracker;
+    }
+
+    @Override
+    public void addedService(ServiceReference reference, Object service) {
+        ClusterManagementService clusterService = (ClusterManagementService) service;
+        if (clusterService != null) {
+            clusterService.register(LISTENER_ID, this);
+            cluster = clusterService;
+        }
+    }
+    
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        if (cluster != null) {
+            cluster.unregister(LISTENER_ID);
+            cluster = null;
+        }
+    }
+
+    @Override
+    public void modifiedService(ServiceReference reference, Object service) {
+        ClusterManagementService clusterService = (ClusterManagementService) service;
+        if (cluster != null) {
+            cluster.unregister(LISTENER_ID);
+            cluster = null;
+        }
+        if (clusterService != null) {
+            clusterService.register(LISTENER_ID, this);
+            cluster = clusterService;
+        }
+    }
+
+    /**
      * Check and update the application state
      */
     private void checkState() {
@@ -399,7 +440,7 @@ public class HealthService implements HealthInfo, ClusterEventListener {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
         } else if (!clusterUp) {
-            if (!cluster.isStarted()) {
+            if (cluster != null && !cluster.isStarted()) {
                 cluster.startClusterManagement();
             }
             updatedAppState = AppState.ACTIVE_NOT_READY;
@@ -512,6 +553,9 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         if (bundleListener != null) {
             context.getBundleContext().removeBundleListener(bundleListener);
         }
+        
+        // Close the tracker
+        tracker.close();
         
         // For now we have to rely on this bundle stopping as an indicator
         // that the system may be shutting down
