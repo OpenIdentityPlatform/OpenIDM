@@ -248,7 +248,7 @@
         <jackson.version>1.9.10</jackson.version>
         <restlet.version>2.0.15</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-        <authnfilter.common.version>0.1.1-SNAPSHOT</authnfilter.common.version>
+        <authnfilter.commons.version>0.1.1-SNAPSHOT</authnfilter.commons.version>
         
         <!-- Commons JSON versions -->
         <commons.util.version>1.1.0-SNAPSHOT</commons.util.version>
@@ -412,19 +412,14 @@
                 <version>1.1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>org.forgerock</groupId>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-container</artifactId>
-                <version>${authnfilter.common.version}</version>
+                <version>${authnfilter.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.forgerock</groupId>
-                <artifactId>forgerock-jaspi-filter</artifactId>
-                <version>${authnfilter.common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock</groupId>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-iwa-module</artifactId>
-                <version>${authnfilter.common.version}</version>
+                <version>${authnfilter.commons.version}</version>
             </dependency>
 
             <!-- Commons -->

@@ -1,12 +1,9 @@
-package org.forgerock.jaspi.config;
+package org.forgerock.openidm.jaspi.config;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.forgerock.jaspi.container.callback.CallbackHandlerImpl;
-import org.forgerock.jaspi.container.config.AuthConfigFactoryImpl;
-import org.forgerock.jaspi.container.config.AuthConfigProviderImpl;
-import org.forgerock.jaspi.container.config.ServerAuthConfigImpl;
+import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -14,9 +11,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.config.AuthConfigFactory;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,15 +24,28 @@ import java.util.Map;
  *     <code>
  * {
  *     "server-auth-config" : {
- *         "JWT-IWA" : {
+ *         "iwa-ad-passthrough" : {
  *             "session-module" : {
- *                 "classname" : "org.forgerock.jaspi.container.modules.JWTModule"
- *                 "some-setting" : "some-value"
- *             }
- *             "auth-module" : {
- *                 "classname" : "org.forgerock.jaspi.container.modules.IWAADModule"
- *                 "some-setting" : "some-value"
- *             }
+ *                 "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+ *             },
+ *             "auth-modules" : [
+ *                 {
+ *                     "class-name" : "org.forgerock.openidm.jaspi.modules.IWAModule",
+ *                     "some-setting" : "some-value"
+ *                 },
+ *                 {
+ *                     "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "some-setting" : "some-value"
+ *                 }
+ *             ]
+ *         },
+ *         "ad-passthrough-only" : {
+ *             "auth-modules" : [
+ *                 {
+ *                     "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "passThroughAuth" : "system/AD/account"
+ *                 }
+ *             ]
  *         }
  *     }
  * }
@@ -57,50 +66,21 @@ public class OSGiAuthnFilterBuilder {
         EnhancedConfig config = JSONEnhancedConfig.newInstance();
         JsonValue jsonConfig = config.getConfigurationAsJson(context);
 
-        // Expecting a JSON structured like this
-        /*
-        {
-            "server-auth-config" : {
-                "JWT-IWA" : {
-                    "session-module" : {
-                        "classname" : "org.forgerock.jaspi.container.modules.JWTModule"
-                        "some-setting" : "some-value"
-                    }
-                    "auth-module" : {
-                        "classname" : "org.forgerock.jaspi.container.modules.IWAADModule"
-                        "some-setting" : "some-value"
-                    }
-                }
-            }
-        }
-         */
-
         if (jsonConfig == null ) {
             // Something strange going on, no configurations found
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
             return;
         }
 
-        CallbackHandler handler = new CallbackHandlerImpl();
-        ServerAuthConfigImpl sac = new ServerAuthConfigImpl(null, null, handler);
-
+        Map<String, Map<String, Object>> authContexts = new HashMap<String, Map<String, Object>>();
         // For each ServerAuthConfig
         for (String s : jsonConfig.get("server-auth-config").required().keys()) {
-
             Map<String, Object> contextProperties = jsonConfig.get("server-auth-config").required().get(s).asMap();
-            sac.registerAuthContext(s, contextProperties);
+            authContexts.put(s, contextProperties);
         }
 
         try {
-            // Now assemble the factory-provider-config-context-module structure
-            AuthConfigFactory factory = new AuthConfigFactoryImpl();
-            AuthConfigProviderImpl provider = new AuthConfigProviderImpl(null, null);
-            provider.setServerAuthConfig(sac);
-            factory.registerConfigProvider(provider, null, null, null);
-
-            // Set this chain to be default
-            AuthConfigFactory.setFactory(factory);
-
+            ConfigurationManager.configure(authContexts);
         } catch (AuthException e) {
             // TODO log and fail
         }

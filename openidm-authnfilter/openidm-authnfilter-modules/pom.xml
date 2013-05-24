@@ -50,16 +50,12 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock</groupId>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-container</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock</groupId>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-iwa-module</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock</groupId>
-            <artifactId>forgerock-jaspi-filter</artifactId>
         </dependency>
     </dependencies>
 
