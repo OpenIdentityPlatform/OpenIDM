@@ -57,7 +57,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock</groupId>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-container</artifactId>
         </dependency>
         <dependency>
