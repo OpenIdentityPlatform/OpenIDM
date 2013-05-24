@@ -38,6 +38,13 @@ public interface ClusterManagementService {
      * @param listener  the listener implementation
      */
     public void register(String listenerId, ClusterEventListener listener);
+
+    /**
+     * Unregisters a listener
+     * 
+     * @param listenerId the listener's ID
+     */
+    public void unregister(String listenerId);
     
     /**
      * Renews the Cluster Management Service's recovery lease. This should

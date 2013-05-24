@@ -327,6 +327,12 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
         listeners.put(listenerId, listener);
     }
     
+    
+    public void unregister(String listenerId) {
+        logger.debug("Unregistering listener {}", listenerId);
+        listeners.remove(listenerId);
+    }
+    
     public void renewRecoveryLease(String instanceId) {
         synchronized (repoLock) {
             try {
