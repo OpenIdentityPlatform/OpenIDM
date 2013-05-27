@@ -18,26 +18,27 @@
  */
 package org.forgerock.openidm.osgi;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
- * Service helper utility, * 
- * Based on apache aries org/apache/aries/jndi/services/ServiceHelper.java
+ * Service helper utility, * Based on apache aries
+ * org/apache/aries/jndi/services/ServiceHelper.java
  */
-public class ServiceUtil {
+public final class ServiceUtil {
 
-    private static class ServicePair {
-        private ServiceReference ref;
-        private Object service;
+    private ServiceUtil() {
     }
 
-    public static Object getService(BundleContext ctx, OsgiName lookupName, String id, boolean requireService) {
+    public static Object getService(BundleContext ctx, OsgiName lookupName, String id,
+            boolean requireService) {
         String interfaceName = lookupName.getInterface();
         String filter = lookupName.getFilter();
         String serviceName = lookupName.getServiceName();
@@ -50,7 +51,7 @@ public class ServiceUtil {
             }
         }
 
-        ServicePair pair = null;
+        Pair<ServiceReference, Object> pair = null;
 
         if (!lookupName.isServiceNameBased()) {
             pair = findService(ctx, interfaceName, filter);
@@ -60,7 +61,9 @@ public class ServiceUtil {
             if (id == null) {
                 filter = "(osgi.jndi.service.name=" + serviceName + ')';
             } else {
-                filter = "(&(" + Constants.SERVICE_ID + '=' + id + ")(osgi.jndi.service.name=" + serviceName + "))";
+                filter =
+                        "(&(" + Constants.SERVICE_ID + '=' + id + ")(osgi.jndi.service.name="
+                                + serviceName + "))";
             }
             pair = findService(ctx, null, filter);
         }
@@ -68,16 +71,17 @@ public class ServiceUtil {
         Object result = null;
         if (pair != null) {
             if (requireService) {
-                result = pair.service;
+                result = pair.getLeft();
             } else {
-                result = pair.ref;
+                result = pair.getRight();
             }
         }
         return result;
     }
 
-    private static ServicePair findService(BundleContext ctx, String interfaceName, String filter) {
-        ServicePair p = null;
+    private static Pair<ServiceReference, Object> findService(BundleContext ctx,
+            String interfaceName, String filter) {
+        Pair<ServiceReference, Object> p = null;
 
         try {
             ServiceReference[] refs = ctx.getServiceReferences(interfaceName, filter);
@@ -94,16 +98,15 @@ public class ServiceUtil {
                     Object service = ctx.getService(ref);
 
                     if (service != null) {
-                        p = new ServicePair();
-                        p.ref = ref;
-                        p.service = service;
+                        p = new ImmutablePair<ServiceReference, Object>(ref, service);
                         break;
                     }
                 }
             }
 
         } catch (InvalidSyntaxException e) {
-            // If we get an invalid syntax exception we just ignore it. Null will be returned which is valid
+            // If we get an invalid syntax exception we just ignore it. Null
+            // will be returned which is valid
         }
         return p;
     }

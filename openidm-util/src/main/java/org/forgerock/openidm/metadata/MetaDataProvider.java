@@ -32,7 +32,7 @@ import org.forgerock.json.fluent.JsonValue;
  * Meta data provider interface to describe configuration requirements of a
  * bundle. Use a meta-data.json file to declare a meta data provider for a
  * bundle*
- * 
+ *
  * @author aegloff
  * @author ckienle
  */
@@ -41,7 +41,7 @@ public interface MetaDataProvider {
     /**
      * Meta-data describing which configuration properties need to be encrypted
      * for a given configuration.
-     * 
+     *
      * @param pidOrFactory
      *            the PID of either the managed service; or for factory
      *            configuration the PID of the Managed Service Factory
@@ -51,7 +51,7 @@ public interface MetaDataProvider {
      * @param config
      *            the new configuration that is being set. May or may not
      *            already have encrypted values.
-     * 
+     *
      * @return a list of configuration properties (identified by JSON pointers)
      *         that need to be encrypted if this MetaDataProvider is responsible
      *         for this configuration. Empty list if none should be encrypted.
@@ -60,14 +60,17 @@ public interface MetaDataProvider {
      *             thrown if this provider knows that the given configuration
      *             has associated meta-data, but the meta-data is not yet
      *             available.
+     * @throws NotConfiguration
+     *             throws when the config parameter is not represent a real
+     *             configuration.
      */
     List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration;
 
     /**
      * Sets a callback to be used to refresh/update the configuration
-     * requirements/properties
-     * 
+     * requirements/properties.
+     *
      * @param callback
      *            a MetaDataProviderCallback implementation
      */

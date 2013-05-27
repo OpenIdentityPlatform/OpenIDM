@@ -1,8 +1,35 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
 package org.forgerock.openidm.core;
 
 import java.util.Stack;
 
 public class PropertyUtil {
+
+    private PropertyUtil() {
+    }
 
     public enum Delimiter {
         DOLLAR {
@@ -48,7 +75,7 @@ public class PropertyUtil {
      * as nested variable placeholders, which are substituted from inner most to
      * outer most. Configuration properties override system properties.
      * </p>
-     * 
+     *
      * @param val
      *            The string on which to perform property substitution.
      * @param propertyAccessor
@@ -137,8 +164,8 @@ public class PropertyUtil {
                         if (null != substValue) {
                             return substValue;
                         } else {
-                            propertyStack.peek().append(delimiter.getStartString()).append(variable)
-                                    .append(DELIM_STOP);
+                            propertyStack.peek().append(delimiter.getStartString())
+                                    .append(variable).append(DELIM_STOP);
                             return propertyStack.peek().toString();
                         }
                     } else {
@@ -147,8 +174,8 @@ public class PropertyUtil {
                         if (null != substValue) {
                             propertyStack.peek().append(substValue);
                         } else {
-                            propertyStack.peek().append(delimiter.getStartString()).append(variable)
-                                    .append(DELIM_STOP);
+                            propertyStack.peek().append(delimiter.getStartString())
+                                    .append(variable).append(DELIM_STOP);
                         }
                     }
                 }
@@ -168,6 +195,7 @@ public class PropertyUtil {
         return parentBuilder.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T getSubstituteValue(Class<T> type, String variable,
             final PropertyAccessor propertyAccessor) {
         T substValue = null;

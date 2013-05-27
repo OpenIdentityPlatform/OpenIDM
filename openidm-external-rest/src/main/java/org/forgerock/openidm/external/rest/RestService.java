@@ -59,6 +59,7 @@ import org.forgerock.json.resource.UpdateRequest;
 
 
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 
@@ -113,8 +114,6 @@ public class RestService implements SingletonResourceProvider {
     public static final String ARG_HEADERS = "_headers";
     public static final String ARG_AUTHENTICATE = "_authenticate";
     public static final String ARG_METHOD = "_method";
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -247,7 +246,7 @@ public class RestService implements SingletonResourceProvider {
                     try {
                         if (text != null && text.trim().length() > 0) {
                             // TODO Null check
-                            handler.handleResult(new JsonValue(mapper.readValue(text, Map.class)));
+                            handler.handleResult(JsonUtil.parseStringified(text));
                         }
                     } catch (Exception ex) {
                         handler.handleError(new InternalServerErrorException(

@@ -24,6 +24,11 @@
 
 package org.forgerock.openidm.util;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonTransformer;
@@ -34,15 +39,117 @@ import org.forgerock.openidm.core.PropertyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonUtil {
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter.Indenter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
+import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+
+public final class JsonUtil {
+
+    private static final ObjectMapper OBJECT_MAPPER;
+
+    private static final ObjectWriter PRETTY_WRITER;
+
+    static {
+        OBJECT_MAPPER = new ObjectMapper();
+        OBJECT_MAPPER.registerModule(new AfterburnerModule());
+        OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        OBJECT_MAPPER.writer().with(SerializationFeature.INDENT_OUTPUT);
+        OBJECT_MAPPER.reader().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        // TODO Make it configurable for Audit service
+        // .configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
+
+        Indenter indenter = new PrettyIndenter();
+        DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+        prettyPrinter.indentObjectsWith(indenter);
+        prettyPrinter.indentArraysWith(indenter);
+        PRETTY_WRITER = OBJECT_MAPPER.writer(prettyPrinter);
+    }
 
     /**
      * Setup logging for the {@link JsonUtil}. Only for diagnostic reason!
      */
     private final static Logger logger = LoggerFactory.getLogger(JsonUtil.class);
 
+    private JsonUtil() {
+    }
+
     public static boolean jsonIsNull(JsonValue value) {
         return (value == null || value.isNull());
+    }
+
+    public static boolean isEncrypted(String value) {
+        boolean encrypted = false;
+        // TODO: delegate the sanity check if String is a candidate for parsing
+        // to the crypto lib
+        boolean candidate =
+                value != null && value.startsWith("{\"$crypto\":{") && value.endsWith("\"}}");
+        if (candidate) {
+            try {
+                JsonValue jsonValue = parseStringified(value);
+                encrypted = JsonCrypto.isJsonCrypto(jsonValue);
+            } catch (JsonException ex) {
+                encrypted = false; // IF we can't parse the string assume it's
+                // not in an encrypted format we support
+            }
+        }
+        return encrypted;
+    }
+
+    public static ObjectMapper build() {
+        return new ObjectMapper(OBJECT_MAPPER.getFactory(),
+                (DefaultSerializerProvider) OBJECT_MAPPER.getSerializerProvider(),
+                (DefaultDeserializationContext) OBJECT_MAPPER.getDeserializationContext());
+    }
+
+    public static String writeValueAsString(JsonValue value) throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsString(value.getObject());
+    }
+
+    public static String writePrettyValueAsString(JsonValue value) throws JsonProcessingException {
+        return PRETTY_WRITER.writeValueAsString(value.getObject());
+    }
+
+    /**
+     *
+     * @param content
+     * @return
+     */
+    public static JsonValue parseStringified(String content) {
+        JsonValue jsonValue = null;
+        try {
+            Object parsedValue = OBJECT_MAPPER.readValue(content, Object.class);
+            jsonValue = new JsonValue(parsedValue);
+        } catch (IOException ex) {
+            throw new JsonException("String passed into parsing is not valid JSON", ex);
+        }
+        return jsonValue;
+    }
+
+    /**
+     *
+     * @param content
+     * @return
+     */
+    public static JsonValue parseURL(URL content) {
+        JsonValue jsonValue = null;
+        try {
+            Object parsedValue = OBJECT_MAPPER.readValue(content, Object.class);
+            jsonValue = new JsonValue(parsedValue);
+        } catch (IOException ex) {
+            throw new JsonException("URL passed into parsing is not valid JSON", ex);
+        }
+        return jsonValue;
     }
 
     public static JsonTransformer getPropertyJsonTransformer(final JsonValue properties,
@@ -62,6 +169,7 @@ public class JsonUtil {
             this.eager = !allowUnresolved;
             this.properties = new PropertyAccessor() {
                 @Override
+                @SuppressWarnings("unchecked")
                 public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
                     JsonPointer pointer = new JsonPointer(key.split("\\."));
                     try {
@@ -94,8 +202,11 @@ public class JsonUtil {
             };
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void transform(JsonValue value) throws JsonException {
+        public void transform(JsonValue value) {
             if (null != value && value.isString()) {
                 try {
                     value.setObject(PropertyUtil.substVars(value.asString(), properties,
@@ -104,6 +215,57 @@ public class JsonUtil {
                     throw new JsonValueException(value, e.getMessage());
                 }
             }
+        }
+    }
+
+    /**
+     * Indenter, part of formatting Jackson output in pretty print Makes the
+     * number of spaces to use per indent configurable.
+     *
+     */
+    private static class PrettyIndenter implements Indenter {
+        // Default to 4 spaces per level
+        int noOfSpaces = 4;
+
+        final static String SYSTEM_LINE_SEPARATOR;
+        static {
+            String lf = null;
+            try {
+                lf = System.getProperty("line.separator");
+            } catch (Throwable t) {
+            } // access exception?
+            SYSTEM_LINE_SEPARATOR = (lf == null) ? "\n" : lf;
+        }
+
+        final static int SPACE_COUNT = 64;
+        final static char[] SPACES = new char[SPACE_COUNT];
+        static {
+            Arrays.fill(SPACES, ' ');
+        }
+
+        /**
+         * Configure how many spaces to use per indent. Default is 4 spaces.
+         *
+         * @param noOfSpaces
+         */
+        public void setIndentSpaces(int noOfSpaces) {
+            this.noOfSpaces = noOfSpaces;
+        }
+
+        public boolean isInline() {
+            return false;
+        }
+
+        @Override
+        public void writeIndentation(JsonGenerator jg, int level) throws IOException,
+                JsonGenerationException {
+            jg.writeRaw(SYSTEM_LINE_SEPARATOR);
+            level = level * noOfSpaces;
+            while (level > SPACE_COUNT) { // should never happen but...
+                jg.writeRaw(SPACES, 0, SPACE_COUNT);
+                level -= SPACES.length;
+            }
+            jg.writeRaw(SPACES, 0, level);
         }
     }
 }

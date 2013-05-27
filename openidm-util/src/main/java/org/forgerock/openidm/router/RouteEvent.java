@@ -31,7 +31,7 @@ import java.util.EventObject;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class RouteEvent extends EventObject {
@@ -40,9 +40,9 @@ public class RouteEvent extends EventObject {
     /**
      * Reference to the service that had a change occur in its lifecycle.
      */
-    private final Route route;
+    private final transient Route route;
 
-    private final Router router;
+    private final transient Router router;
 
     /**
      * Type of service lifecycle change.
@@ -69,7 +69,7 @@ public class RouteEvent extends EventObject {
 
     /**
      * Creates a new service event object.
-     * 
+     *
      * @param type
      *            The event type.
      * @param router
@@ -88,7 +88,7 @@ public class RouteEvent extends EventObject {
      * Returns a {@code Route} that had a change occur in its lifecycle.
      * <p>
      * This {@code Route} is the source of the event.
-     * 
+     *
      * @return {@code Route} that had a lifecycle change.
      */
     public Route getRoute() {
@@ -98,7 +98,7 @@ public class RouteEvent extends EventObject {
     /**
      * Returns a {@code Router} where a change had occurred in.
      * <p>
-     * 
+     *
      * @return {@code Router} that had the change.
      */
     public Router getRouter() {
@@ -111,7 +111,7 @@ public class RouteEvent extends EventObject {
      * <li>{@link #REGISTERED}</li>
      * <li>{@link #UNREGISTERING}</li>
      * </ul>
-     * 
+     *
      * @return Type of service lifecycle change.
      */
 

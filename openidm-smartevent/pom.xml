@@ -30,8 +30,9 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-smartevent</artifactId>
-    <name>OpenIDM smart event framework</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM SmartEvent Bundle</name>
+    <description>This bundle is in experimental stage</description>
 
     <dependencies>
         <dependency>
@@ -46,13 +47,13 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert-core</artifactId>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

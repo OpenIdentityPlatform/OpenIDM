@@ -33,6 +33,7 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -56,6 +57,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -98,6 +100,8 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.jetty.Param;
+import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.joda.time.DateTime;
@@ -106,7 +110,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class KeystoreResourceProvider implements SingletonResourceProvider {
@@ -125,7 +129,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
 
     private final String resourceName;
 
-    public KeystoreResourceProvider( String resourceName, KeyStoreHandler store) {
+    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store) {
         this.store = store;
         this.resourceName = resourceName;
     }
@@ -205,23 +209,33 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                                 request.getContent().get("algorithm").defaultTo("RSA").asString();
                         String signatureAlgorithm =
                                 request.getContent().get("signatureAlgorithm").defaultTo(
-                                        "MD5WithRSAEncryption").asString();  //SHA256WithRSAEncryption
+                                        "MD5WithRSAEncryption").asString(); // SHA256WithRSAEncryption
                         int keySize =
                                 request.getContent().get("keySize").defaultTo(1024).asInteger();
                         String validFrom = request.getContent().get("validFrom").asString();
                         String validTo = request.getContent().get("validTo").asString();
 
                         // Generate the cert
-                        Certificate cert =
+                        Pair<X509Certificate, PrivateKey> cert =
                                 generateCertificate(domainName, algorithm, keySize,
                                         signatureAlgorithm, validFrom, validTo);
 
+                        String password =
+                                request.getContent().get("password").defaultTo(
+                                        Param.getKeystoreKeyPassword()).asString();
+
                         // Add it to the store and reload
-                        store.getStore().setCertificateEntry(resourceId, cert);
+                        store.getStore().setCertificateEntry(resourceId, cert.getKey());
+                        store.getStore().setEntry(
+                                resourceId,
+                                new KeyStore.PrivateKeyEntry(cert.getValue(),
+                                        new Certificate[]{cert.getKey()}),
+                                new KeyStore.PasswordProtection(password.toCharArray()));
                         store.store();
+
                         reload();
 
-                        handler.handleResult(returnCertificate(resourceId, cert));
+                        handler.handleResult(returnCertificate(resourceId, cert.getKey()));
                     }
                 } else {
                     handler.handleError(new BadRequestException("Unsupported action "
@@ -274,7 +288,8 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                 } else {
                     Certificate cert = store.getStore().getCertificate(resourceId);
 
-                    handler.handleResult(new Resource(resourceId, null, returnCertificate(resourceId, cert)));
+                    handler.handleResult(new Resource(resourceId, null, returnCertificate(
+                            resourceId, cert)));
                 }
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
@@ -343,7 +358,6 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             context.init(null, managers, null);
             SSLContext.setDefault(context);
         }
-
 
         private JsonValue returnCertificate(String alias, Certificate cert) throws Exception {
             JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
@@ -433,7 +447,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             handler.handleError(e);
         }
 
-        //TODO move this out from here
+        // TODO move this out from here
         private void reload() throws Exception {
             KeyManagerFactory kmf =
                     KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -466,7 +480,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
     /**
      * Generates a certificate from a supplied string representation of one, and
      * a supplied type.
-     * 
+     *
      * @param content
      *            A JsonValue representation of a certificate
      * @return The generated certificate
@@ -488,14 +502,15 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
 
     /**
      * Generates a self signed certificate from a given domain name.
-     * 
+     *
      * @param domainName
      *            the domain name to use for the new certificate
      * @return The generated certificate
      * @throws Exception
      */
-    private X509Certificate generateCertificate(String domainName, String algorithm, int keySize,
-            String signatureAlgorithm, String validFrom, String validTo) throws Exception {
+    private Pair<X509Certificate, PrivateKey> generateCertificate(String domainName,
+            String algorithm, int keySize, String signatureAlgorithm, String validFrom,
+            String validTo) throws Exception {
 
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA",
                                                                                      // "BC"
@@ -556,7 +571,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         cert.checkValidity(new Date());
         cert.verify(cert.getPublicKey());
 
-        return cert;
+        return Pair.of(cert, keyPair.getPrivate());
     }
 
     public static X509Certificate sign(PKCS10CertificationRequest inputCSR, PrivateKey caPrivate,

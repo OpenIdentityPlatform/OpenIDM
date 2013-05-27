@@ -36,6 +36,7 @@ import java.util.Set;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
@@ -53,6 +54,7 @@ import org.forgerock.json.fluent.JsonValue;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
 
+import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +109,7 @@ public class AuthModule {
 
     /**
      * Authenticate the given username and password
-     * 
+     *
      * @param authcid
      *            the principal that the client used during authentication. This
      *            might be a user name, an email address, etc. The
@@ -271,7 +273,7 @@ public class AuthModule {
         Credential credential = null;
         if (retrCred instanceof String) {
             if (allowStringifiedEncryption) {
-                if (cryptoService.isEncrypted((String) retrCred)) {
+                if (JsonUtil.isEncrypted((String) retrCred)) {
                     JsonValue jsonRetrCred = cryptoService.decrypt((String) retrCred);
                     retrCred = jsonRetrCred == null ? null : jsonRetrCred.asString();
                 }
@@ -280,7 +282,7 @@ public class AuthModule {
         } else if (retrCred != null) {
             if (retrCred instanceof Map) {
                 JsonValue jsonRetrCred = new JsonValue(retrCred);
-                if (cryptoService.isEncrypted(jsonRetrCred)) {
+                if (JsonCrypto.isJsonCrypto(jsonRetrCred)) {
                     retrCred = cryptoService.decrypt(jsonRetrCred);
                     credential = new Password((String) retrCred);
                 } else {

@@ -34,6 +34,7 @@ import java.util.List;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -60,13 +61,12 @@ import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.engine.Utils;
-import org.forgerock.script.engine.Utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Description.
- * 
+ *
  * @author Paul C. Bryan
  * @author aegloff
  */
@@ -185,7 +185,7 @@ class ObjectMapping {
 
     /**
      * Create an instance of a mapping between source and target
-     * 
+     *
      * @param service
      *            The associated sychronization service
      * @param config
@@ -253,7 +253,7 @@ class ObjectMapping {
     /**
      * Mappings can share the same link tables. Establish the relationship
      * between the mappings and determine the proper link type to use
-     * 
+     *
      * @param allMappings
      *            The list of all existing mappings
      */
@@ -371,7 +371,7 @@ class ObjectMapping {
 
     /**
      * Source synchronization
-     * 
+     *
      * @param context
      *            fully-qualified source object identifier.
      * @param triplet
@@ -415,7 +415,7 @@ class ObjectMapping {
     // keep this class clean
     /**
      * TODO: Description.
-     * 
+     *
      * @param target
      *            TODO.
      * @throws ResourceException
@@ -446,7 +446,7 @@ class ObjectMapping {
     // keep this class clean
     /**
      * TODO: Description.
-     * 
+     *
      * @param target
      *            TODO.
      * @throws ResourceException
@@ -478,7 +478,7 @@ class ObjectMapping {
     // keep this class clean
     /**
      * TODO: Description.
-     * 
+     *
      * @param target
      *            TODO.
      * @throws ResourceException
@@ -511,7 +511,7 @@ class ObjectMapping {
 
     /**
      * TODO: Description.
-     * 
+     *
      * @param source
      *            TODO.
      * @param target
@@ -555,15 +555,15 @@ class ObjectMapping {
      * {@link ObjectMapping.TargetSyncOperation#toJsonValue()}.
      * <p/>
      * Script example:
-     * 
+     *
      * <pre>
      *     try {
      *          openidm.action('sync',recon.actionParam)
      *     } catch(e) {
-     * 
+     *
      *     };
      * </pre>
-     * 
+     *
      * @param params
      * @throws ResourceException
      */
@@ -698,7 +698,7 @@ class ObjectMapping {
 
     /**
      * Reconcile a given source ID
-     * 
+     *
      * @param context
      * @param sourceId
      *            the id to reconcile
@@ -764,7 +764,7 @@ class ObjectMapping {
 
     /**
      * TODO: Description.
-     * 
+     *
      * @param entry
      *            TODO.
      * @throws ResourceException
@@ -803,7 +803,7 @@ class ObjectMapping {
     /**
      * Execute a sync engine action explicitly, without going through situation
      * assessment.
-     * 
+     *
      * @param sourceObject
      *            the source object if applicable to the action
      * @param targetObject
@@ -862,7 +862,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * 
+         *
          * @throws ResourceException
          *             TODO.
          */
@@ -906,7 +906,7 @@ class ObjectMapping {
         /**
          * The set unqualified (local) source object ID That a source identifier
          * is set does not automatically imply that the source object exists.
-         * 
+         *
          * @return local identifier of the source object, or null if none
          */
         protected String getSourceObjectId() {
@@ -916,7 +916,7 @@ class ObjectMapping {
         /**
          * The set unqualified (local) targt object ID That a target identifier
          * is set does not automatically imply that the target object exists.
-         * 
+         *
          * @return local identifier of the target object, or null if none
          */
         protected String getTargetObjectId() {
@@ -1041,7 +1041,7 @@ class ObjectMapping {
 
         /**
          * Initializes the link representation
-         * 
+         *
          * @param link
          *            the link object for links that were found/exist in the
          *            repository, null to represent no existing link
@@ -1062,7 +1062,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * 
+         *
          * @param context
          *            The Context assigned to this operation.
          * @throws ResourceException
@@ -1088,7 +1088,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * 
+         *
          * @throws ResourceException
          *             TODO.
          */
@@ -1290,7 +1290,7 @@ class ObjectMapping {
         /**
          * Evaluates source valid for the supplied sourceObjectOverride, or the
          * source object associated with the sync operation if null
-         * 
+         *
          * @return whether valid for this mapping or not.
          * @throws ResourceException
          *             if evaluation failed.
@@ -1315,7 +1315,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * 
+         *
          * @return TODO.
          * @throws ResourceException
          *             TODO.
@@ -1341,7 +1341,7 @@ class ObjectMapping {
 
         /**
          * Executes the given script with the appropriate context information
-         * 
+         *
          * @param context
          *            The script hook name
          * @param scriptPair
@@ -1352,11 +1352,11 @@ class ObjectMapping {
         private Object execScript(final Context context,
                 final Pair<JsonPointer, ScriptEntry> scriptPair) throws ResourceException {
             if (scriptPair != null) {
-                if (scriptPair.snd.isActive()) {
+                if (scriptPair.getRight().isActive()) {
                     throw new ServiceUnavailableException("Failed to execute inactive script: "
-                            + scriptPair.snd.getName());
+                            + scriptPair.getRight().getName());
                 }
-                Script script = scriptPair.snd.getScript(context);
+                Script script = scriptPair.getRight().getScript(context);
 
                 Bindings bindings = script.createBindings();
                 bindings.putAll(triplet.map());
@@ -1384,7 +1384,7 @@ class ObjectMapping {
                     return script.eval();
                 } catch (Throwable t) {
                     logger.debug("ObjectMapping/{} script {} encountered exception at {}", name,
-                            scriptPair.snd.getName(), scriptPair.fst, t);
+                            scriptPair.getRight().getName(), scriptPair.getLeft(), t);
                     throw Utils.adapt(t);
                 }
             }
@@ -1776,7 +1776,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * 
+         *
          * @return TODO.
          */
         private JsonValue toJsonValue() {

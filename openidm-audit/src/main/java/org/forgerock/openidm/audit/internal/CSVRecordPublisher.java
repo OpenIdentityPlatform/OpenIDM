@@ -51,7 +51,7 @@ import com.lmax.disruptor.LifecycleAware;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  * @see <a
  *      href="https://github.com/FasterXML/jackson-dataformat-csv">jackson-dataformat-csv</a>
@@ -91,6 +91,9 @@ public class CSVRecordPublisher implements EventHandler<EventHolder>, LifecycleA
         writer = mapper.writer(schema);
         // AuditEvent result =
         // mapper.reader(AuditEvent.class).withSchema(schema).read(csv);
+
+
+        mapper.
 
         String location = null;
         try {

@@ -41,12 +41,11 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.Constants;
 
 /**
- * A NAME does ...
- * 
+ * A RouteBuilder does ...
+ *
  * @author Laszlo Hordos
  */
-//TODO Fix the fluent methods
-public class RouteBuilder {
+public final class RouteBuilder {
 
     private final Set<RouteItem> routes;
 
@@ -130,7 +129,7 @@ public class RouteBuilder {
             verify();
             routes.add(new RouteItem(collection, singleton, handler, mode, uriTemplate));
         } catch (NullPointerException e) {
-
+            /* ignore */
         }
         this.collection = null;
         this.singleton = null;
@@ -172,7 +171,9 @@ public class RouteBuilder {
             Object[] params = routes.toArray();
             for (int i = 0; i < params.length; i++) {
                 params[i] = ((RouteItem) params[i]).uriTemplate;
-                if (i > 0) sb.append(", ");
+                if (i > 0) {
+                    sb.append(", ");
+                }
                 sb.append(params[i]);
             }
             properties.put(ServerConstants.ROUTER_PREFIX, params);
@@ -216,7 +217,7 @@ public class RouteBuilder {
         return registered.toArray(new Route[registered.size()]);
     }
 
-    private class RouteItem {
+    private static class RouteItem {
         private final CollectionResourceProvider collection;
         private final SingletonResourceProvider singleton;
         private final RequestHandler handler;
@@ -248,25 +249,32 @@ public class RouteBuilder {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
 
             RouteItem routeItem = (RouteItem) o;
 
             if (collection != null ? !collection.equals(routeItem.collection)
-                    : routeItem.collection != null)
+                    : routeItem.collection != null) {
                 return false;
-            if (handler != null ? !handler.equals(routeItem.handler) : routeItem.handler != null)
+            }
+            if (handler != null ? !handler.equals(routeItem.handler) : routeItem.handler != null) {
                 return false;
-            if (mode != routeItem.mode)
+            }
+            if (mode != routeItem.mode) {
                 return false;
+            }
             if (singleton != null ? !singleton.equals(routeItem.singleton)
-                    : routeItem.singleton != null)
+                    : routeItem.singleton != null) {
                 return false;
-            if (!uriTemplate.equals(routeItem.uriTemplate))
+            }
+            if (!uriTemplate.equals(routeItem.uriTemplate)) {
                 return false;
+            }
 
             return true;
         }

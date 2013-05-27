@@ -29,12 +29,15 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.resource.InternalServerErrorException;
+
 /**
  * Handles the conversion of query resultsets into Object set result
- * 
+ *
  * @author aegloff
  */
 public interface QueryResultMapper {
-    List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params, TableQueries tableQueries) 
-            throws SQLException, IOException;
+    List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type,
+            Map<String, Object> params, TableQueries tableQueries) throws SQLException,
+            IOException, InternalServerErrorException;
 }

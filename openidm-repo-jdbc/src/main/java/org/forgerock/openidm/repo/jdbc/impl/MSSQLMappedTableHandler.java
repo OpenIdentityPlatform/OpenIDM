@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,13 +27,18 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.openidm.util.Accessor;
 
 public class MSSQLMappedTableHandler extends MappedTableHandler {
 
     public MSSQLMappedTableHandler(String tableName, Map mapping, String dbSchemaName,
-            JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableName, mapping, dbSchemaName, queriesConfig, sqlExceptionHandler);
+            JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler,
+            Accessor<CryptoService> cryptoServiceAccessor) throws InternalServerErrorException {
+        super(tableName, mapping, dbSchemaName, queriesConfig, sqlExceptionHandler,
+                cryptoServiceAccessor);
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
         /*
          * SQLServer does not support the FOR UPDATE clause         

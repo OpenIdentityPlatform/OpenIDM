@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import javax.script.ScriptException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -64,7 +65,6 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.filter.ScriptedFilter;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.script.engine.Utils.Pair;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides internal routing for a top-level object set.
- * 
+ *
  * @author Paul C. Bryan
  * @author aegloff
  */
@@ -210,7 +210,7 @@ public class JsonResourceRouterService implements ConnectionFactory
 
     /**
      * TODO: Description.
-     * 
+     *
      * @param config
      *            TODO.
      * @throws JsonValueException

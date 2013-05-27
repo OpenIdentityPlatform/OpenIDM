@@ -47,7 +47,7 @@ public class FileUtilTest {
     mkfile 10m text10m.txt
      */
     @BeforeClass
-    public void BeforeClass() throws Exception {
+    public void beforeClass() throws Exception {
         if (null == FileUtilTest.class.getResource("/text1k.txt") ||
                 null == FileUtilTest.class.getResource("/text8k.txt") ||
                 null == FileUtilTest.class.getResource("/text96k.txt") ||

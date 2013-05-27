@@ -51,6 +51,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -97,7 +98,7 @@ import org.slf4j.LoggerFactory;
 import com.tinkerpop.blueprints.Graph;
 
 /**
- * 
+ *
  * @author Laszlo Hordos
  */
 @Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE,
@@ -371,9 +372,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length == 1
                         && (arguments[0] instanceof Map || arguments[0] instanceof JsonValue)) {
-                    return cryptoService
-                            .isEncrypted(arguments[0] instanceof JsonValue ? (JsonValue) arguments[0]
-                                    : new JsonValue(arguments[0]));
+                    return JsonCrypto.isJsonCrypto(arguments[0] instanceof JsonValue ? (JsonValue) arguments[0]
+                            : new JsonValue(arguments[0]));
                 } else {
                     throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
                             "isEncrypted", arguments));
