@@ -40,8 +40,8 @@ import org.osgi.framework.BundleContext;
 public interface AuditLogger {
 
     /**
-     * Set the audit logger configuration which is a logger specific 
-     * map 
+     * Set the audit logger configuration which is a logger specific
+     * map
      * @param config the configuration
      * @param ctx
      */
@@ -52,6 +52,15 @@ public interface AuditLogger {
      */
     void cleanup();
     public void create(String auditType, Map<String, Object> event) throws ResourceException;
+
+
+    /**
+     * Whether this audit logger is used for reads/queries, when multiple
+     * loggers are configured.
+     *
+     * @return whether to use this logger for reads/queries.
+     */
+    boolean isUsedForQueries();
 
     //void handle(ServerContext context, Request request, Map<String,Object> event) throws ResourceException;
 }

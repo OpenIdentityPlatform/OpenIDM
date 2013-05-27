@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.security.internal;
 
+import org.forgerock.openidm.security.KeyStoreHandler;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +42,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class JcaKeyStoreHandler implements KeyStoreHandler {

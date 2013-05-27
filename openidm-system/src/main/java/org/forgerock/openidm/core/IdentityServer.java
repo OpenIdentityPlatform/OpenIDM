@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.core;
 
 import java.io.BufferedInputStream;
@@ -34,34 +35,28 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
 /**
  * This class defines the core of the Identity Server.
- * 
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class IdentityServer implements PropertyAccessor {
-
-    // final static Logger logger =
-    // LoggerFactory.getLogger(IdentityServer.class);
+public final class IdentityServer implements PropertyAccessor {
 
     /**
      * The singleton Identity Server instance.
      */
-    private static final AtomicReference<IdentityServer> identityServer =
+    private static final AtomicReference<IdentityServer> IDENTITY_SERVER =
             new AtomicReference<IdentityServer>(new IdentityServer(null, null));
-    private static final AtomicBoolean initialised = new AtomicBoolean(Boolean.FALSE);
+
+    private static final AtomicBoolean INITIALISED = new AtomicBoolean(Boolean.FALSE);
+
     // The set of properties for the environment config.
     // Keys are lower case for easier case insensitive searching
     // Precedences is 1. Boot file properties, 2. Explicit config properties, 3.
@@ -73,7 +68,7 @@ public class IdentityServer implements PropertyAccessor {
     /**
      * Creates a new identity environment configuration initialized with a copy
      * of the provided set of properties.
-     * 
+     *
      * @param properties
      *            The properties to use when initializing this environment
      *            configuration, or {@code null} to use an empty set of
@@ -92,7 +87,7 @@ public class IdentityServer implements PropertyAccessor {
     }
 
     public static IdentityServer getInstance() {
-        IdentityServer server = identityServer.get();
+        IdentityServer server = IDENTITY_SERVER.get();
         if (null == server) {
             throw new IllegalStateException("IdentityServer has not been initialised");
         }
@@ -106,15 +101,18 @@ public class IdentityServer implements PropertyAccessor {
      * This or the {@link #initInstance(IdentityServer)} method can be called
      * only once and then it throws {@link IllegalStateException} if it's called
      * more then once.
-     * 
+     *
      * @param properties
+     *            the parent {@code PropertyAccessor}
      * @return new instance of {@link IdentityServer}
      * @throws IllegalStateException
      *             when this method called more then once.
      */
     public static IdentityServer initInstance(PropertyAccessor properties) {
-        if (initialised.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
-            return identityServer.getAndSet(properties instanceof IdentityServer ? (IdentityServer)properties : new IdentityServer(properties, identityServer.get()));
+        if (INITIALISED.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+            return IDENTITY_SERVER
+                    .getAndSet(properties instanceof IdentityServer ? (IdentityServer) properties
+                            : new IdentityServer(properties, IDENTITY_SERVER.get()));
         } else {
             throw new IllegalStateException("IdentityServer has been initialised already");
         }
@@ -127,7 +125,7 @@ public class IdentityServer implements PropertyAccessor {
      * This or the {@link #initInstance(PropertyAccessor)} method can be called
      * only once and then it throws {@link IllegalStateException} if it's called
      * more then once.
-     * 
+     *
      * @param server
      *            new instance of {@link IdentityServer}
      * @return same instance as the {@code server} parameter if not {@code null}
@@ -137,19 +135,21 @@ public class IdentityServer implements PropertyAccessor {
      */
     public static IdentityServer initInstance(IdentityServer server) {
         if (null != server) {
-            if (initialised.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
-                return identityServer.getAndSet(server);
+            if (INITIALISED.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+                return IDENTITY_SERVER.getAndSet(server);
             } else {
                 throw new IllegalStateException("IdentityServer has been initialised already");
             }
         }
-        return identityServer.get();
+        return IDENTITY_SERVER.get();
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         T value = null;
-        if (null != bootFileProperties && null != key && ((null != expected && expected
-                .isAssignableFrom(String.class)) || defaultValue instanceof String)) {
+        if (null != bootFileProperties
+                && null != key
+                && ((null != expected && expected.isAssignableFrom(String.class)) || defaultValue instanceof String)) {
             value = (T) bootFileProperties.get(key);
         }
         return null != value ? value : (null != configProperties) ? configProperties.getProperty(
@@ -162,7 +162,7 @@ public class IdentityServer implements PropertyAccessor {
      * check will first be made in the boot properties file, the local config
      * properties, but if no value is found then the JVM system properties will
      * be checked.
-     * 
+     *
      * @param name
      *            The name of the property to retrieve.
      * @param defaultValue
@@ -175,17 +175,17 @@ public class IdentityServer implements PropertyAccessor {
     public String getProperty(String name, String defaultValue, boolean withPropertySubstitution) {
         String result = getProperty(name, defaultValue, String.class);
         if (withPropertySubstitution) {
-            result = (String)PropertyUtil.substVars(result, identityServer.get(), false);
+            result = (String) PropertyUtil.substVars(result, IDENTITY_SERVER.get(), false);
         }
         return result;
     }
-    
+
     /**
      * Retrieves the property with the specified name (case insensitvie). The
      * check will first be made in the boot properties file, the local config
      * properties, but if no value is found then the JVM system properties will
      * be checked.
-     * 
+     *
      * @param name
      *            The name of the property to retrieve.
      * @param defaultValue
@@ -202,7 +202,7 @@ public class IdentityServer implements PropertyAccessor {
      * check will first be made in the local config properties, the boot
      * properties file, but if no value is found then the JVM system properties
      * will be checked.
-     * 
+     *
      * @param name
      *            The name of the property to retrieve.
      * @return The property with the specified name, or {@code null} if no such
@@ -226,7 +226,7 @@ public class IdentityServer implements PropertyAccessor {
     /**
      * Retrieves the path to the root directory for this instance of the
      * Identity Server.
-     * 
+     *
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
@@ -254,7 +254,7 @@ public class IdentityServer implements PropertyAccessor {
     /**
      * Retrieves the path to the root directory for this instance of the
      * Identity Server.
-     * 
+     *
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
@@ -279,14 +279,14 @@ public class IdentityServer implements PropertyAccessor {
      * If the given path is an absolute path, then it will be used. If the path
      * is relative, then it will be interpreted as if it were relative to the
      * Identity Server root.
-     * 
+     *
      * @param path
      *            The path string to be retrieved as a <CODE>File</CODE>
      * @return A <CODE>File</CODE> object that corresponds to the specified
      *         path.
      */
     public static File getFileForPath(String path) {
-        return getFileForPath(path, identityServer.get().getServerRoot());
+        return getFileForPath(path, IDENTITY_SERVER.get().getServerRoot());
     }
 
     /**
@@ -297,11 +297,10 @@ public class IdentityServer implements PropertyAccessor {
      *
      * @param path
      *            The path string to be retrieved as a {@code File}
-     * @return A {@code File} object that corresponds to the specified
-     *         path.
+     * @return A {@code File} object that corresponds to the specified path.
      */
     public static File getFileForInstallPath(String path) {
-        return getFileForPath(path, identityServer.get().getInstallLocation());
+        return getFileForPath(path, IDENTITY_SERVER.get().getInstallLocation());
     }
 
     /**
@@ -312,11 +311,10 @@ public class IdentityServer implements PropertyAccessor {
      *
      * @param path
      *            The path string to be retrieved as a {@code File}
-     * @return A {@code File} object that corresponds to the specified
-     *         path.
+     * @return A {@code File} object that corresponds to the specified path.
      */
     public static File getFileForProjectPath(String path) {
-        return getFileForPath(path, identityServer.get().getProjectLocation());
+        return getFileForPath(path, IDENTITY_SERVER.get().getProjectLocation());
     }
 
     /**
@@ -327,18 +325,18 @@ public class IdentityServer implements PropertyAccessor {
      *
      * @param path
      *            The path string to be retrieved as a {@code File}
-     * @return A {@code File} object that corresponds to the specified
-     *         path.
+     * @return A {@code File} object that corresponds to the specified path.
      */
     public static File getFileForWorkingPath(String path) {
-        return getFileForPath(path, identityServer.get().getWorkingLocation());
+        return getFileForPath(path, IDENTITY_SERVER.get().getWorkingLocation());
     }
+
     /**
      * Retrieves a <CODE>File</CODE> object corresponding to the specified path.
      * If the given path is an absolute path, then it will be used. If the path
      * is relative, then it will be interpreted as if it were relative to the
      * Identity Server root.
-     * 
+     *
      * @param path
      *            The path string to be retrieved as a <CODE>File</CODE>
      * @param serverRoot
@@ -364,7 +362,7 @@ public class IdentityServer implements PropertyAccessor {
      * If the given path is an absolute path, then it will be used. If the path
      * is relative, then it will be interpreted as if it were relative to the
      * {@code rootLocation} parameter.
-     * 
+     *
      * @param path
      *            The path string to be retrieved as a {@code File}
      * @param rootLocation
@@ -467,19 +465,19 @@ public class IdentityServer implements PropertyAccessor {
      * enable development mode set the
      * {@link ServerConstants#PROPERTY_DEBUG_ENABLE} system property
      * {@code true}.
-     * 
+     *
      * @return true if {@code Development} mode is on.
      */
     public static boolean isDevelopmentProfileEnabled() {
         String debug =
-                identityServer.get().getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE, null,
+                IDENTITY_SERVER.get().getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE, null,
                         String.class);
         return (null != debug) && Boolean.valueOf(debug);
     }
 
     /**
      * Loads boot properties file
-     * 
+     *
      * @return properties in boot properties file, keys in lower case
      */
     private Map<String, String> loadProps(String bootFileLocation, IdentityServer identityServer) {
@@ -492,7 +490,7 @@ public class IdentityServer implements PropertyAccessor {
             // bootFile.getAbsolutePath());
             System.out.println("No boot properties file detected at " + bootFile.getAbsolutePath());
         } else if (null != identityServer && bootFile.equals(identityServer.bootPropertyFile)) {
-           return identityServer.bootFileProperties;
+            return identityServer.bootFileProperties;
         } else {
             // logger.info("Using boot properties at {}.",
             // bootFile.getAbsolutePath());

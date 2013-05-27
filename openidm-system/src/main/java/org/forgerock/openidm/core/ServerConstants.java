@@ -23,7 +23,7 @@
  *
  *
  *      Copyright 2006-2010 Sun Microsystems, Inc.
- *      Portions Copyright 2010-2011 ForgeRock AS
+ *      Portions Copyright 2010-2013 ForgeRock AS
  */
 package org.forgerock.openidm.core;
 
@@ -33,11 +33,13 @@ package org.forgerock.openidm.core;
  * <p/>
  * Based on OpenDJ ServerConstants
  */
-public class ServerConstants {
+public final class ServerConstants {
 
     static {
-        System.out.append("OpenIDM version \"").append(getVersion()).append("\" (revision: ")
-                .append(getRevision()).println(")");
+        System.out.println(getDisplayVersion());
+    }
+
+    private ServerConstants() {
     }
 
     public static String getVersion() {
@@ -48,13 +50,35 @@ public class ServerConstants {
         return SCM_REVISION;
     }
 
+    public static String getBuild() {
+        return "";
+    }
+
+    public static String getBranch() {
+        return "";
+    }
+
+    public static String getDisplayVersion() {
+        StringBuilder sb =
+                new StringBuilder("OpenIDM version \"").append(getVersion()).append(
+                        "\" (revision: ").append(getRevision()).append(")");
+
+        if (null != getBuild() && !getBuild().isEmpty()) {
+            sb.append(' ').append(getBuild());
+        }
+        if (null != getBranch() && !getBranch().isEmpty()) {
+            sb.append(' ').append(getBranch());
+        }
+        return sb.toString();
+    }
+
     /**
-     * OpenIDM version number
+     * OpenIDM version number.
      */
     public static final String VERSION = "0";
 
     /**
-     * OpenIDM SCM revision number
+     * OpenIDM SCM revision number.
      */
     public static final String SCM_REVISION = "0";
 
@@ -131,7 +155,6 @@ public class ServerConstants {
      */
     public static final String DEFAULT_BOOT_FILE_LOCATION = "conf/boot/boot.properties";
 
-
     /**
      * Configuration property naming the Factory PID in the configuration
      * dictionary. The property's value is of type <code>String</code>.
@@ -139,7 +162,6 @@ public class ServerConstants {
      * @since 1.1
      */
     public static final String CONFIG_FACTORY_PID = "config.factory-pid";
-
 
     /**
      * The name of the system property that can be used to specify the path to
@@ -149,7 +171,7 @@ public class ServerConstants {
 
     /**
      * The name of the system property that can be used to specify the location
-     * of the boot properties file
+     * of the boot properties file.
      */
     public static final String PROPERTY_BOOT_FILE_LOCATION = "openidm.boot.file";
 
@@ -186,15 +208,25 @@ public class ServerConstants {
 
     public static final String ROUTER_PREFIX = "openidm.router.prefix";
 
-
     /**
      * Query input value for the QUERY_ID input key.
      *
-     * Querying with this query id results in querying all object IDs for a given ObjectSet.
+     * Querying with this query id results in querying all object IDs for a
+     * given ObjectSet.
      *
-     * All ObjectSets supporting query must support the query corresponding to this ID
+     * All ObjectSets supporting query must support the query corresponding to
+     * this ID
      */
     public final static String QUERY_ALL_IDS = "query-all-ids";
+
+    /**
+     * System populated query input key.
+     *
+     * Key available for token substitution inside the query expression,
+     * identifying the resource queried by name. Example use: select * from
+     * ${_resource} where ...
+     */
+    public final static String RESOURCE_NAME = "_resource";
 
     public static final String LAUNCHER_INSTALL_LOCATION = "launcher.install.location";
     public static final String LAUNCHER_INSTALL_URL = "launcher.install.url";

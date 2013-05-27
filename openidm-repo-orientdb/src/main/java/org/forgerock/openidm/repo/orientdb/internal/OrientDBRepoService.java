@@ -107,7 +107,7 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 
 /**
  * Repository service implementation using OrientDB
- * 
+ *
  * @author aegloff
  */
 @Component(name = OrientDBRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
@@ -215,7 +215,7 @@ public class OrientDBRepoService implements RequestHandler {
      * The object will contain metadata properties, including object identifier
      * {@code _id}, and object version {@code _rev} to enable optimistic
      * concurrency supported by OrientDB and OpenIDM.
-     * 
+     *
      * @param orientClassName
      *            the identifier of the object set to retrieve from.
      * @param request
@@ -335,7 +335,7 @@ public class OrientDBRepoService implements RequestHandler {
      * This method sets the {@code _id} property to the assigned identifier for
      * the object, and the {@code _rev} property to the revised object version
      * (For optimistic concurrency)
-     * 
+     *
      * @param orientClassName
      *            the client-generated identifier to use, or {@code null} if
      *            server-generated identifier is requested.
@@ -466,11 +466,11 @@ public class OrientDBRepoService implements RequestHandler {
      * <p>
      * This implementation requires MVCC and hence enforces that clients state
      * what revision they expect to be updating
-     * 
+     *
      * If successful, this method updates metadata properties within the passed
      * object, including: a new {@code _rev} value for the revised object's
      * version
-     * 
+     *
      * @param orientClassName
      *            the identifier of the object to be put, or {@code null} to
      *            request a generated identifier.
@@ -585,7 +585,7 @@ public class OrientDBRepoService implements RequestHandler {
 
     /**
      * Deletes the specified object from the object set.
-     * 
+     *
      * @param orientClassName
      *            the identifier of the object to be deleted.
      * @param localId
@@ -664,12 +664,12 @@ public class OrientDBRepoService implements RequestHandler {
      * Queries are parametric; a set of named parameters is provided as the
      * query criteria. The query result is a JSON object structure composed of
      * basic Java types.
-     * 
+     *
      * The returned map is structured as follow: - The top level map contains
      * meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the
      * result records (QUERY_RESULT)
-     * 
+     *
      * @param context
      *            identifies the object to query.
      * @param request
@@ -715,7 +715,7 @@ public class OrientDBRepoService implements RequestHandler {
 
                 Map<String, String> params =
                         new HashMap<String, String>(request.getAdditionalQueryParameters());
-                params.put(QueryConstants.RESOURCE_NAME, resourceCollectionToOrientClassName(
+                params.put(ServerConstants.RESOURCE_NAME, resourceCollectionToOrientClassName(
                         partition, url.resourceName()));
 
                 ODatabaseDocumentTx database = getConnection();
@@ -858,7 +858,7 @@ public class OrientDBRepoService implements RequestHandler {
      * Detect if the root cause of the exception is an index constraint
      * violation This is necessary as the database may wrap this root cause in
      * further exceptions, masking the underlying cause
-     * 
+     *
      * @param ex
      *            The throwable to check
      * @param maxLevels
@@ -922,7 +922,7 @@ public class OrientDBRepoService implements RequestHandler {
     /**
      * Handle an existing activated service getting changed; e.g. configuration
      * changes or dependency changes
-     * 
+     *
      * @param compContext
      *            THe OSGI component context
      * @throws Exception
@@ -974,10 +974,10 @@ public class OrientDBRepoService implements RequestHandler {
 
     /**
      * Initialize the instnace with the given configuration.
-     * 
+     *
      * This can configure managed (DS/SCR) instances, as well as explicitly
      * instantiated (bootstrap) instances.
-     * 
+     *
      * @param config
      *            the configuration
      */
@@ -1031,10 +1031,10 @@ public class OrientDBRepoService implements RequestHandler {
     /**
      * Set the pre-configured queries, which are identified by a query
      * identifier and can be invoked using this identifier
-     * 
+     *
      * Success to set the queries does not mean they are valid as some can only
      * be validated at query execution time.
-     * 
+     *
      * @param queries
      *            the complete list of configured queries, mapping from query id
      *            to the query expression which may optionally contain tokens in
@@ -1046,7 +1046,7 @@ public class OrientDBRepoService implements RequestHandler {
         Map<String, String> prepQueries = new HashMap<String, String>();
 
         // Query all IDs is a mandatory query, default it and allow override.
-        prepQueries.put(QueryConstants.QUERY_ALL_IDS, "select _openidm_id from ${_resource}");
+        prepQueries.put(ServerConstants.QUERY_ALL_IDS, "select _openidm_id from ${_resource}");
 
         // Populate/Override with Queries configured
         if (queries != null && !queries.isNull()) {
@@ -1062,7 +1062,7 @@ public class OrientDBRepoService implements RequestHandler {
     /**
      * Query by primary key, the OpenIDM identifier. This identifier is
      * different from the OrientDB internal record id.
-     * 
+     *
      * @param id
      *            the OpenIDM identifier for an object
      * @param orientClassName

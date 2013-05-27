@@ -37,17 +37,20 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A utility class for handling and converting OrientDB ODocuments
- * 
+ *
  * @author aegloff
  */
 public class DocumentUtil  {
@@ -57,14 +60,13 @@ public class DocumentUtil  {
      */
     final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
 
-    final static ObjectMapper mapper = new ObjectMapper();
 
-    
+
     // Identifier in the DB representation
-    public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id"; 
-    
+    public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id";
+
     /**
-     * Convert to JSON object structures (akin to simple binding), 
+     * Convert to JSON object structures (akin to simple binding),
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * @param doc the OrientDB document to convert
      * @return the doc converted into maps, lists, java types; or null if the doc was null
@@ -73,11 +75,11 @@ public class DocumentUtil  {
         if (null == doc) {
            return null;
         }
-        Map<String, Object> result = null;
+        JsonValue result = null;
         try {
-            result = mapper.readValue(doc.toJSON(), Map.class);
-        } catch (IOException e) {
-            result = toMap(doc, fieldFilters, true);
+            result = JsonUtil.parseStringified(doc.toJSON());
+        } catch (JsonException e) {
+            //result = toMap(doc, fieldFilters, true);
         }
         if (null != result) {
             result.put("_vertex", doc.getIdentity().toString());
@@ -93,10 +95,10 @@ public class DocumentUtil  {
     }
 
     /**
-     * Convert to JSON object structures (akin to simple binding), 
+     * Convert to JSON object structures (akin to simple binding),
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
-     * 
+     *
      * @param doc the OrientDB document to convert
      * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
@@ -104,7 +106,7 @@ public class DocumentUtil  {
     private static Map toMap(ODocument doc, List<JsonPointer> fieldFilters, boolean topLevel) {
         Map<String, Object> result = null;
         if (doc != null) {
-            result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   
+            result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?
             for (java.util.Map.Entry<String, Object> entry : doc) {
                 Object value = entry.getValue();
                 String key = entry.getKey();
@@ -117,7 +119,7 @@ public class DocumentUtil  {
                     logger.trace("Setting revision to {}", revision);
                     result.put(Resource.FIELD_CONTENT_REVISION, revision);
                 } else {
-                    // TODO: optimization switch: if we know that no embedded ODocuments are used 
+                    // TODO: optimization switch: if we know that no embedded ODocuments are used
                     // (i.e. only embedded Maps, Lists) then we would not need to traverse the whole graph
                     value = asSimpleBinding(value);
                     logger.trace("Map setting {} to value {}", key, value);
@@ -128,15 +130,15 @@ public class DocumentUtil  {
         logger.trace("Converted document {} to {}", doc, result);
         return result;
     }
-    
+
     /**
      * Recursively ensure that the passed type is represented
      * or converted to JSON object model simple binding types,
-     * i.e. ODocument to Map, Set to List 
-     * 
-     * Modifies the passed in objToClean where possible (List, Map), 
+     * i.e. ODocument to Map, Set to List
+     *
+     * Modifies the passed in objToClean where possible (List, Map),
      * returns new types where it is not (ODocument, Set)
-     * 
+     *
      * @param objToClean
      * @return the object in JSON object model representation
      */
@@ -162,9 +164,9 @@ public class DocumentUtil  {
             return objToClean;
         }
     }
-    
+
     /**
-     * Iteratively convert contents as necessary to simple model 
+     * Iteratively convert contents as necessary to simple model
      * @param listToClean list to modify if necessary
      * @return the modified list
      */
@@ -174,17 +176,17 @@ public class DocumentUtil  {
             Object listEntry = listIter.next();
             if (listEntry instanceof ODocument || listEntry instanceof Set) {
                 // Replace the entry with new type
-                listIter.set(asSimpleBinding(listEntry)); 
+                listIter.set(asSimpleBinding(listEntry));
             } else {
                 // Replace directly in the entry
                 asSimpleBinding(listEntry);
-            } 
+            }
         }
         return listToClean;
     }
 
     /**
-     * Iteratively convert contents as necessary to simple model 
+     * Iteratively convert contents as necessary to simple model
      * @param setToClean set to convert to List and modify if necessary
      * @return the modified list
      */
@@ -198,7 +200,7 @@ public class DocumentUtil  {
     }
 
     /**
-     * Iteratively convert contents as necessary to simple model 
+     * Iteratively convert contents as necessary to simple model
      * @param mapToClean map to modify if necessary
      * @return the modified map
      */
@@ -207,10 +209,10 @@ public class DocumentUtil  {
             entry.setValue(asSimpleBinding(entry.getValue()));
         }
         return mapToClean;
-    }    
-    
+    }
+
     /**
-     * Convert from JSON object structures (akin to simple binding), 
+     * Convert from JSON object structures (akin to simple binding),
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * to OrientDB document
      * @param objModel the JSON object structure to convert
@@ -229,7 +231,8 @@ public class DocumentUtil  {
         }
 
         try {
-            result.fromJSON(mapper.writeValueAsString(objModel));
+            //TODO Fix the JsonValue
+            result.fromJSON(JsonUtil.writeValueAsString(new JsonValue(objModel)));
 
             // OpenIDM ID mapping
             Object value = objModel.get(Resource.FIELD_CONTENT_ID);
@@ -258,17 +261,17 @@ public class DocumentUtil  {
             return result;
         } catch (JsonProcessingException e) {
             return toDocument(objModel, docToPopulate, orientDocClass, false, true);
-        }        
+        }
     }
-    
+
     /**
-     * Convert from JSON object structures (akin to simple binding), 
+     * Convert from JSON object structures (akin to simple binding),
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * to OrientDB document
      * @param objModel the JSON object structure to convert
      * @param docToPopulate an optional existing ODocument to update with new values from {@code objModel}
      * @param orientDocClass the OrientDB class of the ODocument to create
-     * @param patch whether the objModel passed in is only partial values (replacing and adding values), 
+     * @param patch whether the objModel passed in is only partial values (replacing and adding values),
      * or if false replaces the whole document with the given {@code objModel}
      * @param topLevel
      * @return the converted orientdb document, or null if objModel was null
@@ -276,7 +279,7 @@ public class DocumentUtil  {
      */
     protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, String orientDocClass, boolean patch,
             boolean topLevel) throws ConflictException {
-        
+
         ODocument result = null;
         if (objModel != null) {
             if (docToPopulate == null) {
@@ -305,7 +308,7 @@ public class DocumentUtil  {
                 if (entry.getKey().equals(Resource.FIELD_CONTENT_ID)) {
                     // OpenIDM ID mapping
                     if (topLevel) {
-                        if (!result.containsField(ORIENTDB_PRIMARY_KEY) 
+                        if (!result.containsField(ORIENTDB_PRIMARY_KEY)
                                 || !result.field(ORIENTDB_PRIMARY_KEY).equals(value)) {
                             logger.trace("Setting primary key to {}", value);
                             result.field(ORIENTDB_PRIMARY_KEY, value);
@@ -340,8 +343,8 @@ public class DocumentUtil  {
                     // unless it is a new newBuilder
                     //if (existingDoc == null) {
                     logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
-                    existingDoc = new ODocument(); 
-                    //} 
+                    existingDoc = new ODocument();
+                    //}
                     ODocument converted = toDocument((Map<String, Object>) value, existingDoc, null, patch, false);
                     result.field(entry.getKey(), converted, OType.EMBEDDED);
                 } else {
@@ -360,12 +363,12 @@ public class DocumentUtil  {
      * @return the OrientDB version
      * @throws ConflictException if the revision String could not be parsed into the int expected by OrientDB
      */
-    public static int parseVersion(String revision) throws ConflictException { 
+    public static int parseVersion(String revision) throws ConflictException {
         int ver = -1;
         try {
             ver = Integer.parseInt(revision);
         } catch (NumberFormatException ex) {
-            throw new ConflictException("OrientDB repository expects revisions as int, " 
+            throw new ConflictException("OrientDB repository expects revisions as int, "
                     + "unable to parse passed revision: " + revision);
         }
         return ver;

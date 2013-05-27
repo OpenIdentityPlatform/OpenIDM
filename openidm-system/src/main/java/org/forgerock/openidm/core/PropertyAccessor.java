@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,7 +26,7 @@ package org.forgerock.openidm.core;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public interface PropertyAccessor {
@@ -34,11 +34,16 @@ public interface PropertyAccessor {
      * Returns the value of the specified property. If the key is not found in
      * the Framework properties, the system properties are then searched. The
      * method returns {@code null} if the property is not found.
-     * 
+     *
      * @param key
      *            The name of the requested property.
+     * @param defaultValue
+     * @param expected
+     * @param <T>
+     *            The type of the expected property.
      * @return The value of the requested property, or {@code null} if the
      *         property is undefined.
+     *
      * @throws SecurityException
      *             If the caller does not have the appropriate
      *             {@code PropertyPermission} to read the property, and the Java

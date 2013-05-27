@@ -27,24 +27,26 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An enhancement to ServiceTracker to allow listeners to be notified on changes
- * Avoids having to extend service tracker each time this is desired, 
+ * Avoids having to extend service tracker each time this is desired,
  * or abusing ServiceTrackerCustomizer for this purpose.
- * 
+ *
  * @author aegloff
+ * @deprecated Use the native OSGi classes instead
  */
+@Deprecated
 public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
-    
+
     private final static Logger logger = LoggerFactory.getLogger(ServiceTrackerNotifier.class);
-    
+
     ServiceTrackerListener listener;
     BundleContext context;
-    
+
     public ServiceTrackerNotifier(BundleContext context, Filter filter, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
         super(context, filter, customizer);
         this.listener = listener;
         this.context = context;
     }
-    
+
     public ServiceTrackerNotifier(BundleContext context, ServiceReference<S> reference, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
         super(context, reference, customizer);
         this.listener = listener;
@@ -56,13 +58,13 @@ public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
         this.listener = listener;
         this.context = context;
     }
-    
+
     public T addingService(ServiceReference<S> reference) {
         T service =  super.addingService(reference);
         if (service == null) {
-            logger.warn("Framework issue, service in service tracker is null for {}", 
+            logger.warn("Framework issue, service in service tracker is null for {}",
                     reference.getProperty(Constants.SERVICE_PID));
-        } 
+        }
         if (listener != null) {
             listener.addedService(reference, service);
         }
@@ -74,12 +76,12 @@ public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
         }
         super.removedService(reference, service);
     }
-    
+
     public void modifiedService(ServiceReference<S> reference, T service) {
         if (service == null) {
-            logger.warn("Framework issue, service in service tracker modified is null for {}", 
+            logger.warn("Framework issue, service in service tracker modified is null for {}",
                     reference.getProperty(Constants.SERVICE_PID));
-        } 
+        }
         if (listener != null) {
             listener.modifiedService(reference, service);
         }

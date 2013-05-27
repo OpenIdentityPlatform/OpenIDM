@@ -45,7 +45,6 @@ import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
@@ -58,7 +57,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public abstract class AbstractRouterRegistry implements ServiceFactory<RouterRegistryService>,
@@ -104,8 +103,6 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
                         + Constants.OBJECTCLASS + "=" + RequestHandler.class.getName() + "))";
         try {
             resourceTracker = new ServiceTracker(context, FrameworkUtil.createFilter(flt), this);
-            Filter f = FrameworkUtil.createFilter("(|(url=/repo/{partition}))");
-
         } catch (InvalidSyntaxException e) {
             // not expected (filter is tested valid)
         }
@@ -117,7 +114,8 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
     protected void deactivate() {
         isActive.compareAndSet(true, false);
         for (final RouteEntry entry : routeCache) {
-            //Entries in cache has circular references to the cache set to remove themselves
+            // Entries in cache has circular references to the cache set to
+            // remove themselves
             entry.removeRoute();
         }
         resourceTracker.close();
@@ -127,33 +125,33 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
      * protected RouteEntry
      * withCollectionResourceProvider(CollectionResourceProvider service, Object
      * uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry
      * updatedCollectionResourceProvider(CollectionResourceProvider service,
      * Object uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry
      * unbindCollectionResourceProvider(CollectionResourceProvider service,
      * Object uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry
      * withSingletonResourceProvider(SingletonResourceProvider service, Object
      * uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry
      * updatedSingletonResourceProvider(SingletonResourceProvider service,
      * Object uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry
      * unbindSingletonResourceProvider(SingletonResourceProvider service, Object
      * uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry withRequestHandler(RequestHandler service, Object
      * uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry updatedRequestHandler(RequestHandler service, Object
      * uriTemplate){ return null;};
-     * 
+     *
      * protected RouteEntry unbindRequestHandler(RequestHandler service, Object
      * uriTemplate){ return null;};
      */
@@ -299,7 +297,7 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
 
         @Override
         public Connection getConnection(String connectionId) throws ResourceException {
-            //TODO This is NOT Authenticated!!!
+            // TODO This is NOT Authenticated!!!
             return Resources.newInternalConnection(registry.getInternalRouter());
         }
 

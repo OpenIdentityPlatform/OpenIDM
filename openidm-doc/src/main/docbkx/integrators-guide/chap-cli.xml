@@ -21,7 +21,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2011-2013 ForgeRock AS
-  !    
+  !
 -->
 <chapter xml:id='chap-cli'
  xmlns='http://docbook.org/ns/docbook'
@@ -32,54 +32,54 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>OpenIDM Command-Line Interface</title>
 
- <para>OpenIDM includes a basic command-line interface that provides a number 
+ <para>OpenIDM includes a basic command-line interface that provides a number
  of utilities for managing the OpenIDM instance.</para>
- 
- <para>All of the utilities are subcommands of the <literal>cli.sh</literal> 
- (UNIX) or <literal>cli.bat</literal> (Windows) scripts. To use the utilities, 
- you can either run them as subcommands, or launch the <command>cli</command> 
- script first, and then run the utility. For example, to run the 
+
+ <para>All of the utilities are subcommands of the <literal>cli.sh</literal>
+ (UNIX) or <literal>cli.bat</literal> (Windows) scripts. To use the utilities,
+ you can either run them as subcommands, or launch the <command>cli</command>
+ script first, and then run the utility. For example, to run the
  <command>encrypt</command> utility on a UNIX system:</para>
- 
+
  <screen>$ cd /path/to/openidm
 $ ./cli.sh
 Using boot properties at /openidm/conf/boot/boot.properties
 openidm# encrypt ....
  </screen>
- 
+
 <para>or</para>
 
  <screen>$ cd /path/to/openidm
 $ ./cli.sh encrypt ...
  </screen>
- 
- <para>By default, the command-line utilities run with the properties defined 
+
+ <para>By default, the command-line utilities run with the properties defined
  in <filename>/path/to/openidm/conf/boot/boot.properties</filename>.</para>
- 
- <para>The startup and shutdown scripts are not discussed in this chapter. For 
- information about these scripts, see <link xlink:href="integrators-guide#chap-services" 
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting and 
+
+ <para>The startup and shutdown scripts are not discussed in this chapter. For
+ information about these scripts, see <link xlink:href="integrators-guide#chap-services"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting and
  Stopping OpenIDM</citetitle></link>.</para>
- 
- <para>The following sections describe the subcommands and their use. Examples 
- assume that you are running the commands on a UNIX system. For Windows 
+
+ <para>The following sections describe the subcommands and their use. Examples
+ assume that you are running the commands on a UNIX system. For Windows
  systems, use <command>cli.bat</command> instead of <command>cli.sh</command>.
  </para>
 
  <section xml:id="cli-configexport">
   <title>configexport</title>
 
-  <para>The <command>configexport</command> subcommand exports all 
-  configuration objects to a specified location, enabling you to reuse a 
-  system configuration in another environment. For example, you can test a 
-  configuration in a development environment, then export it and import it 
-  into a production environment. This subcommand also enables you to inspect 
+  <para>The <command>configexport</command> subcommand exports all
+  configuration objects to a specified location, enabling you to reuse a
+  system configuration in another environment. For example, you can test a
+  configuration in a development environment, then export it and import it
+  into a production environment. This subcommand also enables you to inspect
   the active configuration of an OpenIDM instance.</para>
-  
+
   <para>OpenIDM must be running when you execute this command.</para>
-  
+
   <para>Usage is as follows:</para>
-  
+
   <screen>
 $ ./cli.sh configexport /<replaceable>export-location</replaceable>
   </screen>
@@ -87,13 +87,13 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
   <para>For example:</para>
 
   <screen>$ ./cli.sh configexport /tmp/conf</screen>
-  
-  <para>Configuration objects are exported, as <filename>.json</filename> files, 
-  to the specified directory. Configuration files that are present in this 
-  directory are renamed as backup files, with a timestamp, for example, 
-  <filename>audit.json.2012-12-19T12-00-28.bkp</filename>, and are not 
+
+  <para>Configuration objects are exported, as <filename>.json</filename> files,
+  to the specified directory. Configuration files that are present in this
+  directory are renamed as backup files, with a timestamp, for example,
+  <filename>audit.json.2012-12-19T12-00-28.bkp</filename>, and are not
   overwritten. The following configuration objects are exported:</para>
-  
+
   <itemizedlist>
     <listitem>
       <para>The internal repository configuration (<filename>repo.orientdb.json
@@ -109,7 +109,7 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
     <listitem>
       <para>The managed object configuration (<filename>managed.json</filename>)
       </para>
-    </listitem>                  
+    </listitem>
     <listitem>
       <para>The connector configuration (<filename>provisioner.openicf-*.json
       </filename>)</para>
@@ -125,88 +125,88 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
     <listitem>
       <para>Any configured schedules (<filename>schedule-*.json</filename>)
       </para>
-    </listitem>    
+    </listitem>
     <listitem>
       <para>The synchronization mapping configuration (<filename>sync.json
       </filename>)</para>
-    </listitem>         
+    </listitem>
      <listitem>
-      <para>If workflows are defined, the configuration of the workflow engine 
-      (<filename>workflow.json</filename>) and the workflow access 
+      <para>If workflows are defined, the configuration of the workflow engine
+      (<filename>workflow.json</filename>) and the workflow access
       configuration (<filename>process-access.json</filename>)</para>
     </listitem>
     <listitem>
-     <para>Any configuration files related to the user interface 
+     <para>Any configuration files related to the user interface
      (<filename>ui-*.json</filename>)</para>
     </listitem>
     <listitem>
-      <para>The configuration of any custom endpoints 
+      <para>The configuration of any custom endpoints
       (<filename>endpoint-*.json</filename>)</para>
     </listitem>
     <listitem>
       <para>The policy configuration (<filename>policy.json</filename>)</para>
-    </listitem>    
+    </listitem>
   </itemizedlist>
  </section>
 
 <section xml:id="cli-configimport">
   <title>configimport</title>
 
-  <para>The <command>configimport</command> subcommand imports configuration 
-  objects from the specified directory, enabling you to reuse a system 
-  configuration from another environment. For example, you can test a 
-  configuration in a development environment, then export it and import it 
+  <para>The <command>configimport</command> subcommand imports configuration
+  objects from the specified directory, enabling you to reuse a system
+  configuration from another environment. For example, you can test a
+  configuration in a development environment, then export it and import it
   into a production environment.</para>
 
-  <para>The command updates the existing configuration from the 
-  <replaceable>import-location</replaceable> over the OpenIDM REST interface. 
-  By default, if configuration objects are present in the 
-  <replaceable>import-location</replaceable> and not in the existing 
-  configuration, these objects are added. If configuration objects are present 
-  in the existing location but not in the 
-  <replaceable>import-location</replaceable>, these objects are left untouched 
+  <para>The command updates the existing configuration from the
+  <replaceable>import-location</replaceable> over the OpenIDM REST interface.
+  By default, if configuration objects are present in the
+  <replaceable>import-location</replaceable> and not in the existing
+  configuration, these objects are added. If configuration objects are present
+  in the existing location but not in the
+  <replaceable>import-location</replaceable>, these objects are left untouched
   in the existing configuration.</para>
-        
-  <para>If you include the <literal>--replaceAll</literal> parameter, the 
-  command wipes out the existing configuration and replaces it with the 
-  configuration in the <replaceable>import-location</replaceable>. Objects in 
-  the existing configuration that are not present in the 
+
+  <para>If you include the <literal>--replaceAll</literal> parameter, the
+  command wipes out the existing configuration and replaces it with the
+  configuration in the <replaceable>import-location</replaceable>. Objects in
+  the existing configuration that are not present in the
   <replaceable>import-location</replaceable> are deleted.</para>
-                
+
   <para>Usage is as follows:</para>
-  
+
   <screen>
 $ ./cli.sh configimport [--replaceAll] /<replaceable>import-location</replaceable>
   </screen>
-  
+
   <para>For example:</para>
-  
+
   <screen>
 $ ./cli.sh configimport --replaceAll /tmp/conf
   </screen>
 
-  <para>Configuration objects are imported, as <literal>.json</literal> files, 
-  from the specified directory to the <filename>conf</filename> directory. The 
-  configuration objects that are imported are outlined in the corresponding 
+  <para>Configuration objects are imported, as <literal>.json</literal> files,
+  from the specified directory to the <filename>conf</filename> directory. The
+  configuration objects that are imported are outlined in the corresponding
   export command, described in the previous section.</para>
-  
+
  </section>
- 
+
  <section xml:id="cli-configureconnector">
   <title>configureconnector</title>
-  
-  <para>The <command>configureconnector</command> subcommand generates a 
+
+  <para>The <command>configureconnector</command> subcommand generates a
   configuration for an OpenICF connector.</para>
-  
+
   <para>Usage is as follows:</para>
-  
+
   <screen>$ ./cli.sh configureconnector <replaceable>connector-name</replaceable>
   </screen>
-  
-  <para>Select the type of connector that you want to configure. The following 
+
+  <para>Select the type of connector that you want to configure. The following
   example configures a new XML connector.
   </para>
-  
+
   <screen width="94">$ ./cli.sh configureconnector myXmlConnector
 Using boot properties at /openidm/conf/boot/boot.properties
 Dec 11, 2012 10:35:37 AM org.restlet.ext.httpclient.HttpClientHelper start
@@ -217,135 +217,135 @@ INFO: Starting the HTTP client
 3. XML Connector version <?eval ${openicfBundleVersion}?>
 4. Exit
 Select [0..4]: 3
-Edit the configuration file and run the command again. The configuration was 
+Edit the configuration file and run the command again. The configuration was
   saved to /openidm/temp/provisioner.openicf-myXmlConnector.json
   </screen>
-  
-  <para>The basic configuration is saved in a file named 
+
+  <para>The basic configuration is saved in a file named
   <filename>/openidm/temp/provisioner.openicf-<replaceable>connector-name</replaceable>.json</filename>.
-  Edit the <literal>configurationProperties</literal> parameter in this file to 
-  complete the connector configuration. For an XML connector, you can use the 
+  Edit the <literal>configurationProperties</literal> parameter in this file to
+  complete the connector configuration. For an XML connector, you can use the
   schema definitions in sample 0 for an example configuration.</para>
-  
+
   <programlisting language="javascript">
   "configurationProperties" : {
     "xmlFilePath" : "samples/sample0/data/resource-schema-1.xsd",
     "createFileIfNotExists" : false,
     "xsdFilePath" : "samples/sample0/data/resource-schema-extension.xsd",
     "xsdIcfFilePath" : "samples/sample0/data/xmlConnectorData.xml"
-  },  
+  },
   </programlisting>
-  
-  <para>For more information about the connector configuration properties, see 
+
+  <para>For more information about the connector configuration properties, see
   <link xlink:href="integrators-guide#openicf-provisioner-conf"
 xlink:role="http://docbook.org/xlink/role/olink"><citetitle
 >Configuring Connectors</citetitle></link>.</para>
 
-  <para>When you have modified the file, run the 
-  <command>configureconnector</command> command again so that OpenIDM can pick 
+  <para>When you have modified the file, run the
+  <command>configureconnector</command> command again so that OpenIDM can pick
   up the new connector configuration.</para>
-  
+
   <screen width="98">$ ./cli.sh configureconnector myXmlConnector
 Using boot properties at /openidm/conf/boot/boot.properties
 Configuration was found and picked up from: /openidm/temp/provisioner.openicf-myXmlConnector.json
 Dec 11, 2012 10:55:28 AM org.restlet.ext.httpclient.HttpClientHelper start
 INFO: Starting the HTTP client
 ...
-  </screen>  
-  
-  <para>You can also configure connectors over the REST interface. For more 
+  </screen>
+
+  <para>You can also configure connectors over the REST interface. For more
   information, see <link xlink:href="integrators-guide#connector-wiz"
 xlink:role="http://docbook.org/xlink/role/olink"><citetitle
 >Creating Default Connector Configurations</citetitle></link>.</para>
- </section> 
- 
+ </section>
+
  <section xml:id="cli-encrypt">
   <title>encrypt</title>
- 
-  <para>The <command>encrypt</command> subcommand encrypts an input string, or 
-  JSON object, provided at the command line. This subcommand can be used to 
-  encrypt passwords, or other sensitive data, to be stored in the OpenIDM 
-  repository. The encrypted value is output to standard output and provides 
+
+  <para>The <command>encrypt</command> subcommand encrypts an input string, or
+  JSON object, provided at the command line. This subcommand can be used to
+  encrypt passwords, or other sensitive data, to be stored in the OpenIDM
+  repository. The encrypted value is output to standard output and provides
   details of the cryptography key that is used to encrypt the data.</para>
-  
+
   <para>Usage is as follows:</para>
-  
+
   <screen>
 $ ./cli.sh encrypt [-j] <replaceable>string</replaceable>
   </screen>
-  
-  <para>The <literal>-j</literal> option specifies that the string to be 
-  encrypted is a JSON object. If you do not enter the string as part of the 
-  command, the command prompts for the string to be encrypted. If you enter 
-  the string as part of the command, any special characters, for example 
-  quotation marks, must be escaped.</para>
-  
-  <para>The following example encrypts a normal string value:</para>
-  
-  <screen>
-$ ./cli.sh encrypt mypassword
-Using boot properties at /openidm/conf/boot/boot.properties
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: CryptoService is initialized with 3 keys.
------BEGIN ENCRYPTED VALUE-----
-{
-  "$crypto" : {
-    "value" : {
-      "iv" : "M2913T5ZADlC2ip2imeOyg==",
-      "data" : "DZAAAM1nKjQM1qpLwh3BgA==",
-      "cipher" : "AES/CBC/PKCS5Padding",
-      "key" : "openidm-sym-default"
-    },
-    "type" : "x-simple-encryption"
-  }
-}
-------END ENCRYPTED VALUE------
-  </screen>  
 
-  <para>The following example encrypts a JSON object. The input string must be 
-  a valid JSON object.</para>
-  
+  <para>The <literal>-j</literal> option specifies that the string to be
+  encrypted is a JSON object. If you do not enter the string as part of the
+  command, the command prompts for the string to be encrypted. If you enter
+  the string as part of the command, any special characters, for example
+  quotation marks, must be escaped.</para>
+
+  <para>The following example encrypts a normal string value:</para>
+
   <screen>
-$ ./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}
-Using boot properties at /openidm/conf/boot/boot.properties
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: CryptoService is initialized with 3 keys.
------BEGIN ENCRYPTED VALUE-----
-{
-  "$crypto" : {
-    "value" : {
+      $ ./cli.sh encrypt mypassword
+      Using boot properties at /openidm/conf/boot/boot.properties
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Activating cryptography service of type: JCEKS provider: location: security/keystore.jceks
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-sym-default
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-localhost
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-local-openidm-forgerock-org
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: CryptoService is initialized with 3 keys.
+      -----BEGIN ENCRYPTED VALUE-----
+      {
+      "$crypto" : {
+      "value" : {
       "iv" : "M2913T5ZADlC2ip2imeOyg==",
       "data" : "DZAAAM1nKjQM1qpLwh3BgA==",
       "cipher" : "AES/CBC/PKCS5Padding",
       "key" : "openidm-sym-default"
-    },
-    "type" : "x-simple-encryption"
-  }
-}
-------END ENCRYPTED VALUE------
+      },
+      "type" : "x-simple-encryption"
+      }
+      }
+      ------END ENCRYPTED VALUE------
   </screen>
 
-  <para>The following example prompts for a JSON object to be encrypted. In 
-  this case, you need not escape the special characters.</para>
-  
+  <para>The following example encrypts a JSON object. The input string must be
+  a valid JSON object.</para>
+
   <screen>
-$ ./cli.sh encrypt -j 
+      $ ./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}
+      Using boot properties at /openidm/conf/boot/boot.properties
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Activating cryptography service of type: JCEKS provider: location: security/keystore.jceks
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-sym-default
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-localhost
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: Available cryptography key: openidm-local-openidm-forgerock-org
+      Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
+      INFO: CryptoService is initialized with 3 keys.
+      -----BEGIN ENCRYPTED VALUE-----
+      {
+      "$crypto" : {
+      "value" : {
+      "iv" : "M2913T5ZADlC2ip2imeOyg==",
+      "data" : "DZAAAM1nKjQM1qpLwh3BgA==",
+      "cipher" : "AES/CBC/PKCS5Padding",
+      "key" : "openidm-sym-default"
+      },
+      "type" : "x-simple-encryption"
+      }
+      }
+      ------END ENCRYPTED VALUE------
+  </screen>
+
+  <para>The following example prompts for a JSON object to be encrypted. In
+  this case, you need not escape the special characters.</para>
+
+  <screen><![CDATA[<![CDATA[<![CDATA[<![CDATA[<![CDATA[
+$ ./cli.sh encrypt -j
 Using boot properties at /openidm/conf/boot/boot.properties
 Enter the Json value
 
@@ -353,15 +353,15 @@ Enter the Json value
 Start data input:
 {"password":"myPassw0rd"}
 ^D
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
+Oct 23, 2012 2:37internalPM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
 INFO: Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
+Oct 23, 2012 2:37:56 PM orinternalrgerock.openidm.crypto.impl.CryptoServiceImpl activate
 INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
+Oct 23, 2012 2:37:56 PM org.forgerointernalpenidm.crypto.impl.CryptoServiceImpl activate
 INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
+Oct 23, 2012 2:37:56 PM org.forgerock.openidinternalypto.impl.CryptoServiceImpl activate
 INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
+Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.internal.CryptoServiceImpl activate
 INFO: CryptoService is initialized with 3 keys.
 -----BEGIN ENCRYPTED VALUE-----
 {
@@ -376,59 +376,59 @@ INFO: CryptoService is initialized with 3 keys.
   }
 }
 ------END ENCRYPTED VALUE------
-  </screen>
+  ]]>]]>]]>]]>]]></screen>
 
  </section>
- 
- <section xml:id="cli-keytool">     
+
+ <section xml:id="cli-keytool">
    <title>keytool</title>
-   
+
   <indexterm>
     <primary>Keytool</primary>
-  </indexterm>   
+  </indexterm>
 
-   <para>The <command>keytool</command> subcommand exports or imports 
+   <para>The <command>keytool</command> subcommand exports or imports
    private key values.</para>
-   
-   <para>The Java <command>keytool</command> command enables you to export and 
-   import public keys and certificates, but not private keys. The OpenIDM 
+
+   <para>The Java <command>keytool</command> command enables you to export and
+   import public keys and certificates, but not private keys. The OpenIDM
    <command>keytool</command> subcommand provides this functionality.</para>
 
   <para>Usage is as follows:</para>
-  
+
   <screen>./cli.sh keytool [--export, --import] <replaceable>alias</replaceable>
   </screen>
-  
-  <para>For example, to export the default OpenIDM symmetric key, run the 
+
+  <para>For example, to export the default OpenIDM symmetric key, run the
   following command:</para>
-  
+
   <screen>$ ./cli.sh keytool --export openidm-sym-default
 Using boot properties at /openidm/conf/boot/boot.properties
 Use KeyStore from: /openidm/security/keystore.jceks
-Please enter the password: 
+Please enter the password:
 [OK] Secret key entry with algorithm AES
 AES:606d80ae316be58e94439f91ad8ce1c0
   </screen>
-  
-  <para>The default keystore password is <literal>changeit</literal>. You 
+
+  <para>The default keystore password is <literal>changeit</literal>. You
   should change this password after installation.</para>
-  
-  <para>To import a new secret key named <replaceable>my-new-key</replaceable>, 
+
+  <para>To import a new secret key named <replaceable>my-new-key</replaceable>,
   run the following command:</para>
-  
+
   <screen>$ ./cli.sh keytool --import my-new-key
 Using boot properties at /openidm/conf/boot/boot.properties
 Use KeyStore from: /openidm/security/keystore.jceks
-Please enter the password: 
-Enter the key: 
+Please enter the password:
+Enter the key:
 AES:606d80ae316be58e94439f91ad8ce1c0
   </screen>
-  
-  <para>If a secret key of that name already exists, OpenIDM returns the 
+
+  <para>If a secret key of that name already exists, OpenIDM returns the
   following error:</para>
-  
+
   <screen>"KeyStore contains a key with this alias"</screen>
-   
+
  </section>
 
 <section xml:id="cli-validate">
@@ -439,11 +439,11 @@ AES:606d80ae316be58e94439f91ad8ce1c0
     <secondary>Validating</secondary>
   </indexterm>
 
-  <para>The <command>validate</command> subcommand validates all .json 
+  <para>The <command>validate</command> subcommand validates all .json
   configuration files in the <filename>openidm/conf/</filename> directory.</para>
-  
+
   <para>Usage is as follows:</para>
-  
+
   <screen>
 $ ./cli.sh validate
 Using boot properties at /openidm/conf/boot/boot.properties
@@ -473,7 +473,7 @@ Using boot properties at /openidm/conf/boot/boot.properties
 [Validating] ui-countries.json ........................... SUCCESS
 [Validating] ui-secquestions.json ........................ SUCCESS
 [Validating] workflow.json ............................... SUCCESS
-  </screen>  
+  </screen>
 
 </section>
 

@@ -18,26 +18,25 @@
  */
 package org.forgerock.openidm.osgi;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+
 import javax.naming.CompositeName;
-import javax.naming.NamingException;
 import javax.naming.InvalidNameException;
+import javax.naming.NamingException;
 
 /**
- * A composite name for the OpenIDM namespace. This provides useful utility methods
- * for accessing the name.
- * 
- * Based on 
- * apache aries org/apache/aries/jndi/url/OsgiName.java
- * apache aries org/apache/aries/jndi/url/OsgiNameParser.java
- * 
+ * A composite name for the OpenIDM namespace. This provides useful utility
+ * methods for accessing the name.
+ *
+ * Based on apache aries org/apache/aries/jndi/url/OsgiName.java apache aries
+ * org/apache/aries/jndi/url/OsgiNameParser.java
+ *
  * <p/>
  * component 0: osgi:framework, osgi:service, openidm:services, osgi:servicelist
- * component 1: interface
- * component 2: filter
+ * component 1: interface component 2: filter
  *
  */
 @SuppressWarnings("serial")
@@ -50,7 +49,6 @@ public class OsgiName extends CompositeName {
     public static final String SERVICE_PATH = "service";
     public static final String SERVICES_PATH = "services";
     public static final String SERVICE_LIST_PATH = "servicelist";
-
 
     public OsgiName(String name) {
         super(split(name));
@@ -140,8 +138,11 @@ public class OsgiName extends CompositeName {
                 elements.add(builder.toString());
                 builder = new StringBuilder();
                 continue;
-            } else if (c == '(') count++;
-            else if (c == ')') count++;
+            } else if (c == '(') {
+                count++;
+            } else if (c == ')') {
+                count++;
+            }
 
             builder.append(c);
         }
@@ -154,20 +155,23 @@ public class OsgiName extends CompositeName {
     /**
      * Parse the String representation of a OSGi Object name.
      * <p/>
-     * Example: {@code osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)}
+     * Example:
+     * {@code osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)}
      *
-     * @param name TODO
+     * @param name
+     *            TODO
      * @return TODO
-     * @throws NamingException if the name String has invalid syntax.
+     * @throws NamingException
+     *             if the name String has invalid syntax.
      */
     public static OsgiName parse(String name) throws NamingException {
         OsgiName result = new OsgiName(name);
         String urlScheme = result.getScheme();
         String schemePath = result.getSchemePath();
 
-        if (OSGI_SCHEME.equals(urlScheme) && !(SERVICE_PATH.equals(schemePath) ||
-                SERVICE_LIST_PATH.equals(schemePath) ||
-                FRAMEWORK_PATH.equals(schemePath))) {
+        if (OSGI_SCHEME.equals(urlScheme)
+                && !(SERVICE_PATH.equals(schemePath) || SERVICE_LIST_PATH.equals(schemePath) || FRAMEWORK_PATH
+                        .equals(schemePath))) {
             throw new InvalidNameException(name);
         }
         if (!(OSGI_SCHEME.equals(urlScheme) || OPENIDM_SCHEME.equals(urlScheme))) {

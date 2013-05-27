@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,7 +29,7 @@ import org.osgi.framework.BundleContext;
 /**
  * A FrameworkPropertyAccessor wraps the {@link BundleContext} and accesses all
  * Framework properties.
- * 
+ *
  * @author Laszlo Hordos
  */
 public class FrameworkPropertyAccessor implements PropertyAccessor {
@@ -48,13 +48,15 @@ public class FrameworkPropertyAccessor implements PropertyAccessor {
      * the Framework properties, the system properties are then searched and
      * {@code delegate} is then requested. The method returns {@code null} if
      * the property is not found.
-     * 
+     *
      * @param key
      *            The name of the requested property.
      * @param defaultValue
      *            The value to return if the property is not found.
      * @param expected
      *            The type of the expected value.
+     * @param <T>
+     *            The type of the expected property.
      * @return The value of the requested property, or {@code null} if the
      *         property is undefined.
      * @throws SecurityException
@@ -62,6 +64,7 @@ public class FrameworkPropertyAccessor implements PropertyAccessor {
      *             {@code PropertyPermission} to read the property, and the Java
      *             Runtime Environment supports permissions.
      */
+    @SuppressWarnings("unchecked")
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         T value = null;
         if (null != key

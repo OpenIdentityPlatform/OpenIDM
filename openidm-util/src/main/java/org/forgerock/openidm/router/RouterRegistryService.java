@@ -25,14 +25,13 @@
 package org.forgerock.openidm.router;
 
 import org.forgerock.json.resource.ConnectionProvider;
-import org.forgerock.json.resource.RequestHandler;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
-public interface RouterRegistryService  extends ConnectionProvider /* RequestHandler*/ {
+public interface RouterRegistryService extends ConnectionProvider /* RequestHandler */{
 
     public RouteEntry addRoute(RouteBuilder routeBuilder);
 

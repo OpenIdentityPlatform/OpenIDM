@@ -29,27 +29,22 @@ import java.util.Hashtable;
 
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionProvider;
-import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
-//TODO Delete this when openidm-core is migrated
+// TODO Delete this when openidm-core is migrated
 public class Activator implements BundleActivator {
 
     private AnonymousClass a = null;
@@ -74,23 +69,28 @@ public class Activator implements BundleActivator {
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
         properties.put("org.forgerock.openidm.router", "true");
 
-        routerServiceRegistration = context.registerService(RequestHandler.class,a.getInternalRouter(),properties);
+        routerServiceRegistration =
+                context.registerService(RequestHandler.class, a.getInternalRouter(), properties);
 
         final Connection connection = Resources.newInternalConnection(a.getInternalRouter());
 
-        //TODO move this to core when it's cleaned
-        persistenceConfigRegistration = context.registerService(PersistenceConfig.class, PersistenceConfig.builder().connectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(String connectionId) throws ResourceException {
-                return connection;
-            }
+        // TODO move this to core when it's cleaned
+        persistenceConfigRegistration =
+                context.registerService(PersistenceConfig.class, PersistenceConfig.builder()
+                        .connectionProvider(new ConnectionProvider() {
+                            @Override
+                            public Connection getConnection(String connectionId)
+                                    throws ResourceException {
+                                return connection;
+                            }
 
-            @Override
-            public String getConnectionId(Connection connection) throws ResourceException {
-                return "DEFAULT";
-            }
-        }).classLoader(this.getClass().getClassLoader()).build(),properties);
-        //TODO Use BundleDelegatingClassLoader or WireAdmin from OSGi 4.3
+                            @Override
+                            public String getConnectionId(Connection connection)
+                                    throws ResourceException {
+                                return "DEFAULT";
+                            }
+                        }).classLoader(this.getClass().getClassLoader()).build(), properties);
+        // TODO Use BundleDelegatingClassLoader or WireAdmin from OSGi 4.3
     }
 
     @Override
@@ -112,7 +112,7 @@ public class Activator implements BundleActivator {
         }
     }
 
-    //TODO Replace this later
+    // TODO Replace this later
     private class AnonymousClass extends AbstractRouterRegistry {
 
         private AnonymousClass(BundleContext context) {
@@ -121,7 +121,7 @@ public class Activator implements BundleActivator {
 
         @Override
         protected void activate() {
-            isActive.compareAndSet(false,true);
+            isActive.compareAndSet(false, true);
             getInternalRouter();
             resourceTracker.open();
         }

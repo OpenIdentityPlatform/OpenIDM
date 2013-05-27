@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A Security Manager Service which handles operations on the java security
  * keystore and truststore files.
- * 
+ *
  * @author ckienle
  */
 @Component(name = SecurityManager.PID, policy = ConfigurationPolicy.IGNORE,
@@ -84,6 +84,19 @@ public class SecurityManager implements RequestHandler {
         logger.debug("Activating Security Management Service {}", compContext);
         // Add the Bouncy Castle provider
         Security.addProvider(new BouncyCastleProvider());
+
+
+        // Set System properties
+        if (System.getProperty("javax.net.ssl.keyStore") == null) {
+            System.setProperty("javax.net.ssl.keyStore", Param.getKeystoreLocation());
+            System.setProperty("javax.net.ssl.keyStorePassword", Param.getKeystorePassword(false));
+            System.setProperty("javax.net.ssl.keyStoreType", Param.getKeystoreType());
+        }
+        if (System.getProperty("javax.net.ssl.trustStore") == null) {
+            System.setProperty("javax.net.ssl.trustStore", Param.getTruststoreLocation());
+            System.setProperty("javax.net.ssl.trustStorePassword", Param.getTruststorePassword(false));
+            System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
+        }
 
         KeystoreResourceProvider provider =
                 new KeystoreResourceProvider("keystore", new JcaKeyStoreHandler(Param.getKeystoreType(),

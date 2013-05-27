@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.io.IOException;
@@ -46,7 +47,6 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
@@ -54,11 +54,8 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -76,14 +73,14 @@ import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
+import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -96,24 +93,21 @@ import org.slf4j.LoggerFactory;
  * Repository service implementation using JDBC
  *
  * @author aegloff
+ * @author brmiller
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
-		enabled = true)
+        enabled = true)
 @Service
-// Omit the RepoBootService interface from the managed service
 @Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{partition}*"),
-        @Property(name = "db.type", value = "JDBC")
-})
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{partition}*"),
+    @Property(name = "db.type", value = "JDBC") })
 public class JDBCRepoService implements RequestHandler {
-	
+
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
-
-    ObjectMapper mapper = new ObjectMapper();
 
     private static ServiceRegistration sharedDataSource = null;
 
@@ -144,34 +138,37 @@ public class JDBCRepoService implements RequestHandler {
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     JsonValue config;
-    
-	@Override
-	public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
-		try {
+
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request,
+            ResultHandler<Resource> handler) {
+        try {
             handler.handleResult(read(request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
-	}
-    
-	/**
-	 * Reads a resource from the repository based on the supplied read request.
-	 * 
-	 * @param request the read request.
-	 * @return the requested resource.
-	 * @throws ResourceException if an error was encountered during the read.
-	 */
+    }
+
+    /**
+     * Reads a resource from the repository based on the supplied read request.
+     *
+     * @param request
+     *            the read request.
+     * @return the requested resource.
+     * @throws ResourceException
+     *             if an error was encountered during the read.
+     */
     public Resource read(ReadRequest request) throws ResourceException {
         // Parse the remaining resourceName
-    	String fullId = request.getResourceName();
+        String fullId = request.getResourceName();
         String[] resourceName = ResourceUtil.parseResourceName(fullId);
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-        
+
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
 
@@ -179,17 +176,18 @@ public class JDBCRepoService implements RequestHandler {
         Resource result = null;
         try {
             connection = getConnection();
-            connection.setAutoCommit(true); // Ensure this does not get transaction isolation handling
+            connection.setAutoCommit(true); // Ensure this does not get
+                                            // transaction isolation handling
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-                		"No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
             }
             result = handler.read(fullId, type, localId, connection);
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SQL Exception in read of {} with error code {}, sql state {}",
-                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                        new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
             }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
         } catch (ResourceException ex) {
@@ -201,50 +199,52 @@ public class JDBCRepoService implements RequestHandler {
         } finally {
             CleanupHelper.loggedClose(connection);
         }
-        
+
         return result;
     }
-	
-	@Override
-	public void handleCreate(ServerContext context, CreateRequest request,
-			ResultHandler<Resource> handler) {
-		try {
+
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request,
+            ResultHandler<Resource> handler) {
+        try {
             handler.handleResult(create(request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
-	}
-    
+    }
+
     /**
      * Creates a new resource in the repository.
-     * 
-     * @param request the create request
+     *
+     * @param request
+     *            the create request
      * @return the created resource
-     * @throws ResourceException if an error was encountered during creation
+     * @throws ResourceException
+     *             if an error was encountered during creation
      */
-	public Resource create(CreateRequest request) throws ResourceException {
-		// Parse the remaining resourceName
-    	String fullId = request.getResourceName();
+    public Resource create(CreateRequest request) throws ResourceException {
+        // Parse the remaining resourceName
+        String fullId = request.getResourceName();
         String[] resourceName = ResourceUtil.parseResourceName(fullId);
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-        
+
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         Map<String, Object> obj = request.getContent().asMap();
-		
+
         Connection connection = null;
         boolean retry = false;
         int tryCount = 0;
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-                		"No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
             }
             retry = false;
             ++tryCount;
@@ -260,13 +260,15 @@ public class JDBCRepoService implements RequestHandler {
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in create of {} with error code {}, sql state {}",
-                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
                 }
                 rollback(connection);
                 boolean alreadyExisted = handler.isErrorType(ex, ErrorType.DUPLICATE_KEY);
                 if (alreadyExisted) {
-                    throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
-                            + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")"+ ex.getMessage(), ex);
+                    throw new PreconditionFailedException(
+                            "Create rejected as Object with same ID already exists and was detected. "
+                                    + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")"
+                                    + ex.getMessage(), ex);
                 }
                 if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
@@ -275,8 +277,9 @@ public class JDBCRepoService implements RequestHandler {
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Creating object failed "
-                            + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")" + ex.getMessage(), ex);
+                    throw new InternalServerErrorException("Creating object failed " + "("
+                            + ex.getErrorCode() + "-" + ex.getSQLState() + ")" + ex.getMessage(),
+                            ex);
                 }
             } catch (ResourceException ex) {
                 logger.debug("ResourceException in create of {}", fullId, ex);
@@ -289,56 +292,60 @@ public class JDBCRepoService implements RequestHandler {
             } catch (RuntimeException ex) {
                 logger.debug("Runtime Exception in create of {}", fullId, ex);
                 rollback(connection);
-                throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
+                throw new InternalServerErrorException(
+                        "Creating object failed with unexpected failure: " + ex.getMessage(), ex);
             } finally {
                 CleanupHelper.loggedClose(connection);
             }
         } while (retry);
-                
+
         // Return the newly created resource
         return read(Requests.newReadRequest(fullId));
-	
-	}
-	
-	@Override
-	public void handleUpdate(ServerContext context, UpdateRequest request,
-			ResultHandler<Resource> handler) {
-		try {
+
+    }
+
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler) {
+        try {
             handler.handleResult(update(request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
-	}
-	
-	/**
-	 * Updates a resource in the repository
+    }
+
+    /**
+     * Updates a resource in the repository
      * <p/>
-     * This implementation requires MVCC and hence enforces that clients state what revision they expect
-     * to be updating
+     * This implementation requires MVCC and hence enforces that clients state
+     * what revision they expect to be updating
      * <p/>
-     * If successful, this method updates metadata properties within the passed object,
-     * including: a new {@code _rev} value for the revised object's version
-	 * 
-	 * @param request the update request
-	 * @return the updated resource
-	 * @throws ResourceException if an error was encountered while updating
-	 */
-	public Resource update(UpdateRequest request) throws ResourceException {
-		// Parse the remaining resourceName
-    	String fullId = request.getResourceName();
+     * If successful, this method updates metadata properties within the passed
+     * object, including: a new {@code _rev} value for the revised object's
+     * version
+     *
+     * @param request
+     *            the update request
+     * @return the updated resource
+     * @throws ResourceException
+     *             if an error was encountered while updating
+     */
+    public Resource update(UpdateRequest request) throws ResourceException {
+        // Parse the remaining resourceName
+        String fullId = request.getResourceName();
         String[] resourceName = ResourceUtil.parseResourceName(fullId);
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-        
+
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         Map<String, Object> obj = request.getNewContent().asMap();
         String rev = request.getRevision();
-        
+
         Connection connection = null;
         Integer previousIsolationLevel = null;
         boolean retry = false;
@@ -346,8 +353,8 @@ public class JDBCRepoService implements RequestHandler {
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-                		"No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
             }
             retry = false;
             ++tryCount;
@@ -364,7 +371,7 @@ public class JDBCRepoService implements RequestHandler {
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in update of {} with error code {}, sql state {}",
-                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
                 }
                 rollback(connection);
                 if (handler.isRetryable(ex, connection)) {
@@ -374,7 +381,8 @@ public class JDBCRepoService implements RequestHandler {
                     }
                 }
                 if (!retry) {
-                   throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
+                    throw new InternalServerErrorException("Updating object failed "
+                            + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
                 logger.debug("ResourceException in update of {}", fullId, ex);
@@ -387,7 +395,8 @@ public class JDBCRepoService implements RequestHandler {
             } catch (RuntimeException ex) {
                 logger.debug("Runtime Exception in update of {}", fullId, ex);
                 rollback(connection);
-                throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
+                throw new InternalServerErrorException(
+                        "Updating object failed with unexpected failure: " + ex.getMessage(), ex);
             } finally {
                 if (connection != null) {
                     try {
@@ -401,39 +410,40 @@ public class JDBCRepoService implements RequestHandler {
                 }
             }
         } while (retry);
-        
+
         // Return the newly created resource
         return read(Requests.newReadRequest(fullId));
-	}
-	
-	@Override
-	public void handleDelete(ServerContext context, DeleteRequest request,
-			ResultHandler<Resource> handler) {
-		try {
+    }
+
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request,
+            ResultHandler<Resource> handler) {
+        try {
             handler.handleResult(delete(request));
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
-	}
-	
-	public Resource delete(DeleteRequest request) throws ResourceException {
-		// Parse the remaining resourceName
-		Resource result = null;
-    	String fullId = request.getResourceName();
+    }
+
+    public Resource delete(DeleteRequest request) throws ResourceException {
+        // Parse the remaining resourceName
+        Resource result = null;
+        String fullId = request.getResourceName();
         String[] resourceName = ResourceUtil.parseResourceName(fullId);
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-        
+
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         String rev = request.getRevision();
-        
+
         if (rev == null) {
-            throw new ConflictException("Object passed into delete does not have revision it expects set.");
+            throw new ConflictException(
+                    "Object passed into delete does not have revision it expects set.");
         }
 
         Connection connection = null;
@@ -442,17 +452,16 @@ public class JDBCRepoService implements RequestHandler {
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-                		"No handler configured for resource type " + type);
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
             }
-            
-            
+
             retry = false;
             ++tryCount;
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
-            
+
                 // Read in the resource before deleting
                 result = handler.read(fullId, type, localId, connection);
 
@@ -463,11 +472,12 @@ public class JDBCRepoService implements RequestHandler {
             } catch (IOException ex) {
                 logger.debug("IO Exception in delete of {}", fullId, ex);
                 rollback(connection);
-                throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
+                throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(),
+                        ex);
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in delete of {} with error code {}, sql state {}",
-                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
                 }
                 rollback(connection);
                 if (handler.isRetryable(ex, connection)) {
@@ -477,7 +487,8 @@ public class JDBCRepoService implements RequestHandler {
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
+                    throw new InternalServerErrorException("Deleting object failed "
+                            + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
                 logger.debug("ResourceException in delete of {}", fullId, ex);
@@ -486,78 +497,80 @@ public class JDBCRepoService implements RequestHandler {
             } catch (RuntimeException ex) {
                 logger.debug("Runtime Exception in delete of {}", fullId, ex);
                 rollback(connection);
-                throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
+                throw new InternalServerErrorException(
+                        "Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
             } finally {
                 CleanupHelper.loggedClose(connection);
             }
         } while (retry);
-        
-		return result;
-	}
-	
-	@Override
-	public void handlePatch(ServerContext context, PatchRequest request,
-			ResultHandler<Resource> handler) {
-		final ResourceException e = new NotSupportedException("Patch operations are not supported");
+
+        return result;
+    }
+
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
-	}
-	
-	@Override
-	public void handleQuery(ServerContext context, QueryRequest request,
-			QueryResultHandler handler) {
-		try {
-	    	String fullId = request.getResourceName();
-			String type = fullId;
-	        logger.trace("Full id: {} Extracted type: {}", fullId, type);
+    }
+
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        try {
+            String fullId = request.getResourceName();
+            String type = fullId;
+            logger.trace("Full id: {} Extracted type: {}", fullId, type);
             Map<String, Object> params =
                     new HashMap<String, Object>(request.getAdditionalQueryParameters());
 
-	        Connection connection = null;
-	        try {
-	            TableHandler tableHandler = getTableHandler(type);
-	            if (tableHandler == null) {
-	                throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
-	                		"No handler configured for resource type " + type);
-	            }
-	            connection = getConnection();
-	            connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
+            Connection connection = null;
+            try {
+                TableHandler tableHandler = getTableHandler(type);
+                if (tableHandler == null) {
+                    throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                            "No handler configured for resource type " + type);
+                }
+                connection = getConnection();
+                connection.setAutoCommit(true); // Ensure we do not implicitly
+                                                // start transaction isolation
 
-	            List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
-	            
-	            for (Map<String, Object> resultMap : docs) {
-	            	String id = (String)resultMap.get("_id");
-	            	String rev = (String)resultMap.get("_rev");
-	            	JsonValue value = new JsonValue(resultMap);
-	            	Resource resultResource = new Resource(id, rev, value);
-	            	handler.handleResource(resultResource);
-	            }
+                List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
 
-	            handler.handleResult(new QueryResult());
-	        } catch (SQLException ex) {
-	            if (logger.isDebugEnabled()) {
-	                logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
-	                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
-	            }
-	            throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
-	        } catch (ResourceException ex) {
-	            logger.debug("ResourceException in query of {}", fullId, ex);
-	            throw ex;
-	        }  finally {
-	            CleanupHelper.loggedClose(connection);
-	        }
+                for (Map<String, Object> resultMap : docs) {
+                    String id = (String) resultMap.get("_id");
+                    String rev = (String) resultMap.get("_rev");
+                    JsonValue value = new JsonValue(resultMap);
+                    Resource resultResource = new Resource(id, rev, value);
+                    handler.handleResource(resultResource);
+                }
+
+                handler.handleResult(new QueryResult());
+            } catch (SQLException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
+                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
+                }
+                throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
+            } catch (ResourceException ex) {
+                logger.debug("ResourceException in query of {}", fullId, ex);
+                throw ex;
+            } finally {
+                CleanupHelper.loggedClose(connection);
+            }
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
-	}
+    }
 
-	@Override
-	public void handleAction(ServerContext context, ActionRequest request,
-			ResultHandler<JsonValue> handler) {
-		final ResourceException e = new NotSupportedException("Action operations are not supported");
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler) {
+        final ResourceException e =
+                new NotSupportedException("Action operations are not supported");
         handler.handleError(e);
-	}
+    }
 
     // Utility method to cleanly roll back including logging
     private void rollback(Connection connection) {
@@ -588,7 +601,8 @@ public class JDBCRepoService implements RequestHandler {
         int lastSlashPos = id.lastIndexOf("/");
         if (lastSlashPos > -1) {
             int startPos = 0;
-            // This should not be necessary as relative URI should not start with slash
+            // This should not be necessary as relative URI should not start
+            // with slash
             if (id.startsWith("/")) {
                 startPos = 1;
             }
@@ -618,29 +632,34 @@ public class JDBCRepoService implements RequestHandler {
                     logger.debug("Use table handler configured for {} for type {} ", key, type);
                 }
             }
-            // For future lookups remember the handler determined for this specific type
+            // For future lookups remember the handler determined for this
+            // specific type
             tableHandlers.put(type, handler);
             return handler;
         }
     }
 
     /**
-     * Populate and return a repository service that knows how to query and manipulate configuration.
+     * Populate and return a repository service that knows how to query and
+     * manipulate configuration.
      *
-     * @param repoConfig the bootstrap configuration
+     * @param repoConfig
+     *            the bootstrap configuration
      * @param context
-     * @return the boot repository service. This newBuilder is not managed by SCR and needs to be manually registered.
+     * @return the boot repository service. This newBuilder is not managed by
+     *         SCR and needs to be manually registered.
      */
-    /*static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) {
-        JDBCRepoService bootRepo = new JDBCRepoService();
-        bootRepo.init(repoConfig, context);
-        return bootRepo;
-    }*/
+    /*
+     * static RepoBootService getRepoBootService(JsonValue repoConfig,
+     * BundleContext context) { JDBCRepoService bootRepo = new
+     * JDBCRepoService(); bootRepo.init(repoConfig, context); return bootRepo; }
+     */
 
     /**
      * Activates the JDBC Repository Service
-     * 
-     * @param compContext   The component context
+     *
+     * @param compContext
+     *            The component context
      */
     @Activate
     void activate(ComponentContext compContext) {
@@ -648,8 +667,9 @@ public class JDBCRepoService implements RequestHandler {
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
-                    + ex.getMessage(), ex);
+            logger.warn(
+                    "Configuration invalid and could not be parsed, can not start JDBC repository: "
+                            + ex.getMessage(), ex);
             throw ex;
         }
         init(config, compContext.getBundleContext());
@@ -659,53 +679,62 @@ public class JDBCRepoService implements RequestHandler {
 
     /**
      * Deactivates the JDBC Repository Service
-     * 
-     * @param compContext   the component context
+     *
+     * @param compContext
+     *            the component context
      */
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         logger.info("Repository stopped.");
     }
-    
-    /** 
+
+    /**
      * Handles configuration updates without interrupting the service
-     * 
-     * @param compContext   the component context
+     *
+     * @param compContext
+     *            the component context
      */
     @Modified
     void modified(ComponentContext compContext) throws Exception {
-        logger.debug("Reconfiguring the JDBC Repository Service with configuration {}", compContext.getProperties());
+        logger.debug("Reconfiguring the JDBC Repository Service with configuration {}", compContext
+                .getProperties());
         try {
             JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
             if (hasConfigChanged(config, newConfig)) {
                 deactivate(compContext);
                 activate(compContext);
-                logger.info("Reconfigured the JDBC Repository Service {}", compContext.getProperties());
+                logger.info("Reconfigured the JDBC Repository Service {}", compContext
+                        .getProperties());
             }
         } catch (Exception ex) {
-            logger.warn("Configuration invalid, can not reconfigure the JDBC Repository Service.", ex);
+            logger.warn("Configuration invalid, can not reconfigure the JDBC Repository Service.",
+                    ex);
             throw ex;
         }
     }
-    
+
     /**
-     * Compares the current configuration with a new configuration to determine if the
-     * configuration has changed
-     * 
-     * @param existingConfig    the current configuration object
-     * @param newConfig         the new configuration object
-     * @return                  true if the configurations differ, false otherwise    
+     * Compares the current configuration with a new configuration to determine
+     * if the configuration has changed
+     *
+     * @param existingConfig
+     *            the current configuration object
+     * @param newConfig
+     *            the new configuration object
+     * @return true if the configurations differ, false otherwise
      */
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
         return JsonPatch.diff(existingConfig, newConfig).size() > 0;
     }
-    
+
     /**
      * Initializes the JDBC Repository Service with the supplied configuration
-     * 
-     * @param config            the configuration object
-     * @param bundleContext     the bundle context
+     *
+     * @param config
+     *            the configuration object
+     * @param bundleContext
+     *            the bundle context
      * @throws InvalidException
      */
     void init(JsonValue config, BundleContext bundleContext) throws InvalidException {
@@ -716,7 +745,8 @@ public class JDBCRepoService implements RequestHandler {
                 throw new RuntimeException("JDBC repository not enabled.");
             }
 
-            JsonValue connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
+            JsonValue connectionConfig =
+                    config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
 
             maxTxRetry = connectionConfig.get("maxTxRetry").defaultTo(5).asInteger().intValue();
 
@@ -733,14 +763,18 @@ public class JDBCRepoService implements RequestHandler {
                     logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
                 }
                 if (ctx == null) {
-                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. "
-                            + " Configure DB initialization via direct " + CONFIG_DB_DRIVER + " configuration instead.");
+                    throw new InvalidException(
+                            "Current platform context does not support lookup of repository DB via JNDI. "
+                                    + " Configure DB initialization via direct " + CONFIG_DB_DRIVER
+                                    + " configuration instead.");
                 }
 
                 useDataSource = true;
-                ds = (DataSource) ctx.lookup(jndiName); // e.g. "java:comp/env/jdbc/MySQLDB"
+                ds = (DataSource) ctx.lookup(jndiName); // e.g.
+                                                        // "java:comp/env/jdbc/MySQLDB"
             } else if (!StringUtils.isBlank(jtaName)) {
-                // e.g. osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)
+                // e.g.
+                // osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)
                 OsgiName lookupName = OsgiName.parse(jtaName);
                 Object service = ServiceUtil.getService(bundleContext, lookupName, null, true);
                 if (service instanceof DataSource) {
@@ -753,25 +787,33 @@ public class JDBCRepoService implements RequestHandler {
                 // Get DB Connection via Driver Manager
                 dbDriver = connectionConfig.get(CONFIG_DB_DRIVER).asString();
                 if (dbDriver == null || dbDriver.trim().length() == 0) {
-                    throw new InvalidException("Either a JNDI name (" + CONFIG_JNDI_NAME + "), " +
-                            "or a DB driver lookup (" + CONFIG_DB_DRIVER + ") needs to be configured to connect to a DB.");
+                    throw new InvalidException("Either a JNDI name (" + CONFIG_JNDI_NAME + "), "
+                            + "or a DB driver lookup (" + CONFIG_DB_DRIVER
+                            + ") needs to be configured to connect to a DB.");
                 }
                 dbUrl = connectionConfig.get(CONFIG_DB_URL).required().asString();
                 user = connectionConfig.get(CONFIG_USER).required().asString();
                 password = connectionConfig.get(CONFIG_PASSWORD).defaultTo("").asString();
-                logger.info("Using DB connection configured via Driver Manager with Driver {} and URL", dbDriver, dbUrl);
+                logger.info(
+                        "Using DB connection configured via Driver Manager with Driver {} and URL",
+                        dbDriver, dbUrl);
                 try {
                     Class.forName(dbDriver);
                 } catch (ClassNotFoundException ex) {
-                    logger.error("Could not find configured database driver " + dbDriver + " to start repository ", ex);
+                    logger.error("Could not find configured database driver " + dbDriver
+                            + " to start repository ", ex);
                     throw new InvalidException("Could not find configured database driver "
                             + dbDriver + " to start repository ", ex);
                 }
-                Boolean enableConnectionPool = connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE).asBoolean();
+                Boolean enableConnectionPool =
+                        connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE)
+                                .asBoolean();
                 if (null == sharedDataSource) {
                     Dictionary<String, String> serviceParams = new Hashtable<String, String>(1);
                     serviceParams.put("osgi.jndi.service.name", "jdbc/openidm");
-                    sharedDataSource = bundleContext.registerService(DataSource.class.getName(), DataSourceFactory.newInstance(connectionConfig), serviceParams);
+                    sharedDataSource =
+                            bundleContext.registerService(DataSource.class.getName(),
+                                    DataSourceFactory.newInstance(connectionConfig), serviceParams);
                 }
                 if (enableConnectionPool) {
                     ds = DataSourceFactory.newInstance(connectionConfig);
@@ -785,15 +827,20 @@ public class JDBCRepoService implements RequestHandler {
             // Table handling configuration
             String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
             JsonValue genericQueries = config.get("queries").get("genericTables");
-            int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
+            int maxBatchSize =
+                    connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
             tableHandlers = new HashMap<String, TableHandler>();
-            //TODO Make safe the database type detection
-            DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
+            // TODO Make safe the database type detection
+            DatabaseType databaseType =
+                    DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(
+                            DatabaseType.ANSI_SQL99.name()).asString());
 
             JsonValue defaultMapping = config.get("resourceMapping").get("default");
             if (!defaultMapping.isNull()) {
-                defaultTableHandler = getGenericTableHandler(databaseType, defaultMapping, dbSchemaName, genericQueries, maxBatchSize);
+                defaultTableHandler =
+                        getGenericTableHandler(databaseType, defaultMapping, dbSchemaName,
+                                genericQueries, maxBatchSize);
                 logger.debug("Using default table handler: {}", defaultTableHandler);
             } else {
                 logger.warn("No default table handler configured");
@@ -804,12 +851,9 @@ public class JDBCRepoService implements RequestHandler {
             defaultTableProps.put("mainTable", "configobjects");
             defaultTableProps.put("propertiesTable", "configobjectproperties");
             defaultTableProps.put("searchableDefault", Boolean.FALSE);
-            GenericTableHandler defaultConfigHandler = getGenericTableHandler(
-                    databaseType,
-                    defaultTableProps,
-                    dbSchemaName,
-                    genericQueries,
-                    1);
+            GenericTableHandler defaultConfigHandler =
+                    getGenericTableHandler(databaseType, defaultTableProps, dbSchemaName,
+                            genericQueries, 1);
             tableHandlers.put("config", defaultConfigHandler);
 
             JsonValue genericMapping = config.get("resourceMapping").get("genericMapping");
@@ -820,12 +864,9 @@ public class JDBCRepoService implements RequestHandler {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
                     }
-                    TableHandler handler = getGenericTableHandler(
-                            databaseType,
-                            value,
-                            dbSchemaName,
-                            genericQueries,
-                            maxBatchSize);
+                    TableHandler handler =
+                            getGenericTableHandler(databaseType, value, dbSchemaName,
+                                    genericQueries, maxBatchSize);
 
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
@@ -842,14 +883,10 @@ public class JDBCRepoService implements RequestHandler {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
                     }
-                    TableHandler handler = getMappedTableHandler(
-                            databaseType,
-                            value,
-                            value.get("table").required().asString(),
-                            value.get("objectToColumn").required().asMap(),
-                            dbSchemaName,
-                            explicitQueries,
-                            maxBatchSize);
+                    TableHandler handler =
+                            getMappedTableHandler(databaseType, value, value.get("table")
+                                    .required().asString(), value.get("objectToColumn").required()
+                                    .asMap(), dbSchemaName, explicitQueries, maxBatchSize);
 
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
@@ -860,17 +897,25 @@ public class JDBCRepoService implements RequestHandler {
             logger.warn("Configuration invalid, can not start JDBC repository.", ex);
             throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
         } catch (NamingException ex) {
-            throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
+            throw new InvalidException("Could not find configured jndiName " + jndiName
+                    + " to start repository ", ex);
+        } catch (InternalServerErrorException ex) {
+            throw new InvalidException(
+                    "Could not initialize mapped table handler, can not start JDBC repository.", ex);
         }
 
         Connection testConn = null;
         try {
             // Check if we can get a connection
             testConn = getConnection();
-            testConn.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
+            testConn.setAutoCommit(true); // Ensure we do not implicitly start
+                                          // transaction isolation
         } catch (Exception ex) {
-            logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage()
-                    + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
+            logger.warn(
+                    "JDBC Repository start-up experienced a failure getting a DB connection: "
+                            + ex.getMessage()
+                            + ". If this is not temporary or resolved, Repository operation will be affected.",
+                    ex);
         } finally {
             if (testConn != null) {
                 try {
@@ -882,118 +927,90 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
-    GenericTableHandler getGenericTableHandler(DatabaseType databaseType,
-            JsonValue tableConfig, String dbSchemaName, JsonValue queries, int maxBatchSize) {
+    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, JsonValue tableConfig,
+            String dbSchemaName, JsonValue queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;
 
         // TODO: make pluggable
         switch (databaseType) {
-            case DB2:
-                handler = new DB2TableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new DB2SQLExceptionHandler());
-                break;
-            case ORACLE:
-                handler = new OracleTableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new DefaultSQLExceptionHandler());
-                break;
-            case POSTGRESQL:
-                handler = new PostgreSQLTableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new DefaultSQLExceptionHandler());
-                break;
-            case MYSQL:
-                handler = new GenericTableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new MySQLExceptionHandler());
-                break;
-            case SQLSERVER:
-                handler = new MSSQLTableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new DefaultSQLExceptionHandler());
-                break;
-            default:
-                handler = new GenericTableHandler(
-                        tableConfig,
-                        dbSchemaName,
-                        queries,
-                        maxBatchSize,
-                        new DefaultSQLExceptionHandler());
+        case DB2:
+            handler =
+                    new DB2TableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new DB2SQLExceptionHandler());
+            break;
+        case ORACLE:
+            handler =
+                    new OracleTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new DefaultSQLExceptionHandler());
+            break;
+        case POSTGRESQL:
+            handler =
+                    new PostgreSQLTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new DefaultSQLExceptionHandler());
+            break;
+        case MYSQL:
+            handler =
+                    new GenericTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new MySQLExceptionHandler());
+            break;
+        case SQLSERVER:
+            handler =
+                    new MSSQLTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new DefaultSQLExceptionHandler());
+            break;
+        default:
+            handler =
+                    new GenericTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+                            new DefaultSQLExceptionHandler());
         }
         return handler;
     }
 
-    MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig, String table,
-            Map objectToColumn, String dbSchemaName, JsonValue explicitQueries, int maxBatchSize) {
+    MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig,
+            String table, Map objectToColumn, String dbSchemaName, JsonValue explicitQueries,
+            int maxBatchSize) throws InternalServerErrorException {
+
+        final Accessor<CryptoService> cryptoServiceAccessor = new Accessor<CryptoService>() {
+            public CryptoService access() {
+                return null;
+            }
+        };
 
         MappedTableHandler handler = null;
 
         // TODO: make pluggable
         switch (databaseType) {
-            case DB2:
-                handler = new MappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new DB2SQLExceptionHandler());
-                break;
-            case ORACLE:
-                handler = new MappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new DefaultSQLExceptionHandler());
-                break;
-            case POSTGRESQL:
-                handler = new MappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new DefaultSQLExceptionHandler());
-                break;
-            case MYSQL:
-                handler = new MappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new MySQLExceptionHandler());
-                break;
-            case SQLSERVER:
-                handler = new MSSQLMappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new DefaultSQLExceptionHandler());
-                break;
-            default:
-                handler = new MappedTableHandler(
-                        table,
-                        objectToColumn,
-                        dbSchemaName,
-                        explicitQueries,
-                        new DefaultSQLExceptionHandler());
+        case DB2:
+            handler =
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+                            new DB2SQLExceptionHandler(), cryptoServiceAccessor);
+            break;
+        case ORACLE:
+            handler =
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+                            new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
+            break;
+        case POSTGRESQL:
+            handler =
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+                            new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
+            break;
+        case MYSQL:
+            handler =
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+                            new MySQLExceptionHandler(), cryptoServiceAccessor);
+            break;
+        case SQLSERVER:
+            handler =
+                    new MSSQLMappedTableHandler(table, objectToColumn, dbSchemaName,
+                            explicitQueries, new DefaultSQLExceptionHandler(),
+                            cryptoServiceAccessor);
+            break;
+        default:
+            handler =
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+                            new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
         }
         return handler;
     }

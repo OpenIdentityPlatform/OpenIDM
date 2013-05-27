@@ -27,6 +27,7 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
+import org.forgerock.openidm.audit.internal.AbstractAuditLogger;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -35,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.repo.RepositoryService;
 
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -45,12 +45,8 @@ import org.forgerock.openidm.smartevent.Publisher;
 * Audit logger that logs to a repository
 * @author aegloff
 */
-public class RepoAuditLogger/* implements AuditLogger */{
-
-    /**
-     * Setup logging for the {@link RepoAuditLogger}.
-     */
-    final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
+public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogger*/ {
+//    final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
 //
 //    /**
 //     * Event names for monitoring audit behavior
@@ -64,6 +60,7 @@ public class RepoAuditLogger/* implements AuditLogger */{
 //    String fullIdPrefix = AuditService.ROUTER_PREFIX + "/";
 //
 //    public void setConfig(Map config, BundleContext ctx) throws InvalidException {
+//        super.setConfig(config, ctx);
 //        this.ctx = ctx;
 //    }
 //
@@ -75,10 +72,29 @@ public class RepoAuditLogger/* implements AuditLogger */{
 //     */
 //    @Override
 //    public Map<String, Object> read(String fullId) throws ObjectSetException {
-//        JsonResourceObjectSet svc = getRepoService();
-//        Map<String, Object> result = null;
+//        getRepoService();
+//        Map<String, Object> params = new HashMap<String, Object>();
+//        params.put("_queryId", "query-all");
+//        params.put("fields", "*");
+//        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+//        String type = split[0];
+//        String id = split[1];
+//        Map<String, Object> result = new HashMap<String, Object>();
 //        try {
-//            result = svc.read(fullIdPrefix + fullId);
+//            List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
+//            if (id == null) {
+//                Map<String, Object> queryResult = repo.query(fullIdPrefix + fullId, params);
+//                for (Map<String, Object> entry : (List<Map<String, Object>>) queryResult.get(QueryConstants.QUERY_RESULT)) {
+//                    entries.add(AuditServiceImpl.formatLogEntry(entry, type));
+//                }
+//                formatActivityList(entries);
+//                result.put("entries", entries);
+//            } else {
+//                Map<String, Object> entry = repo.read(fullIdPrefix + fullId);
+//                formatActivityEntry(entry);
+//                result = AuditServiceImpl.formatLogEntry(entry, type);
+//            }
+//
 //        } catch (ObjectSetException ex) {
 //            throw ex;
 //        } catch (RuntimeException ex) {
@@ -93,17 +109,47 @@ public class RepoAuditLogger/* implements AuditLogger */{
 //     */
 //    @Override
 //    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-//        JsonResourceObjectSet svc = getRepoService();
-//        Map<String, Object> result = null;
+//        getRepoService();
+//        String queryId = (String)params.get("_queryId");
+//        boolean formatted = true;
+//        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+//        String type = split[0];
 //        try {
-//            result = svc.query(fullIdPrefix + fullId, params);
-//        } catch (ObjectSetException ex) {
-//            throw ex;
-//        } catch (RuntimeException ex) {
-//            repo = null; // For unexpected exceptions start fresh
-//            throw ex;
+//            if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
+//                formatted = false;
+//            }
+//            Map<String, Object> queryResults = repo.query(fullIdPrefix + fullId, params);
+//
+//            if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+//                return AuditServiceImpl.getReconResults((List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT),
+//                        (String)params.get("reconId"), formatted);
+//            } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+//                List<Map<String, Object>> entryList = (List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT);
+//                formatActivityList(entryList);
+//                return AuditServiceImpl.getActivityResults(entryList);
+//            } else {
+//                throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
+//            }
+//        } catch (Exception e) {
+//            throw new BadRequestException(e);
 //        }
-//        return result;
+//    }
+//
+//    public void formatActivityList(List<Map<String, Object>> entryList) {
+//        for (Map<String, Object> entry : entryList) {
+//            formatActivityEntry(entry);
+//        }
+//    }
+//
+//    public void formatActivityEntry(Map<String, Object> entry) {
+//        Object beforeValue = entry.get("before");
+//        Object afterValue = entry.get("after");
+//        if (beforeValue != null) {
+//            entry.put("before", AuditServiceImpl.parseJsonString((String)beforeValue).getObject());
+//        }
+//        if (afterValue != null) {
+//            entry.put("after", AuditServiceImpl.parseJsonString((String)afterValue).getObject());
+//        }
 //    }
 //
 //    /**
@@ -112,7 +158,10 @@ public class RepoAuditLogger/* implements AuditLogger */{
 //    @Override
 //    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
 //        EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
+//        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+//        String type = split[0];
 //        try {
+//            AuditServiceImpl.preformatLogEntry(type, obj);
 //            createImpl(fullId, obj);
 //        } finally {
 //            measure.end();

@@ -27,7 +27,7 @@ import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 
 /**
  * Provides the Jetty bundle (and in turn the jetty.xml)
- * access to configuration supplied by OpenIDM, 
+ * access to configuration supplied by OpenIDM,
  * without having to resort to system properties
  *
  * @author aegloff
@@ -40,7 +40,7 @@ public class Param {
     public static String getProperty(String propertyName) {
         return JettyPropertyUtil.getProperty(propertyName, false);
     }
-    
+
     /**
      * @return OpenIDM keystore type
      */
@@ -54,7 +54,7 @@ public class Param {
     public static String getKeystoreProvider() {
         return JettyPropertyUtil.getProperty("openidm.keystore.provider", false);
     }
-    
+
     /**
      * @return OpenIDM keystore location, as absolute path.
      */
@@ -62,14 +62,14 @@ public class Param {
         String loc = JettyPropertyUtil.getPathProperty("openidm.keystore.location");
         return loc;
     }
-    
+
     /**
      * @return OpenIDM keystore password, obfuscated in Jetty format.
      */
     public static String getKeystorePassword() {
         return getKeystorePassword(true);
     }
-    
+
     /**
      * @return OpenIDM keystore key password, obfuscated in Jetty format.
      * If no specific key password is set, the keystore password (if present) is used.
@@ -81,7 +81,7 @@ public class Param {
         }
         return obfPwd;
     }
-    
+
     /**
      * @return the truststore location, as absolute path.
      * If no truststore setting is set, the keystore setting (if present) is used.
@@ -93,7 +93,7 @@ public class Param {
         }
         return trustLoc;
     }
-    
+
     /**
      * @return the truststore location, as absolute path.
      * If no truststore setting is set, the keystore setting (if present) is used.
@@ -105,7 +105,7 @@ public class Param {
         }
         return trustType;
     }
-    
+
     /**
      * @return  the truststore password, obfuscated in Jetty format.
      * If no truststore setting is set, the keystore setting (if present) is used.
@@ -117,12 +117,12 @@ public class Param {
         }
         return obfPwd;
     }
-    
+
     /**
      * Returns the truststore password in either clear text or obfuscated.
      * If no truststore setting is set, the keystore setting (if present) is used.
-     * 
-     * @param   obfusctated if the password should be obfuscated.
+     *
+     * @param   obfuscated if the password should be obfuscated.
      * @return  the truststore password.
      */
     public static String getTruststorePassword(boolean obfuscated) {
@@ -132,11 +132,11 @@ public class Param {
         }
         return pwd;
     }
-    
+
     /**
      * Returns the keystore password in either clear text or obfuscated.
-     * 
-     * @param   obfusctated if the password should be obfuscated.
+     *
+     * @param   obfuscated if the password should be obfuscated.
      * @return  the keystore password.
      */
     public static String getKeystorePassword(boolean obfuscated) {

@@ -56,8 +56,8 @@
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        
-        <!-- OrientDB --> 
+
+        <!-- OrientDB -->
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
@@ -66,6 +66,10 @@
                 <exclusion>
                     <groupId>org.iq80.snappy</groupId>
                     <artifactId>snappy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.java.dev.jna</groupId>
+                    <artifactId>platform</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -148,6 +152,26 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -156,13 +180,18 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

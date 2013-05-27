@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,7 +26,7 @@ package org.forgerock.openidm.core;
 
 /**
  * A SystemPropertyAccessor accesses to System properties.
- * 
+ *
  * @author Laszlo Hordos
  */
 public class SystemPropertyAccessor implements PropertyAccessor {
@@ -41,16 +41,19 @@ public class SystemPropertyAccessor implements PropertyAccessor {
      * Returns the value of the specified system property. If the key is not
      * found in the System properties, the {@code delegate} is then requested.
      * The method returns {@code null} if the property is not found.
-     * 
+     *
      * @param key
      *            The name of the requested property.
      * @param defaultValue
      *            The value to return if the property is not found.
      * @param expected
      *            The type of the expected value.
+     * @param <T>
+     *            The type of the expected property.
      * @return The value of the requested property, or {@code null} if the
      *         property is not found.
      */
+    @SuppressWarnings("unchecked")
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         T value = null;
         if (null != key

@@ -24,7 +24,14 @@
 
 package org.forgerock.openidm.internal.recon;
 
-import static org.forgerock.openidm.internal.recon.ReconUtil.*;
+import static org.forgerock.openidm.internal.recon.ReconUtil.DEFAULT_LINK_TYPE;
+import static org.forgerock.openidm.internal.recon.ReconUtil.SOMETHING_TO_NAME;
+import static org.forgerock.openidm.internal.recon.ReconUtil.TARGET_FIELD;
+import static org.forgerock.openidm.internal.recon.ReconUtil.Triplet;
+import static org.forgerock.openidm.internal.recon.ReconUtil.executeQuery;
+import static org.forgerock.openidm.internal.recon.ReconUtil.getLinksWithScript;
+import static org.forgerock.openidm.internal.recon.ReconUtil.resourceToMap;
+import static org.forgerock.openidm.internal.recon.ReconUtil.tripletToJSON;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -50,8 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.Bindings;
-import javax.script.ScriptException;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -73,11 +81,8 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RetryableException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.internal.recon.ConfigurationProvider.Mode;
-import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
-import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -103,7 +108,7 @@ import com.lmax.disruptor.dsl.ProducerType;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class ReconExecutor {
@@ -139,7 +144,7 @@ public class ReconExecutor {
      * FOUND situation was assessed. The Boolean is false to mark it was not
      * assessed yet;
      */
-    private final NavigableMap<String, Utils.Pair<AtomicInteger, Map<String, Object>>> targetCollection;
+    private final NavigableMap<String, Pair<AtomicInteger, Map<String, Object>>> targetCollection;
 
     /**
      * Cache for Links if the Target Resources are preloaded. The Target
@@ -224,7 +229,7 @@ public class ReconExecutor {
             // if (Mode.MANY_TO_ONE.equals(reconMode)) {
             // targetCollection = null;
             targetCollection =
-                    new ConcurrentSkipListMap<String, Utils.Pair<AtomicInteger, Map<String, Object>>>();
+                    new ConcurrentSkipListMap<String, Pair<AtomicInteger, Map<String, Object>>>();
             // } else {
             // targetCollection = new ConcurrentSkipListMap<String, Map<String,
             // Object>>();
@@ -506,9 +511,8 @@ public class ReconExecutor {
              */
             statistics.startStage(ReconStage.ACTIVE_RECONCILING_TARGET);
             if (null != targetCollection) {
-                for (Utils.Pair<AtomicInteger, Map<String, Object>> pair : targetCollection
-                        .values()) {
-                    if (pair.fst.get() > 0) {
+                for (Pair<AtomicInteger, Map<String, Object>> pair : targetCollection.values()) {
+                    if (pair.getLeft().get() > 0) {
                         continue;
                     }
 
@@ -520,7 +524,7 @@ public class ReconExecutor {
                     try {
                         ReconEvent event = disruptor.getRingBuffer().getPreallocated(sequence);
                         event.clear();
-                        event.setTargetMap(pair.snd);
+                        event.setTargetMap(pair.getRight());
                     } finally {
                         disruptor.getRingBuffer().publish(sequence);
                     }
@@ -544,7 +548,7 @@ public class ReconExecutor {
 
     /**
      * Publish a collection of triplets.
-     * 
+     *
      * @param triplets
      *            collection of triplets to publish.
      * @return true if the reconciliation process is cancelled.
@@ -590,7 +594,7 @@ public class ReconExecutor {
     /**
      * Cache the triplet for source recon optimized format and does an absents
      * check.
-     * 
+     *
      * @param triplet
      * @return The {@code triplet} given in the parameter or the one stored
      *         before.
@@ -685,7 +689,7 @@ public class ReconExecutor {
      * them is cheaper then loading the Source/Target and find the links for
      * each. We also need to mark those links which has no source or target
      * objects.
-     * 
+     *
      * @param linkQueryRequest
      * @throws ResourceException
      */
@@ -923,12 +927,12 @@ public class ReconExecutor {
                     if (Mode.MANY_TO_ONE.equals(reconMode)) {
                         /*
                          * TODO FIX THE SCRIPT TO RETURN LINKS
-                         * 
+                         *
                          * Use of the script here may be too expensive. The same
                          * script will be implemented in the ONE_TO_MANY to
                          * qualify the expected link type. Copy that code later
                          * here.
-                         * 
+                         *
                          * Now just use the existing links/linkTypes
                          */
 
@@ -957,12 +961,12 @@ public class ReconExecutor {
                         } else {
                             /*
                              * All target exists and no-link resource.
-                             * 
+                             *
                              * The source recon phase determine the expected
                              * linkType and execute the correlation query. The
                              * query may find this {@code target} resource but
                              * at that point the type is pre determined.
-                             * 
+                             *
                              * This is a marker for the source recon phase about
                              * the target object if no correlation query finds
                              * this resource.
@@ -1006,7 +1010,7 @@ public class ReconExecutor {
                         logger.error("Failed to get the Links for {}", resource.getId());
                         /**
                          * Mark Failed to get the links!!
-                         * 
+                         *
                          * This is a marker for the source recon phase about the
                          * target object if no correlation query finds this
                          * resource.
@@ -1023,7 +1027,7 @@ public class ReconExecutor {
 
         private void cacheTargetCollection(final Triplet.Vertex target, String targetId) {
             // if (Mode.ONE_TO_MANY.equals(reconMode)) {
-            targetCollection.put(targetId, new Utils.Pair<AtomicInteger, Map<String, Object>>(
+            targetCollection.put(targetId, new ImmutablePair<AtomicInteger, Map<String, Object>>(
                     new AtomicInteger(0), target.map()));
             // } else {
             // targetCollection.put(targetId, target);
@@ -1146,14 +1150,14 @@ public class ReconExecutor {
                             // // ----------
                             if (preferences.getConfiguration().isPreLoadTargetCollection()) {
                                 String targetId = triplet.link().targetId();
-                                Utils.Pair<AtomicInteger, Map<String, Object>> t =
+                                Pair<AtomicInteger, Map<String, Object>> t =
                                         targetCollection.get(targetId);
                                 if (null != t) {
-                                    if (!Mode.MANY_TO_ONE.equals(reconMode) && t.fst.get() > 0) {
+                                    if (!Mode.MANY_TO_ONE.equals(reconMode) && t.getLeft().get() > 0) {
                                         // TODO Collision
                                     } else {
-                                        triplet.map().put(TARGET_FIELD, t.snd);
-                                        t.fst.incrementAndGet();
+                                        triplet.map().put(TARGET_FIELD, t.getRight());
+                                        t.getLeft().incrementAndGet();
                                     }
                                 }
                             }
@@ -1266,19 +1270,19 @@ public class ReconExecutor {
         }
 
         /**
-         * 
+         *
          * DO_NOTHING Performs no automated action
-         * 
+         *
          * ON_CREATE_SOURCE: Creates new source
-         * 
+         *
          * LINK Assigns the source to target
-         * 
+         *
          * ON_CREATE_TARGET Creates new target
-         * 
+         *
          * ON_DELETE_TARGET Removes the target
-         * 
+         *
          * ON_UPDATE_TARGET Update/Disables the target
-         * 
+         *
          * <pre>
          *  t       s
          *  a       o
@@ -1382,14 +1386,15 @@ public class ReconExecutor {
 
                                     } else if (policyAction instanceof ScriptEntry) {
                                         Script script =
-                                                ((ScriptEntry) policyAction).getScript(actionContext);
+                                                ((ScriptEntry) policyAction)
+                                                        .getScript(actionContext);
                                         Bindings bindings = script.createBindings();
                                         bindings.putAll(defaultProperties.asMap());
                                         script.setBindings(bindings);
                                         script.eval();
                                     }
                                 } catch (Throwable t) {
-                                    logger.error("Failed to invoke recon action {}",triplet,t);
+                                    logger.error("Failed to invoke recon action {}", triplet, t);
                                     triplet.error(Utils.adapt(t));
                                 }
                             }
@@ -1746,43 +1751,45 @@ public class ReconExecutor {
                         }
                     } else if (null != correlationScript) {
 
-                        /////
+                        // ///
 
-//                    } else if (correlationQuery != null
-//                            && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
-//                        EventEntry measure =
-//                                Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
-//
-//                        Map<String, Object> queryScope = service.newScope();
-//                        if (sourceObjectOverride != null) {
-//                            queryScope.put("source", sourceObjectOverride.asMap());
-//                        } else {
-//                            queryScope.put("source", getSourceObject().asMap());
-//                        }
-//                        try {
-//                            Object query = correlationQuery.exec(queryScope);
-//                            if (query == null || !(query instanceof Map)) {
-//                                throw new ResourceException(
-//                                        "Expected correlationQuery script to yield a Map");
-//                            }
-//                            result =
-//                                    new JsonValue(queryTargetObjectSet((Map) query)).get(
-//                                            QueryConstants.QUERY_RESULT).required();
-//                        } catch (ScriptException se) {
-//                            logger.debug("{} correlationQuery script encountered exception", name, se);
-//                            throw new ResourceException(se);
-//                        } finally {
-//                            measure.end();
-//                        }
-//                    }
+                        // } else if (correlationQuery != null
+                        // && (correlateEmptyTargetSet ||
+                        // !hadEmptyTargetObjectSet())) {
+                        // EventEntry measure =
+                        // Publisher.start(EVENT_CORRELATE_TARGET,
+                        // getSourceObject(), null);
+                        //
+                        // Map<String, Object> queryScope = service.newScope();
+                        // if (sourceObjectOverride != null) {
+                        // queryScope.put("source",
+                        // sourceObjectOverride.asMap());
+                        // } else {
+                        // queryScope.put("source", getSourceObject().asMap());
+                        // }
+                        // try {
+                        // Object query = correlationQuery.exec(queryScope);
+                        // if (query == null || !(query instanceof Map)) {
+                        // throw new ResourceException(
+                        // "Expected correlationQuery script to yield a Map");
+                        // }
+                        // result =
+                        // new JsonValue(queryTargetObjectSet((Map) query)).get(
+                        // QueryConstants.QUERY_RESULT).required();
+                        // } catch (ScriptException se) {
+                        // logger.debug("{} correlationQuery script encountered exception",
+                        // name, se);
+                        // throw new ResourceException(se);
+                        // } finally {
+                        // measure.end();
+                        // }
+                        // }
 
-                        /////
-
-
+                        // ///
 
                         try {
                             Script script = correlationScript.getScript(context);
-                            //TODO This is null!!
+                            // TODO This is null!!
                             script.put("correlationQuery", Requests
                                     .copyOfQueryRequest(correlationQuery));
                             script.getBindings().putAll(triplet.map());
@@ -1957,7 +1964,7 @@ public class ReconExecutor {
          * {@link org.forgerock.openidm.internal.recon.ReconExecutor.TargetResourceEventHandler}
          * . The event handler process events where it's not null. The Handler
          * set it null after processed this event.
-         * 
+         *
          * @return target resource or null if this event is not meant for
          *         {@link org.forgerock.openidm.internal.recon.ReconExecutor.TargetResourceEventHandler}
          *         .
@@ -1968,7 +1975,7 @@ public class ReconExecutor {
 
         /**
          * Set the target resource handled during the target query.
-         * 
+         *
          * @param target
          *            the target resource.
          */
@@ -1989,7 +1996,7 @@ public class ReconExecutor {
          * {@link org.forgerock.openidm.internal.recon.ReconExecutor.SourceResourceEventHandler}
          * . The event handler process events where it's not null. The Handler
          * set it null after processed this event.
-         * 
+         *
          * @return source resource or null if this event is not meant for
          *         {@link org.forgerock.openidm.internal.recon.ReconExecutor.SourceResourceEventHandler}
          *         .
@@ -2000,7 +2007,7 @@ public class ReconExecutor {
 
         /**
          * Set the source resource handled during the target query.
-         * 
+         *
          * @param source
          *            the target resource.
          */
@@ -2010,7 +2017,7 @@ public class ReconExecutor {
 
         /**
          * Get the triplets to process and handle the recon situation.
-         * 
+         *
          * @return the non-null list of all Triplets assigned with this event.
          */
         public Map<String, Map<String, Object>> getTriplets() {
@@ -2019,7 +2026,7 @@ public class ReconExecutor {
 
         /**
          * Get the triplets to process and handle the recon situation.
-         * 
+         *
          * @return the non-null list of all Triplets assigned with this event.
          */
         public void setTriplets(final Map<String, Map<String, Object>> triplets) {
@@ -2039,7 +2046,7 @@ public class ReconExecutor {
 
     }
 
-    //TODO Use the Shared LinkType class instance
+    // TODO Use the Shared LinkType class instance
     static class LinkBuilder {
 
         final boolean reverseLink;
@@ -2118,7 +2125,7 @@ public class ReconExecutor {
         }
 
         /**
-         * 
+         *
          * @param resource
          * @return
          * @throws org.forgerock.json.fluent.JsonValueException
@@ -2128,7 +2135,7 @@ public class ReconExecutor {
         /**
          * Normalizes the source ID if required, e.g. make lower case for case
          * insensitive id comparison purposes
-         * 
+         *
          * @param sourceId
          *            the original id
          * @return normalized id
@@ -2144,7 +2151,7 @@ public class ReconExecutor {
         /**
          * Normalizes the target ID if required, e.g. make lower case for case
          * insensitive id comparison purposes
-         * 
+         *
          * @param targetId
          *            the original id
          * @return normalized id
@@ -2160,7 +2167,7 @@ public class ReconExecutor {
         /**
          * Build full resourceName prefixed with the targetResourceCollection
          * name.
-         * 
+         *
          * @param targetId
          * @return null if the {@code target} parametr is null else the full
          *         resourceName.

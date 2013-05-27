@@ -36,7 +36,7 @@ import java.nio.channels.FileChannel;
  *
  * @author Laszlo Hordos
  */
-public class FileUtil {
+public final class FileUtil {
 
     private FileUtil() {
     }
@@ -45,10 +45,10 @@ public class FileUtil {
      * Read large > 5Mb text files to String.
      *
      * @param file
-     *         source file
+     *            source file
      * @return content of the source {@code file}
      * @throws IOException
-     *         when the source {@code file} can not be read
+     *             when the source {@code file} can not be read
      */
     public final static String readLargeFile(File file) throws IOException {
         FileChannel channel = new FileInputStream(file).getChannel();
@@ -59,35 +59,42 @@ public class FileUtil {
     }
 
     /**
-     * Read small < 5Mb text files to String
+     * Read small < 5Mb text files to String.
      *
      * @param file
-     *         source file
+     *            source file
      * @return content of the source {@code file}
      * @throws IOException
-     *         when the source {@code file} can not be read
+     *             when the source {@code file} can not be read
      */
     public static final String readFile(File file) throws IOException {
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-        SimpleByteBuffer buffer = new SimpleByteBuffer();
-        /*
-            if you are reading really large files you might want to up
-            the buffer from 1024 to a max of 8192.
-         */
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) != -1) {
-            buffer.put(buf, len);
+        BufferedInputStream in = null;
+        try {
+            in = new BufferedInputStream(new FileInputStream(file));
+            SimpleByteBuffer buffer = new SimpleByteBuffer();
+            /*
+             * if you are reading really large files you might want to up the
+             * buffer from 1024 to a max of 8192.
+             */
+            byte[] buf = new byte[1024];
+            int len;
+
+            while ((len = in.read(buf)) != -1) {
+                buffer.put(buf, len);
+            }
+            return new String(buffer.buffer, 0, buffer.write);
+        } finally {
+            if (null != in) {
+                in.close();
+            }
         }
-        in.close();
-        return new String(buffer.buffer, 0, buffer.write);
     }
 
     static class SimpleByteBuffer {
 
-        public byte[] buffer = new byte[256];
+        private byte[] buffer = new byte[256];
 
-        public int write;
+        private int write;
 
         public void put(byte[] buf, int len) {
             ensure(len);

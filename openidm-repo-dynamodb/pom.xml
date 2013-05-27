@@ -31,21 +31,19 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-repo-dynamodb</artifactId>
-    <name>OpenIDM repository using Amazon DynamoDB</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM Repository Bundle - Amazon DynamoDB</name>
+    <description>This bundle ...</description>
+
     <properties>
-        <openidm.osgi.import.before.defaults>org.apache.hadoop.io.compress;resolution:=optional
+        <openidm.osgi.import.before.defaults>
+            org.apache.hadoop.io.compress;resolution:=optional
         </openidm.osgi.import.before.defaults>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
@@ -58,7 +56,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.4.2.1</version>
+            <version>1.4.4.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -109,6 +107,25 @@
             </exclusions>
         </dependency>
 
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -117,13 +134,18 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -153,5 +175,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

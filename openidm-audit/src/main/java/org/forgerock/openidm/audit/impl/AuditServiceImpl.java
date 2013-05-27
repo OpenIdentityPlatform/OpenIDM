@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.audit.impl;
 
 
@@ -42,7 +43,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Audit module
- * 
+ *
  * @author aegloff
  */
 @Component(name = AuditServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
@@ -98,7 +98,6 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      * Setup logging for the {@link AuditServiceImpl}.
      */
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
-    private final static ObjectMapper mapper;
 
     // Keys in the JSON configuration
     public final static String CONFIG_LOG_TO = "logTo";
@@ -120,7 +119,6 @@ public class AuditServiceImpl implements CollectionResourceProvider {
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
     }
 
     /**
@@ -131,10 +129,10 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      * The object will contain metadata properties, including object identifier
      * {@code _id}, and object version {@code _rev} to enable optimistic
      * concurrency
-     * 
+     *
      * {@link org.forgerock.json.resource.RequestHandler#handleRead(org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.ReadRequest, org.forgerock.json.resource.ResultHandler)
      * Reads} an existing resource within the collection.
-     * 
+     *
      * @param context
      *            The request server context.
      * @param resourceId
@@ -262,7 +260,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      * the flagged password fields have changed NOTE: both the watched fields
      * and the password fields will be in the list of "changedField" if they
      * differ
-     * 
+     *
      * @param activity
      *            activity object to update
      */
@@ -296,15 +294,15 @@ public class AuditServiceImpl implements CollectionResourceProvider {
             // the object will have toString() called on it anyway which will
             // convert it to (seemingly) the same format
             try {
-                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper
-                        .writeValueAsString(before.getObject()));
+                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : JsonUtil
+                        .writeValueAsString(before));
             } catch (IOException e) {
                 activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before
                         .getObject().toString());
             }
             try {
-                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper
-                        .writeValueAsString(after.getObject())); // how can we
+                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : JsonUtil
+                        .writeValueAsString(after)); // how can we
                                                                  // know for
                                                                  // system
                                                                  // objects?
@@ -324,7 +322,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
     /**
      * Checks to see if there are differences between the values in two
      * JsonValues before and after Returns a list containing the changed fields
-     * 
+     *
      * @param fieldsToCheck
      *            list of JsonPointers to search for
      * @param before
@@ -355,7 +353,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
     /**
      * Checks to see if two objects are equal either as nulls or through their
      * comparator
-     * 
+     *
      * @param a
      *            first object to compare
      * @param b
@@ -389,7 +387,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      * <p/>
      * {@link org.forgerock.json.resource.RequestHandler#handleUpdate(org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.UpdateRequest, org.forgerock.json.resource.ResultHandler)
      * Updates} an existing resource within the collection.
-     * 
+     *
      * @param context
      *            The request server context.
      * @param resourceId
@@ -544,7 +542,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
         logger.info("Audit service started.");
     }
 
-    /** 
+    /**
      * Configuration modified handling
      * Ensures audit logging service stays registered
      * even whilst configuration changes
@@ -564,7 +562,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
             throw ex;
         }
     }
-    
+
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
         return JsonPatch.diff(existingConfig, newConfig).size() > 0;
     }
@@ -643,7 +641,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
     /**
      * Fetches a list of JsonPointers from the config file under a specified
      * event and field name Expects it to look similar to:
-     * 
+     *
      * <PRE>
      * {
      *    "eventTypes": {
@@ -654,7 +652,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      *    }
      * }
      * </PRE>
-     * 
+     *
      * @param config
      *            the config object to draw from
      * @param event

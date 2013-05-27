@@ -27,6 +27,7 @@ package org.forgerock.openidm.core.filter;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -46,7 +47,6 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.engine.Utils;
-import org.forgerock.script.engine.Utils.Pair;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState> {
@@ -309,10 +309,10 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     protected int evaluateOnRequest(final ServerContext context, final ScriptState state)
             throws ResourceException {
         if (onRequest != null) {
-            ScriptEntry scriptEntry = onRequest.snd;
+            ScriptEntry scriptEntry = onRequest.getRight();
             if (!scriptEntry.isActive()) {
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
-                        + onRequest.snd.getName());
+                        + onRequest.getRight().getName());
             }
             Script script = scriptEntry.getScript(context);
 
@@ -323,8 +323,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                 //TODO Add function to support SKIP/STOP/CONTINUE
                 state.state = script.eval();
             } catch (Throwable t) {
-                logger.debug("Filter/{} script {} encountered exception at {}", onRequest.snd
-                        .getName(), onRequest.fst, t);
+                logger.debug("Filter/{} script {} encountered exception at {}", onRequest.getRight()
+                        .getName(), onRequest.getLeft(), t);
                 throw Utils.adapt(t);
             }
         }
@@ -334,10 +334,10 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     public boolean evaluateOnResponse(final ServerContext context, final ScriptState state,
                                      final Resource resource) throws ResourceException {
         if (onFailure != null) {
-            ScriptEntry scriptEntry = onFailure.snd;
+            ScriptEntry scriptEntry = onFailure.getRight();
             if (!scriptEntry.isActive()) {
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
-                        + onFailure.snd.getName());
+                        + onFailure.getRight().getName());
             }
             Script script = scriptEntry.getScript(context);
 
@@ -349,8 +349,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
-                logger.debug("Filter/{} script {} encountered exception at {}", onFailure.snd
-                        .getName(), onFailure.fst, t);
+                logger.debug("Filter/{} script {} encountered exception at {}", onFailure.getRight()
+                        .getName(), onFailure.getLeft(), t);
                 throw Utils.adapt(t);
             }
         }
@@ -360,10 +360,10 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     public void evaluateOnFailure(final ServerContext context, final ScriptState state,
             final ResourceException error, final ResultHandler<?> handler) throws ResourceException {
         if (onFailure != null) {
-            ScriptEntry scriptEntry = onFailure.snd;
+            ScriptEntry scriptEntry = onFailure.getRight();
             if (!scriptEntry.isActive()) {
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
-                        + onFailure.snd.getName());
+                        + onFailure.getRight().getName());
             }
             Script script = scriptEntry.getScript(context);
 
@@ -375,8 +375,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
-                logger.debug("Filter/{} script {} encountered exception at {}", onFailure.snd
-                        .getName(), onFailure.fst, t);
+                logger.debug("Filter/{} script {} encountered exception at {}", onFailure.getRight()
+                        .getName(), onFailure.getLeft(), t);
                 throw Utils.adapt(t);
             }
         }

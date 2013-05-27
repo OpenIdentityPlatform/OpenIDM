@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A property defined within an managed object. Provides for the specification
  * of triggers to execute during the lifecycle of a managed object.
- * 
+ *
  * @author Paul C. Bryan
  */
 class ManagedObjectProperty {
@@ -84,7 +84,7 @@ class ManagedObjectProperty {
 
     /**
      * Constructs a new managed object property.
-     * 
+     *
      * @param scriptRegistry
      * @param cryptoService
      * @param config
@@ -137,7 +137,7 @@ class ManagedObjectProperty {
      * the {@code "property"} property in the script scope with the property
      * value. Any changes to the property are reflected back into the managed
      * object if the script successfully completes.
-     * 
+     *
      * @param type
      *            type of script to execute.
      * @param script
@@ -173,7 +173,7 @@ class ManagedObjectProperty {
 
     /**
      * Executes the script if it exists, to validate a property value.
-     * 
+     *
      * @param value
      *            the JSON value containing the property value to be validated.
      * @throws ForbiddenException
@@ -202,7 +202,7 @@ class ManagedObjectProperty {
     /**
      * Performs tasks when a property has been retrieved from the repository,
      * including: executing the {@code onRetrieve} script.
-     * 
+     *
      * @param value
      *            the JSON value that was retrieved from the repository.
      * @throws InternalServerErrorException
@@ -216,7 +216,7 @@ class ManagedObjectProperty {
      * Performs tasks when a property is to be stored in the repository,
      * including: executing the {@code onStore} script and encrypting the
      * property.
-     * 
+     *
      * @param value
      *            the JSON value to be stored in the repository.
      * @throws InternalServerErrorException
@@ -225,24 +225,27 @@ class ManagedObjectProperty {
     void onStore(ServerContext context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
         if (encryptor != null && value.isDefined(name)) {
-            try {
-                value.put(name, new JsonCrypto(encryptor.getType(), encryptor.encrypt(value
-                        .get(name))).toJsonValue().getObject());
-            } catch (JsonCryptoException jce) {
-                String msg = name + " property encryption exception";
-                logger.debug(msg, jce);
-                throw new InternalServerErrorException(msg, jce);
-            } catch (JsonException je) {
-                String msg = name + " property transformation exception";
-                logger.debug(msg, je);
-                throw new InternalServerErrorException(msg, je);
+
+            if (JsonCrypto.isJsonCrypto(value)) {
+                try {
+                    value.put(name, new JsonCrypto(encryptor.getType(), encryptor.encrypt(value
+                            .get(name))).toJsonValue().getObject());
+                } catch (JsonCryptoException jce) {
+                    String msg = name + " property encryption exception";
+                    logger.debug(msg, jce);
+                    throw new InternalServerErrorException(msg, jce);
+                } catch (JsonException je) {
+                    String msg = name + " property transformation exception";
+                    logger.debug(msg, je);
+                    throw new InternalServerErrorException(msg, je);
+                }
             }
         }
     }
 
     /**
      * Returns the name of the property.
-     * 
+     *
      * @return
      */
     String getName() {

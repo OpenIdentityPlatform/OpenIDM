@@ -30,8 +30,9 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-crypto</artifactId>
-    <name>OpenIDM cryptography service</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM Cryptography Bundle</name>
+    <description>This bundle provides the JSON Cryptography</description>
 
     <dependencies>
         <dependency>
@@ -39,6 +40,15 @@
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -77,13 +87,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--Export-Package>
-                            org.forgerock.openidm.crypto.factory;version=${project.version},
-                            org.forgerock.openidm.crypto.util;version=${project.version}
-                        </Export-Package-->
-                        <Private-Package>org.forgerock.openidm.crypto.impl</Private-Package>
-                        <Bundle-Activator>org.forgerock.openidm.crypto.impl.Activator</Bundle-Activator>
-                        <Main-Class>org.forgerock.openidm.crypto.impl.Main</Main-Class>
+                        <Bundle-Activator>org.forgerock.openidm.crypto.internal.Activator</Bundle-Activator>
+                        <Main-Class>org.forgerock.openidm.crypto.internal.Main</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>

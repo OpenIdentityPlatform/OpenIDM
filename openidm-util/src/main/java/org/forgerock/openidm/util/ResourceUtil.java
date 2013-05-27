@@ -42,6 +42,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
@@ -59,24 +60,17 @@ import org.osgi.framework.Constants;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class ResourceUtil {
 
     /**
-     * <p>
-     * {@code ContextUtil} instances should NOT be constructed in standard
+     * {@code ResourceUtil} instances should NOT be constructed in standard
      * programming. Instead, the class should be used as
-     * {@code ContextUtil.parseResourceName(" /foo/bar/ ");}.
-     * </p>
-     * 
-     * <p>
-     * This constructor is public to permit tools that require a JavaBean
-     * newBuilder to operate.
-     * </p>
+     * {@code ResourceUtil.parseResourceName(" /foo/bar/ ");}.
      */
-    public ResourceUtil() {
+    private ResourceUtil() {
         super();
     }
 
@@ -84,12 +78,12 @@ public class ResourceUtil {
      * Create a default internal {@link SecurityContext} newBuilder used for
      * internal trusted calls.
      * <p/>
-     * 
+     *
      * If the request is initiated in a non-authenticated location (
      * {@code BundleActivator}, {@code Scheduler}, {@code ConfigurationAdmin})
      * this contest should be used. The AUTHORIZATION module grants full access
      * to this context.
-     * 
+     *
      * @param bundleContext
      *            the context of the OSGi Bundle.
      * @return new {@code SecurityContext} newBuilder.
@@ -112,9 +106,9 @@ public class ResourceUtil {
     /**
      * Retrieve the {@code UriTemplateVariables} from the context.
      * <p/>
-     * 
+     *
      * @param context
-     * 
+     *
      * @return an unmodifiableMap or null if the {@code context} does not
      *         contains {@link RouterContext}
      */
@@ -152,8 +146,8 @@ public class ResourceUtil {
      * {"resourceName/type","resourceId"}</li>
      * </ul>
      * </p>
-     * 
-     * 
+     *
+     *
      * @param resourceName
      *            The name of the JSON resource to which this request should be
      *            targeted.
@@ -331,6 +325,7 @@ public class ResourceUtil {
         return wrapper;
     }
 
+    @SuppressWarnings("fallthrough")
     public static Request requestFromJsonValue(JsonValue request) {
         Request result = null;
         if (null != request) {
@@ -420,9 +415,9 @@ public class ResourceUtil {
             default:
                 throw new JsonValueException(request.get("requestType"), "Unknown requestType");
             }
-            JsonValue _fields = request.get(Request.FIELD_FIELDS);
-            if (_fields.isList()) {
-                for (JsonValue field : _fields) {
+            JsonValue fields = request.get(Request.FIELD_FIELDS);
+            if (fields.isList()) {
+                for (JsonValue field : fields) {
                     result.addField(field.asPointer());
                 }
             }
@@ -430,6 +425,7 @@ public class ResourceUtil {
         return result;
     }
 
+    @SuppressWarnings("fallthrough")
     public static JsonValue requestToJsonValue(Request request) {
         if (null == request) {
             throw new NullPointerException();
@@ -471,11 +467,11 @@ public class ResourceUtil {
                     result.put(QueryRequest.FIELD_QUERY_EXPRESSION, qr.getQueryExpression());
                 }
                 if (null != qr.getSortKeys() && !qr.getSortKeys().isEmpty()) {
-                    List<String> _sortKeys = new ArrayList<String>(qr.getSortKeys().size());
+                    List<String> sortKeys = new ArrayList<String>(qr.getSortKeys().size());
                     for (SortKey sortKey : qr.getSortKeys()) {
-                        _sortKeys.add(sortKey.toString());
+                        sortKeys.add(sortKey.toString());
                     }
-                    result.put(QueryRequest.FIELD_SORT_KEYS, _sortKeys);
+                    result.put(QueryRequest.FIELD_SORT_KEYS, sortKeys);
                 }
                 if (null != qr.getPagedResultsCookie()) {
                     result.put(QueryRequest.FIELD_PAGED_RESULTS_COOKIE, qr.getPagedResultsCookie());
@@ -528,11 +524,11 @@ public class ResourceUtil {
     private static void parseCommonParameter(final JsonValue json, final Request request) {
         json.put(Request.FIELD_RESOURCE_NAME, request.getResourceName());
         if (null != request.getFields() && !request.getFields().isEmpty()) {
-            List<String> _fields = new ArrayList<String>(request.getFields().size());
+            List<String> fields = new ArrayList<String>(request.getFields().size());
             for (JsonPointer pointer : request.getFields()) {
-                _fields.add(pointer.toString());
+                fields.add(pointer.toString());
             }
-            json.put(Request.FIELD_FIELDS, _fields);
+            json.put(Request.FIELD_FIELDS, fields);
         }
     }
 
@@ -541,7 +537,7 @@ public class ResourceUtil {
      * {@code Throwable} is an JSON {@code JsonValueException} then an
      * appropriate {@code ResourceException} is returned, otherwise an
      * {@code InternalServerErrorException} is returned.
-     * 
+     *
      * @param t
      *            The {@code Throwable} to be converted.
      * @return The equivalent resource exception.
@@ -558,5 +554,20 @@ public class ResourceUtil {
             resourceResultCode = ResourceException.INTERNAL_ERROR;
         }
         return ResourceException.getException(resourceResultCode, t.getMessage(), t);
+    }
+
+    public static ResourceException notSupported(final Request request) {
+        return new NotSupportedException(ResourceMessages.ERR_OPERATION_NOT_SUPPORTED_EXPECTATION
+                .get(request.getRequestType().name()).toString());
+    }
+
+    public static ResourceException notSupportedOnCollection(final Request request) {
+        return new NotSupportedException(ResourceMessages.ERR_OPERATION_NOT_SUPPORTED_EXPECTATION
+                .get(request.getRequestType().name()).toString());
+    }
+
+    public static ResourceException notSupportedOnInstance(final Request request) {
+        return new NotSupportedException(ResourceMessages.ERR_OPERATION_NOT_SUPPORTED_EXPECTATION
+                .get(request.getRequestType().name()).toString());
     }
 }

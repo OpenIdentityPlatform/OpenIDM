@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -36,10 +36,10 @@ import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * An Activator opens {@link ServiceTracker<Map<String, Object>, Map<String,
+ * An Activator opens {@code ServiceTracker<Map<String, Object>, Map<String,
  * Object>>} and tracks all service and initialise the {@link IdentityServer}
  * with {@link org.forgerock.openidm.core.ServicePropertyAccessor}.
- * 
+ *
  * @author Laszlo Hordos
  */
 public class Activator implements BundleActivator {

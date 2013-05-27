@@ -46,12 +46,10 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryFilter;
@@ -63,7 +61,6 @@ import org.forgerock.openidm.config.ConfigurationManager;
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
-import org.forgerock.openidm.config.installer.JSONPrettyPrint;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -72,6 +69,7 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -91,7 +89,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class ConfigurationManagerImpl
@@ -106,10 +104,6 @@ public class ConfigurationManagerImpl
     final static Logger logger = LoggerFactory.getLogger(ConfigurationManagerImpl.class);
 
     private static final String LOCATION = "_location";
-
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    private static final JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
 
     private final BundleContext bundleContext;
 
@@ -241,9 +235,9 @@ public class ConfigurationManagerImpl
                 if (entries != null && entries.hasMoreElements()) {
                     URL entryUrl = entries.nextElement();
                     logger.trace("Found metadata file, load and parse {}", entryUrl);
-                    Map metaConfig = mapper.readValue(entryUrl, Map.class);
+                    JsonValue metaConfig = JsonUtil.parseURL(entryUrl);
 
-                    String providerClazzName = (String) metaConfig.get("metaDataProvider");
+                    String providerClazzName =  metaConfig.expect(Map.class).get("metaDataProvider").asString();
                     logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
                     if (providerClazzName == null) {
                         logger.trace(
@@ -572,7 +566,7 @@ public class ConfigurationManagerImpl
      * Update the DelayedConfig in the input cache if the {@code helper} can get
      * the {@code PropertiesToEncrypt} and moves these configs to the buildNext
      * encryption cache.
-     * 
+     *
      * @param helper
      */
     private void updateDelayedConfigs(MetaDataProviderHelper helper) {
@@ -605,7 +599,7 @@ public class ConfigurationManagerImpl
     /**
      * Update the DelayedConfig in the encryption cache and moves these configs
      * to the buildNext install cache.
-     * 
+     *
      * @param service
      * @throws InternalServerErrorException
      */
@@ -660,7 +654,7 @@ public class ConfigurationManagerImpl
 
             JsonValue valueToEncrypt = config.configuration.get(pointer);
             if (null != valueToEncrypt && !valueToEncrypt.isNull()
-                    && !service.isEncrypted(valueToEncrypt)) {
+                    && !JsonCrypto.isJsonCrypto(valueToEncrypt)) {
 
                 if (logger.isTraceEnabled()) {
                     logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {
@@ -705,8 +699,8 @@ public class ConfigurationManagerImpl
         Dictionary encrypted = existingConfig == null ? new Hashtable() : existingConfig;
 
         try {
-            ObjectWriter writer = prettyPrint.getWriter();
-            String value = writer.writeValueAsString(config.configuration.asMap());
+            String value = JsonUtil.writePrettyValueAsString(config.configuration);
+            ;
 
             encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
             if (null != config.getPID().getInstanceAlias()) {
@@ -798,7 +792,7 @@ public class ConfigurationManagerImpl
 
     /**
      * Configure to process all JSON configuration files (if enabled)
-     * 
+     *
      * @param configAdmin
      *            the OSGi configuration admin service
      * @throws java.io.IOException
@@ -852,7 +846,7 @@ public class ConfigurationManagerImpl
      * Check each provider for meta-data for a given pid until the first match
      * is found Requested each time configuration is changed so that meta data
      * providers can handle additional plug-ins
-     * 
+     *
      * @param pidOrFactory
      *            the pid or factory pid
      * @param factoryAlias
@@ -887,7 +881,7 @@ public class ConfigurationManagerImpl
     /**
      * Encrypt properties in the configuration if necessary Also results in
      * pretty print formatting of the JSON configuration.
-     * 
+     *
      * @param pidOrFactory
      *            the PID of either the managed service; or for factory
      *            configuration the PID of the Managed Service Factory
@@ -983,7 +977,7 @@ public class ConfigurationManagerImpl
 
     /**
      * Parse the OSGi configuration in JSON format
-     * 
+     *
      * @param dict
      *            the OSGi configuration
      * @param serviceName
@@ -1001,56 +995,43 @@ public class ConfigurationManagerImpl
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
 
         if (dict != null) {
-            Map<String, Object> parsedConfig = null;
             String jsonConfig = (String) dict.get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
 
             try {
                 if (jsonConfig != null && jsonConfig.trim().length() > 0) {
-                    parsedConfig = mapper.readValue(jsonConfig, Map.class);
+                    jv = JsonUtil.parseStringified(jsonConfig);
                 }
             } catch (Exception ex) {
                 throw new InvalidException("Configuration for " + serviceName
                         + " could not be parsed and may not be valid JSON : " + ex.getMessage(), ex);
-            }
-
-            try {
-                jv = new JsonValue(parsedConfig);
-            } catch (JsonValueException ex) {
-                throw new InvalidException("Component configuration for " + serviceName
-                        + " is invalid: " + ex.getMessage(), ex);
             }
         }
         logger.debug("Parsed configuration for {}", serviceName);
 
         return jv;
     }
+
     /**
-    * Checks the felix.fileinstall.enableConfigSave and felix.fileinstall.disableConfigSave
-    * properties and determines if the configuration object changes should be
-    * saved in the original configuration files as well.
-    * 
-    * @return if the changes should be saved or not
-    */       
-    private boolean shouldSaveConfig()
-    {
-        Object obj = bundleContext.getProperty( DirectoryWatcher.ENABLE_CONFIG_SAVE );
-        if (obj instanceof String)
-        {
+     * Checks the felix.fileinstall.enableConfigSave and
+     * felix.fileinstall.disableConfigSave properties and determines if the
+     * configuration object changes should be saved in the original
+     * configuration files as well.
+     *
+     * @return if the changes should be saved or not
+     */
+    private boolean shouldSaveConfig() {
+        Object obj = bundleContext.getProperty(DirectoryWatcher.ENABLE_CONFIG_SAVE);
+        if (obj instanceof String) {
             obj = Boolean.valueOf((String) obj);
         }
-        if (Boolean.FALSE.equals( obj ))
-        {
+        if (Boolean.FALSE.equals(obj)) {
             return false;
-        }
-        else if ( !Boolean.TRUE.equals( obj ))
-        {
-            obj = bundleContext.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
-            if (obj instanceof String)
-            {
+        } else if (!Boolean.TRUE.equals(obj)) {
+            obj = bundleContext.getProperty(DirectoryWatcher.DISABLE_CONFIG_SAVE);
+            if (obj instanceof String) {
                 obj = Boolean.valueOf((String) obj);
             }
-            if( Boolean.FALSE.equals( obj ) )
-            {
+            if (Boolean.FALSE.equals(obj)) {
                 return false;
             }
         }
@@ -1172,8 +1153,8 @@ public class ConfigurationManagerImpl
             Object json =
                     configuration.getProperties().get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
             if (json instanceof String) {
-                Map config = ConfigurationManagerImpl.mapper.readValue((String) json, Map.class);
-                return convert(persistentIdentifier, new JsonValue(config));
+                JsonValue config = JsonUtil.parseStringified((String) json);
+                return convert(persistentIdentifier, config);
             }
             return convert(persistentIdentifier, new JsonValue(new DictionaryAsMap(configuration
                     .getProperties())));
@@ -1181,8 +1162,7 @@ public class ConfigurationManagerImpl
 
         public static Resource convert(final PID persistentIdentifier, final JsonValue configuration) {
             JsonValue config = configuration.copy();
-            config.put(Resource.FIELD_CONTENT_ID, persistentIdentifier
-                    .getShortCanonicalName());
+            config.put(Resource.FIELD_CONTENT_ID, persistentIdentifier.getShortCanonicalName());
             String revision = null;
             config.put(Resource.FIELD_CONTENT_REVISION, revision);
 
@@ -1252,7 +1232,7 @@ public class ConfigurationManagerImpl
          * {@code MetaDataProvider} and create a new newBuilder of
          * {@link DelayedConfig} if it can handle it with the updated
          * {@link DelayedConfig#sensitiveAttributes}
-         * 
+         *
          * @param config
          * @return null if this {@code MetaDataProvider} can not handle the
          *         given {@code config}
