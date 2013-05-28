@@ -63,6 +63,11 @@ public final class QueryConstants {
     public final static String QUERY_ID = "_queryId";
     
     /**
+     * Query filter.
+     */
+    public final static String QUERY_FILTER = "_queryFilter";
+    
+    /**
      * System populated query input key.
      * 
      * Key available for token substitution inside the query expression, identifying the
