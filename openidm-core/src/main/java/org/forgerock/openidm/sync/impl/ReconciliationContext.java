@@ -101,12 +101,11 @@ public class ReconciliationContext {
         ReconTypeHandler handler = null;
         switch (reconParams.get("_action").asEnum(ReconciliationService.ReconAction.class)) {
         case recon : 
-            handler = new ReconTypeFull(this); 
+            handler = new ReconTypeByQuery(this);
             break;
         case reconById : 
             handler = new ReconTypeById(this); 
             break;
-        //case "reconByQuery" : return new ReconTypeByQuery();
         default: 
             throw new BadRequestException("Unknown action " + reconParams.get("_action").asString());
         }
