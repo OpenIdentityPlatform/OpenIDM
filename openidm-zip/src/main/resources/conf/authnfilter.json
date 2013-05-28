@@ -1,6 +1,9 @@
 {
     "server-auth-config" : {
         "iwa-ad-passthrough" : {
+            "session-module" : {
+                "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+            },
             "auth-modules" : [
                 {
                     "class-name" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
@@ -27,6 +30,9 @@
             ]
         },
         "ad-passthrough-only" : {
+            "session-module" : {
+                "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+            },
             "auth-modules" : [
                 {
                     "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
