@@ -158,23 +158,25 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
                     clusterConfig.getInstanceCheckInOffset());
         }
     }
-    
+
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Cluster Management Service {}", compContext);
-        clusterManagerThread.shutdown();
-        synchronized (repoLock) {
-            try {
-                InstanceState state = getInstanceState(instanceId);
-                state.updateShutdown();
-                state.setState(InstanceState.STATE_DOWN);
-                updateInstanceState(instanceId, state);
-            } catch (JsonResourceException e) {
-                logger.warn("Failed to update instance shutdown timestamp", e);
-            }
-        }    
+        if (clusterConfig.isEnabled()) {
+            clusterManagerThread.shutdown();
+            synchronized (repoLock) {
+                try {
+                    InstanceState state = getInstanceState(instanceId);
+                    state.updateShutdown();
+                    state.setState(InstanceState.STATE_DOWN);
+                    updateInstanceState(instanceId, state);
+                } catch (JsonResourceException e) {
+                    logger.warn("Failed to update instance shutdown timestamp", e);
+                }
+            }  
+        }  
     }
-    
+
     @Override
     public String getInstanceId() {
         return instanceId;
