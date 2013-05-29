@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.modules.IWAModule;
+import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
