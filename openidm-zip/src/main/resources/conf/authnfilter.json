@@ -2,18 +2,15 @@
     "server-auth-config" : {
         "iwa-ad-passthrough" : {
             "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+                "class-name" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule"
             },
             "auth-modules" : [
                 {
                     "class-name" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
-                    "servicePrincipal" : "HTTP/ubuntu0.internal.forgerock.com@INTERNAL.FORGEROCK.COM",
-                    "keytabFileName" : "/Users/Phill/openam/ubuntu0.HTTP.keytab",
-                    "kerberosRealm" : "INTERNAL.FORGEROCK.COM",
-                    "kerberosServerName" : "ActiveDirectory.internal.forgerock.com"
-                },
-                {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+                    "servicePrincipal" : "HTTP/bridge.goldengate.com@GOLDENGATE.COM",
+                    "keytabFileName" : "&{launcher.working.location}/bridge.HTTP.keytab",
+                    "kerberosRealm" : "goldengate.com",
+                    "kerberosServerName" : "ec2-54-242-220-206.compute-1.amazonaws.com",
                     "passThroughAuth" : "system/AD/account",
                     "queryId" : "credential-query",
                     "queryOnResource" : "managed/user",
@@ -31,7 +28,7 @@
         },
         "ad-passthrough-only" : {
             "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+                "class-name" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule"
             },
             "auth-modules" : [
                 {
