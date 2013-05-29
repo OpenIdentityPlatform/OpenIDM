@@ -30,8 +30,10 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-jetty-fragment</artifactId>
-    <name>OpenIDM jetty fragment</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM Jetty Fragment</name>
+    <description>This fragment attaches to PAX Jetty and allow access to OpenIDM boot properties</description>
+
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -80,7 +82,6 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
-                        <Export-Package>org.forgerock.openidm.jetty</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

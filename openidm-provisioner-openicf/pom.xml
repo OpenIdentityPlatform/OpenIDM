@@ -31,7 +31,7 @@
     </parent>
     <artifactId>openidm-provisioner-openicf</artifactId>
     <packaging>bundle</packaging>
-    <name>OpenIDM System Bundle - OpenICF</name>
+    <name>OpenIDM Provisioner System Bundle - OpenICF</name>
     <description>This bundle integrates OpenICF under /system</description>
 
     <properties>

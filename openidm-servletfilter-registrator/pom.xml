@@ -30,8 +30,9 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-servletfilter-registrator</artifactId>
-    <name>OpenIDM servlet filter registration handler</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM servlet filter registration handler</name>
+    <description>This bundle is duplicates of OpenIDM HTTP context bundle</description>
 
     <dependencies>
         <dependency>

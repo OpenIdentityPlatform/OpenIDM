@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -86,13 +85,14 @@ public class SystemAction {
             this.systemType = systemTypeAction.get("systemType").required().asPattern();
             this.actionType = systemTypeAction.get("actionType").required().asString();
             if (systemTypeAction.isDefined("actionFile")) {
-                File scriptFile = IdentityServer
-                        .getFileForProjectPath(systemTypeAction.get("actionFile").required().asString());
+                File scriptFile =
+                        IdentityServer.getFileForProjectPath(systemTypeAction.get("actionFile")
+                                .required().asString());
                 try {
                     actionSource = FileUtil.readFile(scriptFile);
                 } catch (IOException e) {
-                    throw new JsonValueException(systemTypeAction.get("actionFile"), "Failed to load the action file.",
-                            e);
+                    throw new JsonValueException(systemTypeAction.get("actionFile"),
+                            "Failed to load the action file.", e);
                 }
             } else {
                 actionSource = systemTypeAction.get("actionSource").required().asString();

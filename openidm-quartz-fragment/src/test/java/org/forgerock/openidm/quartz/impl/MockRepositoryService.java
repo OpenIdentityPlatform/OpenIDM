@@ -37,7 +37,7 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ResourceException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.repo.RepositoryService;
 
@@ -87,14 +87,14 @@ public class MockRepositoryService implements RepositoryService {
     }
 
     public JsonValue create(String id, Map<String, Object> object)
-            throws ObjectSetException {
+            throws ResourceException {
         printMap("create",object);
         map.put(id, object);
         return new JsonValue(map);
 
     }
 
-    public Map<String, Object> read(String id) throws ObjectSetException, NotFoundException {
+    public Map<String, Object> read(String id) throws ResourceException, NotFoundException {
         Map<String, Object> object = (Map<String, Object>)map.get(id);
         printMap("read", object);
         if (object == null) {
@@ -104,28 +104,28 @@ public class MockRepositoryService implements RepositoryService {
     }
 
     public JsonValue update(String id, String rev, Map<String, Object> object)
-            throws ObjectSetException {
+            throws ResourceException {
         printMap("update", object);
         map.put(id, object);
         return new JsonValue(map);
     }
 
-    public void delete(String id, String rev) throws ObjectSetException {
+    public void delete(String id, String rev) throws ResourceException {
         map.remove(id);
     }
 
     public void patch(String id, String rev, Patch patch)
-            throws ObjectSetException {
+            throws ResourceException {
 
     }
 
     public Map<String, Object> query(String id, Map<String, Object> params)
-            throws ObjectSetException {
+            throws ResourceException {
         return null;
     }
 
     public Map<String, Object> action(String id, Map<String, Object> params)
-            throws ObjectSetException {
+            throws ResourceException {
         return null;
     }
 

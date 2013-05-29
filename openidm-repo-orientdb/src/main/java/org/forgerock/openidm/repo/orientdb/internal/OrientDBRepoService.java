@@ -73,7 +73,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.graph.GraphConnectionFactory;
-import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.util.ResourceUtil.URLParser;
 import org.osgi.framework.Constants;

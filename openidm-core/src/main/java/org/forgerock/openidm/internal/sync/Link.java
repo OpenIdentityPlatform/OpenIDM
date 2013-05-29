@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Uni-directional view of a link.
- * 
+ *
  * Link Types and Links in the repository are bi-directional.
- * 
+ *
  * This view represents one direction of that Link to match the direction of the
  * current mapping context (source/target object set).
- * 
+ *
  * @author Paul C. Bryan
  * @author aegloff
  */
@@ -156,7 +156,7 @@ class Link {
 //                            QueryConstants.QUERY_RESULT).required().expect(List.class);
 //        } catch (JsonValueException jve) {
 //            throw new SynchronizationException("Malformed link query response", jve);
-//        } catch (ObjectSetException ose) {
+//        } catch (ResourceException ose) {
 //            throw new SynchronizationException("Link query failed", ose);
 //        }
 //        return results;

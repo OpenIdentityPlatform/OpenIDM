@@ -38,8 +38,15 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.cluster.ClusterEvent;
+import org.forgerock.openidm.cluster.ClusterEventListener;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
@@ -59,16 +66,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A health service determining system state
- * 
+ *
  * @author aegloff
  */
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM Health Service", immediate = true)
-@Service()
+@Service
+@References({ @Reference(referenceInterface = ClusterManagementService.class,
+        cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
+        bind = "bindClusterManagementService", unbind = "unbindClusterManagementService",
+        updated = "updatedClusterManagementService") })
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service") })
-public class HealthService implements HealthInfo {
+public class HealthService implements HealthInfo, ClusterEventListener {
 
     public static final String PID = "org.forgerock.openidm.health";
 
@@ -76,6 +87,8 @@ public class HealthService implements HealthInfo {
      * Setup logging for the {@link HealthService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
+
+    private static final String LISTENER_ID = "healthService";
 
     /**
      * Application states
@@ -89,6 +102,8 @@ public class HealthService implements HealthInfo {
     private ServiceListener svcListener;
     private BundleListener bundleListener;
 
+    private ClusterManagementService cluster = null;
+
     private ScheduledExecutorService scheduledExecutor = Executors
             .newSingleThreadScheduledExecutor();
 
@@ -97,6 +112,8 @@ public class HealthService implements HealthInfo {
     // Flag to help in processing state during start-up.
     // For clients to query application state, use the state detail instead
     private volatile boolean appStarting = true;
+    // Whether the cluster management thread is up in the "running" state
+    private volatile boolean clusterUp = false;
 
     private volatile StateDetail stateDetail = new StateDetail(AppState.STARTING,
             "OpenIDM starting");
@@ -144,10 +161,13 @@ public class HealthService implements HealthInfo {
      * READY
      */
     private List<String> requiredServices = new ArrayList<String>();
-    private String[] defaultRequiredServices = new String[] { /*"org.forgerock.openidm.config",*/
-        "org.forgerock.openidm.provisioner",
+    private String[] defaultRequiredServices = new String[] { /*
+                                                               * "org.forgerock.openidm.config"
+                                                               * ,
+                                                               */
+    "org.forgerock.openidm.provisioner",
         "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
-        "org.forgerock.openidm.audit", /*"org.forgerock.openidm.policy",*/
+        "org.forgerock.openidm.audit", /* "org.forgerock.openidm.policy", */
         /* "org.forgerock.openidm.managed", */
         "org.forgerock.openidm.script", "org.forgerock.openidm.crypto"
     /* "org.forgerock.openidm.recon", */
@@ -301,8 +321,6 @@ public class HealthService implements HealthInfo {
                 if (!stateDetail.state.equals(AppState.ACTIVE_READY)) {
                     logger.error("OpenIDM failure during startup, {}: {}", stateDetail.state,
                             stateDetail.shortDesc);
-                    System.out.println("OpenIDM failure during startup, " + stateDetail.state
-                            + ": " + stateDetail.shortDesc);
                 } else {
                     logger.debug("Startup check found ready state");
                 }
@@ -316,12 +334,33 @@ public class HealthService implements HealthInfo {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.forgerock.openidm.info.HealthInfo#getHealthInfo()
      */
     @Override
     public JsonValue getHealthInfo() {
         return stateDetail.toJsonValue();
+    }
+
+    private void bindClusterManagementService(final ClusterManagementService service) {
+        service.register(LISTENER_ID, this);
+        cluster = service;
+
+    }
+
+    private void updatedClusterManagementService(final ClusterManagementService service) {
+        if (cluster != null) {
+            cluster.unregister(LISTENER_ID);
+            cluster = null;
+        }
+        if (service != null) {
+            service.register(LISTENER_ID, this);
+            cluster = service;
+        }
+    }
+
+    private void unbindClusterManagementService(final ClusterManagementService service) {
+        service.unregister(LISTENER_ID);
     }
 
     /**
@@ -378,6 +417,12 @@ public class HealthService implements HealthInfo {
         } else if (missingServices.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
+        } else if (!clusterUp) {
+            if (cluster != null && !cluster.isStarted()) {
+                cluster.startClusterManagement();
+            }
+            updatedAppState = AppState.ACTIVE_NOT_READY;
+            updatedShortDesc = "This node can not yet join the cluster";
         } else {
             updatedAppState = AppState.ACTIVE_READY;
             updatedShortDesc = "OpenIDM ready";
@@ -388,7 +433,7 @@ public class HealthService implements HealthInfo {
     /**
      * Process detected state, if it's different than the current state process
      * the state change and report appropriately
-     * 
+     *
      * @param state
      *            new app state
      * @param shortDesc
@@ -450,7 +495,7 @@ public class HealthService implements HealthInfo {
 
     /**
      * Translate Bundle state int
-     * 
+     *
      * @param bundleState
      *            bundle state int
      * @return String version of the state
@@ -475,7 +520,7 @@ public class HealthService implements HealthInfo {
 
     /**
      * Parse the comma delimited property into a list
-     * 
+     *
      * @param prop
      *            comma delimited values
      * @return properties split by comma
@@ -513,7 +558,7 @@ public class HealthService implements HealthInfo {
 
     /**
      * Detailed State
-     * 
+     *
      * @author aegloff
      */
     private static class StateDetail {
@@ -552,4 +597,20 @@ public class HealthService implements HealthInfo {
             return jsonState;
         }
     }
+
+    @Override
+    public boolean handleEvent(ClusterEvent event) {
+        switch (event.getType()) {
+        case INSTANCE_FAILED:
+            clusterUp = false;
+            checkState();
+            break;
+        case INSTANCE_RUNNING:
+            clusterUp = true;
+            checkState();
+            break;
+        }
+        return true;
+    }
+
 }

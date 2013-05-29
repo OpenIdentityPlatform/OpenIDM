@@ -84,7 +84,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Scheduler service using Quartz
- * 
+ *
  * @author aegloff
  * @author ckienle
  */
@@ -284,7 +284,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
 
     /**
      * Schedules a job.
-     * 
+     *
      * @param scheduleConfig
      *            The schedule configuration
      * @param jobName
@@ -358,7 +358,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     /**
      * Creates and returns a CronTrigger using the supplied schedule
      * configuration.
-     * 
+     *
      * @param scheduleConfig
      *            The schedule configuration
      * @param jobName
@@ -400,7 +400,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     /**
      * Creates and returns a JobDataMap using the supplied schedule
      * configuration.
-     * 
+     *
      * @param scheduleConfig
      *            The schedule configuration
      * @return The created JobDataMap
@@ -421,7 +421,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     /**
      * Returns the Scheduler corresponding to whether the supplied schedule
      * configuration is persistent.
-     * 
+     *
      * @param scheduleConfig
      *            The schedule configuration
      * @return The Scheduler
@@ -436,7 +436,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
 
     /**
      * Creates a random Job name.
-     * 
+     *
      * @return A job name
      */
     private String createJobName() {
@@ -447,7 +447,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
 
     /**
      * Determines if a job already exists.
-     * 
+     *
      * @param jobName
      *            The name of the job
      * @param persisted
@@ -464,7 +464,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     }
 
     @Override
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
+    public void create(String id, Map<String, Object> object) throws ResourceException {
         try {
             if (id == null) {
                 id = createJobName();
@@ -485,20 +485,20 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
             try {
                 addSchedule(scheduleConfig, id, false);
             } catch (ParseException e) {
-                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
+                throw new ResourceException(ResourceException.BAD_REQUEST, e);
             } catch (ObjectAlreadyExistsException e) {
-                throw new ObjectSetException(ObjectSetException.CONFLICT, e);
+                throw new ResourceException(ResourceException.CONFLICT, e);
             } catch (SchedulerException e) {
-                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
             }
         } catch (JsonException e) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error creating schedule",
+            throw new ResourceException(ResourceException.BAD_REQUEST, "Error creating schedule",
                     e);
         }
     }
 
     @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
+    public Map<String, Object> read(String id) throws ResourceException {
         Map<String, Object> resultMap = null;
         try {
             Scheduler scheduler = null;
@@ -510,7 +510,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
             } else if (jobExists(id, false)) {
                 scheduler = inMemoryScheduler;
             } else {
-                throw new ObjectSetException(ObjectSetException.NOT_FOUND,
+                throw new ResourceException(ResourceException.NOT_FOUND,
                         "Schedule does not exist");
             }
             job = scheduler.getJobDetail(id, GROUP_NAME);
@@ -521,16 +521,16 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
             resultMap.put("_id", id);
 
         } catch (SchedulerException e) {
-            throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
         }
         return resultMap;
     }
 
     @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+    public void update(String id, String rev, Map<String, Object> object) throws ResourceException {
         try {
             if (id == null) {
-                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
+                throw new ResourceException(ResourceException.BAD_REQUEST, "No ID specified");
             }
             object.put("_id", id);
 
@@ -550,14 +550,14 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
                     addSchedule(scheduleConfig, id, true);
                 }
             } catch (ParseException e) {
-                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
+                throw new ResourceException(ResourceException.BAD_REQUEST, e);
             } catch (ObjectAlreadyExistsException e) {
-                throw new ObjectSetException(ObjectSetException.CONFLICT, e);
+                throw new ResourceException(ResourceException.CONFLICT, e);
             } catch (SchedulerException e) {
-                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
             }
         } catch (JsonException e) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule",
+            throw new ResourceException(ResourceException.BAD_REQUEST, "Error updating schedule",
                     e);
         }
     }
@@ -570,10 +570,10 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     }
 
     @Override
-    public void delete(String id, String rev) throws ObjectSetException {
+    public void delete(String id, String rev) throws ResourceException {
         try {
             if (id == null) {
-                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
+                throw new ResourceException(ResourceException.BAD_REQUEST, "No ID specified");
             }
             try {
                 if (jobExists(id, true)) {
@@ -581,24 +581,24 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
                 } else if (jobExists(id, false)) {
                     inMemoryScheduler.deleteJob(id, GROUP_NAME);
                 } else {
-                    throw new ObjectSetException(ObjectSetException.BAD_REQUEST,
+                    throw new ResourceException(ResourceException.BAD_REQUEST,
                             "Schedule does not exist");
                 }
             } catch (SchedulerException e) {
-                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
             }
         } catch (JsonException e) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule",
+            throw new ResourceException(ResourceException.BAD_REQUEST, "Error updating schedule",
                     e);
         }
     }
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params)
-            throws ObjectSetException {
+            throws ResourceException {
         String queryId = (String) params.get(QueryConstants.QUERY_ID);
         if (queryId == null) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "query-id parameters");
+            throw new ResourceException(ResourceException.BAD_REQUEST, "query-id parameters");
         }
         Map<String, Object> resultMap = null;
         try {
@@ -626,14 +626,14 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
                     resultMap = new HashMap<String, Object>();
                     resultMap.put(QueryConstants.QUERY_RESULT, resultList);
                 } else {
-                    throw new ObjectSetException(ObjectSetException.FORBIDDEN,
+                    throw new ResourceException(ResourceException.FORBIDDEN,
                             "Unsupported query-id: " + queryId);
                 }
             } catch (SchedulerException e) {
-                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
             }
         } catch (JsonException e) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule",
+            throw new ResourceException(ResourceException.BAD_REQUEST, "Error updating schedule",
                     e);
         }
         return resultMap;
@@ -666,7 +666,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params)
-            throws ObjectSetException {
+            throws ResourceException {
 
         if (params.get("_action") == null) {
             throw new BadRequestException("Expecting _action parameter");
@@ -679,20 +679,20 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
                 params.put("_id", id);
                 try {
                     if (jobExists(id, true) || jobExists(id, false)) {
-                        throw new ObjectSetException(ObjectSetException.BAD_REQUEST,
+                        throw new ResourceException(ResourceException.BAD_REQUEST,
                                 "Schedule already exists");
                     }
                     create(id, params);
                     return params;
                 } catch (SchedulerException e) {
-                    throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                    throw new ResourceException(ResourceException.INTERNAL_ERROR, e);
                 }
             } else {
-                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Unknown action: "
+                throw new ResourceException(ResourceException.BAD_REQUEST, "Unknown action: "
                         + action);
             }
         } catch (JsonException e) {
-            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule",
+            throw new ResourceException(ResourceException.BAD_REQUEST, "Error updating schedule",
                     e);
         }
     }
@@ -772,7 +772,7 @@ public class SchedulerService implements MetaDataProvider, SingletonResourceProv
     /**
      * Create the Scheduler newBuilder for the given factory and scheduler name.
      * <p>
-     * 
+     *
      * @param schedulerFactory
      *            the factory to create the Scheduler with
      * @param schedulerName

@@ -71,7 +71,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * {@inheritDoc}
 //     */
 //    @Override
-//    public Map<String, Object> read(String fullId) throws ObjectSetException {
+//    public Map<String, Object> read(String fullId) throws ResourceException {
 //        getRepoService();
 //        Map<String, Object> params = new HashMap<String, Object>();
 //        params.put("_queryId", "query-all");
@@ -95,7 +95,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //                result = AuditServiceImpl.formatLogEntry(entry, type);
 //            }
 //
-//        } catch (ObjectSetException ex) {
+//        } catch (ResourceException ex) {
 //            throw ex;
 //        } catch (RuntimeException ex) {
 //            repo = null; // For unexpected exceptions start fresh
@@ -108,7 +108,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * {@inheritDoc}
 //     */
 //    @Override
-//    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
+//    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ResourceException {
 //        getRepoService();
 //        String queryId = (String)params.get("_queryId");
 //        boolean formatted = true;
@@ -156,7 +156,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * {@inheritDoc}
 //     */
 //    @Override
-//    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+//    public void create(String fullId, Map<String, Object> obj) throws ResourceException {
 //        EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
 //        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
 //        String type = split[0];
@@ -168,11 +168,11 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //        }
 //    }
 //
-//    private void createImpl(String fullId, Map<String, Object> obj) throws ObjectSetException {
+//    private void createImpl(String fullId, Map<String, Object> obj) throws ResourceException {
 //        JsonResourceObjectSet svc = getRepoService();
 //        try {
 //            svc.create(fullIdPrefix + fullId, obj);
-//        } catch (ObjectSetException ex) {
+//        } catch (ResourceException ex) {
 //            throw ex;
 //        } catch (RuntimeException ex) {
 //            repo = null; // For unexpected exceptions start fresh
@@ -221,7 +221,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * Audit service does not support changing audit entries.
 //     */
 //    @Override
-//    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
+//    public void update(String fullId, String rev, Map<String, Object> obj) throws ResourceException {
 //        throw new ForbiddenException("Not allowed on audit service");
 //    }
 //
@@ -229,7 +229,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * Audit service currently does not support deleting audit entries.
 //     */
 //    @Override
-//    public void delete(String fullId, String rev) throws ObjectSetException {
+//    public void delete(String fullId, String rev) throws ResourceException {
 //        throw new ForbiddenException("Not allowed on audit service");
 //    }
 //
@@ -237,7 +237,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * Audit service does not support changing audit entries.
 //     */
 //    @Override
-//    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+//    public void patch(String id, String rev, Patch patch) throws ResourceException {
 //        throw new ForbiddenException("Not allowed on audit service");
 //    }
 //
@@ -245,7 +245,7 @@ public class RepoAuditLogger /* extends AbstractAuditLogger implements AuditLogg
 //     * Audit service does not support actions on audit entries.
 //     */
 //    @Override
-//    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+//    public Map<String, Object> action(String id, Map<String, Object> params) throws ResourceException {
 //        throw new ForbiddenException("Not allowed on audit service");
 //    }
 }
