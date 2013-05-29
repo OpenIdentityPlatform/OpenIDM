@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides access to a set of managed objects of a given type.
- * 
+ *
  * @author Paul C. Bryan
  * @author aegloff
  */
@@ -136,7 +136,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Constructs a new managed object set.
-     * 
+     *
      * @param service
      *            the managed object service
      * @param config
@@ -147,7 +147,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Constructs a new managed object set.
-     * 
+     *
      * @param scriptRegistry
      * @param cryptoService
      * @param config
@@ -248,7 +248,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Generates a fully-qualified object identifier for the managed object.
-     * 
+     *
      * @param id
      *            the local managed object identifier to qualify.
      * @return the fully-qualified managed object identifier.
@@ -264,7 +264,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Generates a fully-qualified object identifier for the repository.
-     * 
+     *
      * @param id
      *            the local managed object identifier to qualify.
      * @return the fully-qualified repository object identifier.
@@ -276,7 +276,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Executes a script if it exists, populating an {@code "object"} property
      * in the root scope.
-     * 
+     *
      * @param type
      *            the type of script being executed.
      * @param script
@@ -309,7 +309,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Executes all of the necessary trigger scripts when an object is retrieved
      * from the repository.
-     * 
+     *
      * @param value
      *            the JSON value that was retrieved from the repository.
      * @throws ForbiddenException
@@ -328,7 +328,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Executes all of the necessary trigger scripts when an object is to be
      * stored in the repository.
-     * 
+     *
      * @param value
      *            the JSON value to be stored in the repository.
      * @throws ForbiddenException
@@ -352,7 +352,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Decrypt the value
-     * 
+     *
      * @param value
      *            an json value with poentially encrypted value(s)
      * @return object with values decrypted
@@ -369,7 +369,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Decrypt the value
-     * 
+     *
      * @param value
      *            an json value with poentially encrypted value(s)
      * @return object with values decrypted
@@ -388,7 +388,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Log the activities on the managed object
-     * 
+     *
      * @param id
      *            unqualified managed object id
      * @param msg
@@ -408,7 +408,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Forbid the use of sub objects
-     * 
+     *
      * @param id
      *            the identifier to check
      * @throws ForbiddenException
@@ -422,7 +422,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Forbid operation without id, on the whole object set
-     * 
+     *
      * @param id
      *            the identifier to check
      * @throws ForbiddenException
@@ -470,7 +470,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * Applies a patch document to an object, or by finding an object in the
      * object set itself via query parameters. As this is an action, the patch
      * document to be applied is in the {@code _entity} parameter.
-     * 
+     *
      * @param context
      * @param request
      * @return
@@ -551,7 +551,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void createInstance(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
         // public void create(String id, Map<String, Object> object) throws
-        // ObjectSetException {
+        // ResourceException {
         logger.debug("Create name={} id={}", name, request.getNewResourceId());
 
         try {
@@ -600,7 +600,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void readInstance(final ServerContext context, String resourceId, ReadRequest request,
             ResultHandler<Resource> handler) {
-        // public Map<String, Object> read(String id) throws ObjectSetException
+        // public Map<String, Object> read(String id) throws ResourceException
         // {
         logger.debug("Read name={} id={}", name, resourceId);
         try {
@@ -625,7 +625,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void updateInstance(final ServerContext context,final String resourceId,final  UpdateRequest request,
             final ResultHandler<Resource> handler) {
         // public void update(String id, String rev, Map<String, Object> object)
-        // throws ObjectSetException {
+        // throws ResourceException {
         logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
 
@@ -655,7 +655,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void deleteInstance(final ServerContext context, final String resourceId, DeleteRequest request,
             ResultHandler<Resource> handler) {
-        // public void delete(String id, String rev) throws ObjectSetException {
+        // public void delete(String id, String rev) throws ResourceException {
         logger.debug("Delete {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
         try {
@@ -690,7 +690,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         // TODO: Consider dropping this Patch object abstraction and just
         // process a patch document directly?
         // public void patch(String id, String rev, Patch patch) throws
-        // ObjectSetException {
+        // ResourceException {
         // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll
         // work for now with patch action.
         // boolean forceUpdate = (rev == null);
@@ -806,7 +806,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void actionCollection(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
         // public Map<String, Object> action(String id, Map<String, Object>
-        // params) throws ObjectSetException {
+        // params) throws ResourceException {
         logger.debug("action name={} id={}", name, request.getResourceName());
 
         try {
@@ -848,7 +848,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Culls properties that are marked private
-     * 
+     *
      * @param jv
      *            JsonValue to cull private properties from
      * @return the supplied JsonValue with private properties culled
@@ -865,7 +865,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Checks to see if the current request's context came from a public
      * interface (i.e. http)
-     * 
+     *
      * @return true if it came over http, false otherwise
      */
     private boolean isPublicContext(Context context) {
@@ -874,7 +874,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Called when a source object has been created.
-     * 
+     *
      * @param id
      *            the fully-qualified identifier of the object that was created.
      * @param value
@@ -900,7 +900,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Called when a source object has been updated.
-     * 
+     *
      * @param id
      *            the fully-qualified identifier of the object that was updated.
      * @param oldValue
@@ -931,7 +931,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /**
      * Called when a source object has been deleted.
-     * 
+     *
      * @param id
      *            the fully-qualified identifier of the object that was deleted.
      * @param oldValue

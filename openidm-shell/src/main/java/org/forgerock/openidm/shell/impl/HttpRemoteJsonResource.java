@@ -75,7 +75,7 @@ public class HttpRemoteJsonResource implements Connection {
      * Requests that the origin server accepts the entity enclosed in the
      * request as a new subordinate of the resource identified by the request
      * URI.
-     * 
+     *
      * @see <a
      *      href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.5">HTTP
      *      RFC - 9.5 POST</a>
@@ -128,7 +128,7 @@ public class HttpRemoteJsonResource implements Connection {
          * org.restlet.data.Form();
          * remoteClient.getRequest().getAttributes().put
          * (HeaderConstants.ATTRIBUTE_HEADERS, additionalHeaders); }
-         * 
+         *
          * additionalHeaders.add("X-OpenIDM-Username", "openidm-admin");
          * additionalHeaders.add("X-OpenIDM-Password", "openidm-admin");
          * additionalHeaders.add("X-PrettyPrint", "1");
@@ -144,7 +144,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<JsonValue> actionAsync(org.forgerock.json.resource.Context context,
-            ActionRequest request, ResultHandler<JsonValue> handler) {
+            ActionRequest request, ResultHandler<? super JsonValue> handler) {
         throw new NotImplementedException();
     }
 
@@ -161,7 +161,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<Resource> createAsync(org.forgerock.json.resource.Context context,
-            CreateRequest request, ResultHandler<Resource> handler) {
+            CreateRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
     }
 
@@ -173,7 +173,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<Resource> deleteAsync(org.forgerock.json.resource.Context context,
-            DeleteRequest request, ResultHandler<Resource> handler) {
+            DeleteRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
     }
 
@@ -195,7 +195,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<Resource> patchAsync(org.forgerock.json.resource.Context context,
-            PatchRequest request, ResultHandler<Resource> handler) {
+            PatchRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
     }
 
@@ -226,7 +226,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<Resource> readAsync(org.forgerock.json.resource.Context context,
-            ReadRequest request, ResultHandler<Resource> handler) {
+            ReadRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
     }
 
@@ -238,7 +238,7 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public FutureResult<Resource> updateAsync(org.forgerock.json.resource.Context context,
-            UpdateRequest request, ResultHandler<Resource> handler) {
+            UpdateRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
     }
 
@@ -251,7 +251,7 @@ public class HttpRemoteJsonResource implements Connection {
             Reference remoteRef = new Reference(id);
 
             // Prepare query params
-            JsonValue params = new JsonValue(null);//jsonRequest.get("params");
+            JsonValue params = new JsonValue(null);// jsonRequest.get("params");
             if (!params.isNull()) {
                 for (Map.Entry<String, Object> entry : params.expect(Map.class).asMap().entrySet()) {
                     if (entry.getValue() instanceof String) {
@@ -263,14 +263,14 @@ public class HttpRemoteJsonResource implements Connection {
 
             // Prepare payload
             Representation request = null;
-            JsonValue value = new JsonValue(null);//jsonRequest.get("value");
+            JsonValue value = new JsonValue(null);// jsonRequest.get("value");
             if (!value.isNull()) {
                 request = new JacksonRepresentation<Map>(value.expect(Map.class).asMap());
             }
 
             // Prepare ETag
             Conditions conditions = new Conditions();
-            JsonValue rev = null;//jsonRequest.get("rev");
+            JsonValue rev = null;// jsonRequest.get("rev");
 
             switch (jsonRequest.getRequestType()) {
             case CREATE:

@@ -24,7 +24,18 @@
 
 package org.forgerock.openidm.provisioner.openicf.internal;
 
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.*;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -149,7 +160,7 @@ import org.slf4j.LoggerFactory;
  * {@link CollectionResourceProvider} interface with <a
  * href="http://openicf.forgerock.org">OpenICF</a>.
  * <p/>
- * 
+ *
  * @author Laszlo Hordos
  */
 @Component(name = OpenICFProvisionerService.PID, policy = ConfigurationPolicy.REQUIRE,
@@ -165,7 +176,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     /**
      * Setup logging for the {@link OpenICFProvisionerService}.
      */
-    //private static final LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(OpenICFProvisionerService.class);
+    // private static final LocalizedLogger logger =
+    // LocalizedLogger.getLocalizedLogger(OpenICFProvisionerService.class);
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -187,7 +199,6 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         connectorInfoProvider = null;
     }
 
-    
     /**
      * RouterRegistryService service.
      */
@@ -217,16 +228,20 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     }
 
     /**
-     * Reference to the ThreadSafe  {@code ConnectorFacade} instance.
+     * Reference to the ThreadSafe {@code ConnectorFacade} instance.
      */
-    private final AtomicReference<ConnectorFacade> connectorFacade = new AtomicReference<ConnectorFacade>();
+    private final AtomicReference<ConnectorFacade> connectorFacade =
+            new AtomicReference<ConnectorFacade>();
 
     /**
-     * Cache the SystemActions from local and {@code provisioner.json} configuration.
+     * Cache the SystemActions from local and {@code provisioner.json}
+     * configuration.
      */
-    private final ConcurrentMap<String, SystemAction> localSystemActionCache = new ConcurrentHashMap<String, SystemAction>();
+    private final ConcurrentMap<String, SystemAction> localSystemActionCache =
+            new ConcurrentHashMap<String, SystemAction>();
 
-    private final ConcurrentMap<String, RequestHandler> objectClassHandlers = new ConcurrentHashMap<String, RequestHandler>();
+    private final ConcurrentMap<String, RequestHandler> objectClassHandlers =
+            new ConcurrentHashMap<String, RequestHandler>();
 
     /**
      * System name for better logging only
@@ -243,7 +258,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     /**
      * Holder of non ObjectClass operations:
-     * 
+     *
      * <pre>
      * ValidateApiOp
      * TestApiOp
@@ -265,12 +280,13 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             loadLocalSystemActions(configuration);
 
             connectorReference = ConnectorUtil.getConnectorReference(configuration);
-             
+
             init(configuration);
 
             connectorFacadeCallback = new ConnectorFacadeCallback() {
                 @Override
-                public void addingConnectorInfo(ConnectorInfo connectorInfo, ConnectorFacadeFactory facadeFactory) {
+                public void addingConnectorInfo(ConnectorInfo connectorInfo,
+                        ConnectorFacadeFactory facadeFactory) {
                     try {
                         APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
                         ConnectorUtil.configureDefaultAPIConfiguration(configuration, config);
@@ -284,16 +300,19 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                             facade.validate();
                             if (connectorFacade.compareAndSet(null, facade)) {
                                 if (null != routeEntry) {
-                                    // This should not happen but keep it in case
+                                    // This should not happen but keep it in
+                                    // case
                                     routeEntry.removeRoute();
                                 }
 
                                 if (facade.getSupportedOperations().contains(TestApiOp.class)) {
                                     try {
                                         facade.test();
-                                        logger.debug("OpenICF connector test of {} succeeded!", systemName);
+                                        logger.debug("OpenICF connector test of {} succeeded!",
+                                                systemName);
                                     } catch (Throwable e) {
-                                        logger.error("OpenICF connector test of {} failed!", systemName, e);
+                                        logger.error("OpenICF connector test of {} failed!",
+                                                systemName, e);
                                     }
                                 } else {
                                     logger.debug("OpenICF connector of {} does not support test.",
@@ -304,8 +323,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                     } catch (Throwable t) {
                         logger.error("//TODO FIX ME", t);
                     } finally {
-                        logger.info("OpenICF Provisioner Service component {} is activated{}", systemName,
-                                (null != connectorFacade.get() ? "."
+                        logger.info("OpenICF Provisioner Service component {} is activated{}",
+                                systemName, (null != connectorFacade.get() ? "."
                                         : " although the service is not available yet."));
                     }
                 }
@@ -316,17 +335,20 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                 }
             };
 
+            connectorInfoProvider.addConnectorFacadeCallback(connectorReference,
+                    connectorFacadeCallback);
 
-            connectorInfoProvider.addConnectorFacadeCallback(connectorReference, connectorFacadeCallback);
-            
-            routeEntry = routerRegistryService.addRoute(RouteBuilder.newBuilder().withTemplate("/system/" + systemName).withSingletonResourceProvider(this)
-                    .buildNext().withModeStartsWith().withTemplate(
-                            "/system/" + systemName
-                                    + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
-                    .withRequestHandler(new ObjectClassRequestHandler()).seal());
+            routeEntry =
+                    routerRegistryService.addRoute(RouteBuilder.newBuilder().withTemplate(
+                            "/system/" + systemName).withSingletonResourceProvider(this)
+                            .buildNext().withModeStartsWith().withTemplate(
+                                    "/system/" + systemName
+                                            + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
+                            .withRequestHandler(new ObjectClassRequestHandler()).seal());
 
             logger.info("OpenICF Provisioner Service component {} is activated{}", systemName,
-                    (null != connectorFacade.get() ? "." : " although the service is not available yet."));
+                    (null != connectorFacade.get() ? "."
+                            : " although the service is not available yet."));
         } catch (Exception e) {
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
@@ -335,18 +357,17 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        if (null != connectorFacadeCallback){
-        connectorInfoProvider.deleteConnectorFacadeCallback(connectorFacadeCallback);
-        connectorFacadeCallback = null;
+        if (null != connectorFacadeCallback) {
+            connectorInfoProvider.deleteConnectorFacadeCallback(connectorFacadeCallback);
+            connectorFacadeCallback = null;
         }
         if (null != routeEntry) {
-        routeEntry.removeRoute();
+            routeEntry.removeRoute();
             routeEntry = null;
         }
         connectorFacade.set(null);
         logger.info("OpenICF Provisioner Service component {} is deactivated.", systemName);
     }
-
 
     private String getSystemName(ComponentContext context, JsonValue configuration) {
         String name = null;
@@ -356,8 +377,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             name = (String) context.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
         }
         if (StringUtil.isBlank(name)) {
-            throw new ComponentException(
-                    "Failed to determine the system name from configuration.");
+            throw new ComponentException("Failed to determine the system name from configuration.");
         } else {
             name = name.trim();
             if (!StringUtils.isAlphanumeric(name)) {
@@ -368,7 +388,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     }
 
     private void loadLocalSystemActions(JsonValue configuration) {
-        //TODO delay initialization /config/system
+        // TODO delay initialization /config/system
 
         if (configuration.isDefined("systemActions")) {
             for (JsonValue actionValue : configuration.get("systemActions").expect(List.class)) {
@@ -392,9 +412,10 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
             for (Map.Entry<String, ObjectClassInfoHelper> entry : ConnectorUtil.getObjectTypes(
                     configuration).entrySet()) {
-                
-                objectClassHandlers.put(entry.getKey(), Resources.newCollection(new ObjectClassResourceProvider(entry.getValue(), objectOperations
-                        .get(entry.getKey()), allowModification)));               
+
+                objectClassHandlers.put(entry.getKey(), Resources
+                        .newCollection(new ObjectClassResourceProvider(entry.getValue(),
+                                objectOperations.get(entry.getKey()), allowModification)));
             }
 
             // TODO Fix this Map
@@ -413,7 +434,6 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         logger.debug("OpenICF connector configuration has no errors.");
     }
 
-
     ConnectorFacade getConnectorFacade() {
         return connectorFacade.get();
     }
@@ -424,7 +444,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
      * "component.name" :
      * "org.forgerock.openidm.provisioner.openicf.ProvisionerService", "ok" :
      * true }
-     * 
+     *
      * @return
      */
     /*
@@ -437,7 +457,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
      * catch (Throwable e) { result.put("error", e.getMessage()); } return
      * result; }
      */
-    //TODO include e.getMessage() both in the audit log and the propagated exception
+    // TODO include e.getMessage() both in the audit log and the propagated
+    // exception
     protected void handleError(Request request, Exception exception, ResultHandler<?> handler) {
 
         if (exception instanceof AlreadyExistsException) {
@@ -520,7 +541,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             // ActivityLog.log(router, request, "Operation " + METHOD.name() +
             // " failed with " + e.getClass().getSimpleName(), id.toString(),
             // before, after, Status.FAILURE);
-            handler.handleError(new NotFoundException("Not found " + request.getResourceName(),exception).setDetail(new JsonValue(new HashMap<String, Object>())));
+            handler.handleError(new NotFoundException("Not found " + request.getResourceName(),
+                    exception).setDetail(new JsonValue(new HashMap<String, Object>())));
         } else if (exception instanceof InvalidCredentialException) {
             if (logger.isDebugEnabled()) {
                 // logger.error("Invalid credential has been provided to operation {} for system object: {}",new
@@ -677,7 +699,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
      * <p/>
      * Invoked by the scheduler when the scheduler triggers.
      * <p/>
-     * Synchronization object: {@code "connectorData" : { "syncToken" :
+     * Synchronization object: {@code "connectorData" : "syncToken" :
      * "1305555929000", "nativeType" : "JAVA_TYPE_LONG" },
      * "synchronizationStatus" : { "errorStatus" : null, "lastKnownServer" :
      * "localServer", "lastModDate" : "2011-05-16T14:47:58.587Z", "lastModNum" :
@@ -696,7 +718,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
      * <p/>
      * The {@code previousStage} object is the previously returned value of this
      * method.
-     * 
+     *
      * @param previousStage
      *            The previously returned object. If null then it's the first
      *            execution.
@@ -838,8 +860,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     // // catch helper.getOperationOptionsBuilder(
     // if (logger.isDebugEnabled()) {
     // logger.debug("Failed to get OperationOptionsBuilder", e);
-    // }            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
-    //"Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+    // } throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
+    // "Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
     //
     // }
     // return stage;
@@ -876,12 +898,12 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             final ResultHandler<JsonValue> handler) {
         try {
 
-
             if (ConnectorAction.script.name().equalsIgnoreCase(request.getAction())) {
                 // TODO NPE check
                 if (StringUtils.isBlank(request.getAdditionalActionParameters().get(
                         SystemAction.SCRIPT_ID))) {
-                    handler.handleError(new BadRequestException("Missing required parameter: "+ SystemAction.SCRIPT_ID));
+                    handler.handleError(new BadRequestException("Missing required parameter: "
+                            + SystemAction.SCRIPT_ID));
                     return;
                 }
                 SystemAction action =
@@ -1038,7 +1060,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (ConnectorException e) {
-           handleError(request,e, handler);
+            handleError(request, e, handler);
         } catch (JsonValueException e) {
             handler.handleError(new BadRequestException(e));
         } catch (Exception e) {
@@ -1063,7 +1085,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     /**
      * Checks the {@code operation} permission before execution.
-     * 
+     *
      * @param operation
      * @return if {@code denied} is true and the {@code onDeny} equals
      *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnActionPolicy#ALLOW}
@@ -1101,7 +1123,6 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         return facade;
     }
 
-
     private class ObjectClassRequestHandler implements RequestHandler {
 
         public static final String OBJECTCLASS = "objectclass";
@@ -1112,9 +1133,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             if (null != variables && variables.containsKey(OBJECTCLASS)) {
                 return variables.get(OBJECTCLASS);
             }
-            throw new ForbiddenException("Direct access without Router to this service is forbidden.");
+            throw new ForbiddenException(
+                    "Direct access without Router to this service is forbidden.");
         }
-
 
         public void handleAction(ServerContext context, ActionRequest request,
                 ResultHandler<JsonValue> handler) {
@@ -1133,7 +1154,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        public void handleCreate(ServerContext context, CreateRequest request,
+                ResultHandler<Resource> handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1149,7 +1171,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+        public void handleDelete(ServerContext context, DeleteRequest request,
+                ResultHandler<Resource> handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1165,7 +1188,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        public void handlePatch(ServerContext context, PatchRequest request,
+                ResultHandler<Resource> handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1181,7 +1205,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        public void handleQuery(ServerContext context, QueryRequest request,
+                QueryResultHandler handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1197,7 +1222,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        public void handleRead(ServerContext context, ReadRequest request,
+                ResultHandler<Resource> handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1213,7 +1239,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        public void handleUpdate(ServerContext context, UpdateRequest request,
+                ResultHandler<Resource> handler) {
             try {
                 String objectClass = getObjectClass(context);
                 RequestHandler delegate = objectClassHandlers.get(objectClass);
@@ -1236,7 +1263,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     /**
      * Handle request on /system/[systemName]/[objectClass]/{id}
-     * 
+     *
      * @ThreadSafe
      */
     private class ObjectClassResourceProvider implements CollectionResourceProvider {
@@ -1246,7 +1273,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         private final boolean allowModification;
 
         private ObjectClassResourceProvider(ObjectClassInfoHelper objectClassInfoHelper,
-                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations, boolean allowModification) {
+                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations,
+                boolean allowModification) {
             this.objectClassInfoHelper = objectClassInfoHelper;
             this.operations = operations;
             this.allowModification = allowModification;
@@ -1254,7 +1282,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
         /**
          * Checks the {@code operation} permission before execution.
-         * 
+         *
          * @param operation
          * @return if {@code denied} is true and the {@code onDeny} equals
          *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnActionPolicy#ALLOW}
@@ -1338,7 +1366,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1416,7 +1444,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                     if (null != helper) {
                         operationOptions = null; // helper.
                     }
-                    Uid uid = null != request.getRevision() ? new Uid(resourceId, request.getRevision()) :new Uid(resourceId);
+                    Uid uid =
+                            null != request.getRevision() ? new Uid(resourceId, request
+                                    .getRevision()) : new Uid(resourceId);
                     facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
                     JsonValue result = new JsonValue(new HashMap<String, Object>());
@@ -1430,7 +1460,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage()));
             } catch (Exception e) {
@@ -1517,7 +1547,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1537,14 +1567,15 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                     OperationOptionInfoHelper helper = operations.get(GetApiOp.class);
                     OperationOptionsBuilder OOBuilder = new OperationOptionsBuilder();
                     if (null == request.getFields() || request.getFields().isEmpty()) {
-                        OOBuilder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
+                        OOBuilder.setAttributesToGet(objectClassInfoHelper
+                                .getAttributesReturnedByDefault());
                     } else {
                         objectClassInfoHelper.setAttributesToGet(OOBuilder, request.getFields());
                     }
                     Uid uid = new Uid(resourceId);
                     ConnectorObject connectorObject =
-                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid,
-                                    OOBuilder.build());
+                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid, OOBuilder
+                                    .build());
 
                     if (null != connectorObject) {
                         handler.handleResult(objectClassInfoHelper.build(connectorObject,
@@ -1556,7 +1587,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1570,16 +1601,21 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, UpdateApiOp.class);
                 if (null != facade) {
-                    //TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
+                    // TODO Fix for
+                    // http://bugster.forgerock.org/jira/browse/CREST-29
                     final Name newName = null;
-                    final Set<Attribute> replaceAttributes = objectClassInfoHelper.getUpdateAttributes(request, newName, cryptoService);
+                    final Set<Attribute> replaceAttributes =
+                            objectClassInfoHelper.getUpdateAttributes(request, newName,
+                                    cryptoService);
 
                     OperationOptionInfoHelper helper = operations.get(UpdateApiOp.class);
                     OperationOptions operationOptions = null;
                     if (null != helper) {
                         operationOptions = null; // helper.
                     }
-                    Uid _uid = null != request.getRevision() ? new Uid(resourceId, request.getRevision()) :new Uid(resourceId);
+                    Uid _uid =
+                            null != request.getRevision() ? new Uid(resourceId, request
+                                    .getRevision()) : new Uid(resourceId);
                     Uid uid =
                             facade.update(objectClassInfoHelper.getObjectClass(), _uid,
                                     AttributeUtil.filterUid(replaceAttributes), operationOptions);
@@ -1589,7 +1625,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1597,15 +1633,15 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             }
         }
 
-        private void returnResource(final Request request, final ResultHandler<Resource> handler,final  ConnectorFacade facade, final Uid uid) throws IOException, JsonCryptoException {
+        private void returnResource(final Request request, final ResultHandler<Resource> handler,
+                final ConnectorFacade facade, final Uid uid) throws IOException,
+                JsonCryptoException {
             OperationOptionsBuilder _getOOBuilder = new OperationOptionsBuilder();
             ConnectorObject co = null;
-            if (objectClassInfoHelper.setAttributesToGet(_getOOBuilder, request
-                    .getFields())) {
+            if (objectClassInfoHelper.setAttributesToGet(_getOOBuilder, request.getFields())) {
                 try {
                     co =
-                            facade.getObject(
-                                    objectClassInfoHelper.getObjectClass(), uid,
+                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid,
                                     _getOOBuilder.build());
                 } catch (Exception e) {
                     logger.error("Failed to read back the user", e);
@@ -1617,12 +1653,10 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                 JsonValue result = new JsonValue(new HashMap<String, Object>());
                 result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
                 if (null != uid.getRevision()) {
-                    result.put(Resource.FIELD_CONTENT_REVISION, uid
-                            .getRevision());
+                    result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
                 }
 
-                handler.handleResult(new Resource(uid.getUidValue(), uid
-                        .getRevision(), result));
+                handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
             }
         }
 
@@ -1634,7 +1668,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
          * helper.isOperationPermitted(UpdateApiOp.class)) { JsonValue newName =
          * object.get(Resource.FIELD_CONTENT_ID); ConnectorObject
          * connectorObject = null; Set<Attribute> attributeSet = null;
-         * 
+         *
          * //TODO support case sensitive and insensitive rename detection! if
          * (newName.isString() &&
          * !id.getLocalId().equals(Id.unescapeUid(newName.asString()))) { //This
@@ -1660,7 +1694,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     /**
      * Handle request on /system/[systemName]/schema
-     * 
+     *
      * @ThreadSafe
      */
     private static class SchemaResourceProvider implements SingletonResourceProvider {

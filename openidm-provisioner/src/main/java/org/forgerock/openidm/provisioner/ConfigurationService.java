@@ -35,11 +35,23 @@ import org.forgerock.json.resource.ResourceException;
  */
 public interface ConfigurationService {
     /**
-     * Multi phase configuration event calls this to generate the response for the next phase.
+     * Multi phase configuration event calls this to generate the response for
+     * the next phase.
      *
      * @param params
      * @return
      * @throws ResourceException
      */
     public JsonValue configure(JsonValue params) throws ResourceException;
+
+    /**
+     * Test the given configuration.
+     *
+     * @param params
+     *            the configuration to test
+     * @throws ResourceException
+     *             when the test fails the {@link ResourceException#getDetail()}
+     *             contains the detailed information.
+     */
+    public void test(JsonValue params) throws ResourceException;
 }

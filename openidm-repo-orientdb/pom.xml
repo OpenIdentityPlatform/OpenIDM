@@ -30,8 +30,10 @@
         <version>2.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-repo-orientdb</artifactId>
-    <name>OpenIDM repository using OrientDB</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM Repository Bundle - OrientDB</name>
+    <description>This bundle implement the OrientDB based repositoryC</description>
+
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,com.sun.jdi*;resolution:=optional,org.apache.hadoop.io.compress;resolution:=optional</openidm.osgi.import.before.defaults>
     </properties>
@@ -39,11 +41,6 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>

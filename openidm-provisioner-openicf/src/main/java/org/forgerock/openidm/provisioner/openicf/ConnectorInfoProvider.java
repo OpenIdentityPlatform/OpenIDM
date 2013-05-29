@@ -1,18 +1,18 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
- * 
+ *
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the License at
  * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at http://forgerock.org/license/CDDLv1.0.html
@@ -20,16 +20,17 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.provisioner.openicf;
 
+import java.util.List;
+
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
-
-import java.util.List;
 
 /**
  * Sample Class Doc
@@ -48,10 +49,12 @@ public interface ConnectorInfoProvider {
 
     /**
      * Adds a {@code ConnectorListener}
+     *
      * @param connectorReference
      * @param handler
      */
-    public void addConnectorFacadeCallback(ConnectorReference connectorReference, ConnectorFacadeCallback handler);
+    public void addConnectorFacadeCallback(ConnectorReference connectorReference,
+            ConnectorFacadeCallback handler);
 
     /**
      *
@@ -71,12 +74,14 @@ public interface ConnectorInfoProvider {
      * Tests the {@link APIConfiguration Configuration} with the connector.
      *
      * @param configuration
-     * @throws RuntimeException if the configuration is not valid or the test failed.
+     * @throws RuntimeException
+     *             if the configuration is not valid or the test failed.
      */
-    public void testConnector(APIConfiguration configuration);
+    public void testConnector(APIConfiguration configuration) throws ResourceException;
 
     /**
-     * Create a new configuration object from the {@code configuration} parameter.
+     * Create a new configuration object from the {@code configuration}
+     * parameter.
      * <p/>
      *
      * @param configuration

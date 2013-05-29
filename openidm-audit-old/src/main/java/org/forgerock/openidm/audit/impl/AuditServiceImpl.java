@@ -475,7 +475,7 @@ public class AuditServiceImpl implements AuditService {
      *
      * @param type the event type for which to return the query logger
      * @return an AuditLogger to use for queries.
-     * @throws ObjectSetException on failure to find an appropriate logger.
+     * @throws ResourceException on failure to find an appropriate logger.
      */
     private AuditLogger getQueryAuditLogger(String type) throws ResourceException {
         // look for a query logger for this eventtype

@@ -199,10 +199,9 @@ public class JsonResourceRouterService implements ConnectionFactory
     }
 
     @Override
-    public FutureResult<Connection> getConnectionAsync(final ResultHandler<Connection> handler) {
+    public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
         return connectionFactory.getConnectionAsync(handler);
     }
-
     @Override
     public void close() {
         connectionFactory.close();

@@ -66,13 +66,12 @@ import javax.script.ScriptException;
 
 /**
  * TODO: Description.
- * 
+ *
  * @author Paul C. Bryan
  * @author aegloff
  */
 
-@Component(name = SynchronizationService.PID, immediate = true,
-        policy = ConfigurationPolicy.REQUIRE)
+//@Component(name = SynchronizationService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({ @Property(name = Constants.SERVICE_DESCRIPTION, value = "Synchronization Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -229,7 +228,7 @@ public class SynchronizationService implements SingletonResourceProvider {
 
     /**
      * TODO: Description.
-     * 
+     *
      * @param name
      *            TODO.
      * @return TODO.

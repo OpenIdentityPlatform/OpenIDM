@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,8 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
  */
 
 package org.forgerock.openidm.provisioner.openicf;
@@ -30,17 +28,20 @@ import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.ConnectorKey;
 
 /**
- * ConnectorReference holds the required {@ConnectorKey} value to find the correct connector in the
- * {@link org.identityconnectors.framework.api.ConnectorInfoManager}. The {@code getConnectorHost} is the key
- * for the ConnectorInfoManager newBuilder.
+ * ConnectorReference holds the required {@ConnectorKey} value to
+ * find the correct connector in the
+ * {@link org.identityconnectors.framework.api.ConnectorInfoManager}. The
+ * {@code getConnectorHost} is the key for the ConnectorInfoManager newBuilder.
  *
  * @author $author$
  * @version $Revision$ $Date$
  */
 public final class ConnectorReference {
     public static final String SINGLE_LOCAL_CONNECTOR_MANAGER = "#LOCAL";
-    public static final String OSGI_SERVICE_CONNECTOR_MANAGER = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager";
-    public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager/(ConnectorBundle-FrameworkVersion=1.1)";
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER =
+            "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager";
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 =
+            "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager/(ConnectorBundle-FrameworkVersion=1.1)";
 
     public enum ConnectorLocation {
         /**
@@ -56,6 +57,7 @@ public final class ConnectorReference {
          */
         REMOTE;
     }
+
     private final ConnectorKey connectorKey;
     private final String connectorLocationName;
     private final ConnectorLocation connectorLocation;
@@ -63,7 +65,8 @@ public final class ConnectorReference {
     /**
      *
      * @param connectorKey
-     * @throws AssertionError when the {@code connectorKey} is null.
+     * @throws AssertionError
+     *             when the {@code connectorKey} is null.
      */
     public ConnectorReference(ConnectorKey connectorKey) {
         this(connectorKey, null);
@@ -73,13 +76,14 @@ public final class ConnectorReference {
      *
      * @param connectorKey
      * @param connectorHost
-     * @throws AssertionError when the {@code connectorKey} is null.
+     * @throws AssertionError
+     *             when the {@code connectorKey} is null.
      */
     public ConnectorReference(ConnectorKey connectorKey, String connectorHost) {
         assert null != connectorKey;
         this.connectorKey = connectorKey;
-        if (StringUtil.isBlank(connectorHost) || SINGLE_LOCAL_CONNECTOR_MANAGER
-                .equalsIgnoreCase(connectorHost)) {
+        if (StringUtil.isBlank(connectorHost)
+                || SINGLE_LOCAL_CONNECTOR_MANAGER.equalsIgnoreCase(connectorHost)) {
             connectorLocationName = SINGLE_LOCAL_CONNECTOR_MANAGER;
             connectorLocation = ConnectorLocation.LOCAL;
         } else {
@@ -101,9 +105,11 @@ public final class ConnectorReference {
     }
 
     /**
-     * Gets the key for the {@link org.identityconnectors.framework.api.ConnectorInfoManager}
+     * Gets the key for the
+     * {@link org.identityconnectors.framework.api.ConnectorInfoManager}
      *
-     * @return if no other value was specified the default value is {#SINGLE_LOCAL_CONNECTOR_MANAGER}
+     * @return if no other value was specified the default value is
+     *         {#SINGLE_LOCAL_CONNECTOR_MANAGER}
      */
     public String getConnectorHost() {
         return connectorLocationName;
@@ -111,10 +117,11 @@ public final class ConnectorReference {
 
     @Override
     public String toString() {
-        return (new StringBuilder(connectorKey.toString())).append(" on host: ").append(connectorLocationName).toString();
+        return (new StringBuilder(connectorKey.toString())).append(" on host: ").append(
+                connectorLocationName).toString();
     }
 
     public ConnectorLocation getConnectorLocation() {
-       return connectorLocation;
+        return connectorLocation;
     }
 }

@@ -33,17 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.codehaus.jackson.map.ObjectMapper;
-
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -56,43 +53,59 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-
-
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
-
 import org.restlet.Client;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
-import org.restlet.data.*;
+import org.restlet.data.CacheDirective;
+import org.restlet.data.ChallengeRequest;
+import org.restlet.data.ChallengeResponse;
+import org.restlet.data.ChallengeScheme;
+import org.restlet.data.CharacterSet;
+import org.restlet.data.Cookie;
+import org.restlet.data.Digest;
+import org.restlet.data.Disposition;
+import org.restlet.data.Encoding;
+import org.restlet.data.Expectation;
+import org.restlet.data.Form;
+import org.restlet.data.Language;
+import org.restlet.data.MediaType;
+import org.restlet.data.Metadata;
+import org.restlet.data.Preference;
+import org.restlet.data.Protocol;
+import org.restlet.data.Range;
+import org.restlet.data.Reference;
+import org.restlet.data.Status;
+import org.restlet.data.Tag;
+import org.restlet.data.Warning;
 import org.restlet.engine.header.CookieReader;
 import org.restlet.engine.header.Header;
 import org.restlet.engine.header.HeaderConstants;
 import org.restlet.engine.util.Base64;
+import org.restlet.representation.EmptyRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
-
 import org.restlet.util.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * External REST connectivity
  *
  * @author aegloff
  */
-@Component(name = RestService.PID, immediate = true, policy = ConfigurationPolicy.IGNORE, enabled = true)
+@Component(name = RestService.PID, immediate = true, policy = ConfigurationPolicy.IGNORE,
+        enabled = true)
 @Service
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "ForgeRock AS"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/external/rest")
-})
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "ForgeRock AS"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/external/rest") })
 public class RestService implements SingletonResourceProvider {
 
     public static final String PID = "org.forgerock.openidm.external.rest";
@@ -102,9 +115,8 @@ public class RestService implements SingletonResourceProvider {
      */
     final static Logger logger = LoggerFactory.getLogger(RestService.class);
 
-
     // Keys in the JSON configuration
-    //public static final String CONFIG_X = "X";
+    // public static final String CONFIG_X = "X";
 
     // Keys in the request parameters to override config
     public static final String ARG_URL = "_url";
@@ -120,31 +132,32 @@ public class RestService implements SingletonResourceProvider {
         logger.info("External REST connectivity started.");
     }
 
-
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.info("External REST connectivity stopped.");
     }
 
-
     @Override
-    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+    public void patchInstance(ServerContext context, PatchRequest request,
+            ResultHandler<Resource> handler) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
     }
 
     @Override
-    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+    public void readInstance(ServerContext context, ReadRequest request,
+            ResultHandler<Resource> handler) {
         final ResourceException e = new NotSupportedException("Read operations are not supported");
         handler.handleError(e);
     }
 
     @Override
-    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Update operations are not supported");
+    public void updateInstance(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Update operations are not supported");
         handler.handleError(e);
     }
-
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request,
@@ -220,21 +233,42 @@ public class RestService implements SingletonResourceProvider {
                 rep.setMediaType(mediaType);
 
                 Representation representation = null;
-                if ("get".equalsIgnoreCase(method)) {
-                    representation = cr.get();
-                } else if ("post".equalsIgnoreCase(method)) {
-                    representation = cr.post(rep);
-                } else if ("put".equalsIgnoreCase(method)) {
-                    representation = cr.put(rep);
-                } else if ("delete".equalsIgnoreCase(method)) {
-                    representation = cr.delete();
-                } else if ("head".equalsIgnoreCase(method)) {
-                    representation = cr.head();
-                } else if ("options".equalsIgnoreCase(method)) {
-                    // TODO: media type arg?
-                    representation = cr.options();
-                } else {
-                    handler.handleError(new BadRequestException("Unknown method " + method));
+                try {
+                    if ("get".equalsIgnoreCase(method)) {
+                        representation = cr.get();
+                    } else if ("post".equalsIgnoreCase(method)) {
+                        representation = cr.post(rep);
+                    } else if ("put".equalsIgnoreCase(method)) {
+                        representation = cr.put(rep);
+                    } else if ("delete".equalsIgnoreCase(method)) {
+                        representation = cr.delete();
+                    } else if ("head".equalsIgnoreCase(method)) {
+                        representation = cr.head();
+                    } else if ("options".equalsIgnoreCase(method)) {
+                        // TODO: media type arg?
+                        representation = cr.options();
+                    } else {
+                        handler.handleError(new BadRequestException("Unknown method " + method));
+                    }
+                } catch (org.restlet.resource.ResourceException e) {
+                    int code = e.getStatus().getCode();
+                    String text = null;
+                    Representation responseEntity = cr.getResponseEntity();
+                    if (responseEntity != null
+                            || representation instanceof EmptyRepresentation == false) {
+                        text = cr.getResponseEntity().getText();
+                    }
+
+                    final ResourceException exception =
+                            ResourceException.getException(code, "Error while processing " + method
+                                    + " request: " + e.getMessage(), e);
+
+                    if (text != null) {
+                        JsonValue detail = new JsonValue(new HashMap<String, Object>());
+                        detail.put("content", text);
+                        exception.setDetail(detail);
+                    }
+                    handler.handleError(exception);
                 }
 
                 String text = representation.getText();
@@ -256,7 +290,9 @@ public class RestService implements SingletonResourceProvider {
                 } else {
                     try {
                         Map<String, Object> resultHeaders = new HashMap<String, Object>();
-                        Series<Header> respHeaders = (Series<Header>) cr.getResponseAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+                        Series<Header> respHeaders =
+                                (Series<Header>) cr.getResponseAttributes().get(
+                                        HeaderConstants.ATTRIBUTE_HEADERS);
                         if (respHeaders != null) {
                             for (Header param : respHeaders) {
                                 String name = param.getName();
@@ -270,8 +306,8 @@ public class RestService implements SingletonResourceProvider {
                         result.put("_body", text);
                         handler.handleResult(result);
                     } catch (Exception ex) {
-                        throw new InternalServerErrorException("Failure in parsing the response: " + text
-                                + " Reported failure: " + ex.getMessage(), ex);
+                        throw new InternalServerErrorException("Failure in parsing the response: "
+                                + text + " Reported failure: " + ex.getMessage(), ex);
                     }
                 }
 
@@ -290,16 +326,13 @@ public class RestService implements SingletonResourceProvider {
         }
     }
 
-
-
-
-
-
-    private void setAttributes(Request request, Map<String, Object> attributes, Map<String, String> headers) {
+    private void setAttributes(Request request, Map<String, Object> attributes,
+            Map<String, String> headers) {
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
 
         if (headers != null) {
-            org.restlet.data.Form extraHeaders = (org.restlet.data.Form) attributes.get("org.restlet.http.headers");
+            org.restlet.data.Form extraHeaders =
+                    (org.restlet.data.Form) attributes.get("org.restlet.http.headers");
             if (extraHeaders == null) {
                 extraHeaders = new org.restlet.data.Form();
                 attributes.put("org.restlet.http.headers", extraHeaders);
@@ -308,62 +341,72 @@ public class RestService implements SingletonResourceProvider {
                 String httpHeader = entry.getKey();
                 logger.info("Adding header {}: {}", entry.getKey(), entry.getValue());
                 if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT)) {
-                    List<Preference<MediaType>> mediaTypes = request.getClientInfo().getAcceptedMediaTypes();
-                    String [] types = entry.getValue().split(",");
+                    List<Preference<MediaType>> mediaTypes =
+                            request.getClientInfo().getAcceptedMediaTypes();
+                    String[] types = entry.getValue().split(",");
                     for (String type : types) {
-                        String [] parts = type.split(";");
+                        String[] parts = type.split(";");
                         String name = parts[0];
                         MediaType mediaType = MediaType.valueOf(name);
                         Preference pref = new Preference(mediaType);
                         addPreferences(pref, parts);
                         mediaTypes.add(pref);
                     }
-                    //attributes.put("request.clientInfo.acceptedMediaTypes", new Preference(new MediaType(entry.getValue())));
+                    // attributes.put("request.clientInfo.acceptedMediaTypes",
+                    // new Preference(new MediaType(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_CHARSET)) {
-                    List<Preference<CharacterSet>> characterSets = request.getClientInfo().getAcceptedCharacterSets();
-                    String [] sets = entry.getValue().split(",");
+                    List<Preference<CharacterSet>> characterSets =
+                            request.getClientInfo().getAcceptedCharacterSets();
+                    String[] sets = entry.getValue().split(",");
                     for (String set : sets) {
-                        String [] parts = set.split(";");
+                        String[] parts = set.split(";");
                         String name = parts[0];
                         CharacterSet characterSet = CharacterSet.valueOf(name);
                         Preference pref = new Preference(characterSet);
                         addPreferences(pref, parts);
                         characterSets.add(pref);
                     }
-                    //attributes.put("request.clientInfo.acceptedCharacterSets", new Preference(new CharacterSet(entry.getValue())));
+                    // attributes.put("request.clientInfo.acceptedCharacterSets",
+                    // new Preference(new CharacterSet(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_ENCODING)) {
-                    List<Preference<Encoding>> encodingsList = request.getClientInfo().getAcceptedEncodings();
-                    String [] encodings = entry.getValue().split(",");
+                    List<Preference<Encoding>> encodingsList =
+                            request.getClientInfo().getAcceptedEncodings();
+                    String[] encodings = entry.getValue().split(",");
                     for (String enc : encodings) {
-                        String [] parts = enc.split(";");
+                        String[] parts = enc.split(";");
                         String name = parts[0];
                         Encoding encoding = Encoding.valueOf(name);
                         Preference pref = new Preference(encoding);
                         addPreferences(pref, parts);
                         encodingsList.add(pref);
                     }
-                    //attributes.put("request.clientInfo.acceptedEncodings", new Preference(new Encoding(entry.getValue())));
+                    // attributes.put("request.clientInfo.acceptedEncodings",
+                    // new Preference(new Encoding(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_LANGUAGE)) {
-                    List<Preference<Language>> languagesList = request.getClientInfo().getAcceptedLanguages();
-                    String [] languages = entry.getValue().split(",");
+                    List<Preference<Language>> languagesList =
+                            request.getClientInfo().getAcceptedLanguages();
+                    String[] languages = entry.getValue().split(",");
                     for (String lang : languages) {
-                        String [] parts = lang.split(";");
+                        String[] parts = lang.split(";");
                         String name = parts[0];
                         Language language = Language.valueOf(name);
                         Preference pref = new Preference(language);
                         addPreferences(pref, parts);
                         languagesList.add(pref);
                     }
-                    //attributes.put("request.clientInfo.acceptedLanguages", new Preference(new Language(entry.getValue())));
+                    // attributes.put("request.clientInfo.acceptedLanguages",
+                    // new Preference(new Language(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_RANGES)) {
-                    attributes.put("response.serverInfo.acceptRanges", Boolean.parseBoolean(entry.getValue()));
+                    attributes.put("response.serverInfo.acceptRanges", Boolean.parseBoolean(entry
+                            .getValue()));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_AGE)) {
                     attributes.put("response.age", Integer.parseInt(entry.getValue()));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_AUTHORIZATION)) {
-                    attributes.put("request.challengeResponse", new ChallengeResponse(ChallengeScheme.valueOf(entry.getValue())));
+                    attributes.put("request.challengeResponse", new ChallengeResponse(
+                            ChallengeScheme.valueOf(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_CACHE_CONTROL)) {
                     List<CacheDirective> cacheDirectives = new ArrayList<CacheDirective>();
-                    String [] cacheControls = entry.getValue().split(",");
+                    String[] cacheControls = entry.getValue().split(",");
                     for (String str : cacheControls) {
                         String name = null, value = null;
                         int i = str.indexOf("=");
@@ -377,7 +420,8 @@ public class RestService implements SingletonResourceProvider {
                             cacheDirectives.add(CacheDirective.maxAge(Integer.parseInt(value)));
                         } else if (name.equals(HeaderConstants.CACHE_MAX_STALE)) {
                             if (value != null) {
-                                cacheDirectives.add(CacheDirective.maxStale(Integer.parseInt(value)));
+                                cacheDirectives.add(CacheDirective
+                                        .maxStale(Integer.parseInt(value)));
                             } else {
                                 cacheDirectives.add(CacheDirective.maxStale());
                             }
@@ -408,7 +452,8 @@ public class RestService implements SingletonResourceProvider {
                         } else if (name.equals(HeaderConstants.CACHE_PUBLIC)) {
                             cacheDirectives.add(CacheDirective.publicInfo());
                         } else if (name.equals(HeaderConstants.CACHE_SHARED_MAX_AGE)) {
-                            cacheDirectives.add(CacheDirective.sharedMaxAge(Integer.parseInt(value)));
+                            cacheDirectives.add(CacheDirective
+                                    .sharedMaxAge(Integer.parseInt(value)));
                         } else {
                             logger.info("Unknown HTTP header Cache-Control entry: {}", str);
                         }
@@ -420,14 +465,14 @@ public class RestService implements SingletonResourceProvider {
                     attributes.put("message.entity.disposition", new Disposition(entry.getValue()));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_ENCODING)) {
                     List<Encoding> contentEncodings = new ArrayList<Encoding>();
-                    String [] encodings = entry.getValue().split(",");
+                    String[] encodings = entry.getValue().split(",");
                     for (String encoding : encodings) {
                         contentEncodings.add(Encoding.valueOf(encoding.trim()));
                     }
                     attributes.put("message.entity.encodings", contentEncodings);
                 } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_LANGUAGE)) {
                     List<Language> contentLanguages = new ArrayList<Language>();
-                    String [] languages = entry.getValue().split(",");
+                    String[] languages = entry.getValue().split(",");
                     for (String language : languages) {
                         contentLanguages.add(Language.valueOf(language.trim()));
                     }
@@ -442,7 +487,8 @@ public class RestService implements SingletonResourceProvider {
                         logger.info("Problem parsing HTTP Content-Location header", e);
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_MD5)) {
-                    attributes.put("message.entity.digest", new Digest(Base64.decode(entry.getValue())));
+                    attributes.put("message.entity.digest", new Digest(Base64.decode(entry
+                            .getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_RANGE)) {
                     String rangeString = entry.getValue().split(" ")[1];
                     rangeString = rangeString.substring(rangeString.indexOf("/"));
@@ -450,8 +496,11 @@ public class RestService implements SingletonResourceProvider {
                     if (rangeString.equals("*")) {
                         range = new Range();
                     } else {
-                        long index = Long.parseLong(rangeString.substring(0, rangeString.indexOf("-")));
-                        long size = Long.parseLong(rangeString.substring(rangeString.indexOf("-") + 1)) - index + 1;
+                        long index =
+                                Long.parseLong(rangeString.substring(0, rangeString.indexOf("-")));
+                        long size =
+                                Long.parseLong(rangeString.substring(rangeString.indexOf("-") + 1))
+                                        - index + 1;
                         range = new Range(size, index);
                     }
                     attributes.put("message.entity.range", range);
@@ -475,7 +524,8 @@ public class RestService implements SingletonResourceProvider {
                     attributes.put("message.entity.tag", Tag.parse(entry.getValue()));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_EXPECT)) {
                     if (entry.getValue().equals("100-continue")) {
-                        request.getClientInfo().getExpectations().add(Expectation.continueResponse());
+                        request.getClientInfo().getExpectations().add(
+                                Expectation.continueResponse());
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_EXPIRES)) {
                     try {
@@ -494,7 +544,7 @@ public class RestService implements SingletonResourceProvider {
                         logger.error("Error parsing HTTP Host header", e);
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_IF_MATCH)) {
-                    String [] tags = entry.getValue().split(",");
+                    String[] tags = entry.getValue().split(",");
                     List<Tag> list = request.getConditions().getMatch();
                     for (String tag : tags) {
                         list.add(Tag.parse(tag));
@@ -506,7 +556,7 @@ public class RestService implements SingletonResourceProvider {
                         logger.error("Error parsing HTTP Modified-Since header", e);
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_IF_NONE_MATCH)) {
-                    String [] tags = entry.getValue().split(",");
+                    String[] tags = entry.getValue().split(",");
                     List<Tag> list = request.getConditions().getNoneMatch();
                     for (String tag : tags) {
                         list.add(Tag.parse(tag));
@@ -529,29 +579,35 @@ public class RestService implements SingletonResourceProvider {
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_LAST_MODIFIED)) {
                     try {
-                        attributes.put("message.entity.modificationDate", format.parse(entry.getValue()));
+                        attributes.put("message.entity.modificationDate", format.parse(entry
+                                .getValue()));
                     } catch (ParseException e) {
                         logger.error("Error parsing HTTP Last-Modified header", e);
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_MAX_FORWARDS)) {
                     request.setMaxForwards(Integer.parseInt(entry.getValue()));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_PROXY_AUTHORIZATION)) {
-                    request.setProxyChallengeResponse(new ChallengeResponse(ChallengeScheme.valueOf(entry.getValue())));
+                    request.setProxyChallengeResponse(new ChallengeResponse(ChallengeScheme
+                            .valueOf(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_RANGE)) {
                     String rangeSection = entry.getValue().split("=")[1];
-                    String [] ranges = rangeSection.split(",");
+                    String[] ranges = rangeSection.split(",");
                     List<Range> rangeList = new ArrayList<Range>();
                     for (String range : ranges) {
                         Range r;
                         if (range.startsWith("-")) {
                             r = new Range(-1, Integer.parseInt(range.substring(1)));
-                        } else if(range.indexOf("-") == -1) {
+                        } else if (range.indexOf("-") == -1) {
                             r = new Range(Integer.parseInt(range));
                         } else if (range.endsWith("-")) {
-                            r = new Range(-1, Integer.parseInt(range.substring(0, range.length()-1)));
+                            r =
+                                    new Range(-1, Integer.parseInt(range.substring(0, range
+                                            .length() - 1)));
                         } else {
                             long index = Long.parseLong(range.substring(0, range.indexOf("-")));
-                            long size = Long.parseLong(range.substring(range.indexOf("-") + 1)) - index + 1;
+                            long size =
+                                    Long.parseLong(range.substring(range.indexOf("-") + 1)) - index
+                                            + 1;
                             r = new Range(size, index);
                         }
                         rangeList.add(r);
@@ -571,7 +627,7 @@ public class RestService implements SingletonResourceProvider {
                 } else if (httpHeader.equals(HeaderConstants.HEADER_VARY)) {
                     attributes.put("response.dimensions", entry.getValue());
                 } else if (httpHeader.equals(HeaderConstants.HEADER_VIA)) {
-                    //return "message.recipientsInfo";
+                    // return "message.recipientsInfo";
                 } else if (httpHeader.equals(HeaderConstants.HEADER_WARNING)) {
                     try {
                         List<Warning> warnings = (List<Warning>) attributes.get("message.warnings");
@@ -580,7 +636,7 @@ public class RestService implements SingletonResourceProvider {
                             attributes.put("message.warnings", warnings);
                         }
                         Warning warning = new Warning();
-                        String [] strs = entry.getValue().split(" ");
+                        String[] strs = entry.getValue().split(" ");
                         warning.setStatus(Status.valueOf(Integer.parseInt(strs[0])));
                         warning.setAgent(strs[1]);
                         warning.setText(strs[2]);
@@ -593,9 +649,11 @@ public class RestService implements SingletonResourceProvider {
                         logger.error("Error parsing HTTP Warning header", e);
                     }
                 } else if (httpHeader.equals(HeaderConstants.HEADER_WWW_AUTHENTICATE)) {
-                    attributes.put("response.challengeRequests", new ChallengeRequest(ChallengeScheme.valueOf(entry.getValue())));
+                    attributes.put("response.challengeRequests", new ChallengeRequest(
+                            ChallengeScheme.valueOf(entry.getValue())));
                 } else if (httpHeader.equals(HeaderConstants.HEADER_X_FORWARDED_FOR)) {
-                    List<String> list = (List<String>) attributes.get("request.clientInfo.addresses");
+                    List<String> list =
+                            (List<String>) attributes.get("request.clientInfo.addresses");
                     if (list == null) {
                         list = new ArrayList<String>();
                         attributes.put("request.clientInfo.addresses", list);
@@ -610,10 +668,10 @@ public class RestService implements SingletonResourceProvider {
         }
     }
 
-    private <T extends Metadata> void addPreferences(Preference<T> pref, String [] parts) {
+    private <T extends Metadata> void addPreferences(Preference<T> pref, String[] parts) {
         if (parts.length > 1) {
             for (int i = 1; i < parts.length; i++) {
-                String [] strs = parts[i].split("=");
+                String[] strs = parts[i].split("=");
                 String n = strs[0].trim();
                 String v = strs[1].trim();
                 if (n.endsWith("q")) {
@@ -626,7 +684,8 @@ public class RestService implements SingletonResourceProvider {
     }
 
     public static ClientResource createClientResource(JsonValue params) {
-        //TODO use the https://wikis.forgerock.org/confluence/display/json/http-request
+        // TODO use the
+        // https://wikis.forgerock.org/confluence/display/json/http-request
         String url = params.get(ARG_URL).required().asString();
         Context context = new Context();
 
@@ -637,15 +696,18 @@ public class RestService implements SingletonResourceProvider {
         JsonValue _authenticate = params.get(ARG_AUTHENTICATE);
 
         if (!_authenticate.isNull()) {
-            ChallengeScheme authType = ChallengeScheme.valueOf(_authenticate.get("type").asString());
+            ChallengeScheme authType =
+                    ChallengeScheme.valueOf(_authenticate.get("type").asString());
             if (authType == null) {
                 authType = ChallengeScheme.HTTP_BASIC;
             }
             if (ChallengeScheme.HTTP_BASIC.equals(authType)) {
                 String identifier = _authenticate.get("user").required().asString();
                 String secret = _authenticate.get("password").asString();
-                logger.debug("Using basic authentication for {} secret supplied: {}", identifier, (secret != null));
-                ChallengeResponse challengeResponse = new ChallengeResponse(authType, identifier, secret);
+                logger.debug("Using basic authentication for {} secret supplied: {}", identifier,
+                        (secret != null));
+                ChallengeResponse challengeResponse =
+                        new ChallengeResponse(authType, identifier, secret);
                 cr.setChallengeResponse(challengeResponse);
                 cr.getRequest().setChallengeResponse(challengeResponse);
             }
@@ -654,8 +716,9 @@ public class RestService implements SingletonResourceProvider {
                 String authenticationTokenPath = "openidm/j_security_check";
 
                 // Prepare the request
-                Request request = new Request(org.restlet.data.Method.POST, authenticationTokenPath
-                        + authenticationTokenPath);
+                Request request =
+                        new Request(org.restlet.data.Method.POST, authenticationTokenPath
+                                + authenticationTokenPath);
 
                 Form loginForm = new Form();
                 loginForm.add("j_username", "admin");
@@ -671,8 +734,10 @@ public class RestService implements SingletonResourceProvider {
 
                 String identifier = _authenticate.get("user").required().asString();
                 String secret = _authenticate.get("password").asString();
-                logger.debug("Using cookie authentication for {} secret supplied: {}", identifier, (secret != null));
-                ChallengeResponse challengeResponse = new ChallengeResponse(authType, identifier, secret);
+                logger.debug("Using cookie authentication for {} secret supplied: {}", identifier,
+                        (secret != null));
+                ChallengeResponse challengeResponse =
+                        new ChallengeResponse(authType, identifier, secret);
                 cr.setChallengeResponse(challengeResponse);
                 cr.getRequest().setChallengeResponse(challengeResponse);
             }

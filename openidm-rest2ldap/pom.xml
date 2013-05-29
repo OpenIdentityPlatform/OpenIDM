@@ -32,10 +32,10 @@
         <groupId>org.forgerock.openidm</groupId>
         <version>2.2.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-rest2ldap</artifactId>
-    <name>OpenIDM Rest2LDAP service</name>
     <packaging>bundle</packaging>
+    <name>OpenIDM Rest2LDAP Bundle</name>
+    <description>This bundle gives REST access to any LDAP server</description>
 
     <dependencies>
         <dependency>
