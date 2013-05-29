@@ -21,7 +21,7 @@
             "for-userName" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_propTable} credprop INNER JOIN ${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "scan-tasks" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )",
-            "query-scheduler-instances" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))"
+            "query-cluster-instances" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))"
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_table}",
@@ -32,7 +32,14 @@
             "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkType = ${linkType}",
-            "scan-tasks" : "SELECT * FROM ${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
+            "scan-tasks" : "SELECT * FROM ${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
+            
+            "audit-by-mapping" : "SELECT * FROM auditrecon WHERE mapping = ${mappingName}",
+            "audit-by-recon-id" : "SELECT * FROM auditrecon WHERE reconId = ${reconId}",
+            "audit-by-recon-id-type" : "SELECT * FROM auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
+            "audit-by-recon-id-situation" : "SELECT * FROM auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
+            "audit-by-activity-parent-action" : "SELECT * FROM auditactivity WHERE parentactionid = ${parentActionId}",
+            "query-all" : "SELECT * FROM ${_table}"
         }
     },
     "resourceMapping" : {
@@ -50,6 +57,11 @@
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
                 "propertiesTable" : "schedobjectproperties",
+                "searchableDefault" : true
+            },
+            "cluster" : {
+                "mainTable" : "clusterobjects",
+                "propertiesTable" : "clusterobjectproperties",
                 "searchableDefault" : true
             }
         },
@@ -123,7 +135,11 @@
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
                     "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
-                    "timestamp" : "activitydate"
+                    "timestamp" : "activitydate",
+                    "actionId" : "actionid",
+                    "exception" : "exceptiondetail",
+                    "mapping" : "mapping",
+                    "messageDetail" : "messagedetail"
                 }
             },
             "audit/access" : {
