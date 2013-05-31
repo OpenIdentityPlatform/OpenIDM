@@ -1,0 +1,32 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0 * * * * ?",
+    "concurrentExecution" : false,
+    "invokeService" : "taskscanner",
+    "invokeContext" : {
+        "waitForCompletion" : false,
+        "numberOfThreads" : 5,
+        "scan" : {
+            "_queryId" : "scan-tasks",
+            "object" : "managed/user",
+            "property" : "/sunrise/date",
+            "condition" : {
+                "before" : "${Time.now + 1d}"
+            },
+            "taskState" : {
+                "started" : "/sunrise/task-started",
+                "completed" : "/sunrise/task-completed"
+            },
+            "recovery" : {
+                "timeout" : "10m"
+            }
+        },
+        "task" : {
+            "script" : {
+                "type" : "text/javascript",
+                "file" : "script/sunrise.js"
+            }
+        }
+    }
+}
