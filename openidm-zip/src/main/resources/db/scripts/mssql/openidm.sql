@@ -241,6 +241,10 @@ CREATE  TABLE  [openidm].[auditrecon]
   activity NVARCHAR(24) NULL ,
   status NVARCHAR(7) NULL ,
   message NTEXT NULL ,
+  actionid NVARCHAR(511) NULL ,
+  exceptiondetail NTEXT NULL ,
+  mapping NTEXT NULL ,
+  messagedetail NTEXT NULL ,
   PRIMARY KEY CLUSTERED (objectid),
 );
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditrecon, 'COLUMN', activitydate;
@@ -355,6 +359,52 @@ CREATE  TABLE [openidm].[schedulerobjectproperties] (
 ALTER TABLE [openidm].[schedulerobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
 CREATE INDEX fk_schedulerobjectproperties_schedulerobjects ON [openidm].[schedulerobjectproperties] (schedulerobjects_id ASC);
 CREATE INDEX idx_schedulerobjectproperties_prop ON [openidm].[schedulerobjectproperties] (propkey ASC, partpropvalue ASC);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`clusterobjects`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='clusterobjects' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[clusterobjects]
+(
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  objecttypes_id NUMERIC(19,0) NOT NULL ,
+  objectid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  fullobject NTEXT NULL ,
+  CONSTRAINT fk_clusterobjects_objecttypes
+    FOREIGN KEY (objecttypes_id)
+    REFERENCES [openidm].[objecttypes] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  PRIMARY KEY CLUSTERED (id),
+);
+CREATE INDEX fk_clusterobjects_objecttypes ON [openidm].[clusterobjects] (objecttypes_id ASC);
+CREATE UNIQUE INDEX idx_clusterobjects_object ON [openidm].[clusterobjects] (objecttypes_id ASC, objectid ASC);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`clusterobjectproperties`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='clusterobjectproperties' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[clusterobjectproperties] (
+  clusterobjects_id NUMERIC(19,0) NOT NULL ,
+  propkey NVARCHAR(255) NOT NULL ,
+  proptype NVARCHAR(32) NULL ,
+  propvalue NVARCHAR(MAX) NULL ,
+  CONSTRAINT fk_clusterobjectproperties_clusterobjects
+    FOREIGN KEY (clusterobjects_id)
+    REFERENCES [openidm].[clusterobjects] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+);
+ALTER TABLE [openidm].[clusterobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
+CREATE INDEX fk_clusterobjectproperties_clusterobjects ON [openidm].[clusterobjectproperties] (clusterobjects_id ASC);
+CREATE INDEX idx_clusterobjectproperties_prop ON [openidm].[clusterobjectproperties] (propkey ASC, partpropvalue ASC);
 END
 
 
