@@ -1129,16 +1129,34 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
 
    <section xml:id="install-.net-connector">
     <title>Installing and Configuring a .NET Connector</title>
-    <para>The use of .NET connector servers is useful when an application is written 
-    in Java, but a connector bundle is written using C#. Since a Java application 
-    (e.g. J2EE application) cannot load C# classes, it is necessary to deploy the
-    C# bundles under a .NET connector server. The Java application can communicate 
-    with the C# connector server over the network, and the C# connector server serves 
-    as a proxy to provide to any authenticated application access to the C# bundles 
-    deployed within the C# connector server.
-        </para>   
-    <para>Make sure the following requirements are met prior to installing .NET.
-     </para>
+    <para>A .NET connector server is useful when an application is written
+    in Java, but a connector bundle is written using C#. Because a Java application
+    (for example, a J2EE application) cannot load C# classes, it is necessary to
+    deploy the C# bundles under a .NET connector server. The Java application can
+    communicate with the C# connector server over the network, and the C#
+    connector server acts as a proxy to provide access to the C# bundles that are
+    deployed within the C# connector server, to any authenticated application.
+    </para>
+
+    <note>
+        <itemizedlist>
+            <listitem>
+                <para>The .NET connector server requires version 4.0.30319
+                    of the .NET framework.</para>
+            </listitem>
+            <listitem>
+                <para>By default, the connector server outputs log messages to
+                    <filename>C:> </filename>. If you do not have permission to
+                    write to the root of the hard drive, an error is generated.
+                    To change the location of the log file, set the
+                    <literal>initializeData</literal> parameter in the trace
+                    settings of the configuration file.</para>
+            </listitem>
+
+        </itemizedlist>
+
+    </note>
+
 
    <procedure>
     <title>Installing the .NET Connector Server</title>
