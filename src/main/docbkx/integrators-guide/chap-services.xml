@@ -320,7 +320,7 @@ Stopping OpenIDM (454)</screen>
       <para>This information can be accessed over REST at 
       <literal>http://localhost:8080/openidm/info/ping</literal>. For example:
       </para>
-      <screen width="91"><?dbfo pgwide="1"?>$ curl
+      <screen><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
@@ -400,8 +400,9 @@ Stopping OpenIDM (454)</screen>
   </itemizedlist>
   
   <para>Additional properties can be passed to the script in this configuration 
-  file (<filename>openidm/samples/infoservice/conf/info-
-  <replaceable>name</replaceable>.json</filename>).</para>
+  file (
+  <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>).
+  </para>
   
   <para>Script files in <filename>openidm/samples/infoservice/script/info/</filename> 
   have access to the following objects:</para>
@@ -420,8 +421,10 @@ Stopping OpenIDM (454)</screen>
     </listitem>
     <listitem>
       <para>Any additional properties that are defined in the configuration 
-      file (<filename>openidm/samples/infoservice/conf/info-
-      <replaceable>name</replaceable>.json</filename>.)</para></listitem>
+      file (
+      <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>.)
+      </para>
+    </listitem>
   </itemizedlist> 
  </section>
 
@@ -657,5 +660,40 @@ Properties:
 -&gt;</screen>
 
  </section>
+
+ <section xml:id="starting-in-debug-mode">
+     <title>Starting OpenIDM in Debug Mode</title>
+     <para>To debug custom libraries, you can start OpenIDM with the option to
+     use the Java Platform Debugger Architecture (JPDA).</para>
+
+     <itemizedlist>
+         <listitem>
+             <para>Start OpenIDM with the <literal>jpda</literal> option:</para>
+             <screen>$ cd /path/to/openidm
+$ ./startup.sh jpda
+./startup.sh
+Using OPENIDM_HOME:   /Users/lana/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=n
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/Users/lana/openidm/conf/logging.properties
+Listening for transport dt_socket at address: 5005
+Using boot properties at /Users/lana/openidm/conf/boot/boot.properties
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 2144)
+-> OpenIDM ready</screen>
+             <para>The relevant JPDA options are outlined in the startup script
+             (<literal>startup.sh</literal>).</para>
+         </listitem>
+         <listitem>
+             <para>In your IDE, attach a Java debugger to the JVM via socket,
+             on port 5005.</para>
+         </listitem>
+     </itemizedlist>
+
+     <caution>
+         <para>This interface is internal and subject to change. If you depend
+         on this interface, contact ForgeRock support.</para>
+     </caution>
+ </section>
+
+
 
 </chapter>

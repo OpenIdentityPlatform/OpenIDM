@@ -116,11 +116,11 @@
    <title>Multiple Instance Configuration Objects</title>
    <para>Multiple instance configuration objects correspond to services that
    can have many instances per installation. Configuration objects are named
-   <literal><replaceable>objectname</replaceable>/<replaceable>instancename
-   </replaceable></literal>. For example, <filename>provisioner.openicf/xml</filename>.</para>
+   <literal><replaceable>objectname</replaceable>/<replaceable>instancename</replaceable></literal>,
+   for example, <filename>provisioner.openicf/xml</filename>.</para>
    <para><emphasis>JSON file</emphasis> views of these configuration objects 
    are named <filename><replaceable>objectname</replaceable>-<replaceable
-   >instancename</replaceable>.json</filename>. For example, 
+   >instancename</replaceable>.json</filename>, for example,
    <filename>provisioner.openicf-xml.json.</filename></para>
    <listitem>
     <para>Multiple <literal>schedule</literal> configurations can run
@@ -208,9 +208,7 @@
             <para>To disable automatic polling for configuration changes, edit the
                 <filename>conf/system.properties</filename> file by uncommenting the
                 following line:</para>
-            <programlisting>
-                # openidm.fileinstall.enabled=false
-            </programlisting>
+            <programlisting># openidm.fileinstall.enabled=false</programlisting>
             <para>Before you disable automatic polling, you must have started the
                 OpenIDM instance at least once to ensure that the configuration has
                 been loaded into the database.
