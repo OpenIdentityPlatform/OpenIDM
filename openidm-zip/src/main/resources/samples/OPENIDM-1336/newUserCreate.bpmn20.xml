@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="newUserCreate" name="User onboarding process">
+        <startEvent id="start" activiti:initiator="startUserId" >
+            <extensionElements>
+                <activiti:formProperty id="userName"
+                                       name="Username"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="givenName"
+                                       name="First Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="familyName"
+                                       name="Last Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="email"
+                                       name="Email"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="country"
+                                       name="Country"
+                                       type="string" />
+                <activiti:formProperty id="city"
+                                       name="City"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="stateProvince"
+                                       name="State"
+                                       type="string" />
+                <activiti:formProperty id="postalCode"
+                                       name="Postal Code"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="address1"
+                                       name="Address"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="phoneNumber"
+                                       name="Phone Number"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="department"
+                                       name="Department"
+                                       required="true"
+                                       type="enum">
+                    <activiti:value id="Human Resources" name="Human Resources"/>
+                    <activiti:value id="Production Planning" name="Production Planning"/>
+                    <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"/>
+                    <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"/>
+                </activiti:formProperty>
+                <activiti:formProperty id="employeeNumber"
+                                       name="Employee number"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="displayName"
+                                       name="Display Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="userType"
+                                       name="User Type"
+                                       required="true"
+                                       type="enum" >
+                    <activiti:value id="employee" name="Employee"/>
+                    <activiti:value id="contractor" name="Contractor"/>
+                </activiti:formProperty>
+            </extensionElements>
+        </startEvent>
+        <sequenceFlow sourceRef="start" targetRef="decisionPrep"/>
+
+        <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy">
+            <script><![CDATA[ 
+                params = [_queryExpression:"select * from managed_user where title='manager' and department='"+department+"'"];
+                manager = openidm.query("managed/user", params)
+                
+                StringBuilder builder = new StringBuilder();
+                for (String string : manager.result._id) {
+                    if (builder.length() > 0) {
+                        builder.append(",");
+                    }
+                    builder.append(string);
+                }
+
+                candidateUsers = builder.toString();
+          ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="decisionPrep" targetRef="decideApprovalTask"/>
+        
+        <userTask id="decideApprovalTask" name="Onboarding Approval" activiti:candidateUsers="${candidateUsers}">
+            <extensionElements>
+                <activiti:formProperty id="userName"
+                                       name="Username"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="givenName"
+                                       name="First Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="familyName"
+                                       name="Last Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="email"
+                                       name="Email"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="country"
+                                       name="Country"
+                                       type="string" />
+                <activiti:formProperty id="city"
+                                       name="City"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="stateProvince"
+                                       name="State"
+                                       type="string" />
+                <activiti:formProperty id="postalCode"
+                                       name="Postal Code"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="address1"
+                                       name="Address"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="phoneNumber"
+                                       name="Phone Number"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="department"
+                                       name="Department"
+                                       required="true"
+                                       type="enum">
+                    <activiti:value id="Human Resources" name="Human Resources"/>
+                    <activiti:value id="Production Planning" name="Production Planning"/>
+                    <activiti:value id="Sales &amp; Distribution" name="Sales &amp; Distribution"/>
+                    <activiti:value id="Treasury &amp; Payments" name="Treasury &amp; Payments"/>
+                </activiti:formProperty>
+                <activiti:formProperty id="startDate"
+                                       name="Start Date (yyyy-MM-dd)"
+                                       type="string"/>
+                <activiti:formProperty id="endDate"
+                                       name="End Date (yyyy-MM-dd)"
+                                       type="string" />
+                <activiti:formProperty id="employeeNumber"
+                                       name="Employee number"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="displayName"
+                                       name="Display Name"
+                                       required="true"
+                                       type="string" />
+                <activiti:formProperty id="userType"
+                                       name="User Type"
+                                       required="true"
+                                       type="enum" >
+                    <activiti:value id="employee" name="Employee"/>
+                    <activiti:value id="contractor" name="Contractor"/>
+                </activiti:formProperty>
+                <activiti:formProperty id="title"
+                                       name="Manager"
+                                       required="true"
+                                       type="enum" >
+                    <activiti:value id="yes" name="Yes"/>
+                    <activiti:value id="no" name="No"/>
+                </activiti:formProperty>
+                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+              <activiti:value id="accept" name="Accept"></activiti:value>
+              <activiti:value id="reject" name="Reject"></activiti:value>
+            </activiti:formProperty>
+            </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
+        
+        <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
+
+        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="createManagedUser">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="createManagedUser" scriptFormat="groovy">
+            <script>
+                <![CDATA[
+                user = [_id:userName, userName:userName, givenName:givenName, familyName:familyName,
+                email:email, country:country, city:city, stateProvince:stateProvince,
+                postalCode:postalCode, address1:address1, phoneNumber:phoneNumber,
+                department:department, employeeNumber:employeeNumber, displayName:displayName,
+                userType:userType, password:"Passw0rd"]
+                
+                if (title == 'yes') {
+                    userTitle = 'manager'
+                    user.put("title", userTitle)
+                }
+                
+                if (userType=='employee') {
+                    accountsList = ["Business"]
+                    user.put("accounts", accountsList)
+                }
+                
+                java.text.SimpleDateFormat formatUTCDate = new java.text.SimpleDateFormat("yyyy-MM-dd");     
+                formatUTCDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+                
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+                
+                
+                if (startDate != "") {
+                    startDateISO = formatUTC.format(formatUTCDate.parse(startDate))
+                    sunriseMap = [date:startDateISO.toString()]
+                    user.put("sunrise", sunriseMap)
+                    user.put("accountStatus", "inactive")
+                }
+                
+                if (endDate != "") {
+                    endDateISO = formatUTC.format(formatUTCDate.parse(endDate))
+                    sunsetMap = [date:endDateISO.toString()]
+                    user.put("sunset", sunsetMap)
+                }
+                
+                assignedManager = manager.result[0]
+                managerMap = [displayName:assignedManager.displayName, managerId:assignedManager._id]
+                managerMap.put('$ref', "managed/user/"+assignedManager._id)
+                user.put("manager", managerMap)
+
+                openidm.create('managed/user', user)
+                
+                readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
+                ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="createManagedUser" targetRef="serviceTask"/>
+        
+        <serviceTask id="serviceTask" activiti:expression="${openidm.query('managed/user', readNewUserFromRepoParams)}"
+                     activiti:resultVariableName="newUserFromRepo"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="sendAcceptNotification"/>
+
+        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+                requestDate = formatUTC.format(new Date());
+                
+                def newRequesterNotification = [
+                "receiverId": "hradmin",
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "The requested user " + userName + " was successfully created"
+                ];
+                def newContractorNotification = [
+                "receiverId": newUserFromRepo.result[0]._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
+                ];
+                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", newContractorNotification)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
+        
+        <sequenceFlow sourceRef="decisionMadeGateway" targetRef="sendDenyNotification">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='reject'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="sendDenyNotification" scriptFormat="groovy">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                requestDate = formatUTC.format(new Date());
+                
+                def newRequesterNotification = [
+                "receiverId": "hradmin",
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "warning",
+                "notificationSubtype" : "",
+                "message" : "Your request to create user " + userName + " was denied."
+                ];
+                openidm.create("repo/ui/notification/", newRequesterNotification)
+                
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
+        
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

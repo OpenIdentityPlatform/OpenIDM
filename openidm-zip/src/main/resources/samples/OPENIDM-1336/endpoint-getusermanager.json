@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/getusermanager",
+    "type" : "text/javascript",
+    "file" : "script/getUserManager.js"
+}
