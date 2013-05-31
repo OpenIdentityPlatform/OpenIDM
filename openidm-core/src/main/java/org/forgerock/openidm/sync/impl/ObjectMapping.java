@@ -100,6 +100,9 @@ class ObjectMapping implements SynchronizationListener {
 
     /** TODO: Description. */
     private String name;
+    
+    /** The raw mapping configuration */
+    private JsonValue config;
 
     /** The name of the links set to use. Defaults to mapping name. */
     private String linkTypeName;
@@ -202,6 +205,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     public ObjectMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
+        this.config = config;
         name = config.get("name").required().asString();
         linkTypeName = config.get("links").defaultTo(name).asString();
         sourceObjectSet = config.get("source").required().asString();
@@ -266,6 +270,13 @@ class ObjectMapping implements SynchronizationListener {
      */
     public String getName() {
         return name;
+    }
+    
+    /**
+     * @return The raw config associated with the object mapping
+     */
+    public JsonValue getConfig() {
+        return config;
     }
 
     /**
@@ -366,65 +377,6 @@ class ObjectMapping implements SynchronizationListener {
             throw new SynchronizationException(ose);
         }
     }
-
-    /**
-     * Get all IDs for a given object set as List and in case sensitive fashion
-     * @see queryAllIds(String, ReconciliationContext, Collection)
-     */
-    private List<String> queryAllIds(final String objectSet, ReconciliationContext reconContext) 
-            throws SynchronizationException {
-        return (List<String>) queryAllIds(objectSet, reconContext, Collections.synchronizedList(new ArrayList<String>()), true);
-    }
-    
-    /**
-     * Get all IDs for a given object set
-     *
-     * @param objectSet the object set to query
-     * @param collectionToPopulate the collection to populate with results
-     * @param caseSensitive whether the collection should be populated in case
-     * sensitive fashion, or if false it populates as lower case only  
-     * @return the collection of (unqualified) ids
-     * @throws SynchronizationException if retrieving or processing the ids failed
-     */
-    private Collection<String> queryAllIds(final String objectSet, ReconciliationContext reconContext, 
-            Collection collectionToPopulate, boolean caseSensitive) throws SynchronizationException {
-        Collection<String> ids = collectionToPopulate;
-
-        HashMap<String, Object> query = new HashMap<String, Object>();
-        query.put(QueryConstants.QUERY_ID, QueryConstants.QUERY_ALL_IDS);
-        try {
-            JsonValue objList = new JsonValue(service.getRouter().query(objectSet, query))
-                    .get(QueryConstants.QUERY_RESULT).required().expect(List.class);
-            for (JsonValue obj : objList) {
-                String value = obj.get("_id").asString();
-                if (!caseSensitive) {
-                    value = (value == null ? null : linkType.normalizeId(value));
-                }
-                ids.add(value);
-            }
-        } catch (JsonValueException jve) {
-            throw new SynchronizationException(jve);
-        } catch (ObjectSetException ose) {
-            throw new SynchronizationException(ose);
-        }
-        reconContext.checkCanceled(); // Throws an exception if reconciliation was canceled
-        return ids;
-    }
-
-    /**
-     * Get all IDs for a given object set as a iterable.
-     * May allow for further optimizations over direct list access and is the preferred way to access.
-     *
-     * @param objectSet the object set to query
-     * @return the list of (unqualified) ids
-     * @throws SynchronizationException if retrieving or processing the ids failed
-     */
-/*    private Iterable<String> queryAllIdsIterable(final String objectSet, final ReconciliationContext reconContext)
-            throws SynchronizationException {
-        // For now we pull all into memory immediately
-        return queryAllIds(objectSet, reconContext);
-    }
-*/
 
 // TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
@@ -765,8 +717,7 @@ class ObjectMapping implements SynchronizationListener {
             Collection<String> remainingTargetIds = null;
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 reconContext.getStatistics().targetQueryStart();
-                remainingTargetIds = queryAllIds(targetObjectSet, reconContext,
-                        Collections.synchronizedList(new ArrayList<String>()), linkType.isTargetCaseSensitive());
+                remainingTargetIds = reconContext.getReconHandler().queryTargetIds();
                 reconContext.setTargetIds(new ArrayList(remainingTargetIds));
                 reconContext.getStatistics().targetQueryEnd();
             } else {

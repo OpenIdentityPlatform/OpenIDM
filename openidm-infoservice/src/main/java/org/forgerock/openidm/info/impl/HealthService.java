@@ -106,6 +106,8 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
     private volatile boolean appStarting = true; 
     // Whether the cluster management thread is up in the "running" state
     private volatile boolean clusterUp = false;
+    // Whether the cluster management service is enabled
+    private volatile boolean clusterEnabled = true;
 
     private volatile StateDetail stateDetail = 
             new StateDetail(AppState.STARTING, "OpenIDM starting");
@@ -361,6 +363,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         ClusterManagementService clusterService = (ClusterManagementService) service;
         if (clusterService != null) {
             clusterService.register(LISTENER_ID, this);
+            clusterEnabled = clusterService.isEnabled();
             cluster = clusterService;
         }
     }
@@ -439,7 +442,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         } else if (missingServices.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
-        } else if (!clusterUp) {
+        } else if (clusterEnabled && !clusterUp) {
             if (cluster != null && !cluster.isStarted()) {
                 cluster.startClusterManagement();
             }

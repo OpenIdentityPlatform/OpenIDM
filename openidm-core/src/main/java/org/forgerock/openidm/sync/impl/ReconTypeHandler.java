@@ -40,6 +40,12 @@ public interface ReconTypeHandler {
     List<String> querySourceIds() throws SynchronizationException;
 
     /**
+     * @return the target identifiers to reconcile. Can be a sub-set of target identifiers.
+     * @throws SynchronizationException
+     */
+    List<String> queryTargetIds() throws SynchronizationException;
+    
+    /**
      * @return true if the target phase should be executed for this recon, false if not
      */
     boolean isRunTargetPhase();

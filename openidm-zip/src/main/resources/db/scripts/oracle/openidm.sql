@@ -26,6 +26,14 @@ PROMPT Creating Sequence schedulerobjects_id_SEQ ...
 CREATE SEQUENCE  schedulerobjects_id_SEQ  
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
+-- DROP SEQUENCE clusterobjects_id_SEQ;
+
+
+PROMPT Creating Sequence clusterobjects_id_SEQ ...
+CREATE SEQUENCE  clusterobjects_id_SEQ  
+  MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
+
+  
 -- DROP SEQUENCE objecttypes_id_SEQ;
 
 
@@ -119,7 +127,11 @@ CREATE TABLE auditrecon (
   situation VARCHAR2(24 CHAR),
   activity VARCHAR2(24 CHAR),
   status VARCHAR2(7 CHAR),
-  message CLOB
+  message CLOB,
+  actionid VARCHAR2(511 CHAR),
+  exceptiondetail CLOB,
+  mapping CLOB,
+  messagedetail CLOB
 );
 
 
@@ -436,6 +448,67 @@ CREATE INDEX fk_schedulerobjects_objectypes ON schedulerobjects
 ) 
 ;
 
+-- DROP TABLE clusterobjectproperties CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table clusterobjectproperties ...
+CREATE TABLE clusterobjectproperties (
+  clusterobjects_id NUMBER(24,0) NOT NULL,
+  propkey VARCHAR2(255 CHAR) NOT NULL,
+  proptype VARCHAR2(32 CHAR),
+  propvalue VARCHAR2(4000 CHAR)
+);
+
+
+PROMPT Creating Index fk_clusterobjectproperties_man on clusterobjectproperties ...
+CREATE INDEX fk_clusterobjectproperties_man ON clusterobjectproperties
+(
+  clusterobjects_id
+) 
+;
+PROMPT Creating Index idx_clusterobjectproperties_3 on clusterobjectproperties ...
+CREATE INDEX idx_clusterobjectproperties_3 ON clusterobjectproperties
+(
+  propkey,
+  propvalue
+)
+;
+
+-- DROP TABLE clusterobjects CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table clusterobjects ...
+CREATE TABLE clusterobjects (
+  id NUMBER(24,0) NOT NULL,
+  objecttypes_id NUMBER(24,0) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  fullobject CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_9 on table clusterobjects ... 
+ALTER TABLE clusterobjects
+ADD CONSTRAINT PRIMARY_9 PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+PROMPT Creating Unique Index idx_clusterobjects_object on clusterobjects...
+CREATE UNIQUE INDEX idx_clusterobjects_object ON clusterobjects
+(
+  objecttypes_id,
+  objectid
+) 
+;
+PROMPT Creating Index fk_clusterobjects_objectypes on clusterobjects ...
+CREATE INDEX fk_clusterobjects_objectypes ON clusterobjects
+(
+  objecttypes_id
+) 
+;
+
 -- DROP TABLE objecttypes CASCADE CONSTRAINTS;
 
 
@@ -614,6 +687,34 @@ BEGIN
       LOOP
            EXIT WHEN v_incval>=v_newVal;
            SELECT managedobjects_id_SEQ.nextval INTO v_incval FROM dual;
+      END LOOP;
+    END IF;
+    --used to emulate LAST_INSERT_ID()
+    --mysql_utilities.identity := v_newVal; 
+   -- assign the value from the sequence to emulate the identity column
+   :new.id := v_newVal;
+  END IF;
+END;
+
+/
+
+CREATE OR REPLACE TRIGGER clusterobjects_id_TRG BEFORE INSERT ON clusterobjects
+FOR EACH ROW
+DECLARE 
+v_newVal NUMBER(12) := 0;
+v_incval NUMBER(12) := 0;
+BEGIN
+  IF INSERTING AND :new.id IS NULL THEN
+    SELECT  clusterobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
+    -- If this is the first time this table have been inserted into (sequence == 1)
+    IF v_newVal = 1 THEN 
+      --get the max indentity value from the table
+      SELECT NVL(max(id),0) INTO v_newVal FROM clusterobjects;
+      v_newVal := v_newVal + 1;
+      --set the sequence to that value
+      LOOP
+           EXIT WHEN v_incval>=v_newVal;
+           SELECT clusterobjects_id_SEQ.nextval INTO v_incval FROM dual;
       END LOOP;
     END IF;
     --used to emulate LAST_INSERT_ID()

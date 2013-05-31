@@ -158,23 +158,25 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
                     clusterConfig.getInstanceCheckInOffset());
         }
     }
-    
+
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Cluster Management Service {}", compContext);
-        clusterManagerThread.shutdown();
-        synchronized (repoLock) {
-            try {
-                InstanceState state = getInstanceState(instanceId);
-                state.updateShutdown();
-                state.setState(InstanceState.STATE_DOWN);
-                updateInstanceState(instanceId, state);
-            } catch (JsonResourceException e) {
-                logger.warn("Failed to update instance shutdown timestamp", e);
-            }
-        }    
+        if (clusterConfig.isEnabled()) {
+            clusterManagerThread.shutdown();
+            synchronized (repoLock) {
+                try {
+                    InstanceState state = getInstanceState(instanceId);
+                    state.updateShutdown();
+                    state.setState(InstanceState.STATE_DOWN);
+                    updateInstanceState(instanceId, state);
+                } catch (JsonResourceException e) {
+                    logger.warn("Failed to update instance shutdown timestamp", e);
+                }
+            }  
+        }  
     }
-    
+
     @Override
     public String getInstanceId() {
         return instanceId;
@@ -271,17 +273,19 @@ public class ClusterManager extends ObjectSetJsonResource implements ClusterMana
             break;
         case InstanceState.STATE_DOWN:
             instanceInfo.put("state", "down");
-            if (!state.hasShutdown() && state.getRecoveryAttempts() > 0) {
-                recoveryMap.put("recoveredBy", state.getRecoveringInstanceId());
-                recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
-                recoveryMap.put("recoveryStarted", 
-                        dateUtil.formatDateTime(new Date(state.getRecoveryStarted())));
-                recoveryMap.put("recoveryFinished", 
-                        dateUtil.formatDateTime(new Date(state.getRecoveryFinished())));
-                recoveryMap.put("detectedDown", 
-                        dateUtil.formatDateTime(new Date(state.getDetectedDown())));
-                instanceInfo.put("recovery", recoveryMap);
-            } else if (state.getRecoveryAttempts() > 0) {
+            if (!state.hasShutdown()) {
+                if (state.getRecoveryAttempts() > 0) {
+                    recoveryMap.put("recoveredBy", state.getRecoveringInstanceId());
+                    recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
+                    recoveryMap.put("recoveryStarted", dateUtil.formatDateTime(new Date(state.getRecoveryStarted())));
+                    recoveryMap.put("recoveryFinished", dateUtil.formatDateTime(new Date(state.getRecoveryFinished())));
+                    recoveryMap.put("detectedDown", dateUtil.formatDateTime(new Date(state.getDetectedDown())));
+                    instanceInfo.put("recovery", recoveryMap);
+                } else {
+                    // Should never reach this state
+                    logger.error("Instance {} is in 'down' but has not been shutdown or recovered", instanceId);
+                }
+            } else {
                 instanceInfo.put("shutdown", dateUtil.formatDateTime(new Date(state.getShutdown())));
             }
             break;
