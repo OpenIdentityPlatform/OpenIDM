@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -49,6 +51,7 @@ import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
@@ -70,6 +73,7 @@ import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.Constants;
@@ -97,15 +101,20 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     public final static String CONFIG_LOG_TYPE = "logType";
     public final static String CONFIG_LOG_TYPE_CSV = "csv";
     public final static String CONFIG_LOG_TYPE_REPO = "repository";
-    
+    public final static String CONFIG_LOG_TYPE_ROUTER = "router";
+
     public final static String TYPE_RECON = "recon";
     public final static String TYPE_ACTIVITY = "activity";
+    public final static String TYPE_ACCESS = "access";
 
     public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
     public final static String QUERY_BY_MAPPING = "audit-by-mapping";
     public final static String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
     public final static String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
     public final static String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
+
+    // "marker" context key to determine whether we're already in an audit logging operation
+    private static final String IN_AUDIT_LOGGER = "inAuditLogger";
 
     private static Script script = null;
     
@@ -132,22 +141,11 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         if using this with for scr 1.6.2
         Ensure we do not get bound on router whilst it is activating
     */
-/*    @Reference(
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
+    @Reference(
         target = "(service.pid=org.forgerock.openidm.router)"
     )
-    Object router;
-    protected void bindRouter(JsonResource router) {
-        this.router = router;
-    }
-    protected void unbindRouter(JsonResource router) {
-        this.router = router;
-    }
-*/
+    JsonResource router;
+
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
      * against the current schema and may need processing to conform to an updated schema.
@@ -679,10 +677,17 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 String logType = (String) entry.get(CONFIG_LOG_TYPE);
                 // TDDO: make pluggable
                 AuditLogger auditLogger = null;
-                if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
+                if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
                     auditLogger = new CSVAuditLogger();
-                } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
+                } else if (CONFIG_LOG_TYPE_REPO.equalsIgnoreCase(logType)) {
                     auditLogger = new RepoAuditLogger();
+                } else if (CONFIG_LOG_TYPE_ROUTER.equalsIgnoreCase(logType)) {
+                    auditLogger = new RouterAuditLogger(
+                            new Accessor<JsonResource>() {
+                                public JsonResource access() {
+                                    return router;
+                                }
+                            });
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }
@@ -750,11 +755,60 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     public static Map<String, Object> formatLogEntry(Map<String, Object> entry, String type) {
-        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+        if (AuditServiceImpl.TYPE_RECON.equals(type)) {
             return AuditServiceImpl.formatReconEntry(entry);
+        } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
+            return AuditServiceImpl.formatActivityEntry(entry);
+        } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {
+            return AuditServiceImpl.formatAccessEntry(entry);
         } else {
             return entry;
         }
+    }
+
+    /**
+     * Returns an ordered audit log access entry.
+     *
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    private static Map<String,Object> formatAccessEntry(Map<String,Object> entry) {
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
+        formattedEntry.put("_id", entry.get("_id"));
+        formattedEntry.put("action", entry.get("action"));
+        formattedEntry.put("ip", entry.get("ip"));
+        formattedEntry.put("principal", entry.get("principal"));
+        formattedEntry.put("roles", entry.get("roles"));
+        formattedEntry.put("status", entry.get("status"));
+        formattedEntry.put("timestamp", entry.get("timestamp"));
+        formattedEntry.put("userid", entry.get("userid"));
+        return formattedEntry;
+    }
+
+    /**
+     * Returns an ordered audit log activity entry.
+     *
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    private static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
+        formattedEntry.put("_id", entry.get("_id"));
+        formattedEntry.put("activityId", entry.get("activityId"));
+        formattedEntry.put("timestamp", entry.get("timestamp"));
+        formattedEntry.put("action", entry.get("action"));
+        formattedEntry.put("message", entry.get("message"));
+        formattedEntry.put("objectId", entry.get("objectId"));
+        formattedEntry.put("rev", entry.get("rev"));
+        formattedEntry.put("rootActionId", entry.get("rootActionId"));
+        formattedEntry.put("parentActionId", entry.get("parentActionId"));
+        formattedEntry.put("requester", entry.get("requester"));
+        formattedEntry.put("before", entry.get("before"));
+        formattedEntry.put("after", entry.get("after"));
+        formattedEntry.put("status", entry.get("status"));
+        formattedEntry.put("changedFields", entry.get("changedFields"));
+        formattedEntry.put("passwordChanged", entry.get("passwordChanged"));
+        return formattedEntry;
     }
 
     /**
@@ -764,7 +818,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      * @return the formatted entry
      */
     public static Map<String, Object> formatReconEntry(Map<String, Object> entry) {
-        Map<String, Object> formattedEntry = new HashMap<String, Object>();
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
         formattedEntry.put("_id", entry.get("_id"));
         formattedEntry.put("entryType", entry.get("entryType"));
         formattedEntry.put("timestamp", entry.get("timestamp"));
@@ -820,11 +874,11 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
-        Map<String, Object> results = new HashMap<String, Object>();
+        Map<String, Object> results = new LinkedHashMap<String, Object>();
         results.put("result", entryList);
         return results;
     }
-    
+
     protected static JsonValue parseJsonString(String stringified) {
         JsonValue jsonValue = null;
         try {

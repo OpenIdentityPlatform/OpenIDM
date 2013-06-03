@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.audit.util;
@@ -61,6 +61,9 @@ public class ActivityLog {
     public final static String CHANGED_FIELDS = "changedFields";
     public final static String PASSWORD_CHANGED = "passwordChanged";
 
+    // "marker" context key to determine whether we're already in an audit logging operation
+    private static final String IN_LOG_ACTIVITY = "inLogActivity";
+
     /**
      * Creates a Jackson object mapper. By default, it
      * calls {@link org.codehaus.jackson.map.ObjectMapper#ObjectMapper()}.
@@ -73,6 +76,42 @@ public class ActivityLog {
         dateUtil = DateUtil.getDateUtil("UTC");
     }
 
+    /**
+     * Add the logging activity marker to the request for future "we are logging" detection.
+     *
+     * @param request the context/request in progress
+     * @param marker the marker value
+     */
+    public static void enterLogActivity(JsonValue request, String marker) {
+        request.put(IN_LOG_ACTIVITY, marker);
+    }
+
+    /**
+     * Remove the logging activity marker from the request to indicate activity logging is complete.
+     *
+     * @param request the context/request for which logging is complete
+     */
+    public static void exitLogActivity(JsonValue request) {
+        request.remove(IN_LOG_ACTIVITY);
+    }
+
+    /**
+     * Test the <tt>request</tt> for presence of the logging activity indicator.  The marker
+     * may be present in the request's parent context, so walk the chain until we run out of
+     * context.
+     *
+     * @param request the context/request for which to detect logging activity
+     * @return whether or not this context/request appears to be involved in logging activity
+     */
+    public static boolean isInLogActivity(JsonValue request) {
+        while (request != null && !request.isNull()) {
+            if (request.get(IN_LOG_ACTIVITY) != null
+                    && !request.get(IN_LOG_ACTIVITY).isNull())
+                return true;
+            request = request.get("parent");
+        }
+        return false;
+    }
 
     public static String getRequester(JsonValue request) {
         String result = null;
@@ -89,6 +128,9 @@ public class ActivityLog {
 
     public static void log(JsonResource router, JsonValue request, String message, String objectId,
                            JsonValue before, JsonValue after, Status status) throws JsonResourceException {
+        if (isInLogActivity(request)) {
+            return;
+        }
         if (request == null) {
             request = new JsonValue(null);
         }
@@ -109,6 +151,9 @@ public class ActivityLog {
 
     public static void log(ObjectSet router, JsonValue request, String message, String objectId,
                            JsonValue before, JsonValue after, Status status) throws ObjectSetException {
+        if (isInLogActivity(request)) {
+            return;
+        }
         if (request == null) {
             request = new JsonValue(null);
         }

@@ -1,0 +1,86 @@
+Audit Sample - Show extended audit capability
+---------------------------------------------
+Copyright (c) 2013 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+
+The sample demonstrates configuring a MySQL database to receive the
+audit logs for access, activity, and recon using the OpenICF ScriptedSQL
+connetor.  It can be used alongside any of the other OpenIDM samples by
+copying the accompanying files into the respective directories.
+
+The configuration files used in this sample are as follows:
+
+*   samples/audit-sample/conf/provisioner.openicf-scriptedsql.json shows the ScriptedSQL 
+    connector configuration.
+*   samples/audit-sample/conf/audit.json shows how to enable audit logging on the router.
+*   samples/audit-sample/data/sample_audit_db.mysql provides a sample schema DDL to create
+    the tables in the external mysql database.
+*   samples/audit-samples/tools/ contains the Groovy scripts that allow the OpenICF
+    ScriptedSQL connector to interface with the MySQL database.
+
+External Configuration
+
+In this example OpenIDM communicates with an external MySQL database server.
+
+The sample expects the following configuration for MySQL:
+*   The database is available on the local host.
+*   The database listens on port 3306.
+*   You can connect over the network to the database with user 'root' and password 'password'.
+*   MySQL serves a database called audit with tables access, activity, and recon.
+
+The database schema is as described in the data definition language file, openidm/samples/audit-sample/data/sample_audit_db.mysql. Import the file into MySQL before running the sample.
+
+$ ./bin/mysql -u root -p < /path/to/openidm/samples/sample3/data/sample_audit_db.mysql
+Enter password:
+
+Make sure MySQL is running.
+
+You will also need to install the MySQL Connector/J iinto the openidm/bundle directory:
+
+$ cp mysql-connector-java-<version>-bin.jar /path/to/openidm/bundle/
+
+
+Start with sample1 and overlay the audit-sample files:
+
+$ cd /path/to/openidm
+$ cp -a samples/sample1 samples/myauditsample
+$ cp -a samples/audit-sample/* samples/myauditsample
+
+Then use the sample, by starting OpenIDM with the configuration as described for sample 1:
+
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/myauditsample
+
+Initiate a reconciliation operation over the REST interface, as follows:
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+Alternatively, edit samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json
+to enable scheduled reconciliation:
+
+    "enabled" : true,
+
+The following curl command requests all identifiers in OpenIDM's internal
+repository. Use it to see the results after reconciliation for example.
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+
+
+Inspect the MySQL database:
+
+mysql> select * from access;
+
+You will see the access logs consistent with the curl commands executed.
+
+mysql> select * from activity;
+
+You will see the activity logs consistent with the curl commands executed.
+
+mysql> select * from recon;
+
+You will see the recon logs consistent with the curl commands executed.
+
+
