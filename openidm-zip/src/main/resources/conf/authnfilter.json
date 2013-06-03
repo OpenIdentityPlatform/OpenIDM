@@ -2,7 +2,12 @@
     "server-auth-config" : {
         "iwa-ad-passthrough" : {
             "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule"
+                "class-name" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule",
+                "key-alias" : "openidm-localhost",
+                "private-key-password" : "changeit",
+                "keystore-type" : "JCEKS",
+                "keystore-file" : "security/keystore.jceks",
+                "keystore-password" : "changeit"
             },
             "auth-modules" : [
                 {
@@ -28,7 +33,12 @@
         },
         "ad-passthrough-only" : {
             "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule"
+                "class-name" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
+                "key-alias" : "openidm-localhost",
+                "private-key-password" : "changeit",
+                "keystore-type" : "JCEKS",
+                "keystore-file" : "security/keystore.jceks",
+                "keystore-password" : "changeit"
             },
             "auth-modules" : [
                 {
