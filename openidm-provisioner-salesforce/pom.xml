@@ -37,7 +37,7 @@
     <name>OpenIDM Salesforce Endpoints Service</name>
     <packaging>bundle</packaging>
     <properties>
-        <openidm.osgi.import.before.defaults>org.mozilla.javascript;resolution:=optional</openidm.osgi.import.before.defaults>
+        <openidm.osgi.import.before.defaults>org.stringtemplate.v4;resolution:=optional</openidm.osgi.import.before.defaults>
     </properties>
     <repositories>
         <repository>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>com.force.api</groupId>
             <artifactId>force-wsc</artifactId>
-            <version>27.0.0</version>
+            <version>28.0.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>rhino</groupId>
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>com.force.api</groupId>
             <artifactId>force-metadata-api</artifactId>
-            <version>27.0.0</version>
+            <version>28.0.0</version>
         </dependency>
 
         <dependency>
