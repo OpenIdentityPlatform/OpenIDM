@@ -130,6 +130,21 @@ public class ADPassthroughModule implements ServerAuthModule {
             } else {
                 LOGGER.debug("ADPassthroughModule: Authentication successful");
                 messageInfo.setRequestMessage(result);
+
+                final String USERNAME_ATTRIBUTE = "openidm.username";
+                final String USERID_ATTRIBUTE = "openidm.userid";
+                final String ROLES_ATTRIBUTE = "openidm.roles";
+                final String RESOURCE_ATTRIBUTE = "openidm.resource";
+                final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
+
+                String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
+                Map<String, Object> messageInfoParams = messageInfo.getMap();
+                messageInfoParams.put(USERNAME_ATTRIBUTE, xOpenIDMUsername);
+                messageInfoParams.put(USERID_ATTRIBUTE, result.getUserId());
+                messageInfoParams.put(ROLES_ATTRIBUTE, result.getRoles());
+                messageInfoParams.put(RESOURCE_ATTRIBUTE, "system/AD/account");
+                messageInfoParams.put(OPENIDM_AUTHINVOKED, "authnfilter");
+
                 return AuthStatus.SUCCESS;
             }
         } catch (IOException e) {

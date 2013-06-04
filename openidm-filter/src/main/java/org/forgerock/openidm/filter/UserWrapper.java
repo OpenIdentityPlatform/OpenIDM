@@ -86,7 +86,14 @@ public class UserWrapper extends HttpServletRequestWrapper {
             }
         };
     }
-        
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
 
     @Override
     public Principal getUserPrincipal() {
