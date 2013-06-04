@@ -851,21 +851,37 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
-    public void setReconEntryMessage(ReconEntry entry, Exception se) {
+    /**
+     * Populates the "exception", "message", and "messageDetail" fields of a ReconEntry when an Exception is 
+     * thrown during reconciliation.
+     * 
+     * @param entry the ReconEntry object
+     * @param exception the Exception thrown during reconciliation
+     */
+    public void setReconEntryMessage(ReconEntry entry, Exception exception) {
         JsonResourceException jre = null;
-        Throwable throwable = se;
-        entry.exception = se;
-        while (throwable.getCause() != null) { // want message associated with original cause
-            if (jre == null && throwable instanceof JsonResourceException) {
-                jre = (JsonResourceException)throwable;
+        Throwable throwable = exception;
+        Throwable rootCause = null;
+        entry.exception = exception;
+        // Loop to find the root cause (and find JsonResourceException closest to it if any)
+        while (throwable != null) {
+            rootCause = throwable;
+            // Check if the current throwable is a JsonResourceException
+            if (rootCause instanceof JsonResourceException) {
+                // Used for populating the "messageDetail" of the entry
+                jre = (JsonResourceException)rootCause;
             }
-            throwable = throwable.getCause();
+            throwable = rootCause.getCause();
         }
-        if (se != throwable) {
-            entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+        // Check if there was an Exception chain and set the entry message
+        if (exception != rootCause) {
+            // There was an Exception chain so append the root cause message to the top level message
+            entry.message = exception.getMessage() + ". Root cause: " + rootCause.getMessage();
         } else {
-            entry.message = throwable.getMessage();
+            // There was only one Exception
+            entry.message = rootCause.getMessage();
         }
+        // If there was a JsonResourceException in the chain set the messageDetail
         if (jre != null) {
             entry.messageDetail = ((JsonResourceException)jre).toJsonValue();           
         }
