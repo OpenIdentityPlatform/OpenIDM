@@ -43,7 +43,7 @@ def sql = new Sql(connection);
 
 switch ( objectClass ) {
     case "recon":
-    sql.execute("INSERT INTO recon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    sql.execute("INSERT INTO auditrecon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             attributes.get("objectid")?.get(0),
             attributes.get("entrytype")?.get(0),
@@ -67,7 +67,7 @@ switch ( objectClass ) {
     break
 
     case "activity":
-    sql.execute("INSERT INTO activity (objectid,activityid,activitydate,activity,message,subjectid,subjectrev,rootactionid,parentactionid,requester,subjectbefore,subjectafter,status,changedfields,passwordchanged) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    sql.execute("INSERT INTO auditactivity (objectid,activityid,activitydate,activity,message,subjectid,subjectrev,rootactionid,parentactionid,requester,subjectbefore,subjectafter,status,changedfields,passwordchanged) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             attributes.get("objectid")?.get(0),
             attributes.get("activityid")?.get(0),
@@ -90,7 +90,7 @@ switch ( objectClass ) {
 
     case "access":
 
-    sql.execute("INSERT INTO access (objectid,activity,ip,principal,roles,status,activitydate,userid) values (?,?,?,?,?,?,?,?)",
+    sql.execute("INSERT INTO auditaccess (objectid,activity,ip,principal,roles,status,activitydate,userid) values (?,?,?,?,?,?,?,?)",
         [
             attributes.get("objectid")?.get(0),
             attributes.get("activity")?.get(0),
