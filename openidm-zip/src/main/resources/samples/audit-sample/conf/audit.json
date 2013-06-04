@@ -27,9 +27,6 @@
             "logType" : "router",
             "location" : "system/auditdb",
             "useForQueries" : true
-        },
-        {
-            "logType" : "repository"
         }
     ],
     "exceptionFormatter" : {
