@@ -74,8 +74,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @References({ @Reference(referenceInterface = ClusterManagementService.class,
         cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-        bind = "bindClusterManagementService", unbind = "unbindClusterManagementService",
-        updated = "updatedClusterManagementService") })
+        bind = "bindClusterManagementService", unbind = "unbindClusterManagementService"/*,
+        updated = "updatedClusterManagementService"*/) })
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service") })

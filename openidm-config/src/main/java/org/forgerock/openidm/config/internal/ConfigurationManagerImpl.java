@@ -325,6 +325,7 @@ public class ConfigurationManagerImpl
                 DelayedConfig targetConfig = null;
 
                 try {
+                    boolean wait = false;
                     // Process the config with the providers
                     for (MetaDataProviderHelper helper : bundleProviderTracker.getTracked()
                             .values()) {
@@ -338,6 +339,7 @@ public class ConfigurationManagerImpl
                             // TODO should we stop and delay the config or
                             // continue
                             // the processing
+                            wait = true;
                         }
                     }
                     if (targetConfig == null) {
@@ -359,9 +361,13 @@ public class ConfigurationManagerImpl
                                     // TODO should we stop and delay the config
                                     // or
                                     // continue the processing
+                                    wait = true;
                                 }
                             }
                         }
+                    }
+                    if (!wait && targetConfig == null) {
+                        targetConfig = new DelayedConfig(sourceConfig, Collections.<JsonPointer>emptyList());
                     }
                 } catch (NotConfiguration e) {
                     return null;
@@ -700,7 +706,6 @@ public class ConfigurationManagerImpl
 
         try {
             String value = JsonUtil.writePrettyValueAsString(config.configuration);
-            ;
 
             encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
             if (null != config.getPID().getInstanceAlias()) {

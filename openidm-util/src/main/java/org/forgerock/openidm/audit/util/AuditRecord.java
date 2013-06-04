@@ -22,14 +22,13 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.audit;
+package org.forgerock.openidm.audit.util;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
@@ -43,8 +42,8 @@ import java.util.Map;
 
 /**
  * Interface to get log information, subject of log by and log for.
- * 
- * 
+ *
+ *
  * @author Laszlo Hordos
  */
 public interface AuditRecord {
@@ -52,74 +51,74 @@ public interface AuditRecord {
     /**
      * The Date/Time field. This field is one of the two required in any log
      * record.
-     * 
+     *
      * @supported.api
      */
     public static final String TIME = "TIME";
     /**
      * The Data field. This field is one of the two required in any log record.
-     * 
+     *
      * @supported.api
      */
     public static final String DATA = "Data";
     /**
      * The LogLevel field. The level at which the log record was logged.
-     * 
+     *
      * @supported.api
      */
     public static final String LOG_LEVEL = "LogLevel";
     /**
      * The Domain field. The AM Domain pertaining to the log record's Data
      * field.
-     * 
+     *
      * @supported.api
      */
     public static final String DOMAIN = "Domain";
     /**
      * The LoginID field. The AM Login ID pertaining to the log record's Data
      * field.
-     * 
+     *
      * @supported.api
      */
     public static final String LOGIN_ID = "LoginID";
     /**
      * The IPAddr field. The IP Address pertaining to the log record's Data
      * field.
-     * 
+     *
      * @supported.api
      */
     public static final String IP_ADDR = "IPAddr";
     /**
      * The HostName field. The HostName pertaining to the log record's Data
      * field.
-     * 
+     *
      * @supported.api
      */
     public static final String HOST_NAME = "HostName";
     /**
      * The ModuleName field. The AM Module pertaining to the log record's Data
      * field.
-     * 
+     *
      * @supported.api
      */
     public static final String MODULE_NAME = "ModuleName";
     /**
      * The LoggedBy field. The ID associated with who logged the record.
-     * 
+     *
      * @supported.api
      */
     public static final String LOGGED_BY = "LoggedBy";
     /**
      * The ContextID field. The ID associated with the user's session that is
      * the subject of this log record.
-     * 
+     *
      * @supported.api
      */
     public static final String CONTEXT_ID = "ContextID";
     /**
      * The MessageID field. The unique Message Identifier associated with this
      * particular log record data field.
-     * 
+     *
      * @supported.api
      */
     public static final String MESSAGE_ID = "MessageID";
@@ -127,7 +126,7 @@ public interface AuditRecord {
     /**
      * The NameID field. The Name Identifier associated with this particular log
      * record data field.
-     * 
+     *
      * @supported.api
      */
     public static final String NAME_ID = "NameID";
@@ -137,7 +136,7 @@ public interface AuditRecord {
 
     /**
      * Returns log information map.
-     * 
+     *
      * @return log information map.
      */
     Map<String, Object> getLogInfoMap();
@@ -145,7 +144,7 @@ public interface AuditRecord {
     /**
      * Adds to the log information map, the field key and its corresponding
      * value.
-     * 
+     *
      * @param key
      *            The key which will be used by the formatter to determine if
      *            this piece of info is supposed to be added to the log string
@@ -157,14 +156,14 @@ public interface AuditRecord {
 
     /**
      * Returns log by subject.
-     * 
+     *
      * @return log by subject.
      */
     Object getLogBy();
 
     /**
      * Returns log for subject.
-     * 
+     *
      * @return log for subject.
      */
     Object getLogFor();

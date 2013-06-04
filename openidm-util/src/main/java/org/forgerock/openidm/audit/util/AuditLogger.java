@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.audit;
+package org.forgerock.openidm.audit.util;
 
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResultHandler;
