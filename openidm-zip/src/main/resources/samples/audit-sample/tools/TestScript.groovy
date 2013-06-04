@@ -34,7 +34,7 @@ log.info("Entering "+action+" Script");
 def sql = new Sql(connection);
 
 // a relatively-cheap query to run on start up to ensure database connectivity
-sql.eachRow("select * from recon limit 1", { println it.objectid} );
-sql.eachRow("select * from activity limit 1", { println it.objectid} );
-sql.eachRow("select * from access limit 1", { println it.objectid} );
+sql.eachRow("select * from recon limit 1", { } );
+sql.eachRow("select * from activity limit 1", { } );
+sql.eachRow("select * from access limit 1", { } );
 
