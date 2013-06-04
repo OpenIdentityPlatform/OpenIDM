@@ -128,6 +128,11 @@ public class IWAADPassthroughModule implements ServerAuthModule {
             request.setAttribute(RESOURCE_ATTRIBUTE, "system/AD/account");
             request.setAttribute(OPENIDM_AUTHINVOKED, "authnfilter");
 
+            Map<String, String> messageInfoParams = messageInfo.getMap();
+            messageInfoParams.put(USERNAME_ATTRIBUTE, username);
+            messageInfoParams.put(RESOURCE_ATTRIBUTE, "system/AD/account");
+            messageInfoParams.put(OPENIDM_AUTHINVOKED, "authnfilter");
+
             LOGGER.debug("IWAADPassthroughModule: Successful log in with user, {}", username);;
 
             return AuthStatus.SUCCESS;
@@ -138,6 +143,13 @@ public class IWAADPassthroughModule implements ServerAuthModule {
 
     @Override
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
+
+        if ("anonymous".equals(xOpenIDMUsername)) {
+            messageInfo.getMap().put("skipSession", true);
+        }
         return AuthStatus.SEND_SUCCESS;
     }
 
