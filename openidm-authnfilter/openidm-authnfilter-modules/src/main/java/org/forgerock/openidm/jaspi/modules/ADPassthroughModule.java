@@ -137,9 +137,8 @@ public class ADPassthroughModule implements ServerAuthModule {
                 final String RESOURCE_ATTRIBUTE = "openidm.resource";
                 final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
-                String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
                 Map<String, Object> messageInfoParams = messageInfo.getMap();
-                messageInfoParams.put(USERNAME_ATTRIBUTE, xOpenIDMUsername);
+                messageInfoParams.put(USERNAME_ATTRIBUTE, result.getUserPrincipal().getName());
                 messageInfoParams.put(USERID_ATTRIBUTE, result.getUserId());
                 messageInfoParams.put(ROLES_ATTRIBUTE, result.getRoles());
                 messageInfoParams.put(RESOURCE_ATTRIBUTE, "system/AD/account");
