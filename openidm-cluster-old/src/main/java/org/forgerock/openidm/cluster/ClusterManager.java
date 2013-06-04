@@ -91,7 +91,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Cluster Management Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/cluster")
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/cluster*")
 })
 public class ClusterManager implements RequestHandler, ClusterManagementService {
 
@@ -114,7 +114,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * The Repository Service Accessor
      */
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
-    private RouteService accessor;
+    private static RouteService accessor;
 
     protected void bindRouteService(final RouteService service) {
         accessor = service;
@@ -250,7 +250,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     resultMap.put("results", list);
                 } else {
                     logger.debug("Attempting to read instance {} from the database", instanceId);
-                    ReadRequest r = Requests.newReadRequest("/cluster/states", request.getResourceName());
+                    ReadRequest r = Requests.newReadRequest("/repo/cluster/states", request.getResourceName());
                     Resource instanceValue = serverContext.getConnection().read(serverContext, r);
                     if (!instanceValue.getContent().isNull()) {
                         resultMap.put("results", getInstanceMap(instanceValue.getContent()));
@@ -323,7 +323,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * @return the repository ID prefix
      */
     private String getIdPrefix() {
-        return "cluster/";
+        return "/repo/cluster/";
     }
 
     /**
@@ -412,7 +412,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                CreateRequest r = Requests.newCreateRequest(repoId,new JsonValue(map));
+                CreateRequest r = Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1),new JsonValue(map));
                 ServerContext c = accessor.createServerContext();
                 map = c.getConnection().create(c,r).getContent().asMap();
             }
@@ -428,7 +428,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             logger.debug("Reading from repo {}", repoId);
             ReadRequest r = Requests.newReadRequest(repoId);
             ServerContext c = accessor.createServerContext();
-            return c.getConnection().read(c,r).getContent();
+            Resource res = c.getConnection().read(c,r);
+            res.getContent().put("_id", res.getId());
+            res.getContent().put("_rev", res.getRevision());
+            return res.getContent();
         } catch (NotFoundException e) {
             return new JsonValue(null);
         }

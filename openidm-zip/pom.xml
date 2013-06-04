@@ -127,11 +127,11 @@
             <artifactId>openidm-servletfilter-registrator</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-infoservice</artifactId>
@@ -189,11 +189,11 @@
             <version>${openidm.version}</version>
             <classifier>jar-with-dependencies</classifier>
         </dependency-->
-        <!--<dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-cluster</artifactId>
             <version>${openidm.version}</version>
-        </dependency>-->
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>

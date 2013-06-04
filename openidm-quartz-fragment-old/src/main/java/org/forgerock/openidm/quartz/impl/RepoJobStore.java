@@ -56,6 +56,7 @@ import org.forgerock.openidm.cluster.ClusterEventType;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 
+import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -205,16 +206,20 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     public boolean setAccessor() {
         if (accessor == null) {
-            BundleContext ctx = FrameworkUtil.getBundle(RequestHandler.class).getBundleContext();
+            BundleContext ctx = FrameworkUtil.getBundle(RouteService.class).getBundleContext();
             ServiceReference serviceReference = null;
             try {
-                serviceReference = ctx.getServiceReferences(RequestHandler.class, "(openidm.router.prefix=/repo*)").iterator().next();
+                serviceReference = ctx.getServiceReferences(RouteService.class, "(openidm.router.prefix=/repo*)").iterator().next();
             } catch (InvalidSyntaxException e) {
                 /* ignore the filter is correct*/
             }
-            RequestHandler repoService = RequestHandler.class.cast(ctx.getService(serviceReference));
+            RouteService repoService = RouteService.class.cast(ctx.getService(serviceReference));
             if (repoService != null) {
-                accessor = new ServerContext(new RootContext(), Resources.newInternalConnection(repoService));
+                try {
+                    accessor = repoService.createServerContext();
+                } catch (ResourceException e) {
+                    /* ignore */
+                }
             }
             return !(accessor == null);
         }
@@ -270,7 +275,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      * @return the repository ID prefix
      */
     private String getIdPrefix() {
-        return "scheduler/";
+        return "/repo/scheduler/";
     }
 
     /**
@@ -1900,7 +1905,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 map.put(instanceId, acquiredTriggerIds);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId, new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -1958,7 +1963,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 waitingTriggersRepoList = new ArrayList<String>();
                 map.put("names", waitingTriggersRepoList);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId, new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -2096,7 +2101,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId, new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
             }
             return map;
         }
@@ -2122,7 +2127,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 list = new ArrayList<String>();
                 map.put(listId, list);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId, new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
             } else {
                 // else check if list exists in map
                 list = (List<String>) map.get(listId);
