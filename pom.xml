@@ -295,6 +295,7 @@
         -->
         <releaseDate />
         <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
+        <frDocPluginVersion>1.2.0</frDocPluginVersion>
     </properties>
 
     <modules>
@@ -822,13 +823,20 @@
             <plugin>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-doc-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>${frDocPluginVersion}</version>
                 <inherited>false</inherited>
                 <configuration>
                  <projectName>OpenIDM</projectName>
                  <googleAnalyticsId>${gaId}</googleAnalyticsId>
                 </configuration>
                 <executions>
+                    <execution>
+                        <id>copy-common</id>
+ 	 	 	            <phase>pre-site</phase>
+ 	 	 	            <goals>
+ 	 	 	                <goal>boilerplate</goal>
+ 	 	 	            </goals>
+ 	 	 	        </execution>
                     <execution>
                         <id>build-doc</id>
                         <phase>pre-site</phase>
