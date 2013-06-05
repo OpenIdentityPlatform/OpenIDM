@@ -33,7 +33,7 @@ The sample expects the following configuration for MySQL:
 
 The database schema is as described in the data definition language file, openidm/samples/audit-sample/data/sample_audit_db.mysql. Import the file into MySQL before running the sample.
 
-$ ./bin/mysql -u root -p < /path/to/openidm/samples/sample3/data/sample_audit_db.mysql
+$ ./bin/mysql -u root -p < /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
 Enter password:
 
 Make sure MySQL is running.
@@ -71,15 +71,15 @@ $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password
 
 Inspect the MySQL database:
 
-mysql> select * from access;
+mysql> select * from auditaccess;
 
 You will see the access logs consistent with the curl commands executed.
 
-mysql> select * from activity;
+mysql> select * from auditactivity;
 
 You will see the activity logs consistent with the curl commands executed.
 
-mysql> select * from recon;
+mysql> select * from auditrecon;
 
 You will see the recon logs consistent with the curl commands executed.
 
