@@ -42,7 +42,7 @@ def sql = new Sql(connection);
 //Create must return UID. Let's return the name for now.
 
 switch ( objectClass ) {
-    case "recon":
+    case "auditrecon":
     sql.execute("INSERT INTO auditrecon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             attributes.get("objectid")?.get(0),
@@ -66,7 +66,7 @@ switch ( objectClass ) {
     sql.commit();
     break
 
-    case "activity":
+    case "auditactivity":
     sql.execute("INSERT INTO auditactivity (objectid,activityid,activitydate,activity,message,subjectid,subjectrev,rootactionid,parentactionid,requester,subjectbefore,subjectafter,status,changedfields,passwordchanged) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             attributes.get("objectid")?.get(0),
@@ -88,7 +88,7 @@ switch ( objectClass ) {
     sql.commit();
     break
 
-    case "access":
+    case "auditaccess":
 
     sql.execute("INSERT INTO auditaccess (objectid,activity,ip,principal,roles,status,activitydate,userid) values (?,?,?,?,?,?,?,?)",
         [
