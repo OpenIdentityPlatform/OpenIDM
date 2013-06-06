@@ -88,7 +88,7 @@ if (query != null) {
 }
 
 switch ( objectClass ) {
-    case "recon":
+    case "auditrecon":
     sql.eachRow("SELECT * FROM auditrecon" + where,
             { result.add(
                 [
@@ -114,7 +114,7 @@ switch ( objectClass ) {
             } );
     break
 
-    case "activity":
+    case "auditactivity":
     sql.eachRow("SELECT * FROM auditactivity" + where,
             { result.add(
                 [
@@ -138,7 +138,7 @@ switch ( objectClass ) {
             } );
     break
 
-    case "access":
+    case "auditaccess":
     sql.eachRow("SELECT * FROM auditaccess" + where, 
             { result.add(
                 [
