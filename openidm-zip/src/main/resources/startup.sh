@@ -87,7 +87,6 @@ echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 # Keep track of this pid
 echo $$ > $OPENIDM_PID_FILE
 
-(
 # Make the script location the current directory
 cd $PRGDIR
 
@@ -100,4 +99,5 @@ exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	org.forgerock.commons.launcher.Main -c $OPENIDM_HOME/bin/launcher.json "$@"
 
 # org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
-)
+
+cd -
