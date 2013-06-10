@@ -74,15 +74,10 @@ public class IWAADPassthroughModule implements ServerAuthModule {
 
             String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
             String xOpenIdmPassword = request.getHeader("X-OpenIDM-password");
-            HttpSession session = request.getSession(false);
             boolean haveOpenIDMUsername = false;
             if (xOpenIDMUsername != null && xOpenIdmPassword != null) {
                 LOGGER.debug("IWAADPassthroughModule: Request header contains OpenIDM username");
                 haveOpenIDMUsername = xOpenIDMUsername != null;
-            }
-            if (!haveOpenIDMUsername && session != null) {
-                LOGGER.debug("IWAADPassthroughModule: Session contains OpenIDM username");
-                haveOpenIDMUsername = session.getAttribute("openidm.username") != null;
             }
             if (haveOpenIDMUsername) {
                 // skip straight to ad passthrough

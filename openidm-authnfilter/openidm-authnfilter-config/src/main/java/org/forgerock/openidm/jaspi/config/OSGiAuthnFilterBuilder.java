@@ -3,6 +3,7 @@ package org.forgerock.openidm.jaspi.config;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
@@ -72,15 +73,16 @@ public class OSGiAuthnFilterBuilder {
             return;
         }
 
+        Configuration configuration = new Configuration();
         Map<String, Map<String, Object>> authContexts = new HashMap<String, Map<String, Object>>();
         // For each ServerAuthConfig
         for (String s : jsonConfig.get("server-auth-config").required().keys()) {
             Map<String, Object> contextProperties = jsonConfig.get("server-auth-config").required().get(s).asMap();
-            authContexts.put(s, contextProperties);
+            configuration.addAuthContext(s, contextProperties);
         }
 
         try {
-            ConfigurationManager.configure(authContexts);
+            ConfigurationManager.configure(configuration);
         } catch (AuthException e) {
             // TODO log and fail
         }
