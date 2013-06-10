@@ -352,6 +352,7 @@ public class SalesforceConnection extends ClientResource {
                     jre.setDetail((Map<String, Object>) res);
                 } else if (res instanceof List) {
                     Map<String, Object> details = new HashMap<String, Object>();
+                    StringBuilder msg = new StringBuilder();
                     for (Object o : (List<Object>) res) {
                         if (o instanceof Map) {
                             if (null != ((Map) o).get("errorCode")) {
@@ -359,8 +360,12 @@ public class SalesforceConnection extends ClientResource {
                             } else {
                                 details.put(UUID.randomUUID().toString(), o);
                             }
+                            if (null != ((Map) o).get("message")) {
+                                msg.append(((Map) o).get("message")).append("\n");
+                            }
                         }
                     }
+                    details.put("message", msg.toString());
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
                     logger.error("REST API error:\n {} \n ", mapper
