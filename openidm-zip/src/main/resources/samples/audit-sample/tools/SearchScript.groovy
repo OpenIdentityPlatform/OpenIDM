@@ -88,8 +88,8 @@ if (query != null) {
 }
 
 switch ( objectClass ) {
-    case "recon":
-    sql.eachRow("SELECT * FROM recon" + where,
+    case "auditrecon":
+    sql.eachRow("SELECT * FROM auditrecon" + where,
             { result.add(
                 [
                 __UID__:it.objectid,
@@ -114,8 +114,8 @@ switch ( objectClass ) {
             } );
     break
 
-    case "activity":
-    sql.eachRow("SELECT * FROM activity" + where,
+    case "auditactivity":
+    sql.eachRow("SELECT * FROM auditactivity" + where,
             { result.add(
                 [
                 __UID__:it.objectid,
@@ -138,8 +138,8 @@ switch ( objectClass ) {
             } );
     break
 
-    case "access":
-    sql.eachRow("SELECT * FROM access" + where, 
+    case "auditaccess":
+    sql.eachRow("SELECT * FROM auditaccess" + where, 
             { result.add(
                 [
                 __UID__:it.objectid,,
