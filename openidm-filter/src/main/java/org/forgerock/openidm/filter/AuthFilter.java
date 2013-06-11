@@ -163,34 +163,34 @@ public class AuthFilter
         AuthData authData = new AuthData();
 
         try {
-            HttpSession session = req.getSession(false);
-            String logout = req.getHeader("X-OpenIDM-Logout");
+//            HttpSession session = req.getSession(false);
+//            String logout = req.getHeader("X-OpenIDM-Logout");
             String headerLogin = req.getHeader(HEADER_USERNAME);
             String basicAuth = req.getHeader("Authorization");
-            if (logout != null) {
-                if (session != null) {
-                    session.invalidate();
-                }
-                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                // SEND_SUCCESS
-                return null;
+//            if (logout != null) {
+//                if (session != null) {
+//                    session.invalidate();
+//                }
+//                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
+//                // SEND_SUCCESS
+//                return null;
               // if we see the certficate port this request is for client auth only
-            } else if (allowClientCertOnly(req)) {
+            /*} else */if (allowClientCertOnly(req)) {
                 authData = hasClientCert(req);
                 logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
-            } else if (session == null && headerLogin != null) {
+            } else if (/*session == null && */headerLogin != null) {
                 authData = authenticateUser(req);
                 logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
-                createSession(req, session, authData);
-            } else if (session == null && basicAuth != null) {
+//                createSession(req, session, authData);
+            } else if (/*session == null && */basicAuth != null) {
                 authData = doBasicAuth(basicAuth);
                 logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
-                createSession(req, session, authData);
-            } else if (session != null) {
-                authData.username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
-                authData.userId = (String)session.getAttribute(USERID_ATTRIBUTE);
-                authData.roles = (List<String>) session.getAttribute(ROLES_ATTRIBUTE);
-                authData.resource = (String)session.getAttribute(RESOURCE_ATTRIBUTE);
+//                createSession(req, session, authData);
+//            } else if (session != null) {
+//                authData.username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
+//                authData.userId = (String)session.getAttribute(USERID_ATTRIBUTE);
+//                authData.roles = (List<String>) session.getAttribute(ROLES_ATTRIBUTE);
+//                authData.resource = (String)session.getAttribute(RESOURCE_ATTRIBUTE);
             } else {
                 // SEND_FAILURE
                 throw new AuthException(authData.username);
@@ -276,20 +276,20 @@ public class AuthFilter
         return ad;
     }
 
-    private void createSession(HttpServletRequest req, HttpSession sess, AuthData ad) {
-        if (req.getHeader("X-OpenIDM-NoSession") == null) {
-            sess = req.getSession();
-            sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
-            sess.setAttribute(USERID_ATTRIBUTE, ad.userId);
-            sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
-            sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Created session for: {} with id {}, roles {} and resource: {}",
-                    new Object[] {ad.username, ad.userId, ad.roles, ad.resource});
-            }
-        }
-    }
+//    private void createSession(HttpServletRequest req, HttpSession sess, AuthData ad) {
+//        if (req.getHeader("X-OpenIDM-NoSession") == null) {
+//            sess = req.getSession();
+//            sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
+//            sess.setAttribute(USERID_ATTRIBUTE, ad.userId);
+//            sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
+//            sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
+//
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("Created session for: {} with id {}, roles {} and resource: {}",
+//                    new Object[] {ad.username, ad.userId, ad.roles, ad.resource});
+//            }
+//        }
+//    }
 
     /**
      * @param request the full request
