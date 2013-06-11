@@ -100,7 +100,7 @@ if (request.method !== "query") {
                     }
                     
                     if(!user) {
-                        throw "Bad userId"; 
+                        return userId;
                     }
                 }
                 users[userId] = user;
@@ -109,12 +109,17 @@ if (request.method !== "query") {
         },
         
         getDisplayableOf = function(user) {
-            if (user.givenName || user.familyName) {
-                return user.givenName + " " + user.familyName;
+            if (typeof user === "object") {
+                if (user.givenName || user.familyName) {
+                    return user.givenName + " " + user.familyName;
+                } else {
+                    return user.userName ? user.userName : user._id;
+                }
             } else {
-                return user.userName ? user.userName : user._id;
+                return user;
             }
         },
+
         userId, 
         roles, 
         userName,
