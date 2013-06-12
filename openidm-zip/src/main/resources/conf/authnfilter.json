@@ -1,24 +1,32 @@
 {
     "server-auth-config" : {
-        "iwa-ad-passthrough" : {
+        "iwa-ad-anon-passthrough" : {
             "session-module" : {
                 "class-name" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule",
                 "key-alias" : "openidm-localhost",
                 "private-key-password" : "changeit",
                 "keystore-type" : "JCEKS",
                 "keystore-file" : "security/keystore.jceks",
-                "keystore-password" : "changeit"
+                "keystore-password" : "changeit",
+                "token-life" : "10"
             },
             "auth-modules" : [
                 {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
+                    "class-name" : "org.forgerock.openidm.jaspi.modules.IWAPassthroughModule",
                     "servicePrincipal" : "HTTP/bridge.goldengate.com@GOLDENGATE.COM",
                     "keytabFileName" : "&{launcher.working.location}/bridge.HTTP.keytab",
                     "kerberosRealm" : "goldengate.com",
                     "kerberosServerName" : "ec2-54-242-220-206.compute-1.amazonaws.com",
                     "passThroughAuth" : "system/AD/account",
-                    "queryId" : "credential-query",
-                    "queryOnResource" : "managed/user",
+                    "propertyMapping" : {
+                        "userRoles" : "memberOf"
+                    },
+                    "defaultUserRoles" : [
+                        "openidm-reg"
+                    ]
+                },
+                {
+                    "class-name" : "org.forgerock.openidm.jaspi.modules.AnonymousModule",
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
@@ -26,8 +34,7 @@
                     },
                     "defaultUserRoles" : [
                         "openidm-reg"
-                    ],
-                    "allowedGroups" : [ ]
+                    ]
                 }
             ]
         },

@@ -30,63 +30,49 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
- * to Active Directory.
- */
-public class ADPassthroughModule extends IDMServerAuthModule {
+public class AnonymousModule extends IDMServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ADPassthroughModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(AnonymousModule.class);
 
-    private ADPassthroughAuthenticator adPassthroughAuthenticator;
+    private final String internalUserQueryId = "credential-internaluser-query";
+    private final String queryOnInternalUserResource = "internal/user";
+
+    private AnonymousAuthenticator anonymousAuthenticator;
 
     /**
      * Required default constructor of OSGi to instantiate.
      */
-    public ADPassthroughModule() {
+    public AnonymousModule() {
     }
 
     /**
-     * For tests purposes.
-     *
-     * @param adPassthroughAuthenticator A mock of an ADPassthroughAuthenticator instance.
-     */
-    public ADPassthroughModule(ADPassthroughAuthenticator adPassthroughAuthenticator) {
-        this.adPassthroughAuthenticator = adPassthroughAuthenticator;
-    }
-
-    /**
-     * Initialises the ADPassthroughModule with the OSGi json configuration.
+     * Initialises the AnonymousModule with the OSGi json configuration.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
+     * @throws javax.security.auth.message.AuthException {@inheritDoc}
      */
     @Override
-    protected void doInitialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
+    protected void doInitialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map options) throws AuthException {
 
         JsonValue config = new JsonValue(options);
 
         List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        String passThroughAuth = config.get("passThroughAuth").asString();
 
         // User properties - default to NULL if not defined
         JsonValue properties = config.get("propertyMapping");
+        String userIdProperty = properties.get("userId").asString();
+        String userCredentialProperty = properties.get("userCredential").asString();
         String userRolesProperty = properties.get("userRoles").asString();
 
-        adPassthroughAuthenticator = new ADPassthroughAuthenticator(passThroughAuth, userRolesProperty, defaultRoles);
-
+        anonymousAuthenticator = new AnonymousAuthenticator(userRolesProperty, defaultRoles, userIdProperty, userCredentialProperty);
     }
 
     /**
-     * Validates the client's request by calling through to the existing AuthFilter.authenticate() method.
-     * If the authenticate method return null, this indicates a logout and AuthStatus.SEND_SUCCESS will be returned.
-     * If the authenticate method returns a valid UserWrapper object, this indicates a successful authentication and
-     * AuthStatus.SUCCESS will be returned.
-     * If the authenticate method throws an org.forgerock.openidm.filter.AuthException, this indicates an unsuccessful
-     * authentication and AuthStatus.SEND_FAILURE will be returned.
+     *
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
@@ -95,37 +81,34 @@ public class ADPassthroughModule extends IDMServerAuthModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus doValidateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject, AuthData authData) throws AuthException {
-
-        LOGGER.debug("ADPassthroughModule: validateRequest START");
+    protected AuthStatus doValidateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject, AuthData authData)
+            throws AuthException {
 
         HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
 
         try {
-            LOGGER.debug("ADPassthroughModule: Delegating call to internal AuthFilter");
             String password = request.getHeader("X-OpenIDM-password");
             authData.username = request.getHeader("X-OpenIDM-username");
-            if (authData.username == null || password == null || authData.username.equals("") || password.equals("")) {
-                LOGGER.debug("Failed authentication, missing or empty headers");
-                return AuthStatus.SEND_FAILURE;
-            }
-            authData = adPassthroughAuthenticator.authenticate(authData, password);
+
+            authData.status = anonymousAuthenticator.authenticate(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
+            authData.resource = queryOnInternalUserResource;
+
             if (authData.status) {
-                LOGGER.debug("ADPassthroughModule: Authentication successful");
-                LOGGER.debug("Found valid session for {} id {} with roles {}", authData.username, authData.userId, authData.roles);
+                logger.debug("ADPassthroughModule: Authentication successful");
+                logger.debug("Found valid session for {} id {} with roles {}", authData.username, authData.userId, authData.roles);
 
                 return AuthStatus.SUCCESS;
             } else {
-                LOGGER.debug("ADPassthroughModule: Authentication failed");
+                logger.debug("ADPassthroughModule: Authentication failed");
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            LOGGER.debug("ADPassthroughModule: validateRequest END");
+            logger.debug("ADPassthroughModule: validateRequest END");
         }
     }
 
     /**
-     * No work to do here so always returns AuthStatus.SEND_SUCCESS.
+     *
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
@@ -134,6 +117,14 @@ public class ADPassthroughModule extends IDMServerAuthModule {
      */
     @Override
     protected AuthStatus doSecureResponse(MessageInfo messageInfo, Subject subject) throws AuthException {
+
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
+
+        if ("anonymous".equals(xOpenIDMUsername)) {
+            messageInfo.getMap().put("skipSession", true);
+        }
+
         return AuthStatus.SEND_SUCCESS;
     }
 
