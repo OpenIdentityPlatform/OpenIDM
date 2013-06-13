@@ -37,6 +37,7 @@ import org.activiti.engine.impl.form.DateFormType;
 import org.activiti.engine.impl.form.DefaultStartFormHandler;
 import org.activiti.engine.impl.form.EnumFormType;
 import org.activiti.engine.impl.form.FormPropertyHandler;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
@@ -44,19 +45,20 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.ProcessDefinitionMixIn;
 
 /**
  * Resource implementation of ProcessDefinition related Activiti operations
+ *
  * @author orsolyamebold
  */
 public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     private final static ObjectMapper mapper;
     private ProcessEngine processEngine;
-    private TaskDefinitionResource taskDefinitionResource;
 
     static {
         mapper = new ObjectMapper();
@@ -69,45 +71,42 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     public ProcessDefinitionResource(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        taskDefinitionResource = new TaskDefinitionResource(processEngine);
     }
-    
+
     public void setProcessEngine(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        taskDefinitionResource = new TaskDefinitionResource(processEngine);
     }
 
     @Override
     public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionCollection on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
     public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionInstance on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("CreateInstance on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("DeleteInstance on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("PatchInstance on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            if ("taskdefinition".equals(((RouterContext) context).getUriTemplateVariables().get("subobj"))) {
-                taskDefinitionResource.queryCollection(context, request, handler);
-            } else if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+            if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                 List<ProcessDefinition> definitionList = processEngine.getRepositoryService().createProcessDefinitionQuery().list();
                 if (definitionList != null && definitionList.size() > 0) {
                     for (ProcessDefinition processDefinition : definitionList) {
@@ -138,23 +137,20 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     @Override
     public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            if ("taskdefinition".equals(((RouterContext) context).getUriTemplateVariables().get("subobj"))) {
-                taskDefinitionResource.readInstance(context, ((RouterContext) context).getUriTemplateVariables().get("subobjid"), request, handler);
-            } else {
-                ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(resourceId);
-                Map value = mapper.convertValue(def, HashMap.class);
-                Resource r = new Resource(def.getId(), null, new JsonValue(value));
-                FormService formService = processEngine.getFormService();
-                StartFormData startFormData = formService.getStartFormData(def.getId());
-                if (def.hasStartFormKey()) {
-                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
-                }
-                DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) def.getStartFormHandler();
-                List<Map> propertyList = new ArrayList<Map>();
-                addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
-                r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
-                handler.handleResult(r);
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+            ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(resourceId);
+            Map value = mapper.convertValue(def, HashMap.class);
+            Resource r = new Resource(def.getId(), null, new JsonValue(value));
+            FormService formService = processEngine.getFormService();
+            StartFormData startFormData = formService.getStartFormData(def.getId());
+            if (def.hasStartFormKey()) {
+                r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
             }
+            DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) def.getStartFormHandler();
+            List<Map> propertyList = new ArrayList<Map>();
+            addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
+            r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
+            handler.handleResult(r);
         } catch (ActivitiException e) {
             handler.handleError(new NotFoundException());
         } catch (Exception ex) {
@@ -164,7 +160,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("UpdateInstance on ProcessDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**

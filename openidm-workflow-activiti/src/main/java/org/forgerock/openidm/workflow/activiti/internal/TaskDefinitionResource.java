@@ -33,19 +33,21 @@ import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.form.DateFormType;
 import org.activiti.engine.impl.form.DefaultTaskFormHandler;
 import org.activiti.engine.impl.form.EnumFormType;
-import org.activiti.engine.impl.form.FormPropertyHandler;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.EnumFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.TaskDefinitionMixIn;
 
 /**
  * Resource implementation of TaskDefinition related Activiti operations
+ *
  * @author orsolyamebold
  */
 public class TaskDefinitionResource implements CollectionResourceProvider {
@@ -72,34 +74,35 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionCollection on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
     public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionInstance on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("CreateInstance on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("DeleteInstance on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("PatchInstance on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("objid");
+                String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("procdefid");
                 ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(processDefinitionId);
                 Map<String, TaskDefinition> taskdefinitions = procdef.getTaskDefinitions();
                 for (TaskDefinition taskDefinition : taskdefinitions.values()) {
@@ -123,7 +126,8 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
     @Override
     public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("objid");
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+            String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("procdefid");
             ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(processDefinitionId);
             TaskDefinition taskDefinition = procdef.getTaskDefinitions().get(resourceId);
             DefaultTaskFormHandler taskFormHandler = (DefaultTaskFormHandler) taskDefinition.getTaskFormHandler();
@@ -140,6 +144,6 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("UpdateInstance on TaskDefinitionResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 }
