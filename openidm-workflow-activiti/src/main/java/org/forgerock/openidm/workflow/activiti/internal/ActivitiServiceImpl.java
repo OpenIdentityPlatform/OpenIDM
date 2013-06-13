@@ -56,6 +56,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.internal.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
@@ -78,10 +79,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = {
-        ActivitiServiceImpl.ROUTER_PREFIX_OBJ,
-        ActivitiServiceImpl.ROUTER_PREFIX_OBJID,
-        ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJ,
-        ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJID})})
+        ActivitiServiceImpl.ROUTER_PREFIX})})
 @References({
     @Reference(name = "JavaDelegateServiceReference", referenceInterface = JavaDelegate.class,
     bind = "bindService", unbind = "unbindService",
@@ -95,10 +93,7 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
     public final static String PID = "org.forgerock.openidm.workflow";
-    public final static String ROUTER_PREFIX_OBJ = "/workflow/{activitiobj}";
-    public final static String ROUTER_PREFIX_OBJID = "/workflow/{activitiobj}/{objid}";
-    public final static String ROUTER_PREFIX_OBJID_SUBOBJ = "/workflow/{activitiobj}/{objid}/{subobj}";
-    public final static String ROUTER_PREFIX_OBJID_SUBOBJID = "/workflow/{activitiobj}/{objid}/{subobj}/{subobjid}";
+    public final static String ROUTER_PREFIX = "/workflow*";
     // Keys in the JSON configuration
     public static final String CONFIG_ENABLED = "enabled";
     public static final String CONFIG_LOCATION = "location";
@@ -179,7 +174,7 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     @Override
     public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("Patch on ActivitiService not supported."));
+        handler.handleError(ResourceUtil.notSupported(request));
     }
 
     @Override

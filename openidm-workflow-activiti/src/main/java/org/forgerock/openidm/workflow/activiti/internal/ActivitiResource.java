@@ -23,13 +23,10 @@
  */
 package org.forgerock.openidm.workflow.activiti.internal;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.impl.identity.Authentication;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
-import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.util.ResourceUtil;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -38,112 +35,83 @@ import org.forgerock.openidm.audit.util.ActivityLog;
  */
 public class ActivitiResource implements RequestHandler {
 
-    private Map<String, CollectionResourceProvider> resources = new HashMap<String, CollectionResourceProvider>(3);
+    private Router resources = new Router();
+    private Router subResources = new Router();
 
     public ActivitiResource(ProcessEngine engine, PersistenceConfig config) {
-        resources.put("processdefinition", new ProcessDefinitionResource(engine));
-        resources.put("processinstance", new ProcessInstanceResource(engine, config));
-        resources.put("taskinstance", new TaskInstanceResource(engine));
+        subResources.addRoute("/", new ProcessDefinitionResource(engine));
+        subResources.addRoute("/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
+        
+        resources.addRoute(RoutingMode.STARTS_WITH, "/processdefinition", subResources);
+        resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
+        resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
     }
 
     public void setProcessEngine(ProcessEngine engine, PersistenceConfig config) {
-        resources.put("processdefinition", new ProcessDefinitionResource(engine));
-        resources.put("processinstance", new ProcessInstanceResource(engine, config));
-        resources.put("taskinstance", new TaskInstanceResource(engine));
+        subResources.addRoute("/", new ProcessDefinitionResource(engine));
+        subResources.addRoute("/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
+        
+        resources.addRoute(RoutingMode.STARTS_WITH, "/processdefinition", subResources);
+        resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
+        resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
     }
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Action on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.actionInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
-            }
+            resources.handleAction(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Create on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.createInstance(context, request, handler);
-            }
+            resources.handleCreate(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Delete on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.deleteInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
-            }
+            resources.handleDelete(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 
     @Override
     public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("Patch on ActivitiResource not supported yet."));
+        handler.handleError(ResourceUtil.notSupported(request));
     }
 
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Query on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.queryCollection(context, request, handler);
-            }
+            resources.handleQuery(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Read on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.readInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
-            }
+            resources.handleRead(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
-            CollectionResourceProvider resource = resources.get(((RouterContext) context).getUriTemplateVariables().get("activitiobj"));
-            if (resource == null) {
-                handler.handleError(new NotSupportedException("Update on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
-            } else {
-                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-                resource.updateInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
-            }
+            resources.handleUpdate(context, request, handler);
         } catch (Exception ex) {
-            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+            handler.handleError(ResourceUtil.adapt(ex));
         }
     }
 }

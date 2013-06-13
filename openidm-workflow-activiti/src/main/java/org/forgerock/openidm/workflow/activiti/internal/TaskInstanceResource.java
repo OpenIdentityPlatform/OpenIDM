@@ -34,6 +34,7 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
@@ -42,6 +43,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.TaskEntityMixIn;
 
 /**
@@ -70,12 +72,13 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionCollection on TaskInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
     public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskService taskService = processEngine.getTaskService();
             Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
             if (task == null) {
@@ -99,22 +102,23 @@ public class TaskInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("CreateInstance on TaskInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("DeleteInstance on TaskInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("PatchInstance on TaskInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskQuery query = processEngine.getTaskService().createTaskQuery();
             if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())
                     || ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
@@ -144,6 +148,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
     @Override
     public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             TaskQuery query = processEngine.getTaskService().createTaskQuery();
             query.taskId(resourceId);
             Task task = query.singleResult();
@@ -180,6 +185,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
     @Override
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             Task task = processEngine.getTaskService().createTaskQuery().taskId(resourceId).singleResult();
             if (task == null) {
                 handler.handleError(new NotFoundException());

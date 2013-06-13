@@ -31,13 +31,14 @@ import java.util.Map;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.HistoricProcessInstanceEntity;
 import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.runtime.ProcessInstanceQuery;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.internal.mixin.HistoricProcessInstanceMixIn;
 
 /**
@@ -68,17 +69,18 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionCollection on ProcessInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
     }
 
     @Override
     public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("ActionInstance on ProcessInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             String key = ActivitiUtil.removeKeyFromRequest(request);
             String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
             String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
@@ -111,6 +113,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             if (processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult() != null) {
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
                 Map<String, String> result = new HashMap<String, String>(1);
@@ -126,12 +129,13 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("PatchInstance on ProcessInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     @Override
     public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                 HistoricProcessInstanceQuery query = processEngine.getHistoryService().createHistoricProcessInstanceQuery();
                 query = query.unfinished();
@@ -143,10 +147,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 }
                 handler.handleResult(new QueryResult());
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
-                ProcessInstanceQuery query = processEngine.getRuntimeService().createProcessInstanceQuery();
+                HistoricProcessInstanceQuery query = processEngine.getHistoryService().createHistoricProcessInstanceQuery();
                 setProcessInstanceParams(query, request);
-                List<ProcessInstance> list = query.list();
-                for (ProcessInstance processinstance : list) {
+                List<HistoricProcessInstance> list = query.list();
+                for (HistoricProcessInstance processinstance : list) {
                     Map value = mapper.convertValue(processinstance, HashMap.class);
                     Resource r = new Resource(processinstance.getId(), null, new JsonValue(value));
                     handler.handleResource(r);
@@ -163,6 +167,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     @Override
     public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
         try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             HistoricProcessInstance instance =
                     processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
             if (instance == null) {
@@ -179,7 +184,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
 
     @Override
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(new NotSupportedException("UpdateInstance on ProcessInstanceResource not supported."));
+        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
     }
 
     /**
@@ -189,7 +194,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
      * @param query Query to update
      * @param request incoming request
      */
-    private void setProcessInstanceParams(ProcessInstanceQuery query, QueryRequest request) {
+    private void setProcessInstanceParams(HistoricProcessInstanceQuery query, QueryRequest request) {
         String processDefinitionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID);
         query = processDefinitionId == null ? query : query.processDefinitionId(processDefinitionId);
         String processDefinitionKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY);
