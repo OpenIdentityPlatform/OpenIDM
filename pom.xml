@@ -324,12 +324,12 @@
         <module>openidm-quartz-fragment</module>
         <module>openidm-scheduler</module>
         <module>openidm-security-jetty</module>
-        <module>openidm-security</module>
-        <module>openidm-servlet</module>
+	<module>openidm-security</module>
         <module>openidm-shell</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-        <module>openidm-ui-enduser</module>
+        <module>openidm-ui</module>
+        <module>openidm-ui-ria</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-workflow-remote</module>
