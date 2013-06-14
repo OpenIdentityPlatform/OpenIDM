@@ -36,7 +36,10 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
+import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -52,16 +55,25 @@ import org.slf4j.LoggerFactory;
  * Changes and additions by
  * @author laszlo
  * @author aegloff
+ * @author brmiller
  */
-@Component(name = "org.forgerock.openidm.ui.simple", 
+@Component(name = "org.forgerock.openidm.ui.context", 
         immediate = true,
-        policy = ConfigurationPolicy.IGNORE)
+        policy = ConfigurationPolicy.REQUIRE)
 public final class ResourceServlet
         extends HttpServlet {
     final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
-    
+
+    /** config parameter keys */
+    private static final String CONFIG_ENABLED = "enabled";
+    private static final String CONFIG_CONTEXT_ROOT = "urlContextRoot";
+    private static final String CONFIG_BUNDLE = "bundle";
+    private static final String CONFIG_NAME = "name";
+    private static final String CONFIG_RESOURCE_DIR = "resourceDir";
+
     //TODO Decide where to put the web and the java resources. Now both are in root
-    private final String path = "/public";
+    private Bundle bundle;
+    private String resourceDir;
     
     private List<String> extFolders;
     
@@ -72,22 +84,57 @@ public final class ResourceServlet
     HttpContext httpContext;
 
     ComponentContext context;
-    
+
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
-        
+        logger.info("Activating resource servlet with configuration {}", context.getProperties());
+        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);
+
+        if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
+            logger.info("UI is disabled - not registering UI servlet");
+            return;
+        }
+        else if (config.get(CONFIG_CONTEXT_ROOT) == null || config.get(CONFIG_CONTEXT_ROOT).isNull()) {
+            logger.info("UI does not specify contextRoot - unable to register servlet");
+            return;
+        }
+        else if (config.get(CONFIG_BUNDLE) == null
+                || config.get(CONFIG_BUNDLE).isNull()
+                || !config.get(CONFIG_BUNDLE).isMap()
+                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME) == null
+                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME).isNull()) {
+            logger.info("UI does not specify bundle name - unable to register servlet");
+            return;
+        }
+        else if (config.get(CONFIG_BUNDLE) == null
+                || !config.get(CONFIG_BUNDLE).isMap()
+                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
+                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
+            logger.info("UI does not specify bundle resourceDir - unable to register servlet");
+            return;
+        }
+
+        for (Bundle bundle : context.getBundleContext().getBundles()) {
+            if (bundle.getSymbolicName().equals(config.get(CONFIG_BUNDLE).get(CONFIG_NAME).asString())) {
+                this.bundle = bundle;
+            }
+        }
+        resourceDir = config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString();
+
+        String contextRoot = config.get(CONFIG_CONTEXT_ROOT).asString();
+
+        // TODO rework this into an extension config when we support serving extensions from other locations
         extFolders = new ArrayList<String>();
         extFolders.add("/css/");
         extFolders.add("/images/");
         extFolders.add("/locales/");
         extFolders.add("/templates/");
-        
-        String alias = "/openidmui";
+
         Dictionary<String, Object> props = new Hashtable<String, Object>();
-        httpService.registerServlet(alias, this,  props, httpContext);
-        logger.debug("Registered UI servlet at {}", alias);
-    }    
+        httpService.registerServlet(contextRoot, this,  props, httpContext);
+        logger.debug("Registered UI servlet at {}", contextRoot);
+    }
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -99,13 +146,13 @@ public final class ResourceServlet
             res.sendRedirect(req.getServletPath() + "/index.html");
         } else {
             if (!target.startsWith("/")) {
-                target += "/" + target;
+                target = "/" + target;
             }
 
             File extFile = null;
             String extFileCanonical = null;
-            String resName = this.path + target;
-            String extDir = IdentityServer.getInstance().getProperty("openidm.ui.extension.dir", 
+            String resName = this.resourceDir + target;
+            String extDir = IdentityServer.getInstance().getProperty("openidm.ui.extension.dir",
                     "&{launcher.install.location}/ui/extension", true);
             for (String ext : extFolders) {
                 if (target.startsWith(ext)) {
@@ -125,7 +172,7 @@ public final class ResourceServlet
             if (extFile != null && extFile.exists()) {
                 url = extFile.getCanonicalFile().toURI().toURL();
             } else {
-                url = context.getBundleContext().getBundle().getResource(resName);
+                url = bundle.getResource(resName);
             }
 
             if (url == null) {
