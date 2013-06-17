@@ -1,9 +1,7 @@
 package org.forgerock.openidm.filter;
 
-import java.util.Map;
-
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filter.AuthFilter.AuthData;
+import org.forgerock.openidm.jaspi.modules.AuthData;
 
 public interface AuthFilterService {
 
