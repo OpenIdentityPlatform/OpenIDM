@@ -61,6 +61,11 @@ public class OSGiAuthnFilterBuilder {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    /**
+     * Configures the commons Authentication Filter with the configuration in the authnfilter.json file.
+     *
+     * @param context The ComponentContext.
+     */
     @Activate
     protected void activate(ComponentContext context) {
 
@@ -68,13 +73,12 @@ public class OSGiAuthnFilterBuilder {
         JsonValue jsonConfig = config.getConfigurationAsJson(context);
 
         if (jsonConfig == null ) {
-            // Something strange going on, no configurations found
+            // No configurations found
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
             return;
         }
 
         Configuration configuration = new Configuration();
-        Map<String, Map<String, Object>> authContexts = new HashMap<String, Map<String, Object>>();
         // For each ServerAuthConfig
         for (String s : jsonConfig.get("server-auth-config").required().keys()) {
             Map<String, Object> contextProperties = jsonConfig.get("server-auth-config").required().get(s).asMap();
@@ -84,7 +88,7 @@ public class OSGiAuthnFilterBuilder {
         try {
             ConfigurationManager.configure(configuration);
         } catch (AuthException e) {
-            // TODO log and fail
+            logger.error("Failed to configure the commons Authentication Filter");
         }
     }
 }

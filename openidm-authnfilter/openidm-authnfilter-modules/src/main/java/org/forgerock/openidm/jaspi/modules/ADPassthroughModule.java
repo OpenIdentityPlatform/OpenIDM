@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,13 +42,14 @@ public class ADPassthroughModule extends IDMServerAuthModule {
     private ADPassthroughAuthenticator adPassthroughAuthenticator;
 
     /**
-     * Required default constructor of OSGi to instantiate.
+     * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
+     * module.
      */
     public ADPassthroughModule() {
     }
 
     /**
-     * For tests purposes.
+     * Constructor used by tests to inject dependencies.
      *
      * @param adPassthroughAuthenticator A mock of an ADPassthroughAuthenticator instance.
      */
@@ -56,16 +58,16 @@ public class ADPassthroughModule extends IDMServerAuthModule {
     }
 
     /**
-     * Initialises the ADPassthroughModule with the OSGi json configuration.
+     * Initialises the AD Passthrough authentication module with the OSGi json configuration.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void doInitialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            JsonValue options) {
 
         JsonValue config = new JsonValue(options);
 
@@ -81,21 +83,16 @@ public class ADPassthroughModule extends IDMServerAuthModule {
     }
 
     /**
-     * Validates the client's request by calling through to the existing AuthFilter.authenticate() method.
-     * If the authenticate method return null, this indicates a logout and AuthStatus.SEND_SUCCESS will be returned.
-     * If the authenticate method returns a valid UserWrapper object, this indicates a successful authentication and
-     * AuthStatus.SUCCESS will be returned.
-     * If the authenticate method throws an org.forgerock.openidm.filter.AuthException, this indicates an unsuccessful
-     * authentication and AuthStatus.SEND_FAILURE will be returned.
+     * Validates the client's request by passing through the request to be authenticated against AD.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus doValidateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject, AuthData authData) throws AuthException {
+    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
+            AuthData authData) {
 
         LOGGER.debug("ADPassthroughModule: validateRequest START");
 
@@ -103,16 +100,22 @@ public class ADPassthroughModule extends IDMServerAuthModule {
 
         try {
             LOGGER.debug("ADPassthroughModule: Delegating call to internal AuthFilter");
-            String password = request.getHeader("X-OpenIDM-password");
-            authData.username = request.getHeader("X-OpenIDM-username");
-            if (authData.username == null || password == null || authData.username.equals("") || password.equals("")) {
+
+            String username = request.getHeader("X-OpenIDM-Username");
+            String password = request.getHeader("X-OpenIDM-Password");
+
+            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 LOGGER.debug("Failed authentication, missing or empty headers");
                 return AuthStatus.SEND_FAILURE;
             }
-            authData = adPassthroughAuthenticator.authenticate(authData, password);
-            if (authData.status) {
+
+            authData.setUsername(username);
+            boolean authenticated = adPassthroughAuthenticator.authenticate(authData, password);
+
+            if (authenticated) {
                 LOGGER.debug("ADPassthroughModule: Authentication successful");
-                LOGGER.debug("Found valid session for {} id {} with roles {}", authData.username, authData.userId, authData.roles);
+                LOGGER.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
+                        authData.getUserId(), authData.getRoles());
 
                 return AuthStatus.SUCCESS;
             } else {
@@ -128,12 +131,11 @@ public class ADPassthroughModule extends IDMServerAuthModule {
      * No work to do here so always returns AuthStatus.SEND_SUCCESS.
      *
      * @param messageInfo {@inheritDoc}
-     * @param subject {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus doSecureResponse(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
         return AuthStatus.SEND_SUCCESS;
     }
 
@@ -142,9 +144,8 @@ public class ADPassthroughModule extends IDMServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void doCleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
     }
 }

@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,43 +29,78 @@ import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.Map;
 import java.util.Set;
 
+/**
+ * Commons Authentication Filter module to provide authentication using IWA.
+ */
 public class IWAModule extends IDMServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IWAModule.class);
 
-    private CallbackHandler handler;
-    private Map options;
+    private final org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule;
 
-    private org.forgerock.jaspi.modules.iwa.IWAModule iwaModule;
-
-    @Override
-    protected void doInitialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-                           Map options) throws AuthException {
-        this.handler = handler;
-        this.options = options;
-        this.iwaModule = new org.forgerock.jaspi.modules.iwa.IWAModule();
-        iwaModule.initialize(requestPolicy, responsePolicy, handler, options);
+    /**
+     * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
+     * module.
+     */
+    public IWAModule() {
+        commonsIwaModule = new org.forgerock.jaspi.modules.iwa.IWAModule();
     }
 
+    /**
+     * Constructor used by tests to inject dependencies.
+     *
+     * @param commonsIwaModule A mock of the Commons IWAModule.
+     */
+    public IWAModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule) {
+        this.commonsIwaModule = commonsIwaModule;
+    }
+
+    /**
+     * Initialises the commons IWA authentication module.
+     *
+     * @param requestPolicy {@inheritDoc}
+     * @param responsePolicy {@inheritDoc}
+     * @param handler {@inheritDoc}
+     * @param options {@inheritDoc}
+     * @throws AuthException {@inheritDoc}
+     */
     @Override
-    protected AuthStatus doValidateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject, AuthData authData)
-            throws AuthException {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            JsonValue options) throws AuthException {
+        commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, options.asMap());
+    }
+
+    /**
+     * Uses the IWA authentication to handle the authentication process.
+     *
+     * AuthStatus.SEND_CONTINUE is returned with the response Http code set to 401 unauthorized and a Negotiate header.
+     * If IWA is enabled on the client then the subsequent request will contain the Kerberos token and
+     * AuthStatus.SUCCESS will be returned for a successful authentication and AuthStatus.SEND_FAILURE if authentication
+     * fails/
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param clientSubject {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
+     * @param authData {@inheritDoc}
+     * @return {@inheritDoc}
+     * @throws AuthException {@inheritDoc}
+     */
+    @Override
+    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
+            AuthData authData) {
 
         LOGGER.debug("IWAADPassthroughModule: validateRequest START");
 
-        HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
-        HttpServletResponse response = (HttpServletResponse)messageInfo.getResponseMessage();
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
 
         LOGGER.debug("IWAADPassthroughModule: Processing request {}", request.getRequestURL().toString());
 
-
-        AuthStatus authStatus;
         try {
             LOGGER.debug("IWAADPassthroughModule: Calling IWA modules");
-            authStatus = iwaModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+            AuthStatus authStatus = commonsIwaModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
             if (!AuthStatus.SUCCESS.equals(authStatus)) {
                 LOGGER.debug("IWAADPassthroughModule: IWA response to send to client, returning status, {}",
@@ -77,7 +113,7 @@ public class IWAModule extends IDMServerAuthModule {
             Set<Principal> principals = clientSubject.getPrincipals(Principal.class);
             for (Principal principal : principals) {
                 String principalName = principal.getName();
-                if (principalName != null || !"".equals(principalName)) {
+                if (principalName != null && !"".equals(principalName)) {
                     username = principalName;
                     break;
                 }
@@ -86,8 +122,10 @@ public class IWAModule extends IDMServerAuthModule {
                 LOGGER.error("IWAADPassthroughModule: Username not found by IWA");
                 throw new AuthException("Could not get username");
             }
-            authData.username = username;
-            authData.resource = "system/AD/account";
+            // Need to set as much information as possible so it can be put in both the request and JWT for IDM
+            // and later use
+            authData.setUsername(username);
+            authData.setResource("system/AD/account");
 
             LOGGER.debug("IWAADPassthroughModule: Successful log in with user, {}", username);;
 
@@ -101,12 +139,25 @@ public class IWAModule extends IDMServerAuthModule {
         }
     }
 
+    /**
+     * No work to do here so always returns AuthStatus.SEND_SUCCESS.
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
-    protected AuthStatus doSecureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
         return AuthStatus.SEND_SUCCESS;
     }
 
+    /**
+     * Nothing to clean up.
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param subject {@inheritDoc}
+     */
     @Override
-    protected void doCleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
     }
 }

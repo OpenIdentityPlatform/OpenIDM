@@ -19,12 +19,104 @@ package org.forgerock.openidm.jaspi.modules;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Holds authentication information for a login.
+ */
 public class AuthData {
 
-    String username;
-    String userId;
-    List<String> roles = new ArrayList<String>();
-    boolean status = false;
-    String resource = "default";
+    private String username;
+    private String userId;
+    private List<String> roles = new ArrayList<String>();
+//    private boolean status = false;
+    private String resource = "default";
 
+    /**
+     * Gets the username of the user.
+     *
+     * @return The username.
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Sets the username of the user.
+     *
+     * @param username The username.
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * Gets the user id of the user.
+     *
+     * @return The user id.
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Sets the user id of the user.
+     *
+     * @param userId The user id.
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Gets the roles the user is allocated.
+     *
+     * @return The roles.
+     */
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    /**
+     * Sets the roles the user is allocated.
+     *
+     * @param roles The roles.
+     */
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
+
+//    /**
+//     * Gets the status of the authentication. Either true for success or false for failure.
+//     *
+//     * @return The authentication status.
+//     */
+//    public boolean getStatus() {
+//        return status;
+//    }
+//
+//    /**
+//     * Sets the status of the authentication. Either true for success or false for failure.
+//     *
+//     * @param status The authentication status.
+//     */
+//    public void setStatus(boolean status) {
+//        this.status = status;
+//    }
+
+    /**
+     * Gets the resource used to authenticate the user.
+     *
+     * @return The resource.
+     */
+    public String getResource() {
+        return resource;
+    }
+
+    /**
+     * Sets the resource used to authenticate the user.
+     *
+     * @param resource The resource.
+     */
+    public void setResource(String resource) {
+        this.resource = resource;
+    }
 }

@@ -1,56 +1,19 @@
 {
     "server-auth-config" : {
-        "iwa-ad-anon-passthrough" : {
-            "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule",
-                "key-alias" : "openidm-localhost",
-                "private-key-password" : "changeit",
-                "keystore-type" : "JCEKS",
-                "keystore-file" : "security/keystore.jceks",
-                "keystore-password" : "changeit",
-                "token-life" : "10"
-            },
-            "auth-modules" : [
-                {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.IWAPassthroughModule",
-                    "servicePrincipal" : "HTTP/bridge.goldengate.com@GOLDENGATE.COM",
-                    "keytabFileName" : "&{launcher.working.location}/bridge.HTTP.keytab",
-                    "kerberosRealm" : "goldengate.com",
-                    "kerberosServerName" : "ec2-54-242-220-206.compute-1.amazonaws.com",
-                    "passThroughAuth" : "system/AD/account",
-                    "propertyMapping" : {
-                        "userRoles" : "memberOf"
-                    },
-                    "defaultUserRoles" : [
-                        "openidm-reg"
-                    ]
-                },
-                {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.AnonymousModule",
-                    "propertyMapping" : {
-                        "userId" : "_id",
-                        "userCredential" : "password",
-                        "userRoles" : "memberOf"
-                    },
-                    "defaultUserRoles" : [
-                        "openidm-reg"
-                    ]
-                }
-            ]
-        },
-        "ad-passthrough-only" : {
+        "idm-auth" : {
             "session-module" : {
                 "class-name" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
                 "key-alias" : "openidm-localhost",
                 "private-key-password" : "changeit",
                 "keystore-type" : "JCEKS",
                 "keystore-file" : "security/keystore.jceks",
-                "keystore-password" : "changeit"
+                "keystore-password" : "changeit",
+                "token-life" : "10",
+                "userid-key": "X-OpenIDM-Username"
             },
             "auth-modules" : [
                 {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
-                    "passThroughAuth" : "system/AD/account",
+                    "class-name" : "org.forgerock.openidm.jaspi.modules.IDMAuthModule",
                     "queryId" : "credential-query",
                     "queryOnResource" : "managed/user",
                     "propertyMapping" : {
@@ -58,10 +21,7 @@
                         "userCredential" : "password",
                         "userRoles" : "memberOf"
                     },
-                    "defaultUserRoles" : [
-                        "openidm-reg"
-                    ],
-                    "allowedGroups" : [ ]
+                    "defaultUserRoles" : [ ]
                 }
             ]
         }

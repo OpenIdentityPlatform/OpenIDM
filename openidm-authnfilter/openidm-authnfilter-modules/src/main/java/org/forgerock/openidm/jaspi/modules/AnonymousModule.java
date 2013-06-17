@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Commons Authentication Filter module to provide authentication for the anonymous user.
+ */
 public class AnonymousModule extends IDMServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(AnonymousModule.class);
@@ -37,12 +41,22 @@ public class AnonymousModule extends IDMServerAuthModule {
     private final String internalUserQueryId = "credential-internaluser-query";
     private final String queryOnInternalUserResource = "internal/user";
 
-    private AnonymousAuthenticator anonymousAuthenticator;
+    private AuthHelper authHelper;
 
     /**
-     * Required default constructor of OSGi to instantiate.
+     * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
+     * module.
      */
     public AnonymousModule() {
+    }
+
+    /**
+     * Constructor used by tests to inject dependencies.
+     *
+     * @param authHelper A mock of the AuthHelper.
+     */
+    public AnonymousModule(AuthHelper authHelper) {
+        this.authHelper = authHelper;
     }
 
     /**
@@ -52,50 +66,46 @@ public class AnonymousModule extends IDMServerAuthModule {
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
-     * @throws javax.security.auth.message.AuthException {@inheritDoc}
      */
     @Override
-    protected void doInitialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map options) throws AuthException {
-
-        JsonValue config = new JsonValue(options);
-
-        List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
-
-        // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        String userIdProperty = properties.get("userId").asString();
-        String userCredentialProperty = properties.get("userCredential").asString();
-        String userRolesProperty = properties.get("userRoles").asString();
-
-        anonymousAuthenticator = new AnonymousAuthenticator(userRolesProperty, defaultRoles, userIdProperty, userCredentialProperty);
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            JsonValue options) {
+        authHelper = new AuthHelper(options);
     }
 
     /**
-     *
+     * Authenticates the user as the anonymous user. If authentication is successful AuthStatus.SUCCESS is returned,
+     * otherwise AuthStatus.SEND_FAILURE is returned.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus doValidateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject, AuthData authData)
-            throws AuthException {
+    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
+            AuthData authData) {
 
-        HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            String password = request.getHeader("X-OpenIDM-password");
-            authData.username = request.getHeader("X-OpenIDM-username");
+            String username = request.getHeader("X-OpenIDM-Username");
+            String password = request.getHeader("X-OpenIDM-Password");
 
-            authData.status = anonymousAuthenticator.authenticate(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
-            authData.resource = queryOnInternalUserResource;
+            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+                logger.debug("Failed authentication, missing or empty headers");
+                return AuthStatus.SEND_FAILURE;
+            }
 
-            if (authData.status) {
+            authData.setUsername(username);
+            boolean authSucceeded = authHelper.authenticate(internalUserQueryId, queryOnInternalUserResource,
+                    username, password, authData);
+            authData.setResource(queryOnInternalUserResource);
+
+            if (authSucceeded) {
                 logger.debug("ADPassthroughModule: Authentication successful");
-                logger.debug("Found valid session for {} id {} with roles {}", authData.username, authData.userId, authData.roles);
+                logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
+                        authData.getUserId(), authData.getRoles());
 
                 return AuthStatus.SUCCESS;
             } else {
@@ -108,18 +118,17 @@ public class AnonymousModule extends IDMServerAuthModule {
     }
 
     /**
-     *
+     * No work to do here so always returns AuthStatus.SEND_SUCCESS.
      *
      * @param messageInfo {@inheritDoc}
-     * @param subject {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus doSecureResponse(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        String xOpenIDMUsername = request.getHeader("X-OpenIDM-username");
+        String xOpenIDMUsername = request.getHeader("X-OpenIDM-Username");
 
         if ("anonymous".equals(xOpenIDMUsername)) {
             messageInfo.getMap().put("skipSession", true);
@@ -133,9 +142,8 @@ public class AnonymousModule extends IDMServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void doCleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
     }
 }
