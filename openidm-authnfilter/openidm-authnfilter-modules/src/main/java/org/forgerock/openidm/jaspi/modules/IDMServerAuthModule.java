@@ -49,7 +49,7 @@ import java.util.Map;
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(IDMAuthModule.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
     /** Attribute in session containing authenticated username. */
     private static final String USERNAME_ATTRIBUTE = "openidm.username";
