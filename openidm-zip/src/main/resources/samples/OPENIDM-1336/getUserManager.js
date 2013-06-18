@@ -1,22 +1,24 @@
 if (request.method == "query") {
+    if (!request.params.userId) {
+     throw "Parameter userId is required";   
+    }
     userId = request.params.userId
     user = openidm.read("managed/user/"+userId)
-    manager = openidm.read("managed/user/"+user.manager.managerId)
-    delegates = []
-    if (manager.delegates !== undefined) {
-        for (i = 0; i < manager.delegates.length; i++) {
-            processDelegates(manager.delegates[i])
+    if (!user) {
+        throw "User not found: " + userId
+    }
+    managerCandidates = { managers : ["superadmin"] };
+    if (user.manager && user.manager.managerId) {
+        pushIfNotContains(managerCandidates.managers, user.manager.managerId)
+        manager = openidm.read("managed/user/"+user.manager.managerId)
+        if (manager.delegates !== undefined) {
+            for (i = 0; i < manager.delegates.length; i++) {
+                processDelegates(manager.delegates[i])
+            }
         }
     }
-    if (delegates.length > 0) {
-        delegates.toString()
-    } else {
-        if (user.manager) {
-            user.manager.managerId
-        } else {
-            "superadmin"
-        }
-    }
+    
+    managerCandidates
 } else {
     throw "Unsupported operation: " + request.method;
 }
@@ -27,7 +29,13 @@ function processDelegates(delegate) {
     var now = new Date();
     
     if (startDate < now && now < endDate ) {
-        delegates.push(delegate.to)
+        pushIfNotContains(managerCandidates.managers, delegate.to)
+    }
+}
+
+function pushIfNotContains(list, item) {
+    if (list.indexOf(item) == -1) {
+        list.push(item)
     }
 }
 
