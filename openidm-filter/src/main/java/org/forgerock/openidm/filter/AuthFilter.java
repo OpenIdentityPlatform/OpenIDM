@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -62,6 +63,9 @@ public class AuthFilter implements AuthFilterService, JsonResource {
     /** Re-authentication password header */
     public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
+    private String queryId;
+    private String queryOnResource;
+
     /** The authentication module to delegate to */
     private AuthHelper authHelper;
 
@@ -79,7 +83,17 @@ public class AuthFilter implements AuthFilterService, JsonResource {
 
     private void setConfig(ComponentContext context) {
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        authHelper = new AuthHelper(config);
+
+        queryId = config.get("queryId").defaultTo("credential-query").asString();
+        queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
+
+        JsonValue properties = config.get("propertyMapping");
+        String userIdProperty = properties.get("userId").asString();
+        String userCredentialProperty = properties.get("userCredential").asString();
+        String userRolesProperty = properties.get("userRoles").asString();
+        List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
+
+        authHelper = new AuthHelper(userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     /**
@@ -132,12 +146,13 @@ public class AuthFilter implements AuthFilterService, JsonResource {
             }
         }
         AuthData ad = new AuthData();
-        ad.setUsername(secCtx.get("security").get("username").asString());
-        if (ad.getUsername() == null || reauthPassword == null || ad.getUsername().equals("") || reauthPassword.equals("")) {
+        String username = secCtx.get("security").get("username").asString();
+        ad.setUsername(username);
+        if (username == null || reauthPassword == null || username.equals("") || reauthPassword.equals("")) {
             logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException("Failed authentication, missing or empty headers");
         }
-        boolean authenticated = authHelper.authenticate(ad, reauthPassword);
+        boolean authenticated = authHelper.authenticate(queryId, queryOnResource, username, reauthPassword, ad);
         if (!authenticated) {
             throw new AuthException(ad.getUsername());
         }

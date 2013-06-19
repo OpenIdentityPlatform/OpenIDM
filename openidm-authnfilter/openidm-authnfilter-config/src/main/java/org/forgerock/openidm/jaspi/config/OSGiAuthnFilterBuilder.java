@@ -24,26 +24,26 @@ import java.util.Map;
  * <pre>
  *     <code>
  * {
- *     "server-auth-config" : {
- *         "iwa-ad-passthrough" : {
- *             "session-module" : {
- *                 "class-name" : "org.forgerock.jaspi.modules.JwtSessionModule"
+ *     "serverAuthConfig" : {
+ *         "iwaAdPassthrough" : {
+ *             "sessionModule" : {
+ *                 "className" : "org.forgerock.jaspi.modules.JwtSessionModule"
  *             },
- *             "auth-modules" : [
+ *             "authModules" : [
  *                 {
- *                     "class-name" : "org.forgerock.openidm.jaspi.modules.IWAModule",
- *                     "some-setting" : "some-value"
+ *                     "className" : "org.forgerock.openidm.jaspi.modules.IWAModule",
+ *                     "someSetting" : "some-value"
  *                 },
  *                 {
- *                     "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
- *                     "some-setting" : "some-value"
+ *                     "className" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "someSetting" : "some-value"
  *                 }
  *             ]
  *         },
- *         "ad-passthrough-only" : {
- *             "auth-modules" : [
+ *         "adPassthroughOnly" : {
+ *             "authModules" : [
  *                 {
- *                     "class-name" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "className" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
  *                     "passThroughAuth" : "system/AD/account"
  *                 }
  *             ]
@@ -62,7 +62,7 @@ public class OSGiAuthnFilterBuilder {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * Configures the commons Authentication Filter with the configuration in the authnfilter.json file.
+     * Configures the commons Authentication Filter with the configuration in the authentication.json file.
      *
      * @param context The ComponentContext.
      */
@@ -80,8 +80,8 @@ public class OSGiAuthnFilterBuilder {
 
         Configuration configuration = new Configuration();
         // For each ServerAuthConfig
-        for (String s : jsonConfig.get("server-auth-config").required().keys()) {
-            Map<String, Object> contextProperties = jsonConfig.get("server-auth-config").required().get(s).asMap();
+        for (String s : jsonConfig.get("serverAuthConfig").required().keys()) {
+            Map<String, Object> contextProperties = jsonConfig.get("serverAuthConfig").required().get(s).asMap();
             configuration.addAuthContext(s, contextProperties);
         }
 

@@ -41,33 +41,16 @@ public class AuthHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
 
-    // default properties set in config/system.properties
-    String queryId;
-    String queryOnResource;
-    String internalUserQueryId;
-    String queryOnInternalUserResource;
     String userIdProperty;
     String userCredentialProperty;
     String userRolesProperty;
     List<String> defaultRoles;
 
-    // configuration conf/authentication.json
-
-    public AuthHelper(JsonValue config) {
-        defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        queryId = config.get("queryId").defaultTo("credential-query").asString();
-        queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
-        internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
-        queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
-
-        // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        userIdProperty = properties.get("userId").asString();
-        userCredentialProperty = properties.get("userCredential").asString();
-        userRolesProperty = properties.get("userRoles").asString();
-
-        logger.info("AuthHelper config params userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
-            defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource);
+    public AuthHelper(String userIdProperty, String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
+        this.userIdProperty = userIdProperty;
+        this.userCredentialProperty = userCredentialProperty;
+        this.userRolesProperty = userRolesProperty;
+        this.defaultRoles = defaultRoles;
 
         if ((userIdProperty != null && userCredentialProperty == null) ||
                 (userIdProperty == null && userCredentialProperty != null)) {
@@ -80,42 +63,21 @@ public class AuthHelper {
             userIdProperty, userCredentialProperty, userRolesProperty);
     }
 
-    /**
-     * Authenticate the given username and password
-     * @param authData The current authentication data to validate and augment, with the username supplied
-     * @param password The supplied password to validate
-     * @return the authentication data augmented with role, id, status info. Whether authentication was successful is
-     * carried by the status property 
-     */
-    public boolean authenticate(AuthData authData, String password) {
-
-        boolean authenticated = authenticate(queryId, queryOnResource, authData.getUsername(), password, authData);
-        if (!authenticated) {
-            // Authenticate against the internal user table if authentication against managed users failed
-            authenticated = authenticate(internalUserQueryId, queryOnInternalUserResource, authData.getUsername(),
-                    password, authData);
-            authData.setResource(queryOnInternalUserResource);
-        } else {
-            authData.setResource(queryOnResource);
-        }
-        return authenticated;
-    }
-
-    public boolean authenticate(String passQueryId, String passQueryOnResource, String login, String password,
+    public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
             AuthData authData) {
 
         try {
-            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authData);
+            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, authData);
             if (userInfo != null && userInfo.checkCredential(password)) {
                 List<String> roles = authData.getRoles();
                 roles.clear();
                 roles.addAll(userInfo.getRoleNames());
                 return true;
             } else {
-                logger.debug("Authentication failed for {} due to invalid credentials", login);
+                logger.debug("Authentication failed for {} due to invalid credentials", username);
             }
         } catch (Exception ex) {
-            logger.warn("Authentication failed to get user info for {} {}", login, ex);
+            logger.warn("Authentication failed to get user info for {} {}", username, ex);
             return false;
         }
         return false;
