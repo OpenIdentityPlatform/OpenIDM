@@ -1,21 +1,27 @@
 {
-    "server-auth-config" : {
-        "idm-auth" : {
-            "session-module" : {
-                "class-name" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
-                "key-alias" : "openidm-localhost",
-                "private-key-password" : "changeit",
-                "keystore-type" : "JCEKS",
-                "keystore-file" : "security/keystore.jceks",
-                "keystore-password" : "changeit",
-                "token-life" : "10",
-                "userid-key": "X-OpenIDM-Username"
+    "serverAuthConfig" : {
+        "idmAuth" : {
+            "sessionModule" : {
+                "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "changeit",
+                "keystoreType" : "JCEKS",
+                "keystoreFile" : "security/keystore.jceks",
+                "keystorePassword" : "changeit",
+                "tokenLife" : "10"
             },
-            "auth-modules" : [
+            "authModules" : [
                 {
-                    "class-name" : "org.forgerock.openidm.jaspi.modules.IDMAuthModule",
-                    "queryId" : "credential-query",
-                    "queryOnResource" : "managed/user",
+                    "className" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "memberOf"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                {
+                    "className" : "org.forgerock.openidm.jaspi.modules.InternalUserAuthModule",
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
@@ -25,5 +31,5 @@
                 }
             ]
         }
-    }
+    },
 }

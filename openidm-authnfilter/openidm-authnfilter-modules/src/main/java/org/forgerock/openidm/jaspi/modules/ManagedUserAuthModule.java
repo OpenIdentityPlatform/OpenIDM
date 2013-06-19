@@ -34,18 +34,22 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-public class IDMAuthModule extends IDMServerAuthModule {
+public class ManagedUserAuthModule extends IDMServerAuthModule {
 
-    private final static Logger logger = LoggerFactory.getLogger(IDMAuthModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(ManagedUserAuthModule.class);
 
     /** Authentication username header */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
     /** Authentication password header */
     public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
+
+    private static final String QUERY_ID = "credential-query";
+    private static final String QUERY_ON_RESOURCE = "managed/user";
 
     // A list of ports that allow authentication purely based on client certificates (SSL mutual auth)
     private Set<Integer> clientAuthOnly = new HashSet<Integer>();
@@ -56,7 +60,7 @@ public class IDMAuthModule extends IDMServerAuthModule {
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public IDMAuthModule() {
+    public ManagedUserAuthModule() {
     }
 
     /**
@@ -64,12 +68,12 @@ public class IDMAuthModule extends IDMServerAuthModule {
      *
      * @param authHelper A mock of an AuthHelper instance.
      */
-    public IDMAuthModule(AuthHelper authHelper) {
+    public ManagedUserAuthModule(AuthHelper authHelper) {
         this.authHelper = authHelper;
     }
 
     /**
-     * Initialises the IDMAuthModule.
+     * Initialises the ManagedUserAuthModule.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
@@ -89,7 +93,13 @@ public class IDMAuthModule extends IDMServerAuthModule {
         }
         logger.info("Authentication disabled on ports: {}", clientAuthOnly);
 
-        authHelper = new AuthHelper(options);
+        JsonValue properties = options.get("propertyMapping");
+        String userIdProperty = properties.get("userId").asString();
+        String userCredentialProperty = properties.get("userCredential").asString();
+        String userRolesProperty = properties.get("userRoles").asString();
+        List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
+
+        authHelper = new AuthHelper(userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     /**
@@ -198,7 +208,7 @@ public class IDMAuthModule extends IDMServerAuthModule {
     }
 
     /**
-     * Authenticates the request internally.
+     * Authenticates the request.
      *
      * @param request The HttpServletRequest.
      * @param authData The AuthData object.
@@ -213,7 +223,7 @@ public class IDMAuthModule extends IDMServerAuthModule {
             return false;
         }
         authData.setUsername(username);
-        return authHelper.authenticate(authData, password);
+        return authHelper.authenticate(QUERY_ID, QUERY_ON_RESOURCE, username, password, authData);
     }
 
     /**
@@ -239,7 +249,7 @@ public class IDMAuthModule extends IDMServerAuthModule {
             return false;
         }
         authData.setUsername(t[0]);
-        return authHelper.authenticate(authData, t[1]);
+        return authHelper.authenticate(QUERY_ID, QUERY_ON_RESOURCE, t[0], t[1], authData);
     }
 
     /**

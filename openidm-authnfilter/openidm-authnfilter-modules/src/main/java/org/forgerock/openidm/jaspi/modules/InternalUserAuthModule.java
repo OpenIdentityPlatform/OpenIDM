@@ -23,20 +23,18 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Commons Authentication Filter module to provide authentication for the anonymous user.
  */
-public class AnonymousModule extends IDMServerAuthModule {
+public class InternalUserAuthModule extends IDMServerAuthModule {
 
-    private final static Logger logger = LoggerFactory.getLogger(AnonymousModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(InternalUserAuthModule.class);
 
     private final String internalUserQueryId = "credential-internaluser-query";
     private final String queryOnInternalUserResource = "internal/user";
@@ -47,7 +45,7 @@ public class AnonymousModule extends IDMServerAuthModule {
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public AnonymousModule() {
+    public InternalUserAuthModule() {
     }
 
     /**
@@ -55,12 +53,12 @@ public class AnonymousModule extends IDMServerAuthModule {
      *
      * @param authHelper A mock of the AuthHelper.
      */
-    public AnonymousModule(AuthHelper authHelper) {
+    public InternalUserAuthModule(AuthHelper authHelper) {
         this.authHelper = authHelper;
     }
 
     /**
-     * Initialises the AnonymousModule with the OSGi json configuration.
+     * Initialises the InternalUserAuthModule with the OSGi json configuration.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
@@ -70,7 +68,14 @@ public class AnonymousModule extends IDMServerAuthModule {
     @Override
     protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             JsonValue options) {
-        authHelper = new AuthHelper(options);
+
+        JsonValue properties = options.get("propertyMapping");
+        String userIdProperty = properties.get("userId").asString();
+        String userCredentialProperty = properties.get("userCredential").asString();
+        String userRolesProperty = properties.get("userRoles").asString();
+        List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
+
+        authHelper = new AuthHelper(userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     /**
@@ -118,7 +123,9 @@ public class AnonymousModule extends IDMServerAuthModule {
     }
 
     /**
-     * No work to do here so always returns AuthStatus.SEND_SUCCESS.
+     * Always returns AuthStatus.SEND_SUCCESS but checks to see if the user that has been authenticated is the
+     * anonymous user and if so sets skipSession to prevent the creation of a session by the Session Module,
+     * (if it is configured in this case).
      *
      * @param messageInfo {@inheritDoc}
      * @param serviceSubject {@inheritDoc}

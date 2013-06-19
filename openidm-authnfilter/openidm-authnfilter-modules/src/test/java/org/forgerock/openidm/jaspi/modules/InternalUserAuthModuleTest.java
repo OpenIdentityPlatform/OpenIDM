@@ -31,9 +31,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
-public class AnonymousModuleTest {
+public class InternalUserAuthModuleTest {
 
-    private AnonymousModule anonymousModule;
+    private InternalUserAuthModule internalUserAuthModule;
 
     private AuthHelper authHelper;
 
@@ -42,7 +42,7 @@ public class AnonymousModuleTest {
 
         authHelper = mock(AuthHelper.class);
 
-        anonymousModule = new AnonymousModule(authHelper);
+        internalUserAuthModule = new InternalUserAuthModule(authHelper);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class AnonymousModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -85,7 +85,7 @@ public class AnonymousModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -109,7 +109,7 @@ public class AnonymousModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -133,7 +133,7 @@ public class AnonymousModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -160,7 +160,7 @@ public class AnonymousModuleTest {
                 authData)).willReturn(true);
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verify(authData).setUsername("USERNAME");
@@ -187,7 +187,7 @@ public class AnonymousModuleTest {
                 authData)).willReturn(false);
 
         //When
-        AuthStatus authStatus = anonymousModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         //Then
         verify(authData).setUsername("USERNAME");
@@ -210,7 +210,7 @@ public class AnonymousModuleTest {
         given(messageInfo.getMap()).willReturn(messageInfoMap);
 
         //When
-        AuthStatus authStatus = anonymousModule.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
@@ -233,7 +233,7 @@ public class AnonymousModuleTest {
         given(messageInfo.getMap()).willReturn(messageInfoMap);
 
         //When
-        AuthStatus authStatus = anonymousModule.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
