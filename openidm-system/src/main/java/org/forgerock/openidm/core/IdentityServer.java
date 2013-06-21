@@ -345,6 +345,9 @@ public final class IdentityServer implements PropertyAccessor {
      *         path.
      */
     public static File getFileForPath(String path, String serverRoot) {
+        if (null == path) {
+            return null;
+        }
         File f = new File(path);
 
         if (f.isAbsolute()) {
@@ -484,7 +487,10 @@ public final class IdentityServer implements PropertyAccessor {
         File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
         Map<String, String> entries = new HashMap<String, String>();
 
-        if (!bootFile.exists()) {
+        if (null == bootFile) {
+            System.out.println("No boot file properties: "
+                    + ServerConstants.PROPERTY_BOOT_FILE_LOCATION);
+        } else if (!bootFile.exists()) {
             // TODO: move this class out of system bundle so we can use logging
             // logger.info("No boot properties file detected at {}.",
             // bootFile.getAbsolutePath());

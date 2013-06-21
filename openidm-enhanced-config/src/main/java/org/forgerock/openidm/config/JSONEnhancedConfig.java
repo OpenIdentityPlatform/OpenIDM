@@ -135,7 +135,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      */
     public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context,
             String servicePid) throws InvalidException, InternalErrorException {
-        return getConfiguration(dict, context, servicePid, true);
+        return getConfiguration(dict, servicePid, true);
     }
 
     /**
@@ -145,8 +145,8 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      * @param decrypt
      *            true if any encrypted values should be decrypted in the result
      */
-    public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context,
-            String servicePid, boolean decrypt) throws InvalidException, InternalErrorException {
+    public JsonValue getConfiguration(Dictionary<String, Object> dict, String servicePid,
+            boolean decrypt) throws InvalidException, InternalErrorException {
         JsonValue jv = new JsonValue(new LinkedHashMap<String, Object>());
 
         if (dict != null) {
@@ -174,30 +174,35 @@ public class JSONEnhancedConfig implements EnhancedConfig {
 
         JsonValue decrypted = jv;
         if (!jv.isNull()) {
-            decrypted.getTransformers().add(new PropertyTransformer());
+            decrypted.getTransformers().add(new PropertyTransformer(doEscape));
             decrypted.applyTransformers();
             decrypted = decrypted.copy();
         }
-        if (decrypt && dict != null && !jv.isNull() && context != null
-                && context.getBundle() != null) { // todo: different way to
-                                                  // handle mock unit tests
-            decrypted = decrypt(jv, context);
+        // todo: different way to handle mock unit tests
+        if (decrypt && dict != null && !jv.isNull()) {
+            decrypted = decrypt(jv);
         }
 
         return decrypted;
     }
 
-    private JsonValue decrypt(JsonValue value, BundleContext context) throws JsonException,
-            InternalErrorException {
-        return getCryptoService(context).decrypt(value); // makes a decrypted
-                                                         // copy
+    private JsonValue decrypt(JsonValue value) throws JsonException, InternalErrorException {
+        return getCryptoService().decrypt(value); // makes a decrypted copy
     }
 
-    private CryptoService getCryptoService(BundleContext context) throws InternalErrorException {
+    private CryptoService getCryptoService() throws InternalErrorException {
         return CryptoServiceFactory.getInstance();
     }
 
-    private class PropertyTransformer implements JsonTransformer {
+    public static class PropertyTransformer implements JsonTransformer {
+
+        // Disable the property escaping by default
+        private final boolean doEscape;
+
+        public PropertyTransformer(boolean doEscape) {
+            this.doEscape = doEscape;
+        }
+
         @Override
         public void transform(JsonValue value) throws JsonException {
             if (null != value && value.isString()) {

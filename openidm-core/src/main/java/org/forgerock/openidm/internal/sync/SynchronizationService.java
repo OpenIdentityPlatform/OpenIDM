@@ -124,18 +124,18 @@ public class SynchronizationService implements SingletonResourceProvider {
         } catch (ScriptException e) {
             throw new ComponentException("Configuration error: " + e.getMessage(), e);
         }
-        logger.info("Synchronization service activated.");
+        logger.info("Synchronization service is activated.");
     }
 
     @Modified
     void modified(ComponentContext context) {
-        logger.info("Synchronization service modified.");
+        logger.info("Synchronization service is modified.");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
         mappings.clear();
-        logger.info("Synchronization service deactivated.");
+        logger.info("Synchronization service is deactivated.");
     }
 
     // ----- Implementation of CollectionResourceProvider interface

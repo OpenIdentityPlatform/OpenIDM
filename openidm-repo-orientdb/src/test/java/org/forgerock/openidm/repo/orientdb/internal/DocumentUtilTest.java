@@ -26,26 +26,34 @@ package org.forgerock.openidm.repo.orientdb.internal;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
 import static org.fest.assertions.data.MapEntry.entry;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.record.OTrackedList;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.serialization.serializer.record.string.ORecordSerializerSchemaAware2CSV;
 
 public class DocumentUtilTest {
 
@@ -74,7 +82,7 @@ public class DocumentUtilTest {
 
     @Test
     public void docToMapNullTest() {
-        assertNull(DocumentUtil.toMap(null, null));
+        assertNull(DocumentUtil.toResource(null));
     }
 
     @Test(enabled = false)
@@ -91,7 +99,7 @@ public class DocumentUtilTest {
         doc.field("present", Boolean.FALSE);
         doc.field("somedate", new Date());
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(
                 entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"), // "-1:-1"),
@@ -130,7 +138,7 @@ public class DocumentUtilTest {
         doc.field("phonenumbers", new ODocument().field("home", "555-666-7777").field("mobile",
                 "555-111-2222"), OType.EMBEDDED);
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"), // "-1:-1"),
                                                                                             // //
@@ -172,7 +180,7 @@ public class DocumentUtilTest {
                 "city", "New York"));
         doc.field("addresses", addresses, OType.EMBEDDED);
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"), // "-1:-1"),
                                                                                             // //
@@ -219,7 +227,7 @@ public class DocumentUtilTest {
         doc.field("widget", new ODocument().field("name", "widget-a").field("detail", detail),
                 OType.EMBEDDED);
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"),
                 entry(Resource.FIELD_CONTENT_REVISION, "0"));
@@ -253,7 +261,7 @@ public class DocumentUtilTest {
         doc.field("widget", new ODocument().field("name", "widget-a").field("detail", detail),
                 OType.EMBEDDED);
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"),
                 entry(Resource.FIELD_CONTENT_REVISION, "0"));
@@ -291,7 +299,7 @@ public class DocumentUtilTest {
         doc.field("widget", new ODocument().field("name", "widget-a").field("detail", detail),
                 OType.EMBEDDED);
 
-        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(doc).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"),
                 entry(Resource.FIELD_CONTENT_REVISION, "0"));
@@ -310,14 +318,14 @@ public class DocumentUtilTest {
     }
 
     @Test
-    public void mapToDocNullTest() throws ConflictException {
-        assertNull(DocumentUtil.toDocument(null, null, orientDocClass, false, true));
+    public void mapToDocNullTest() throws Exception {
+        assertNull(DocumentUtil.toDocument(null, null, null, null));
     }
 
     @Test
-    public void mapToNewFlatDoc() throws ConflictException {
+    public void mapToNewFlatDoc() throws Exception {
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put(Resource.FIELD_CONTENT_REVISION, "1");
         map.put("firstname", "Sam");
@@ -328,7 +336,7 @@ public class DocumentUtilTest {
         map.put("amount", Float.valueOf(12345678.89f));
         map.put("present", Boolean.FALSE);
 
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", "1",map, new ODocument(orientDocClass));
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -343,8 +351,8 @@ public class DocumentUtilTest {
     }
 
     @Test
-    public void mapToExistingFlatDoc() throws ConflictException {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public void mapToExistingFlatDoc() throws Exception {
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put(Resource.FIELD_CONTENT_REVISION, "1");
         map.put("firstname", "Sam");
@@ -367,7 +375,7 @@ public class DocumentUtilTest {
         existingDoc.field("present", Boolean.FALSE);
         existingDoc.field("AnotherFieldToBeRemoved", new Date());
 
-        ODocument result = DocumentUtil.toDocument(map, existingDoc, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", "1",map, existingDoc);
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -387,12 +395,12 @@ public class DocumentUtilTest {
     }
 
     @Test
-    public void mapToNewDocExistingRevision() throws ConflictException {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public void mapToNewDocExistingRevision() throws Exception {
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put(Resource.FIELD_CONTENT_REVISION, "100");
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", "100",map, new ODocument(orientDocClass));
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -401,9 +409,9 @@ public class DocumentUtilTest {
     }
 
     @Test
-    public void mapToNewEmbeddedDoc() throws ConflictException {
+    public void mapToNewEmbeddedDoc() throws Exception {
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put("firstname", "John");
         map.put("lastname", "Doe");
@@ -418,7 +426,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
 
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", null,map, new ODocument(orientDocClass));
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -426,20 +434,20 @@ public class DocumentUtilTest {
         assertEquals(result.field("lastname"), "Doe", "unexpected lastname");
         assertEquals(result.getVersion(), 0, "Version not as expected");
 
-        Map phonenumbers =  result.field("phonenumbers");
+        Map phonenumbers = result.field("phonenumbers");
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertEquals(phonenumbers.get("home"), "555-666-7777", "unexpected home phone");
         assertEquals(phonenumbers.get("mobile"), "555-111-2222", "unexpected mobile phone");
-        //Iterator i = phonenumbers.iterator();
-        //i.next();
-        //assertTrue(i.hasNext());
+        // Iterator i = phonenumbers.iterator();
+        // i.next();
+        // assertTrue(i.hasNext());
         // https://github.com/alexruiz/fest-assert-2.x/issues/142
         // assertThat(phonenumbers).hasSize(2);
     }
 
     @Test
-    public void mapToExistingEmbeddedDoc() throws ConflictException {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public void mapToExistingEmbeddedDoc() throws Exception {
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         // deliberately remove the firstname
         map.put("lastname", "Doe");
@@ -459,7 +467,7 @@ public class DocumentUtilTest {
         existingDoc.field("phonenumbers", new ODocument().field("home", "555-666-7777").field(
                 "mobile", "555-111-2222"), OType.EMBEDDED);
 
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", null,map, new ODocument(orientDocClass));
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -477,17 +485,17 @@ public class DocumentUtilTest {
         assertEquals(phonenumbers.get("mobile"), "555-111-2229", "unexpected mobile phone");
         assertFalse(phonenumbers.containsKey("home"),
                 "Home phone should have been removed but is present.");
-        //Iterator i = phonenumbers.iterator();
-        //i.next();
-        //assertTrue(i.hasNext());
+        // Iterator i = phonenumbers.iterator();
+        // i.next();
+        // assertTrue(i.hasNext());
         // https://github.com/alexruiz/fest-assert-2.x/issues/142
         // assertThat(phonenumbers).hasSize(2);
     }
 
     @Test
-    public void listToEmbeddedList() throws ConflictException {
+    public void listToEmbeddedList() throws Exception {
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put("firstname", "John");
         map.put("lastname", "Doe");
@@ -502,7 +510,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
 
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument result = DocumentUtil.toDocument("client-assigned-id", null, map, new ODocument(orientDocClass));
 
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id",
                 "unexpected ID");
@@ -518,29 +526,29 @@ public class DocumentUtilTest {
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertEquals(phonenumbers.get("home"), "555-666-7777", "unexpected home phone");
         assertEquals(phonenumbers.get("mobile"), "555-111-2222", "unexpected mobile phone");
-        //Iterator i = phonenumbers.iterator();
-        //i.next();
-        //assertTrue(i.hasNext());
+        // Iterator i = phonenumbers.iterator();
+        // i.next();
+        // assertTrue(i.hasNext());
         // https://github.com/alexruiz/fest-assert-2.x/issues/142
         // assertThat(phonenumbers).hasSize(2);
     }
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void mapToDocInvalidRevision() throws ConflictException {
+    @Test(expectedExceptions = BadRequestException.class)
+    public void mapToDocInvalidRevision() throws Exception {
         // Check ConflictException is thrown for invalid versions
-        Map<String, Object> map = new HashMap<String, Object>();
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put(Resource.FIELD_CONTENT_REVISION, "invalid-version"); // OrientDB
                                                                      // revisions
                                                                      // are ints
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
+        DocumentUtil.toDocument("client-assigned-id", "a", map, new ODocument(orientDocClass));
         assertTrue(false, "Invalid Revision must trigger failure");
     }
 
     @Test
-    public void mapToDocToMap() throws ConflictException {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public void mapToDocToMap() throws Exception {
+        JsonValue map = new JsonValue(new HashMap<String, Object>());
         map.put(Resource.FIELD_CONTENT_ID, "client-assigned-id");
         map.put(Resource.FIELD_CONTENT_REVISION, "2");
         map.put("firstname", "John");
@@ -556,9 +564,9 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
 
-        ODocument intermediateResult = DocumentUtil.toDocument(map, null, orientDocClass);
+        ODocument intermediateResult = DocumentUtil.toDocument("client-assigned-id", "2", map, new ODocument(orientDocClass));
 
-        Map result = DocumentUtil.toMap(intermediateResult, null).getContent().asMap();
+        Map result = DocumentUtil.toResource(intermediateResult).getContent().asMap();
 
         assertThat(result).contains(entry(Resource.FIELD_CONTENT_ID, "client-assigned-id"),
                 entry(Resource.FIELD_CONTENT_REVISION, "2"), entry("firstname", "John"),
@@ -578,14 +586,58 @@ public class DocumentUtilTest {
     }
 
     @Test
-    public void parseValidRevision() throws ConflictException {
+    public void parseValidRevision() throws ResourceException {
         int ver = DocumentUtil.parseVersion("98765");
         assertEquals(ver, 98765);
     }
 
-    @Test(expectedExceptions = ConflictException.class)
-    public void parseInvalidRevision() throws ConflictException {
+    @Test(expectedExceptions = BadRequestException.class)
+    public void parseInvalidRevision() throws ResourceException {
         int ver = DocumentUtil.parseVersion("some-text-98765");
         fail("Parsing of invalid revision must fail, but did not.");
     }
+
+    /**
+     * @see <a
+     *      href="https://github.com/nuvolabase/orientdb/issues/1517">1517</a>
+     * @throws Exception
+     */
+    @Test(enabled = false)
+    public void testCSV() throws Exception {
+        String iContent = "list:[\"String\",]";
+        ORecordSerializerSchemaAware2CSV testable = new ORecordSerializerSchemaAware2CSV();
+        testable.fromString(iContent, new ODocument(), new String[0]);
+    }
+
+    @Test(enabled = false)
+    public void testNullList() throws Exception {
+        ODocument documentSource = new ODocument();
+        documentSource.fromJSON("{\"list\" : [\"string\", null]}");
+
+        ODocument documentTarget = new ODocument();
+        documentTarget.fromStream(documentSource.toStream());
+
+        OTrackedList<Object> list = documentTarget.field("list", OType.EMBEDDEDLIST);
+        assertEquals(list.get(0), "string");
+        assertNull(list.get(1));
+    }
+
+    /**
+     * @see <a
+     *      href="https://github.com/nuvolabase/orientdb/issues/1521">1521</a>
+     * @throws Exception
+     */
+    @Test(enabled = false)
+    public void testList() throws Exception {
+        ODocument documentSource = new ODocument();
+        documentSource.fromJSON("{\"list\" : [\"string\", 42]}");
+
+        ODocument documentTarget = new ODocument();
+        documentTarget.fromStream(documentSource.toStream());
+
+        OTrackedList<Object> list = documentTarget.field("list", OType.EMBEDDEDLIST);
+        assertEquals(list.get(0), "string");
+        assertEquals(list.get(1), 42);
+    }
+
 }

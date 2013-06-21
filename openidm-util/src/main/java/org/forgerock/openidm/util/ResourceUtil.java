@@ -29,6 +29,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +40,13 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
@@ -64,6 +68,8 @@ import org.osgi.framework.Constants;
  * @author Laszlo Hordos
  */
 public class ResourceUtil {
+
+    private static final String SPECIAL_PREFIX = "_";
 
     /**
      * {@code ResourceUtil} instances should NOT be constructed in standard
@@ -313,6 +319,79 @@ public class ResourceUtil {
         }
     }
 
+    public static boolean isSpecialAttribute(String name) {
+        return name.startsWith(SPECIAL_PREFIX);
+    }
+
+    public static boolean applyPatchOperations(final List<PatchOperation> operations,
+            final JsonValue newContent) throws ResourceException {
+        boolean isModified = false;
+        if (null != operations) {
+            for (final PatchOperation operation : operations) {
+                try {
+                    if (operation.isAdd()) {
+                        newContent.putPermissive(operation.getField(), operation.getValue()
+                                .getObject());
+                    } else if (operation.isRemove()) {
+                        if (operation.getValue().isNull()) {
+                            // Remove entire value.
+                            newContent.remove(operation.getField());
+                        } else {
+                            // Find matching value(s) and remove (assumes
+                            // reference to array).
+                            final JsonValue value = newContent.get(operation.getField());
+                            if (value != null) {
+                                if (value.isList()) {
+                                    final Object valueToBeRemoved =
+                                            operation.getValue().getObject();
+                                    final Iterator<Object> iterator = value.asList().iterator();
+                                    while (iterator.hasNext()) {
+                                        if (valueToBeRemoved.equals(iterator.next())) {
+                                            iterator.remove();
+                                        }
+                                    }
+                                } else {
+                                    // Single valued field.
+                                    final Object valueToBeRemoved =
+                                            operation.getValue().getObject();
+                                    if (valueToBeRemoved.equals(value.getObject())) {
+                                        newContent.remove(operation.getField());
+                                    }
+                                }
+                            }
+                        }
+                    } else if (operation.isReplace()) {
+                        newContent.remove(operation.getField());
+                        if (!operation.getValue().isNull()) {
+                            newContent.putPermissive(operation.getField(), operation.getValue()
+                                    .getObject());
+                        }
+                    } else if (operation.isIncrement()) {
+                        final JsonValue value = newContent.get(operation.getField());
+                        final Number amount = operation.getValue().asNumber();
+                        if (value == null) {
+                            throw new BadRequestException("The field '" + operation.getField()
+                                    + "' does not exist");
+                        } else if (value.isList()) {
+                            final List<Object> elements = value.asList();
+                            for (int i = 0; i < elements.size(); i++) {
+                                elements.set(i, increment(operation, elements.get(i), amount));
+                            }
+                        } else {
+                            newContent.put(operation.getField(), increment(operation, value
+                                    .getObject(), amount));
+                        }
+                    }
+                    isModified = true;
+                } catch (final JsonValueException e) {
+                    throw new ConflictException("The field '" + operation.getField()
+                            + "' does not exist");
+                }
+            }
+        }
+        return isModified;
+    }
+
     public static JsonValue resourceToJsonValue(Resource resource) {
         final JsonValue wrapper = new JsonValue(new LinkedHashMap<String, Object>(3));
         wrapper.add(Resource.FIELD_ID, resource.getId());
@@ -529,6 +608,22 @@ public class ResourceUtil {
                 fields.add(pointer.toString());
             }
             json.put(Request.FIELD_FIELDS, fields);
+        }
+    }
+
+    private static Object increment(final PatchOperation operation, final Object object,
+            final Number amount) throws BadRequestException {
+        if (object instanceof Long) {
+            return ((Long) object) + amount.longValue();
+        } else if (object instanceof Integer) {
+            return ((Integer) object) + amount.intValue();
+        } else if (object instanceof Float) {
+            return ((Float) object) + amount.floatValue();
+        } else if (object instanceof Double) {
+            return ((Double) object) + amount.doubleValue();
+        } else {
+            throw new BadRequestException("The field '" + operation.getField()
+                    + "' is not a number");
         }
     }
 

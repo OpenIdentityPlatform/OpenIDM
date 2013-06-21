@@ -24,26 +24,26 @@
 
 package org.forgerock.openidm.repo.orientdb.internal;
 
-import java.io.File;
+import static org.forgerock.openidm.util.ResourceUtil.getUriTemplateVariables;
+import static org.forgerock.openidm.util.ResourceUtil.notSupported;
+
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -52,16 +52,17 @@ import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
-import org.forgerock.json.resource.FutureResult;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.PreconditionRequiredException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -69,14 +70,11 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.graph.GraphConnectionFactory;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.util.ResourceUtil.URLParser;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +82,8 @@ import org.slf4j.LoggerFactory;
 import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.core.command.OCommandManager;
 import com.orientechnologies.orient.core.command.OCommandResultListener;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
@@ -96,13 +92,13 @@ import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OCommandExecutorSQLDelegate;
 import com.orientechnologies.orient.core.sql.query.OSQLAsynchQuery;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.orientechnologies.orient.core.tx.OTransaction;
 
 /**
  * Repository service implementation using OrientDB
@@ -115,8 +111,7 @@ import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using OrientDB"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/{partition}*"),
-    @Property(name = "db.type", value = "OrientDB") })
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/{partition}*") })
 public class OrientDBRepoService implements RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.repo.orientdb";
@@ -145,65 +140,76 @@ public class OrientDBRepoService implements RequestHandler {
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
 
-    private ODatabaseDocumentPool pool;
-
-    private String dbURL;
-    private String user;
-    private String password;
-    private int poolMinSize = 5;
-    private int poolMaxSize = 20;
-
-    // Current configuration
-    private JsonValue existingConfig;
-
-    private EmbeddedOServerService embeddedServer;
+    final EmbeddedOServerService embeddedServer = new EmbeddedOServerService();
 
     private Map<String, String> predefinedQueries = null;
 
+    @Activate
+    void activate(ComponentContext context) throws Exception {
+        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+
+        embeddedServer.activate(configuration).init(configuration);
+
+        setConfiguredQueries(configuration.get(CONFIG_QUERIES));
+
+        logger.info("Repository service is activated.");
+    }
+
+    /**
+     * Handle an existing activated service getting changed; e.g. configuration
+     * changes or dependency changes
+     *
+     * @param compContext
+     *            THe OSGI component context
+     * @throws Exception
+     *             if handling the modified event failed
+     */
+    // @Modified
+    // void modified(ComponentContext compContext) throws Exception {
+    // logger.debug("Handle repository service modified notification");
+    //
+    // JsonValue configuration =
+    // JSONEnhancedConfig.newInstance().getConfigurationAsJson(compContext);
+    //
+    // if (existingConfig != null &&
+    // dbURL.equals(embeddedServer.getDBUrl(newConfig))
+    // && user.equals(getUser(newConfig)) &&
+    // password.equals(getPassword(newConfig))) {
+    // // If the DB pool settings don't change keep the existing pool
+    // logger.info("(Re-)initialize repository with latest configuration.");
+    //
+    // } else {
+    // // If the DB pool settings changed do a more complete
+    // // re-initialization
+    // logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");
+    // deactivate(compContext);
+    // activate(compContext);
+    // }
+    // setConfiguredQueries(configuration.get(CONFIG_QUERIES));
+    //
+    // logger.debug("Repository service id modified");
+    // }
+
+    @Deactivate
+    void deactivate(ComponentContext context) {
+        embeddedServer.deactivate();
+        logger.info("Repository service is deactivated.");
+    }
+
     protected String getPartition(ServerContext context) throws ResourceException {
-        Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
+        Map<String, String> variables = getUriTemplateVariables(context);
         if (null != variables && variables.containsKey("partition")) {
             return variables.get("partition");
         }
         throw new ForbiddenException("Direct access without Router to this service is forbidden.");
     }
 
-    @Override
-    public void handleAction(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
-        final ResourceException e =
-                new NotSupportedException("Action operations are not supported");
-        handler.handleError(e);
-    }
+    // ----- Implementation of RequestHandler interface
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request,
-            ResultHandler<Resource> handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
-        handler.handleError(e);
-    }
-
-    @Override
-    public void handleRead(ServerContext context, ReadRequest request,
-            ResultHandler<Resource> handler) {
-        try {
-            String partition = getPartition(context);
-            if (PARTITION_LINKS.equals(partition)) {
-                // Use the Graph Database
-
-            } else {
-                // Use the Document Database
-                URLParser url = URLParser.parse(request.getResourceName()).last();
-                String orientClassName =
-                        resourceCollectionToOrientClassName(partition, url.resourceCollection());
-
-                handler.handleResult(read(orientClassName, url.value(), request));
-            }
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
-        }
+    public void handleAction(final ServerContext context, final ActionRequest request,
+            final ResultHandler<JsonValue> handler) {
+        handler.handleError(notSupported(request));
     }
 
     /**
@@ -215,8 +221,6 @@ public class OrientDBRepoService implements RequestHandler {
      * {@code _id}, and object version {@code _rev} to enable optimistic
      * concurrency supported by OrientDB and OpenIDM.
      *
-     * @param orientClassName
-     *            the identifier of the object set to retrieve from.
      * @param request
      *            the identifier of the object to retrieve from the object set.
      * @throws NotFoundException
@@ -227,50 +231,74 @@ public class OrientDBRepoService implements RequestHandler {
      *             if the passed identifier is invalid
      * @return the requested object.
      */
-    public Resource read(String orientClassName, String localId, ReadRequest request)
-            throws ResourceException {
-        // Parse the remaining resourceName
-        if (localId == null) {
-            throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to read.");
-        }
-        // At this point we don't know if the last segment of resourceName is
-        // meant to be id or type
-        // The https://bugster.forgerock.org/jira/browse/OPENIDM-739 is not
-        // fixed at this level
-        // the partition=ui but resourceName will be parsed to {"notification"}
-        // or {"notification","7"}
-
-        // partition and optional sub-type together defines the OrientDB
-        // Document type!?
-
-        Resource result = null;
-        ODatabaseDocumentTx db = getConnection();
-        try {
-            ODocument doc = getByID(orientClassName, localId, db);
-            if (doc == null) {
-                throw new NotFoundException("Object repo/" + localId + " not found in "
-                        + orientClassName);
-            }
-            result = DocumentUtil.toMap(doc, request.getFields());
-            logger.trace("Completed get for orientType: {}, id: {}, result: {}", new Object[] {
-                orientClassName, localId, result });
-        } finally {
-            if (db != null) {
-                db.close();
-            }
-        }
-        return result;
-    }
-
     @Override
-    public void handleCreate(ServerContext context, CreateRequest request,
-            ResultHandler<Resource> handler) {
+    public void handleRead(final ServerContext context, final ReadRequest request,
+            final ResultHandler<Resource> handler) {
+        ODatabaseDocumentTx db = null;
         try {
-            String partition = getPartition(context);
+            db = getConnection();
+
+            final String partition = getPartition(context);
             if (PARTITION_LINKS.equals(partition)) {
                 // Use the Graph Database
-                OGraphDatabase gdb = OGraphDatabasePool.global().acquire(dbURL, user, password);
+
+            } else {
+                // Use the Document Database
+                Pair<String, Object> id = parseResourceName(request, partition);
+                ODocument doc = getByID(id, request.getFields(), db);
+
+                logger.trace("Completed get for orientType: {}, id: {}", id.getLeft(), id
+                        .getRight());
+                handler.handleResult(DocumentUtil.toResource(doc));
+            }
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates a new object in the object set.
+     * <p>
+     * This method sets the {@code _id} property to the assigned identifier for
+     * the object, and the {@code _rev} property to the revised object version
+     * (For optimistic concurrency)
+     *
+     * @param context
+     *            the client-generated identifier to use, or {@code null} if
+     *            server-generated identifier is requested.
+     * @param request
+     *            the contents of the object to create in the object set.
+     * @throws NotFoundException
+     *             if the specified id could not be resolved.
+     * @throws ForbiddenException
+     *             if access to the object or object set is forbidden.
+     * @throws ConflictException
+     *             if an object with the same ID already exists.
+     */
+    @Override
+    public void handleCreate(final ServerContext context, final CreateRequest request,
+            final ResultHandler<Resource> handler) {
+        ODatabaseDocumentTx db = null;
+        // The try-with-resources Statement JAVA 7
+        // try (ODatabaseDocumentTx db = getConnection()) {
+        try {
+            db = getConnection();
+
+            final String partition = getPartition(context);
+            if (PARTITION_LINKS.equals(partition)) {
+                // Edges
+
+                OGraphDatabase gdb = (OGraphDatabase) getConnection();// OGraphDatabasePool.global().acquire(dbURL,
+                                                                      // user,
+                                                                      // password);
                 try {
 
                     final ORecordId iSourceVertexRid =
@@ -307,7 +335,8 @@ public class OrientDBRepoService implements RequestHandler {
                     edge.field("label", edge.getClassName());
                     edge.save();
 
-                    handler.handleResult(getResource(edge.getIdentity().toString(), edge));
+                    // handler.handleResult(getResource(edge.getIdentity().toString(),
+                    // edge));
                 } catch (OException e) {
                     logger.error("OrientDB Exception: " + e.toString());
                 } finally {
@@ -315,148 +344,160 @@ public class OrientDBRepoService implements RequestHandler {
                 }
 
             } else {
-                // Use the Document Database
-                URLParser url = URLParser.parse(request.getResourceName());
-                String orientClassName =
-                        resourceCollectionToOrientClassName(partition, url.last().resourceName());
-                handler.handleResult(create(orientClassName, request));
+                // Vertexes
+
+                Pair<OClass, String> id =
+                        parseResourceName(db.getMetadata().getSchema(), request, partition);
+
+                final ODocument newDocument = new ODocument(id.getLeft());
+
+                DocumentUtil.toDocument(id.getRight(), null, request.getContent(), newDocument);
+
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Created ODocument for id: {} to save {}", id.getRight(),
+                            newDocument.toJSON());
+                }
+
+                try {
+                    db.save(newDocument);
+                    if (null == id.getRight()) {
+                        try {
+
+                            newDocument.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, newDocument
+                                    .getIdentity().toString().substring(1));
+
+                            db.save(newDocument);
+                        } catch (Throwable t) {
+                            logger.warn("Failed to save the generated Id of object {}", newDocument
+                                    .getIdentity());
+                        }
+                    }
+
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(
+                                "Create payload for orientClass: {}, resourceName: {}, resourceId: {}, doc: {}",
+                                new Object[] { id.getLeft(), request.getResourceName(),
+                                    request.getNewResourceId(), newDocument });
+                    } else {
+                        logger.debug(
+                                "Completed create for partition: {}, resourceName: {}, resourceId: {}, revision: {}",
+                                new Object[] { id.getLeft(), request.getResourceName(),
+                                    request.getNewResourceId(), newDocument.getVersion() });
+                    }
+
+                    // The ODocument is saved we don't care about the
+                    // further exceptions
+                    handler.handleResult(DocumentUtil.toResource(newDocument));
+
+                } catch (OIndexException ex) {
+                    // Because the OpenIDM ID is defined as unique,
+                    // duplicate inserts must fail
+                    if (ex.getMessage().contains(DBHelper.UNIQUE_PRIMARY_IDX)) {
+                        handler.handleError(new ConflictException(
+                                "Create rejected as Object with same ID already exists. "
+                                        + ex.getMessage(), ex));
+                    } else {
+                        handler.handleError(new ConflictException(ex));
+                    }
+                } catch (ODatabaseException ex) {
+                    // Because the OpenIDM ID is defined as unique,
+                    // duplicate inserts must fail
+                    // OrientDB may wrap the IndexException root cause.
+                    if (isCauseIndexException(ex, 10)) {
+                        handler.handleError(new PreconditionFailedException(
+                                "Create rejected as Object with same ID already exists and was detected. "
+                                        + ex.getMessage(), ex));
+                    } else {
+                        handler.handleError(adapt(ex));
+                    }
+                }
             }
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
-        }
-    }
-
-    /**
-     * Creates a new object in the object set.
-     * <p>
-     * This method sets the {@code _id} property to the assigned identifier for
-     * the object, and the {@code _rev} property to the revised object version
-     * (For optimistic concurrency)
-     *
-     * @param orientClassName
-     *            the client-generated identifier to use, or {@code null} if
-     *            server-generated identifier is requested.
-     * @param request
-     *            the contents of the object to create in the object set.
-     * @throws NotFoundException
-     *             if the specified id could not be resolved.
-     * @throws ForbiddenException
-     *             if access to the object or object set is forbidden.
-     * @throws PreconditionFailedException
-     *             if an object with the same ID already exists.
-     */
-    public Resource create(String orientClassName, CreateRequest request) throws ResourceException {
-        // It's a POST _action=create
-        if (StringUtils.isBlank(request.getNewResourceId())) {
-            request.setNewResourceId(UUID.randomUUID().toString());
-        }
-        // The ResourceName may be "/" only
-
-        // if (fullId == null || localId == null) {
-        // throw new
-        // NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: "
-        // + fullId + " local identifier: " + localId);
-        // } else if (type == null) {
-        // throw new
-        // NotFoundException("The object identifier did not include sufficient information to determine the object type: "
-        // + fullId);
-        // }
-
-        // request.getContent().put(Resource.FIELD_CONTENT_ID,
-        // localId);
-
-        // TODO ODocument instances always refer to the thread-local database
-        ODatabaseDocumentTx db = getConnection();
-        try {
-            // Rather than using MVCC for insert, rely on primary key uniqueness
-            // constraints to detect duplicate create
-            Map<String, Object> newContent = request.getContent().asMap();
-            newContent.put(Resource.FIELD_CONTENT_ID, request.getNewResourceId());
-            ODocument newDoc =
-                    DocumentUtil.toDocument(request.getContent().asMap(), null, orientClassName);
-            // TODO Fix the logging
-            // logger.trace("Created doc for id: {} to save {}", fullId,
-            // newDoc);
-            newDoc.save();
-
-            // request.getContent().put(Resource.FIELD_CONTENT_REVISION,
-            // Integer.toString(newDoc.getVersion()));
-            if (logger.isTraceEnabled()) {
-                logger.trace(
-                        "Create payload for orientClass: {}, resourceName: {}, resourceId: {}, doc: {}",
-                        new Object[] { orientClassName, request.getResourceName(),
-                            request.getNewResourceId(), newDoc });
-            } else {
-                logger.debug(
-                        "Completed create for partition: {}, resourceName: {}, resourceId: {}, revision: {}",
-                        new Object[] { orientClassName, request.getResourceName(),
-                            request.getNewResourceId(), newDoc.getVersion() });
-            }
-
-            return getResource(request.getNewResourceId(), newDoc);
-        } catch (OIndexException ex) {
-            // Because the OpenIDM ID is defined as unique, duplicate inserts
-            // must fail
-            throw new PreconditionFailedException(
-                    "Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
-        } catch (com.orientechnologies.orient.core.exception.ODatabaseException ex) {
-            // Because the OpenIDM ID is defined as unique, duplicate inserts
-            // must fail.
-            // OrientDB may wrap the IndexException root cause.
-            if (isCauseIndexException(ex, 10)) {
-                throw new PreconditionFailedException(
-                        "Create rejected as Object with same ID already exists and was detected. "
-                                + ex.getMessage(), ex);
-            } else {
-                throw ex;
-            }
-        } catch (RuntimeException e) {
-            throw e;
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
         } finally {
-            if (db != null) {
-                db.close();
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
             }
         }
-    }
-
-    private Resource getResource(String resourceId, ODocument newDoc) {
-        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
-        // _ID
-        content.put(Resource.FIELD_CONTENT_ID, resourceId);
-        // _REV
-        String rev = Integer.toString(newDoc.getVersion());
-        content.put(Resource.FIELD_CONTENT_REVISION, Integer.toString(newDoc.getVersion()));
-        // _VERTEX
-        // String vid = String.format("#%d:%d",
-        // newDoc.getIdentity().getClusterId(),
-        // newDoc.getIdentity().getClusterPosition().intValue());
-        content.put("_vertex", newDoc.getIdentity().toString());
-        return new Resource(resourceId, rev, content);
     }
 
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
+        ODatabaseDocumentTx db = null;
         try {
-            String partition = getPartition(context);
+            db = getConnection();
+
+            final String partition = getPartition(context);
             if (PARTITION_LINKS.equals(partition)) {
                 // Use the Graph Database
 
             } else {
                 // Use the Document Database
-                URLParser url = URLParser.parse(request.getResourceName());
-                String orientClassName =
-                        resourceCollectionToOrientClassName(partition, url.last()
-                                .resourceCollection());
 
-                handler.handleResult(update(orientClassName, url.last().value(), request));
+                final Pair<String, Object> id = parseResourceName(request, partition);
+                final ODocument existingODocument =
+                        getODocumentForUpdate(id, request.getRevision(), db);
+
+                handler.handleResult(update(existingODocument, id, request, db));
             }
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void handlePatch(final ServerContext context, final PatchRequest request,
+            final ResultHandler<Resource> handler) {
+        ODatabaseDocumentTx db = null;
+        try {
+            db = getConnection();
+
+            final String partition = getPartition(context);
+            if (PARTITION_LINKS.equals(partition)) {
+                // Use the Graph Database
+
+            } else {
+                // Use the Document Database
+                final Pair<String, Object> id = parseResourceName(request, partition);
+                final ODocument existingODocument =
+                        getODocumentForUpdate(id, request.getRevision(), db);
+
+                final Resource existingResource = DocumentUtil.toResource(existingODocument);
+                final JsonValue newContent = existingResource.getContent();
+
+                if (ResourceUtil.applyPatchOperations(request.getPatchOperations(), newContent)) {
+                    // Update
+                    // TODO Fix the ID patch
+                    handler.handleResult(update(DocumentUtil.toDocument(null, null, newContent,
+                            existingODocument), id, null, db));
+                } else {
+                    // not modified;
+                    handler.handleResult(existingResource);
+                }
+            }
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
+            }
         }
     }
 
@@ -470,12 +511,11 @@ public class OrientDBRepoService implements RequestHandler {
      * object, including: a new {@code _rev} value for the revised object's
      * version
      *
-     * @param orientClassName
-     *            the identifier of the object to be put, or {@code null} to
-     *            request a generated identifier.
-     * @param localId
-     *            the version of the object to update; or {@code null} if not
-     *            provided.
+     * @param existingODocument
+     *            the existing document in database identified by {@code id}
+     *            parameter.
+     * @param id
+     *            the identifier was used to read the {@code existingODocument}.
      * @param request
      *            the contents of the object to put in the object set.
      * @throws ConflictException
@@ -489,14 +529,9 @@ public class OrientDBRepoService implements RequestHandler {
      * @throws BadRequestException
      *             if the passed identifier is invalid
      */
-    public Resource update(String orientClassName, String localId, UpdateRequest request)
+    public Resource update(final ODocument existingODocument, final Pair<String, Object> id,
+            final UpdateRequest request, final ODatabaseDocumentTx database)
             throws ResourceException {
-        // Parse the remaining resourceName
-        String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
-        if (resourceName == null) {
-            throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to update.");
-        }
 
         // At this point we don't know if the last segment of resourceName is
         // meant to be id or type
@@ -508,88 +543,40 @@ public class OrientDBRepoService implements RequestHandler {
         // partition and optional sub-type together defines the OrientDB
         // Document type!?
 
-        // TODO http://code.google.com/p/orient/wiki/JavaMultiThreading
-        ODatabaseDocumentTx db = getConnection();
         try {
-            db.begin();
-            ODocument existingDoc = getByID(orientClassName, localId, db);
-            if (existingDoc == null) {
-                throw new NotFoundException("Update on object " + orientClassName + "/" + localId
-                        + " could not find existing object.");
-            }
-            ODocument updatedDoc =
-                    DocumentUtil.toDocument(request.getNewContent().asMap(), existingDoc,
-                            orientClassName);
+            database.begin();
+            ODocument updatedODocument = null;
+            if (null != request) {
+                updatedODocument =
+                        DocumentUtil.toDocument(null, request.getRevision(), request
+                                .getNewContent(), existingODocument);
 
-            if (!StringUtils.isBlank(request.getRevision())) {
-                updatedDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
-                // request.getNewContent().put(Resource.FIELD_CONTENT_REVISION,
-                // request.getRevision());
+            } else {
+                updatedODocument = existingODocument;
             }
+
             logger.trace("Updated doc for orientType: {}, resourceName: {}, to save {}",
-                    new Object[] { orientClassName, request.getResourceName(), updatedDoc });
+                    new Object[] { id.getLeft(), request.getResourceName(), updatedODocument });
 
-            updatedDoc.save();
-            db.commit();
-
-            // obj.put(DocumentUtil.TAG_REV,
-            // Integer.toString(updatedDoc.getVersion()));
-            // Set ID to return to caller
-            // obj.put(DocumentUtil.TAG_ID,
-            // updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
-            // TODO Fix the logging
-            // logger.debug("Committed update for id: {} revision: {}", fullId,
-            // updatedDoc.getVersion());
-            // logger.trace("Update payload for id: {} doc: {}", fullId,
-            // updatedDoc);
-            return getResource(localId, updatedDoc);
+            database.save(updatedODocument);
+            database.commit();
+            return DocumentUtil.toResource(updatedODocument);
         } catch (OConcurrentModificationException ex) {
-            db.rollback();
+            database.rollback();
             throw new PreconditionFailedException(
                     "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: "
                             + ex.getMessage(), ex);
         } catch (RuntimeException e) {
-            db.rollback();
+            database.rollback();
             throw e;
-        } finally {
-            if (db != null) {
-                db.close();
-            }
-        }
-    }
-
-    @Override
-    public void handleDelete(ServerContext context, DeleteRequest request,
-            ResultHandler<Resource> handler) {
-        try {
-            String partition = getPartition(context);
-            if (PARTITION_LINKS.equals(partition)) {
-                // Use the Graph Database
-
-            } else {
-                // Use the Document Database
-                URLParser url = URLParser.parse(request.getResourceName());
-                String orientClassName =
-                        resourceCollectionToOrientClassName(partition, url.last()
-                                .resourceCollection());
-
-                handler.handleResult(delete(orientClassName, url.last().value(), request));
-            }
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
         }
     }
 
     /**
      * Deletes the specified object from the object set.
      *
-     * @param orientClassName
-     *            the identifier of the object to be deleted.
-     * @param localId
-     *            the version of the object to delete or {@code null} if not
-     *            provided.
+     * {@inheritDoc}
+     *
      * @throws NotFoundException
      *             if the specified object could not be found.
      * @throws ForbiddenException
@@ -599,7 +586,63 @@ public class OrientDBRepoService implements RequestHandler {
      * @throws PreconditionFailedException
      *             if version did not match the existing object in the set.
      */
-    public Resource delete(String orientClassName, String localId, DeleteRequest request)
+    @Override
+    public void handleDelete(final ServerContext context, final DeleteRequest request,
+            final ResultHandler<Resource> handler) {
+        ODatabaseDocumentTx db = null;
+        try {
+            db = getConnection();
+
+            final String partition = getPartition(context);
+            if (PARTITION_LINKS.equals(partition)) {
+                // Use the Graph Database
+
+            } else {
+                // Use the Document Database
+
+                Pair<String, Object> id = parseResourceName(request, partition);
+
+                final ODocument existingODocument =
+                        getODocumentForUpdate(id, request.getRevision(), db);
+                if (db.isMVCC()) {
+                    try {
+                        db.delete(existingODocument);
+                    } catch (OConcurrentModificationException ex) {
+                        throw new PreconditionFailedException(
+                                "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.",
+                                ex);
+                    }
+                    /*
+                     * catch (OException e) { // TODO: investigate if the
+                     * document is deleted in another thread }
+                     */
+                } else {
+                    // How to delete now
+                    db.begin(OTransaction.TXTYPE.OPTIMISTIC);
+                    try {
+                        db.delete(existingODocument);
+                        db.commit();
+                    } catch (Exception e) {
+                        db.rollback();
+                        throw e;
+                    }
+                }
+                handler.handleResult(getResource(null, existingODocument));
+            }
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
+            }
+        }
+    }
+
+    public Resource _delete(String orientClassName, String localId, DeleteRequest request)
             throws ResourceException {
         // Parse the remaining resourceName
         String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
@@ -624,7 +667,8 @@ public class OrientDBRepoService implements RequestHandler {
         ODatabaseDocumentTx db = getConnection();
         try {
             db.begin();
-            ODocument existingDoc = getByID(orientClassName, localId, db);
+            ODocument existingDoc = null;// getByID(orientClassName, localId,
+                                         // db);
             if (existingDoc == null) {
                 throw new NotFoundException("Object does not exist for delete on: "
                         + orientClassName + "/" + localId);
@@ -640,7 +684,7 @@ public class OrientDBRepoService implements RequestHandler {
             db.delete(existingDoc);
             db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
-            return DocumentUtil.toMap(existingDoc, request.getFields());
+            return DocumentUtil.toResource(existingDoc);
         } catch (OConcurrentModificationException ex) {
             db.rollback();
             throw new PreconditionFailedException(
@@ -687,7 +731,10 @@ public class OrientDBRepoService implements RequestHandler {
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
+        ODatabaseDocumentTx db = null;
         try {
+            db = getConnection();
+
             String queryExpression = null;
             if (request.getQueryFilter() != null) {
                 handler.handleError(new NotSupportedException("Query by Filter not supported"));
@@ -703,7 +750,7 @@ public class OrientDBRepoService implements RequestHandler {
                 queryExpression = predefinedQueries.get(request.getQueryId());
             }
 
-            String partition = getPartition(context);
+            final String partition = getPartition(context);
             if (PARTITION_LINKS.equals(partition)) {
                 // Use the Graph Database
 
@@ -717,14 +764,14 @@ public class OrientDBRepoService implements RequestHandler {
                 params.put(ServerConstants.RESOURCE_NAME, resourceCollectionToOrientClassName(
                         partition, url.resourceName()));
 
-                ODatabaseDocumentTx database = getConnection();
                 try {
                     final AtomicReference<OIdentifiable> lastRecord =
                             new AtomicReference<OIdentifiable>();
 
                     // This blocks the thread and wait until the query is
                     // finished to fetch the last record.
-                    // TODO How to submit and make is async if the DB supports
+                    // TODO How to submit and make is async if the DB
+                    // supports
                     // it?
                     OSQLAsynchQuery<ODocument> query =
                             new OSQLAsynchQuery(((String) PropertyUtil.substVars(queryExpression,
@@ -739,7 +786,8 @@ public class OrientDBRepoService implements RequestHandler {
                                         final ORID lastRid = i.getIdentity();
                                         handler.handleResult(new QueryResult(lastRid.next(), -1));
                                     } else {
-                                        // TODO How to handle empty result???
+                                        // TODO How to handle empty
+                                        // result???
                                         handler.handleResult(new QueryResult(null, -1));
                                     }
 
@@ -751,8 +799,7 @@ public class OrientDBRepoService implements RequestHandler {
                     query.setResultListener(new OCommandResultListener() {
                         @Override
                         public boolean result(Object iRecord) {
-                            final Resource r =
-                                    DocumentUtil.toMap((ODocument) iRecord, request.getFields());
+                            final Resource r = DocumentUtil.toResource((ODocument) iRecord);
                             boolean accepted = handler.handleResource(r);
                             if (accepted) {
                                 lastRecord.set((OIdentifiable) iRecord);
@@ -766,15 +813,17 @@ public class OrientDBRepoService implements RequestHandler {
                     });
                     OCommandManager.instance().registerExecutor(query.getClass(),
                             OCommandExecutorSQLDelegate.class);
-                    database.command(query).execute(params);
+                    db.command(query).execute(params);
                 } catch (OQueryParsingException firstTryEx) {
-                    // TODO: consider differentiating between bad configuration
+                    // TODO: consider differentiating between bad
+                    // configuration
                     // and bad request
                     handler.handleError(new BadRequestException(
                             "Failed to resolve and parse the query " + queryExpression
                                     + " with params: " + params, firstTryEx));
                 } catch (IllegalArgumentException ex) {
-                    // TODO: consider differentiating between bad configuration
+                    // TODO: consider differentiating between bad
+                    // configuration
                     // and bad request
                     handler.handleError(new BadRequestException("Query is invalid: "
                             + queryExpression + " " + ex.getMessage(), ex));
@@ -783,15 +832,18 @@ public class OrientDBRepoService implements RequestHandler {
                     handler.handleError(new InternalServerErrorException(ex));
                 } finally {
                     // measure.end();
-                    if (database != null) {
-                        database.close();
-                    }
                 }
             }
-        } catch (final ResourceException e) {
-            handler.handleError(e);
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+        } catch (final Throwable t) {
+            handler.handleError(adapt(t));
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case. Should never happen!", t);
+                }
+            }
         }
     }
 
@@ -800,44 +852,8 @@ public class OrientDBRepoService implements RequestHandler {
      *         done to return to the pool.
      * @throws InternalServerErrorException
      */
-    ODatabaseDocumentTx getConnection() throws InternalServerErrorException {
-        ODatabaseDocumentTx db = null;
-        int maxRetry = 100; // give it up to approx 10 seconds to recover
-        int retryCount = 0;
-
-        while (db == null && retryCount < maxRetry) {
-            retryCount++;
-            try {
-                db = pool.acquire(dbURL, user, password);
-                if (retryCount > 1) {
-                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}",
-                            retryCount);
-                }
-                retryCount = maxRetry;
-            } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
-                // TODO: remove work-around once OrientDB resolves this
-                // condition
-                if (retryCount == maxRetry) {
-                    logger.warn(
-                            "Failure reported acquiring connection from pool, retried {} times before giving up.",
-                            retryCount, ex);
-                    throw new InternalServerErrorException(
-                            "Failure reported acquiring connection from pool, retried "
-                                    + retryCount + " times before giving up: " + ex.getMessage(),
-                            ex);
-                } else {
-                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
-                    logger.trace("Pool acquire failure detail ", ex);
-                    try {
-                        Thread.sleep(100); // Give the DB time to complete what
-                                           // it's doing before retrying
-                    } catch (InterruptedException iex) {
-                        // ignore that sleep was interrupted
-                    }
-                }
-            }
-        }
-        return db;
+    ODatabaseDocumentTx getConnection() throws ResourceException {
+        return embeddedServer.getConnection();
     }
 
     String resourceCollectionToOrientClassName(String partition, String resourceName) {
@@ -876,141 +892,19 @@ public class OrientDBRepoService implements RequestHandler {
         return false;
     }
 
-    private ServiceRegistration<GraphConnectionFactory> graphServiceRegistration = null;
+    // private ServiceRegistration<GraphConnectionFactory>
+    // graphServiceRegistration = null;
 
-    @Activate
-    void activate(ComponentContext compContext) throws Exception {
-        logger.debug("Activating Service with configuration {}", compContext.getProperties());
-
-        try {
-            existingConfig = JSONEnhancedConfig.newInstance().getConfigurationAsJson(compContext);
-        } catch (RuntimeException ex) {
-            logger.warn(
-                    "Configuration invalid and could not be parsed, can not start OrientDB repository: "
-                            + ex.getMessage(), ex);
-            throw ex;
-        }
-        embeddedServer = new EmbeddedOServerService();
-        embeddedServer.activate(existingConfig);
-
-        init(existingConfig);
-
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(Constants.SERVICE_DESCRIPTION, "Repository Service using OrientDB");
-        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
-
-        graphServiceRegistration =
-                compContext.getBundleContext().registerService(GraphConnectionFactory.class,
-                        new GraphConnectionFactory() {
-                            @Override
-                            public Graph getConnection() throws ResourceException {
-                                return new OrientGraph(OGraphDatabasePool.global().acquire(dbURL,
-                                        user, password));
-                            }
-
-                            @Override
-                            public FutureResult<Graph> getConnectionAsync(
-                                    ResultHandler<Graph> handler) {
-                                return null;
-                            }
-                        }, properties);
-
-        logger.info("Repository started.");
-    }
-
-    /**
-     * Handle an existing activated service getting changed; e.g. configuration
-     * changes or dependency changes
-     *
-     * @param compContext
-     *            THe OSGI component context
-     * @throws Exception
-     *             if handling the modified event failed
-     */
-    @Modified
-    void modified(ComponentContext compContext) throws Exception {
-        logger.debug("Handle repository service modified notification");
-        JsonValue newConfig = null;
-        try {
-            newConfig = JSONEnhancedConfig.newInstance().getConfigurationAsJson(compContext);
-        } catch (RuntimeException ex) {
-            logger.warn(
-                    "Configuration invalid and could not be parsed, can not start OrientDB repository",
-                    ex);
-            throw ex;
-        }
-        if (existingConfig != null && dbURL.equals(getDBUrl(newConfig))
-                && user.equals(getUser(newConfig)) && password.equals(getPassword(newConfig))) {
-            // If the DB pool settings don't change keep the existing pool
-            logger.info("(Re-)initialize repository with latest configuration.");
-            init(newConfig);
-        } else {
-            // If the DB pool settings changed do a more complete
-            // re-initialization
-            logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");
-            deactivate(compContext);
-            activate(compContext);
-        }
-
-        existingConfig = newConfig;
-        logger.debug("Repository service modified");
-    }
-
-    @Deactivate
-    void deactivate(ComponentContext compContext) {
-        logger.debug("Deactivating Service {}", compContext);
-        if (null != graphServiceRegistration) {
-            graphServiceRegistration.unregister();
-            graphServiceRegistration = null;
-        }
-
-        cleanup();
-        if (embeddedServer != null) {
-            embeddedServer.deactivate();
-        }
-        logger.info("Repository stopped.");
-    }
-
-    /**
-     * Initialize the instnace with the given configuration.
-     *
-     * This can configure managed (DS/SCR) instances, as well as explicitly
-     * instantiated (bootstrap) instances.
-     *
-     * @param config
-     *            the configuration
-     */
-    void init(JsonValue config) {
-        try {
-            dbURL = getDBUrl(config);
-            user = getUser(config);
-            logger.info("OObjectDatabasePool.global().acquire(\"{}\", \"{}\", \"****\");", dbURL,
-                    user);
-            password = getPassword(config);
-            setConfiguredQueries(config.get(CONFIG_QUERIES));
-        } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid, can not start OrientDB repository", ex);
-            throw ex;
-        }
-
-        try {
-            pool = DBHelper.getPool(dbURL, user, password, poolMinSize, poolMaxSize, config, true);
-            logger.debug("Obtained pool {}", pool);
-        } catch (RuntimeException ex) {
-            logger.warn("Initializing database pool failed", ex);
-            throw ex;
-        }
-    }
-
-    private String getDBUrl(JsonValue config) {
-        File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
-        String orientDbFolder = dbFolder.getAbsolutePath();
-        orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not
-                                                            // handle
-                                                            // backslashes well
-        return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder)
-                .asString();
-    }
+    // private String getDBUrl(JsonValue config) {
+    // File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
+    // String orientDbFolder = dbFolder.getAbsolutePath();
+    // orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not
+    // // handle
+    // // backslashes well
+    // return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" +
+    // orientDbFolder)
+    // .asString();
+    // }
 
     private String getUser(JsonValue config) {
         return config.get(CONFIG_USER).defaultTo("admin").asString();
@@ -1018,13 +912,6 @@ public class OrientDBRepoService implements RequestHandler {
 
     private String getPassword(JsonValue config) {
         return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
-    }
-
-    /**
-     * Cleanup and close the repository
-     */
-    void cleanup() {
-        DBHelper.closePools();
     }
 
     /**
@@ -1064,46 +951,182 @@ public class OrientDBRepoService implements RequestHandler {
      *
      * @param id
      *            the OpenIDM identifier for an object
-     * @param orientClassName
+     * @param fieldFilters
      *            the OrientDB class
      * @param database
      *            a handle to the OrientDB database object. No other thread must
      *            operate on this concurrently.
      * @return The ODocument if found, null if not found.
-     * @throws BadRequestException
-     *             if the passed identifier or type are invalid
+     * @throws NotFoundException
+     *             if the ODocument not exits
      */
-    public ODocument getByID(final String orientClassName, final String id,
-            ODatabaseDocumentTx database) throws BadRequestException {
-        if (id == null) {
-            throw new BadRequestException("Query by id the passed id was null.");
-        } else if (orientClassName == null) {
-            throw new BadRequestException("Query by id the passed type was null.");
-        }
+    public ODocument getByID(final Pair<String, Object> id, final List<JsonPointer> fieldFilters,
+            final ODatabaseDocumentTx database) throws NotFoundException,
+            InternalServerErrorException {
+        ODocument oDocument = null;
 
-        try {
-            ORecordId RID = new ORecordId(id);
-            Object o = database.getRecord(RID);
-            if (o instanceof ODocument) {
-                return (ODocument) o;
+        if (id.getRight() instanceof ORecordId) {
+            try {
+                ORecordId RID = (ORecordId) id.getRight();
+                Object o = database.getRecord(RID); //database.getRecord(new ORecordId("#12:1"))
+                if (o instanceof ODocument) {
+                    oDocument = (ODocument) o;
+                } else {
+                    logger.warn("The requested record is not a Document {}", o);
+                }
+            } catch (ODatabaseException e) {
+                logger.error("Invalid id {}", id, e);
             }
-        } catch (IllegalArgumentException e) {
-            logger.trace("Invalid id {}", id, e);
-        } catch (ODatabaseException e) {
-            logger.error("Invalid id {}", id, e);
         }
 
+        // TODO build the fileds from the fieldFilters
         OSQLSynchQuery<ODocument> query =
-                new OSQLSynchQuery<ODocument>("select * from " + orientClassName + " where "
+                new OSQLSynchQuery<ODocument>("select @rid from " + id.getLeft() + " where "
                         + DocumentUtil.ORIENTDB_PRIMARY_KEY + " = ? ");
-        List<ODocument> result = database.query(query, id);
+        try {
+            List<ODocument> result = database.query(query, String.valueOf(id.getRight()));
 
-        ODocument first = null;
-        if (result.size() > 0) {
-            // ID is of type unique index, there must only be one at most
-            first = result.get(0);
+            if (result.size() == 1) {
+                // ID is of type unique index, there must only be one at most
+
+                //This trick gets the full oDocument and loads the other attributes
+                oDocument = result.get(0).field("rid");
+            } else if (result.size() > 1) {
+                throw new InternalServerErrorException("The resource with ID '"
+                        + String.valueOf(id.getRight()) + "is not unique");
+            }
+        } catch (final OQueryParsingException e) {
+            if (e.getCause().getMessage().equalsIgnoreCase(
+                    "Class '" + id.getLeft() + "' was not found in current database")) {
+                throw new NotFoundException();
+            } else {
+                throw e;
+            }
         }
-        return first;
+
+        if (oDocument == null) {
+            throw new NotFoundException("The resource with ID '" + String.valueOf(id.getRight())
+                    + "' could not be read because it does not exist");
+        }
+        return oDocument;
     }
 
+    private Resource getResource(String resourceId, ODocument newDoc) {
+        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
+        // _ID
+        content.put(Resource.FIELD_CONTENT_ID, resourceId);
+        // _REV
+        String rev = Integer.toString(newDoc.getVersion());
+        content.put(Resource.FIELD_CONTENT_REVISION, Integer.toString(newDoc.getVersion()));
+        // _VERTEX
+        // String vid = String.format("#%d:%d",
+        // newDoc.getIdentity().getClusterId(),
+        // newDoc.getIdentity().getClusterPosition().intValue());
+        content.put("_vertex", newDoc.getIdentity().toString());
+        return new Resource(resourceId, rev, content);
+    }
+
+    private ODocument getODocumentForUpdate(final Pair<String, Object> id, final String rev,
+            final ODatabaseDocumentTx database) throws ResourceException {
+        if (rev != null && StringUtils.isBlank(rev)) {
+            throw new PreconditionRequiredException();
+        }
+
+        final ODocument document = getByID(id, null, database);
+        if (rev != null && !"*".equals(rev) && !rev.equals(Integer.toString(document.getVersion()))) {
+            throw new PreconditionFailedException("The resource with ID '" + id
+                    + "' could not be updated because it does not have the required version");
+        }
+        return document;
+    }
+
+    /**
+     * Adapts a {@code Throwable} to a {@code ResourceException}. If the
+     * {@code Throwable} is an JSON {@code JsonValueException} then an
+     * appropriate {@code ResourceException} is returned, otherwise an
+     * {@code InternalServerErrorException} is returned.
+     *
+     * @param t
+     *            The {@code Throwable} to be converted.
+     * @return The equivalent resource exception.
+     */
+    public ResourceException adapt(final Throwable t) {
+        int resourceResultCode;
+        try {
+            throw t;
+        } catch (OConcurrentModificationException ex) {
+            resourceResultCode = ResourceException.VERSION_MISMATCH;
+        } catch (final ResourceException e) {
+            return e;
+        } catch (final JsonValueException e) {
+            resourceResultCode = ResourceException.BAD_REQUEST;
+        } catch (final Throwable tmp) {
+            resourceResultCode = ResourceException.INTERNAL_ERROR;
+        }
+        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
+    }
+
+    private Pair<OClass, String> parseResourceName(final OSchema schema,
+            final CreateRequest request, final String partition) throws ResourceException {
+
+        Pair<String, Object> pair = parseResourceName(request, partition);
+
+        OClass iClass = schema.getClass(pair.getLeft());
+        if (null == iClass) {
+
+            // TODO Move this to the Util class
+            OClass superClass = schema.getClass(DBHelper.CLASS_JSON_RESOURCE);
+
+            iClass = schema.createClass(pair.getLeft(), superClass);
+            schema.save();
+        }
+        return Pair.of(iClass, request.getNewResourceId());
+    }
+
+    /*
+     * This method has to be checked in a distributed environment to check what
+     * is the disadvantages of getting the schema in advance. The Pair<String,
+     * Object> may be better.
+     */
+    private Pair<String, Object> parseResourceName(final Request request, final String partition)
+            throws ResourceException {
+
+        if (request instanceof CreateRequest) {
+            final CreateRequest cr = (CreateRequest) request;
+            String resourceName = null;
+            if (StringUtils.isNotBlank(cr.getNewResourceId())) {
+                try {
+                    ORecordId rid = new ORecordId(cr.getNewResourceId());
+                    throw new BadRequestException("The id can not have the format %d:%d " + rid);
+                } catch (IllegalArgumentException e) {
+                    /* expected */
+                    resourceName = cr.getNewResourceId();
+                }
+            }
+
+            String iClassName =
+                    resourceCollectionToOrientClassName(partition, request.getResourceName());
+
+            return Pair.of(iClassName, (Object) resourceName);
+        } else {
+            URLParser url = URLParser.parse(request.getResourceName()).last();
+            String iClassName = partition;
+
+            if (url.index() < 0) {
+                throw new BadRequestException(
+                        "The repository requires clients to supply an identifier for the object to read.");
+            } else if (url.index() > 0) {
+                iClassName =
+                        resourceCollectionToOrientClassName(partition, url.resourceCollection());
+            }
+
+            try {
+                ORecordId RID = new ORecordId(url.value());
+                return Pair.of(iClassName, (Object) RID);
+            } catch (IllegalArgumentException e) {
+                return Pair.of(iClassName, (Object) url.value());
+            }
+
+        }
+    }
 }

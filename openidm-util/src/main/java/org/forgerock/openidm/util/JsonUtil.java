@@ -46,6 +46,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter.Indenter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -60,11 +61,12 @@ public final class JsonUtil {
     private static final ObjectWriter PRETTY_WRITER;
 
     static {
-        OBJECT_MAPPER = new ObjectMapper();
-        OBJECT_MAPPER.registerModule(new AfterburnerModule());
-        OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        OBJECT_MAPPER.writer().with(SerializationFeature.INDENT_OUTPUT);
-        OBJECT_MAPPER.reader().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        OBJECT_MAPPER =
+                new ObjectMapper().registerModule(new AfterburnerModule()).configure(
+                        JsonParser.Feature.ALLOW_COMMENTS, true).disable(
+                        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(
+                        SerializationFeature.INDENT_OUTPUT).enable(
+                        MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
 
         // TODO Make it configurable for Audit service
         // .configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
@@ -107,9 +109,9 @@ public final class JsonUtil {
     }
 
     public static ObjectMapper build() {
-        return new ObjectMapper(OBJECT_MAPPER.getFactory(),
-                (DefaultSerializerProvider) OBJECT_MAPPER.getSerializerProvider(),
-                (DefaultDeserializationContext) OBJECT_MAPPER.getDeserializationContext());
+        final ObjectMapper mapper = OBJECT_MAPPER.copy();
+        mapper.getFactory().configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        return mapper;
     }
 
     public static String writeValueAsString(JsonValue value) throws JsonProcessingException {

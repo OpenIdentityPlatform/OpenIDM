@@ -33,14 +33,14 @@ import org.osgi.service.cm.ConfigurationPlugin;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class CryptoConfigurationPlugin implements ConfigurationPlugin  {
     @Override
     public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
         properties.put(JSONEnhancedConfig.class.getCanonicalName(), JSONEnhancedConfig
-                .newInstance().getConfiguration((Dictionary<String, Object>) properties, null,
+                .newInstance().getConfiguration((Dictionary<String, Object>) properties,
                         (String) reference.getProperty(Constants.SERVICE_PID), true));
     }
 }
