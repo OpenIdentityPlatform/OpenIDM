@@ -1051,82 +1051,93 @@ openidm.create("config/custom/myconfig", mymap)</programlisting>
    <section xml:id="configuration-objects-programmatic-update">
      <title>Updating Objects</title>
 
-    <para>The following script example updates an object type.</para>
+    <para>The following script example updates a custom configuration object
+    type.</para>
+
+    <programlisting language="javascript">openidm.update("config/custom/myconfig", mymap)</programlisting>
+
+    <!-- MVCC not currently supported for config objects
     <programlisting language="javascript">var expectedRev = origMap._rev
-openidm.update("managed/custom/myconfig", expectedRev, mymap)</programlisting>
+openidm.update("config/custom/myconfig", expectedRev, mymap)</programlisting>
+
 
     <para>The MVCC mechanism requires that <literal>expectedRev</literal>
     be set to the expected revision of the object to update. You obtain the
     revision from the object's <literal>_rev</literal> property. If something
     else changes the object concurrently, OpenIDM rejects the update, and you
-    must either retry or inspect the concurrent modification.</para>
+    must either retry or inspect the concurrent modification.</para> -->
    </section>
 
    <section xml:id="configuration-objects-programmatic-delete">
     <title>Deleting Objects</title>
 
-    <para>The following script example deletes an object type.</para>
+    <para>The following script example deletes a custom configuration object
+    type.</para>
 
-    <programlisting language="javascript">var expectedRev = origMap._rev
+    <programlisting language="javascript">openidm.delete("config/custom/myconfig")</programlisting>
+
+   <!-- MVCC not currently supported for config objects
+
+   <programlisting language="javascript">var expectedRev = origMap._rev
 openidm.delete("config/custom/myconfig", expectedRev)</programlisting>
 
-    <para>The MVCC mechanism requires that <literal>expectedRev</literal>
-    be set to the expected revision of the object to update. You obtain the
-    revision from the object's <literal>_rev</literal> property. If something
-    else changes the object concurrently, OpenIDM rejects deletion, and you
-    must either retry or inspect the concurrent modification.</para>
-   </section>
+   <para>The MVCC mechanism requires that <literal>expectedRev</literal>
+   be set to the expected revision of the object to update. You obtain the
+   revision from the object's <literal>_rev</literal> property. If something
+   else changes the object concurrently, OpenIDM rejects deletion, and you
+   must either retry or inspect the concurrent modification.</para> -->
+  </section>
 
-   <section xml:id="configuration-objects-programmatic-read">
-    <title>Reading Objects</title>
+  <section xml:id="configuration-objects-programmatic-read">
+   <title>Reading Objects</title>
 
-    <para>The following script example reads an object type.</para>
+   <para>The following script example reads an object type.</para>
 
-    <programlisting language="javascript">
+   <programlisting language="javascript">
 val = openidm.read("config/custom/myconfig")</programlisting>
-   </section>
- </section>
+  </section>
+</section>
 
- <section xml:id="system-objects">
-  <title>System Objects</title>
-  <indexterm>
-   <primary>Objects</primary>
-   <secondary>System objects</secondary>
-  </indexterm>
+<section xml:id="system-objects">
+ <title>System Objects</title>
+ <indexterm>
+  <primary>Objects</primary>
+  <secondary>System objects</secondary>
+ </indexterm>
 
-  <para><firstterm>System objects</firstterm> are pluggable representations of
-  objects on external systems. They follow the same RESTful resource based
-  design principles as managed objects. There is a default implementation for
-  the OpenICF framework, which allows any connector object to be represented
-  as a system object.</para>
- </section>
+ <para><firstterm>System objects</firstterm> are pluggable representations of
+ objects on external systems. They follow the same RESTful resource based
+ design principles as managed objects. There is a default implementation for
+ the OpenICF framework, which allows any connector object to be represented
+ as a system object.</para>
+</section>
 
- <section xml:id="audit-objects">
-  <title>Audit Objects</title>
-  <indexterm>
-   <primary>Objects</primary>
-   <secondary>Audit objects</secondary>
-  </indexterm>
+<section xml:id="audit-objects">
+ <title>Audit Objects</title>
+ <indexterm>
+  <primary>Objects</primary>
+  <secondary>Audit objects</secondary>
+ </indexterm>
 
-  <para>Audit objects house audit data selected for local storage in the
-  OpenIDM repository. For details, see the chapter on <link
-  xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-auditing"><citetitle>Using Audit
-  Logs</citetitle></link>.</para>
- </section>
+ <para>Audit objects house audit data selected for local storage in the
+ OpenIDM repository. For details, see the chapter on <link
+ xlink:role="http://docbook.org/xlink/role/olink"
+ xlink:href="integrators-guide#chap-auditing"><citetitle>Using Audit
+ Logs</citetitle></link>.</para>
+</section>
 
- <section xml:id="links">
-  <title>Links</title>
-  <indexterm>
-   <primary>Objects</primary>
-   <secondary>Links</secondary>
-  </indexterm>
+<section xml:id="links">
+ <title>Links</title>
+ <indexterm>
+  <primary>Objects</primary>
+  <secondary>Links</secondary>
+ </indexterm>
 
-  <para>Link objects define relations between source objects and target
-  objects, usually relations between managed objects and system objects.
-  The link relationship is established by provisioning activity that either
-  results in a new account on a target system, or a reconciliation or
-  synchronization scenario that takes a <literal>LINK</literal> action.</para>
- </section>
+ <para>Link objects define relations between source objects and target
+ objects, usually relations between managed objects and system objects.
+ The link relationship is established by provisioning activity that either
+ results in a new account on a target system, or a reconciliation or
+ synchronization scenario that takes a <literal>LINK</literal> action.</para>
+</section>
 
 </appendix>
