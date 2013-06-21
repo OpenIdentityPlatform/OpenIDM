@@ -48,6 +48,7 @@ public class ConfigMeta implements MetaDataProvider {
     public ConfigMeta() {
         List<JsonPointer> props = new ArrayList<JsonPointer>();
         props.add(new JsonPointer(OrientDBRepoService.CONFIG_PASSWORD));
+        props.add(new JsonPointer("/embeddedServer/users/*/password"));
         propertiesToEncrypt = Collections.unmodifiableList(props);
     }
 
@@ -60,7 +61,7 @@ public class ConfigMeta implements MetaDataProvider {
             return propertiesToEncrypt;
         }
         return null;
-    } 
+    }
 
     /**
      * @inheritDoc

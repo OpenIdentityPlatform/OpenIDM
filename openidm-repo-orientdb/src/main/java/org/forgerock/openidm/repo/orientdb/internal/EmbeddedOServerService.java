@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,209 +21,265 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.repo.orientdb.internal;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.forgerock.json.fluent.JsonValue;
 
-import com.orientechnologies.orient.server.OServer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.orientechnologies.common.concur.lock.OLockException;
+import com.orientechnologies.common.io.OIOUtils;
+import com.orientechnologies.common.profiler.OProfiler;
+import com.orientechnologies.orient.core.Orient;
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
 import com.orientechnologies.orient.server.OServerMain;
-import com.orientechnologies.orient.server.config.OServerCommandConfiguration;
 import com.orientechnologies.orient.server.config.OServerConfiguration;
 import com.orientechnologies.orient.server.config.OServerEntryConfiguration;
-import com.orientechnologies.orient.server.config.OServerHandlerConfiguration;
-import com.orientechnologies.orient.server.config.OServerNetworkConfiguration;
-import com.orientechnologies.orient.server.config.OServerNetworkListenerConfiguration;
-import com.orientechnologies.orient.server.config.OServerNetworkProtocolConfiguration;
-import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
-import com.orientechnologies.orient.server.config.OServerStorageConfiguration;
-import com.orientechnologies.orient.server.config.OServerUserConfiguration;
 
 /**
  * Component for embedded OrientDB server
  *
  * @author aegloff
  */
-public class EmbeddedOServerService {
+public class EmbeddedOServerService extends OServerMain {
+
+    /**
+     * Setup logging for the {@link EmbeddedOServerService}.
+     */
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
+    private static final String SERVER_DATABASE_PATH = "server.database.path";
 
-    OServer orientDBServer;
+    // Current configuration
+    private JsonValue existingConfig;
 
-    void activate(JsonValue config) throws Exception {
-        logger.trace("Activating Service with configuration {}", config);
+    private String dbURL;
+    private String user;
+    private String password;
+
+    EmbeddedOServerService activate(JsonValue config) throws Exception {
         try {
-            JsonValue enabled = config.get("embeddedServer").get("enabled");
 
-            // Create regardless of whether enabled to ensure proper shutdown handling (observed in RC9)
-            orientDBServer = OServerMain.create();
-            
-            // enabled flag should be Boolean, but allow for (deprecated) String representation for now.
-            if ((enabled.isBoolean() && Boolean.TRUE.equals(enabled.asBoolean())
-                    || enabled.isString() && "true".equalsIgnoreCase(enabled.asString()))) {
+            JsonValue globalConfiguration = config.get("globalConfiguration").expect(Map.class);
+            if (!globalConfiguration.isNull()) {
+                OGlobalConfiguration.setConfiguration(globalConfiguration.asMap());
+            }
+
+            if (isEnable(config)) {
                 OServerConfiguration serverConfig = getOrientDBConfig(config);
-                orientDBServer.startup(serverConfig);
-                orientDBServer.activate();
+                logger.trace("Starting embedded OrientDB server.");
+                OGlobalConfiguration.ENVIRONMENT_DUMP_CFG_AT_STARTUP.setValue(logger
+                        .isTraceEnabled());
+                create().startup(serverConfig);
+                Orient.instance().getProfiler().registerHookValue("system.databases",
+                        "List of databases configured in Server", OProfiler.METRIC_TYPE.TEXT,
+                        new OProfiler.OProfilerHookValue() {
+                            @Override
+                            public Object getValue() {
+                                final StringBuilder dbs = new StringBuilder();
+                                for (String dbName : server().getAvailableStorageNames().keySet()) {
+                                    if (dbs.length() > 0)
+                                        dbs.append(',');
+                                    dbs.append(dbName);
+                                }
+                                return dbs.toString();
+                            }
+                        });
+                server().activate();
 
-                //com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().create();
-                //OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
-                //OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
-                //OGremlinHelper.global().create();
+                // com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().create();
+                // OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
+                // OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
+                // OGremlinHelper.global().create();
 
-                logger.info("Embedded DB server started.");
+                logger.info("Starting embedded OrientDB server is succeeded.");
             }
         } catch (Exception ex) {
-            logger.warn("Could not start OrientDB embedded server, service disabled.", ex);
+            logger.error("Failed to start embedded OrientDB server.", ex);
+            throw ex;
+        }
+        return this;
+    }
+
+    EmbeddedOServerService deactivate() {
+        DBHelper.closePools();
+        if (server() != null) {
+            server().shutdown();
+            logger.debug("Embedded DB server stopped.");
+        }
+        Orient.instance().shutdown();
+        // com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().destroy();
+        return this;
+    }
+
+    /**
+     * Initialize the instnace with the given configuration.
+     *
+     * This can configure managed (DS/SCR) instances, as well as explicitly
+     * instantiated (bootstrap) instances.
+     *
+     * @param config
+     *            the configuration
+     */
+    void init(JsonValue config) throws Exception {
+        try {
+            dbURL = getDBUrl(config);
+            user = config.get(OrientDBRepoService.CONFIG_USER).defaultTo("admin").asString();
+            logger.info("OObjectDatabasePool.global().acquire(\"{}\", \"{}\", \"****\");", dbURL,
+                    user);
+            password =
+                    config.get(OrientDBRepoService.CONFIG_PASSWORD).defaultTo("admin").asString();
+
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid, can not start OrientDB repository", ex);
+            throw ex;
+        }
+
+        try {
+            DBHelper.getPool(dbURL, user, password, config, true);
+            logger.debug("Obtained pool {}");
+        } catch (Exception ex) {
+            logger.warn("Initializing database pool failed", ex);
             throw ex;
         }
     }
 
-    void deactivate() {
-        if (orientDBServer != null) {
-            orientDBServer.shutdown();
-            logger.debug("Embedded DB server stopped.");
+    /**
+     * TODO http://code.google.com/p/orient/wiki/JavaMultiThreading
+     * @return A connection from the pool. Call close on the connection when
+     *         done to return to the pool.
+     * @throws org.forgerock.json.resource.InternalServerErrorException
+     */
+    ODatabaseDocumentTx getConnection() throws ResourceException {
+        ODatabaseDocumentTx db = null;
+        int maxRetry = 100; // give it up to approx 10 seconds to recover
+        int retryCount = 0;
+
+        while (db == null && retryCount < maxRetry) {
+            retryCount++;
+            try {
+                // TYPE_GRAPH.equals(db.get(ODatabase.ATTRIBUTES.TYPE))
+                db = OGraphDatabasePool.global().acquire(dbURL, user, password);
+                //db = ODatabaseDocumentPool.global().acquire(dbURL, user, password);
+                if (retryCount > 1) {
+                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}",
+                            retryCount);
+                }
+                retryCount = maxRetry;
+            } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
+                // TODO: remove work-around once OrientDB resolves this
+                // condition
+                if (retryCount == maxRetry) {
+                    logger.warn(
+                            "Failure reported acquiring connection from pool, retried {} times before giving up.",
+                            retryCount, ex);
+                    throw new ServiceUnavailableException(
+                            "Failure reported acquiring connection from pool, retried "
+                                    + retryCount + " times before giving up: " + ex.getMessage(),
+                            ex);
+                } else {
+                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
+                    logger.trace("Pool acquire failure detail ", ex);
+                    try {
+                        // Give the DB time to complete what it's doing before
+                        // retrying
+                        Thread.sleep(100);
+                    } catch (InterruptedException iex) {
+                        // ignore that sleep was interrupted
+                    }
+                }
+            } catch (OLockException e) {
+                logger.warn("Not more resources available in global pool. Requested resource: {}",
+                        OIOUtils.getUnixFileName(user + "@" + dbURL));
+                // TODO provide less information in exception @Security concern
+                throw new ServiceUnavailableException(
+                        "Not more resources available in global pool. Requested resource: "
+                                + OIOUtils.getUnixFileName(user + "@" + dbURL));
+            }
         }
-        //com.orientechnologies.orient.graph.gremlin.OGremlinHelper.global().destroy();
+        if (db != null) {
+            return db;
+        } else {
+            throw new ServiceUnavailableException();
+        }
     }
 
-    // TODO: make configurable
-    protected OServerConfiguration getOrientDBConfig(JsonValue config) {
+    /**
+     * Checks the configuration if the embedded OrientDB service is enabled.
+     *
+     * @param config
+     * @return
+     */
+    static boolean isEnable(JsonValue config) {
+        // enabled flag should be Boolean, but allow for (deprecated) String
+        // representation for now.
+        JsonValue enabled = config.get("embeddedServer").get("enabled");
+        return (enabled.isBoolean() && Boolean.TRUE.equals(enabled.asBoolean()) || enabled
+                .isString()
+                && "true".equalsIgnoreCase(enabled.asString()));
+    }
 
-        OServerConfiguration configuration = new OServerConfiguration();
-
-        Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
-        
-        if (clustered) {
-            configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
-            OServerHandlerConfiguration handler = new OServerHandlerConfiguration();
-            handler.clazz = "com.orientechnologies.orient.server.handler.distributed.ODistributedServerManager";
-            configuration.handlers.add(handler);
-            
-            String clusterName = config.get("embeddedServer").get("clusterName").defaultTo("openidm").asString();
-            String multicastAddress = config.get("embeddedServer").get("clusterAddress").defaultTo("235.1.1.1").asString();
-            String multicastPort = config.get("embeddedServer").get("clusterPort").defaultTo("2424").asString();
-            String clusterSecurityKey = config.get("embeddedServer").get("clusterSecurityKey").defaultTo("hw3CgjSzqm8I/axu").asString();
-            
-            handler.parameters = new OServerParameterConfiguration[]{
-                    new OServerParameterConfiguration("enabled", Boolean.toString(clustered)),
-                    new OServerParameterConfiguration("name", clusterName),
-                    new OServerParameterConfiguration("security.algorithm", "Blowfish"),
-                    new OServerParameterConfiguration("network.multicast.address", multicastAddress),
-                    new OServerParameterConfiguration("network.multicast.port", multicastPort),
-                    new OServerParameterConfiguration("network.multicast.heartbeat", "10"),
-                    new OServerParameterConfiguration("server.update.delay", "5000"),
-                    new OServerParameterConfiguration("server.electedForLeadership", "true"),
-                    new OServerParameterConfiguration("security.key", clusterSecurityKey),
-            };
-            logger.info("OrientDB clustering enabled on {}:{} with cluster name {}", new Object[] {multicastAddress, multicastPort, clusterName});
-        }
-
-        configuration.network = new OServerNetworkConfiguration();
-        configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>();
-        OServerNetworkProtocolConfiguration protocol1 = new OServerNetworkProtocolConfiguration();
-        protocol1.name = "binary";
-        protocol1.implementation = "com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary";
-        configuration.network.protocols.add(protocol1);
-        OServerNetworkProtocolConfiguration protocol2 = new OServerNetworkProtocolConfiguration();
-        protocol2.name = "http";
-        protocol2.implementation = "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb";
-        configuration.network.protocols.add(protocol2);
-//        NOTE: No longer exists as of 1.1.0-SNAPSHOT evidently
-//        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();
-//        protocol3.name = "distributed";
-//        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";
-//        configuration.network.protocols.add(protocol3);
-
-        configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
-        OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
-
-        // TODO: make configurable what address it is accessible on
-        //listener1.ipAddress = "0.0.0.0";
-        listener1.ipAddress = "127.0.0.1";
-        listener1.portRange = "2424-2424";
-        if (clustered) {
-            listener1.protocol = "distributed";
+    String getDBUrl(JsonValue configuration) {
+        // <engine>:<db-type>:<db-name>[?<db-param>=<db-value>[&]]*
+        String url = null;
+        if (isEnable(configuration)) {
+            url = server().getStorageURL("openidm");
+            if (null == url) {
+                url =
+                        configuration.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo(
+                                "local:" + server().getDatabaseDirectory() + "openidm").asString();
+            }
         } else {
-            listener1.protocol = "binary";
+            url =
+                    configuration.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo(
+                            "remote:localhost/openidm").asString();
         }
-        configuration.network.listeners.add(listener1);
-        OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
+        return url;
+    }
 
-        // TODO: make configurable what address it is accessible on
-        // listener2.ipAddress = "0.0.0.0";
-        listener2.ipAddress = "127.0.0.1";
-        listener2.portRange = "2480-2480";
-        listener2.protocol = "http";
+    private OServerConfiguration getOrientDBConfig(JsonValue config) {
 
-//        NOTE: no longer used in 1.3
-//        OServerCommandConfiguration command1 = new OServerCommandConfiguration();
-//        command1.pattern = "POST|*.action GET|*.action";
-//        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
-//        command1.parameters = new OServerEntryConfiguration[0];
+        ObjectMapper mapper = JsonUtil.build();
 
-        // Access to the studio web app
-        OServerCommandConfiguration command2 = new OServerCommandConfiguration();
-        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
-        command2.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
-        command2.parameters = new OServerEntryConfiguration[2];
-        command2.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");
-        command2.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");
+        OServerConfiguration configuration =
+                mapper.convertValue(config.get("embeddedServer").asMap(),
+                        OServerConfiguration.class);
 
-        listener2.commands = new OServerCommandConfiguration[]{
-//                command1,
-                command2
-        };
+        String OHOME = IdentityServer.getFileForWorkingPath("db").getAbsolutePath();
 
-        listener2.parameters = new OServerParameterConfiguration[1];
-        // Connection custom parameters. If not specified the global configuration will be taken
-        listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
-        
-        configuration.network.listeners.add(listener2);
+        System.setProperty("ORIENTDB_HOME", OHOME);
 
-        OServerStorageConfiguration storage1 = new OServerStorageConfiguration();
-        storage1.name = "temp";
-        storage1.path = "memory:temp";
-        storage1.userName = "admin";
-        storage1.userPassword = "admin";
-        storage1.loadOnStartup = false;
-        File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
-        String dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + dbFolder.getAbsolutePath()).asString();
-        String user = config.get(OrientDBRepoService.CONFIG_USER).defaultTo("admin").asString();
-        String pwd = config.get(OrientDBRepoService.CONFIG_PASSWORD).defaultTo("admin").asString();
+        Map<String, OServerEntryConfiguration> customProperties =
+                new HashMap<String, OServerEntryConfiguration>();
+        customProperties.put("server.database.path", new OServerEntryConfiguration(
+                SERVER_DATABASE_PATH, OHOME + "/"));
 
-        OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
-        storage2.name = "openidm";
-        storage2.path = dbURL;
-        storage2.userName = user;
-        storage2.userPassword = pwd;
-        storage2.loadOnStartup = false;
+        // Make sure the database path always ends with '/'
+        if (configuration.properties != null) {
+            for (OServerEntryConfiguration prop : configuration.properties) {
+                if (SERVER_DATABASE_PATH.equals(prop.name)) {
+                    if (!prop.value.endsWith("/")) {
+                        prop.value = prop.value + "/";
+                    }
+                }
+                customProperties.put(prop.name, prop);
+            }
+        }
 
-        configuration.storages = new OServerStorageConfiguration[]{
-                storage1,
-                storage2
-        };
-
-        // Defaulted to the same as the regular user
-        String rootPwd = config.get("embeddedServer").get("rootPwd").defaultTo(pwd).asString();
-        configuration.users = new OServerUserConfiguration[]{
-                new OServerUserConfiguration("root", rootPwd, "*")
-        };
-        configuration.properties = new OServerEntryConfiguration[]{
-                new OServerEntryConfiguration("server.cache.staticResources", "false"),
-                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio"),
-                new OServerEntryConfiguration("orient.home", dbFolder.getAbsolutePath())
-                //new OServerEntryConfiguration("log.console.level", "info"),
-                //new OServerEntryConfiguration("log.file.level", "fine")
-        };
-        // OrientDB currently logs a warning if this is not set, 
-        // although it should be taking the setting from the config above instead.
-        System.setProperty("ORIENTDB_HOME", dbFolder.getAbsolutePath());
-
+        configuration.properties =
+                customProperties.values().toArray(
+                        new OServerEntryConfiguration[customProperties.size()]);
         return configuration;
     }
-
 }

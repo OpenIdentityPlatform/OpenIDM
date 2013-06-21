@@ -39,13 +39,13 @@ import org.testng.annotations.Test;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class JSONEnhancedConfigTest {
     @Test
     public void testGetConfiguration() throws Exception {
-        
+
         // Redirect to a test Boot file
         String bootFile =
                 URLDecoder.decode(JSONEnhancedConfigTest.class.getResource(
@@ -54,7 +54,7 @@ public class JSONEnhancedConfigTest {
         System.setProperty("system.environment", "TEST");
 
         IdentityServer.initInstance(new SystemPropertyAccessor(null));
-        
+
         /*
          * {"attr1" : "&{property1}","attr2" : "pre &{property2}-post","attr3" :
          * "&{not-available}","attr4":{"subattr1" :
@@ -74,7 +74,7 @@ public class JSONEnhancedConfigTest {
         Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
         dict.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, jsonConfigProperty);
 
-        JsonValue configuration = enhancedConfig.getConfiguration(dict, null, "pid", false);
+        JsonValue configuration = enhancedConfig.getConfiguration(dict, "pid", false);
 
         assertEquals(configuration.get("attr1").required().asString(), "value1");
         assertEquals(configuration.get("attr2").required().asString(), "pre value2-post");

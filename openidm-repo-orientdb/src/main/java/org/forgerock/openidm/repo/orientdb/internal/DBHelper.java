@@ -23,172 +23,167 @@
  */
 package org.forgerock.openidm.repo.orientdb.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.InvalidException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
+import com.orientechnologies.common.io.OIOUtils;
+import com.orientechnologies.orient.client.remote.OEngineRemote;
+import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
+import com.orientechnologies.orient.core.db.record.ODatabaseRecord;
+import com.orientechnologies.orient.core.exception.OConfigurationException;
+import com.orientechnologies.orient.core.exception.OSecurityAccessException;
+import com.orientechnologies.orient.core.exception.OStorageException;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
+import com.orientechnologies.orient.server.config.OServerConfiguration;
 
 /**
  * A Helper to interact with the OrientDB
+ *
  * @author aegloff
  */
-public class DBHelper {
-    final static Logger logger = LoggerFactory.getLogger(DBHelper.class);
-    
-    private static Map<String, ODatabaseDocumentPool> pools = new HashMap<String, ODatabaseDocumentPool>();
+public final class DBHelper {
+
+    public static final String UNIQUE_PRIMARY_IDX = "UNIQUE_PRIMARY_IDX";
+
+    private DBHelper() {
+    }
 
     /**
-     * Get the DB pool for the given URL. May return an existing pool newBuilder.
-     * Also can initialize/create/update the DB to meet the passed
+     * Setup logging for the {@link DBHelper}.
+     */
+    final static Logger logger = LoggerFactory.getLogger(DBHelper.class);
+
+    public static final String TYPE_GRAPH = "graph";
+    public static final String TYPE_DOCUMENT = "document";
+    public static final String CLASS_JSON_RESOURCE = "JSONResource";
+
+    /**
+     * Get the DB pool for the given URL. May return an existing pool
+     * newBuilder. Also can initialize/create/update the DB to meet the passed
      * configuration if setupDB is enabled
-     * 
+     *
      * Do not close the returned pool directly as it may be used by others.
-     * 
+     *
      * To cleanly shut down the application, call closePools at the end
-     * 
-     * @param dbURL the orientdb URL
-     * @param user the orientdb user to connect
-     * @param password the orientdb password to connect
-     * @param minSize the orientdb pool minimum size
-     * @param maxSize the orientdb pool maximum size
-     * @param completeConfig the full configuration for the DB
-     * @param setupDB true if it should also check the DB exists in the state
-     * to match the passed configuration, and to set it up to match 
+     *
+     * @param dbURL
+     *            the orientdb URL
+     * @param user
+     *            the orientdb user to connect
+     * @param password
+     *            the orientdb password to connect
+     * @param completeConfig
+     *            the full configuration for the DB
+     * @param setupDB
+     *            true if it should also check the DB exists in the state to
+     *            match the passed configuration, and to set it up to match
      * @return the pool
      * @throws org.forgerock.openidm.config.InvalidException
      */
-    public synchronized static ODatabaseDocumentPool getPool(String dbURL, String user,
-            String password, int minSize, int maxSize, JsonValue completeConfig, boolean setupDB)
-            throws InvalidException {
-
-        ODatabaseDocumentTx setupDbConn = null;
-        ODatabaseDocumentPool pool = null;
+    public synchronized static void getPool(String dbURL, String user, String password,
+            JsonValue completeConfig, boolean setupDB) throws InvalidException, IOException {
         try {
             if (setupDB) {
                 logger.debug("Check DB exists in expected state for pool {}", dbURL);
-                setupDbConn = checkDB(dbURL, user, password, completeConfig);
+                checkDB(dbURL, user, password, completeConfig);
             }
             logger.debug("Getting pool {}", dbURL);
-            pool = pools.get(dbURL);
-            if (pool == null) {
-                pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
-                pools.put(dbURL, pool);
+
+            if (!ODatabaseDocumentPool.global().getPools().containsKey(
+                    OIOUtils.getUnixFileName(user + "@" + dbURL))) {
+                initPool(dbURL, user, password);
             }
         } finally {
-            if (setupDbConn != null) {
-                setupDbConn.close();
-            }
+
         }
-        return pool;
     }
 
     /**
-     * Closes all pools managed by this helper
-     * Call at application shut-down to cleanly shut down the pools.
+     * Closes all pools managed by this helper Call at application shut-down to
+     * cleanly shut down the pools.
      */
     public synchronized static void closePools() {
         logger.debug("Close DB pools");
-        for (ODatabaseDocumentPool pool : pools.values()) {
-            try {
-                pool.close();
-                logger.trace("Closed pool {}", pool);
-            } catch (Exception ex) {
-                logger.info("Faillure reported in closing pool {}", pool, ex);
-            }
+        try {
+            ODatabaseDocumentPool.global().close();
+            logger.trace("Successfully closed global pool {}");
+        } catch (Exception ex) {
+            logger.info("Failure reported in closing global pool", ex);
         }
-        pools = new HashMap(); // release all our closed pool references
     }
-    
+
     /**
      * Initialize the DB pool.
-     * @param dbURL the orientdb URL
-     * @param user the orientdb user to connect
-     * @param password the orientdb password to connect
-     * @param minSize the orientdb pool minimum size
-     * @param maxSize the orientdb pool maximum size
-     * @param completeConfig
+     *
+     * @param dbURL
+     *            the orientdb URL
+     * @param user
+     *            the orientdb user to connect
+     * @param password
+     *            the orientdb password to connect
      * @return the initialized pool
      * @throws org.forgerock.openidm.config.InvalidException
      */
-    private static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
-            int minSize, int maxSize, JsonValue completeConfig) throws InvalidException {
+    private static void initPool(String dbURL, String user, String password)
+            throws InvalidException {
         logger.trace("Initializing DB Pool {}", dbURL);
-        
-        // Enable transaction log
-        OGlobalConfiguration.TX_USE_LOG.setValue(true);
-        
-        // Immediate disk sync for commit 
-        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
-        
-        // Have the storage closed when the DB is closed.
-        OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(false);
-        
+
         boolean success = false;
         int maxRetry = 10;
         int retryCount = 0;
-        ODatabaseDocumentPool pool = null;
-        
+
         // Initialize and try to verify the DB. Retry maxRetry times.
         do {
             retryCount++;
-            if (pool != null) {
-                pool.close();
-            }
-            pool = ODatabaseDocumentPool.global();
-            // Moving from 0.9.25 to 1.0 RC had to change this
-            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
-            //pool.setup(minSize, maxSize);
-            warmUpPool(pool, dbURL, user, password, 1);
-            
+            warmUpPool(dbURL, user, password);
             boolean finalTry = (retryCount >= maxRetry);
-            success = test(pool, dbURL, user, password, finalTry);
+            success = test(dbURL, user, password, finalTry);
         } while (!success && retryCount < maxRetry);
-        
+
         if (!success) {
             logger.warn("DB could not be verified.");
         } else {
             logger.info("DB verified on try {}", retryCount);
         }
-        
-        logger.debug("Opened and initialized pool {}", pool);
 
-        return pool;
+        logger.debug("Opened and initialized global pool {}");
     }
-    
+
     /**
-     * Perform a basic access on the DB for a rudimentary test 
+     * Perform a basic access on the DB for a rudimentary test
+     *
      * @return whether the basic access succeeded
      */
-    private static boolean test(ODatabaseDocumentPool pool, String dbURL, String user,
-            String password, boolean finalTry) {
-        
+    private static boolean test(String dbURL, String user, String password, boolean finalTry) {
+
         ODatabaseDocumentTx db = null;
         try {
             logger.info("Verifying the DB.");
-            db = pool.acquire(dbURL, user, password);
-            java.util.Iterator iter = db.browseClass("config"); // Config always should exist
-            if (iter.hasNext()) {
-                iter.next();
-            }
+            db = ODatabaseDocumentPool.global().acquire(dbURL, user, password);
+            // JSONResource always should exist
+            OClass superClass = db.getMetadata().getSchema().getClass(CLASS_JSON_RESOURCE);
+
         } catch (OException ex) {
             if (finalTry) {
                 logger.info("Exceptions encountered in verifying the DB", ex);
@@ -199,25 +194,27 @@ public class DBHelper {
         } finally {
             if (db != null) {
                 db.close();
-            } 
+            }
         }
         return true;
     }
-    
+
     /**
-     * Ensure the min size pool entries are initilized.
-     * Cuts down on some (small) initial latency with lazy init
-     * Do not call with a min past the real pool max, it will block.
+     * Ensure the min size pool entries are initilized. Cuts down on some
+     * (small) initial latency with lazy init Do not call with a min past the
+     * real pool max, it will block.
      */
-    private static void warmUpPool(ODatabaseDocumentPool pool, String dbURL, String user,
-            String password, int minSize) {
-        
+    private static void warmUpPool(String dbURL, String user, String password) {
+        int minSize =
+                Math.min(OGlobalConfiguration.DB_POOL_MIN.getValueAsInteger(),
+                        OGlobalConfiguration.DB_POOL_MAX.getValueAsInteger());
+
         logger.trace("Warming up pool up to minSize {}", Integer.valueOf(minSize));
-        List<ODatabaseDocumentTx> list = new ArrayList<ODatabaseDocumentTx>();
-        for (int count=0; count < minSize; count++) {
+        List<ODatabaseDocumentTx> list = new ArrayList<ODatabaseDocumentTx>(minSize);
+        for (int count = 0; count < minSize; count++) {
             logger.trace("Warming up entry {}", Integer.valueOf(count));
             try {
-                list.add(pool.acquire(dbURL, user, password));
+                list.add(ODatabaseDocumentPool.global().acquire(dbURL, user, password));
             } catch (Exception ex) {
                 logger.warn("Issue in warming up db pool, entry {}", Integer.valueOf(count), ex);
             }
@@ -228,7 +225,8 @@ public class DBHelper {
                     entry.close();
                 }
             } catch (Exception ex) {
-                logger.warn("Issue in connection close during warming up db pool, entry {}", entry, ex);
+                logger.warn("Issue in connection close during warming up db pool, entry {}", entry,
+                        ex);
             }
         }
     }
@@ -236,167 +234,251 @@ public class DBHelper {
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static ODatabaseDocumentTx checkDB(String dbURL, String user, String password, JsonValue completeConfig)
-            throws InvalidException {
-        // TODO: Creation/opening of db may be not be necessary if we require
-        // this managed externally
-        OGraphDatabase db = new OGraphDatabase(dbURL);
-        if (db.exists()) {
-            logger.info("Using DB at {}", dbURL);
-            db.open(user, password);
-            // Check if structure changed
-            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig)
+            throws InvalidException, IOException {
+        OGraphDatabase db = null;
+        try {
+            db = Orient.instance().getDatabaseFactory().createGraphDatabase(dbURL);
+            if (dbURL.startsWith(OEngineRemote.NAME)) {
+                try {
+                    // OConfigurationException("Database 'openidm' is not configured on server");
+                    db.open(user, password);
+                } catch (OException e) {
+                    if (e instanceof OConfigurationException || e instanceof OStorageException) {
+                        // Assume the 'openidm' database does not exist.
+                        OServerAdmin admin = null;
+                        try {
+                            admin = new OServerAdmin(dbURL);
+                            try {
+                                admin.connect(user, password);
+                            } catch (final OException ex) {
+                                final Throwable t = ex.getCause();
+                                if (t instanceof OSecurityAccessException) {
+
+                                    String rootName =
+                                            completeConfig.get("rootName").defaultTo(
+                                                    OServerConfiguration.SRV_ROOT_ADMIN).asString();
+                                    String rootPassword =
+                                            completeConfig
+                                                    .get("rootPassword")
+                                                    .defaultTo(
+                                                            "7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4")
+                                                    .asString();
+
+                                    if (StringUtils.isNotBlank(rootPassword)) {
+                                        admin.connect(rootName, rootPassword);
+                                    } else {
+                                        throw new InvalidException(
+                                                "Missing /rootName and /rootPassword configuration so the 'openidm' database can not be created automatically.");
+                                    }
+                                } else {
+                                    throw ex;
+                                }
+                            }
+                            if (!admin.existsDatabase()) {
+                                if ("admin".equals(user) && "admin".equals(password)) {
+                                    admin.createDatabase(OGraphDatabase.TYPE, "local");
+                                } else {
+                                    throw new InvalidException(
+                                            "New database must use the default 'admin':'admin' name:password combination");
+                                }
+                            } else {
+                                // The exception was not because the 'openidm'
+                                // database does not exits
+                                throw e;
+                            }
+                        } finally {
+                            if (null != admin) {
+                                try {
+                                    admin.close();
+                                } catch (Throwable t) {
+                                    /* ignore */
+                                    logger.trace("Failed to close OServerAdmin", e);
+                                }
+                            }
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
+            } else {
+                if (!db.exists()) {
+                    if ("admin".equals(user) && "admin".equals(password)) {
+                        db.create();
+                    } else {
+                        throw new InvalidException(
+                                "New database must use the default 'admin':'admin' name:password combination");
+                    }
+                }
+            }
+            if (db.isClosed()) {
+                db.open(user, password);
+            }
             populateSample(db, completeConfig);
-        } else {
-            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-            logger.info("DB does not exist, creating {}", dbURL);
-            db.create();
-            populateSample(db, completeConfig);
+        } finally {
+            if (null != db) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    logger.error("TODO: Debug this case", t);
+                }
+            }
         }
-        return db;
     }
 
     // TODO: Review the initialization mechanism
-    private static void populateSample(OGraphDatabase db, JsonValue completeConfig)
+    private static void populateSample(final ODatabaseDocumentTx db, final JsonValue completeConfig)
             throws InvalidException {
-        
+
         JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+
+        final OSchema schema = db.getMetadata().getSchema();
+        OClass superClass = schema.getClass(CLASS_JSON_RESOURCE);
+        if (null == superClass) {
+            if (schema.existsClass("V")) {
+                superClass = schema.createClass(CLASS_JSON_RESOURCE, schema.getClass("V"));
+            } else {
+                superClass = schema.createClass(CLASS_JSON_RESOURCE);
+            }
+            superClass.createProperty(DocumentUtil.ORIENTDB_PRIMARY_KEY, OType.STRING);
+            superClass.createIndex(UNIQUE_PRIMARY_IDX, OClass.INDEX_TYPE.UNIQUE,
+                    DocumentUtil.ORIENTDB_PRIMARY_KEY);
+        }
+
         if (dbStructure == null) {
-            logger.warn("No database structure defined in the configuration." + completeConfig);
+            logger.warn("No database structure defined in the configuration.");
         } else {
             JsonValue orientDBClasses = dbStructure.get(OrientDBRepoService.CONFIG_ORIENTDB_CLASS);
-            OSchema schema = db.getMetadata().getSchema();
-            
+
             // Default always to create Config class for bootstrapping
             if (orientDBClasses == null || orientDBClasses.isNull()) {
-                orientDBClasses = new JsonValue(new java.util.HashMap());
+                orientDBClasses = new JsonValue(new HashMap());
             }
-            
+
             Map cfgIndexes = new java.util.HashMap();
             orientDBClasses.put("config", cfgIndexes);
-                            
+
             logger.info("Setting up database");
 
-                for (String orientClassName : orientDBClasses.keys()) {
+            for (String orientClassName : orientDBClasses.keys()) {
 
-                    if (schema.existsClass(orientClassName)) {
-                        // TODO: update indexes too if changed
-                        logger.trace("OrientDB class {} already exists, skipping", orientClassName);
-                    } else {
-                        createOrientDBClass(db,schema, orientClassName, orientDBClasses.get(orientClassName));
-                        if ("internal_user".equals(orientClassName)) {
-                            populateDefaultUsers(orientClassName, db, completeConfig);
-                        }
+                if (schema.existsClass(orientClassName)) {
+                    // TODO: update indexes too if changed
+                    logger.trace("OrientDB class {} already exists, skipping", orientClassName);
+                } else {
+                    createOrientDBClass(schema, superClass, orientClassName, orientDBClasses
+                            .get(orientClassName));
+                    if ("internal_user".equals(orientClassName)) {
+                        populateDefaultUsers(orientClassName);
                     }
                 }
-
-            schema.save(); 
-            
+            }
+            schema.save();
         }
     }
-    
-    private static void createOrientDBClass(OGraphDatabase graph, OSchema schema,
+
+    private static void createOrientDBClass(final OSchema schema, final OClass superClass,
             String orientClassName, JsonValue orientClassConfig) {
-        
+
         logger.info("Creating OrientDB class {}", orientClassName);
 
-        OClass orientClass = schema.createClass(orientClassName, graph.getVertexBaseClass(),
-                graph.addCluster(orientClassName,
-                OStorage.CLUSTER_TYPE.PHYSICAL));
-        
-        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+        ODatabaseRecord graph = ODatabaseRecordThreadLocal.INSTANCE.get();
+
+        // TODO Recheck this method call
+        OClass orientClass =
+                schema.createClass(orientClassName, superClass, graph.addCluster(orientClassName,
+                        OStorage.CLUSTER_TYPE.PHYSICAL));
+
+        JsonValue indexes =
+                orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX).expect(List.class);
         for (JsonValue index : indexes) {
-            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
-            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
-            
+            String[] propertyNames = null;
+
             String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
-            String[] propertyNames = null; 
-            if (propertyName != null) {
-                propertyNames = new String[] {propertyName};
+            if (StringUtils.isNotBlank(propertyName)) {
+                propertyNames = new String[] { propertyName };
             } else {
-                List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
-                if (propNamesList == null) {
-                    throw new InvalidException("Invalid index configuration. " 
-                            + "Missing property name(s) on index configuration for property type "
-                            + propertyType + " with index type " + indexType + " on " + orientClassName);
+                List<Object> propNamesList =
+                        index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
+                if (propNamesList == null || propNamesList.isEmpty()) {
+                    throw new JsonValueException(index,
+                            "Invalid index configuration. Missing propertyName(s) on index configuration");
                 }
-                propertyNames = (String[]) propNamesList.toArray(new String[0]);
+                propertyNames = propNamesList.toArray(new String[propNamesList.size()]);
             }
-            
+
             // Determine a unique name to use for the index
             // Naming pattern used is <class>|property1[|propertyN]*|Idx
-            StringBuilder indexName = new StringBuilder(orientClassName);
-            indexName.append("|"); // Not using dot as is reserved for (simple index) naming convention
+            StringBuilder indexName = new StringBuilder(orientClassName).append("|");
+            // Not using dot as is reserved for (simple index) naming convention
             for (String entry : propertyNames) {
-                indexName.append(entry);
-                indexName.append("|");
+                indexName.append(entry).append("|");
             }
             indexName.append("Idx");
-            
-            logger.info("Creating index on propertis {} of type {} with index type {} on {} for OrientDB class ", 
-                    new Object[] {propertyNames, propertyType, indexType, orientClassName});
 
-            OType orientPropertyType = null;
-            try {
-                orientPropertyType = OType.valueOf(propertyType.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new InvalidException("Invalid property type '" + propertyType + 
-                        "' in configuration on properties "
-                        + propertyNames + " with index type " + indexType + " on " 
-                        + orientClassName + " valid values: " + OType.values() 
-                        + " failure message: " + ex.getMessage(), ex);
-            }
-            
-            try {
-                OClass.INDEX_TYPE orientIndexType = OClass.INDEX_TYPE.valueOf(indexType.toUpperCase());
-                OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
-                orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
-            } catch (IllegalArgumentException ex) {
-                throw new InvalidException("Invalid index type '" + indexType + 
-                        "' in configuration on properties "
-                        + propertyNames + " of type " + propertyType + " on " 
-                        + orientClassName + " valid values: " + OClass.INDEX_TYPE.values() 
-                        + " failure message: " + ex.getMessage(), ex);
-            }
+            OType orientPropertyType =
+                    index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asEnum(OType.class);
+
+            OClass.INDEX_TYPE orientIndexType =
+                    index.get(OrientDBRepoService.CONFIG_INDEX_TYPE)
+                            .asEnum(OClass.INDEX_TYPE.class);
+
+            logger.info(
+                    "Creating index on properties {} of type {} with index type {} on {} for OrientDB class ",
+                    new Object[] { propertyNames, orientPropertyType, orientIndexType,
+                        orientClassName });
+
+            orientClass.createProperty(propertyName, orientPropertyType);
+            orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
         }
     }
-    
+
     // Populates the default user, the pwd needs to be changed by the installer
-    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db, 
-            JsonValue completeConfig) throws InvalidException {
-        
-        String defaultAdminUser = "openidm-admin";
-        // Default password needs to be replaced after installation
-        String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":"
-                + "\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},"
-                + "\"type\":\"x-simple-encryption\"}}";
-        String defaultAdminRoles = "openidm-admin,openidm-authorized";
-        populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, 
-                defaultAdminPwd, defaultAdminRoles);
-        logger.trace("Created default user {}. Please change the assigned default password.", 
-                defaultAdminUser);
-        
-        String anonymousUser = "anonymous";
-        String anonymousPwd = "anonymous";
-        String anonymousRoles = "openidm-reg";
-        populateDefaultUser(defaultTableName, db, completeConfig, anonymousUser, anonymousPwd, anonymousRoles);
-        logger.trace("Created default user {} for registration purposes.", anonymousUser);
-    }    
-    
-    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, 
-            JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
-        
-        JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
-        defaultAdmin.put("_openidm_id", user);
-        defaultAdmin.put("userName", user);
-        defaultAdmin.put("password", pwd);
-        defaultAdmin.put("roles", roles);
-        
-        try {
-            ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, defaultTableName);
-            newDoc.save();
-        } catch (ConflictException ex) {
-            throw new InvalidException("Unexpected failure during DB set-up of default user", ex);
-        }
+    private static void populateDefaultUsers(String defaultTableName) {
+
+        populateDefaultUser(defaultTableName, ADMIN);
+        logger.trace("Created default user 'openidm-admin'. Please change the assigned default password.");
+
+        populateDefaultUser(defaultTableName, ANONYMOUS);
+        logger.trace("Created default user 'anonymous' for registration purposes.");
     }
+
+    private static void populateDefaultUser(String defaultTableName, String user) {
+        ODocument newDoc = new ODocument(defaultTableName);
+        newDoc.fromJSON(user);
+        newDoc.save();
+    }
+
+    /* @formatter:off */
+    private static final String ADMIN =
+            "{\n" +
+            "   \"_openidm_id\":\"openidm-admin\",\n" +
+            "   \"userName\":\"openidm-admin\",\n" +
+            "   \"password\":{\n" +
+            "      \"$crypto\":{\n" +
+            "         \"value\":{\n" +
+            "            \"iv\":\"fIevcJYS4TMxClqcK7covg==\",\n" +
+            "            \"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\n" +
+            "            \"cipher\":\"AES/CBC/PKCS5Padding\",\n" +
+            "            \"key\":\"openidm-sym-default\"\n" +
+            "         },\n" +
+            "         \"type\":\"x-simple-encryption\"\n" +
+            "      }\n" +
+            "   },\n" +
+            "   \"roles\":[\n" +
+            "      \"openidm-admin\",\n" +
+            "      \"openidm-authorized\"\n" +
+            "   ]\n" +
+            "}";
+
+    private static final String ANONYMOUS =
+            "{\n" +
+            "   \"_openidm_id\":\"anonymous\",\n" +
+            "   \"userName\":\"anonymous\",\n" +
+            "   \"password\":\"anonymous\",\n" +
+            "   \"roles\":[\n" +
+            "      \"openidm-reg\"\n" +
+            "   ]\n" +
+            "}";
+    /* @formatter:on */
 }
