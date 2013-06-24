@@ -8,7 +8,8 @@ var userDetail,
     rolesArr,
     resource = "system/AD/account";
 
-if (security && security.username && security.username !== "anonymous") {
+if (security && security.username && security.username !== "anonymous"
+    && (!(security.userid && security["openidm-roles"]))) {
 
     if (security && security.username) {
 

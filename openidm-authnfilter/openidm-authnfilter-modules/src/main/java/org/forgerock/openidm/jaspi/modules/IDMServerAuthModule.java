@@ -166,9 +166,10 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             request.setAttribute(RESOURCE_ATTRIBUTE, authData.getResource());
             request.setAttribute(OPENIDM_AUTHINVOKED, "authnfilter");
 
-            Map<String, String> messageInfoParams = messageInfo.getMap();
+            Map<String, Object> messageInfoParams = messageInfo.getMap();
             messageInfoParams.put(USERID_ATTRIBUTE, authData.getUserId());
             messageInfoParams.put(USERNAME_ATTRIBUTE, authData.getUsername());
+            messageInfoParams.put(ROLES_ATTRIBUTE, authData.getRoles());
             messageInfoParams.put(RESOURCE_ATTRIBUTE, authData.getResource());
             messageInfoParams.put(OPENIDM_AUTHINVOKED, "authnfilter");
             messageInfoParams.put("uid", authData.getUsername());
