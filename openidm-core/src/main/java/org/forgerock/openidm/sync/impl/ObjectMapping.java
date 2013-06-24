@@ -26,7 +26,6 @@ package org.forgerock.openidm.sync.impl;
 // Java SE
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +45,7 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
+import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -671,7 +671,8 @@ class ObjectMapping implements SynchronizationListener {
                 resultScript.exec(scope);
             } catch (ScriptException se) {
                 LOGGER.debug("{} result script encountered exception", name, se);
-                throw new SynchronizationException(se);
+                throw new SynchronizationException(se.toJsonResourceException(name + 
+                        " result script encountered exception"));
             }
         }
     }
@@ -859,7 +860,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param exception the Exception thrown during reconciliation
      */
     public void setReconEntryMessage(ReconEntry entry, Exception exception) {
-        JsonResourceException jre = null;
+        JsonValue messageDetails = null;  // Used for populating the "messageDetail" of the entry
         Throwable throwable = exception;
         Throwable rootCause = null;
         entry.exception = exception;
@@ -868,8 +869,7 @@ class ObjectMapping implements SynchronizationListener {
             rootCause = throwable;
             // Check if the current throwable is a JsonResourceException
             if (rootCause instanceof JsonResourceException) {
-                // Used for populating the "messageDetail" of the entry
-                jre = (JsonResourceException)rootCause;
+                messageDetails = new JsonValue(((JsonResourceException)rootCause).getDetail());
             }
             throwable = rootCause.getCause();
         }
@@ -882,8 +882,8 @@ class ObjectMapping implements SynchronizationListener {
             entry.message = rootCause.getMessage();
         }
         // If there was a JsonResourceException in the chain set the messageDetail
-        if (jre != null) {
-            entry.messageDetail = ((JsonResourceException)jre).toJsonValue();           
+        if (messageDetails != null) {
+            entry.messageDetail = messageDetails;           
         }
     }
     
@@ -1419,7 +1419,8 @@ class ObjectMapping implements SynchronizationListener {
                         result = (Boolean) o;
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validSource script encountered exception", name, se);
-                        throw new SynchronizationException(se);
+                        throw new SynchronizationException(se.toJsonResourceException(name + 
+                                " validSource script encountered exception"));
                     }
                 } else { // no script means true
                     result = true;
@@ -1451,7 +1452,8 @@ class ObjectMapping implements SynchronizationListener {
                         result = (Boolean) o;
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validTarget script encountered exception", name, se);
-                        throw new SynchronizationException(se);
+                        throw new SynchronizationException(se.toJsonResourceException(name + 
+                                " validTarget script encountered exception"));
                     }
                 } else { // no script means true
                     result = true;
@@ -1503,7 +1505,8 @@ class ObjectMapping implements SynchronizationListener {
                     script.exec(scope);
                 } catch (ScriptException se) {
                     LOGGER.debug("{} script encountered exception", name + " " + type, se);
-                    throw new SynchronizationException(se);
+                    throw new SynchronizationException(se.toJsonResourceException(name + " " + type + 
+                            " script encountered exception"));
                 }
             }
         }
@@ -1803,7 +1806,8 @@ class ObjectMapping implements SynchronizationListener {
                     result = new JsonValue(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
                     LOGGER.debug("{} correlationQuery script encountered exception", name, se);
-                    throw new SynchronizationException(se);
+                    throw new SynchronizationException(se.toJsonResourceException(name + 
+                            " correlationQuery script encountered exception"));
                 } finally {
                     measure.end();
                 }
