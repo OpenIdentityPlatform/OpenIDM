@@ -19,6 +19,7 @@ package org.forgerock.openidm.jaspi.config;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Modified;
 import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.json.fluent.JsonValue;
@@ -84,9 +85,20 @@ public class OSGiAuthnFilterBuilder {
      */
     @Activate
     protected void activate(ComponentContext context) {
-
         EnhancedConfig config = JSONEnhancedConfig.newInstance();
         JsonValue jsonConfig = config.getConfigurationAsJson(context);
+        configureAuthenticationFilter(jsonConfig);
+    }
+
+    @Modified
+    public void modified(ComponentContext context) throws Exception {
+        EnhancedConfig config = JSONEnhancedConfig.newInstance();
+        JsonValue jsonConfig = config.getConfigurationAsJson(context);
+        ConfigurationManager.unconfigure();
+        configureAuthenticationFilter(jsonConfig);
+    }
+
+    private void configureAuthenticationFilter(JsonValue jsonConfig) {
 
         if (jsonConfig == null ) {
             // No configurations found
