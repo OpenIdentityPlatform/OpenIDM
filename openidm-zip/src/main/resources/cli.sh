@@ -34,7 +34,7 @@ echo "Executing $PRG..."
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-OPENIDM_HOME=${OPENIDM_HOME:-`(cd $PRGDIR; pwd)`}
+OPENIDM_HOME=${OPENIDM_HOME:-`(cd "$PRGDIR"; pwd)`}
 echo "Starting shell in $OPENIDM_HOME"
 
 java -classpath "$OPENIDM_HOME/bin/*:$OPENIDM_HOME/bundle/*" \
