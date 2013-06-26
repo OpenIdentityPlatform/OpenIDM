@@ -17,6 +17,7 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,19 +92,19 @@ public class IWAModule extends IDMServerAuthModule {
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
             AuthData authData) {
 
-        LOGGER.debug("IWAADPassthroughModule: validateRequest START");
+        LOGGER.debug("IWAModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
 
-        LOGGER.debug("IWAADPassthroughModule: Processing request {}", request.getRequestURL().toString());
+        LOGGER.debug("IWAModule: Processing request {}", request.getRequestURL().toString());
 
         try {
-            LOGGER.debug("IWAADPassthroughModule: Calling IWA modules");
+            LOGGER.debug("IWAModule: Calling IWA modules");
             AuthStatus authStatus = commonsIwaModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
             if (!AuthStatus.SUCCESS.equals(authStatus)) {
-                LOGGER.debug("IWAADPassthroughModule: IWA response to send to client, returning status, {}",
+                LOGGER.debug("IWAModule: IWA response to send to client, returning status, {}",
                         response.getStatus());
                 return authStatus;
             }
@@ -119,7 +120,7 @@ public class IWAModule extends IDMServerAuthModule {
                 }
             }
             if (username == null) {
-                LOGGER.error("IWAADPassthroughModule: Username not found by IWA");
+                LOGGER.error("IWAModule: Username not found by IWA");
                 throw new AuthException("Could not get username");
             }
             // Need to set as much information as possible so it can be put in both the request and JWT for IDM
@@ -127,15 +128,17 @@ public class IWAModule extends IDMServerAuthModule {
             authData.setUsername(username);
             authData.setResource("system/AD/account");
 
-            LOGGER.debug("IWAADPassthroughModule: Successful log in with user, {}", username);;
+            LOGGER.debug("IWAModule: Successful log in with user, {}", username);;
 
+            logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
             return AuthStatus.SUCCESS;
         } catch (AuthException e) {
             // fallback to AD passthrough
-            LOGGER.debug("IWAADPassthroughModule: IWA has failed, falling back to AD Passthrough");
+            LOGGER.debug("IWAModule: IWA has failed");
+            logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
             return AuthStatus.SEND_FAILURE;
         } finally {
-            LOGGER.debug("IWAADPassthroughModule: validateRequest END");
+            LOGGER.debug("IWAModule: validateRequest END");
         }
     }
 

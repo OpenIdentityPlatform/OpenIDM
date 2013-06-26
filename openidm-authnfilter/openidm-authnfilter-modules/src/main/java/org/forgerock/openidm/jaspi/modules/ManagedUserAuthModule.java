@@ -42,12 +42,6 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(ManagedUserAuthModule.class);
 
-    /** Authentication username header */
-    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
-
-    /** Authentication password header */
-    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
-
     private static final String QUERY_ID = "credential-query";
     private static final String QUERY_ON_RESOURCE = "managed/user";
 
@@ -121,7 +115,7 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
 
         String headerLogin = req.getHeader(HEADER_USERNAME);
         String basicAuth = req.getHeader("Authorization");
-        // if we see the certficate port this request is for client auth only
+        // if we see the certificate port this request is for client auth only
         if (allowClientCertOnly(req)) {
             authenticated = authenticateUsingClientCert(req, authData);
             logAuthRequest(req, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
@@ -138,11 +132,7 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
         logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(), authData.getUserId(),
                 authData.getRoles());
 
-        if (authenticated) {
-            return AuthStatus.SUCCESS;
-        } else {
-            return AuthStatus.SEND_FAILURE;
-        }
+        return authenticated ? AuthStatus.SUCCESS : AuthStatus.SEND_FAILURE;
     }
 
     /**
@@ -179,7 +169,7 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
                 logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
             }
         }
-        if (!(certs != null && certs.length > 0 && certs[0] != null)) {
+        if (certs == null || certs.length == 0 || certs[0] == null) {
             return false;
         }
         authData.setUsername(certs[0].getSubjectDN().getName());

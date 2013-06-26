@@ -18,6 +18,7 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +107,7 @@ public class ADPassthroughModule extends IDMServerAuthModule {
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 LOGGER.debug("Failed authentication, missing or empty headers");
+                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
                 return AuthStatus.SEND_FAILURE;
             }
 
@@ -117,9 +119,11 @@ public class ADPassthroughModule extends IDMServerAuthModule {
                 LOGGER.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
                         authData.getUserId(), authData.getRoles());
 
+                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
                 return AuthStatus.SUCCESS;
             } else {
                 LOGGER.debug("ADPassthroughModule: Authentication failed");
+                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
