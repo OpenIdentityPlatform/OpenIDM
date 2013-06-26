@@ -78,7 +78,6 @@ public class AuthHelper {
             }
         } catch (Exception ex) {
             logger.warn("Authentication failed to get user info for {} {}", username, ex);
-            return false;
         }
         return false;
     }

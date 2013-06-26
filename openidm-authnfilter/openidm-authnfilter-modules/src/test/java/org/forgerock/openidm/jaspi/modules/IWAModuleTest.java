@@ -223,7 +223,7 @@ public class IWAModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(authData);
+        verify(authData, never()).setUsername(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 

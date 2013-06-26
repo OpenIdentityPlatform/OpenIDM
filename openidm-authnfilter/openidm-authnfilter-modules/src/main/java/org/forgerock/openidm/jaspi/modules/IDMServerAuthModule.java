@@ -16,13 +16,9 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.util.DateUtil;
@@ -51,6 +47,12 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
+    /** Authentication username header */
+    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
+
+    /** Authentication password header */
+    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
+
     /** Attribute in session containing authenticated username. */
     private static final String USERNAME_ATTRIBUTE = "openidm.username";
 
@@ -70,33 +72,13 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     private String logClientIPHeader = null;
 
-    @Reference(
-            name = "ref_Auth_JsonResourceRouterService",
-            referenceInterface = JsonResource.class,
-            bind = "bindRouter",
-            unbind = "unbindRouter",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC,
-            target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private static ObjectSet router;
-
     /**
-     * Binds the JsonResource router to the router member variable.
+     * Gets the Router used for logging.
      *
-     * @param router The JsonResource router to bind.
+     * @return The instance of the Router.
      */
-    private void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
-    }
-
-    /**
-     * Unbinds the JsonResource router from the router member variable.
-     *
-     * @param router The JsonResource router to unbind.
-     */
-    private void unbindRouter(JsonResource router) {
-        this.router = null;
+    private ObjectSet getRouter() {
+        return OSGiAuthnFilterBuilder.router;
     }
 
     /**
@@ -243,8 +225,8 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
                 }
             }
             entry.put("ip", ipAddress);
-            if (router != null) {
-                router.create("audit/access", entry);
+            if (getRouter() != null) {
+                getRouter().create("audit/access", entry);
             } else {
                 // Filter should have rejected request if router is not available
                 LOGGER.warn("Failed to log entry for {} as router is null.", username);

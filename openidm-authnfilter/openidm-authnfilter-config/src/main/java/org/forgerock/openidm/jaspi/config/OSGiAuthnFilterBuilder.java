@@ -20,17 +20,22 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSet;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.message.AuthException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -108,9 +113,8 @@ public class OSGiAuthnFilterBuilder {
 
         Configuration configuration = new Configuration();
         // For each ServerAuthConfig
-        for (String s : jsonConfig.get("serverAuthConfig").required().keys()) {
-            Map<String, Object> contextProperties = jsonConfig.get("serverAuthConfig").required().get(s).asMap();
-            configuration.addAuthContext(s, contextProperties);
+        for (Map.Entry<String,Object> entry : jsonConfig.get("serverAuthConfig").required().asMap().entrySet()) {
+            configuration.addAuthContext(entry.getKey(), (Map<String,Object>) entry.getValue());
         }
 
         try {
@@ -118,5 +122,34 @@ public class OSGiAuthnFilterBuilder {
         } catch (AuthException e) {
             logger.error("Failed to configure the commons Authentication Filter");
         }
+    }
+
+    @Reference(
+            name = "ref_Auth_JsonResourceRouterService",
+            referenceInterface = JsonResource.class,
+            bind = "bindRouter",
+            unbind = "unbindRouter",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC,
+            target = "(service.pid=org.forgerock.openidm.router)"
+    )
+    public static ObjectSet router;
+
+    /**
+     * Binds the JsonResource router to the router member variable.
+     *
+     * @param router The JsonResource router to bind.
+     */
+    private void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
+    }
+
+    /**
+     * Unbinds the JsonResource router from the router member variable.
+     *
+     * @param router The JsonResource router to unbind.
+     */
+    private void unbindRouter(JsonResource router) {
+        this.router = null;
     }
 }

@@ -18,6 +18,7 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,11 +95,12 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            String username = request.getHeader("X-OpenIDM-Username");
-            String password = request.getHeader("X-OpenIDM-Password");
+            String username = request.getHeader(IDMServerAuthModule.HEADER_USERNAME);
+            String password = request.getHeader(IDMServerAuthModule.HEADER_PASSWORD);
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 logger.debug("Failed authentication, missing or empty headers");
+                logAuthRequest(request, username, null, null, Status.FAILURE);
                 return AuthStatus.SEND_FAILURE;
             }
 
@@ -108,17 +110,19 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
             authData.setResource(queryOnInternalUserResource);
 
             if (authSucceeded) {
-                logger.debug("ADPassthroughModule: Authentication successful");
+                logger.debug("InternalUserAuthModule: Authentication successful");
                 logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
                         authData.getUserId(), authData.getRoles());
 
+                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
                 return AuthStatus.SUCCESS;
             } else {
-                logger.debug("ADPassthroughModule: Authentication failed");
+                logger.debug("InternalUserAuthModule: Authentication failed");
+                logAuthRequest(request, username, null, null, Status.FAILURE);
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            logger.debug("ADPassthroughModule: validateRequest END");
+            logger.debug("InternalUserAuthModule: validateRequest END");
         }
     }
 
@@ -135,7 +139,7 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        String xOpenIDMUsername = request.getHeader("X-OpenIDM-Username");
+        String xOpenIDMUsername = request.getHeader(IDMServerAuthModule.HEADER_USERNAME);
 
         if ("anonymous".equals(xOpenIDMUsername)) {
             messageInfo.getMap().put("skipSession", true);

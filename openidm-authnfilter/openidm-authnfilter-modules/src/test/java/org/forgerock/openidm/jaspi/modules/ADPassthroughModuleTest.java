@@ -66,7 +66,9 @@ public class ADPassthroughModuleTest {
 
         //Then
         verifyZeroInteractions(adPassthroughAuthenticator);
-        verifyZeroInteractions(authData);
+        verify(authData, never()).setUsername(anyString());
+        verify(authData, never()).setResource(anyString());
+        verify(authData, never()).setUserId(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -91,7 +93,9 @@ public class ADPassthroughModuleTest {
 
         //Then
         verifyZeroInteractions(adPassthroughAuthenticator);
-        verifyZeroInteractions(authData);
+        verify(authData, never()).setUsername(anyString());
+        verify(authData, never()).setResource(anyString());
+        verify(authData, never()).setUserId(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -116,7 +120,9 @@ public class ADPassthroughModuleTest {
 
         //Then
         verifyZeroInteractions(adPassthroughAuthenticator);
-        verifyZeroInteractions(authData);
+        verify(authData, never()).setUsername(anyString());
+        verify(authData, never()).setResource(anyString());
+        verify(authData, never()).setUserId(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -141,7 +147,9 @@ public class ADPassthroughModuleTest {
 
         //Then
         verifyZeroInteractions(adPassthroughAuthenticator);
-        verifyZeroInteractions(authData);
+        verify(authData, never()).setUsername(anyString());
+        verify(authData, never()).setResource(anyString());
+        verify(authData, never()).setUserId(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 

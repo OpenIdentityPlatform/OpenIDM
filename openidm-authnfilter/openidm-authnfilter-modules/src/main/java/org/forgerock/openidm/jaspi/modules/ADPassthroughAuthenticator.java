@@ -97,7 +97,7 @@ public class ADPassthroughAuthenticator {
                             }
                         }
 
-                        return authenticated;
+                        return true;
                     }
                 } catch (JsonResourceException e) {
                     logger.trace("Failed pass-through authentication of {} on {}.",
