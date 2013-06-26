@@ -1,0 +1,205 @@
+{
+    "mappings" : [
+        {
+            "name" : "managedUser_systemBusiness",
+            "source" : "managed/user",
+            "target" : "system/business/account",
+            "enableSync" : false,
+            "properties" : [
+                {
+                    "source" : "address1",
+                    "target" : "address"
+                },
+                {
+                    "source" : "city",
+                    "target" : "city"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department"
+                },
+                {
+                    "source" : "email",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "familyName",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "phoneNumber",
+                    "target" : "phoneNumber"
+                },
+                {
+                    "source" : "postalCode",
+                    "target" : "postalCode"
+                },
+                {
+                    "source" : "stateProvince",
+                    "target" : "stateProvince"
+                },
+                {
+                    "source" : "title",
+                    "target" : "title"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "userType",
+                    "target" : "userType"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "uid"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "recon_managedUser_systemBusiness",
+            "source" : "managed/user",
+            "target" : "system/business/account",
+            "links" : "managedUser_systemBusiness",
+            "enableSync" : false,
+            "properties" : [
+                {
+                    "source" : "address1",
+                    "target" : "address"
+                },
+                {
+                    "source" : "city",
+                    "target" : "city"
+                },
+                {
+                    "source" : "department",
+                    "target" : "department"
+                },
+                {
+                    "source" : "email",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "familyName",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "phoneNumber",
+                    "target" : "phoneNumber"
+                },
+                {
+                    "source" : "postalCode",
+                    "target" : "postalCode"
+                },
+                {
+                    "source" : "stateProvince",
+                    "target" : "stateProvince"
+                },
+                {
+                    "source" : "title",
+                    "target" : "title"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "userType",
+                    "target" : "userType"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "uid"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : {
+                        "workflowName" : "orphanAccountReport",
+                        "type" : "text/javascript",
+                        "file" : "bin/defaults/script/workflow/workflow.js"
+                    }
+                }
+            ]
+        }
+    ]
+}
