@@ -8,7 +8,7 @@ notRunning() {
 
 cleanupPidFile() {
   # clean up left over pid files if necessary
-  if [ -f $OPENIDM_PID_FILE ]; then
+  if [ -f "$OPENIDM_PID_FILE" ]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
 }
@@ -37,7 +37,7 @@ PRGDIR=`dirname "$PRG"`
 # Only set OPENIDM_PID_FILE if not already set
 [ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE="$OPENIDM_HOME"/.openidm.pid
 
-if [ -f $OPENIDM_PID_FILE ]; then
+if [ -f "$OPENIDM_PID_FILE" ]; then
   START_PID=`cat "$OPENIDM_PID_FILE"`
 fi
 if [ -z "$START_PID" ]; then
