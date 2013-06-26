@@ -615,17 +615,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>2.1.2</version>
+                <version>3.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>2.1.2</version>
+                <version>3.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>2.1.2</version>
+                <version>3.0.1</version>
             </dependency>
         
             <!-- H2 Database -->
