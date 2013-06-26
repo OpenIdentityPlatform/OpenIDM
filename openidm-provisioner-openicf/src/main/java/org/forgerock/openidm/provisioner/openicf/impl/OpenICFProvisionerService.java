@@ -390,7 +390,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                     case action:
                         before = new JsonValue(new HashMap());
                         before.put("value", value);
-                        before.put("params", params);
+                        before.put("params", filterParamsToLog(params));
                         ActionId actionId = params.get(ServerConstants.ACTION_NAME).required().asEnum(ActionId.class);
                         after = action(id, actionId, value, params.required());
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
@@ -519,7 +519,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
         }
     }
-
+    
     public JsonValue create(Id id, JsonValue object, JsonValue params) throws Exception {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
@@ -965,6 +965,12 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
             connectorFacade = connectorFacadeFactory.newInstance(operationHelperBuilder.getRuntimeAPIConfiguration());
         }
         return connectorFacade;
+    }
+    
+    private JsonValue filterParamsToLog(JsonValue params) {
+        JsonValue result = params.copy();
+        result.remove("password");
+        return result;
     }
 
     private void traceObject(SimpleJsonResource.Method action, Id id, JsonValue source) {
