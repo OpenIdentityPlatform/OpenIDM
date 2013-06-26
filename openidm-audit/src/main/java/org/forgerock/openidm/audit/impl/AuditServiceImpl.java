@@ -873,12 +873,35 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         return results;
     }
 
-    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
+    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList, boolean formatted) {
+        return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACTIVITY);
+    }
+
+    public static Map<String, Object> getAccessResults(List<Map<String, Object>> entryList, boolean formatted) {
+        return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACCESS);
+    }
+    
+    private static Map<String, Object> getResults(List<Map<String, Object>> entryList, boolean formatted, String type) {
         Map<String, Object> results = new LinkedHashMap<String, Object>();
+        if (formatted) {
+            List<Map<String, Object>> formattedList = new ArrayList<Map<String, Object>>();
+            for (Map<String, Object> entry : entryList) {
+                if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+                    formattedList.add(AuditServiceImpl.formatActivityEntry(entry));
+                } else if (type.equals(AuditServiceImpl.TYPE_ACCESS)) {
+                    formattedList.add(AuditServiceImpl.formatAccessEntry(entry));
+                } else {
+                    formattedList.add(entry);
+                }
+            }
+            results.put("result", formattedList);
+        } else {
+            results.put("result", entryList);
+        }
         results.put("result", entryList);
         return results;
     }
-
+        
     protected static JsonValue parseJsonString(String stringified) {
         JsonValue jsonValue = null;
         try {

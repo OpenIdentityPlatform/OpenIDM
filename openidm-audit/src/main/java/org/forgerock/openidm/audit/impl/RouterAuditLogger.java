@@ -206,9 +206,9 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
                                 return AuditServiceImpl.getReconResults(
                                         entryList, (String)params.get("reconId"), formatted);
                             } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
-                                return AuditServiceImpl.getActivityResults(unflattenActivityList(entryList));
+                                return AuditServiceImpl.getActivityResults(unflattenActivityList(entryList), formatted);
                             } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {
-                                return AuditServiceImpl.getActivityResults(entryList);
+                                return AuditServiceImpl.getAccessResults(entryList, formatted);
                             } else {
                                 String queryId = (String) params.get("_queryId");
                                 throw new BadRequestException("Unsupported queryId " + queryId + " on type " + type);
