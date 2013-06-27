@@ -78,24 +78,19 @@
                         "indexType" : "unique"
                     },
                     {
-                        "propertyName" : "linkType",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyName" : "firstId",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyName" : "secondId",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
                         "propertyName" : "reconId",
                         "propertyType" : "string",
                         "indexType" : "notunique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "firstId" ],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "secondId" ],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
                     }
                 ]
             },
