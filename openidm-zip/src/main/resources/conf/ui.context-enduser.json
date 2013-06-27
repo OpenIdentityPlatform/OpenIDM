@@ -1,0 +1,8 @@
+{
+    "enabled" : true,
+    "urlContextRoot" : "/openidmui",
+    "bundle" : {
+        "name" : "org.forgerock.openidm.ui-enduser",
+        "resourceDir" : "/public"
+    }
+}
