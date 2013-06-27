@@ -37,9 +37,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.forgerock.openidm.core.IdentityServer;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +65,8 @@ public final class ResourceServlet
     private List<String> extFolders;
     
     @Reference
-    HttpService httpService;
+    private WebContainer webContainer;
     
-    @Reference(target="(openidm.contextid=shared)")
-    HttpContext httpContext;
-
     ComponentContext context;
     
     @Activate
@@ -85,7 +81,7 @@ public final class ResourceServlet
         
         String alias = "/openidmui";
         Dictionary<String, Object> props = new Hashtable<String, Object>();
-        httpService.registerServlet(alias, this,  props, httpContext);
+        webContainer.registerServlet(alias, this,  props, webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", alias);
     }    
     
