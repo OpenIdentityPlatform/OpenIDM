@@ -63,10 +63,7 @@ import org.slf4j.LoggerFactory;
 public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
     private final static Logger logger = LoggerFactory.getLogger(ServletFilterRegistratorSvc.class);
 
-    // Context of this scr component 
-    private ComponentContext context;
-    
-    // Comfig received for this component
+    // Config received for this component
     private JsonValue config;
 
     // Handle to registered servlet filter
@@ -79,9 +76,8 @@ public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
 
     @Activate
     protected synchronized void activate(ComponentContext context) throws Exception {
-        this.context = context;
-        logger.info("Activating servlet registratrator with configuration {}", context.getProperties());
-        config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+        logger.info("Activating servlet registrator with configuration {}", context.getProperties());
+        config = new JSONEnhancedConfig().getConfigurationAsJson(context);
 
         logger.debug("Parsed servlet filter config: {}", config);
 
@@ -107,8 +103,7 @@ public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
             // null value is used to keep track of properties that weren't set before
             origSystemProperties.put(key, prev);
         }
-        preInvokeReqAttributes = 
-                (Map<String, Object>) config.get("requestAttributes").asMap();
+        preInvokeReqAttributes = config.get("requestAttributes").asMap();
         
         String httpContextId = config.get("httpContextId").defaultTo("openidm").asString();
 
@@ -130,6 +125,10 @@ public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
             // default
             urlPatterns = new ArrayList<String>();
             urlPatterns.add("/openidm/*");
+            // TODO Now that UI urlContexts are configurable, the servlet-filter config
+            // either needs to list the urlContext urlPatterns that are configured by
+            // ui.context-<x>.json, or this code needs to programmatically deduce the
+            // urlPatterns represented by UI-context config (preferred).
             urlPatterns.add("/openidmui/*");
         } else {
             urlPatterns = rawUrlPatterns.asList(String.class);

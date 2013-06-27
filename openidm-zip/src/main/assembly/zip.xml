@@ -395,8 +395,7 @@
                 <exclude>org.osgi:org.osgi.compendium</exclude>
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui</exclude>
+                <exclude>org.forgerock.openidm:openidm-ui-enduser</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
@@ -416,9 +415,9 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/admin</outputDirectory>
+            <outputDirectory>/openidm/ui/default/enduser</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui</include>
+                <include>org.forgerock.openidm:openidm-ui-enduser</include>
             </includes>
         </dependencySet>
         <dependencySet>
