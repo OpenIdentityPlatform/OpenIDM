@@ -31,22 +31,18 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.objset.ConflictException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
-import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
-import com.orientechnologies.orient.core.storage.OStorage.CLUSTER_TYPE;
-import com.orientechnologies.orient.core.storage.impl.local.OClusterLocal;
 
 /**
  * A Helper to interact with the OrientDB
@@ -310,6 +306,7 @@ public class DBHelper {
         
         JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
         for (JsonValue index : indexes) {
+            String indexName = null;
             String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
             String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
             
@@ -326,35 +323,45 @@ public class DBHelper {
                 }
                 propertyNames = (String[]) propNamesList.toArray(new String[0]);
             }
-            
+
             // Determine a unique name to use for the index
             // Naming pattern used is <class>|property1[|propertyN]*|Idx
-            StringBuilder indexName = new StringBuilder(orientClassName);
-            indexName.append("|"); // Not using dot as is reserved for (simple index) naming convention
+            StringBuilder sb = new StringBuilder(orientClassName);
+            sb.append("|"); // Not using dot as is reserved for (simple index) naming convention
             for (String entry : propertyNames) {
-                indexName.append(entry);
-                indexName.append("|");
+                sb.append(entry);
+                sb.append("|");
             }
-            indexName.append("Idx");
-            
-            logger.info("Creating index on propertis {} of type {} with index type {} on {} for OrientDB class ", 
-                    new Object[] {propertyNames, propertyType, indexType, orientClassName});
+            sb.append("Idx");
+            indexName = sb.toString();
 
-            OType orientPropertyType = null;
-            try {
-                orientPropertyType = OType.valueOf(propertyType.toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new InvalidException("Invalid property type '" + propertyType + 
-                        "' in configuration on properties "
-                        + propertyNames + " with index type " + indexType + " on " 
-                        + orientClassName + " valid values: " + OType.values() 
-                        + " failure message: " + ex.getMessage(), ex);
+            // Check if a single property is being defined and create it if so
+            for (String propName : propertyNames) {
+                if (orientClass.getProperty(propName) != null) {
+                    continue;
+                }
+                logger.info("Creating property {} of type {}", new Object[] {propName, propertyType});
+                OType orientPropertyType = null;
+                try {
+                    // Create property type object
+                    orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+                } catch (IllegalArgumentException ex) {
+                    throw new InvalidException("Invalid property type '"
+                            + propertyType + "' in configuration on properties "
+                            + propertyNames + " with index type " + indexType
+                            + " on " + orientClassName + " valid values: " + OType.values() 
+                            + " failure message: " + ex.getMessage(), ex);
+                }
+                // Create property
+                orientClass.createProperty(propName, orientPropertyType);
             }
             
+            logger.info("Creating index on properties {} of type {} with index type {} on {} for OrientDB class ", 
+                    new Object[] {propertyNames, propertyType, indexType, orientClassName});
             try {
+                // Create the index
                 OClass.INDEX_TYPE orientIndexType = OClass.INDEX_TYPE.valueOf(indexType.toUpperCase());
-                OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
-                orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
+                orientClass.createIndex(indexName, orientIndexType, propertyNames);
             } catch (IllegalArgumentException ex) {
                 throw new InvalidException("Invalid index type '" + indexType + 
                         "' in configuration on properties "
