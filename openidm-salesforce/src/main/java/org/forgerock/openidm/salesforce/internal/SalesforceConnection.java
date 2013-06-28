@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.sforce.ws.ConnectionException;
+import com.sforce.ws.SessionRenewer;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -71,7 +73,7 @@ import com.sforce.ws.ConnectorConfig;
  * http:/
  * /boards.developerforce.com/t5/REST-API-Integration/Having-trouble-getting
  * -Access-Token-with-username-password/td-p/278305
- * 
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
@@ -94,7 +96,7 @@ public class SalesforceConnection extends ClientResource {
      * Requests that the origin server accepts the entity enclosed in the
      * request as a new subordinate of the resource identified by the request
      * URI.
-     * 
+     *
      * @see <a href="http://www.w3.org/Protocols/rfc2068/rfc2068">HTTP PATCH
      *      method</a>
      */
@@ -337,6 +339,13 @@ public class SalesforceConnection extends ClientResource {
         config.setServiceEndpoint(config.getRestEndpoint());
         config.setSessionId(getOAuthUser().getAccessToken());
 
+        config.setSessionRenewer( new SessionRenewer() {
+            @Override
+            public SessionRenewalHeader renewSession(ConnectorConfig config) throws ConnectionException {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+
         return config;
     }
 
@@ -461,7 +470,7 @@ public class SalesforceConnection extends ClientResource {
 
     /**
      * Converts successful JSON token body responses to OAuthUser.
-     * 
+     *
      * @param body
      *            Representation containing a successful JSON body element.
      * @return OAuthUser object containing accessToken, refreshToken and
