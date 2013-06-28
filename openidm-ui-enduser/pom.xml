@@ -182,8 +182,9 @@
               <instructions>
                 <Import-Package>*</Import-Package>
                 <Include-Resource>
-                  public=target/classes,
-                  public=target/dependency
+                  <!-- order here matters; we want depedencies in first, then overwritten by local resources -->
+                  public=target/dependency,
+                  public=target/classes
                 </Include-Resource>
               </instructions>
             </configuration>
