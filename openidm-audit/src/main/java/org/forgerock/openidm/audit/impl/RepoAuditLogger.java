@@ -96,11 +96,11 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
                 for (Map<String, Object> entry : (List<Map<String, Object>>) queryResult.get(QueryConstants.QUERY_RESULT)) {
                     entries.add(AuditServiceImpl.formatLogEntry(entry, type));
                 }
-                formatActivityList(entries);
+                parseJsonValuesFromList(entries);
                 result.put("entries", entries);
             } else {
                 Map<String, Object> entry = repo.read(fullIdPrefix + fullId);
-                formatActivityEntry(entry);
+                parseJsonValuesFromEntry(entry);
                 result = AuditServiceImpl.formatLogEntry(entry, type);
             }
 
@@ -134,8 +134,10 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
                         (String)params.get("reconId"), formatted);
             } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
                 List<Map<String, Object>> entryList = (List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT);
-                formatActivityList(entryList);
-                return AuditServiceImpl.getActivityResults(entryList);
+                parseJsonValuesFromList(entryList);
+                return AuditServiceImpl.getActivityResults(entryList, formatted);
+            } else if (type.equals(AuditServiceImpl.TYPE_ACCESS)) {
+                return AuditServiceImpl.getAccessResults((List<Map<String, Object>>)queryResults.get(QueryConstants.QUERY_RESULT), formatted);
             } else {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
@@ -144,13 +146,13 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
         }
     }
     
-    public void formatActivityList(List<Map<String, Object>> entryList) {
+    public void parseJsonValuesFromList(List<Map<String, Object>> entryList) {
         for (Map<String, Object> entry : entryList) {
-            formatActivityEntry(entry);
+            parseJsonValuesFromEntry(entry);
         }
     }
 
-    public void formatActivityEntry(Map<String, Object> entry) {
+    public void parseJsonValuesFromEntry(Map<String, Object> entry) {
         Object beforeValue = entry.get("before");
         Object afterValue = entry.get("after");
         if (beforeValue != null) {

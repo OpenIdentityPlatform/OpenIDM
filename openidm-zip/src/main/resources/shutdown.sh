@@ -8,7 +8,7 @@ notRunning() {
 
 cleanupPidFile() {
   # clean up left over pid files if necessary
-  if [ -f $OPENIDM_PID_FILE ]; then
+  if [ -f "$OPENIDM_PID_FILE" ]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
 }
@@ -26,7 +26,7 @@ while [ -h "$PRG" ]; do
   fi
 done
 
-echo $PRG
+echo "$PRG"
 
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
@@ -35,9 +35,9 @@ PRGDIR=`dirname "$PRG"`
 [ -z "$OPENIDM_HOME" ] && OPENIDM_HOME=`cd "$PRGDIR" >/dev/null; pwd`
 
 # Only set OPENIDM_PID_FILE if not already set
-[ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
+[ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE="$OPENIDM_HOME"/.openidm.pid
 
-if [ -f $OPENIDM_PID_FILE ]; then
+if [ -f "$OPENIDM_PID_FILE" ]; then
   START_PID=`cat "$OPENIDM_PID_FILE"`
 fi
 if [ -z "$START_PID" ]; then

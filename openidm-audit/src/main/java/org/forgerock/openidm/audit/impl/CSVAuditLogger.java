@@ -262,7 +262,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                         rawEntryList.add(entry);
                     }
                 }
-                return AuditServiceImpl.getActivityResults(rawEntryList);
+                return AuditServiceImpl.getActivityResults(rawEntryList, formatted);
             } else {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
