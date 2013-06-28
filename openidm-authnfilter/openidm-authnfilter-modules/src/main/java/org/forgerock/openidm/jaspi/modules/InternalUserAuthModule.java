@@ -100,7 +100,7 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 logger.debug("Failed authentication, missing or empty headers");
-                logAuthRequest(request, username, null, null, Status.FAILURE);
+                //Auth failure will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SEND_FAILURE;
             }
 
@@ -114,11 +114,11 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
                 logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
                         authData.getUserId(), authData.getRoles());
 
-                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+                //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;
             } else {
                 logger.debug("InternalUserAuthModule: Authentication failed");
-                logAuthRequest(request, username, null, null, Status.FAILURE);
+                //Auth failure will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {

@@ -17,11 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +29,6 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,8 +38,6 @@ import java.util.Map;
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(IDMServerAuthModule.class);
-
     /** Authentication username header */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
@@ -54,32 +45,21 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
     /** Attribute in session containing authenticated username. */
-    private static final String USERNAME_ATTRIBUTE = "openidm.username";
+    static final String USERNAME_ATTRIBUTE = "openidm.username";
 
     /** Attribute in session containing authenticated userid. */
-    private static final String USERID_ATTRIBUTE = "openidm.userid";
+    static final String USERID_ATTRIBUTE = "openidm.userid";
 
     /** Attribute in session and request containing assigned roles. */
-    private static final String ROLES_ATTRIBUTE = "openidm.roles";
+    static final String ROLES_ATTRIBUTE = "openidm.roles";
 
     /** Attribute in session containing user's resource (managed_user or internal_user) */
-    private static final String RESOURCE_ATTRIBUTE = "openidm.resource";
+    static final String RESOURCE_ATTRIBUTE = "openidm.resource";
 
     /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request */
-    private static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
+    static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
-    private static final DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
-
-    private String logClientIPHeader = null;
-
-    /**
-     * Gets the Router used for logging.
-     *
-     * @return The instance of the Router.
-     */
-    private ObjectSet getRouter() {
-        return OSGiAuthnFilterBuilder.router;
-    }
+    static final String OPENIDM_AUTH_STATUS = "openidm.auth.status";
 
     /**
      * Extracts the "clientIPHeader" value from the json configuration.
@@ -94,7 +74,6 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     public final void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             Map options) throws AuthException {
         JsonValue jsonValue = new JsonValue(options);
-        logClientIPHeader = jsonValue.get("clientIPHeader").asString();
         initialize(requestPolicy, responsePolicy, handler, jsonValue);
     }
 
@@ -139,6 +118,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
         AuthStatus authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
+        Map<String, Object> messageInfoParams = messageInfo.getMap();
         if (AuthStatus.SUCCESS.equals(authStatus)) {
             HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
 
@@ -148,14 +128,15 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             request.setAttribute(RESOURCE_ATTRIBUTE, authData.getResource());
             request.setAttribute(OPENIDM_AUTHINVOKED, "authnfilter");
 
-            Map<String, Object> messageInfoParams = messageInfo.getMap();
-            messageInfoParams.put(USERID_ATTRIBUTE, authData.getUserId());
-            messageInfoParams.put(USERNAME_ATTRIBUTE, authData.getUsername());
-            messageInfoParams.put(ROLES_ATTRIBUTE, authData.getRoles());
-            messageInfoParams.put(RESOURCE_ATTRIBUTE, authData.getResource());
             messageInfoParams.put(OPENIDM_AUTHINVOKED, "authnfilter");
-            messageInfoParams.put("uid", authData.getUsername());
         }
+
+        messageInfoParams.put(USERID_ATTRIBUTE, authData.getUserId());
+        messageInfoParams.put(USERNAME_ATTRIBUTE, authData.getUsername());
+        messageInfoParams.put(ROLES_ATTRIBUTE, authData.getRoles());
+        messageInfoParams.put(RESOURCE_ATTRIBUTE, authData.getResource());
+        boolean authSuccess = AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.SEND_SUCCESS.equals(authStatus);
+        messageInfoParams.put(OPENIDM_AUTH_STATUS, authSuccess);
 
         return authStatus;
     }
@@ -194,45 +175,4 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
      */
     protected abstract AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject,
             Subject serviceSubject, AuthData authData) throws AuthException;
-
-    /**
-     * Logs the authentication request.
-     *
-     * @param request The HttpServletRequest that made the authentication request.
-     * @param username The username of the user that made the authentication request.
-     * @param userId The user id of the user that made the authentication request.
-     * @param roles The roles of the user that made the authentication request.
-     * @param status The status of the authentication request, either true for success or false for failure.
-     */
-    protected void logAuthRequest(HttpServletRequest request, String username, String userId, List<String> roles,
-            Status status) {
-        try {
-            Map<String,Object> entry = new HashMap<String,Object>();
-            entry.put("timestamp", DATE_UTIL.now());
-            entry.put("action", "authenticate");
-            entry.put("status", status.toString());
-            entry.put("principal", username);
-            entry.put("userid", userId);
-            entry.put("roles", roles);
-            // check for header sent by load balancer for IPAddr of the client
-            String ipAddress;
-            if (logClientIPHeader == null ) {
-                ipAddress = request.getRemoteAddr();
-            } else {
-                ipAddress = request.getHeader(logClientIPHeader);
-                if (ipAddress == null) {
-                    ipAddress = request.getRemoteAddr();
-                }
-            }
-            entry.put("ip", ipAddress);
-            if (getRouter() != null) {
-                getRouter().create("audit/access", entry);
-            } else {
-                // Filter should have rejected request if router is not available
-                LOGGER.warn("Failed to log entry for {} as router is null.", username);
-            }
-        } catch (ObjectSetException ose) {
-            LOGGER.warn("Failed to log entry for {}", username, ose);
-        }
-    }
 }

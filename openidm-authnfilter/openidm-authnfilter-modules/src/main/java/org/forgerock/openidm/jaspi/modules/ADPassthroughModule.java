@@ -107,7 +107,7 @@ public class ADPassthroughModule extends IDMServerAuthModule {
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 LOGGER.debug("Failed authentication, missing or empty headers");
-                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
+                //Auth failure will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SEND_FAILURE;
             }
 
@@ -119,11 +119,11 @@ public class ADPassthroughModule extends IDMServerAuthModule {
                 LOGGER.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
                         authData.getUserId(), authData.getRoles());
 
-                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+                //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;
             } else {
                 LOGGER.debug("ADPassthroughModule: Authentication failed");
-                logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
+                //Auth failure will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {

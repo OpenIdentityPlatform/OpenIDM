@@ -127,9 +127,10 @@ public class IDMServerAuthModuleTest {
 
         verify(messageInfoMap).put("openidm.userid", "USER_ID");
         verify(messageInfoMap).put("openidm.username", "USERNAME");
+        verify(messageInfoMap).put("openidm.roles", roles);
         verify(messageInfoMap).put("openidm.resource", "RESOURCE");
         verify(messageInfoMap).put("openidm.authinvoked", "authnfilter");
-        verify(messageInfoMap).put("uid", "USERNAME");
+        verify(messageInfoMap).put("openidm.auth.status", true);
 
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
@@ -153,9 +154,8 @@ public class IDMServerAuthModuleTest {
         AuthStatus authStatus = idmServerAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verifyZeroInteractions(messageInfo);
         verifyZeroInteractions(request);
-        verifyZeroInteractions(messageInfoMap);
+        verify(messageInfoMap).put("openidm.auth.status", false);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 }

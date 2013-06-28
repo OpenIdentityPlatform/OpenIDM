@@ -118,15 +118,15 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
         // if we see the certificate port this request is for client auth only
         if (allowClientCertOnly(req)) {
             authenticated = authenticateUsingClientCert(req, authData);
-            logAuthRequest(req, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+            //Auth success will be logged in IDMServerAuthModule super type.
         } else if (headerLogin != null) {
             authenticated = authenticateUser(req, authData);
-            logAuthRequest(req, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+            //Auth success will be logged in IDMServerAuthModule super type.
         } else if (basicAuth != null) {
             authenticated = authenticateUsingBasicAuth(basicAuth, authData);
-            logAuthRequest(req, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+            //Auth success will be logged in IDMServerAuthModule super type.
         } else {
-            logAuthRequest(req, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
+            //Auth failure will be logged in IDMServerAuthModule super type.
             return AuthStatus.SEND_FAILURE;
         }
         logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(), authData.getUserId(),

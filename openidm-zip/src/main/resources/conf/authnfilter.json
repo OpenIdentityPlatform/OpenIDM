@@ -1,5 +1,6 @@
 {
     "serverAuthConfig" : {
+        "auditLogger" : "org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger",
         "idmAuth" : {
             "sessionModule" : {
                 "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",

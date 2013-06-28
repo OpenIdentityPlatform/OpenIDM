@@ -130,12 +130,12 @@ public class IWAModule extends IDMServerAuthModule {
 
             LOGGER.debug("IWAModule: Successful log in with user, {}", username);;
 
-            logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.SUCCESS);
+            //Auth success will be logged in IDMServerAuthModule super type.
             return AuthStatus.SUCCESS;
         } catch (AuthException e) {
             // fallback to AD passthrough
             LOGGER.debug("IWAModule: IWA has failed");
-            logAuthRequest(request, authData.getUsername(), authData.getUserId(), authData.getRoles(), Status.FAILURE);
+            //Auth failure will be logged in IDMServerAuthModule super type.
             return AuthStatus.SEND_FAILURE;
         } finally {
             LOGGER.debug("IWAModule: validateRequest END");
