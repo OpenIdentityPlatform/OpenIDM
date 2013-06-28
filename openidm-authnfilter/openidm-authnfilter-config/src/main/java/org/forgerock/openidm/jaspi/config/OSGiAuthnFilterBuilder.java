@@ -114,7 +114,11 @@ public class OSGiAuthnFilterBuilder {
         Configuration configuration = new Configuration();
         // For each ServerAuthConfig
         for (Map.Entry<String,Object> entry : jsonConfig.get("serverAuthConfig").required().asMap().entrySet()) {
-            configuration.addAuthContext(entry.getKey(), (Map<String,Object>) entry.getValue());
+            if ("auditLogger".equals(entry.getKey())) {
+                configuration.setAuditLoggerClassName((String) entry.getValue());
+            } else {
+                configuration.addAuthContext(entry.getKey(), (Map<String,Object>) entry.getValue());
+            }
         }
 
         try {

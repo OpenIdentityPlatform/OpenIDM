@@ -27,7 +27,6 @@ public class AuthData {
     private String username;
     private String userId;
     private List<String> roles = new ArrayList<String>();
-//    private boolean status = false;
     private String resource = "default";
 
     /**
@@ -83,24 +82,6 @@ public class AuthData {
     public void setRoles(List<String> roles) {
         this.roles = roles;
     }
-
-//    /**
-//     * Gets the status of the authentication. Either true for success or false for failure.
-//     *
-//     * @return The authentication status.
-//     */
-//    public boolean getStatus() {
-//        return status;
-//    }
-//
-//    /**
-//     * Sets the status of the authentication. Either true for success or false for failure.
-//     *
-//     * @param status The authentication status.
-//     */
-//    public void setStatus(boolean status) {
-//        this.status = status;
-//    }
 
     /**
      * Gets the resource used to authenticate the user.
