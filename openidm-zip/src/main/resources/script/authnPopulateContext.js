@@ -9,7 +9,7 @@ var userDetail,
     resource = "system/AD/account";
 
 if (security && security.username && security.username !== "anonymous"
-    && (!(security.userid && security["openidm-roles"]))) {
+    && (!(security.userid && security.userid.id && security.userid.component && security["openidm-roles"]))) {
 
     if (security && security.username) {
 
