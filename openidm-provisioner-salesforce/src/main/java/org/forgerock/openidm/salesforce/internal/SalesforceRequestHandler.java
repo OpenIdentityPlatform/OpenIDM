@@ -52,6 +52,7 @@ import org.forgerock.openidm.salesforce.internal.async.AsyncJobResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.GenericResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.QueryResourceProvider;
 import org.forgerock.openidm.salesforce.internal.data.SObjectsResourceProvider;
+import org.forgerock.openidm.salesforce.internal.metadata.MetadataResourceProvider;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -60,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 @Component(name = SalesforceRequestHandler.PID, immediate = true,
@@ -118,6 +119,11 @@ public class SalesforceRequestHandler implements ProvisionerService {
                 new GenericResourceProvider(connection));
 
         routes.put(Pattern.compile("query"), new QueryResourceProvider(connection));
+
+
+        MetadataResourceProvider meta = new MetadataResourceProvider(connection);
+        routes.put(Pattern.compile("\\Qmetadata/\\E(([^/])+)"), meta);
+        routes.put(Pattern.compile("\\Qmetadata/\\E([^/]+)/(([^/]+))"), meta);
 
         logger.info("OAUTH Token: {}", connection.getOAuthUser().getAuthorization());
     }

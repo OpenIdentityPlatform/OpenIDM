@@ -335,6 +335,7 @@ public class SalesforceConnection extends ClientResource {
         config.setRestEndpoint(new Reference(getOAuthUser().getBaseReference(), new Reference(
                 "services/" + api + "/" + Double.toString(configuration.getVersion())))
                 .getTargetRef().toString());
+        config.setServiceEndpoint(config.getRestEndpoint());
         config.setSessionId(getOAuthUser().getAccessToken());
 
         return config;
