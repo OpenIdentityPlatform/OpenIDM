@@ -599,4 +599,30 @@ $ ./startup.sh</screen>
     <para>The logout URL effectively performs the same action as clicking on
     the Log out link of the UI.</para>
 </section>
+
+    <section xml:id="ui-path">
+        <title>Changing the UI Path</title>
+
+        <para>By default, the UI is registered at a specific URL
+        (<literal><replaceable>base-context</replaceable>/openidmui</literal>).
+        To override the default URL and specify your own path, edit the
+        <filename>openidm/conf/ui.context-enduser.json</filename>
+        file, setting the <literal>urlContextRoot</literal> property to the
+        new URL. For example, to change the path to
+        <literal><replaceable>base-context</replaceable>/exampleui</literal>,
+        edit the file as follows:</para>
+
+        <screen>"urlContextRoot" : "/exampleui",</screen>
+    </section>
+
+    <section xml:id="ui-disabling">
+        <title>Disabling the UI</title>
+
+        <para>The UI is packaged as a separate bundle that can be disabled
+        in the configuration before server startup. To disable the registration
+        of the UI servlet, edit the <filename>openidm/conf/ui.context-enduser.json</filename>
+        file, setting the <literal>enabled</literal> property to false:</para>
+
+        <screen>"enabled" : false,</screen>
+    </section>
 </chapter>
