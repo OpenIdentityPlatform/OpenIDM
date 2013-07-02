@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
  * A custom endpoints service to provide a scriptable way to extend and
  * customize the system
  *
- * /TODO migrate [OPENIDM-1112]/[CR-1179]
  * @author Laszlo Hordos
  * @author aegloff
  */
@@ -69,6 +68,18 @@ public class EndpointsService extends AbstractScriptedService {
      * Setup logging for the {@link EndpointsService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
+
+    /** PersistenceConfig service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private PersistenceConfig persistenceConfig;
+
+    protected void bindPersistenceConfig(final PersistenceConfig service) {
+        persistenceConfig = service;
+    }
+
+    protected void unbindPersistenceConfig(final PersistenceConfig service) {
+        persistenceConfig = null;
+    }
 
     private ComponentContext context;
 
@@ -103,6 +114,13 @@ public class EndpointsService extends AbstractScriptedService {
 
     protected String[] getRouterPrefixes(String factoryPid, JsonValue configuration) {
         return new String[] { "/endpoint/" + String.valueOf(factoryPid) + "*" };
+    }
+
+    protected JsonValue serialiseServerContext(ServerContext context) throws ResourceException {
+        if (null != context && null != persistenceConfig) {
+            return ServerContext.saveToJson(context, persistenceConfig);
+        }
+        return null;
     }
 
     protected BundleContext getBundleContext() {
