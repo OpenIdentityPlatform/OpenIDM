@@ -2,7 +2,7 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
-CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
+CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin ;
 USE `openidm` ;
 
 -- -----------------------------------------------------
@@ -151,7 +151,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
+  `rootactionid` VARCHAR(255) NULL ,
   `reconid` VARCHAR(36) NULL ,
   `reconciling` VARCHAR(12) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
@@ -162,6 +162,10 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `activity` VARCHAR(24) NULL ,
   `status` VARCHAR(7) NULL ,
   `message` TEXT NULL ,
+  `actionid` VARCHAR(255) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
@@ -171,9 +175,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
-  `parentactionid` VARCHAR(511) NULL ,
-  `activityid` VARCHAR(511) NULL ,
+  `rootactionid` VARCHAR(255) NULL ,
+  `parentactionid` VARCHAR(255) NULL ,
+  `activityid` VARCHAR(255) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
   `message` TEXT NULL ,
@@ -217,6 +221,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
 -- Table `openidm`.`schedulerobjects`
 -- -----------------------------------------------------
@@ -254,6 +259,24 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `openidm`.`uinotification`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `notificationType` VARCHAR(255) NOT NULL ,
+  `createDate` VARCHAR(255) NOT NULL ,
+  `message` TEXT NOT NULL ,
+  `requester` VARCHAR(255) NULL ,
+  `receiverId` VARCHAR(38) NOT NULL ,
+  `requesterId` VARCHAR(38) NULL ,
+  `notificationSubtype` VARCHAR(255) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
 -- -----------------------------------------------------
 -- Table `openidm`.`clusterobjects`
 -- -----------------------------------------------------
@@ -282,30 +305,13 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
+  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `proptype`(23) ASC) ,
   INDEX `fk_clusterobjectproperties_clusterobjects` (`clusterobjects_id` ASC) ,
-  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
   CONSTRAINT `fk_clusterobjectproperties_clusterobjects`
     FOREIGN KEY (`clusterobjects_id` )
     REFERENCES `openidm`.`clusterobjects` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `openidm`.`uinotification`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `notificationType` VARCHAR(255) NOT NULL ,
-  `createDate` VARCHAR(255) NOT NULL ,
-  `message` TEXT NOT NULL ,
-  `requester` VARCHAR(255) NULL ,
-  `receiverId` VARCHAR(38) NOT NULL ,
-  `requesterId` VARCHAR(38) NULL ,
-  `notificationSubtype` VARCHAR(255) NULL ,
-  PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
 

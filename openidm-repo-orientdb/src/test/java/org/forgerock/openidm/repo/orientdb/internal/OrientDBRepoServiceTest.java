@@ -25,9 +25,11 @@
 package org.forgerock.openidm.repo.orientdb.internal;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
 import java.io.File;
@@ -40,6 +42,7 @@ import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -56,7 +59,11 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
@@ -64,12 +71,14 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.RoutingMode;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyAccessor;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -228,7 +237,27 @@ public class OrientDBRepoServiceTest {
 
     @Test
     public void testHandlePatch() throws Exception {
+        final JsonValue content = newContent();
+        CreateRequest createRequest = Requests.newCreateRequest("/repo/managed/user", content);
+        Resource resource0 = connection.create(new RootContext(), createRequest);
+        assertNotNull(resource0.getId());
 
+        PatchRequest patchRequest =
+                Requests.newPatchRequest("/repo/managed/user", resource0.getId());
+        patchRequest.setRevision(resource0.getRevision());
+        patchRequest.addPatchOperation(PatchOperation.add("attribute", "New Value"));
+        patchRequest.addPatchOperation(PatchOperation.increment("integer", 8));
+        patchRequest.addPatchOperation(PatchOperation.increment("number", -0.14));
+        patchRequest.addPatchOperation(PatchOperation.remove("string"));
+        patchRequest.addPatchOperation(PatchOperation.replace("boolean", false));
+
+        Resource resource1 = connection.patch(new RootContext(), patchRequest);
+
+        ReadRequest readRequest = Requests.newReadRequest("/repo/managed/user", resource1.getId());
+        Resource resource1Read = connection.read(new RootContext(), readRequest);
+        assertThat(resource1Read.getContent().asMap()).contains(entry("attribute", "New Value"),
+                entry("integer", 50), entry("number", 3.0), entry("boolean", false))
+                .doesNotContainKey("string");
     }
 
     @Test
@@ -251,6 +280,24 @@ public class OrientDBRepoServiceTest {
         Resource resource1Read = connection.read(new RootContext(), readRequest);
         assertThat(resource1Read).is(
                 new ResourceCondition("ldap", resource1.getRevision(), content));
+    }
+
+    @Test
+    public void testHandleQuery() throws Exception {
+        QueryRequest queryRequest = Requests.newQueryRequest("/repo/internal/user");
+        queryRequest.setQueryId("get-by-field-value");
+        queryRequest.setAdditionalQueryParameter("field", "userName");
+        queryRequest.setAdditionalQueryParameter("value", "anonymous");
+        Collection<Resource> results = new ArrayList<Resource>();
+        QueryResult result = connection.query(new RootContext(), queryRequest, results);
+        Assert.assertEquals(results.size(), 1);
+
+        queryRequest = Requests.newQueryRequest("/repo/internal/user");
+        queryRequest.setQueryId("get-users-of-role");
+        queryRequest.setAdditionalQueryParameter("role", "openidm-authorized");
+        results = new ArrayList<Resource>();
+        result = connection.query(new RootContext(), queryRequest, results);
+        Assert.assertEquals(results.size(), 1);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -313,27 +360,25 @@ public class OrientDBRepoServiceTest {
         } catch (NotFoundException e) {
             assertThat(e).hasMessageContaining("Resource '/repo' not found");
         }
-        //
-        // // Request#5 - Bad request
-        // try {
-        // connection.create(new RootContext(),
-        // Requests.newCreateRequest("/repo/config", content));
-        // } catch (ConflictException e) {
-        // assertThat(e).hasMessageContaining("2");
-        // }
-        //
-        // // Request#6 - Bad request
-        // try {
-        // connection.create(new RootContext(),
-        // Requests.newCreateRequest("/repo/audit/action", "2", content));
-        // } catch (ConflictException e) {
-        // assertThat(e).hasMessageContaining("2");
-        // }
     }
 
     @Test
     public void testHandleUpdate() throws Exception {
+        final JsonValue content = newContent();
+        CreateRequest createRequest = Requests.newCreateRequest("/repo/managed/user", content);
+        Resource resource0 = connection.create(new RootContext(), createRequest);
+        assertNotNull(resource0.getId());
 
+        content.put("attribute", "New Value");
+        UpdateRequest updateRequest =
+                Requests.newUpdateRequest("/repo/managed/user", resource0.getId(), content);
+        updateRequest.setRevision(resource0.getRevision());
+
+        Resource resource1 = connection.update(new RootContext(), updateRequest);
+
+        ReadRequest readRequest = Requests.newReadRequest("/repo/managed/user", resource1.getId());
+        Resource resource1Read = connection.read(new RootContext(), readRequest);
+        assertThat(resource1Read.getContent().asMap()).contains(entry("attribute", "New Value"));
     }
 
     @Test
@@ -438,6 +483,7 @@ public class OrientDBRepoServiceTest {
     private JsonValue newContent() {
         JsonValue object = new JsonValue(newMap());
         object.put("map", newMap());
+        // https://github.com/nuvolabase/orientdb/issues/1521
         object.remove("list");
         return object;
     }
@@ -450,7 +496,7 @@ public class OrientDBRepoServiceTest {
         map.put("number", 3.14);
         Map<String, Object> mapList = new HashMap<String, Object>();
         mapList.put("e", 2.71);
-        map.put("list", Arrays.asList(new Object[] { "We Built This City", 42, 3.14, false,
+        map.put("list", Arrays.asList(new Object[] { "We Built This City", 42, 3.14, false, null,
             Arrays.asList(new Object[] { "Marvin", "Pluto" }), mapList }));
         map.put("null", null);
         return map;

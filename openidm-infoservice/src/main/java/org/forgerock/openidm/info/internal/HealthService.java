@@ -38,10 +38,6 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.cluster.ClusterEvent;
@@ -50,17 +46,22 @@ import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
+import org.forgerock.openidm.osgi.ServiceTrackerListener;
+import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,14 +73,18 @@ import org.slf4j.LoggerFactory;
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM Health Service", immediate = true)
 @Service
-@References({ @Reference(referenceInterface = ClusterManagementService.class,
-        cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-        bind = "bindClusterManagementService", unbind = "unbindClusterManagementService"/*,
-        updated = "updatedClusterManagementService"*/) })
+/*
+ * @References({ @Reference(referenceInterface = ClusterManagementService.class,
+ * cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy =
+ * ReferencePolicy.DYNAMIC, bind = "bindClusterManagementService", unbind =
+ * "unbindClusterManagementService"
+ *//*
+    * , updated = "updatedClusterManagementService"
+    *//* ) }) */
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service") })
-public class HealthService implements HealthInfo, ClusterEventListener {
+public class HealthService implements HealthInfo, ClusterEventListener, ServiceTrackerListener {
 
     public static final String PID = "org.forgerock.openidm.health";
 
@@ -96,6 +101,8 @@ public class HealthService implements HealthInfo, ClusterEventListener {
     enum AppState {
         STARTING, ACTIVE_READY, ACTIVE_NOT_READY, STOPPING
     }
+
+    static ServiceTracker tracker;
 
     private ComponentContext context;
     private FrameworkListener frameworkListener;
@@ -114,6 +121,8 @@ public class HealthService implements HealthInfo, ClusterEventListener {
     private volatile boolean appStarting = true;
     // Whether the cluster management thread is up in the "running" state
     private volatile boolean clusterUp = false;
+    // Whether the cluster management service is enabled
+    private volatile boolean clusterEnabled = true;
 
     private volatile StateDetail stateDetail = new StateDetail(AppState.STARTING,
             "OpenIDM starting");
@@ -124,32 +133,50 @@ public class HealthService implements HealthInfo, ClusterEventListener {
      */
     private List<String> requiredBundles = new ArrayList<String>();
 
+    /* @formatter:off */
     private String[] defaultRequiredBundles = new String[] {
         "org.forgerock.openicf.framework.connector-framework",
         "org.forgerock.openicf.framework.connector-framework-internal",
-        "org.forgerock.openicf.framework.connector-framework-osgi", "org.forgerock.openidm.audit",
-        "org.forgerock.openidm.core", "org.forgerock.openidm.enhanced-config",
-        "org.forgerock.openidm.external-email", "org.forgerock.openidm.external-rest",
-        "org.forgerock.openidm.filter", "org.forgerock.openidm.httpcontext",
-        "org.forgerock.openidm.infoservice", "org.forgerock.openidm.policy",
-        "org.forgerock.openidm.provisioner", "org.forgerock.openidm.provisioner-openicf",
-        "org.forgerock.openidm.repo", "org.forgerock.openidm.servlet",
-        "org.forgerock.openidm.script", "org.forgerock.openidm.smartevent",
-        "org.forgerock.openidm.system", "org.forgerock.openidm.ui", "org.forgerock.openidm.util",
+        "org.forgerock.openicf.framework.connector-framework-osgi",
+        "org.forgerock.openidm.audit",
+        "org.forgerock.openidm.core",
+        "org.forgerock.openidm.enhanced-config",
+        "org.forgerock.openidm.external-email",
+        "org.forgerock.openidm.external-rest",
+        "org.forgerock.openidm.filter",
+        "org.forgerock.openidm.httpcontext",
+        "org.forgerock.openidm.infoservice",
+        "org.forgerock.openidm.policy",
+        "org.forgerock.openidm.provisioner",
+        "org.forgerock.openidm.provisioner-openicf",
+        "org.forgerock.openidm.repo",
+        "org.forgerock.openidm.restlet",
+        "org.forgerock.openidm.smartevent",
+        "org.forgerock.openidm.system",
+        "org.forgerock.openidm.ui",
+        "org.forgerock.openidm.util",
         "org.forgerock.commons.org.forgerock.json.resource",
-        "org.forgerock.commons.json-resource-servlet", "org.forgerock.commons.json-resource",
-        "org.forgerock.commons.org.forgerock.util", "org.forgerock.openidm.security-jetty",
-        "org.forgerock.openidm.jetty-fragment", "org.forgerock.openidm.quartz-fragment",
-        "org.ops4j.pax.web.pax-web-extender-whiteboard", "org.forgerock.openidm.scheduler",
-        "org.ops4j.pax.web.pax-web-jetty-bundle", "org.forgerock.openidm.repo-jdbc",
-        "org.forgerock.openidm.repo-orientdb", "org.forgerock.openidm.config",
-        "org.forgerock.openidm.crypto"
-    // For now, default to not check for the workflow engine
-    // "org.activiti.engine",
-    // "org.activiti.osgi",
-    // "org.forgerock.openidm.workflow-activiti",
-    // "UserApplicationAcceptance.bar"
-            };
+        "org.forgerock.commons.org.forgerock.json.resource.restlet",
+        "org.forgerock.commons.org.forgerock.restlet",
+        "org.forgerock.commons.org.forgerock.util",
+        "org.forgerock.openidm.security-jetty",
+        "org.forgerock.openidm.jetty-fragment",
+        "org.forgerock.openidm.quartz-fragment",
+        "org.ops4j.pax.web.pax-web-extender-whiteboard",
+        "org.forgerock.openidm.scheduler",
+        "org.ops4j.pax.web.pax-web-jetty-bundle",
+        "org.forgerock.openidm.repo-jdbc",
+        "org.forgerock.openidm.repo-orientdb",
+        "org.forgerock.openidm.config",
+        "org.forgerock.openidm.crypto",
+        "org.forgerock.openidm.cluster"
+        // For now, default to not check for the workflow engine
+        //"org.activiti.engine",
+        //"org.activiti.osgi",
+        //"org.forgerock.openidm.workflow-activiti",
+        //"UserApplicationAcceptance.bar"
+    };
+    /* @formatter:on */
 
     /**
      * Maximum time after framework start for required services to register to
@@ -161,27 +188,30 @@ public class HealthService implements HealthInfo, ClusterEventListener {
      * READY
      */
     private List<String> requiredServices = new ArrayList<String>();
-    private String[] defaultRequiredServices = new String[] { /*
-                                                               * "org.forgerock.openidm.config"
-                                                               * ,
-                                                               */
-    "org.forgerock.openidm.provisioner",
-        "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
-        "org.forgerock.openidm.audit", /* "org.forgerock.openidm.policy", */
-        /* "org.forgerock.openidm.managed", */
-        "org.forgerock.openidm.script", "org.forgerock.openidm.crypto"
-    /* "org.forgerock.openidm.recon", */
-    // TODO: add once committed "org.forgerock.openidm.info",
-            /* "org.forgerock.openidm.router", */
-            /*
-             * "org.forgerock.openidm.scheduler",
-             * "org.forgerock.openidm.taskscanner"
-             */
-            // "org.forgerock.openidm.bootrepo.orientdb",
-            // "org.forgerock.openidm.bootrepo.jdbc",
-            // "org.forgerock.openidm.workflow.activiti.engine",
-            // "org.forgerock.openidm.workflow"
-            };
+    /* @formatter:off */
+    private String[] defaultRequiredServices = new String[] {
+            "org.forgerock.openidm.config",
+            "org.forgerock.openidm.provisioner",
+            "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
+            "org.forgerock.openidm.external.rest",
+            "org.forgerock.openidm.audit",
+            "org.forgerock.openidm.policy",
+            "org.forgerock.openidm.managed",
+            "org.forgerock.openidm.script",
+            "org.forgerock.openidm.crypto",
+            "org.forgerock.openidm.recon",
+//TODO: add once committed "org.forgerock.openidm.info",
+            "org.forgerock.openidm.router",
+            "org.forgerock.openidm.scheduler",
+            "org.forgerock.openidm.scope",
+            "org.forgerock.openidm.taskscanner",
+            "org.forgerock.openidm.cluster"
+            //"org.forgerock.openidm.bootrepo.orientdb",
+            //"org.forgerock.openidm.bootrepo.jdbc",
+            //"org.forgerock.openidm.workflow.activiti.engine",
+            //"org.forgerock.openidm.workflow"
+    };
+    /* @formatter:on */
 
     @Activate
     protected void activate(final ComponentContext context) {
@@ -191,6 +221,10 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         requiredServices = new ArrayList<String>();
         requiredServices.addAll(Arrays.asList(defaultRequiredServices));
         applyPropertyConfig();
+
+        // Set up tracker
+        BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
+        tracker = initServiceTracker(ctx);
 
         // Handle framework changes
         frameworkListener = new FrameworkListener() {
@@ -342,6 +376,52 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         return stateDetail.toJsonValue();
     }
 
+    /**
+     * Initialize the service tracker and open it.
+     *
+     * @param context
+     *            the BundleContext
+     * @return the ServiceTracker
+     */
+    private ServiceTracker initServiceTracker(BundleContext context) {
+        ServiceTracker tracker =
+                new ServiceTrackerNotifier(context, ClusterManagementService.class.getName(), null,
+                        this);
+        tracker.open();
+        return tracker;
+    }
+
+    @Override
+    public void addedService(ServiceReference reference, Object service) {
+        ClusterManagementService clusterService = (ClusterManagementService) service;
+        if (clusterService != null) {
+            clusterService.register(LISTENER_ID, this);
+            clusterEnabled = clusterService.isEnabled();
+            cluster = clusterService;
+        }
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+        if (cluster != null) {
+            cluster.unregister(LISTENER_ID);
+            cluster = null;
+        }
+    }
+
+    @Override
+    public void modifiedService(ServiceReference reference, Object service) {
+        ClusterManagementService clusterService = (ClusterManagementService) service;
+        if (cluster != null) {
+            cluster.unregister(LISTENER_ID);
+            cluster = null;
+        }
+        if (clusterService != null) {
+            clusterService.register(LISTENER_ID, this);
+            cluster = clusterService;
+        }
+    }
+
     private void bindClusterManagementService(final ClusterManagementService service) {
         service.register(LISTENER_ID, this);
         cluster = service;
@@ -417,7 +497,7 @@ public class HealthService implements HealthInfo, ClusterEventListener {
         } else if (missingServices.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
-        } else if (!clusterUp) {
+        } else if (clusterEnabled && !clusterUp) {
             if (cluster != null && !cluster.isStarted()) {
                 cluster.startClusterManagement();
             }

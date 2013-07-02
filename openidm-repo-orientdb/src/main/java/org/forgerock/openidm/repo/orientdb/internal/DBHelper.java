@@ -419,17 +419,33 @@ public final class DBHelper {
             OType orientPropertyType =
                     index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asEnum(OType.class);
 
+            // Check if a single property is being defined and create it if so
+            for (String propName : propertyNames) {
+                if (orientClass.getProperty(propName) != null) {
+                    continue;
+                }
+                logger.info("Creating property {} of type {}", propName, orientPropertyType);
+                // Create property
+                orientClass.createProperty(propName, orientPropertyType);
+            }
+
+            // Create the index
             OClass.INDEX_TYPE orientIndexType =
                     index.get(OrientDBRepoService.CONFIG_INDEX_TYPE)
                             .asEnum(OClass.INDEX_TYPE.class);
+            try {
 
-            logger.info(
-                    "Creating index on properties {} of type {} with index type {} on {} for OrientDB class ",
-                    new Object[] { propertyNames, orientPropertyType, orientIndexType,
-                        orientClassName });
-
-            orientClass.createProperty(propertyName, orientPropertyType);
-            orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
+                logger.info(
+                        "Creating index on properties {} of type {} with index type {} on {} for OrientDB class ",
+                        new Object[] { propertyNames, orientPropertyType, orientIndexType,
+                            orientClassName });
+                orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
+            } catch (IllegalArgumentException ex) {
+                throw new InvalidException("Invalid index type '" + orientIndexType
+                        + "' in configuration on properties " + propertyNames + " of type "
+                        + orientPropertyType + " on " + orientClassName + " valid values: "
+                        + OClass.INDEX_TYPE.values() + " failure message: " + ex.getMessage(), ex);
+            }
         }
     }
 

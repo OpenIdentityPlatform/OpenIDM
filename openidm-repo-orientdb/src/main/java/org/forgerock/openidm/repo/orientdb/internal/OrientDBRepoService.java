@@ -80,7 +80,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
-import com.orientechnologies.orient.core.command.OCommandManager;
+import com.orientechnologies.orient.client.remote.OEngineRemote;
 import com.orientechnologies.orient.core.command.OCommandResultListener;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
@@ -88,14 +88,12 @@ import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.exception.OQueryParsingException;
-import com.orientechnologies.orient.core.id.ORID;
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.sql.OCommandExecutorSQLDelegate;
 import com.orientechnologies.orient.core.sql.query.OSQLAsynchQuery;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import com.orientechnologies.orient.core.tx.OTransaction;
@@ -556,7 +554,7 @@ public class OrientDBRepoService implements RequestHandler {
             }
 
             logger.trace("Updated doc for orientType: {}, resourceName: {}, to save {}",
-                    new Object[] { id.getLeft(), request.getResourceName(), updatedODocument });
+                    new Object[] { id.getLeft(), id.getRight(), updatedODocument });
 
             database.save(updatedODocument);
             database.commit();
@@ -768,52 +766,41 @@ public class OrientDBRepoService implements RequestHandler {
                     final AtomicReference<OIdentifiable> lastRecord =
                             new AtomicReference<OIdentifiable>();
 
-                    // This blocks the thread and wait until the query is
-                    // finished to fetch the last record.
-                    // TODO How to submit and make is async if the DB
-                    // supports
-                    // it?
-                    OSQLAsynchQuery<ODocument> query =
-                            new OSQLAsynchQuery(((String) PropertyUtil.substVars(queryExpression,
-                                    new OrientSQLPropertyAccessor(params),
-                                    PropertyUtil.Delimiter.DOLLAR, true))) {
-                                @Override
-                                public List run(Object... iArgs) {
-                                    super.run(iArgs);
-                                    final OIdentifiable i = lastRecord.get();
-
-                                    if (null != i) {
-                                        final ORID lastRid = i.getIdentity();
-                                        handler.handleResult(new QueryResult(lastRid.next(), -1));
-                                    } else {
-                                        // TODO How to handle empty
-                                        // result???
-                                        handler.handleResult(new QueryResult(null, -1));
-                                    }
-
-                                    return Collections.emptyList();
+                    if (db.getURL().startsWith(OEngineRemote.NAME)) {
+                        OSQLAsynchQuery<ODocument> query =
+                                new OSQLAsynchQuery(((String) PropertyUtil.substVars(
+                                        queryExpression, new OrientSQLPropertyAccessor(params),
+                                        PropertyUtil.Delimiter.DOLLAR, true)));
+                        query.setResultListener(new OCommandResultListener() {
+                            @Override
+                            public boolean result(Object iRecord) {
+                                final Resource r = DocumentUtil.toResource((ODocument) iRecord);
+                                boolean accepted = handler.handleResource(r);
+                                if (accepted) {
+                                    lastRecord.set((OIdentifiable) iRecord);
                                 }
-                            };
-                    logger.debug("Manual token substitution for {} resulted in {}",
-                            queryExpression, query);
-                    query.setResultListener(new OCommandResultListener() {
-                        @Override
-                        public boolean result(Object iRecord) {
-                            final Resource r = DocumentUtil.toResource((ODocument) iRecord);
-                            boolean accepted = handler.handleResource(r);
-                            if (accepted) {
-                                lastRecord.set((OIdentifiable) iRecord);
+                                return accepted;
                             }
-                            return accepted;
-                        }
 
-                        public void end() {
-                            /* there is nothing to clean up */
+                            public void end() {
+                                /* there is nothing to clean up */
+                            }
+                        });
+                        logger.debug("Manual token substitution for {} resulted in {}",
+                                queryExpression, query);
+                        db.query(query, params);
+                    } else {
+                        OSQLSynchQuery<ODocument> query =
+                                new OSQLSynchQuery(((String) PropertyUtil.substVars(
+                                        queryExpression, new OrientSQLPropertyAccessor(params),
+                                        PropertyUtil.Delimiter.DOLLAR, true)));
+                        logger.debug("Manual token substitution for {} resulted in {}",
+                                queryExpression, query);
+                        for (Object document :  db.query(query, params)) {
+                            handler.handleResource(DocumentUtil.toResource((ODocument)document));
                         }
-                    });
-                    OCommandManager.instance().registerExecutor(query.getClass(),
-                            OCommandExecutorSQLDelegate.class);
-                    db.command(query).execute(params);
+                    }
+                    handler.handleResult(new QueryResult());
                 } catch (OQueryParsingException firstTryEx) {
                     // TODO: consider differentiating between bad
                     // configuration
@@ -906,13 +893,13 @@ public class OrientDBRepoService implements RequestHandler {
     // .asString();
     // }
 
-    private String getUser(JsonValue config) {
-        return config.get(CONFIG_USER).defaultTo("admin").asString();
-    }
-
-    private String getPassword(JsonValue config) {
-        return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
-    }
+//    private String getUser(JsonValue config) {
+//        return config.get(CONFIG_USER).defaultTo("admin").asString();
+//    }
+//
+//    private String getPassword(JsonValue config) {
+//        return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
+//    }
 
     /**
      * Set the pre-configured queries, which are identified by a query
@@ -968,7 +955,8 @@ public class OrientDBRepoService implements RequestHandler {
         if (id.getRight() instanceof ORecordId) {
             try {
                 ORecordId RID = (ORecordId) id.getRight();
-                Object o = database.getRecord(RID); //database.getRecord(new ORecordId("#12:1"))
+                Object o = database.getRecord(RID); // database.getRecord(new
+                                                    // ORecordId("#12:1"))
                 if (o instanceof ODocument) {
                     oDocument = (ODocument) o;
                 } else {
@@ -989,7 +977,8 @@ public class OrientDBRepoService implements RequestHandler {
             if (result.size() == 1) {
                 // ID is of type unique index, there must only be one at most
 
-                //This trick gets the full oDocument and loads the other attributes
+                // This trick gets the full oDocument and loads the other
+                // attributes
                 oDocument = result.get(0).field("rid");
             } else if (result.size() > 1) {
                 throw new InternalServerErrorException("The resource with ID '"

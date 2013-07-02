@@ -339,13 +339,6 @@ public class SalesforceConnection extends ClientResource {
         config.setServiceEndpoint(config.getRestEndpoint());
         config.setSessionId(getOAuthUser().getAccessToken());
 
-        config.setSessionRenewer( new SessionRenewer() {
-            @Override
-            public SessionRenewalHeader renewSession(ConnectorConfig config) throws ConnectionException {
-                return null;  //To change body of implemented methods use File | Settings | File Templates.
-            }
-        });
-
         return config;
     }
 

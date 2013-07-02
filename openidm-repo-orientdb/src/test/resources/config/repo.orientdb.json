@@ -4,7 +4,7 @@
     "rootPassword" : "7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4",
     "queries":{
         "get-by-field-value":"select * FROM ${_resource} WHERE ${field} = :value",
-        "get-users-of-role":"select userName FROM ${_resource} WHERE roles matches '^(.*,)?${role}(,.*)?$'",
+        "get-users-of-role":"select userName FROM ${_resource} WHERE roles CONTAINS( :role )",
         "query-all-ids":"select _openidm_id from ${_resource}",
         "query-all":"select ${fields} from ${_resource}",
         "links-for-firstId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND firstId = :firstId",
@@ -49,12 +49,12 @@
                         "indexType":"notunique"
                     },
                     {
-                        "propertyName":"firstId",
+                        "propertyNames" : [ "linkType", "firstId" ],
                         "propertyType":"string",
                         "indexType":"notunique"
                     },
                     {
-                        "propertyName":"secondId",
+                        "propertyNames" : [ "linkType", "secondId" ],
                         "propertyType":"string",
                         "indexType":"notunique"
                     },

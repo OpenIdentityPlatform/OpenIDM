@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="OpenIDMUISuite" verbose="1">
+	<parameter name="url" value="http://localhost:28080/" />
+
+	<test name="OpenIDMUITest">
+		<classes>
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminAddUserTest" />
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminModifyUserTest" />
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminUsersViewTest" />
+		</classes>
+	</test>
+
+</suite>

@@ -117,6 +117,7 @@
  <xinclude:include href="appendix-scripting.xml" />
  <xinclude:include href='appendix-router.xml' />
  <xinclude:include href='appendix-jetty.xml' />
+ <xinclude:include href='appendix-interface-stability.xml' />
  <xinclude:include href='../shared/glossary.xml' />
 
  <index />
