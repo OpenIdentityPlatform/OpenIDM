@@ -1,0 +1,27 @@
+Sample 10 - IWA Populate Security Context
+---------------------------------------------
+Copyright (c) 2013 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+The sample demonstrates how to populate the security context when using IWA as an authentication mechanism.
+
+The configuration files used in this sample are as follows:
+
+*   samples/sample10/conf/authentication.json details the authentication chain used to authenticate users.
+*   samples/sample10/script/authnPopulateContext.js performs the population of the security context.
+
+Change the following attributes in the samples/sample10/conf/authentication.json to match your Kerberos set up:
+*   servicePrincipal
+*   keytabFileName
+*   kerberosRealm
+*   kerberosServerName
+
+To run the sample, start OpenIDM with the configuration for sample 10
+
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample10
+
+In browser configured and set up for IWA, navigate to http://localhost:8080/openidm and if IWA is set up correctly
+you should automatically be logged in.

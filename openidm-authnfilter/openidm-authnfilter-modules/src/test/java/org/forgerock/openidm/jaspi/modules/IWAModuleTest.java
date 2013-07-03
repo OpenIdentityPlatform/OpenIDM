@@ -36,6 +36,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
+/**
+ * @author Phill Cunnington
+ */
 public class IWAModuleTest {
 
     private IWAModule iwaModule;

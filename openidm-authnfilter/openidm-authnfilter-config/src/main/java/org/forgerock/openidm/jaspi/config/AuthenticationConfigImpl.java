@@ -20,35 +20,61 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An implementation of the AuthenticationConfig that reads and holds the authentication configuration.
+ *
+ * @author Phill Cunnington
+ */
 @Component(name = AuthenticationConfigImpl.PID, policy = ConfigurationPolicy.REQUIRE)
 @Service
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Configuration Service")
+})
 public class AuthenticationConfigImpl implements AuthenticationConfig {
 
+    /** The PID for this Component. */
     public static final String PID = "org.forgerock.openidm.authentication";
 
     private static final Logger DEBUG = LoggerFactory.getLogger(AuthenticationConfigImpl.class);
 
     private JsonValue config;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JsonValue getConfig() {
         return config;
     }
 
+    /**
+     * Converts the ComponentContext into a JsonValue and stores it for later use.
+     *
+     * @param context The ComponentContext.
+     */
     @Activate
     public void activate(ComponentContext context) {
         config = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
         DEBUG.debug("OpenIDM Config for Authentication {} is activated.", config.get(Constants.SERVICE_PID));
     }
 
+    /**
+     * Nulls the stored authentication JsonValue.
+     *
+     * @param context The ComponentContext.
+     */
     @Deactivate
     public void deactivate(ComponentContext context) {
         DEBUG.debug("OpenIDM Config for Authentication {} is deactivated.", config.get(Constants.SERVICE_PID));

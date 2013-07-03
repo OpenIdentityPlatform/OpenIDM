@@ -37,6 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Helper class which performs authentication against manged internal user tables.
+ */
 public class AuthHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
@@ -46,14 +49,23 @@ public class AuthHelper {
     String userRolesProperty;
     List<String> defaultRoles;
 
-    public AuthHelper(String userIdProperty, String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
+    /**
+     * Constructs an instance of the AuthHelper.
+     *
+     * @param userIdProperty The user id property.
+     * @param userCredentialProperty The user credential property.
+     * @param userRolesProperty The user roles property.
+     * @param defaultRoles The list of default roles.
+     */
+    public AuthHelper(String userIdProperty, String userCredentialProperty, String userRolesProperty,
+            List<String> defaultRoles) {
         this.userIdProperty = userIdProperty;
         this.userCredentialProperty = userCredentialProperty;
         this.userRolesProperty = userRolesProperty;
         this.defaultRoles = defaultRoles;
 
-        if ((userIdProperty != null && userCredentialProperty == null) ||
-                (userIdProperty == null && userCredentialProperty != null)) {
+        if ((userIdProperty != null && userCredentialProperty == null)
+                || (userIdProperty == null && userCredentialProperty != null)) {
             logger.warn("AuthHelper config does not fully define the necessary properties."
                     + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
                     + " Defaulting to manual role query.", userIdProperty, userCredentialProperty);
@@ -63,6 +75,16 @@ public class AuthHelper {
             userIdProperty, userCredentialProperty, userRolesProperty);
     }
 
+    /**
+     * Performs the authentication using the given query id, resource, username and password.
+     *
+     * @param passQueryId The query id.
+     * @param passQueryOnResource The query resource.
+     * @param username The username.
+     * @param password The password.
+     * @param authData The AuthData object.
+     * @return True if authentication is successful, otherwise false.
+     */
     public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
             AuthData authData) {
 
@@ -82,7 +104,7 @@ public class AuthHelper {
         return false;
     }
 
-    private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username, AuthData authData)
+    private UserInfo getRepoUserInfo(String repoQueryId, String repoResource, String username, AuthData authData)
             throws Exception {
 
         UserInfo user = null;
@@ -154,9 +176,8 @@ public class AuthHelper {
             } else {
                 credential = getCredential(retrCred, retrId, username, retrCredPropName, true);
                 roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
-                logger.debug("User information for {}: id: {} credential available: {} " +
-                		"roles from repo: {} total roles: {}",
-                        username, retrId, (retrCred != null), retrRoles, roleNames);
+                logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total "
+                        + "roles: {}", username, retrId, (retrCred != null), retrRoles, roleNames);
 
                 user = new UserInfo(username, credential, roleNames);
             }
@@ -170,8 +191,8 @@ public class AuthHelper {
         Credential credential = null;
         if (retrCred instanceof String) {
             if (allowStringifiedEncryption) {
-                if (getCrypto().isEncrypted((String)retrCred)) {
-                    JsonValue jsonRetrCred = getCrypto().decrypt((String)retrCred);
+                if (getCrypto().isEncrypted((String) retrCred)) {
+                    JsonValue jsonRetrCred = getCrypto().decrypt((String) retrCred);
                     retrCred = jsonRetrCred == null ? null : jsonRetrCred.asString();
                 }
             }
@@ -196,11 +217,12 @@ public class AuthHelper {
         return credential;
     }
 
-    private List<String> addRoles(List<String> existingRoleNames, Object retrRoles, String retrRolesPropName, List<String> defaultRoles) {
+    private List<String> addRoles(List<String> existingRoleNames, Object retrRoles, String retrRolesPropName,
+            List<String> defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
         } else if (retrRoles instanceof String) {
-            List<String> parsedRoles = parseCommaDelimitedRoles((String)retrRoles);
+            List<String> parsedRoles = parseCommaDelimitedRoles((String) retrRoles);
             existingRoleNames.addAll(parsedRoles);
         } else if (retrRolesPropName != null) {
             logger.warn("Unknown roles type retrieved from query in property, expected Collection: {} type: {}",
@@ -225,14 +247,9 @@ public class AuthHelper {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
-        return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
+        return new JsonResourceObjectSet((RepositoryService) ctx.getService(repoRef));
     }
 
-    /**
-     *
-     *
-     * @return
-     */
     private CryptoService getCrypto() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();

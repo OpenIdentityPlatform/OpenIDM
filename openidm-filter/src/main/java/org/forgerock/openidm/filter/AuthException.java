@@ -17,9 +17,9 @@
 package org.forgerock.openidm.filter;
 
 /**
- * Authentication failed exception
+ * Authentication failed exception.
  *
- * @author Jamie Nelson 
+ * @author Jamie Nelson
  */
 public class AuthException extends Exception {
 
@@ -34,6 +34,8 @@ public class AuthException extends Exception {
 
     /**
      * Constructs a new exception with the specified detail message.
+     *
+     * @param message The message.
      */
     public AuthException(String message) {
         super(message);
@@ -41,6 +43,8 @@ public class AuthException extends Exception {
 
     /**
      * Constructs a new exception with the specified cause.
+     *
+     * @param cause The cause.
      */
     public AuthException(Throwable cause) {
         super(cause);
@@ -48,6 +52,9 @@ public class AuthException extends Exception {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message The message.
+     * @param cause The cause.
      */
     public AuthException(String message, Throwable cause) {
         super(message, cause);

@@ -17,8 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,19 +27,22 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Basis of all commons authentication filter modules. Ensures the required attributes/properties are set
  * after a request has been validated to ensure the attributes/properties needed by the rest of OpenIDM are present
  * so OpenIDM can operate properly.
+ *
+ * @author Phill Cunnington
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
 
-    /** Authentication username header */
+    /** Authentication username header. */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
-    /** Authentication password header */
+    /** Authentication password header. */
     public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
     /** Attribute in session containing authenticated username. */
@@ -53,13 +54,15 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     /** Attribute in session and request containing assigned roles. */
     static final String ROLES_ATTRIBUTE = "openidm.roles";
 
-    /** Attribute in session containing user's resource (managed_user or internal_user) */
+    /** Attribute in session containing user's resource (managed_user or internal_user). */
     static final String RESOURCE_ATTRIBUTE = "openidm.resource";
 
-    /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request */
+    /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request.*/
     static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
     static final String OPENIDM_AUTH_STATUS = "openidm.auth.status";
+
+    private String logClientIPHeader = null;
 
     /**
      * Extracts the "clientIPHeader" value from the json configuration.
@@ -74,6 +77,9 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     public final void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             Map options) throws AuthException {
         JsonValue jsonValue = new JsonValue(options);
+
+        logClientIPHeader = (String) options.get("userId");
+
         initialize(requestPolicy, responsePolicy, handler, jsonValue);
     }
 
@@ -85,6 +91,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
      * @param responsePolicy The response policy this module must enforce, or null.
      * @param handler CallbackHandler used to request information.
      * @param options A JsonValue of module-specific configuration properties.
+     * @throws AuthException If there is a problem initialising the Authentication module.
      */
     protected abstract void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler handler, JsonValue options) throws AuthException;
@@ -116,11 +123,15 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
         AuthData authData = new AuthData();
 
+        Map<String, Object> messageInfoParams = messageInfo.getMap();
+
+        // Add this properties so the AuditLogger knows whether to log the client IP in the header.
+        messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
+
         AuthStatus authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
-        Map<String, Object> messageInfoParams = messageInfo.getMap();
         if (AuthStatus.SUCCESS.equals(authStatus)) {
-            HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
+            HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
             request.setAttribute(USERID_ATTRIBUTE, authData.getUserId());
             request.setAttribute(USERNAME_ATTRIBUTE, authData.getUsername());
@@ -154,6 +165,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
      *                       validate the request. If the Subject is not null, the method implementation may add
      *                       additional Principals or credentials (pertaining to the recipient of the service request)
      *                       to the Subject.
+     * @param authData The AuthData object containing the authentication results.
      * @return An AuthStatus object representing the completion status of the processing performed by the method. The
      *          AuthStatus values that may be returned by this method are defined as follows:
      * <ul>

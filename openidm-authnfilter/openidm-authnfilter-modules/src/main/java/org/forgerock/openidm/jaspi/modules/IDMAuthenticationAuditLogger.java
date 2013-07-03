@@ -33,14 +33,15 @@ import java.util.Map;
 
 /**
  * Creates audit entries for each authentication attempt.
+ *
+ * @author Phill Cunnington
  */
 public class IDMAuthenticationAuditLogger implements AuditLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuthenticationAuditLogger.class);
 
     private static final DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
-
-    private String logClientIPHeader = null;//TODO need a way of setting
+    public static final String LOG_CLIENT_IP_HEADER_KEY = "logClientIPHeader";
 
     /**
      * {@inheritDoc}
@@ -53,7 +54,8 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
         String userId = (String) map.get(IDMServerAuthModule.USERID_ATTRIBUTE);
         List<String> roles = (List<String>) map.get(IDMServerAuthModule.ROLES_ATTRIBUTE);
         boolean status = (Boolean) map.get(IDMServerAuthModule.OPENIDM_AUTH_STATUS);
-        logAuthRequest(request, username, userId, roles, status);
+        String logClientIPHeader = (String) map.get(LOG_CLIENT_IP_HEADER_KEY);
+        logAuthRequest(request, username, userId, roles, status, logClientIPHeader);
     }
 
     /**
@@ -62,7 +64,7 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
      * @return The instance of the Router.
      */
     private ObjectSet getRouter() {
-        return OSGiAuthnFilterBuilder.router;
+        return OSGiAuthnFilterBuilder.getRouter();
     }
 
     /**
@@ -73,11 +75,12 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
      * @param userId The user id of the user that made the authentication request.
      * @param roles The roles of the user that made the authentication request.
      * @param status The status of the authentication request, either true for success or false for failure.
+     * @param logClientIPHeader Whether to log the client IP in the header.
      */
     protected void logAuthRequest(HttpServletRequest request, String username, String userId, List<String> roles,
-            boolean status) {
+            boolean status, String logClientIPHeader) {
         try {
-            Map<String,Object> entry = new HashMap<String,Object>();
+            Map<String, Object> entry = new HashMap<String, Object>();
             entry.put("timestamp", DATE_UTIL.now());
             entry.put("action", "authenticate");
             entry.put("status", status ? Status.SUCCESS.toString() : Status.FAILURE.toString());
@@ -86,7 +89,7 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
             entry.put("roles", roles);
             // check for header sent by load balancer for IPAddr of the client
             String ipAddress;
-            if (logClientIPHeader == null ) {
+            if (logClientIPHeader == null) {
                 ipAddress = request.getRemoteAddr();
             } else {
                 ipAddress = request.getHeader(logClientIPHeader);

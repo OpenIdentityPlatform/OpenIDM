@@ -39,6 +39,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 
+/**
+ * @author Phill Cunnington
+ */
 public class IWAADPassthroughModuleTest {
 
     private IWAADPassthroughModule iwaAdPassthroughModule;

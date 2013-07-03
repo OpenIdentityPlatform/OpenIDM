@@ -19,7 +19,8 @@ package org.forgerock.openidm.jaspi.config;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -27,10 +28,10 @@ import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +76,17 @@ import java.util.Map;
  *     </code>
  * </pre>
  *
+ * @author Jonathan Scudder
+ * @author Phill Cunnington
  */
 @Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Commons Authentication Filter Configuration")
+})
 public class OSGiAuthnFilterBuilder {
 
+    /** The PID for this component. */
     public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -110,9 +118,14 @@ public class OSGiAuthnFilterBuilder {
         configureAuthenticationFilter(config);
     }
 
+    /**
+     * Configures the commons Authentication Filter with the given configuration.
+     *
+     * @param jsonConfig The authentication configuration.
+     */
     private void configureAuthenticationFilter(JsonValue jsonConfig) {
 
-        if (jsonConfig == null ) {
+        if (jsonConfig == null) {
             // No configurations found
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
             return;
@@ -120,11 +133,11 @@ public class OSGiAuthnFilterBuilder {
 
         Configuration configuration = new Configuration();
         // For each ServerAuthConfig
-        for (Map.Entry<String,Object> entry : jsonConfig.get("serverAuthConfig").required().asMap().entrySet()) {
+        for (Map.Entry<String, Object> entry : jsonConfig.get("serverAuthConfig").required().asMap().entrySet()) {
             if ("auditLogger".equals(entry.getKey())) {
                 configuration.setAuditLoggerClassName((String) entry.getValue());
             } else {
-                configuration.addAuthContext(entry.getKey(), (Map<String,Object>) entry.getValue());
+                configuration.addAuthContext(entry.getKey(), (Map<String, Object>) entry.getValue());
             }
         }
 
@@ -144,7 +157,8 @@ public class OSGiAuthnFilterBuilder {
             policy = ReferencePolicy.STATIC,
             target = "(service.pid=org.forgerock.openidm.router)"
     )
-    public static ObjectSet router;
+    /** The Router service. */
+    private static ObjectSet router;
 
     /**
      * Binds the JsonResource router to the router member variable.
@@ -162,5 +176,14 @@ public class OSGiAuthnFilterBuilder {
      */
     private void unbindRouter(JsonResource router) {
         this.router = null;
+    }
+
+    /**
+     * Returns the Router instance.
+     *
+     * @return The Router instance.
+     */
+    public static ObjectSet getRouter() {
+        return router;
     }
 }

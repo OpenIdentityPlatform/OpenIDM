@@ -25,12 +25,13 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 
-import java.util.Map;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
+/**
+ * @author Phill Cunnington
+ */
 public class ADPassthroughModuleTest {
 
     private ADPassthroughModule adPassthroughModule;
@@ -46,7 +47,7 @@ public class ADPassthroughModuleTest {
     }
 
     @Test
-    public void shouldValidateRequestWhenUsernameHeaderIsNull() {
+    public void shouldValidateRequestWhenUsernameHeaderIsNull() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -73,7 +74,7 @@ public class ADPassthroughModuleTest {
     }
 
     @Test
-    public void shouldValidateRequestWhenUsernameHeaderIsEmptyString() {
+    public void shouldValidateRequestWhenUsernameHeaderIsEmptyString() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -100,7 +101,7 @@ public class ADPassthroughModuleTest {
     }
 
     @Test
-    public void shouldValidateRequestWhenPasswordHeaderIsNull() {
+    public void shouldValidateRequestWhenPasswordHeaderIsNull() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -127,7 +128,7 @@ public class ADPassthroughModuleTest {
     }
 
     @Test
-    public void shouldValidateRequestWhenPasswordHeaderIsEmptyString() {
+    public void shouldValidateRequestWhenPasswordHeaderIsEmptyString() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -171,7 +172,8 @@ public class ADPassthroughModuleTest {
         given(adPassthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(true);
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verify(authData).setUsername("USERNAME");
@@ -196,7 +198,8 @@ public class ADPassthroughModuleTest {
         given(adPassthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(false);
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verify(authData).setUsername("USERNAME");
