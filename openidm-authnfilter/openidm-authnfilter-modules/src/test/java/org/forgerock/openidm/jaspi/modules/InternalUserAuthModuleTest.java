@@ -31,6 +31,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
+/**
+ * @author Phill Cunnington
+ */
 public class InternalUserAuthModuleTest {
 
     private InternalUserAuthModule internalUserAuthModule;
@@ -61,7 +64,8 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -85,7 +89,8 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -109,7 +114,8 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -133,7 +139,8 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -160,7 +167,8 @@ public class InternalUserAuthModuleTest {
                 authData)).willReturn(true);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verify(authData).setUsername("USERNAME");
@@ -187,7 +195,8 @@ public class InternalUserAuthModuleTest {
                 authData)).willReturn(false);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+                authData);
 
         //Then
         verify(authData).setUsername("USERNAME");

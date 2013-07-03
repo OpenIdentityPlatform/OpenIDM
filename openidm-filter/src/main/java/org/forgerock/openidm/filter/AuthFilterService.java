@@ -19,16 +19,18 @@ package org.forgerock.openidm.filter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.jaspi.modules.AuthData;
 
+/**
+ * Service interface for AuthFilter.
+ */
 public interface AuthFilterService {
 
     /**
-     * Method for re-authenticating requests.  The request's security context
-     *  will need to include a "X-OpenIDM-Reauth-Password" header.
-     *  to succeed
-     * 
-     * @param request   The request object.
-     * @return          The AuthData response object.
-     * @throws AuthException
+     * Method for re-authenticating requests.  The request's security context will need to include a
+     * "X-OpenIDM-Reauth-Password" header to succeed.
+     *
+     * @param request The request object.
+     * @return The AuthData response object.
+     * @throws AuthException If there is a problem re-authenticating.
      */
     public AuthData reauthenticate(JsonValue request) throws AuthException;
 }

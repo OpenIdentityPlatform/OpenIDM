@@ -9,7 +9,7 @@
     "defaultUserRoles" : [ ],
     "serverAuthConfig" : {
         "auditLogger" : "org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger",
-        "idmAuth" : {
+        "iwaAdPassthrough" : {
             "sessionModule" : {
                 "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
                 "keyAlias" : "openidm-localhost",
@@ -17,15 +17,18 @@
                 "keystoreType" : "&{openidm.keystore.type}",
                 "keystoreFile" : "&{openidm.keystore.location}",
                 "keystorePassword" : "&{openidm.keystore.password}",
-                "maxTokenLifeMinutes" : "30",
-                "tokenIdleTimeMinutes" : "10"
+                "maxTokenLife" : "30",
+                "tokenIdleTime" : "10"
             },
             "authModules" : [
                 {
-                    "className" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
+                    "className" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
+                    "servicePrincipal" : "SERVICE_PRINCIPAL",
+                    "keytabFileName" : "KEYTAB_FILE_LOCATION",
+                    "kerberosRealm" : "KERBEROS_REALM",
+                    "kerberosServerName" : "KERBEROS_SERVER_NAME",
+                    "passThroughAuth" : "system/AD/account",
                     "propertyMapping" : {
-                        "userId" : "_id",
-                        "userCredential" : "password",
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [ ]

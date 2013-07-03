@@ -18,7 +18,6 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,8 @@ import java.util.List;
 
 /**
  * Commons Authentication Filter module to provide authentication for the anonymous user.
+ *
+ * @author Phill Cunnington
  */
 public class InternalUserAuthModule extends IDMServerAuthModule {
 
@@ -86,6 +87,7 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
+     * @param authData {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override

@@ -30,12 +30,15 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.security.auth.message.AuthException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against AD.
+ *
+ * @author Phill Cunnington
  */
 public class ADPassthroughAuthenticator {
 
@@ -65,8 +68,9 @@ public class ADPassthroughAuthenticator {
      * @param password The user's password.
      * @return The AuthData object the was passed in, with information set on it from the results of the authentication
      * request.
+     * @throws AuthException If pass-through authentication fails.
      */
-    public boolean authenticate(AuthData authData, String password) {
+    public boolean authenticate(AuthData authData, String password) throws AuthException {
 
         if (!StringUtils.isEmpty(passThroughAuth) && !"anonymous".equals(authData.getUsername())) {
             JsonResource router = getJsonResource();
@@ -79,7 +83,7 @@ public class ADPassthroughAuthenticator {
                 params.put("username", authData.getUsername());
                 params.put("password", password);
                 try {
-                    JsonValue result  = accessor.action(passThroughAuth ,params, null);
+                    JsonValue result  = accessor.action(passThroughAuth, params, null);
                     boolean authenticated = result.isDefined(ServerConstants.OBJECT_PROPERTY_ID);
                     if (authenticated) {
                         //This is what I was talking about. We don't have a way to populate this. Use script to overcome
@@ -103,6 +107,8 @@ public class ADPassthroughAuthenticator {
                     logger.trace("Failed pass-through authentication of {} on {}.",
                             authData.getUsername(), passThroughAuth, e);
                     //authentication failed
+                    throw new AuthException("Failed pass-through authentication of " + authData.getUsername() + " on "
+                            + passThroughAuth + ".");
                 }
             }
         }
@@ -124,6 +130,10 @@ public class ADPassthroughAuthenticator {
         } catch (InvalidSyntaxException e) {
             /* ignore, the filter is tested */
         }
-        return routers.size() > 0 ? ctx.getService(routers.iterator().next()) : null;
+        if (ctx != null) {
+            return routers.size() > 0 ? ctx.getService(routers.iterator().next()) : null;
+        } else {
+            return null;
+        }
     }
 }

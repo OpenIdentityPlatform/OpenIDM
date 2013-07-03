@@ -3,7 +3,7 @@
     "systemProperties" : { },
     "requestAttributes" : { },
     "initParams" : {
-        "moduleChain" : "iwa-ad-anon-passthrough"
+        "moduleConfiguration" : "idmAuth"
     },
     "scriptExtensions" : {
         "augmentSecurityContext" : {

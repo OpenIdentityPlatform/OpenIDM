@@ -18,7 +18,6 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,11 +29,12 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
  * to Active Directory.
+ *
+ * @author Phill Cunnington
  */
 public class ADPassthroughModule extends IDMServerAuthModule {
 
@@ -89,15 +89,17 @@ public class ADPassthroughModule extends IDMServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
+     * @param authData {@inheritDoc}
      * @return {@inheritDoc}
+     * @throws AuthException If there is a problem performing the authentication.
      */
     @Override
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            AuthData authData) {
+            AuthData authData) throws AuthException {
 
         LOGGER.debug("ADPassthroughModule: validateRequest START");
 
-        HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
             LOGGER.debug("ADPassthroughModule: Delegating call to internal AuthFilter");

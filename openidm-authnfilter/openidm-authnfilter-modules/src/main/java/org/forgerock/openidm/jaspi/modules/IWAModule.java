@@ -17,7 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +33,8 @@ import java.util.Set;
 
 /**
  * Commons Authentication Filter module to provide authentication using IWA.
+ *
+ * @author Phill Cunnington
  */
 public class IWAModule extends IDMServerAuthModule {
 
@@ -90,7 +91,7 @@ public class IWAModule extends IDMServerAuthModule {
      */
     @Override
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            AuthData authData) {
+            AuthData authData) throws AuthException {
 
         LOGGER.debug("IWAModule: validateRequest START");
 
@@ -128,7 +129,7 @@ public class IWAModule extends IDMServerAuthModule {
             authData.setUsername(username);
             authData.setResource("system/AD/account");
 
-            LOGGER.debug("IWAModule: Successful log in with user, {}", username);;
+            LOGGER.debug("IWAModule: Successful log in with user, {}", username);
 
             //Auth success will be logged in IDMServerAuthModule super type.
             return AuthStatus.SUCCESS;

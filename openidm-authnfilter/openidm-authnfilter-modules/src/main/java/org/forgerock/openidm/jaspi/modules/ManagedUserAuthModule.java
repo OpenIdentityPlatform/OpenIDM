@@ -19,13 +19,11 @@ package org.forgerock.openidm.jaspi.modules;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.audit.util.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
@@ -38,6 +36,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+/**
+ * Authentication Module for authenticating users against a managed users table.
+ *
+ * @author Phill Cunnington
+ */
 public class ManagedUserAuthModule extends IDMServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(ManagedUserAuthModule.class);
@@ -161,7 +164,7 @@ public class ManagedUserAuthModule extends IDMServerAuthModule {
         if (certs != null) {
             Principal existingPrincipal = null;
             if (request instanceof HttpServletRequest) {
-                ((HttpServletRequest)request).getUserPrincipal();
+                ((HttpServletRequest) request).getUserPrincipal();
             }
             logger.debug("Request {} existing Principal {} has {} certificates", request, existingPrincipal,
                     certs.length);

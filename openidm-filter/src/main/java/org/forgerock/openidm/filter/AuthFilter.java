@@ -21,7 +21,6 @@ package org.forgerock.openidm.filter;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -31,7 +30,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
 import org.forgerock.openidm.jaspi.modules.AuthData;
@@ -48,7 +46,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 /**
- * Auth Filter
+ * Auth Filter.
+ *
  * @author Jamie Nelson
  * @author aegloff
  * @author ckienle
@@ -64,13 +63,13 @@ public class AuthFilter implements AuthFilterService, JsonResource {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
-    /** Re-authentication password header */
+    /** Re-authentication password header. */
     public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
     private String queryId;
     private String queryOnResource;
 
-    /** The authentication module to delegate to */
+    /** The authentication module to delegate to. */
     private AuthHelper authHelper;
 
     @Reference(
@@ -89,6 +88,11 @@ public class AuthFilter implements AuthFilterService, JsonResource {
         config = null;
     }
 
+    /**
+     * Activates this component.
+     *
+     * @param context The ComponentContext.
+     */
     @Activate
     protected synchronized void activate(ComponentContext context) {
         logger.info("Activating Auth Filter with configuration {}", context.getProperties());
@@ -110,7 +114,7 @@ public class AuthFilter implements AuthFilterService, JsonResource {
     }
 
     /**
-     * Action support, including reauthenticate action
+     * Action support, including re-authenticate action.
      * {@inheritDoc}
      */
     public JsonValue handle(JsonValue request) throws JsonResourceException {
@@ -134,16 +138,19 @@ public class AuthFilter implements AuthFilterService, JsonResource {
                     throw new ForbiddenException("Reauthentication failed", ex);
                 }
             } else {
-                throw new BadRequestException("Action " + action + " on authentication service not supported " + params);
+                throw new BadRequestException("Action " + action + " on authentication service not supported "
+                        + params);
             }
         } else {
-            throw new BadRequestException("Actions not supported on child resource of authentication service " + params);
+            throw new BadRequestException("Actions not supported on child resource of authentication service "
+                    + params);
         }
         return response;
     }
 
     /**
-     * Re-authenticate based on the context associated with the request
+     * Re-authenticate based on the context associated with the request.
+     *
      * @param request the full request
      * @return authenticated user if success
      * @throws AuthException if reauthentication failed
@@ -154,7 +161,7 @@ public class AuthFilter implements AuthFilterService, JsonResource {
         String reauthPassword = null;
         for (Entry<String, Object> entry : headers.asMap().entrySet()) {
             if (entry.getKey().equalsIgnoreCase(HEADER_REAUTH_PASSWORD)) {
-                reauthPassword = (String)entry.getValue();
+                reauthPassword = (String) entry.getValue();
                 break;
             }
         }
@@ -173,6 +180,8 @@ public class AuthFilter implements AuthFilterService, JsonResource {
     }
 
     /**
+     * Gets the Security Context.
+     *
      * @param request the full request
      * @return the security context of the request, or null if does not exist
      */

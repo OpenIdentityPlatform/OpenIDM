@@ -28,11 +28,12 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * This Authentication Module uses the IWA authentication module with fall through to the AD Passthrough authentication
  * module.
+ *
+ * @author Phill Cunnington
  */
 public class IWAADPassthroughModule extends IWAModule {
 
@@ -92,12 +93,13 @@ public class IWAADPassthroughModule extends IWAModule {
      * @param serviceSubject {@inheritDoc}
      * @param authData {@inheritDoc}
      * @return {@inheritDoc}
+     * @throws AuthException If there is a problem performing the authentication.
      */
     @Override
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            AuthData authData) {
+            AuthData authData) throws AuthException {
 
-        HttpServletRequest request = (HttpServletRequest)messageInfo.getRequestMessage();
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         String xOpenIDMUsername = request.getHeader("X-OpenIDM-Username");
         String xOpenIdmPassword = request.getHeader("X-OpenIDM-Password");

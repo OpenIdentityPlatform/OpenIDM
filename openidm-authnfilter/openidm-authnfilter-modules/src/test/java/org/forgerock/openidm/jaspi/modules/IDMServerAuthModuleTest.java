@@ -38,6 +38,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
 
+/**
+ * @author Phill Cunnington
+ */
 public class IDMServerAuthModuleTest {
 
     private List<String> roles;

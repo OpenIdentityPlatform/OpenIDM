@@ -18,7 +18,17 @@ package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.json.fluent.JsonValue;
 
+/**
+ * Interface for injecting an implementation which contains the authentication configuration.
+ *
+ * @author Phill Cunnington
+ */
 public interface AuthenticationConfig {
 
+    /**
+     * Returns the authentication configuration.
+     *
+     * @return The authentication configuration.
+     */
     JsonValue getConfig();
 }
