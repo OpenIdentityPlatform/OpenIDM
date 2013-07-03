@@ -5,7 +5,12 @@
     "initParams" : {
         "moduleConfiguration" : "idmAuth"
     },
-    "scriptExtensions" : { },
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "script/authnPopulateContext.js"
+        }
+    },
     "urlPatterns" : [
         "/openidm/*"
     ],
