@@ -10,6 +10,7 @@ The sample demonstrates how to populate the security context when using IWA as a
 The configuration files used in this sample are as follows:
 
 *   samples/sample10/conf/authentication.json details the authentication chain used to authenticate users.
+*   samples/sample10/conf/servletfilter-authnfilter.json the servlet filter registration that specifies the security context script to run.
 *   samples/sample10/script/authnPopulateContext.js performs the population of the security context.
 
 Change the following attributes in the samples/sample10/conf/authentication.json to match your Kerberos set up:
