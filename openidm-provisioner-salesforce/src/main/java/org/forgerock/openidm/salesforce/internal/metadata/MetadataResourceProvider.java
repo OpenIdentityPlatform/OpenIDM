@@ -109,6 +109,8 @@ public class MetadataResourceProvider extends SimpleJsonResource {
                     header.headerElement = new SessionHeader_element();
                     ((SessionHeader_element) header.headerElement).setSessionId(config
                             .getSessionId());
+                    MetadataResourceProvider.this.connection.getSessionHeader().setSessionId(
+                            config.getSessionId());
                     return header;
                 }
             });
