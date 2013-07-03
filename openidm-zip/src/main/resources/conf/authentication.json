@@ -6,5 +6,39 @@
         "userCredential" : "password",
         "userRoles" : "roles"
     },
-    "defaultUserRoles" : [ ]
+    "defaultUserRoles" : [ ],
+    "serverAuthConfig" : {
+        "auditLogger" : "org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger",
+        "idmAuth" : {
+            "sessionModule" : {
+                "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "changeit",
+                "keystoreType" : "JCEKS",
+                "keystoreFile" : "security/keystore.jceks",
+                "keystorePassword" : "changeit",
+                "tokenLife" : "10"
+            },
+            "authModules" : [
+                {
+                    "className" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "memberOf"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                {
+                    "className" : "org.forgerock.openidm.jaspi.modules.InternalUserAuthModule",
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "memberOf"
+                    },
+                    "defaultUserRoles" : [ ]
+                }
+            ]
+        }
+    }
 }
