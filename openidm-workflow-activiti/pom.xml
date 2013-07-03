@@ -34,7 +34,6 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <spring.version>3.1.0.RELEASE</spring.version>
         <drools.version>5.1.1</drools.version>
     </properties>
     <repositories>
@@ -140,23 +139,6 @@
             </exclusions>
         </dependency>
 
-        <!-- Spring -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
