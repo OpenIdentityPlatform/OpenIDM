@@ -24,12 +24,16 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
 import org.forgerock.openidm.jaspi.modules.AuthData;
 import org.forgerock.openidm.jaspi.modules.AuthHelper;
 import org.forgerock.openidm.objset.BadRequestException;
@@ -49,7 +53,7 @@ import java.util.Map.Entry;
  * @author aegloff
  * @author ckienle
  */
-@Component(name = "org.forgerock.openidm.authentication", immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(name = "org.forgerock.openidm.reauthentication", immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Service(value = {AuthFilterService.class, JsonResource.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -69,20 +73,29 @@ public class AuthFilter implements AuthFilterService, JsonResource {
     /** The authentication module to delegate to */
     private AuthHelper authHelper;
 
+    @Reference(
+            name = "AuthenticationConfig",
+            referenceInterface = AuthenticationConfig.class,
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            bind = "bindAuthenticationConfig",
+            unbind = "unBindAuthenticationConfig"
+    )
+    private JsonValue config;
+    private void bindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
+        config = authenticationConfig.getConfig();
+    }
+    private void unBindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
+        config = null;
+    }
+
     @Activate
     protected synchronized void activate(ComponentContext context) {
         logger.info("Activating Auth Filter with configuration {}", context.getProperties());
-        setConfig(context);
+        setConfig(config);
     }
 
-    @Modified
-    void modified(ComponentContext context) throws Exception {
-        logger.info("Modified auth Filter with configuration {}", context.getProperties());
-        setConfig(context);
-    }
-
-    private void setConfig(ComponentContext context) {
-        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+    private void setConfig(JsonValue config) {
 
         queryId = config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();

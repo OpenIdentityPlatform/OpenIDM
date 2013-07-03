@@ -76,12 +76,28 @@ import java.util.Map;
  * </pre>
  *
  */
-@Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 public class OSGiAuthnFilterBuilder {
 
-    public static final String PID = "org.forgerock.openidm.authnfilter";
+    public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Reference(
+            name = "AuthenticationConfig",
+            referenceInterface = AuthenticationConfig.class,
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            bind = "bindAuthenticationConfig",
+            unbind = "unBindAuthenticationConfig"
+    )
+    private JsonValue config;
+    private void bindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
+        config = authenticationConfig.getConfig();
+    }
+    private void unBindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
+        config = null;
+    }
 
     /**
      * Configures the commons Authentication Filter with the configuration in the authentication.json file.
@@ -90,17 +106,8 @@ public class OSGiAuthnFilterBuilder {
      */
     @Activate
     protected void activate(ComponentContext context) {
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
-        JsonValue jsonConfig = config.getConfigurationAsJson(context);
-        configureAuthenticationFilter(jsonConfig);
-    }
-
-    @Modified
-    public void modified(ComponentContext context) throws Exception {
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
-        JsonValue jsonConfig = config.getConfigurationAsJson(context);
         ConfigurationManager.unconfigure();
-        configureAuthenticationFilter(jsonConfig);
+        configureAuthenticationFilter(config);
     }
 
     private void configureAuthenticationFilter(JsonValue jsonConfig) {
