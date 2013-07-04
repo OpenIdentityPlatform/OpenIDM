@@ -11,7 +11,7 @@
         "auditLogger" : "org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger",
         "idmAuth" : {
             "sessionModule" : {
-                "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
+                "className" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule",
                 "keyAlias" : "openidm-localhost",
                 "privateKeyPassword" : "changeit",
                 "keystoreType" : "&{openidm.keystore.type}",
