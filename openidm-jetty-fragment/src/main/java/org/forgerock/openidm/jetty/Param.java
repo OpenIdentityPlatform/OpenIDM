@@ -24,6 +24,11 @@
 package org.forgerock.openidm.jetty;
 
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Provides the Jetty bundle (and in turn the jetty.xml)
@@ -39,6 +44,13 @@ public class Param {
      */
     public static String getProperty(String propertyName) {
         return JettyPropertyUtil.getProperty(propertyName, false);
+    }
+    
+    /**
+     * @return OpenIDM default certAlias
+     */
+    public static String getCertAlias() {
+        return JettyPropertyUtil.getProperty("openidm.https.keystore.cert.alias", false);
     }
     
     /**
