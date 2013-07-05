@@ -94,7 +94,7 @@ public class InternalUserAuthModuleTest {
 
         //Then
         verifyZeroInteractions(authHelper);
-        verifyZeroInteractions(authData);
+        verify(authData).setResource("internal/user");
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -119,7 +119,7 @@ public class InternalUserAuthModuleTest {
 
         //Then
         verifyZeroInteractions(authHelper);
-        verifyZeroInteractions(authData);
+        verify(authData).setResource("internal/user");
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -144,7 +144,7 @@ public class InternalUserAuthModuleTest {
 
         //Then
         verifyZeroInteractions(authHelper);
-        verifyZeroInteractions(authData);
+        verify(authData).setResource("internal/user");
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 

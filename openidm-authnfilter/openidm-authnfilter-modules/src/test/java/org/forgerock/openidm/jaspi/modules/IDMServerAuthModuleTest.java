@@ -71,11 +71,6 @@ public class IDMServerAuthModuleTest {
             }
 
             @Override
-            public AuthStatus secureResponse(MessageInfo messageInfo, Subject subject) throws AuthException {
-                return null;
-            }
-
-            @Override
             public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
             }
         };
