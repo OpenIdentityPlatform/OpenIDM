@@ -45,6 +45,9 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     /** Authentication password header. */
     public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
+    /** Authentication without a session header. */
+    public static final String NO_SESSION = "X-OpenIDM-NoSession";
+
     /** Attribute in session containing authenticated username. */
     static final String USERNAME_ATTRIBUTE = "openidm.username";
 
@@ -187,4 +190,26 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
      */
     protected abstract AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject,
             Subject serviceSubject, AuthData authData) throws AuthException;
+
+    /**
+     * Always returns AuthStatus.SEND_SUCCESS but checks to see if the request was made with the X-OpenIDM-NoSession
+     * header and if so sets skipSession to prevent the creation of a session by the Session Module, (if it is
+     * configured in this case).
+     *
+     * @param messageInfo {@inheritDoc}
+     * @param serviceSubject {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
+
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        String noSession = request.getHeader(IDMServerAuthModule.NO_SESSION);
+
+        if (Boolean.parseBoolean(noSession)) {
+            messageInfo.getMap().put("skipSession", true);
+        }
+
+        return AuthStatus.SEND_SUCCESS;
+    }
 }

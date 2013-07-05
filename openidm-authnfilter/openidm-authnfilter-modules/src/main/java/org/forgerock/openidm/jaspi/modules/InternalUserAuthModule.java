@@ -16,38 +16,27 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.security.auth.Subject;
-import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * Commons Authentication Filter module to provide authentication for the anonymous user.
  *
  * @author Phill Cunnington
  */
-public class InternalUserAuthModule extends IDMServerAuthModule {
+public class InternalUserAuthModule extends IDMUserAuthModule {
 
-    private final static Logger logger = LoggerFactory.getLogger(InternalUserAuthModule.class);
-
-    private final String internalUserQueryId = "credential-internaluser-query";
-    private final String queryOnInternalUserResource = "internal/user";
-
-    private AuthHelper authHelper;
+    private static final String INTERNAL_USER_QUERY_ID = "credential-internaluser-query";
+    private static final String QUERY_ON_INTERNAL_USER_RESOURCE = "internal/user";
 
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
     public InternalUserAuthModule() {
+        super(INTERNAL_USER_QUERY_ID, QUERY_ON_INTERNAL_USER_RESOURCE);
     }
 
     /**
@@ -56,76 +45,7 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
      * @param authHelper A mock of the AuthHelper.
      */
     public InternalUserAuthModule(AuthHelper authHelper) {
-        this.authHelper = authHelper;
-    }
-
-    /**
-     * Initialises the InternalUserAuthModule with the OSGi json configuration.
-     *
-     * @param requestPolicy {@inheritDoc}
-     * @param responsePolicy {@inheritDoc}
-     * @param handler {@inheritDoc}
-     * @param options {@inheritDoc}
-     */
-    @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            JsonValue options) {
-
-        JsonValue properties = options.get("propertyMapping");
-        String userIdProperty = properties.get("userId").asString();
-        String userCredentialProperty = properties.get("userCredential").asString();
-        String userRolesProperty = properties.get("userRoles").asString();
-        List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
-
-        authHelper = new AuthHelper(userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
-    }
-
-    /**
-     * Authenticates the user as the anonymous user. If authentication is successful AuthStatus.SUCCESS is returned,
-     * otherwise AuthStatus.SEND_FAILURE is returned.
-     *
-     * @param messageInfo {@inheritDoc}
-     * @param clientSubject {@inheritDoc}
-     * @param serviceSubject {@inheritDoc}
-     * @param authData {@inheritDoc}
-     * @return {@inheritDoc}
-     */
-    @Override
-    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            AuthData authData) {
-
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-
-        try {
-            String username = request.getHeader(IDMServerAuthModule.HEADER_USERNAME);
-            String password = request.getHeader(IDMServerAuthModule.HEADER_PASSWORD);
-
-            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-                logger.debug("Failed authentication, missing or empty headers");
-                //Auth failure will be logged in IDMServerAuthModule super type.
-                return AuthStatus.SEND_FAILURE;
-            }
-
-            authData.setUsername(username);
-            boolean authSucceeded = authHelper.authenticate(internalUserQueryId, queryOnInternalUserResource,
-                    username, password, authData);
-            authData.setResource(queryOnInternalUserResource);
-
-            if (authSucceeded) {
-                logger.debug("InternalUserAuthModule: Authentication successful");
-                logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
-                        authData.getUserId(), authData.getRoles());
-
-                //Auth success will be logged in IDMServerAuthModule super type.
-                return AuthStatus.SUCCESS;
-            } else {
-                logger.debug("InternalUserAuthModule: Authentication failed");
-                //Auth failure will be logged in IDMServerAuthModule super type.
-                return AuthStatus.SEND_FAILURE;
-            }
-        } finally {
-            logger.debug("InternalUserAuthModule: validateRequest END");
-        }
+        super(authHelper, INTERNAL_USER_QUERY_ID, QUERY_ON_INTERNAL_USER_RESOURCE);
     }
 
     /**
@@ -147,16 +67,6 @@ public class InternalUserAuthModule extends IDMServerAuthModule {
             messageInfo.getMap().put("skipSession", true);
         }
 
-        return AuthStatus.SEND_SUCCESS;
-    }
-
-    /**
-     * Nothing to clean up.
-     *
-     * @param messageInfo {@inheritDoc}
-     * @param subject {@inheritDoc}
-     */
-    @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject subject) {
+        return super.secureResponse(messageInfo, serviceSubject);
     }
 }
