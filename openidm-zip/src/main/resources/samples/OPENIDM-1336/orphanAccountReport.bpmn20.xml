@@ -66,7 +66,6 @@
                 params.put('_action', 'performAction')
                 params.put('reconId', reconId)
                 params.put('mapping', mapping)
-                params.put('situation', situation)
                 params.put('action', 'delete')
                 params.put('target', user)
                 targetId = execution.getVariables().get("targetId")

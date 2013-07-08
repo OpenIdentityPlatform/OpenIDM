@@ -3,13 +3,14 @@
  * and open the template in the editor.
  */
 
-managerId = source.manager.substring(4, source.indexof(','));
-manager = openidm.read('/managed/user/'+managerId)
+if (source !== null) {
+    managerId = source.substring(4, source.indexOf(','));
 
-managerMap = {
-    "managerId" : managerId,
-    "$ref" : "/managed/user/"+managerId,
-    "displayName" : manager.displayName
+    managerMap = {
+        "managerId" : managerId,
+        "$ref" : "/managed/user/"+managerId,
+        "displayName" : managerId
+    }
+    managerMap
 }
 
-managerMap

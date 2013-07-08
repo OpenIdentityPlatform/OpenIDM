@@ -6,28 +6,45 @@
              targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="
              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-    <process id="accessRequest" name="Access request process">
+    <process id="certification" name="Certification process">
         <startEvent id="start" activiti:initiator="startUserId" />
         <sequenceFlow sourceRef="start" targetRef="readUserData"/>
 
         <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
-            <script><![CDATA[
-                user = openidm.read("managed/user/" + startUserId)
+            <script><![CDATA[ 
+                user = openidm.read("managed/user/" + userId)
                 userName = user.userName
                 givenName = user.givenName
                 familyName = user.familyName
                 email = user.email 
                 department = user.department
-                candidateManagers = openidm.query('endpoint/getusermanager', [userId:startUserId]).managers
+                candidateManagers = openidm.query('endpoint/getusermanager', [userId:userId]).managers
                 hasBusiness = (user.accounts != null && user.accounts.contains("Business"))
                 hasProject = (user.accounts != null && user.accounts.contains("Project"))
                 ]]>
             </script>
         </scriptTask>
-        <sequenceFlow sourceRef="readUserData" targetRef="userAccessRequest"/>
+        <sequenceFlow sourceRef="readUserData" targetRef="managerApproval"/>
         
-        <userTask id="userAccessRequest" name="User Access Request" activiti:assignee="${startUserId}">
+        <userTask id="managerApproval" name="Access Status Check" activiti:candidateUsers="${candidateManagers}">
             <extensionElements>
+                <activiti:taskListener event="assignment" expression="${execution.setVariable('assignedManager', task.assignee)}" />
+                <activiti:formProperty id="userName"
+                                       name="Username"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="givenName"
+                                       name="First Name"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="familyName"
+                                       name="Last Name"
+                                       writable="false"
+                                       type="string" />
+                <activiti:formProperty id="email"
+                                       name="Email"
+                                       writable="false"
+                                       type="string" />
                 <activiti:formProperty id="business"
                                        name="Access to Business system: "
                                        expression="#{hasBusiness}"
@@ -36,98 +53,21 @@
                                        name="Access to Project system: "
                                        expression="#{hasProject}"
                                        type="boolean"/>
-                <activiti:formProperty id="request" name="Request" type="enum" required="true">
-                    <activiti:value id="accept" name="Request"></activiti:value>
-                    <activiti:value id="cancel" name="Cancel"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="userAccessRequest" targetRef="requestMadeGateway"></sequenceFlow>
-        
-        <exclusiveGateway id="requestMadeGateway" name="Request Made"></exclusiveGateway>
-        <sequenceFlow sourceRef="requestMadeGateway" targetRef="managerApproval">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${request=='accept'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
-        
-        <userTask id="managerApproval" name="User Access Request Approval" activiti:candidateUsers="${candidateManagers}">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="familyName"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="email"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="business"
-                                       name="Access to Business system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system: "
-                                       type="boolean"/>
                 <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
-                    <activiti:value id="accept" name="Accept"></activiti:value>
-                    <activiti:value id="reject" name="Reject"></activiti:value>
+                    <activiti:value id="change" name="Change"></activiti:value>
+                    <activiti:value id="nochange" name="Do not change"></activiti:value>
                 </activiti:formProperty>
             </extensionElements>
         </userTask>
         <sequenceFlow sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"/>
         
-        <boundaryEvent id="boundarytimer" cancelActivity="true" attachedToRef="managerApproval">
-            <timerEventDefinition>
-                <timeDuration>PT10M</timeDuration>
-            </timerEventDefinition>
-        </boundaryEvent>
-        <sequenceFlow sourceRef="boundarytimer" targetRef="escalationApproval"/>
-
-        <userTask id="escalationApproval" name="User Access Request Approval Escalation" activiti:assignee="superadmin">
-            <extensionElements>
-                <activiti:formProperty id="userName"
-                                       name="Username"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="givenName"
-                                       name="First Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="familyName"
-                                       name="Last Name"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="email"
-                                       name="Email"
-                                       writable="false"
-                                       type="string" />
-                <activiti:formProperty id="business"
-                                       name="Access to Business system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="project"
-                                       name="Access to Project system: "
-                                       type="boolean"/>
-                <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
-                    <activiti:value id="accept" name="Accept"></activiti:value>
-                    <activiti:value id="reject" name="Reject"></activiti:value>
-                </activiti:formProperty>
-            </extensionElements>
-        </userTask>
-        <sequenceFlow sourceRef="escalationApproval" targetRef="managerDecisionMadeGateway"/>
-        
         <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made"></exclusiveGateway>
         <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="administratorApproval">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='accept'} ]]>
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='change'} ]]>
             </conditionExpression>
         </sequenceFlow>
         
-        <userTask id="administratorApproval" name="User Access Request Approval" activiti:assignee="systemadmin">
+        <userTask id="administratorApproval" name="Access Status Check" activiti:assignee="systemadmin">
             <extensionElements>
                 <activiti:formProperty id="userName"
                                        name="Username"
@@ -190,13 +130,13 @@
                 requestDate = formatUTC.format(new Date());
                 
                 def requesterNotification = [
-                "receiverId": startUserId,
+                "receiverId": userId,
                 "requesterId" : "",
                 "requester" : "",
                 "createDate" : requestDate,
                 "notificationType" : "info",
                 "notificationSubtype" : "",
-                "message" : "The access request was accepted"
+                "message" : "Your system access was reviewed by your manager"
                 ];
                 
                 openidm.create("repo/ui/notification/", requesterNotification)
@@ -204,8 +144,8 @@
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
         
-        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="sendDenyNotification">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='reject'} ]]>
+        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="end">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${managerDecision=='nochange'} ]]>
             </conditionExpression>
         </sequenceFlow>
         <sequenceFlow sourceRef="adminDecisionMadeGateway" targetRef="sendDenyNotification">
@@ -218,31 +158,21 @@
                 java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
                 formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
                 requestDate = formatUTC.format(new Date());
-                if (managerDecision == 'reject') {
-                    rejecter = 'manager'
-                } else {
-                    rejecter = 'systemadmin'
-                }
                 
                 def requesterNotification = [
-                "receiverId": startUserId,
+                "receiverId": assignedManager,
                 "requesterId" : "",
-                "requester" : rejecter,
+                "requester" : "systemadmin",
                 "createDate" : requestDate,
                 "notificationType" : "warning",
                 "notificationSubtype" : "",
-                "message" : "Your access request was denied by " + rejecter
+                "message" : "Your system access review for " + userId +" was denied by systemadmin"
                 ];
                 openidm.create("repo/ui/notification/", requesterNotification)
                 
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
-        
-        <sequenceFlow sourceRef="requestMadeGateway" targetRef="end">
-            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${request=='cancel'} ]]>
-            </conditionExpression>
-        </sequenceFlow>
         
         <endEvent id="end"/>
 
