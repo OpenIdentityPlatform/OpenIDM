@@ -4,7 +4,15 @@
             "name" : "managedUser_systemBusiness",
             "source" : "managed/user",
             "target" : "system/business/account",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "map = {'query': {'Equals': {'field': 'uid', 'values': [ source.userName ]}}};map;"
+            },
             "enableSync" : false,
+            "validSource" : {
+                "type" : "text/javascript",
+                "file" : "script/isSourceValidBusiness.js"
+            },
             "properties" : [
                 {
                     "source" : "address1",
@@ -103,7 +111,15 @@
             "source" : "managed/user",
             "target" : "system/business/account",
             "links" : "managedUser_systemBusiness",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "map = {'query': {'Equals': {'field': 'uid', 'values': [ source.userName ]}}};map;"
+            },
             "enableSync" : false,
+            "validSource" : {
+                "type" : "text/javascript",
+                "file" : "script/isSourceValidBusiness.js"
+            },
             "properties" : [
                 {
                     "source" : "address1",
@@ -189,7 +205,11 @@
                 },
                 {
                     "situation" : "UNQUALIFIED",
-                    "action" : "IGNORE"
+                    "action" : {
+                        "workflowName" : "orphanAccountReport",
+                        "type" : "text/javascript",
+                        "file" : "bin/defaults/script/workflow/workflow.js"
+                    }
                 },
                 {
                     "situation" : "UNASSIGNED",

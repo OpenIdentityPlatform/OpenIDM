@@ -5,6 +5,5 @@
 
 if (source.employeeType === 'employee') {
     accounts = new Array("Business")
+    accounts
 }
-
-accounts
