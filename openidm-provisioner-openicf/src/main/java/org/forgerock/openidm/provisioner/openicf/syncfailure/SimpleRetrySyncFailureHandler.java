@@ -82,6 +82,8 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
         }
 
         if (currentRetries >= syncFailureRetries) {
+            logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", invoking post-retry handler: "
+                    +  postRetryHandler.getClass().getSimpleName());
             // retries exhausted; move on...
             postRetryHandler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord,
                     failedRecordUid, exception);
