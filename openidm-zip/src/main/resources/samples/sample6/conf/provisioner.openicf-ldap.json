@@ -98,6 +98,16 @@
          "maintainLdapGroupMembership" : false,
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },
+   "syncFailureHandler" :
+      {
+         "strategy" : "simple-retry",
+         "syncFailureRetries" : 5,
+         "postRetryHandler" :
+            {
+               "strategy" : "dead-letter",
+               "repoId" : "repo/synchronisation/deadLetterQueue/ldap"
+            }
+      },
    "objectTypes" :
       {
          "account" :
