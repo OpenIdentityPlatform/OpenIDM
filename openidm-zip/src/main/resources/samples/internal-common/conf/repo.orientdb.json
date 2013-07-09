@@ -118,6 +118,7 @@
                     }
                 ]
             },
+            "synchronisation_deadLetterQueue_ldap" : { },
             "config" : {
                 "index" : [
                     {
