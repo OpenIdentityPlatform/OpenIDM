@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.module.afterburner.deser.CreatorOptimizer;
+import com.fasterxml.jackson.module.afterburner.ser.SerializerModifier;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
@@ -62,12 +64,11 @@ public final class JsonUtil {
 
     static {
         OBJECT_MAPPER =
-                new ObjectMapper().registerModule(new AfterburnerModule()).configure(
+                new ObjectMapper().configure(
                         JsonParser.Feature.ALLOW_COMMENTS, true).disable(
                         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(
                         SerializationFeature.INDENT_OUTPUT).enable(
                         MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-
         // TODO Make it configurable for Audit service
         // .configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
 

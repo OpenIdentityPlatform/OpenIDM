@@ -27,6 +27,12 @@ package org.forgerock.openidm.repo.orientdb.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.deser.std.StdValueInstantiator;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.fasterxml.jackson.module.afterburner.deser.CreatorOptimizer;
+import com.fasterxml.jackson.module.afterburner.deser.DeserializerModifier;
+import com.fasterxml.jackson.module.afterburner.ser.SerializerModifier;
+import com.fasterxml.jackson.module.afterburner.util.DynamicPropertyAccessorBase;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
@@ -43,7 +49,6 @@ import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.OServerConfiguration;
 import com.orientechnologies.orient.server.config.OServerEntryConfiguration;
@@ -170,7 +175,7 @@ public class EmbeddedOServerService extends OServerMain {
             retryCount++;
             try {
                 // TYPE_GRAPH.equals(db.get(ODatabase.ATTRIBUTES.TYPE))
-                db = OGraphDatabasePool.global().acquire(dbURL, user, password);
+                db = ODatabaseDocumentPool.global().acquire(dbURL, user, password);
                 //db = ODatabaseDocumentPool.global().acquire(dbURL, user, password);
                 if (retryCount > 1) {
                     logger.info("Succeeded in acquiring connection from pool in retry attempt {}",
@@ -251,6 +256,23 @@ public class EmbeddedOServerService extends OServerMain {
     private OServerConfiguration getOrientDBConfig(JsonValue config) {
 
         ObjectMapper mapper = JsonUtil.build();
+        // Force to import this package!!
+        StdValueInstantiator i = null;
+        mapper.registerModule(new AfterburnerModule(){
+            @Override
+            public void setupModule(SetupContext context)
+            {
+                super.setupModule(context);
+                ClassLoader cl = EmbeddedOServerService.class.getClassLoader();
+                context.addBeanDeserializerModifier(new DeserializerModifier(cl,
+                        _cfgUseOptimizedBeanDeserializer));
+                context.addBeanSerializerModifier(new SerializerModifier(cl));
+            }
+        });
+        //Force to import them!!!
+        //CreatorOptimizer b = null;
+        //SerializerModifier c = null;
+
 
         OServerConfiguration configuration =
                 mapper.convertValue(config.get("embeddedServer").asMap(),

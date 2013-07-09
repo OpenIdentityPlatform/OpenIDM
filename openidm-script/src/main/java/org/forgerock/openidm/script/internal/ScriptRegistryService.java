@@ -76,8 +76,6 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.graph.GraphConnectionFactory;
-import org.forgerock.openidm.graph.GraphFunction;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptName;
@@ -95,7 +93,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tinkerpop.blueprints.Graph;
 
 /**
  *
@@ -118,9 +115,6 @@ import com.tinkerpop.blueprints.Graph;
     @Reference(name = "ScriptEngineFactoryReference",
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
             unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "GraphReference", referenceInterface = GraphConnectionFactory.class, bind = "bindGraphConnectionFactory",
-            unbind = "unbindGraphConnectionFactory", cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "FunctionReference", referenceInterface = Function.class,
             bind = "bindFunction", unbind = "unbindFunction",
@@ -170,31 +164,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
-    // TODO Implement optional dependency on this class
-    protected void bindGraphConnectionFactory(final GraphConnectionFactory service) {
-        openidm.put("graph", new GraphFunction(service));
-    }
-
-    protected void unbindGraphConnectionFactory(final GraphConnectionFactory service) {
-        openidm.remove("graph");
-    }
-
     @Activate
     protected void activate(ComponentContext context) {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
-
-        if (configuration.get("Groovy").isMap()) {
-            try {
-                com.tinkerpop.gremlin.groovy.Gremlin.load();
-                configuration.get("Groovy").put(
-                        org.codehaus.groovy.control.customizers.ImportCustomizer.class
-                                .getCanonicalName(),
-                        com.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine
-                                .getImportCustomizer());
-            } catch (Throwable e) {
-                logger.info("Groovy Gremlin is not initialised!");
-            }
-        }
 
         setConfiguration(configuration.required().asMap());
 

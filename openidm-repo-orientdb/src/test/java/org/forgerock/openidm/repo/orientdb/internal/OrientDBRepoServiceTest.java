@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import org.fest.assertions.api.Assertions;
 import org.fest.assertions.core.Condition;
 import org.forgerock.json.fluent.JsonValue;
@@ -140,6 +141,7 @@ public class OrientDBRepoServiceTest {
         }
 
         ObjectMapper mapper = JsonUtil.build();
+        mapper.registerModule(new AfterburnerModule());
         JsonValue configuration =
                 new JsonValue(mapper.readValue(OrientDBRepoServiceTest.class
                         .getResourceAsStream("/config/repo.orientdb.json"), Map.class));
@@ -184,8 +186,6 @@ public class OrientDBRepoServiceTest {
                     new URL[] {
                         OServerMain.class.getProtectionDomain().getCodeSource().getLocation(),
                         Orient.class.getProtectionDomain().getCodeSource().getLocation(),
-                        com.orientechnologies.orient.graph.sql.OGraphCommandExecutorSQLFactory.class
-                                .getProtectionDomain().getCodeSource().getLocation(),
                         com.orientechnologies.orient.enterprise.channel.binary.OChannelBinaryServer.class
                                 .getProtectionDomain().getCodeSource().getLocation()
 

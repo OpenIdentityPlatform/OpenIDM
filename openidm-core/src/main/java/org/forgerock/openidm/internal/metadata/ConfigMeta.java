@@ -29,10 +29,7 @@ import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.internal.recon.ReconciliationExecutorService;
-import org.forgerock.openidm.internal.recon.ReconciliationService;
 import org.forgerock.openidm.internal.router.JsonResourceRouterService;
-import org.forgerock.openidm.internal.sync.SynchronizationService;
 import org.forgerock.openidm.managed.ManagedObjectService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
@@ -43,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class ConfigMeta implements MetaDataProvider {
@@ -55,7 +52,7 @@ public class ConfigMeta implements MetaDataProvider {
 
     /*
      * final static List<JsonPointer> properties;
-     * 
+     *
      * static { List<JsonPointer> p = new ArrayList<JsonPointer>(4); p.add(new
      * JsonPointer("/")); properties = Collections.unmodifiableList(p); }
      */
@@ -68,16 +65,7 @@ public class ConfigMeta implements MetaDataProvider {
         if (ManagedObjectService.PID.equalsIgnoreCase(pidOrFactory)) {
             logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
             return Collections.emptyList();
-        } else if (ReconciliationService.PID.equalsIgnoreCase(pidOrFactory)) {
-            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
-            return Collections.emptyList();
-        } else if (ReconciliationExecutorService.PID.equalsIgnoreCase(pidOrFactory)) {
-            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
-            return Collections.emptyList();
         } else if (JsonResourceRouterService.PID.equalsIgnoreCase(pidOrFactory)) {
-            logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
-            return Collections.emptyList();
-        } else if (SynchronizationService.PID.equalsIgnoreCase(pidOrFactory)) {
             logger.trace("Configuration advised {}-{}", pidOrFactory, instanceAlias);
             return Collections.emptyList();
         }

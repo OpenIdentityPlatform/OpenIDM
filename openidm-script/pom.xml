@@ -42,27 +42,10 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-graph</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.tinkerpop.gremlin.osgi</groupId>
-            <artifactId>gremlin-groovy</artifactId>
-            <version>2.3.0</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>

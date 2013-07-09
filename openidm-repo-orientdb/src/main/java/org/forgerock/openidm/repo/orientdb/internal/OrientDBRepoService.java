@@ -78,12 +78,9 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.client.remote.OEngineRemote;
 import com.orientechnologies.orient.core.command.OCommandResultListener;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
 import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.exception.ODatabaseException;
@@ -92,7 +89,6 @@ import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
-import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.query.OSQLAsynchQuery;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
@@ -123,7 +119,7 @@ public class OrientDBRepoService implements RequestHandler {
     private static final String EVENT_RAW_QUERY_PREFIX =
             "openidm/internal/repo/orientdb/raw/query/";
 
-    private static final String PARTITION_LINKS = "link";
+    private static final String PARTITION_LINKS = "edge";
 
     // Keys in the JSON configuration
     public static final String CONFIG_QUERIES = "queries";
@@ -293,53 +289,6 @@ public class OrientDBRepoService implements RequestHandler {
             final String partition = getPartition(context);
             if (PARTITION_LINKS.equals(partition)) {
                 // Edges
-
-                OGraphDatabase gdb = (OGraphDatabase) getConnection();// OGraphDatabasePool.global().acquire(dbURL,
-                                                                      // user,
-                                                                      // password);
-                try {
-
-                    final ORecordId iSourceVertexRid =
-                            new ORecordId(request.getContent().get("firstId").required().asString());
-                    final ORecordId iDestVertexRid =
-                            new ORecordId(request.getContent().get("secondId").required()
-                                    .asString());
-
-                    ODocument edge = null;
-
-                    if ("/".equals(request.getResourceName())) {
-                        edge = gdb.createEdge(iSourceVertexRid, iDestVertexRid);
-                    } else {
-                        // Use the Document Database
-                        URLParser url = URLParser.parse(request.getResourceName()).last();
-                        String iClassName =
-                                resourceCollectionToOrientClassName(url.resourceName(), null);
-                        if (gdb.getVertexType(iClassName) == null) {
-                            OClass ce = gdb.createEdgeType(iClassName);
-                            ce.createProperty("label", OType.STRING);
-                        }
-                        edge = gdb.createEdge(iSourceVertexRid, iDestVertexRid, iClassName);
-                    }
-
-                    for (Map.Entry<String, Object> entry : request.getContent().asMap().entrySet()) {
-                        if (entry.getKey().startsWith("_") || "firstId".equals(entry.getKey())
-                                || "secondId".equals(entry.getKey())) {
-                            continue;
-                        }
-                        if (entry.getValue() instanceof String) {
-                            edge.field(entry.getKey(), entry.getValue());
-                        }
-                    }
-                    edge.field("label", edge.getClassName());
-                    edge.save();
-
-                    // handler.handleResult(getResource(edge.getIdentity().toString(),
-                    // edge));
-                } catch (OException e) {
-                    logger.error("OrientDB Exception: " + e.toString());
-                } finally {
-                    gdb.close();
-                }
 
             } else {
                 // Vertexes

@@ -190,7 +190,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
     private List<String> requiredServices = new ArrayList<String>();
     /* @formatter:off */
     private String[] defaultRequiredServices = new String[] {
-            "org.forgerock.openidm.config",
+            //"org.forgerock.openidm.config",
             "org.forgerock.openidm.provisioner",
             "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
             "org.forgerock.openidm.external.rest",
@@ -199,12 +199,11 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             "org.forgerock.openidm.managed",
             "org.forgerock.openidm.script",
             "org.forgerock.openidm.crypto",
-            "org.forgerock.openidm.recon",
+            //"org.forgerock.openidm.recon",
 //TODO: add once committed "org.forgerock.openidm.info",
             "org.forgerock.openidm.router",
             "org.forgerock.openidm.scheduler",
-            "org.forgerock.openidm.scope",
-            "org.forgerock.openidm.taskscanner",
+            //"org.forgerock.openidm.taskscanner",
             "org.forgerock.openidm.cluster"
             //"org.forgerock.openidm.bootrepo.orientdb",
             //"org.forgerock.openidm.bootrepo.jdbc",
