@@ -25,6 +25,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.util.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,24 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(SyncFailureHandlerFactory.class);
+
+    /** Scope factory service. */
+    @Reference(
+            referenceInterface = ScopeFactory.class,
+            bind = "bindScopeFactory",
+            unbind = "unbindScopeFactory",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.DYNAMIC
+    )
+    private ScopeFactory scopeFactory;
+
+    protected void bindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = scopeFactory;
+    }
+
+    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = null;
+    }
 
     /** the router */
     @Reference(referenceInterface = JsonResource.class,
@@ -74,12 +93,9 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                         },
                         config);
             }
-            /*
-            else if ("scripted".equals(config.get("strategy").asString())) {
-                ...
-                TODO implement scripted handler
+            else if ("script".equals(config.get("strategy").asString())) {
+                return new ScriptedSyncFailureHandler(scopeFactory, config);
             }
-             */
         }
         return new NullSyncFailureHandler();
     }
