@@ -306,7 +306,6 @@
         <module>openidm-provisioner</module>
         <module>openidm-repo-jdbc</module>
         <module>openidm-repo-orientdb</module>
-        <module>openidm-rest2ldap</module>
         <module>openidm-filter</module>
         <module>openidm-salesforce</module>
         <module>openidm-servlet</module>
@@ -325,9 +324,6 @@
         <module>openidm-workflow-activiti</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
-        <module>openidm-graph</module>
-        <module>openidm-support</module>
-        <module>openidm-repo-dynamodb</module>
     </modules>
 
     <profiles>
@@ -374,12 +370,6 @@
             </activation>
             <modules>
                 <module>openidm-integration-tests</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>openidm-webapp</id>
-            <modules>
-                <module>openidm-webapp</module>
             </modules>
         </profile>
     </profiles>
@@ -745,17 +735,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>3.0.1</version>
+                <version>2.1.4</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>3.0.1</version>
+                <version>2.1.4</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>3.0.1</version>
+                <version>2.1.4</version>
             </dependency>
 
             <!-- Test Dependencies -->

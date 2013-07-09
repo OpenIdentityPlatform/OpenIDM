@@ -1,3 +1,0 @@
-{
-    "metaDataProvider" : "org.forgerock.openidm.repo.dynamodb.internal.metadata.ConfigMeta"
-}

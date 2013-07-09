@@ -45,7 +45,6 @@ import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
 import com.orientechnologies.orient.core.db.record.ODatabaseRecord;
 import com.orientechnologies.orient.core.exception.OConfigurationException;
 import com.orientechnologies.orient.core.exception.OSecurityAccessException;
@@ -236,9 +235,9 @@ public final class DBHelper {
      */
     private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig)
             throws InvalidException, IOException {
-        OGraphDatabase db = null;
+        ODatabaseDocumentTx db = null;
         try {
-            db = Orient.instance().getDatabaseFactory().createGraphDatabase(dbURL);
+            db = Orient.instance().getDatabaseFactory().createObjectDatabase(dbURL);
             if (dbURL.startsWith(OEngineRemote.NAME)) {
                 try {
                     // OConfigurationException("Database 'openidm' is not configured on server");
@@ -277,7 +276,7 @@ public final class DBHelper {
                             }
                             if (!admin.existsDatabase()) {
                                 if ("admin".equals(user) && "admin".equals(password)) {
-                                    admin.createDatabase(OGraphDatabase.TYPE, "local");
+                                    admin.createDatabase("document", "local");
                                 } else {
                                     throw new InvalidException(
                                             "New database must use the default 'admin':'admin' name:password combination");

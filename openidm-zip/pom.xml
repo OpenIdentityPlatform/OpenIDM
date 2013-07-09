@@ -164,11 +164,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-rest2ldap</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
         </dependency>
