@@ -701,9 +701,9 @@ class ObjectMapping implements SynchronizationListener {
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         reconContext.setStage(ReconStage.ACTIVE_QUERY_ENTRIES);
         JsonValue context = ObjectSetContext.get();
+        JsonValue rootContext = JsonResourceContext.getRootContext(context);
         try {
             context.add("trigger", "recon");
-            JsonValue rootContext = JsonResourceContext.getRootContext(context);
             logReconStart(reconId, rootContext, context);
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
@@ -783,7 +783,11 @@ class ObjectMapping implements SynchronizationListener {
             logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
+        } catch (SynchronizationException e) {
+            logReconFailed(reconContext, rootContext, context, e);
+            throw e;
         } catch (InterruptedException ex) {
+            logReconFailed(reconContext, rootContext, context, ex);
             reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } finally {
@@ -986,6 +990,15 @@ class ObjectMapping implements SynchronizationListener {
         reconEndEntry.messageDetail = new JsonValue(reconContext.getSummary());
         logReconEntry(reconEndEntry);
         LOGGER.info("Reconciliation completed. " + simpleSummary);
+    }
+
+    private void logReconFailed(ReconciliationContext reconContext, JsonValue rootContext, JsonValue context, Exception exception) throws SynchronizationException {
+        ReconEntry entry = new ReconEntry(null, rootContext, ReconEntry.RECON_END, dateUtil);
+        entry.timestamp = new Date();
+        entry.reconId = reconContext.getReconId();
+        entry.status = Status.FAILURE;
+        setReconEntryMessage(entry, exception);
+        logReconEntry(entry);
     }
 
     /**
