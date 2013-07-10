@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -117,8 +118,11 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                             String failedRecord,  Uid failedRecordUid,  Exception exception)
                         throws SyncHandlerException {
 
-                        for (SyncFailureHandler handler : handlers) {
+                        Iterator<SyncFailureHandler> iter = handlers.iterator();
+                        while (iter.hasNext()) {
+                            SyncFailureHandler handler = iter.next();
                             handler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
+                            iter.remove();
                         }
                     }
                 };
