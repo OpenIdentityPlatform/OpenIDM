@@ -45,6 +45,6 @@ public class NullSyncFailureHandler implements SyncFailureHandler {
             Uid failedRecordUid,
             Exception exception)
         throws SyncHandlerException {
-        // Null object pattern - does nothing - everything's "OK"
+        // Null object pattern - does nothing - everything is "OK"
     }
 }

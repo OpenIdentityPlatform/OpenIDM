@@ -23,6 +23,13 @@ import org.forgerock.json.fluent.JsonValue;
  * @author brmiller
  */
 public interface SyncFailureHandlerFactory {
+    /**
+     * Create a <em>SyncFailureHandler</em> from the config.  The config should describe a strategy and
+     * any necessary parameters needed by that handler.
+     *
+     * @param config the config for the SyncFailureHandler
+     * @return the SyncFailureHandler
+     */
     public SyncFailureHandler create(JsonValue config);
 }
 

@@ -19,7 +19,7 @@ import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 
 /**
- * A hander interface for liveSync failures.
+ * A handler interface for liveSync failures.
  *
  * @author brmiller
  */
