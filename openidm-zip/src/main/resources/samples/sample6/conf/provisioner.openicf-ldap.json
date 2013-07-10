@@ -101,12 +101,7 @@
    "syncFailureHandler" :
       {
          "retries" : 5,
-         "deadLetterQueue" : "repo/synchronisation/deadLetterQueue/ldap",
-         "script" : 
-             {
-                "type" : "text/javascript",
-                "file" : "script/onSyncFailure.js"
-             }
+         "deadLetterQueue" : "repo/synchronisation/deadLetterQueue/ldap"
       }
    "objectTypes" :
       {
