@@ -83,11 +83,11 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
                 throw new SyncHandlerException("sync failure script returned false for "
                         + failedRecordUid + " object.");
             }
- 	 	} catch (Exception scriptEx) {
-            logger.debug("onSyncFailure script on {} encountered exception", systemIdentifierName, scriptEx);
+        } catch (Exception scriptEx) {
+            logger.debug("sync failure script on {} encountered exception", systemIdentifierName, scriptEx);
             throw new SyncHandlerException("Issue with handling the failure during synchronize "
                     + failedRecordUid + " object. " + exception.getMessage() + ". Failure handling reported "
                     + scriptEx.getMessage(), scriptEx);
- 	 	}
+        }
     }
 }
