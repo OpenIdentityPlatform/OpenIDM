@@ -15,7 +15,6 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.json.fluent.JsonValue;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.slf4j.Logger;
@@ -23,8 +22,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * A simple sync failure handler that retries <em>n</em> times before passing control to a subsequent
- * sync failure handler.
+ * A simple sync failure handler that counts retries.
  *
  * @author brmiller
  */
@@ -34,10 +32,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     private static final Logger logger = LoggerFactory.getLogger(SimpleRetrySyncFailureHandler.class);
 
     /** how many times to retry live sync of a particular sync token */
-    private int syncFailureRetries;
-
-    /** the handler to call when the retries are exhausted */
-    private SyncFailureHandler postRetryHandler;
+    private final int syncFailureRetries;
 
     /** current token being retried */
     private SyncToken currentSyncToken;
@@ -46,16 +41,12 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     private int currentRetries;
 
     /**
-     * Construct the SyncFailureHandler according to the config.
+     * Construct the SyncFailureHandler.
      *
-     * @param handlerFactory the SyncFailureHandlerFactory used to create the postRetryHandler according to the config
-     * @param config the configuration for this handler
+     * @param syncFailureRetries the number of retries
      */
-    public SimpleRetrySyncFailureHandler(SyncFailureHandlerFactory handlerFactory, JsonValue config) {
-        syncFailureRetries = config.get("syncFailureRetries").isNull()
-            ? 0
-            : config.get("syncFailureRetries").asInteger().intValue();
-        postRetryHandler = handlerFactory.create(config.get("postRetryHandler"));
+    public SimpleRetrySyncFailureHandler(int syncFailureRetries) {
+        this.syncFailureRetries = syncFailureRetries;
     }
 
     /**
@@ -82,11 +73,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
         }
 
         if (currentRetries >= syncFailureRetries) {
-            logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", invoking post-retry handler: "
-                    +  postRetryHandler.getClass().getSimpleName());
-            // retries exhausted; move on...
-            postRetryHandler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord,
-                    failedRecordUid, exception);
+            logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + " exhausted");
         } else {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", retrying");
             throw new SyncHandlerException("Failed to synchronize " + failedRecordUid + " object, " +

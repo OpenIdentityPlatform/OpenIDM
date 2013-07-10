@@ -21,7 +21,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.util.Accessor;
-import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Handle a LiveSync failure by saving it's detail to a dead-letter queue.  The queue 
+ * Handle a LiveSync failure by saving its detail to a dead-letter queue.  The queue
  * is implemented as a repository target.
  *
  * @author brmiller
@@ -40,20 +39,20 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
     private static final Logger logger = LoggerFactory.getLogger(DeadLetterQueueHandler.class);
 
     /** accessor to the router */
-    private Accessor<JsonResourceAccessor> accessor;
+    private final Accessor<JsonResourceAccessor> accessor;
 
-    /** the repoId to store the failed sync details */
-    private String repoId;
+    /** the repoPath to store the failed sync details */
+    private final String repoPath;
 
     /**
      * Construct this live sync failure handler.
      *
      * @param accessor an accessor to the router
-     * @param config the config specifying the repoId path
+     * @param repoPath the repo path
      */
-    public DeadLetterQueueHandler(Accessor<JsonResourceAccessor> accessor, JsonValue config) {
+    public DeadLetterQueueHandler(Accessor<JsonResourceAccessor> accessor, String repoPath) {
         this.accessor = accessor;
-        this.repoId = config.get("repoId").asString();
+        this.repoPath = repoPath;
     }
 
     /**
@@ -66,11 +65,11 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
      * @param exception the Exception that was thrown as part of the failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(String systemIdentifierName, SyncToken token, String objectType, 
+    public void handleSyncFailure(String systemIdentifierName, SyncToken token, String objectType,
             String failedRecord, Uid failedRecordUid, Exception exception)
         throws SyncHandlerException {
 
-        String id = repoId + "/" + token.getValue();
+        String id = repoPath + "/" + token.getValue();
 
         try {
             JsonValue syncDetail = new JsonValue(new HashMap<String,Object>());
@@ -83,7 +82,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
             accessor.access().create(id, syncDetail);
             logger.info(failedRecordUid + " saved to dead letter queue");
         } catch (JsonResourceException e) {
-            throw new ConnectorException("Failed reading/writing " + id, e);
+            throw new SyncHandlerException("Failed reading/writing " + id, e);
         }
     }
 }

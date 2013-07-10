@@ -27,8 +27,13 @@ import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.util.Accessor;
+import org.identityconnectors.framework.common.objects.SyncToken;
+import org.identityconnectors.framework.common.objects.Uid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A factory service to create the SyncFailureHandler strategy from config.
@@ -73,30 +78,53 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     private JsonResource router;
 
     /**
-     * Create a <em>SyncFailureHandler</em> from the config.  The config should describe a strategy and
-     * any necessary parameters needed by that handler.
+     * Create a <em>SyncFailureHandler</em> from the config.  The config should optionally
+     * describe
+     * <ul>
+     *     <li>number of retries</li>
+     *     <li>whether to save the failed sync item to a dead-letter queue</li>
+     *     <li>whether to call an external, user-supplied script</li>
+     * </ul>
      *
      * @param config the config for the SyncFailureHandler
      * @return the SyncFailureHandler
      */
     public SyncFailureHandler create(JsonValue config) {
         if (!config.isNull()) {
-            if ("simple-retry".equals(config.get("strategy").asString())) {
-                return new SimpleRetrySyncFailureHandler(this, config);
+            final List<SyncFailureHandler> handlers = new ArrayList<SyncFailureHandler>();
+
+            // look for retry config FIRST, so sync failure retry handler will be invoked first
+            if (!config.get("retries").isNull() && config.get("retries").asInteger() > 0) {
+                handlers.add(new SimpleRetrySyncFailureHandler(config.get("retries").asInteger()));
             }
-            else if ("dead-letter".equals(config.get("strategy").asString())) {
-                return new DeadLetterQueueHandler(
+            if (!config.get("deadLetterQueue").isNull() && config.get("deadLetterQueue").asString().length() > 0) {
+                handlers.add(new DeadLetterQueueHandler(
                         new Accessor<JsonResourceAccessor>() {
                             public JsonResourceAccessor access() {
                                 return new JsonResourceAccessor(router, ObjectSetContext.get());
                             }
                         },
-                        config);
+                        config.get("deadLetterQueue").asString()));
             }
-            else if ("script".equals(config.get("strategy").asString())) {
-                return new ScriptedSyncFailureHandler(scopeFactory, config);
+            if (!config.get("script").isNull() && config.get("script").isMap()) {
+                handlers.add(new ScriptedSyncFailureHandler(scopeFactory, config.get("script")));
+            }
+
+            if (handlers.size() > 0) {
+                return new SyncFailureHandler() {
+                    @Override
+                    public void handleSyncFailure(String systemIdentifierName,  SyncToken token,  String objectType,
+                            String failedRecord,  Uid failedRecordUid,  Exception exception)
+                        throws SyncHandlerException {
+
+                        for (SyncFailureHandler handler : handlers) {
+                            handler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
+                        }
+                    }
+                };
             }
         }
+        // either no config, no retries, or no configured handlers
         return new NullSyncFailureHandler();
     }
 }
