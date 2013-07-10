@@ -38,10 +38,10 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
     private static final Logger logger = LoggerFactory.getLogger(ScriptedSyncFailureHandler.class);
 
     /** ScopeFactory */
-    private ScopeFactory scopeFactory;
+    private final ScopeFactory scopeFactory;
 
     /** the script to call */
-    private Script script;
+    private final Script script;
 
     /**
      * Construct this sync failure handler.
@@ -51,7 +51,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      */
     public ScriptedSyncFailureHandler(ScopeFactory scopeFactory, JsonValue config) {
         this.scopeFactory = scopeFactory;
-        script = Scripts.newInstance(getClass().getSimpleName(), config);
+        this.script = Scripts.newInstance(getClass().getSimpleName(), config);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         scope.put("failedRecordUid", failedRecordUid);
 
         try {
-            boolean success = ((Boolean) script.exec(scope)).booleanValue();
+            boolean success = (Boolean) script.exec(scope);
             logger.debug("sync failure script returned {}", success);
             if (!success) {
                 throw new SyncHandlerException("sync failure script returned false for "
