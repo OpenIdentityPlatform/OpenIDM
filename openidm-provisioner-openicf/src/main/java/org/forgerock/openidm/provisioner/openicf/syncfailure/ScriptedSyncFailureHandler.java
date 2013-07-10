@@ -70,24 +70,24 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         throws SyncHandlerException {
 
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());
-	    scope.put("systemIdentifier", systemIdentifierName);
- 	 	scope.put("objectType", objectType);
- 	 	scope.put("exception", exception);
- 	 	scope.put("failedRecord", failedRecord);
- 	 	scope.put("failedRecordUid", failedRecordUid);
+        scope.put("systemIdentifier", systemIdentifierName);
+        scope.put("objectType", objectType);
+        scope.put("exception", exception);
+        scope.put("failedRecord", failedRecord);
+        scope.put("failedRecordUid", failedRecordUid);
 
         try {
- 	 	    boolean success = ((Boolean) script.exec(scope)).booleanValue();
+            boolean success = ((Boolean) script.exec(scope)).booleanValue();
             logger.debug("sync failure script returned {}", success);
             if (!success) {
                 throw new SyncHandlerException("sync failure script returned false for "
                         + failedRecordUid + " object.");
             }
  	 	} catch (Exception scriptEx) {
- 	    	logger.debug("onSyncFailure script on {} encountered exception", systemIdentifierName, scriptEx);
- 	 	    throw new SyncHandlerException("Issue with handling the failure during synchronize "
- 	 	            + failedRecordUid + " object. " + exception.getMessage() + ". Failure handling reported "
- 	 	            + scriptEx.getMessage(), scriptEx);
+            logger.debug("onSyncFailure script on {} encountered exception", systemIdentifierName, scriptEx);
+            throw new SyncHandlerException("Issue with handling the failure during synchronize "
+                    + failedRecordUid + " object. " + exception.getMessage() + ". Failure handling reported "
+                    + scriptEx.getMessage(), scriptEx);
  	 	}
     }
 }

@@ -27,6 +27,7 @@ public class SyncHandlerException extends RuntimeException {
     public SyncHandlerException(String message) {
         super(message);
     }
+
     /**
      * {@inheritDoc}
      */
