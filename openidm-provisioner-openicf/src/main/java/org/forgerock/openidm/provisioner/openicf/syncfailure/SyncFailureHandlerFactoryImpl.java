@@ -118,6 +118,8 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                             String failedRecord,  Uid failedRecordUid,  Exception exception)
                         throws SyncHandlerException {
 
+                        // run through the list of handlers once, removing ones that successfully executed
+                        // (the unsuccessful ones will throw a SyncHandlerException)
                         Iterator<SyncFailureHandler> iter = handlers.iterator();
                         while (iter.hasNext()) {
                             SyncFailureHandler handler = iter.next();
