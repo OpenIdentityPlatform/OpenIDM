@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -113,19 +112,25 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
 
             if (handlers.size() > 0) {
                 return new SyncFailureHandler() {
+
+                    /* initialize our starting position at the start of the handler list */
+                    private int pos = 0;
+
                     @Override
                     public void handleSyncFailure(String systemIdentifierName,  SyncToken token,  String objectType,
                             String failedRecord,  Uid failedRecordUid,  Exception exception)
                         throws SyncHandlerException {
 
-                        // run through the list of handlers once, removing ones that successfully executed
+                        // run through the list of handlers once
                         // (the unsuccessful ones will throw a SyncHandlerException)
-                        Iterator<SyncFailureHandler> iter = handlers.iterator();
-                        while (iter.hasNext()) {
-                            SyncFailureHandler handler = iter.next();
-                            handler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
-                            iter.remove();
+                        while (pos < handlers.size()) {
+                            handlers.get(pos).handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
+                            pos++;
                         }
+                        // we made it through all the handlers (no exceptions); 
+                        // re-initialize the starting position for the next use of 
+                        // this "handler of handlers"
+                        pos = 0;
                     }
                 };
             }
