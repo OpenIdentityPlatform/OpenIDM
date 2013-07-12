@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
+import java.util.Map;
+
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
@@ -22,8 +24,6 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.Scripts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Handle liveSync failure by calling an external, user-supplied script.
@@ -41,15 +41,20 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
     /** the script to call */
     private final Script script;
 
+    /** map of references to built-in sync failure handlers made available to user-supplied script */
+    private final Map<String,SyncFailureHandler> builtInHandlers;
+
     /**
      * Construct this sync failure handler.
      *
      * @param scopeFactory the ScopeFactory
      * @param config the config
      */
-    public ScriptedSyncFailureHandler(ScopeFactory scopeFactory, JsonValue config) {
+    public ScriptedSyncFailureHandler(ScopeFactory scopeFactory, JsonValue config, 
+            Map<String,SyncFailureHandler> builtInHandlers) {
         this.scopeFactory = scopeFactory;
         this.script = Scripts.newInstance(getClass().getSimpleName(), config);
+        this.builtInHandlers = builtInHandlers;
     }
 
     /**
@@ -64,8 +69,9 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         throws SyncHandlerException {
 
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());
-        scope.putAll(syncFailure.asMap());
-        scope.put("failureCause", failureCause.toString());
+        scope.put("syncFailure", syncFailure);
+        scope.put("failureCause", failureCause);
+        scope.putAll(builtInHandlers);
 
         try {
             script.exec(scope);

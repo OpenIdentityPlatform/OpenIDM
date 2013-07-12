@@ -56,7 +56,6 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
-     *
      * @param syncFailure contains sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
