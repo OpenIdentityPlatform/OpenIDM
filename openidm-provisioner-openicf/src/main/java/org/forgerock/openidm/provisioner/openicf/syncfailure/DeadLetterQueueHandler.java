@@ -41,18 +41,13 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
     /** accessor to the router */
     private final Accessor<JsonResourceAccessor> accessor;
 
-    /** the repoPath to store the failed sync details */
-    private final String repoPath;
-
     /**
      * Construct this live sync failure handler.
      *
      * @param accessor an accessor to the router
-     * @param repoPath the repo path
      */
-    public DeadLetterQueueHandler(Accessor<JsonResourceAccessor> accessor, String repoPath) {
+    public DeadLetterQueueHandler(Accessor<JsonResourceAccessor> accessor) {
         this.accessor = accessor;
-        this.repoPath = repoPath;
     }
 
     /**
@@ -69,7 +64,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
             String failedRecord, Uid failedRecordUid, Exception exception)
         throws SyncHandlerException {
 
-        String id = repoPath + "/" + token.getValue();
+        String id = "/repo/sychronisation/deadLetterQueue/" + systemIdentifierName + "/" + token.getValue();
 
         try {
             JsonValue syncDetail = new JsonValue(new HashMap<String,Object>());

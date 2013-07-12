@@ -17,14 +17,18 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A Null-object SyncFailureHandler that implements the equivalent of an "ignore"
- * operation.
+ * A SyncFailureHandler that logs the error and ignores it.
  *
  * @author brmiller
  */
-public class NullSyncFailureHandler implements SyncFailureHandler {
+public class LoggedIgnoreHandler implements SyncFailureHandler {
+    /** Logger */
+    private static final Logger logger = LoggerFactory.getLogger(LoggedIgnoreHandler.class);
+
     /*
      * Handle sync failure.
      *
@@ -43,6 +47,6 @@ public class NullSyncFailureHandler implements SyncFailureHandler {
             Uid failedRecordUid,
             Exception exception)
         throws SyncHandlerException {
-        // Null object pattern - does nothing - everything is "OK"
+        logger.warn("LiveSync failure on {}, sync-token {} for {}, {}", systemIdentifierName, token.getValue(), objectType, failedRecordUid.getUidValue());
     }
 }
