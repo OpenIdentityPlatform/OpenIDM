@@ -74,10 +74,10 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
         }
 
         if (currentRetries >= syncFailureRetries) {
-            logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + " exhausted");
+            logger.info("sync retries = {}/{}, retries exhausted", currentRetries, syncFailureRetries);
             postRetryHandler.invoke(syncFailure, failureCause);
         } else {
-            logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", retrying");
+            logger.info("sync retries = {}/{}, retrying", currentRetries, syncFailureRetries);
             throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid").asString()
                     + " object, retries (" + currentRetries + ") not exhausted.",
                     failureCause);

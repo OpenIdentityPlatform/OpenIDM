@@ -66,7 +66,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
             JsonValue syncDetail = syncFailure.copy();
             syncDetail.put("failureCause", failureCause.toString());
             accessor.access().create(id, syncDetail);
-            logger.info(syncFailure.get("uid").asString() + " saved to dead letter queue");
+            logger.info("{} saved to dead letter queue", syncFailure.get("uid").asString());
         } catch (JsonResourceException e) {
             throw new SyncHandlerException("Failed reading/writing " + id, e);
         }
