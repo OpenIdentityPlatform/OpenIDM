@@ -65,7 +65,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * @param syncFailure @throws SyncHandlerException when retries are not exceeded
      * @param failureCause the cause of the sync failure
      */
-    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
+    public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());

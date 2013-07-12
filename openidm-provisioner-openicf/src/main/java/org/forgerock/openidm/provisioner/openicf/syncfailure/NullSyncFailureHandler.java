@@ -32,7 +32,7 @@ public class NullSyncFailureHandler implements SyncFailureHandler {
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
+    public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
         // Null object pattern - does nothing - everything is "OK"
     }
