@@ -934,8 +934,13 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                     if (logger.isDebugEnabled()) {
                                         logger.error("Failed synchronise {} object, handle failure using {}", syncDelta.getUid(), syncFailureHandler, e);
                                     }
-                                    syncFailureHandler.handleSyncFailure(systemIdentifier.getName(),
-                                            syncDelta.getToken(),  objectType, failedRecord[0], syncDelta.getUid(), e);
+                                    Map<String,Object> syncFailure = new HashMap<String,Object>(6);
+                                    syncFailure.put("token", syncDelta.getToken().getValue());
+                                    syncFailure.put("systemIdentifier", systemIdentifier.getName());
+                                    syncFailure.put("objectType", objectType);
+                                    syncFailure.put("uid", syncDelta.getUid().getUidValue());
+                                    syncFailure.put("failedRecord", failedRecord[0]);
+                                    syncFailureHandler.handleSyncFailure(new JsonValue(syncFailure), e);
                                 }
                                 // success (either by original sync or by failure handler)
                                 lastToken[0] = syncDelta.getToken();

@@ -15,8 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
+import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,24 +28,20 @@ public class LoggedIgnoreHandler implements SyncFailureHandler {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(LoggedIgnoreHandler.class);
 
-    /*
+    /**
      * Handle sync failure.
      *
-     * @param token the sync token that failed
-     * @param objectType the type of object being synchronized
-     * @param failedRecord the failed record
-     * @param failedRecordUid the failed record's id
-     * @param exception the Exception that was thrown as part of the failure
+     * @param syncFailure JsonValue that contains the sync failure data
+     * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(
-            String systemIdentifierName,
-            SyncToken token,
-            String objectType,
-            String failedRecord,
-            Uid failedRecordUid,
-            Exception exception)
+    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
-        logger.warn("LiveSync failure on {}, sync-token {} for {}, {}", systemIdentifierName, token.getValue(), objectType, failedRecordUid.getUidValue());
+        logger.warn("{} liveSync failure on sync-token {} for {}, {} - {}",
+                syncFailure.get("systemIdentifier").asString(),
+                syncFailure.get("token").asInteger(),
+                syncFailure.get("objectType").asString(),
+                syncFailure.get("uid").asString(),
+                failureCause.toString());
     }
 }
