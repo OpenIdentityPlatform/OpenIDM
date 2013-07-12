@@ -35,7 +35,7 @@ public class LoggedIgnoreHandler implements SyncFailureHandler {
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
+    public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
         logger.warn("{} liveSync failure on sync-token {} for {}, {} - {}",
                 syncFailure.get("systemIdentifier").asString(),

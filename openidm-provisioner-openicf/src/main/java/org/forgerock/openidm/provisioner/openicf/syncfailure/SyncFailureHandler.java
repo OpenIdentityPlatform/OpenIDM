@@ -31,6 +31,6 @@ public interface SyncFailureHandler
      * @param failureCause the cause of the exception
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
+    public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException;
 }

@@ -60,7 +60,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
+    public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         final int token = syncFailure.get("token").asInteger().intValue();
@@ -75,7 +75,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
 
         if (currentRetries >= syncFailureRetries) {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + " exhausted");
-            postRetryHandler.handleSyncFailure(syncFailure, failureCause);
+            postRetryHandler.invoke(syncFailure, failureCause);
         } else {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", retrying");
             throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid").asString()
