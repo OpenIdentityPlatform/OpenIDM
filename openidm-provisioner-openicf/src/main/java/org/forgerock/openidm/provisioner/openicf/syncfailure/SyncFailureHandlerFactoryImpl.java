@@ -52,6 +52,13 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(SyncFailureHandlerFactory.class);
 
+    /* config tokens */
+    protected static final String CONFIG_MAX_RETRIES = "maxRetries";
+    protected static final String CONFING_POST_RETRY = "postRetryAction";
+    protected static final String CONFIG_DEAD_LETTER = "dead-letter-queue";
+    protected static final String CONFIG_LOGGED_IGNORE = "logged-ignore";
+    protected static final String CONFIG_SCRIPT = "script";
+
     /** Scope factory service. */
     @Reference(
             referenceInterface = ScopeFactory.class,
@@ -82,60 +89,65 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
      * describe
      * <ul>
      *     <li>number of retries</li>
-     *     <li>whether to save the failed sync item to a dead-letter queue</li>
-     *     <li>whether to call an external, user-supplied script</li>
+     *     <li>what to do upon retry exhaustion:
+     *     <ul>
+     *         <li>whether to save the failed sync item to a dead-letter queue</li>
+     *         <li>whether to log and ignore the failure</li>
+     *         <li>whether to call an external, user-supplied script</li>
+     *     </ul>
      * </ul>
      *
      * @param config the config for the SyncFailureHandler
      * @return the SyncFailureHandler
      */
     public SyncFailureHandler create(JsonValue config) {
-        if (!config.isNull()) {
-            final List<SyncFailureHandler> handlers = new ArrayList<SyncFailureHandler>();
 
-            // look for retry config FIRST, so sync failure retry handler will be invoked first
-            if (!config.get("retries").isNull() && config.get("retries").asInteger() > 0) {
-                handlers.add(new SimpleRetrySyncFailureHandler(config.get("retries").asInteger()));
-            }
-            if (!config.get("deadLetterQueue").isNull() && config.get("deadLetterQueue").asString().length() > 0) {
-                handlers.add(new DeadLetterQueueHandler(
+        if (null == config || config.isNull()) {
+            return new NullSyncFailureHandler();
+        }
+
+        JsonValue maxRetries = config.get(CONFIG_MAX_RETRIES);
+        JsonValue postRetry = config.get(CONFING_POST_RETRY);
+
+        if (maxRetries.isNull() || maxRetries.asInteger() < 1) {
+            return getPostRetryHandler(postRetry);
+        } else {
+            return new SimpleRetrySyncFailureHandler(maxRetries.asInteger(),
+                    getPostRetryHandler(postRetry));
+        }
+    }
+
+    /**
+     * Create the SycFailureHandler to execute when the retries are exhausted (or if no retries are configured).
+     * The config passed here is the value side of
+     * {code}
+     * "postRetryAction" : <value>
+     * {code}
+     * It may be either a String which indicates which handler to use, or a Map which indicates a handler
+     * with more complex configuration.
+     *
+     * @param config the config that further specifies the sync failure handler
+     * @return the SyncFailureHandler
+     */
+    private SyncFailureHandler getPostRetryHandler(JsonValue config) {
+        if (config.isString()) {
+            if (CONFIG_DEAD_LETTER.equals(config.asString())) {
+                return new DeadLetterQueueHandler(
                         new Accessor<JsonResourceAccessor>() {
                             public JsonResourceAccessor access() {
                                 return new JsonResourceAccessor(router, ObjectSetContext.get());
                             }
-                        },
-                        config.get("deadLetterQueue").asString()));
-            }
-            if (!config.get("script").isNull() && config.get("script").isMap()) {
-                handlers.add(new ScriptedSyncFailureHandler(scopeFactory, config.get("script")));
-            }
-
-            if (handlers.size() > 0) {
-                return new SyncFailureHandler() {
-
-                    /* initialize our starting position at the start of the handler list */
-                    private int pos = 0;
-
-                    @Override
-                    public void handleSyncFailure(String systemIdentifierName,  SyncToken token,  String objectType,
-                            String failedRecord,  Uid failedRecordUid,  Exception exception)
-                        throws SyncHandlerException {
-
-                        // run through the list of handlers once
-                        // (the unsuccessful ones will throw a SyncHandlerException)
-                        while (pos < handlers.size()) {
-                            handlers.get(pos).handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
-                            pos++;
-                        }
-                        // we made it through all the handlers (no exceptions); 
-                        // re-initialize the starting position for the next use of 
-                        // this "handler of handlers"
-                        pos = 0;
-                    }
-                };
+                        });
+            } else if (CONFIG_LOGGED_IGNORE.equals(config.asString())) {
+                return new LoggedIgnoreHandler();
             }
         }
-        // either no config, no retries, or no configured handlers
+        else if (config.isMap()) {
+            if (config.get(CONFIG_SCRIPT).isMap()) {
+                return new ScriptedSyncFailureHandler(scopeFactory, config.get(CONFIG_SCRIPT));
+            }
+        }
+
         return new NullSyncFailureHandler();
     }
 }

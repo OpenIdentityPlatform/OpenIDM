@@ -34,6 +34,9 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     /** how many times to retry live sync of a particular sync token */
     private final int syncFailureRetries;
 
+    /** the handler to call after the retries are exhausted */
+    private final SyncFailureHandler postRetryHandler;
+
     /** current token being retried */
     private SyncToken currentSyncToken;
 
@@ -45,8 +48,9 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      *
      * @param syncFailureRetries the number of retries
      */
-    public SimpleRetrySyncFailureHandler(int syncFailureRetries) {
+    public SimpleRetrySyncFailureHandler(int syncFailureRetries, SyncFailureHandler postRetryHandler) {
         this.syncFailureRetries = syncFailureRetries;
+        this.postRetryHandler = postRetryHandler;
     }
 
     /**
@@ -74,6 +78,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
 
         if (currentRetries >= syncFailureRetries) {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + " exhausted");
+            postRetryHandler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
         } else {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", retrying");
             throw new SyncHandlerException("Failed to synchronize " + failedRecordUid + " object, " +

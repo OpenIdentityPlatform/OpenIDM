@@ -101,7 +101,7 @@
    "syncFailureHandler" :
       {
          "retries" : 5,
-         "deadLetterQueue" : "repo/synchronisation/deadLetterQueue/ldap"
+         "postRetryAction" : "dead-letter-queue"
       }
    "objectTypes" :
       {
