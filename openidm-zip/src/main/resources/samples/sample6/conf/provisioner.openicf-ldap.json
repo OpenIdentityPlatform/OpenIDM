@@ -100,7 +100,7 @@
       },
    "syncFailureHandler" :
       {
-         "retries" : 5,
+         "maxRetries" : 5,
          "postRetryAction" : "dead-letter-queue"
       }
    "objectTypes" :
