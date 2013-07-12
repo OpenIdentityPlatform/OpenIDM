@@ -15,14 +15,10 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import java.util.HashMap;
-
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.util.Accessor;
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,29 +49,24 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
     /**
      * Handle sync failure.
      *
-     * @param token the sync token that failed
-     * @param objectType the type of object being synchronized
-     * @param failedRecord the failed record
-     * @param failedRecordUid the failed record's id
-     * @param exception the Exception that was thrown as part of the failure
+     * @param syncFailure JsonValue that contains the sync failure data
+     * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(String systemIdentifierName, SyncToken token, String objectType,
-            String failedRecord, Uid failedRecordUid, Exception exception)
+    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
-        String id = "/repo/sychronisation/deadLetterQueue/" + systemIdentifierName + "/" + token.getValue();
+        String id = new StringBuffer("repo/synchronisation/deadLetterQueue/")
+            .append(syncFailure.get("systemIdentifier").asString())
+            .append("/")
+            .append(syncFailure.get("token").asInteger())
+            .toString();
 
         try {
-            JsonValue syncDetail = new JsonValue(new HashMap<String,Object>());
-            syncDetail.put("systemIdentifier", systemIdentifierName);
-            syncDetail.put("objectType", objectType);
-            syncDetail.put("exception", exception);
-            syncDetail.put("failedRecord", failedRecord);
-            syncDetail.put("failedRecordUid", failedRecordUid.getUidValue());
-            syncDetail.put("syncRetries", 0);
+            JsonValue syncDetail = syncFailure.copy();
+            syncDetail.put("failureCause", failureCause.toString());
             accessor.access().create(id, syncDetail);
-            logger.info(failedRecordUid + " saved to dead letter queue");
+            logger.info(syncFailure.get("uid").asString() + " saved to dead letter queue");
         } catch (JsonResourceException e) {
             throw new SyncHandlerException("Failed reading/writing " + id, e);
         }

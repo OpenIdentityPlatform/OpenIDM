@@ -15,8 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A handler interface for liveSync failures.
@@ -28,19 +27,10 @@ public interface SyncFailureHandler
     /**
      * Handle the sync failure.
      *
-     * @param token the sync token that failed
-     * @param objectType the type of object being synchronized
-     * @param failedRecord the failed record
-     * @param failedRecordUid the failed record's id
-     * @param exception the Exception that was thrown as part of the failure
+     * @param syncFailure contains the sync failure data
+     * @param failureCause the cause of the exception
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(
-            String systemIdentifierName,
-            SyncToken token,
-            String objectType,
-            String failedRecord,
-            Uid failedRecordUid,
-            Exception exception)
+    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException;
 }

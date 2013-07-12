@@ -15,8 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
+import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     private final SyncFailureHandler postRetryHandler;
 
     /** current token being retried */
-    private SyncToken currentSyncToken;
+    private int currentSyncToken;
 
     /** number of retries on current token */
     private int currentRetries;
@@ -57,18 +56,17 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
-     * @param token the sync token that failed
-     * @param objectType the type of object being synchronized
-     * @param failedRecord the failed record
-     * @param failedRecordUid the failed record's id
-     * @param exception the Exception that was thrown as part of the failure
+     *
+     * @param syncFailure contains sync failure data
+     * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void handleSyncFailure(String systemIdentifierName, SyncToken token, String objectType, 
-            String failedRecord, Uid failedRecordUid, Exception exception)
+    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
-        if (token.equals(currentSyncToken)) {
+        final int token = syncFailure.get("token").asInteger().intValue();
+
+        if (token == currentSyncToken) {
             currentRetries++;
         }
         else {
@@ -78,11 +76,12 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
 
         if (currentRetries >= syncFailureRetries) {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + " exhausted");
-            postRetryHandler.handleSyncFailure(systemIdentifierName, token, objectType, failedRecord, failedRecordUid, exception);
+            postRetryHandler.handleSyncFailure(syncFailure, failureCause);
         } else {
             logger.info("sync retries = " + currentRetries + "/" + syncFailureRetries + ", retrying");
-            throw new SyncHandlerException("Failed to synchronize " + failedRecordUid + " object, " +
-                    "retries (" + currentRetries + ") not exhausted.", exception);
+            throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid").asString()
+                    + " object, retries (" + currentRetries + ") not exhausted.",
+                    failureCause);
         }
     }
 }

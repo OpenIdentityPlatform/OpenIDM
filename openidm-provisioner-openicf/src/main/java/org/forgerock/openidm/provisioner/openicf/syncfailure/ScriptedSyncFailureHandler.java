@@ -20,8 +20,6 @@ import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.Scripts;
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,31 +56,25 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
-     * @param token the sync token that failed
-     * @param objectType the type of object being synchronized
-     * @param failedRecord the failed record
-     * @param failedRecordUid the failed record's id
-     * @param exception the Exception that was thrown as part of the failure
-     * @throws SyncHandlerException when retries are not exceeded
+     *
+     * @param syncFailure @throws SyncHandlerException when retries are not exceeded
+     * @param failureCause the cause of the sync failure
      */
-    public void handleSyncFailure(String systemIdentifierName, SyncToken token, String objectType,
-            String failedRecord, Uid failedRecordUid, Exception exception)
+    public void handleSyncFailure(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());
-        scope.put("systemIdentifier", systemIdentifierName);
-        scope.put("objectType", objectType);
-        scope.put("exception", exception);
-        scope.put("failedRecord", failedRecord);
-        scope.put("failedRecordUid", failedRecordUid);
+        scope.putAll(syncFailure.asMap());
+        scope.put("failureCause", failureCause.toString());
 
         try {
             script.exec(scope);
         } catch (Exception e) {
-            logger.debug("sync failure script on {} encountered exception", systemIdentifierName, e);
+            logger.debug("sync failure script on {} encountered exception", 
+                    syncFailure.get("systemIdentifier").asString(), e);
             throw new SyncHandlerException("Issue with handling the failure during synchronize "
-                    + failedRecordUid + " object. " + exception.getMessage() + ". Failure handling reported "
-                    + e.getMessage(), e);
+                    + syncFailure.get("uid").asString() + " object. " + failureCause.getMessage()
+                    + ". Failure handling reported " + e.getMessage(), e);
         }
     }
 }
