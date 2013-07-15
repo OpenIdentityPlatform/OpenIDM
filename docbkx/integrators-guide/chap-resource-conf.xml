@@ -959,6 +959,15 @@
      <listitem>
       <para>If <literal>true</literal>, OpenIDM modifies group membership when
       entries are renamed or deleted.</para>
+      <para>In the sample LDAP connector configuration file provided with
+      OpenIDM, this property is set to <literal>false</literal>. This means
+      that LDAP group membership is not modified when entries are renamed or
+      deleted in OpenIDM. To ensure that entries are removed from LDAP groups
+      when the entries are deleted, set this property to <literal>true</literal>
+      or enable referential integrity on the LDAP server. For OpenDJ, see
+      <link xlink:href="http://docs.forgerock.org/en/opendj/2.6.0/admin-guide/index.html#referential-integrity">
+      <citetitle>Configuring Referential Integrity</citetitle></link> for more
+      information.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -1231,14 +1240,13 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
      </step>
      <step>
       <para>Review the <filename>ConnectorServer.exe.config</filename> file to verify
-      additional configuration. This includes the port, address, and SSL settings in
+      additional configuration, including the port, address, and SSL settings in
       the <filename>AppSettings</filename>.
      
-     <screen>&lt;add key="connectorserver.port" value="8759" /&gt;
+     <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
 &lt;add key="connectorserver.usessl" value="false" /&gt;
-
 &lt;add key="connectorserver.certificatestorename" value="ConnectorServerSSLCertificate" /&gt;
-&lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;
+&lt;add key="connectorserver.ipaddress" value="0.0.0.0" /&gt;
 </screen>
       </para>
       <para>The port can be set by changing the value of <literal>connectorserver.port</literal>.
@@ -1376,7 +1384,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/
      <step>
       <para>Edit the <literal>configurationProperties</literal> according to your 
       setup and make sure that the <literal>bundleVersion</literal> is the same
-      version as <filename>ActioveDirectory.Connector.dll</filename> in the Windows 
+      version as <filename>ActiveDirectory.Connector.dll</filename> in the Windows
       Connector Server folder. (Right click on the <literal>dll</literal>, 
       <literal>properties</literal>, <literal>tab details</literal>, and <literal>Product 
       version</literal>.)
@@ -1857,7 +1865,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
            </listitem>
             <listitem>
              <para>The path to groovy scripts should be <literal>createScriptFileName : 
-             /home/tester/openicf/tools/CreateScript.groovy ...</literal>.
+             /home/tester/openicf/tools/CreateScript.groovy</literal>.
              </para>
              <para>For Windows, the path will follow Unix notation. For example the path 
              could be <literal>Program Files (x86)/openicf/tools/CreateScript.groovy</literal>,
