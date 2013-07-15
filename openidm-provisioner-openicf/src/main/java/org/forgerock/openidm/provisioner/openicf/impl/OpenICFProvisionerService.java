@@ -52,6 +52,8 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
+import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
+import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -78,7 +80,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The OpenICFProvisionerService is the implementation of {@link CollectionResourceProvider} interface
@@ -86,6 +95,7 @@ import java.util.*;
  * <p/>
  *
  * @author Laszlo Hordos
+ * @author brmiller
  */
 @Component(name = OpenICFProvisionerService.PID, policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM System Object Set Service", immediate = true)
@@ -113,6 +123,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     private ConnectorReference connectorReference = null;
     private Map<String, SystemAction> systemActions = new HashMap<String, SystemAction>();
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private SyncFailureHandler syncFailureHandler = null;
 
     /**
      * ConnectorInfoProvider service.
@@ -130,6 +141,11 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     @Reference
     protected CryptoService cryptoService = null;
 
+    /**
+     * SyncFailureHandlerFactory service.
+     */
+    @Reference
+    protected SyncFailureHandlerFactory syncFailureHandlerFactory = null;
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -141,6 +157,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier);
             }
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
+
+            syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
         } catch (Exception e) {
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
@@ -848,7 +866,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
      *                                       if the  {@code previousStage} is not Map.
      * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonValue)} or any exception happed inside the connector.
      */
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener) 
+    public JsonValue liveSynchronize(final String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener) 
             throws JsonResourceException {
         if (!serviceAvailable) return previousStage;
         JsonValue stage = previousStage != null ? previousStage.copy() : new JsonValue(new LinkedHashMap<String, Object>());
@@ -911,15 +929,21 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                             synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null);
                                             break;
                                     }
-                                    lastToken[0] = syncDelta.getToken();
                                 } catch (Exception e) {
                                     failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
                                     if (logger.isDebugEnabled()) {
-                                        logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
+                                        logger.error("Failed synchronise {} object, handle failure using {}", syncDelta.getUid(), syncFailureHandler, e);
                                     }
-                                    throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object. "
-                                            + e.getMessage(), e);
+                                    Map<String,Object> syncFailure = new HashMap<String,Object>(6);
+                                    syncFailure.put("token", syncDelta.getToken().getValue());
+                                    syncFailure.put("systemIdentifier", systemIdentifier.getName());
+                                    syncFailure.put("objectType", objectType);
+                                    syncFailure.put("uid", syncDelta.getUid().getUidValue());
+                                    syncFailure.put("failedRecord", failedRecord[0]);
+                                    syncFailureHandler.invoke(new JsonValue(syncFailure), e);
                                 }
+                                // success (either by original sync or by failure handler)
+                                lastToken[0] = syncDelta.getToken();
                                 return true;
                             }
                         }, operationOptionsBuilder.build());

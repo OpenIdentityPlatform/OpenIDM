@@ -138,7 +138,8 @@
                     <instructions>
                         <Private-Package>
                             org.forgerock.openidm.provisioner.openicf.impl.*,
-                            org.forgerock.openidm.provisioner.openicf.internal.*
+                            org.forgerock.openidm.provisioner.openicf.internal.*,
+                            org.forgerock.openidm.provisioner.openicf.syncfailure.*
                         </Private-Package>
                         <Export-Package>
                             org.forgerock.openidm.provisioner.openicf;version=${openidm.version},

@@ -31,6 +31,7 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
+import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
@@ -85,6 +86,11 @@ public abstract class OpenICFProvisionerServiceTestBase {
         if (null != bind) {
             bind.setAccessible(true);
             bind.set(service, mock(JsonResource.class));
+        }
+        bind = OpenICFProvisionerService.class.getDeclaredField("syncFailureHandlerFactory");
+        if (null != bind) {
+            bind.setAccessible(true);
+            bind.set(service, mock(SyncFailureHandlerFactory.class));
         }
 
         Method activate = OpenICFProvisionerService.class.getDeclaredMethod("activate", ComponentContext.class);
