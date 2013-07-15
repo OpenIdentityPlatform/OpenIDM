@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
@@ -50,11 +51,18 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * @param scopeFactory the ScopeFactory
      * @param config the config
      */
-    public ScriptedSyncFailureHandler(ScopeFactory scopeFactory, JsonValue config, 
-            Map<String,SyncFailureHandler> builtInHandlers) {
+    public ScriptedSyncFailureHandler(ScopeFactory scopeFactory, JsonValue config,
+            SyncFailureHandler... builtInHandlers) {
         this.scopeFactory = scopeFactory;
         this.script = Scripts.newInstance(getClass().getSimpleName(), config);
-        this.builtInHandlers = builtInHandlers;
+        this.builtInHandlers = new HashMap<String,SyncFailureHandler>();
+        for (SyncFailureHandler handler : builtInHandlers) {
+            if (handler instanceof LoggedIgnoreHandler) {
+                this.builtInHandlers.put("loggedIgnore", handler);
+            } else if (handler instanceof DeadLetterQueueHandler) {
+                this.builtInHandlers.put("deadLetterQueue", handler);
+            }
+        }
     }
 
     /**
@@ -71,7 +79,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());
         scope.put("syncFailure", syncFailure);
         scope.put("failureCause", failureCause);
-        scope.putAll(builtInHandlers);
+        scope.put("failureHandlers", builtInHandlers);
 
         try {
             script.exec(scope);
