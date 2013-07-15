@@ -15,11 +15,6 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
@@ -32,10 +27,6 @@ import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.util.Accessor;
-import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A factory service to create the SyncFailureHandler strategy from config.
@@ -50,9 +41,6 @@ import org.slf4j.LoggerFactory;
 @Service()
 public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory {
     public static final String PID = "org.forgerock.openidm.openicf.syncfailure";
-
-    /** Logger */
-    private static final Logger logger = LoggerFactory.getLogger(SyncFailureHandlerFactory.class);
 
     /* config tokens */
     protected static final String CONFIG_MAX_RETRIES = "maxRetries";
@@ -146,17 +134,15 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
         }
         else if (config.isMap()) {
             if (config.get(CONFIG_SCRIPT).isMap()) {
-                // build map of internal handlers so a script can call them if desired
-                Map<String,SyncFailureHandler> handlers = new HashMap<String,SyncFailureHandler>();
-                handlers.put("deadLetterQueue", new DeadLetterQueueHandler(
-                            new Accessor<JsonResourceAccessor>() {
-                                public JsonResourceAccessor access() {
-                                    return new JsonResourceAccessor(router, ObjectSetContext.get());
-                                }
-                            }));
-                handlers.put("loggedIgnore", new LoggedIgnoreHandler());
-
-                return new ScriptedSyncFailureHandler(scopeFactory, config.get(CONFIG_SCRIPT), handlers);
+                return new ScriptedSyncFailureHandler(scopeFactory, config.get(CONFIG_SCRIPT),
+                        // pass internal handlers so a script can call them if desired
+                        new LoggedIgnoreHandler(),
+                        new DeadLetterQueueHandler(
+                                new Accessor<JsonResourceAccessor>() {
+                                    public JsonResourceAccessor access() {
+                                        return new JsonResourceAccessor(router, ObjectSetContext.get());
+                                    }
+                                }));
             }
         }
 
