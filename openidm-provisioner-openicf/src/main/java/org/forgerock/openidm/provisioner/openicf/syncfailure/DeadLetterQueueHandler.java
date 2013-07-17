@@ -22,6 +22,9 @@ import org.forgerock.openidm.util.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * Handle a LiveSync failure by saving its detail to a dead-letter queue.  The queue
@@ -53,20 +56,20 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(JsonValue syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         String id = new StringBuffer("repo/synchronisation/deadLetterQueue/")
-            .append(syncFailure.get("systemIdentifier").asString())
+            .append(syncFailure.get("systemIdentifier"))
             .append("/")
             .append(syncFailure.get("token").toString())
             .toString();
 
         try {
-            JsonValue syncDetail = syncFailure.copy();
+            Map<String,Object> syncDetail = new HashMap<String, Object>(syncFailure);
             syncDetail.put("failureCause", failureCause.toString());
-            accessor.access().create(id, syncDetail);
-            logger.info("{} saved to dead letter queue", syncFailure.get("uid").asString());
+            accessor.access().create(id, new JsonValue(syncDetail));
+            logger.info("{} saved to dead letter queue", syncFailure.get("uid"));
         } catch (JsonResourceException e) {
             throw new SyncHandlerException("Failed reading/writing " + id, e);
         }

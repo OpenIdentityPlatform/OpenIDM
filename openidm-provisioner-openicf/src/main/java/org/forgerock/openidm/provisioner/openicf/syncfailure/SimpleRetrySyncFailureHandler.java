@@ -15,9 +15,10 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 
 /**
@@ -60,7 +61,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(JsonValue syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         final Object token = syncFailure.get("token");
@@ -78,7 +79,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
             postRetryHandler.invoke(syncFailure, failureCause);
         } else {
             logger.info("sync retries = {}/{}, retrying", currentRetries, syncFailureRetries);
-            throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid").asString()
+            throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid")
                     + " object, retries (" + currentRetries + ") not exhausted.",
                     failureCause);
         }
