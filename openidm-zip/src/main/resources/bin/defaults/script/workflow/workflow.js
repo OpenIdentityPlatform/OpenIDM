@@ -34,15 +34,19 @@
             "processDefinitionKey": workflowName,
             "_var-mapping":recon.actionParam.mapping,
             "_var-situation":recon.actionParam.situation,
-            "_var-action":recon.actionParam.action,
-            "_var-sourceId":recon.actionParam.sourceId
+            "_var-action":recon.actionParam.action
         },
-        process = openidm.query('workflow/processinstance', queryParams);
+        process,
+        businessKey = "sourceId: " + recon.actionParam.sourceId + ", targetId: " + recon.actionParam.targetId + ", reconId: " + recon.actionParam.reconId;
     
-    if (null !== recon.actionParam.targetId) {
+    if (typeof recon.actionParam.sourceId !== "undefined" && null !== recon.actionParam.sourceId) {
+        queryParams["_var-sourceId"] = recon.actionParam.sourceId;
+    }
+    if (typeof recon.actionParam.targetId !== "undefined" && null !== recon.actionParam.targetId) {
         queryParams["_var-targetId"] = recon.actionParam.targetId;
     }
-    
+
+    process = openidm.query('workflow/processinstance', queryParams);
     logger.trace("asynchronous reconciliation: process.result.length => {}", process.result.length);
     
     /*
@@ -53,6 +57,7 @@
          There is no process instance found so we start one.
          */
         recon.actionParam._key = workflowName;
+        recon.actionParam._businessKey = businessKey;
         logger.trace("asynchronous reconciliation: Start '{}' process", recon.actionParam._key);
         openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, recon.actionParam);
     }
