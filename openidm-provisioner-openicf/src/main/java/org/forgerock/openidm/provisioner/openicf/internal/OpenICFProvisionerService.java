@@ -53,6 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -62,7 +63,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -106,6 +106,7 @@ import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistryService;
 import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.security.GuardedString;
@@ -180,7 +181,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     // LocalizedLogger.getLocalizedLogger(OpenICFProvisionerService.class);
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonUtil.build();
 
     // Monitoring event name prefix
     private static final String EVENT_PREFIX = "openidm/internal/system/";
@@ -191,11 +192,11 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ConnectorInfoProvider connectorInfoProvider = null;
 
-    private void bindConnectorInfoProvider(final ConnectorInfoProvider service) {
+    void bindConnectorInfoProvider(final ConnectorInfoProvider service) {
         connectorInfoProvider = service;
     }
 
-    private void unbindConnectorInfoProvider(final ConnectorInfoProvider service) {
+    void unbindConnectorInfoProvider(final ConnectorInfoProvider service) {
         connectorInfoProvider = null;
     }
 
@@ -205,11 +206,11 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.STATIC)
     protected RouterRegistryService routerRegistryService;
 
-    private void bindRouterRegistryService(final RouterRegistryService service) {
+    void bindRouterRegistryService(final RouterRegistryService service) {
         routerRegistryService = service;
     }
 
-    private void unbindRouterRegistryService(final RouterRegistryService service) {
+    void unbindRouterRegistryService(final RouterRegistryService service) {
         routerRegistryService = null;
     }
 
@@ -219,11 +220,11 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService = null;
 
-    private void bindCryptoService(final CryptoService service) {
+    void bindCryptoService(final CryptoService service) {
         cryptoService = service;
     }
 
-    private void unbindCryptoService(final CryptoService service) {
+    void unbindCryptoService(final CryptoService service) {
         cryptoService = null;
     }
 
@@ -246,7 +247,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     /**
      * System name for better logging only
      */
-    private String systemName = null;
+    String systemName = null;
 
     private ConnectorFacadeCallback connectorFacadeCallback = null;
 
@@ -910,7 +911,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                         localSystemActionCache.get(request.getAdditionalActionParameters().get(
                                 SystemAction.SCRIPT_ID));
 
-                String systemType = null;// connectorReference.getConnectorKey().getConnectorName();
+                String systemType = connectorReference.getConnectorKey().getConnectorName();
                 List<ScriptContextBuilder> scriptContextBuilderList =
                         action.getScriptContextBuilders(systemType);
                 if (null != scriptContextBuilderList) {

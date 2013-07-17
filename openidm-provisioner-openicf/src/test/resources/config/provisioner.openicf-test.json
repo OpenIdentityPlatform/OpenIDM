@@ -4,7 +4,8 @@
       {
          "bundleName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector.bundle",
          "bundleVersion" : "1.0",
-         "connectorName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector"
+         "connectorName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector",
+         "connectorHostRef" : "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager"
       },
    "poolConfigOption" :
       {
@@ -84,7 +85,7 @@
                           {
                               "systemType" : ".*TestConnector",
                               "actionType" : "Shell",
-                              "actionFile" : "login.cmd"
+                              "actionFile" : "&{launcher.working.location}login.cmd"
                           }
                       ]
           }
