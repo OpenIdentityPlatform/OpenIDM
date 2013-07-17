@@ -42,20 +42,20 @@ import static org.testng.Assert.assertEquals;
 /**
  * @author Phill Cunnington
  */
-public class IWAADPassthroughModuleTest {
+public class IWAPassthroughModuleTest {
 
-    private IWAADPassthroughModule iwaAdPassthroughModule;
+    private IWAPassthroughModule iwaAdPassthroughModule;
 
     private org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule;
-    private ADPassthroughModule adPassthroughModule;
+    private PassthroughModule passthroughModule;
 
     @BeforeClass
     public void setUp() {
 
         commonsIwaModule = mock(org.forgerock.jaspi.modules.iwa.IWAModule.class);
-        adPassthroughModule = mock(ADPassthroughModule.class);
+        passthroughModule = mock(PassthroughModule.class);
 
-        iwaAdPassthroughModule = new IWAADPassthroughModule(commonsIwaModule, adPassthroughModule);
+        iwaAdPassthroughModule = new IWAPassthroughModule(commonsIwaModule, passthroughModule);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class IWAADPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).initialize(requestPolicy, responsePolicy, handler, optionsMap);
-        verify(adPassthroughModule).initialize(requestPolicy, responsePolicy, handler, options);
+        verify(passthroughModule).initialize(requestPolicy, responsePolicy, handler, options);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class IWAADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData))
+        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData))
                 .willReturn(AuthStatus.SEND_CONTINUE);
 
         //When
@@ -101,7 +101,7 @@ public class IWAADPassthroughModuleTest {
                 authData);
 
         //Then
-        verify(adPassthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, authData);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
@@ -131,7 +131,7 @@ public class IWAADPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(adPassthroughModule);
+        verifyZeroInteractions(passthroughModule);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
@@ -161,7 +161,7 @@ public class IWAADPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(adPassthroughModule);
+        verifyZeroInteractions(passthroughModule);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
@@ -184,7 +184,7 @@ public class IWAADPassthroughModuleTest {
 
         given(commonsIwaModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
-        given(adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData))
+        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData))
                 .willReturn(AuthStatus.SEND_SUCCESS);
 
         //When
@@ -193,7 +193,7 @@ public class IWAADPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(adPassthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, authData);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
@@ -233,7 +233,7 @@ public class IWAADPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(adPassthroughModule);
+        verifyZeroInteractions(passthroughModule);
         verify(authData).setUsername("USERNAME");
         verify(authData).setResource("system/AD/account");
         assertEquals(authStatus, AuthStatus.SUCCESS);

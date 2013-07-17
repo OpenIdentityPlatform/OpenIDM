@@ -115,17 +115,12 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-authnfilter-config</artifactId>
+            <artifactId>openidm-authnfilter</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-authnfilter-modules</artifactId>
-            <version>${openidm.version}</version>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>

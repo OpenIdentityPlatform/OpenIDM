@@ -8,12 +8,11 @@
     },
     "defaultUserRoles" : [ ],
     "serverAuthConfig" : {
-        "auditLogger" : "org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger",
         "idmAuth" : {
             "sessionModule" : {
-                "className" : "org.forgerock.jaspi.modules.session.jwt.JwtSessionModule",
+                "name" : "JWT_SESSION",
                 "keyAlias" : "openidm-localhost",
-                "privateKeyPassword" : "changeit",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
                 "keystoreType" : "&{openidm.keystore.type}",
                 "keystoreFile" : "&{openidm.keystore.location}",
                 "keystorePassword" : "&{openidm.keystore.password}",
@@ -22,7 +21,17 @@
             },
             "authModules" : [
                 {
-                    "className" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
+                    "name" : "PASSTHROUGH",
+                    "passThroughAuth" : "system/AD/account",
+                    "propertyMapping" : {
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [
+                    ],
+                    "enabled" : false
+                },
+                {
+                    "name" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
@@ -31,7 +40,7 @@
                     "defaultUserRoles" : [ ]
                 },
                 {
-                    "className" : "org.forgerock.openidm.jaspi.modules.InternalUserAuthModule",
+                    "name" : "INTERNAL_USER",
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",

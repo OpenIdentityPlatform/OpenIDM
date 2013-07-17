@@ -36,26 +36,27 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Contains logic to perform authentication by passing the request through to be authenticated against AD.
+ * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
+ * connector.
  *
  * @author Phill Cunnington
  */
-public class ADPassthroughAuthenticator {
+public class PassthroughAuthenticator {
 
-    final static Logger logger = LoggerFactory.getLogger(ADPassthroughAuthenticator.class);
+    final static Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
 
     private final String passThroughAuth;
     private final String userRolesProperty;
     private final List<String> defaultRoles;
 
     /**
-     * Constructs an instance of the ADPassthroughAuthenticator.
+     * Constructs an instance of the PassthroughAuthenticator.
      *
      * @param passThroughAuth The passThroughAuth resource.
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public ADPassthroughAuthenticator(String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
+    public PassthroughAuthenticator(String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
         this.passThroughAuth = passThroughAuth;
         this.userRolesProperty = userRolesProperty;
         this.defaultRoles = defaultRoles;

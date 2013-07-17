@@ -30,40 +30,40 @@ import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * This Authentication Module uses the IWA authentication module with fall through to the AD Passthrough authentication
+ * This Authentication Module uses the IWA authentication module with fall through to the Passthrough authentication
  * module.
  *
  * @author Phill Cunnington
  */
-public class IWAADPassthroughModule extends IWAModule {
+public class IWAPassthroughModule extends IWAModule {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IWAADPassthroughModule.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IWAPassthroughModule.class);
 
-    private final ADPassthroughModule adPassthroughModule;
+    private final PassthroughModule passthroughModule;
 
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public IWAADPassthroughModule() {
+    public IWAPassthroughModule() {
         super();
-        adPassthroughModule = new ADPassthroughModule();
+        passthroughModule = new PassthroughModule();
     }
 
     /**
      * Constructor used by tests to inject dependencies.
      *
      * @param commonsIwaModule A mock of the Commons IWAModule.
-     * @param adPassthroughModule A mock of the ADPassthroughMdoule.
+     * @param passthroughModule A mock of the ADPassthroughMdoule.
      */
-    public IWAADPassthroughModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule,
-            ADPassthroughModule adPassthroughModule) {
+    public IWAPassthroughModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule,
+            PassthroughModule passthroughModule) {
         super(commonsIwaModule);
-        this.adPassthroughModule = adPassthroughModule;
+        this.passthroughModule = passthroughModule;
     }
 
     /**
-     * Initialises the super IWA authentication module and the AD Passthrough authentication module.
+     * Initialises the super IWA authentication module and the Passthrough authentication module.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
@@ -75,18 +75,18 @@ public class IWAADPassthroughModule extends IWAModule {
     protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             JsonValue options) throws AuthException {
         super.initialize(requestPolicy, responsePolicy, handler, options);
-        adPassthroughModule.initialize(requestPolicy, responsePolicy, handler, options);
+        passthroughModule.initialize(requestPolicy, responsePolicy, handler, options);
     }
 
     /**
-     * Uses the IWA authentication module with fall through to the AD Passthrough authentication module to validate the
+     * Uses the IWA authentication module with fall through to the Passthrough authentication module to validate the
      * request.
      *
-     * If the OpenIDM username header has been set then AD Passthrough is used.
+     * If the OpenIDM username header has been set then Passthrough is used.
      * If the OpenIDM username header is not set the IWA is used.
-     * If IWA fails then AD Passthrough is used.
-     * If AD Passthrough fails then the method returns AuthStatus.SEND_FAILURE.
-     * If either AD Passthrough or IWA succeeds then the method return AuthStatus.SUCCESS.
+     * If IWA fails then Passthrough is used.
+     * If Passthrough fails then the method returns AuthStatus.SEND_FAILURE.
+     * If either Passthrough or IWA succeeds then the method return AuthStatus.SUCCESS.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
@@ -105,14 +105,14 @@ public class IWAADPassthroughModule extends IWAModule {
         String xOpenIdmPassword = request.getHeader("X-OpenIDM-Password");
         if (!StringUtils.isEmpty(xOpenIDMUsername) && !StringUtils.isEmpty(xOpenIdmPassword)) {
             // skip straight to ad passthrough
-            LOGGER.debug("IWAADPassthroughModule: Have OpenIDM username, falling back to AD Passthrough");
-            return adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+            LOGGER.debug("IWAPassthroughModule: Have OpenIDM username, falling back to AD Passthrough");
+            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
         }
 
         AuthStatus authStatus = super.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
 
         if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
-            return adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, authData);
         } else {
             return authStatus;
         }
