@@ -276,6 +276,8 @@ public class SystemObjectSetService implements JsonResource,
             throw new ExecutionException(jve);
         } catch (JsonResourceException e) {
             throw new ExecutionException(e);
+        } catch (RuntimeException e) {
+            throw new ExecutionException(e);
         }
     }
     
