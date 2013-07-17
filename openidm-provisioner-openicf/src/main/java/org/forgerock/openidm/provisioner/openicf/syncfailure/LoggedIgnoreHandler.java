@@ -39,7 +39,7 @@ public class LoggedIgnoreHandler implements SyncFailureHandler {
         throws SyncHandlerException {
         logger.warn("{} liveSync failure on sync-token {} for {}, {} - {}",
                 syncFailure.get("systemIdentifier").asString(),
-                syncFailure.get("token").asInteger(),
+                syncFailure.get("token").toString(),
                 syncFailure.get("objectType").asString(),
                 syncFailure.get("uid").asString(),
                 failureCause.toString());
