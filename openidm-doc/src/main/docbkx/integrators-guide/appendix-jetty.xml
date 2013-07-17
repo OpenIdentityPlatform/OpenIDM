@@ -36,14 +36,14 @@
  server.</para>
 
  <para>To configure the embedded Jetty server, edit
- <filename>openidm/conf/jetty.xml</filename>. OpenIDM delegates all connector
- configuration to <filename>jetty.xml</filename>. OSGi and PAX web specific
+ <filename>openidm/conf/jetty.xml</filename>. OpenIDM delegates most of the
+ connector configuration to <filename>jetty.xml</filename>. OSGi and PAX web specific
  settings for connector configuration therefore do not have an effect. This
  lets you take advantage of all Jetty capabilities, as the web server is not
  configured through an abstraction that might limit some of the options.</para>
 
- <para>The Jetty configuration can reference configuration properties from
- OpenIDM, such key store details, from OpenIDM's
+ <para>The Jetty configuration can reference configuration properties (such as
+ port numbers and key store details) from OpenIDM's
  <filename>boot.properties</filename> configuration file.</para>
 
  <section xml:id="access-openidm-config-properties">
@@ -76,6 +76,24 @@
 
    <variablelist>
     <para>The following explicit Bean properties are available.</para>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.http</literal></para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.https</literal></para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.mutualauth</literal></para>
+        </listitem>
+    </varlistentry>
     <varlistentry>
      <term>keystoreType</term>
      <listitem>
@@ -142,10 +160,7 @@
    <para>By default the embedded Jetty server uses the following
    settings.</para>
    <listitem>
-    <para>An HTTP connector, listening on port 8080</para>
-   </listitem>
-   <listitem>
-    <para>An SSL connector, listening on port 8443</para>
+    <para>The HTTP, SSL, and Mutual Authentication ports defined in OpenIDM</para>
    </listitem>
    <listitem>
     <para>Same key store/trust store settings as OpenIDM</para>

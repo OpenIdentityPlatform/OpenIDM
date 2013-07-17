@@ -190,6 +190,15 @@
                     }
                 ]
             },
+            "security_keys" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "audit_recon" : {
                 "index" : [
                     {
@@ -199,7 +208,8 @@
                     }
                 ]
             },
-            "audit_activity" : {}
+            "audit_activity" : {},
+            "audit_access" : {}
         }
     },
     "embeddedServer" : {
