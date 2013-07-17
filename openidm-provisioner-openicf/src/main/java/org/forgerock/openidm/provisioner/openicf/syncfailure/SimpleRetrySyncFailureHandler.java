@@ -37,7 +37,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     private final SyncFailureHandler postRetryHandler;
 
     /** current token being retried */
-    private int currentSyncToken;
+    private Object currentSyncToken;
 
     /** number of retries on current token */
     private int currentRetries;
@@ -63,7 +63,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
     public void invoke(JsonValue syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
-        final int token = syncFailure.get("token").asInteger().intValue();
+        final Object token = syncFailure.get("token");
 
         if (token == currentSyncToken) {
             currentRetries++;

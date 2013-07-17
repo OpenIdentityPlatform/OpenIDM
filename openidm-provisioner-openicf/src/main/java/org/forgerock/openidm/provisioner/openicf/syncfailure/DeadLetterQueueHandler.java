@@ -59,7 +59,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
         String id = new StringBuffer("repo/synchronisation/deadLetterQueue/")
             .append(syncFailure.get("systemIdentifier").asString())
             .append("/")
-            .append(syncFailure.get("token").asInteger())
+            .append(syncFailure.get("token").toString())
             .toString();
 
         try {
