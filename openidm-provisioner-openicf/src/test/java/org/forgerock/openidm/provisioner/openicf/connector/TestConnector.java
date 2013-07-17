@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,8 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.provisioner.openicf.connector;
 
 import org.identityconnectors.common.script.Script;
@@ -56,7 +56,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
         SchemaOp, ScriptOnConnectorOp, ScriptOnResourceOp, SearchOp<String>, SyncOp, TestOp, UpdateAttributeValuesOp, UpdateOp, AttributeNormalizer {
     @Override
     public Attribute normalizeAttribute(ObjectClass oclass, Attribute attribute) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -89,7 +89,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid authenticate(ObjectClass objectClass, String username, GuardedString password, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -114,7 +114,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void checkAlive() {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -124,7 +124,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Configuration getConfiguration() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -138,7 +138,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void init(Configuration cfg) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -146,7 +146,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void dispose() {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -172,7 +172,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid create(ObjectClass oclass, Set<Attribute> attrs, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -190,7 +190,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void delete(ObjectClass objClass, Uid uid, OperationOptions options) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -229,7 +229,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid resolveUsername(ObjectClass objectClass, String username, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -398,7 +398,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public FilterTranslator<String> createFilterTranslator(ObjectClass oclass, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -475,7 +475,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void sync(ObjectClass objClass, SyncToken token, SyncResultsHandler handler, OperationOptions options) {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -496,7 +496,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public SyncToken getLatestSyncToken(ObjectClass objClass) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -509,7 +509,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void test() {
-        //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     /**
@@ -543,7 +543,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid addAttributeValues(ObjectClass objclass, Uid uid, Set<Attribute> valuesToAdd, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -576,7 +576,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid removeAttributeValues(ObjectClass objclass, Uid uid, Set<Attribute> valuesToRemove, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
@@ -618,6 +618,6 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Uid update(ObjectClass objclass, Uid uid, Set<Attribute> replaceAttributes, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }

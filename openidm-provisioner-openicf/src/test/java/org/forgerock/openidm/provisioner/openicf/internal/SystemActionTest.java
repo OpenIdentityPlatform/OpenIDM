@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,14 +24,11 @@
 
 package org.forgerock.openidm.provisioner.openicf.internal;
 
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceTestConnectorTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -48,9 +45,10 @@ public class SystemActionTest {
     @BeforeClass
     public void BeforeClass() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        configuration = new JsonValue(mapper.readValue(SystemActionTest.class.getResourceAsStream(
-                "/config/" + OpenICFProvisionerServiceTestConnectorTest.class.getCanonicalName() + ".json"),
-                Map.class));
+        configuration =
+                new JsonValue(mapper.readValue(SystemActionTest.class
+                        .getResourceAsStream("/config/" + SystemActionTest.class.getCanonicalName()
+                                + ".json"), Map.class));
     }
 
     @Test

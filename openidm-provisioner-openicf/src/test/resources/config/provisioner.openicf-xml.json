@@ -1,20 +1,12 @@
 {
-   "_id" : "1AB5045E-607C-11E0-95F8-77CADFD72085",
-   "_rev" : "686897696a7c876b7e",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
    "name" : "XML",
-   "displayName" : "Test XML Connector",
-   "typeString" : "File",
-   "hasId" : "true",
    "connectorRef" :
       {
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+         "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
          "bundleVersion" : "[1.1.0.0,1.1.1.0)",
-         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
+         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
       },
    "producerBufferSize" : 100,
-   "connectorPoolingSupported" : true,
    "poolConfigOption" :
       {
          "maxObjects" : 10,
@@ -40,9 +32,10 @@
       },
    "configurationProperties" :
       {
-         "xsdIcfFilePath" : "XSDICFFILEPATH",
-         "xsdFilePath" : "XSDFILEPATH",
-         "xmlFilePath" : "XMLFILEPATH"
+         "xsdIcfFilePath" : "&{launcher.working.location}xml/resource-schema-1.xsd",
+         "xsdFilePath" : "&{launcher.working.location}xml/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
+         "xmlFilePath" : "&{launcher.working.location}data/xml-data.xml",
+         "createFileIfNotExists" : true
       },
    "objectTypes" :
       {

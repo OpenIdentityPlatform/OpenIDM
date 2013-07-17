@@ -1,0 +1,13 @@
+{
+    "connectorsLocation" : "connectors",
+    "remoteConnectorServers" : [
+        {
+            "name"          : "testServer",
+            "host"          : "127.0.0.1",
+            "port"          : 8759,
+            "useSSL"        : false,
+            "timeout"       : 0,
+            "key"           : "Passw0rd"
+        }
+    ]
+}

@@ -119,7 +119,6 @@
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
-        <testSourceDirectory>${basedir}/fake</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.forgerock.commons</groupId>
@@ -143,7 +142,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <skipTests>true</skipTests>
                         <bundles.configuration.location>${project.build.testOutputDirectory}/connectorServer/</bundles.configuration.location>
                         <openidm.system.server.root>${project.build.testOutputDirectory}/connectorServer/</openidm.system.server.root>
                         <openicfServerPort>${openicf.port}</openicfServerPort>
@@ -180,48 +178,22 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.file</groupId>
-                                    <artifactId>openicf-xml-connector</artifactId>
-                                    <version>1.1.0.0</version>
-                                    <type>bundle</type>
+                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <artifactId>xml-connector</artifactId>
+                                    <version>1.1.0.1</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.ldap</groupId>
-                                    <artifactId>openicf-ldap-connector</artifactId>
-                                    <version>1.1.0.0</version>
-                                    <type>bundle</type>
+                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <artifactId>csvfile-connector</artifactId>
+                                    <version>1.1.0.1</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.os</groupId>
-                                    <artifactId>openicf-solaris-connector</artifactId>
-                                    <version>1.1.0.0-EA</version>
-                                    <type>bundle</type>
-                                </artifactItem>
-                                <!--artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.os</groupId>
-                                    <artifactId>openicf-vms-connector</artifactId>
-                                    <version>1.1.0.0</version>
-                                    <type>bundle</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.db</groupId>
-                                    <artifactId>openicf-databasetable-connector</artifactId>
-                                    <version>1.1.0.0</version>
-                                    <type>bundle</type>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors.db</groupId>
-                                    <artifactId>openicf-mysqluser-connector</artifactId>
-                                    <version>1.1.0.0</version>
-                                    <type>bundle</type>
-                                </artifactItem-->
                             </artifactItems>
-                            <outputDirectory>${project.build.testOutputDirectory}/connectorServer/connectors
+                            <outputDirectory>${project.build.testOutputDirectory}/connectors
                             </outputDirectory>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--execution>
                         <id>copy-connectorServer</id>
                         <phase>generate-test-sources</phase>
                         <goals>
@@ -242,20 +214,20 @@
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>2.1.3</version>
+                                    <version>2.1.6</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.testOutputDirectory}/connectorServer/lib</outputDirectory>
                             <stripVersion>true</stripVersion>
                         </configuration>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
             <!-- Remote Connector Server Test -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.7</version>
+                <version>1.8</version>
                 <executions>
                     <execution>
                         <id>reserve-network-port</id>

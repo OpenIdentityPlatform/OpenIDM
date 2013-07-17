@@ -123,7 +123,7 @@
 //
 //    //@Test
 //    public void activatorTest() throws IOException {
-////        URL connectorConfigurationURL = RemoteConnectorServerTest.class.getResource("/config/ConnectorInfoProviderServiceConfiguration.json");
+////        URL connectorConfigurationURL = RemoteConnectorServerTest.class.getResource("/config/provisioner.openicf.connectorinfoprovider.json");
 ////        Assert.assertNotNull(connectorConfigurationURL);
 ////        ObjectMapper mapper = new ObjectMapper();
 ////        Map<String, Object> properties = mapper.readValue(connectorConfigurationURL, Map.class);
