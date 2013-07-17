@@ -32,18 +32,18 @@ import static org.testng.Assert.assertEquals;
 /**
  * @author Phill Cunnington
  */
-public class ADPassthroughModuleTest {
+public class PassthroughModuleTest {
 
-    private ADPassthroughModule adPassthroughModule;
+    private PassthroughModule passthroughModule;
 
-    private ADPassthroughAuthenticator adPassthroughAuthenticator;
+    private PassthroughAuthenticator passthroughAuthenticator;
 
     @BeforeMethod
     public void setUp() {
 
-        adPassthroughAuthenticator = mock(ADPassthroughAuthenticator.class);
+        passthroughAuthenticator = mock(PassthroughAuthenticator.class);
 
-        adPassthroughModule = new ADPassthroughModule(adPassthroughAuthenticator);
+        passthroughModule = new PassthroughModule(passthroughAuthenticator);
     }
 
     @Test
@@ -62,11 +62,11 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
-        verifyZeroInteractions(adPassthroughAuthenticator);
+        verifyZeroInteractions(passthroughAuthenticator);
         verify(authData, never()).setUsername(anyString());
         verify(authData, never()).setResource(anyString());
         verify(authData, never()).setUserId(anyString());
@@ -89,11 +89,11 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
-        verifyZeroInteractions(adPassthroughAuthenticator);
+        verifyZeroInteractions(passthroughAuthenticator);
         verify(authData, never()).setUsername(anyString());
         verify(authData, never()).setResource(anyString());
         verify(authData, never()).setUserId(anyString());
@@ -116,11 +116,11 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
-        verifyZeroInteractions(adPassthroughAuthenticator);
+        verifyZeroInteractions(passthroughAuthenticator);
         verify(authData, never()).setUsername(anyString());
         verify(authData, never()).setResource(anyString());
         verify(authData, never()).setUserId(anyString());
@@ -143,11 +143,11 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
-        verifyZeroInteractions(adPassthroughAuthenticator);
+        verifyZeroInteractions(passthroughAuthenticator);
         verify(authData, never()).setUsername(anyString());
         verify(authData, never()).setResource(anyString());
         verify(authData, never()).setUserId(anyString());
@@ -169,10 +169,10 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(adPassthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(true);
+        given(passthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(true);
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
@@ -195,10 +195,10 @@ public class ADPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(adPassthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(false);
+        given(passthroughAuthenticator.authenticate(authData, "PASSWORD")).willReturn(false);
 
         //When
-        AuthStatus authStatus = adPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 authData);
 
         //Then
@@ -214,7 +214,7 @@ public class ADPassthroughModuleTest {
         Subject serviceSubject = new Subject();
 
         //When
-        AuthStatus authStatus = adPassthroughModule.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = passthroughModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);

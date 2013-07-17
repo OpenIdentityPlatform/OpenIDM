@@ -13,7 +13,7 @@
             "sessionModule" : {
                 "className" : "org.forgerock.jaspi.modules.iwa.JwtSessionModule",
                 "keyAlias" : "openidm-localhost",
-                "privateKeyPassword" : "changeit",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
                 "keystoreType" : "&{openidm.keystore.type}",
                 "keystoreFile" : "&{openidm.keystore.location}",
                 "keystorePassword" : "&{openidm.keystore.password}",
@@ -22,7 +22,7 @@
             },
             "authModules" : [
                 {
-                    "className" : "org.forgerock.openidm.jaspi.modules.IWAADPassthroughModule",
+                    "className" : "org.forgerock.openidm.jaspi.modules.IWAPassthroughModule",
                     "servicePrincipal" : "SERVICE_PRINCIPAL",
                     "keytabFileName" : "KEYTAB_FILE_LOCATION",
                     "kerberosRealm" : "KERBEROS_REALM",

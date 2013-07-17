@@ -19,24 +19,36 @@ package org.forgerock.openidm.jaspi.config;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.jaspi.container.config.AuthContextConfiguration;
 import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
+import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.http.ContextRegistrator;
+import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
+import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.message.AuthException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -50,15 +62,15 @@ import java.util.Map;
  *     "serverAuthConfig" : {
  *         "iwaAdPassthrough" : {
  *             "sessionModule" : {
- *                 "className" : "org.forgerock.jaspi.modules.JwtSessionModule"
+ *                 "name" : "JWT_SESSION"
  *             },
  *             "authModules" : [
  *                 {
- *                     "className" : "org.forgerock.openidm.jaspi.modules.IWAModule",
+ *                     "name" : "IWA",
  *                     "someSetting" : "some-value"
  *                 },
  *                 {
- *                     "className" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "name" : "PASSTHROUGH",
  *                     "someSetting" : "some-value"
  *                 }
  *             ]
@@ -66,7 +78,7 @@ import java.util.Map;
  *         "adPassthroughOnly" : {
  *             "authModules" : [
  *                 {
- *                     "className" : "org.forgerock.openidm.jaspi.modules.ADPassthroughModule",
+ *                     "name" : "PASSTHROUGH",
  *                     "passThroughAuth" : "system/AD/account"
  *                 }
  *             ]
@@ -88,6 +100,8 @@ public class OSGiAuthnFilterBuilder {
 
     /** The PID for this component. */
     public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
+
+    private static final String DEFAULT_LOGGER_CLASS_NAME = IDMAuthenticationAuditLogger.class.getCanonicalName();
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -115,6 +129,7 @@ public class OSGiAuthnFilterBuilder {
     @Activate
     protected void activate(ComponentContext context) {
         ConfigurationManager.unconfigure();
+        registerAuthnFilter();
         configureAuthenticationFilter(config);
     }
 
@@ -131,13 +146,20 @@ public class OSGiAuthnFilterBuilder {
             return;
         }
 
+        JsonValue serverAuthConfig = jsonConfig.get("serverAuthConfig").required();
+
         Configuration configuration = new Configuration();
+        String auditLoggerClassName = serverAuthConfig.get("auditLogger").defaultTo(DEFAULT_LOGGER_CLASS_NAME).asString();
+        configuration.setAuditLoggerClassName(auditLoggerClassName);
+
         // For each ServerAuthConfig
-        for (Map.Entry<String, Object> entry : jsonConfig.get("serverAuthConfig").required().asMap().entrySet()) {
-            if ("auditLogger".equals(entry.getKey())) {
-                configuration.setAuditLoggerClassName((String) entry.getValue());
+        for (String serverAuthConfigKey : serverAuthConfig.keys()) {
+            if ("auditLogger".equals(serverAuthConfigKey)) {
+                continue;
             } else {
-                configuration.addAuthContext(entry.getKey(), (Map<String, Object>) entry.getValue());
+                AuthContextConfiguration authContextConfiguration = configuration.addAuthContext(serverAuthConfigKey);
+                addAuthContext(authContextConfiguration, serverAuthConfig.get(serverAuthConfigKey));
+                authContextConfiguration.done();
             }
         }
 
@@ -145,6 +167,70 @@ public class OSGiAuthnFilterBuilder {
             ConfigurationManager.configure(configuration);
         } catch (AuthException e) {
             logger.error("Failed to configure the commons Authentication Filter");
+        }
+    }
+
+    /**
+     *
+     *
+     * @param authContextConfiguration
+     * @param authContextConfig
+     */
+    private void addAuthContext(AuthContextConfiguration authContextConfiguration, JsonValue authContextConfig) {
+
+        JsonValue sessionModuleConfig = authContextConfig.get("sessionModule");
+        if (sessionModuleConfig != null) {
+            Map<String, Object> moduleProperties = getAuthModuleProperties(sessionModuleConfig);
+            if (moduleProperties != null) {
+                authContextConfiguration.setSessionModule(moduleProperties);
+            }
+        }
+
+        Iterator<JsonValue> authModulesIter = authContextConfig.get("authModules").required().iterator();
+        while (authModulesIter.hasNext()) {
+            JsonValue authModuleConfig = authModulesIter.next();
+            Map<String, Object> moduleProperties = getAuthModuleProperties(authModuleConfig);
+            if (moduleProperties != null) {
+                authContextConfiguration.addAuthenticationModule(moduleProperties);
+            }
+        }
+    }
+
+    /**
+     *
+     *
+     * @param authModuleConfig
+     * @return
+     */
+    private Map<String, Object> getAuthModuleProperties(JsonValue authModuleConfig) {
+
+        boolean enabled = authModuleConfig.get("enabled").defaultTo(true).asBoolean();
+        if (enabled) {
+
+            String className = resolveAuthModuleClassName(authModuleConfig.get("name").asString());
+
+            Map<String, Object> moduleProperties = new HashMap<String, Object>(authModuleConfig.asMap());
+            moduleProperties.remove("enabled");
+            moduleProperties.remove("name");
+            moduleProperties.put("className", className);
+
+            return moduleProperties;
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     *
+     * @param authModuleName
+     * @return
+     */
+    private String resolveAuthModuleClassName(String authModuleName) {
+        try {
+            return IDMAuthModule.valueOf(authModuleName).getAuthModuleClass().getCanonicalName();
+        } catch (IllegalArgumentException e) {
+            return authModuleName;
         }
     }
 
@@ -166,7 +252,7 @@ public class OSGiAuthnFilterBuilder {
      * @param router The JsonResource router to bind.
      */
     private void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
+        OSGiAuthnFilterBuilder.router = new JsonResourceObjectSet(router);
     }
 
     /**
@@ -175,7 +261,7 @@ public class OSGiAuthnFilterBuilder {
      * @param router The JsonResource router to unbind.
      */
     private void unbindRouter(JsonResource router) {
-        this.router = null;
+        OSGiAuthnFilterBuilder.router = null;
     }
 
     /**
@@ -185,5 +271,34 @@ public class OSGiAuthnFilterBuilder {
      */
     public static ObjectSet getRouter() {
         return router;
+    }
+
+    private ServiceRegistration serviceRegistration;
+
+    private void registerAuthnFilter() {
+
+        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
+        filterMapping.setFilter(new AuthNFilter());
+        filterMapping.setHttpContextId("openidm");
+        filterMapping.setServletNames("OpenIDM Authentication");
+        filterMapping.setUrlPatterns("/openidm/*");
+
+        Map<String, String> initParams = new HashMap<String, String>();
+        initParams.put("moduleConfiguration", "idmAuth");
+        filterMapping.setInitParams(initParams);
+
+        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
+    }
+
+    @Deactivate
+    protected synchronized void deactivate(ComponentContext context) {
+        if (serviceRegistration != null) {
+            try {
+                serviceRegistration.unregister();
+                logger.info("Unregistered authentication filter.");
+            } catch (Exception ex) {
+                logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
+            }
+        }
     }
 }

@@ -32,34 +32,34 @@ import java.util.List;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
- * to Active Directory.
+ * to a OpenICF Connector.
  *
  * @author Phill Cunnington
  */
-public class ADPassthroughModule extends IDMServerAuthModule {
+public class PassthroughModule extends IDMServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ADPassthroughModule.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
 
-    private ADPassthroughAuthenticator adPassthroughAuthenticator;
+    private PassthroughAuthenticator passthroughAuthenticator;
 
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public ADPassthroughModule() {
+    public PassthroughModule() {
     }
 
     /**
      * Constructor used by tests to inject dependencies.
      *
-     * @param adPassthroughAuthenticator A mock of an ADPassthroughAuthenticator instance.
+     * @param passthroughAuthenticator A mock of an PassthroughAuthenticator instance.
      */
-    public ADPassthroughModule(ADPassthroughAuthenticator adPassthroughAuthenticator) {
-        this.adPassthroughAuthenticator = adPassthroughAuthenticator;
+    public PassthroughModule(PassthroughAuthenticator passthroughAuthenticator) {
+        this.passthroughAuthenticator = passthroughAuthenticator;
     }
 
     /**
-     * Initialises the AD Passthrough authentication module with the OSGi json configuration.
+     * Initialises the Passthrough authentication module with the OSGi json configuration.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
@@ -79,12 +79,12 @@ public class ADPassthroughModule extends IDMServerAuthModule {
         JsonValue properties = config.get("propertyMapping");
         String userRolesProperty = properties.get("userRoles").asString();
 
-        adPassthroughAuthenticator = new ADPassthroughAuthenticator(passThroughAuth, userRolesProperty, defaultRoles);
+        passthroughAuthenticator = new PassthroughAuthenticator(passThroughAuth, userRolesProperty, defaultRoles);
 
     }
 
     /**
-     * Validates the client's request by passing through the request to be authenticated against AD.
+     * Validates the client's request by passing through the request to be authenticated against a OpenICF Connector.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
@@ -97,12 +97,12 @@ public class ADPassthroughModule extends IDMServerAuthModule {
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
             AuthData authData) throws AuthException {
 
-        LOGGER.debug("ADPassthroughModule: validateRequest START");
+        LOGGER.debug("PassthroughModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            LOGGER.debug("ADPassthroughModule: Delegating call to internal AuthFilter");
+            LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
 
             String username = request.getHeader("X-OpenIDM-Username");
             String password = request.getHeader("X-OpenIDM-Password");
@@ -114,22 +114,22 @@ public class ADPassthroughModule extends IDMServerAuthModule {
             }
 
             authData.setUsername(username);
-            boolean authenticated = adPassthroughAuthenticator.authenticate(authData, password);
+            boolean authenticated = passthroughAuthenticator.authenticate(authData, password);
 
             if (authenticated) {
-                LOGGER.debug("ADPassthroughModule: Authentication successful");
+                LOGGER.debug("PassthroughModule: Authentication successful");
                 LOGGER.debug("Found valid session for {} id {} with roles {}", authData.getUsername(),
                         authData.getUserId(), authData.getRoles());
 
                 //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;
             } else {
-                LOGGER.debug("ADPassthroughModule: Authentication failed");
+                LOGGER.debug("PassthroughModule: Authentication failed");
                 //Auth failure will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            LOGGER.debug("ADPassthroughModule: validateRequest END");
+            LOGGER.debug("PassthroughModule: validateRequest END");
         }
     }
 
