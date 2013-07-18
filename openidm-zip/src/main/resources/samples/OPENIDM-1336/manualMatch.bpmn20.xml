@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+
+
+    <process id="manualMatch" name="Manual Linking Workflow">
+        <startEvent id="start" />
+        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
+        <scriptTask id="readUserData" scriptFormat="groovy">
+            <script>
+                sourceuser = openidm.read('managed/user/' + sourceId)
+                correlationQueryParams = [query : [Equals: [field : 'userName',values : [sourceuser.userName]]]]
+                results = openidm.query("system/business/account", correlationQueryParams)
+                
+                possibleTargets = ['__ignore' : 'Ignore']
+                for (user in results.result) {
+                    possibleTargets.put(user.uid, user.userName + ' (' + user.uid + ' - ' + user.familyName + ', ' + user.givenName + ')')
+                }
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="readUserData" targetRef="matchAccounts"/>
+        
+        <userTask id="matchAccounts" name="Manual Linking Task" activiti:assignee="systemadmin">
+            <extensionElements>
+                <activiti:formProperty id="_formGenerationTemplate"
+                                       type="string" default="
+&lt;style&gt;
+#targetLinking fieldset {
+       margin-top: 0;
+}
+#targetLinking .group-field {
+       float: left !important;
+       width: 100%;
+}
+#targetLinking .field label {
+       text-align: left;
+}
+#targetLinking .field input,#targetLinking .field select {
+       clear: both;
+}
+#targetLinking .field .validation-message {
+       clear: none !important;
+       margin-left: 20px !important;
+       float: left !important;
+}
+&lt;/style&gt;
+
+&lt;h2 class=&quot;header&quot;&gt;Source Account Details&lt;/h2&gt;
+&lt;fieldset&gt;
+    &lt;div class=&quot;fields&quot;&gt;
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label&gt;UserName&lt;/label&gt; 
+            &lt;input type=&quot;text&quot; value=&quot;{{variables.sourceuser.userName}}&quot; readonly/&gt; 
+        &lt;/div&gt;
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label&gt;Family Name&lt;/label&gt; 
+            &lt;input type=&quot;text&quot; value=&quot;{{variables.sourceuser.familyName}}&quot; readonly/&gt; 
+        &lt;/div&gt;
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label&gt;Given Name&lt;/label&gt; 
+            &lt;input type=&quot;text&quot; value=&quot;{{variables.sourceuser.givenName}}&quot; readonly/&gt; 
+        &lt;/div&gt;
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label&gt;Email&lt;/label&gt; 
+            &lt;input type=&quot;text&quot; value=&quot;{{variables.sourceuser.email}}&quot; readonly/&gt; 
+        &lt;/div&gt;
+        &lt;div class=&quot;field&quot;&gt;
+            &lt;label&gt;Department&lt;/label&gt; 
+            &lt;input type=&quot;text&quot; value=&quot;{{variables.sourceuser.department}}&quot; readonly/&gt; 
+        &lt;/div&gt;
+        &lt;div class=&quot;field&quot;&gt;  
+            &lt;label class=&quot;light&quot;&gt;{{t &quot;Possible targets&quot;}}&lt;/label&gt; 
+            {{select  variables.possibleTargets &quot;target&quot; &quot;0&quot; &quot;&quot;  &quot; data-validator='required' &quot;}}
+
+            &lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
+            &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt; 
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/fieldset&gt;
+
+&lt;script&gt;
+    {{#if assignee}}
+    require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], function (v) { 
+    v.bindValidators($(&apos;#targetLinking form&apos;), &quot;managed/user/&quot;, function () {
+        v.validateAllFields($(&apos;#targetLinking form&apos;));
+    });
+    });
+    {{/if}}
+&lt;/script&gt;" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="matchAccounts" targetRef="linkAccount"/>
+        
+        <scriptTask id="linkAccount" scriptFormat="groovy">
+            <script>
+                if ("__ignore" != target) {
+                    params = new java.util.HashMap();
+                    params.put('_action', 'performAction')
+                    params.put('reconId', reconId)
+                    params.put('mapping', mapping)
+                    params.put('action', 'link')
+                    params.put('sourceId', sourceId)
+                    params.put('targetId', target)
+                    openidm.action('sync', params)
+                }
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="linkAccount" targetRef="end"/>
+        <endEvent id="end"/>
+    </process>
+</definitions>
