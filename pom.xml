@@ -290,7 +290,7 @@
 
     <modules>
         <module>openidm-audit-old</module>
-        <module>openidm-cluster-old</module>
+        <module>openidm-cluster</module>
         <module>openidm-config</module>
         <module>openidm-core</module>
         <module>openidm-crypto</module>
