@@ -113,7 +113,7 @@
             "links" : "managedUser_systemBusiness",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "map = {'query': {'Equals': {'field': 'uid', 'values': [ source.userName ]}}};map;"
+                "source" : "map = {'query': {'Equals': {'field': 'userName', 'values': [ source.userName ]}}};map;"
             },
             "enableSync" : false,
             "validSource" : {
@@ -193,7 +193,11 @@
                 },
                 {
                     "situation" : "AMBIGUOUS",
-                    "action" : "IGNORE"
+                    "action" : {
+                        "workflowName" : "manualMatch",
+                        "type" : "text/javascript",
+                        "file" : "bin/defaults/script/workflow/workflow.js"
+                    }
                 },
                 {
                     "situation" : "MISSING",
