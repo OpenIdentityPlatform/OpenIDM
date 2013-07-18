@@ -240,9 +240,7 @@ public class OrientDBRepoService implements RequestHandler {
                 // Use the Document Database
                 Pair<String, Object> id = parseResourceName(request, partition);
                 ODocument doc = getByID(id, request.getFields(), db);
-
-                logger.trace("Completed get for orientType: {}, id: {}", id.getLeft(), id
-                        .getRight());
+                logger.trace("Completed get for orientType: {}, id: {}", id.getLeft(), id.getRight());
                 handler.handleResult(DocumentUtil.toResource(doc));
             }
         } catch (final Throwable t) {
@@ -295,14 +293,12 @@ public class OrientDBRepoService implements RequestHandler {
 
                 Pair<OClass, String> id =
                         parseResourceName(db.getMetadata().getSchema(), request, partition);
-
+                
                 final ODocument newDocument = new ODocument(id.getLeft());
 
                 DocumentUtil.toDocument(id.getRight(), null, request.getContent(), newDocument);
-
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Created ODocument for id: {} to save {}", id.getRight(),
-                            newDocument.toJSON());
+                    logger.trace("Created ODocument for id: {} to save {}", id.getRight(), newDocument.toJSON());
                 }
 
                 try {
@@ -315,8 +311,7 @@ public class OrientDBRepoService implements RequestHandler {
 
                             db.save(newDocument);
                         } catch (Throwable t) {
-                            logger.warn("Failed to save the generated Id of object {}", newDocument
-                                    .getIdentity());
+                            logger.warn("Failed to save the generated Id of object {}", newDocument.getIdentity());
                         }
                     }
 
@@ -387,8 +382,7 @@ public class OrientDBRepoService implements RequestHandler {
                 // Use the Document Database
 
                 final Pair<String, Object> id = parseResourceName(request, partition);
-                final ODocument existingODocument =
-                        getODocumentForUpdate(id, request.getRevision(), db);
+                final ODocument existingODocument = getODocumentForUpdate(id, request.getRevision(), db);
 
                 handler.handleResult(update(existingODocument, id, request, db));
             }
@@ -480,24 +474,16 @@ public class OrientDBRepoService implements RequestHandler {
             final UpdateRequest request, final ODatabaseDocumentTx database)
             throws ResourceException {
 
-        // At this point we don't know if the last segment of resourceName is
-        // meant to be id or type
-        // The https://bugster.forgerock.org/jira/browse/OPENIDM-739 is not
-        // fixed at this level
-        // the partition=ui but resourceName will be parsed to {"notification"}
-        // or {"notification","7"}
-
-        // partition and optional sub-type together defines the OrientDB
-        // Document type!?
+        // At this point we don't know if the last segment of resourceName is meant to be id or type
+        // The https://bugster.forgerock.org/jira/browse/OPENIDM-739 is not fixed at this level
+        // the partition=ui but resourceName will be parsed to {"notification"} or {"notification","7"}
+        // partition and optional sub-type together defines the OrientDB Document type!?
 
         try {
             database.begin();
             ODocument updatedODocument = null;
             if (null != request) {
-                updatedODocument =
-                        DocumentUtil.toDocument(null, request.getRevision(), request
-                                .getNewContent(), existingODocument);
-
+                updatedODocument = DocumentUtil.toDocument(null, request.getRevision(), request.getNewContent(), existingODocument);
             } else {
                 updatedODocument = existingODocument;
             }
@@ -900,7 +886,7 @@ public class OrientDBRepoService implements RequestHandler {
             final ODatabaseDocumentTx database) throws NotFoundException,
             InternalServerErrorException {
         ODocument oDocument = null;
-
+        
         if (id.getRight() instanceof ORecordId) {
             try {
                 ORecordId RID = (ORecordId) id.getRight();
@@ -915,10 +901,9 @@ public class OrientDBRepoService implements RequestHandler {
                 logger.error("Invalid id {}", id, e);
             }
         }
-
-        // TODO build the fileds from the fieldFilters
-        OSQLSynchQuery<ODocument> query =
-                new OSQLSynchQuery<ODocument>("select @rid from " + id.getLeft() + " where "
+        
+        // TODO build the fields from the fieldFilters
+        OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>("select @rid from " + id.getLeft() + " where "
                         + DocumentUtil.ORIENTDB_PRIMARY_KEY + " = ? ");
         try {
             List<ODocument> result = database.query(query, String.valueOf(id.getRight()));
