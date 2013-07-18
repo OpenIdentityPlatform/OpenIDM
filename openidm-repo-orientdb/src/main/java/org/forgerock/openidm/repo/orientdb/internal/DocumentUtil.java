@@ -117,7 +117,6 @@ public class DocumentUtil {
             return null;
         }
         try {
-
             //TODO: Improve the performance here
             if (null != content) {
                 for (String name : content.keys()) {
@@ -125,6 +124,11 @@ public class DocumentUtil {
                         content.remove(name);
                     }
                 }
+            }
+            
+            String tmpId = id;
+            if (null == tmpId) {
+            	tmpId = docToPopulate.field(ORIENTDB_PRIMARY_KEY);
             }
 
             if (null != content && content.size() > 0) {
@@ -137,11 +141,11 @@ public class DocumentUtil {
 
 
             // OpenIDM ID mapping
-            if (StringUtils.isNotBlank(id)) {
+            if (StringUtils.isNotBlank(tmpId)) {
                 if (!docToPopulate.containsField(ORIENTDB_PRIMARY_KEY)
                         || !docToPopulate.field(ORIENTDB_PRIMARY_KEY).equals(id)) {
-                    logger.trace("Setting primary key to {}", id);
-                    docToPopulate.field(ORIENTDB_PRIMARY_KEY, id);
+                    logger.trace("Setting primary key to {}", tmpId);
+                    docToPopulate.field(ORIENTDB_PRIMARY_KEY, tmpId);
                 }
             }
 
@@ -153,7 +157,7 @@ public class DocumentUtil {
                     docToPopulate.setVersion(rev);
                 }
             }
-
+            
             return docToPopulate;
         } catch (JsonProcessingException e) {
             throw new BadRequestException("Failed to convert the content", e);
