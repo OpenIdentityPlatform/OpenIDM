@@ -36,7 +36,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
-import org.forgerock.openidm.provisioner.openicf.impl.BundleContextStub;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
@@ -84,31 +82,19 @@ public class ConnectorInfoProviderServiceTest {
 
         properties = new Hashtable<String, Object>();
         properties.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, config);
-        beforeMethod();
-    }
 
-    public void beforeMethod() throws Exception {
-        Map<String, String> systemProperties = getTestSystemConfiguration();
+        // Set root
+        URL root = ConnectorInfoProviderServiceTest.class.getResource("/");
+        Assert.assertNotNull(root);
+        String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
+        System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
 
         ComponentContext context = mock(ComponentContext.class);
         // stubbing
         when(context.getProperties()).thenReturn(properties);
-        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
-        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
+        ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
         instance.activate(context);
         testableConnectorInfoProvider = instance;
-    }
-
-    // @Test
-    public void testActivateProperly() throws Exception {
-        Map<String, String> systemProperties = getTestSystemConfiguration();
-
-        ComponentContext context = mock(ComponentContext.class);
-        // stubbing
-        when(context.getProperties()).thenReturn(properties);
-        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
-        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
-        instance.activate(context);
     }
 
     // @Test(expectedExceptions = ComponentException.class)
@@ -125,18 +111,10 @@ public class ConnectorInfoProviderServiceTest {
 
     @Test
     public void testFindConnectorInfo() throws Exception {
-        Map<String, String> systemProperties = getTestSystemConfiguration();
-        ComponentContext context = mock(ComponentContext.class);
-        // stubbing
-        when(context.getProperties()).thenReturn(properties);
-        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
-        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
-        instance.activate(context);
-
         ConnectorReference ref =
                 new ConnectorReference(new ConnectorKey(
-                        "org.forgerock.openicf.connectors.file.openicf-xml-connector", "1.1.0.0",
-                        "com.forgerock.openicf.xml.XMLConnector"));
+                        "org.forgerock.openicf.connectors.xml-connector", "1.1.0.1",
+                        "org.forgerock.openicf.connectors.xml.XMLConnector"));
         Assert.assertNotNull(testableConnectorInfoProvider.findConnectorInfo(ref),
                 "XML Connector is missing");
 
@@ -146,8 +124,8 @@ public class ConnectorInfoProviderServiceTest {
     public void testCreateSystemConfiguration() throws URISyntaxException {
         ConnectorInfo xmlConnectorInfo = null;
         ConnectorKey key =
-                new ConnectorKey("org.forgerock.openicf.connectors.file.openicf-xml-connector",
-                        "1.1.0.0", "com.forgerock.openicf.xml.XMLConnector");
+                new ConnectorKey("org.forgerock.openicf.connectors.xml-connector", "1.1.0.1",
+                        "org.forgerock.openicf.connectors.xml.XMLConnector");
         for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
             if (key.equals(info.getConnectorKey())) {
                 xmlConnectorInfo = info;
@@ -167,6 +145,7 @@ public class ConnectorInfoProviderServiceTest {
         URI xmlFilePath = xmlRoot.toURI().resolve("data.xml");
         configuration.getConfigurationProperties().setPropertyValue("xmlFilePath",
                 new File(xmlFilePath));
+        configuration.getConfigurationProperties().setPropertyValue("createFileIfNotExists", true);
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -182,32 +161,11 @@ public class ConnectorInfoProviderServiceTest {
     @Test
     public void testGetAllConnectorInfo() throws Exception {
         List<ConnectorInfo> result = testableConnectorInfoProvider.getAllConnectorInfo();
-        assertThat(result).isNotNull().as(
-                "XML connector must be in /connectorServer/connectors/ directory").isNotEmpty();
+        assertThat(result).isNotNull().as("XML connector must be in /connectors/ directory")
+                .isNotEmpty();
     }
 
-    private Map<String, String> getTestSystemConfiguration() throws Exception {
-        URL root = ConnectorInfoProviderServiceTest.class.getResource("/connectorServer/");
-        Assert.assertNotNull(root);
-        String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
-        Map<String, String> systemProperties = new HashMap<String, String>(1);
-        systemProperties.put(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
-        return systemProperties;
-    }
-
-    public class InnerConnectorInfoProviderService extends ConnectorInfoProviderService {
-        @Override
-        public void activate(ComponentContext context) {
-            super.activate(context);
-        }
-
-        @Override
-        public void deactivate(ComponentContext context) {
-            super.deactivate(context);
-        }
-    }
-
-    @Test()
+    @Test(enabled = false)
     public void testPropertiesToEncrypt() throws Exception {
         InputStream inputStream =
                 ConnectorInfoProviderServiceTest.class
