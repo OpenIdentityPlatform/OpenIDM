@@ -58,8 +58,8 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.ConfigurationManager;
-import org.forgerock.openidm.config.InternalErrorException;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InternalErrorException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
@@ -897,7 +897,7 @@ public class ConfigurationManagerImpl
      *            The OSGi configuration
      * @return The configuration with any properties encrypted that a
      *         component's meta data marks as encrypted
-     * @throws org.forgerock.openidm.config.InvalidException
+     * @throws org.forgerock.openidm.config.enhanced.InvalidException
      *             if the configuration was not valid JSON and could not be
      *             parsed
      * @throws org.forgerock.openidm.config.InternalErrorException

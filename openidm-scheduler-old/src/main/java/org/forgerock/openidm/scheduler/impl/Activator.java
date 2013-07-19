@@ -26,8 +26,8 @@
 package org.forgerock.openidm.scheduler.impl;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.scheduler.SchedulerConfig;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

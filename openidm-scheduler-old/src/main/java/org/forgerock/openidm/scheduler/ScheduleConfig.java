@@ -35,7 +35,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;

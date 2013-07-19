@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.config;
+package org.forgerock.openidm.config.enhanced;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
