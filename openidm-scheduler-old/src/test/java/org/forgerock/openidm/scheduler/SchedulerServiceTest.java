@@ -27,9 +27,9 @@ import java.util.Map;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 
 import static org.mockito.Mockito.*;
 

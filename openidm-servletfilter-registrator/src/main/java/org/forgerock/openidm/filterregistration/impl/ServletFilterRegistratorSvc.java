@@ -44,7 +44,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
 import org.forgerock.openidm.http.ContextRegistrator;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;

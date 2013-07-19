@@ -33,7 +33,7 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
 import org.osgi.framework.BundleContext;

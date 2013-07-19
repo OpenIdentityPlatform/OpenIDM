@@ -70,7 +70,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.MetaDataProvider;

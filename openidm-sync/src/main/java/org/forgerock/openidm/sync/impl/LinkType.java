@@ -30,7 +30,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 
 /**
  * Represents the sharable Link Types,

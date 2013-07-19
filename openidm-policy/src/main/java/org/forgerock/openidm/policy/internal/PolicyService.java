@@ -44,7 +44,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.script.AbstractScriptedService;

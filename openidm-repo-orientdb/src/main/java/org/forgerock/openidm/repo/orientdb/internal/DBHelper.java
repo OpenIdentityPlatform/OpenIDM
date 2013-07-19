@@ -32,7 +32,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public final class DBHelper {
      *            true if it should also check the DB exists in the state to
      *            match the passed configuration, and to set it up to match
      * @return the pool
-     * @throws org.forgerock.openidm.config.InvalidException
+     * @throws org.forgerock.openidm.config.enhanced.InvalidException
      */
     public synchronized static void getPool(String dbURL, String user, String password,
             JsonValue completeConfig, boolean setupDB) throws InvalidException, IOException {
@@ -142,7 +142,7 @@ public final class DBHelper {
      * @param password
      *            the orientdb password to connect
      * @return the initialized pool
-     * @throws org.forgerock.openidm.config.InvalidException
+     * @throws org.forgerock.openidm.config.enhanced.InvalidException
      */
     private static void initPool(String dbURL, String user, String password)
             throws InvalidException {
