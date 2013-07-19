@@ -69,11 +69,10 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * Handle sync failure by counting retries on this sync token, passing to
      * (optional) post-retry handler when retries are exceeded.
      *
-     *
      * @param syncFailure @throws SyncHandlerException when retries are not exceeded
      * @param failureCause the cause of the sync failure
      */
-    public void invoke(JsonValue syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
         Map<String,Object> scope = scopeFactory.newInstance(ObjectSetContext.get());
@@ -84,10 +83,9 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
         try {
             script.exec(scope);
         } catch (Exception e) {
-            logger.debug("sync failure script on {} encountered exception", 
-                    syncFailure.get("systemIdentifier").asString(), e);
+            logger.debug("sync failure script on {} encountered exception", syncFailure.get("systemIdentifier"), e);
             throw new SyncHandlerException("Issue with handling the failure during synchronize "
-                    + syncFailure.get("uid").asString() + " object. " + failureCause.getMessage()
+                    + syncFailure.get("uid") + " object: " + failureCause.getMessage()
                     + ". Failure handling reported " + e.getMessage(), e);
         }
     }

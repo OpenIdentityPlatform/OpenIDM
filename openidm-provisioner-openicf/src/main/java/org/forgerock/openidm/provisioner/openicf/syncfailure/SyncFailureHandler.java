@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.json.fluent.JsonValue;
+import java.util.Map;
 
 /**
  * A handler interface for liveSync failures.
@@ -31,6 +31,6 @@ public interface SyncFailureHandler
      * @param failureCause the cause of the exception
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(JsonValue syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException;
 }
