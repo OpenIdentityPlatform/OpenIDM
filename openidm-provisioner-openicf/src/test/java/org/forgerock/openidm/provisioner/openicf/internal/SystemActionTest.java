@@ -47,8 +47,7 @@ public class SystemActionTest {
         ObjectMapper mapper = new ObjectMapper();
         configuration =
                 new JsonValue(mapper.readValue(SystemActionTest.class
-                        .getResourceAsStream("/config/" + SystemActionTest.class.getCanonicalName()
-                                + ".json"), Map.class));
+                        .getResourceAsStream("/config/provisioner.openicf-test.json"), Map.class));
     }
 
     @Test
@@ -59,10 +58,5 @@ public class SystemActionTest {
             }
         }
         Assert.fail();
-    }
-
-    @Test
-    public void testGetScriptContextBuilders() throws Exception {
-
     }
 }

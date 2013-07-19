@@ -85,7 +85,7 @@
                           {
                               "systemType" : ".*TestConnector",
                               "actionType" : "Shell",
-                              "actionFile" : "&{launcher.working.location}login.cmd"
+                              "actionFile" : "login.cmd"
                           }
                       ]
           }
