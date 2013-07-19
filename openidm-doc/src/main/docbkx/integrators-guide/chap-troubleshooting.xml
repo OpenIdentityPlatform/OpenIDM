@@ -93,7 +93,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 
   <programlisting language="none">
 WARNING: Loading configuration file /path/to/openidm/conf/sync.json failed
-org.forgerock.openidm.config.InvalidException:
+org.forgerock.openidm.config.enhanced.InvalidException:
  Configuration for org.forgerock.openidm.sync could not be parsed and may not
      be valid JSON : Unexpected character ('}' (code 125)): expected a value
      at [Source: java.io.StringReader@3951f910; line: 24, column: 6]
