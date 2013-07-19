@@ -384,27 +384,27 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         getProperty {
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
-                if (arguments.length < 1 || arguments.length > 2) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
-                            .name(), arguments));
+            	boolean useCache = false;
+                if (arguments.length < 1 || arguments.length > 3) {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
+                }
+                if (arguments.length == 3) {
+                	useCache = (Boolean) arguments[2];
                 }
                 if (arguments[0] instanceof String) {
                     String name = (String) arguments[0];
-                    Object result = propertiesCache.get(name);
+                    Object result = null;
+                    if (useCache) {
+                    	result = propertiesCache.get(name);
+                    }
                     if (null == result) {
                         Object defaultValue = arguments.length == 2 ? arguments[1] : null;
-                        defaultValue =
-                                IdentityServer.getInstance().getProperty(name, defaultValue,
-                                        Object.class);
-                        result = propertiesCache.putIfAbsent(name, defaultValue);
-                        if (result == null) {
-                            result = defaultValue;
-                        }
+                        result = IdentityServer.getInstance().getProperty(name, defaultValue, Object.class);
+                        propertiesCache.putIfAbsent(name, result);
                     }
                     return result;
                 } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
-                            .name(), arguments));
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
                 }
             }
         },
@@ -413,8 +413,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             public Object call(Parameter scope, Function callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length != 0) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
-                            .name(), arguments));
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
                 }
                 return IdentityServer.getInstance().getWorkingLocation().getAbsolutePath();
             }
