@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.forgerock.json.fluent.JsonValue;
+import java.util.Map;
 
 /**
  * A Null-object SyncFailureHandler that implements the equivalent of an "ignore"
@@ -27,12 +27,11 @@ public class NullSyncFailureHandler implements SyncFailureHandler {
     /**
      * Handle sync failure.
      *
-     *
      * @param syncFailure contains the sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(JsonValue syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
         // Null object pattern - does nothing - everything is "OK"
     }

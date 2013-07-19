@@ -61,6 +61,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
 // SLF4J
+import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +138,7 @@ public class Servlet extends RestletRouterServlet {
     protected synchronized void bindRestlet(Restlet restlet, Map<String, Object> properties) {
         Object path = properties.get(PATH_PROPERTY);
         if (path != null && path instanceof String) { // service is specified as internally routable
-            attach((String)path, restlet);
+            attach((String) path, restlet);
         }
     }
     protected synchronized void unbindRestlet(Restlet restlet, Map<String, Object> properties) {
@@ -315,8 +316,7 @@ public class Servlet extends RestletRouterServlet {
                 throw ex;
             } catch (JsonResourceException ex) {
                 logger.warn("Failure in augmenting security context: {}", ex.getMessage(), ex);
-                throw new RuntimeException("Failure in augmenting security context: " 
-                            + ex.getMessage(), ex);
+                throw new ResourceException(ex);
             }
 
             logger.debug("New populated context: {}", result);
