@@ -41,6 +41,8 @@ public class PassthroughModule extends IDMServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
 
+    private static String passThroughAuth;
+
     private PassthroughAuthenticator passthroughAuthenticator;
 
     /**
@@ -74,7 +76,7 @@ public class PassthroughModule extends IDMServerAuthModule {
         JsonValue config = new JsonValue(options);
 
         List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        String passThroughAuth = config.get("passThroughAuth").asString();
+        passThroughAuth = config.get("passThroughAuth").asString();
 
         // User properties - default to NULL if not defined
         JsonValue properties = config.get("propertyMapping");
@@ -101,6 +103,8 @@ public class PassthroughModule extends IDMServerAuthModule {
         LOGGER.debug("PassthroughModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
+        request.setAttribute("passThroughAuth", passThroughAuth);
 
         try {
             LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");

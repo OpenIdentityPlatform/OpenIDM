@@ -6,7 +6,7 @@ logger.debug("Augment context for: {}", security.username);
 var userDetail,
     params,
     rolesArr,
-    resource = "system/AD/account";
+    resource = request.attributes["passThroughAuth"];
 
 if (security && security.username && security.username !== "anonymous"
     && (!(security.userid && security.userid.id && security.userid.component && security["openidm-roles"]))) {
@@ -31,7 +31,7 @@ if (security && security.username && security.username !== "anonymous"
             security.userid = {"component" : resource, "id" : userDetail.result[0]._id };
         }
         // Only augment roles if missing
-        if (!security["openidm-roles"]) {
+        if (!security["openidm-roles"] || !security["openidm-roles"].length && userDetail.result[0].memberOf.length) {
             rolesArr = userDetail.result[0].memberOf;
             security["openidm-roles"] = rolesArr;
         }
