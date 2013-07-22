@@ -32,23 +32,22 @@ import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.http.ContextRegistrator;
+import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.message.AuthException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -127,7 +126,7 @@ public class OSGiAuthnFilterBuilder {
      * @param context The ComponentContext.
      */
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws Exception {
         ConfigurationManager.unconfigure();
         registerAuthnFilter();
         configureAuthenticationFilter(config);
@@ -171,10 +170,12 @@ public class OSGiAuthnFilterBuilder {
     }
 
     /**
+     * Adds a configured Auth Context to the authentication filter.
+     * <p>
+     * The Auth Context details the list of Session and Auth modules in the authentication chain.
      *
-     *
-     * @param authContextConfiguration
-     * @param authContextConfig
+     * @param authContextConfiguration The AuthContextConfiguration builder instance.
+     * @param authContextConfig The auth context configuration.
      */
     private void addAuthContext(AuthContextConfiguration authContextConfiguration, JsonValue authContextConfig) {
 
@@ -197,10 +198,10 @@ public class OSGiAuthnFilterBuilder {
     }
 
     /**
+     * Parses the auth module configuration into a map of module properties.
      *
-     *
-     * @param authModuleConfig
-     * @return
+     * @param authModuleConfig The auth module configuration.
+     * @return The auth module properties.
      */
     private Map<String, Object> getAuthModuleProperties(JsonValue authModuleConfig) {
 
@@ -221,10 +222,11 @@ public class OSGiAuthnFilterBuilder {
     }
 
     /**
+     * Resolves the given auth module name from either a core IDM auth module name from {@link IDMAuthModule} or
+     * a fully qualified class name of the auth module.
      *
-     *
-     * @param authModuleName
-     * @return
+     * @param authModuleName The auth module name.
+     * @return The auth module class name.
      */
     private String resolveAuthModuleClassName(String authModuleName) {
         try {
@@ -273,23 +275,63 @@ public class OSGiAuthnFilterBuilder {
         return router;
     }
 
+    @Reference(
+            name = "ref_ServletFilterRegistration",
+            referenceInterface = ServletFilterRegistration.class,
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            bind = "bindServletFilterRegistration",
+            unbind = "unbindServletFilterRegistration"
+    )
+    private ServletFilterRegistration servletFilterRegistration;
+    private void bindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+        this.servletFilterRegistration = servletFilterRegistration;
+    }
+    private void unbindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+        this.servletFilterRegistration = null;
+    }
+
     private ServiceRegistration serviceRegistration;
 
-    private void registerAuthnFilter() {
-
-        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
-        filterMapping.setFilter(new AuthNFilter());
-        filterMapping.setHttpContextId("openidm");
-        filterMapping.setServletNames("OpenIDM Authentication");
-        filterMapping.setUrlPatterns("/openidm/*");
+    /**
+     * Registers the Authentication Filter in OSGi.
+     *
+     * @throws Exception If a problem occurs whilst registering the filter.
+     */
+    private void registerAuthnFilter() throws Exception {
 
         Map<String, String> initParams = new HashMap<String, String>();
         initParams.put("moduleConfiguration", "idmAuth");
-        filterMapping.setInitParams(initParams);
 
-        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
+        Map<String, String> augmentSecurityContext = new HashMap<String, String>();
+        augmentSecurityContext.put("type", "text/javascript");
+        augmentSecurityContext.put("file", "script/authnPopulateContext.js");
+
+        Map<String, Object> scriptExtensions = new HashMap<String, Object>();
+        scriptExtensions.put("augmentSecurityContext", augmentSecurityContext);
+
+        List<String> urlPatterns = new ArrayList<String>();
+        urlPatterns.add("/openidm/*");
+
+        Map<String, Object> filterConfig = new HashMap<String, Object>();
+        filterConfig.put("classPathURLs", new ArrayList<String>());
+        filterConfig.put("systemProperties", new HashMap<String, Object>());
+        filterConfig.put("requestAttributes", new HashMap<String, Object>());
+        filterConfig.put("initParams", initParams);
+        filterConfig.put("scriptExtensions", scriptExtensions);
+        filterConfig.put("urlPatterns", urlPatterns);
+        filterConfig.put("filterClass", AuthNFilter.class.getCanonicalName());
+
+        JsonValue filterConfigJson = new JsonValue(filterConfig);
+
+        servletFilterRegistration.registerFilter(filterConfigJson);
     }
 
+    /**
+     * De-registers the authentication filter.
+     *
+     * @param context The ComponentContext.
+     */
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         if (serviceRegistration != null) {

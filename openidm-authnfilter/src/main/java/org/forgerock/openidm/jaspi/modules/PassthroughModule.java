@@ -28,6 +28,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -104,7 +105,7 @@ public class PassthroughModule extends IDMServerAuthModule {
         try {
             LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
 
-            String username = request.getHeader("X-OpenIDM-Username");
+            final String username = request.getHeader("X-OpenIDM-Username");
             String password = request.getHeader("X-OpenIDM-Password");
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
@@ -114,6 +115,11 @@ public class PassthroughModule extends IDMServerAuthModule {
             }
 
             authData.setUsername(username);
+            clientSubject.getPrincipals().add(new Principal() {
+                public String getName() {
+                    return username;
+                }
+            });
             boolean authenticated = passthroughAuthenticator.authenticate(authData, password);
 
             if (authenticated) {

@@ -120,7 +120,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         HttpServletRequest req = (HttpServletRequest) messageInfo.getRequestMessage();
         boolean authenticated;
 
-        String headerLogin = req.getHeader(HEADER_USERNAME);
+        final String headerLogin = req.getHeader(HEADER_USERNAME);
         String basicAuth = req.getHeader("Authorization");
         // if we see the certificate port this request is for client auth only
         if (allowClientCertOnly(req)) {
@@ -139,6 +139,14 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         authData.setResource(queryOnResource);
         logger.debug("Found valid session for {} id {} with roles {}", authData.getUsername(), authData.getUserId(),
                 authData.getRoles());
+
+        if (authenticated) {
+            clientSubject.getPrincipals().add(new Principal() {
+                public String getName() {
+                    return headerLogin;
+                }
+            });
+        }
 
         return authenticated ? AuthStatus.SUCCESS : AuthStatus.SEND_FAILURE;
     }

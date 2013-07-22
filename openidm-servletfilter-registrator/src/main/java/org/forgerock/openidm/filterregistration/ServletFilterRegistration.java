@@ -14,36 +14,24 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.filterregistration;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.osgi.framework.ServiceRegistration;
 
 /**
- * Holds the configuration used to register a servlet filter.
+ * Interface for registering servlet filters in OSGi.
  *
  * @author Phill Cunnington
  */
-public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
-
-    private final JsonValue config;
+public interface ServletFilterRegistration {
 
     /**
-     * Constructs a new ServletFilterRegistratorSvc instance.
+     * Parses the given servlet filter configuration and registers a servlet filter in OSGi.
      *
      * @param config The servlet filter configuration.
+     * @return The ServiceRegistration.
+     * @throws Exception If a problem occurs registering the servlet filter.
      */
-    public ServletFilterRegistratorSvc(JsonValue config) {
-        this.config = config;
-    }
-
-    /**
-     * Gets the configuration of the servlet filter.
-     *
-     * @return The servlet filter configuration.
-     */
-    @Override
-    public JsonValue getConfiguration() {
-        return config;
-    }
+    ServiceRegistration registerFilter(JsonValue config) throws Exception;
 }
