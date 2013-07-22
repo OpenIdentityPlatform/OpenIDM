@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-sample'
@@ -65,8 +65,7 @@
 
   <para>If you want to query the internal noSQL database, you can download 
   OrientDB (version <?eval ${orientdbVersion}?>) from <link 
-  xlink:href="http://code.google.com/p/orient/downloads/list">
-  http://code.google.com/p/orient/downloads/list</link>.
+  xlink:href="http://code.google.com/p/orient/downloads/list" />.
   You will find the shell console in the <filename>bin</filename> directory. 
   Start OrientDB console using either <command>console.sh</command> or 
   <command>console.bat</command>, and then connect to the running OpenIDM with 
@@ -105,11 +104,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   
   <para>You can also use OrientDB Studio to query the default OrientDB 
   repository. After you have installed and started OpenIDM, point your browser 
-  to <link xlink:href="http://localhost:2480/studio/">
-  http://localhost:2480/studio/</link>. The default database is <literal>openidm
-  </literal> and the default user and password are <literal>admin</literal> and 
-  <literal>admin</literal>. Click Connect to connect to the repository. For 
-  more information about OrientDB Studio, see the 
+  to <link xlink:href="http://localhost:2480/studio/" />. The default database
+  is <literal>openidm</literal> and the default user and password are
+  <literal>admin</literal> and <literal>admin</literal>. Click Connect to
+  connect to the repository. For more information about OrientDB Studio, see the
   <link xlink:href="http://code.google.com/p/orient/wiki/OrientDB_Studio">
   OrientDB Studio documentation</link>.</para>
  </section>
