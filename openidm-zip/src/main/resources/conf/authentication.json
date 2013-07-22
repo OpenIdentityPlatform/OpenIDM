@@ -31,7 +31,7 @@
                     "enabled" : false
                 },
                 {
-                    "name" : "org.forgerock.openidm.jaspi.modules.ManagedUserAuthModule",
+                    "name" : "MANAGED_USER",
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
