@@ -38,6 +38,9 @@ import java.util.Map;
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
 
+    //TODO change to CREST constant when IDM have been updated to use 2.0.0 version
+    public static final String CONTEXT_REQUEST_KEY = "org.forgerock.security.context";
+
     /** Authentication username header. */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
@@ -80,7 +83,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             Map options) throws AuthException {
         JsonValue jsonValue = new JsonValue(options);
 
-        logClientIPHeader = (String) options.get("userId");
+        logClientIPHeader = (String) options.get("clientIPHeader");
 
         initialize(requestPolicy, responsePolicy, handler, jsonValue);
     }
@@ -126,6 +129,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
         AuthData authData = new AuthData();
 
         Map<String, Object> messageInfoParams = messageInfo.getMap();
+        Map<String, Object> contextMap = (Map<String, Object>) messageInfoParams.get(CONTEXT_REQUEST_KEY);
 
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
         messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
@@ -141,15 +145,15 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             request.setAttribute(RESOURCE_ATTRIBUTE, authData.getResource());
             request.setAttribute(OPENIDM_AUTHINVOKED, "authnfilter");
 
-            messageInfoParams.put(OPENIDM_AUTHINVOKED, "authnfilter");
+            contextMap.put(OPENIDM_AUTHINVOKED, "authnfilter");
         }
 
-        messageInfoParams.put(USERID_ATTRIBUTE, authData.getUserId());
-        messageInfoParams.put(USERNAME_ATTRIBUTE, authData.getUsername());
-        messageInfoParams.put(ROLES_ATTRIBUTE, authData.getRoles());
-        messageInfoParams.put(RESOURCE_ATTRIBUTE, authData.getResource());
+        contextMap.put(USERID_ATTRIBUTE, authData.getUserId());
+        contextMap.put(USERNAME_ATTRIBUTE, authData.getUsername());
+        contextMap.put(ROLES_ATTRIBUTE, authData.getRoles());
+        contextMap.put(RESOURCE_ATTRIBUTE, authData.getResource());
         boolean authSuccess = AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.SEND_SUCCESS.equals(authStatus);
-        messageInfoParams.put(OPENIDM_AUTH_STATUS, authSuccess);
+        contextMap.put(OPENIDM_AUTH_STATUS, authSuccess);
 
         return authStatus;
     }

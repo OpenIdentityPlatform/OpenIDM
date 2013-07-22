@@ -103,6 +103,7 @@ public class IDMServerAuthModuleTest {
         IDMServerAuthModule idmServerAuthModule = getIDMServerAuthModule(AuthStatus.SUCCESS, authData);
         MessageInfo messageInfo = mock(MessageInfo.class);
         Map<String, Object> messageInfoMap = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -110,6 +111,7 @@ public class IDMServerAuthModuleTest {
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(messageInfoMap.get("org.forgerock.security.context")).willReturn(contextMap);
 
         //When
         AuthStatus authStatus = idmServerAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -123,12 +125,12 @@ public class IDMServerAuthModuleTest {
         verify(request).setAttribute("openidm.resource", "RESOURCE");
         verify(request).setAttribute("openidm.authinvoked", "authnfilter");
 
-        verify(messageInfoMap).put("openidm.userid", "USER_ID");
-        verify(messageInfoMap).put("openidm.username", "USERNAME");
-        verify(messageInfoMap).put("openidm.roles", roles);
-        verify(messageInfoMap).put("openidm.resource", "RESOURCE");
-        verify(messageInfoMap).put("openidm.authinvoked", "authnfilter");
-        verify(messageInfoMap).put("openidm.auth.status", true);
+        verify(contextMap).put("openidm.userid", "USER_ID");
+        verify(contextMap).put("openidm.username", "USERNAME");
+        verify(contextMap).put("openidm.roles", roles);
+        verify(contextMap).put("openidm.resource", "RESOURCE");
+        verify(contextMap).put("openidm.authinvoked", "authnfilter");
+        verify(contextMap).put("openidm.auth.status", true);
 
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
@@ -140,6 +142,7 @@ public class IDMServerAuthModuleTest {
         IDMServerAuthModule idmServerAuthModule = getIDMServerAuthModule(AuthStatus.SEND_FAILURE, null);
         MessageInfo messageInfo = mock(MessageInfo.class);
         Map<String, Object> messageInfoMap = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
 
@@ -147,13 +150,14 @@ public class IDMServerAuthModuleTest {
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
+        given(messageInfoMap.get("org.forgerock.security.context")).willReturn(contextMap);
 
         //When
         AuthStatus authStatus = idmServerAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verifyZeroInteractions(request);
-        verify(messageInfoMap).put("openidm.auth.status", false);
+        verify(contextMap).put("openidm.auth.status", false);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 }
