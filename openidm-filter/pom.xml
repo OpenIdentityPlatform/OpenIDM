@@ -36,6 +36,11 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-authnfilter</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
         </dependency>

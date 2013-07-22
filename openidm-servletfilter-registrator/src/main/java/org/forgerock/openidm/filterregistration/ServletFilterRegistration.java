@@ -9,28 +9,29 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2013 ForgeRock Inc. All rights reserved.
+ * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.filterregistration;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.jaspi.modules.AuthData;
+import org.osgi.framework.ServiceRegistration;
 
 /**
- * Service interface for AuthFilter.
+ * Interface for registering servlet filters in OSGi.
+ *
+ * @author Phill Cunnington
  */
-public interface AuthFilterService {
+public interface ServletFilterRegistration {
 
     /**
-     * Method for re-authenticating requests.  The request's security context will need to include a
-     * "X-OpenIDM-Reauth-Password" header to succeed.
+     * Parses the given servlet filter configuration and registers a servlet filter in OSGi.
      *
-     * @param request The request object.
-     * @return The AuthData response object.
-     * @throws AuthException If there is a problem re-authenticating.
+     * @param config The servlet filter configuration.
+     * @return The ServiceRegistration.
+     * @throws Exception If a problem occurs registering the servlet filter.
      */
-    public AuthData reauthenticate(JsonValue request) throws AuthException;
+    ServiceRegistration registerFilter(JsonValue config) throws Exception;
 }

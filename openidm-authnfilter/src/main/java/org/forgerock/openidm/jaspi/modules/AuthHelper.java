@@ -11,10 +11,24 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2013 ForgeRock Inc. All rights reserved.
  */
 
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.jaspi.modules;
+
+import org.eclipse.jetty.plus.jaas.spi.UserInfo;
+import org.eclipse.jetty.util.security.Credential;
+import org.eclipse.jetty.util.security.Password;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.http.ContextRegistrator;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepositoryService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,121 +37,81 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.util.security.Password;
+/**
+ * Helper class which performs authentication against manged internal user tables.
+ */
+public class AuthHelper {
 
-import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.filter.AuthFilter.AuthData;
-import org.forgerock.openidm.http.ContextRegistrator;
-import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.repo.QueryConstants;
+    private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
 
-import org.forgerock.json.fluent.JsonValue;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-
-import org.eclipse.jetty.plus.jaas.spi.UserInfo;
-
-// Deprecated
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class AuthModule {
-
-    final static Logger logger = LoggerFactory.getLogger(AuthModule.class);
-
-    // default properties set in config/system.properties
-    String queryId;
-    String queryOnResource;
-    String internalUserQueryId;
-    String queryOnInternalUserResource;
     String userIdProperty;
     String userCredentialProperty;
     String userRolesProperty;
     List<String> defaultRoles;
 
-    // configuration conf/authentication.json
+    /**
+     * Constructs an instance of the AuthHelper.
+     *
+     * @param userIdProperty The user id property.
+     * @param userCredentialProperty The user credential property.
+     * @param userRolesProperty The user roles property.
+     * @param defaultRoles The list of default roles.
+     */
+    public AuthHelper(String userIdProperty, String userCredentialProperty, String userRolesProperty,
+            List<String> defaultRoles) {
+        this.userIdProperty = userIdProperty;
+        this.userCredentialProperty = userCredentialProperty;
+        this.userRolesProperty = userRolesProperty;
+        this.defaultRoles = defaultRoles;
 
-    public AuthModule(JsonValue config) {
-        defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        queryId = config.get("queryId").defaultTo("credential-query").asString();
-        queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
-        internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
-        queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
-
-        // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        userIdProperty = properties.get("userId").asString();
-        userCredentialProperty = properties.get("userCredential").asString();
-        userRolesProperty = properties.get("userRoles").asString();
-
-        logger.info("AuthModule config params userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
-            new Object[] {defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
-
-        if ((userIdProperty != null && userCredentialProperty == null) ||
-                (userIdProperty == null && userCredentialProperty != null)) {
-            logger.warn("AuthModule config does not fully define the necessary properties."
+        if ((userIdProperty != null && userCredentialProperty == null)
+                || (userIdProperty == null && userCredentialProperty != null)) {
+            logger.warn("AuthHelper config does not fully define the necessary properties."
                     + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
                     + " Defaulting to manual role query.", userIdProperty, userCredentialProperty);
         }
 
-        logger.info("AuthModule config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
-            new Object[] {userIdProperty, userCredentialProperty, userRolesProperty} );
+        logger.info("AuthHelper config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
+            userIdProperty, userCredentialProperty, userRolesProperty);
     }
 
     /**
-     * Authenticate the given username and password
-     * @param authData The current authentication data to validate and augment, with the username supplied
-     * @param password The supplied password to validate
-     * @param resource
-     * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
-     * carried by the status property 
+     * Performs the authentication using the given query id, resource, username and password.
+     *
+     * @param passQueryId The query id.
+     * @param passQueryOnResource The query resource.
+     * @param username The username.
+     * @param password The password.
+     * @param authData The AuthData object.
+     * @return True if authentication is successful, otherwise false.
      */
-    public AuthData authenticate(AuthData authData, String password) {
+    public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
+            AuthData authData) {
 
-        boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
-        if (!authenticated) {
-            // Authenticate against the internal user table if authentication against managed users failed
-            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
-            authData.resource = queryOnInternalUserResource;
-        } else {
-            authData.resource = queryOnResource;
-        }
-        authData.status = authenticated;
-        
-        return authData;
-    }
-
-    private boolean authPass(String passQueryId, String passQueryOnResource,
-            String login, String password, AuthData authData) {
-        UserInfo userInfo = null;
         try {
-            userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authData);
+            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, authData);
             if (userInfo != null && userInfo.checkCredential(password)) {
-                List<String> roles = authData.roles;
+                List<String> roles = authData.getRoles();
                 roles.clear();
                 roles.addAll(userInfo.getRoleNames());
                 return true;
             } else {
-                logger.debug("Authentication failed for {} due to invalid credentials", login);
+                logger.debug("Authentication failed for {} due to invalid credentials", username);
             }
         } catch (Exception ex) {
-            logger.warn("Authentication failed to get user info for {} {}", login, ex);
-            return false;
+            logger.warn("Authentication failed to get user info for {} {}", username, ex);
         }
         return false;
     }
 
-    private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
-            AuthData authData) throws Exception {
-        UserInfo user = null;
-        Credential credential = null;
-        List roleNames = new ArrayList();
+    private UserInfo getRepoUserInfo(String repoQueryId, String repoResource, String username, AuthData authData)
+            throws Exception {
 
-        Map props = new HashMap();
+        UserInfo user = null;
+        Credential credential;
+        List<String> roleNames = new ArrayList<String>();
+
+        Map<String, Object> props = new HashMap<String, Object>();
         props.put(QueryConstants.QUERY_ID, repoQueryId);
         props.put("username", username);
         Map resultWrapper = getRepo().query(repoResource, props);
@@ -158,7 +132,7 @@ public class AuthModule {
             // If all of the required user parameters are defined
             // we can just fetch that info instead of iterating/requiring it in-order
             if (userIdProperty != null && userCredentialProperty != null) {
-                logger.debug("AuthModule using explicit role query");
+                logger.debug("AuthHelper using explicit role query");
                 retrId = entry.get(userIdProperty).asString();
 
                 retrCredPropName = userCredentialProperty;
@@ -170,7 +144,7 @@ public class AuthModule {
                     retrRoles = entry.get(userRolesProperty).getObject();
                 }
             } else {
-                logger.debug("AuthModule using default role query");
+                logger.debug("AuthHelper using default role query");
                 int nonInternalCount = 0;
                 // Repo supports returning the map entries in the order of the query,
                 // even though JSON itself does not guarantee order.
@@ -194,7 +168,7 @@ public class AuthModule {
                 }
             }
 
-            authData.userId = retrId; // The internal user id can be different than the login user name
+            authData.setUserId(retrId); // The internal user id can be different than the login user name
             if (retrId == null) {
                 logger.warn("Query for credentials did not contain expected result property defining the user id");
             } else if (retrCred == null && retrCredPropName == null) {
@@ -202,9 +176,8 @@ public class AuthModule {
             } else {
                 credential = getCredential(retrCred, retrId, username, retrCredPropName, true);
                 roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
-                logger.debug("User information for {}: id: {} credential available: {} " +
-                		"roles from repo: {} total roles: {}",
-                        new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
+                logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total "
+                        + "roles: {}", username, retrId, (retrCred != null), retrRoles, roleNames);
 
                 user = new UserInfo(username, credential, roleNames);
             }
@@ -213,13 +186,13 @@ public class AuthModule {
         return user;
     }
 
-    Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName,
+    private Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName,
             boolean allowStringifiedEncryption) {
         Credential credential = null;
         if (retrCred instanceof String) {
             if (allowStringifiedEncryption) {
-                if (getCrypto().isEncrypted((String)retrCred)) {
-                    JsonValue jsonRetrCred = getCrypto().decrypt((String)retrCred);
+                if (getCrypto().isEncrypted((String) retrCred)) {
+                    JsonValue jsonRetrCred = getCrypto().decrypt((String) retrCred);
                     retrCred = jsonRetrCred == null ? null : jsonRetrCred.asString();
                 }
             }
@@ -233,22 +206,23 @@ public class AuthModule {
                 } else {
                     logger.warn("Unknown credential type in id: {} for: {} credential used from: {}. "
                             + "The map does not represent an encrypted value.",
-                            new Object[] {retrId, username, retrCredPropName});
+                            retrId, username, retrCredPropName);
                 }
             } else {
                 logger.warn("Unknown credential type in id: {} for: {} credential used from: {}. "
                         + "The data type is not supported: {}",
-                        new Object[] {retrId, username, retrCredPropName, retrCred.getClass()});
+                        retrId, username, retrCredPropName, retrCred.getClass());
             }
         }
         return credential;
     }
 
-    List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
+    private List<String> addRoles(List<String> existingRoleNames, Object retrRoles, String retrRolesPropName,
+            List<String> defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
         } else if (retrRoles instanceof String) {
-            List parsedRoles = parseCommaDelimitedRoles((String)retrRoles);
+            List<String> parsedRoles = parseCommaDelimitedRoles((String) retrRoles);
             existingRoleNames.addAll(parsedRoles);
         } else if (retrRolesPropName != null) {
             logger.warn("Unknown roles type retrieved from query in property, expected Collection: {} type: {}",
@@ -260,8 +234,8 @@ public class AuthModule {
         return existingRoleNames;
     }
 
-    private List parseCommaDelimitedRoles(String rawRoles) {
-        List result = new ArrayList();
+    private List<String> parseCommaDelimitedRoles(String rawRoles) {
+        List<String> result = new ArrayList<String>();
         if (rawRoles != null) {
             String[] split = rawRoles.split(",");
             result = Arrays.asList(split);
@@ -269,15 +243,14 @@ public class AuthModule {
         return result;
     }
 
-
-    JsonResourceObjectSet getRepo() {
+    private JsonResourceObjectSet getRepo() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
-        return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
+        return new JsonResourceObjectSet((RepositoryService) ctx.getService(repoRef));
     }
 
-    CryptoService getCrypto() {
+    private CryptoService getCrypto() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference cryptoRef = ctx.getServiceReference(CryptoService.class.getName());

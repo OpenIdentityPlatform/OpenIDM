@@ -248,6 +248,7 @@
         <jackson.version>1.9.10</jackson.version>
         <restlet.version>2.0.15</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
+        <authnfilter.commons.version>1.0.0-SNAPSHOT</authnfilter.commons.version>
         
         <!-- Commons JSON versions -->
         <commons.util.version>1.1.0-SNAPSHOT</commons.util.version>
@@ -319,6 +320,7 @@
         <module>openidm-repo-orientdb</module>
         <module>openidm-repo</module>
         <module>openidm-restlet</module>
+        <module>openidm-authnfilter</module>
         <module>openidm-filter</module>
         <module>openidm-servletfilter-registrator</module>
         <module>openidm-quartz-fragment</module>
@@ -409,6 +411,21 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>org.forgerock.restlet</artifactId>
                 <version>1.1.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-jaspi-container</artifactId>
+                <version>${authnfilter.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
+                <version>${authnfilter.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-jaspi-iwa-module</artifactId>
+                <version>${authnfilter.commons.version}</version>
             </dependency>
 
             <!-- Commons -->
