@@ -108,10 +108,19 @@
             <artifactId>openidm-restlet</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-filter</artifactId>
             <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-authnfilter</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>

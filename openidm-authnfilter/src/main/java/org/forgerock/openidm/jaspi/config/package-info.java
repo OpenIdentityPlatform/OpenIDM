@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012-2013 ForgeRock Inc. All rights reserved.
+ * Copyright 2013 ForgeRock Inc. All rights reserved.
  */
 
 /**
- * OpenIDM authentication filtering classes.
+ * OpenIDM authentication using commons authentication filter.
  * <p>
- * This package defines the related classes necessary for performing user authentication in OpenIDM
+ * This package defines the classes required for configuration the commons authentication filter.
  */
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.jaspi.config;

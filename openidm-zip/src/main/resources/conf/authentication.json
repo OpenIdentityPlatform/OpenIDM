@@ -6,5 +6,49 @@
         "userCredential" : "password",
         "userRoles" : "roles"
     },
-    "defaultUserRoles" : [ ]
+    "defaultUserRoles" : [ ],
+    "serverAuthConfig" : {
+        "idmAuth" : {
+            "sessionModule" : {
+                "name" : "JWT_SESSION",
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "30",
+                "tokenIdleTimeMinutes" : "10"
+            },
+            "authModules" : [
+                {
+                    "name" : "PASSTHROUGH",
+                    "passThroughAuth" : "system/AD/account",
+                    "propertyMapping" : {
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [
+                    ],
+                    "enabled" : false
+                },
+                {
+                    "name" : "MANAGED_USER",
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                {
+                    "name" : "INTERNAL_USER",
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                }
+            ]
+        }
+    }
 }

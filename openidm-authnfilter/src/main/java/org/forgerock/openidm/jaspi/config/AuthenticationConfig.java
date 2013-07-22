@@ -9,14 +9,26 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2012-2013 ForgeRock Inc. All rights reserved.
+ * Copyright 2013 ForgeRock Inc.
  */
 
+package org.forgerock.openidm.jaspi.config;
+
+import org.forgerock.json.fluent.JsonValue;
+
 /**
- * OpenIDM authentication filtering classes.
- * <p>
- * This package defines the related classes necessary for performing user authentication in OpenIDM
+ * Interface for injecting an implementation which contains the authentication configuration.
+ *
+ * @author Phill Cunnington
  */
-package org.forgerock.openidm.filter;
+public interface AuthenticationConfig {
+
+    /**
+     * Returns the authentication configuration.
+     *
+     * @return The authentication configuration.
+     */
+    JsonValue getConfig();
+}

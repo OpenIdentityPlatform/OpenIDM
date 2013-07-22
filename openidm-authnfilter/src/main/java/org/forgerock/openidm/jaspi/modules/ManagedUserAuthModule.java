@@ -14,36 +14,32 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+package org.forgerock.openidm.jaspi.modules;
 
 /**
- * Holds the configuration used to register a servlet filter.
+ * Authentication Module for authenticating users against a managed users table.
  *
  * @author Phill Cunnington
  */
-public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
+public class ManagedUserAuthModule extends IDMUserAuthModule {
 
-    private final JsonValue config;
+    private static final String QUERY_ID = "credential-query";
+    private static final String QUERY_ON_RESOURCE = "managed/user";
 
     /**
-     * Constructs a new ServletFilterRegistratorSvc instance.
-     *
-     * @param config The servlet filter configuration.
+     * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
+     * module.
      */
-    public ServletFilterRegistratorSvc(JsonValue config) {
-        this.config = config;
+    public ManagedUserAuthModule() {
+        super(QUERY_ID, QUERY_ON_RESOURCE);
     }
 
     /**
-     * Gets the configuration of the servlet filter.
+     * Constructor used by tests to inject dependencies.
      *
-     * @return The servlet filter configuration.
+     * @param authHelper A mock of an AuthHelper instance.
      */
-    @Override
-    public JsonValue getConfiguration() {
-        return config;
+    public ManagedUserAuthModule(AuthHelper authHelper) {
+        super(authHelper, QUERY_ID, QUERY_ON_RESOURCE);
     }
 }
