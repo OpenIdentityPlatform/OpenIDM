@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-ui'
@@ -48,8 +48,7 @@
   and is not guaranteed to be compatible with the next OpenIDM release.</para>
 
   <para>To access the user interface, install and start OpenIDM, then point 
-  your browser to <link xlink:href="http://localhost:8080/openidmui">
-  http://localhost:8080/openidmui</link>.</para>
+  your browser to <link xlink:href="http://localhost:8080/openidmui" />.</para>
   
   <para>Log in as the default administrative user (Login: openidm-admin, 
   Password: openidm-admin) or as an existing user in the repository. The 

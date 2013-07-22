@@ -245,8 +245,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
       <para>Use these hints to connect to the console.</para>
       <listitem>
        <para>Default Console URL: <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console'
-       >http://localhost:8080/system/console</link></para>
+       xlink:href='http://localhost:8080/system/console' /></para>
       </listitem>
       <listitem>
        <para>Default user name: <literal>admin</literal></para>
@@ -287,10 +286,10 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
     RESTClient</link> for Firefox. Alternatively you can use the 
     <command>curl</command> command-line utility that is included with most
      operating systems. For more information on <command>curl</command>, see 
-     <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>. If 
+     <link xlink:href="http://curl.haxx.se/" />. If
      you cannot locate the <command>curl</command> command on your system, you 
      can download it from 
-     <link xlink:href="http://curl.haxx.se/download.html">http://curl.haxx.se/download.html</link>.
+     <link xlink:href="http://curl.haxx.se/download.html" />.
     </para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
@@ -413,8 +412,7 @@ $</screen>
       <step>
        <para>Or click Stop on the System Information tab of the Felix console,
        by default <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console'
-       >http://localhost:8080/system/console</link>.</para>
+       xlink:href='http://localhost:8080/system/console' />.</para>
        <para>This stops the Servlet container as well, and the console is
        no longer accessible.</para>
       </step>

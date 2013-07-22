@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-repository'
@@ -312,10 +312,9 @@ mysql&gt; show tables;
                  <para>Download the <literal>bnd</literal> Java archive file
                  (<filename>biz.aQute.bnd.jar</filename>) that enables you
                  to create OSGi bundles. The file can be downloaded from
-                 <link xlink:href="http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar"
-                 >http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar</link>. For
+                 <link xlink:href="http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar" />. For
                  more information about <literal>bnd</literal>, see
-                 <link xlink:href="http://www.aqute.biz/Bnd/Bnd">http://www.aqute.biz/Bnd/Bnd</link>.
+                 <link xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
                  </para>
                  <para>Copy the file to <filename>openidm\db\scripts\mssql</filename>.</para>
              </step>
