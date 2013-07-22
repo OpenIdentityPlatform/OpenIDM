@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2013 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-jetty'
@@ -302,8 +302,7 @@
         <para>Filter configuration initialization parameters that are passed 
         to the servlet filter <literal>init</literal> method. For more 
         information, see 
-        <link xlink:href="http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html"
-        >http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html</link>.
+        <link xlink:href="http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html" />.
         </para>
       </listitem>
     </varlistentry>
