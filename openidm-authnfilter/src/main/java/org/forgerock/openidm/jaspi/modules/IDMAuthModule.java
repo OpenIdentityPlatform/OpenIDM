@@ -20,21 +20,42 @@ import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 
 import javax.security.auth.message.module.ServerAuthModule;
 
+/**
+ * Enum that represents all the core IDM Authentication modules.
+ *
+ * @author Phill Cunnington
+ */
 public enum IDMAuthModule {
 
+    /** JWT Session Auth Module. */
     JWT_SESSION(JwtSessionModule.class),
+    /** Managed User Auth Module. */
     MANAGED_USER(ManagedUserAuthModule.class),
+    /** Internal User Auth Module. */
     INTERNAL_USER(InternalUserAuthModule.class),
+    /** Passthrough to OpenICF connector Auth Module. */
     PASSTHROUGH(PassthroughModule.class),
+    /** IWA Auth Module. */
     IWA(IWAModule.class),
+    /** IWA and Passthrough Auth Module. */
     IWA_PASSTHROUGH(IWAPassthroughModule.class);
 
     private Class<? extends ServerAuthModule> clazz;
 
+    /**
+     * Constructs a new IDMAuthModule.
+     *
+     * @param clazz The corresponding class of the authentication module.
+     */
     private IDMAuthModule(Class<? extends ServerAuthModule> clazz) {
         this.clazz = clazz;
     }
 
+    /**
+     * Gets the corresponding class of the authentication module.
+     *
+     * @return The authentication modules class.
+     */
     public Class<? extends ServerAuthModule> getAuthModuleClass() {
         return clazz;
     }
