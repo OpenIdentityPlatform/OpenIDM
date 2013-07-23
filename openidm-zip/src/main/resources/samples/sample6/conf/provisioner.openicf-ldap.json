@@ -101,7 +101,7 @@
    "syncFailureHandler" :
       {
          "maxRetries" : 5,
-         "postRetryAction" : "dead-letter-queue"
+         "postRetryAction" : "logged-ignore"
       },
    "objectTypes" :
       {

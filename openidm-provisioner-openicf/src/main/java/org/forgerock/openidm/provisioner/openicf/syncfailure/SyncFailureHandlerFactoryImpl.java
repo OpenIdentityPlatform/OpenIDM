@@ -93,13 +93,15 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     public SyncFailureHandler create(JsonValue config) {
 
         if (null == config || config.isNull()) {
-            return new NullSyncFailureHandler();
+            return InfiniteRetrySyncFailureHandler.INSTANCE;
         }
 
         JsonValue maxRetries = config.get(CONFIG_MAX_RETRIES);
         JsonValue postRetry = config.get(CONFING_POST_RETRY);
 
-        if (maxRetries.isNull() || maxRetries.asInteger() < 1) {
+        if (maxRetries.isNull() || maxRetries.asInteger() < 0) {
+            return InfiniteRetrySyncFailureHandler.INSTANCE;
+        } else if (maxRetries.asInteger() == 0) {
             return getPostRetryHandler(postRetry);
         } else {
             return new SimpleRetrySyncFailureHandler(maxRetries.asInteger(),
@@ -146,7 +148,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
             }
         }
 
-        return new NullSyncFailureHandler();
+        return NullSyncFailureHandler.INSTANCE;
     }
 }
 
