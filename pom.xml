@@ -281,7 +281,7 @@
 
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <docTargetVersion>2.2.0</docTargetVersion>
+        <docTargetVersion>${project.version}</docTargetVersion><!-- Reset before final publication -->
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
