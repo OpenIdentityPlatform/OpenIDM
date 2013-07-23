@@ -18,29 +18,30 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 import java.util.Map;
 
 /**
- * A Null-object SyncFailureHandler that implements the equivalent of an "ignore"
- * operation.
+ * A retry failure handler which retries infinitely.
  *
  * @author brmiller
  */
-public class NullSyncFailureHandler implements SyncFailureHandler {
-
-    /** an instance of the NullSyncFailureHandler -- there only needs to be one */
-    public static final SyncFailureHandler INSTANCE = new NullSyncFailureHandler();
+public class InfiniteRetrySyncFailureHandler implements SyncFailureHandler {
+    /** an instance of the InfiniteRetrySyncFailureHanlder -- there only needs to be one */
+    public static final SyncFailureHandler INSTANCE = new InfiniteRetrySyncFailureHandler();
 
     // restrict instantiation to the above INSTANCE
-    private NullSyncFailureHandler() {
+    private InfiniteRetrySyncFailureHandler() {
     }
 
-    /**
-     * Handle sync failure.
+    /** 
+     * Handle sync failure by counting retries on this sync token, passing to
+     * (optional) post-retry handler when retries are exceeded.
      *
-     * @param syncFailure contains the sync failure data
+     * @param syncFailure contains sync failure data
      * @param failureCause the cause of the sync failure
      * @throws SyncHandlerException when retries are not exceeded
      */
-    public void invoke(Map<String, Object> syncFailure, Exception failureCause)
+    public void invoke(Map<String, Object> syncFailure, Exception failureCause) 
         throws SyncHandlerException {
-        // Null object pattern - does nothing - everything is "OK"
+
+        throw new SyncHandlerException("Failed to synchronize " + syncFailure.get("uid") + " object on "
+                + syncFailure.get("systemIdentifier") + ": " + failureCause.getMessage(), failureCause);
     }
 }

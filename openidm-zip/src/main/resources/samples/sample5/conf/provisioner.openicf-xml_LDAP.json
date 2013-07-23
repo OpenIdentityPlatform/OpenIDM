@@ -33,6 +33,10 @@
         "xsdFilePath" : "samples/sample5/data/resource-schema-extension.xsd",
         "xmlFilePath" : "samples/sample5/data/xml_LDAP_Data.xml"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "account" : {
             "$schema" : "http://json-schema.org/draft-03/schema",

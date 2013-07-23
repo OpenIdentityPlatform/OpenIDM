@@ -54,6 +54,10 @@
         "groupObjectClasses" : [ "racfGroup", "racfGroupOvmSegment", "racfGroupOmvsSegment" ],
         "segmentNames" : [ "ACCOUNT.RACF", "ACCOUNT.TSO", "ACCOUNT.OMVS", "ACCOUNT.CICS" ]
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" :
     {
         "group" :

@@ -43,6 +43,10 @@
         "testScriptFileName" : "&{launcher.project.location}/tools/TestScript.groovy",
         "searchScriptFileName" : "&{launcher.project.location}/tools/SearchScript.groovy"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "recon" : {
             "$schema" : "http://json-schema.org/draft-03/schema",

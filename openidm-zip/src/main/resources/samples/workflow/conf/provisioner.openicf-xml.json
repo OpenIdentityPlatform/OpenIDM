@@ -33,6 +33,10 @@
         "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
         "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "account" : {
             "$schema" : "http://json-schema.org/draft-03/schema",

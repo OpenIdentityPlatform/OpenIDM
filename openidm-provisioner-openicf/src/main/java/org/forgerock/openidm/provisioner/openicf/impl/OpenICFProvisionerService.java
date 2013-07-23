@@ -954,10 +954,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                             lastException.put("syncDelta", failedRecord[0]);
                         }
                         stage.put("lastException", lastException);
-                        if (logger.isDebugEnabled()) {
-                            logger.error("Live synchronization of {} failed on {}",
-                                    new Object[]{objectType, systemIdentifier.getName()}, t);
-                        }
+                        logger.warn("Live synchronization of {} failed on {}",
+                                new Object[]{objectType, systemIdentifier.getName()}, t);
                     } finally {
                         token = lastToken[0];
                         logger.debug("Synchronization is finished. New LatestSyncToken value: {}", token);

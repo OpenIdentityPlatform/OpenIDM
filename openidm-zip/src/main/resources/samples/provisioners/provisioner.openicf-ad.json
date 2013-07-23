@@ -45,6 +45,11 @@
          "SyncDomainController" : null,
          "SearchContext" : ""
       },
+   "syncFailureHandler" : 
+      {
+         "maxRetries" : 5,
+         "postRetryAction" : "logged-ignore"
+      },
    "objectTypes" :
       {
          "Group" :

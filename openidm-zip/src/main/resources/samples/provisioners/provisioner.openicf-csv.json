@@ -36,6 +36,11 @@
          "nameAttribute" : "lastName",
          "passwordAttribute" : "password"
       },
+   "syncFailureHandler" :
+      {
+         "maxRetries" : 5,
+         "postRetryAction" : "logged-ignore"
+      },
    "objectTypes" :
       {
          "account" :
