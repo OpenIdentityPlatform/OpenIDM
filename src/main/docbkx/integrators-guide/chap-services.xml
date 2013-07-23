@@ -281,15 +281,19 @@ Stopping OpenIDM (454)</screen>
      property in <literal>system.properties</literal>.</para>
      <para>You can use variable substitution in any <literal>.json</literal>
      configuration file with the install, working and project locations
-     described previously. Property substitution takes the following syntax:</para>
-     <programlisting language="javascript">
-"launcher.install.location"
-"launcher.install.url"
-"launcher.working.location"
-"launcher.working.url"
-"launcher.project.location"
-"launcher.project.url"
-     </programlisting>
+     described previously. The following properties can be substituted:</para>
+
+     <simplelist>
+         <member><literal>install.location</literal></member>
+         <member><literal>install.url</literal></member>
+         <member><literal>working.location</literal></member>
+         <member><literal>working.url</literal></member>
+         <member><literal>project.location</literal></member>
+         <member><literal>project.url</literal></member>
+     </simplelist>
+
+     <para>Property substitution takes the following syntax:</para>
+     <screen>&amp;{launcher.<replaceable>property</replaceable>}</screen>
 
      <para>For example, to specify the location of the OrientDB database, you
      can set the <literal>dbUrl</literal> property in <filename>repo.orientdb.json</filename>
