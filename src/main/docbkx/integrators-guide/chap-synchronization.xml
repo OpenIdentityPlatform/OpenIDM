@@ -970,7 +970,6 @@
 
    </section>
 
-
   </section>
   <section xml:id="livesync-over-rest">
       <title>Triggering LiveSync Over REST</title>
@@ -1054,6 +1053,213 @@
         </note>
     </section>
 
+    <section xml:id="livesync-retry-strategy">
+        <title>Configuring the LiveSync Retry Policy</title>
+
+        <para>OpenIDM enables you to specify what should happen if a LiveSync
+        operation reports a failure for an operation. By configuring the LiveSync
+        retry policy, you can specify how many times a failed modification
+        should be reattempted and what should happen in the event that the
+        modification is unsuccessful after the specified number of attempts.
+        If no retry policy is configured, OpenIDM reattempts the change an
+        infinite number of times, until the change is successful. This behavior
+        can increase data consistency in the case of transient failures (for
+        example, when the connection to the database is temporarily lost).
+        However, in situations where the cause of the failure is permanent
+        (for example, if the change does not meet certain policy requirements)
+        the change will never succeed, regardless of the number of attempts.
+        In this case, the infinite retry behavior can effectively block
+        subsequent LiveSync operations from starting.</para>
+
+        <para>Generally, a scheduled reconciliation operation will eventually
+        force consistency. However, to prevent repeated retries that block
+        the LiveSync mechanism, you should restrict the number of times OpenIDM
+        reattempts the same modification. You can then specify what OpenIDM
+        does with failed LiveSync changes. For example, the failed modification
+        can be stored in a "dead letter queue", discarded, or reapplied.
+        Alternatively, an administrator can be notified of the failure by email
+        or by some other means. This behavior is scriptable. The default
+        configuration, in the samples provided with OpenIDM, is to retry a
+        failed modification five times, and then to log and ignore the failure.</para>
+
+        <para>The LiveSync retry policy is configured in the connector
+        configuration file (<filename>provisioner.openicf-*.json</filename>).
+        The sample connector configuration files have a retry policy defined
+        as follows:</para>
+
+        <programlisting language="javascript">"syncFailureHandler" : {
+    "maxRetries" : 5,
+    "postRetryAction" : "logged-ignore"
+},</programlisting>
+
+        <para>The <literal>maxRetries</literal> field specifies the number of
+        attempts that OpenIDM should make to process the failed modification.
+        The value of this property must be a positive integer, or
+        <literal>-1</literal>. A value of zero (or omitting the <literal>maxRetries</literal>
+        property) indicates that failed modifications should not be reattempted.
+        In this case, the post retry action is executed immediately when a
+        LiveSync operation fails. A value of <literal>-1</literal> (or omitting
+        the entire <literal>syncFailureHandler</literal> from the configuration)
+        indicates that failed modifications should be retried an infinite number
+        of times. In this case, no post retry action is executed.</para>
+
+        <para>The default retry policy relies on the scheduler, or whatever
+        invokes the LiveSync operation. Therefore, if retries are enabled and
+        a LiveSync modification fails, OpenIDM will retry the modification the
+        next time that LiveSync is invoked.</para>
+
+        <para>The <literal>postRetryAction</literal> field indicates what
+        action OpenIDM should take in the event that the maximum number of
+        retries has been reached (or if <literal>maxRetries</literal> has been
+        set to zero). The post retry action can be one of the following:</para>
+
+        <itemizedlist>
+            <listitem>
+                <para><literal>logged-ignore</literal> indicates that OpenIDM
+                should ignore the failed modification, and log its occurrence.</para>
+            </listitem>
+            <listitem>
+                <para><literal>dead-letter-queue</literal> indicates that
+                OpenIDM should save the details of the failed modification in
+                a table in the repository (accessible over REST at
+                <literal>repo/synchronisation/deadLetterQueue/<replaceable>provisioner-name</replaceable></literal>).</para>
+            </listitem>
+            <listitem>
+                <para><literal>script</literal> specifies a custom script that
+                should be executed when the maximum number of retries has been
+                reached. For information about using custom scripts in the
+                configuration, see the <link xlink:href="integrators-guide#appendix-scripting"
+                xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting Reference</citetitle></link>.</para>
+                <para>In addition to the regular objects described in the
+                Scripting Reference, the following objects are available in the
+                script scope:</para>
+                <itemizedlist>
+                    <listitem>
+                        <para><literal>syncFailure</literal></para>
+                        <para>Provides details about the failed record. The
+                        structure of the <literal>syncFailure</literal> object
+                        is as follows:</para>
+                        <programlisting language="javascript">"syncFailure" :
+    {
+        "token" : <replaceable>the ID of the token</replaceable>,
+        "systemIdentifier" : <replaceable>a string identifier that matches the "name" property in
+                        provisioner.openicf.json</replaceable>,
+        "objectType" : <replaceable>the object type being synced, one of the keys in the
+                        "objectTypes" property in provisioner.openicf.json</replaceable>,
+        "uid" : <replaceable>the UID of the object (for example uid=joe,ou=People,dc=example,dc=com)</replaceable>,
+        "failedRecord", <replaceable>the record that failed to synchronize</replaceable>
+    },</programlisting>
+                        <para>To access these fields, include
+                        <literal>syncFailure.<replaceable>fieldname</replaceable></literal>
+                        in your JavaScript.</para>
+                    </listitem>
+                    <listitem>
+                        <para><literal>failureCause</literal></para>
+                        <para>Provides the exception that caused the original
+                        LiveSync failure.</para>
+                    </listitem>
+                    <listitem>
+                        <para><literal>failureHandlers</literal></para>
+                        <para>OpenIDM currently provides two synchronization
+                        failure handlers "out of the box". <literal>loggedIgnore</literal>
+                        indicates that the failure should be logged, after which
+                        no further action should be taken. <literal>deadLetterQueue</literal>
+                        indicates that the failed record should be written to
+                        a specific table in the repository, where further action
+                        can be taken. To invoke one of the internal failure
+                        handlers from your JavaScript, use a call similar to the following:</para>
+                <screen>failureHandlers.deadLetterQueue.invoke(syncFailure, failureCause);</screen>
+                    </listitem>
+                </itemizedlist>
+                <para>Two sample scripts are provided in
+                <filename>path/to/openidm/samples/syncfailure/script</filename>
+                one that logs failures, and one that sends them to the dead
+                letter queue in the repository.</para>
+            </listitem>
+        </itemizedlist>
+
+        <para>The following sample provisioner configuration file extract shows
+        a LiveSync retry policy that specifies a maximum of four retries before
+        the failed modification is sent to the dead letter queue.
+        </para>
+
+        <programlisting language="javascript">
+...
+"connectorName" : "org.identityconnectors.ldap.LdapConnector"
+    },<emphasis role="heavy">
+    "syncFailureHandler" : {
+        "maxRetries" : 4,
+        "postRetryAction" : dead-letter-queue
+    },</emphasis>
+    "poolConfigOption" : {
+...
+        </programlisting>
+
+        <para>In the case of a failed modification, a message similar to the
+        following is output to the log file:</para>
+
+        <screen>INFO: sync retries = 1/4, retrying</screen>
+
+        <para>OpenIDM reattempts the modification, the specified number of
+        times. If the modification is still unsuccessful, a message similar to
+        the following is logged:</para>
+
+        <screen width="88">INFO: sync retries = 4/4, retries exhausted
+Jul 19, 2013 11:59:30 AM
+    org.forgerock.openidm.provisioner.openicf.syncfailure.DeadLetterQueueHandler invoke
+INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
+        </screen>
+
+        <para>The log message indicates the entry for which the modification
+        failed (<literal>uid=jdoe</literal>, in this example).</para>
+
+        <para>You can view the failed modification in the dead letter queue,
+         over the REST interface, as follows:</para>
+
+        <screen width="98">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"
+
+    {
+       "query-time-ms": 2,
+       "result":
+       [
+           {
+               "_id": "4",
+               "_rev": "0"
+           }
+       ],
+       "conversion-time-ms": 0
+    }</screen>
+
+        <para>To view the details of a specific failed modification, include
+        its ID in the URL:</para>
+
+        <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/repo/synchronisation/deadLetterQueue/ldap/4"
+
+{
+  "objectType": "account",
+  "systemIdentifier": "ldap",
+  "failureCause": "org.forgerock.openidm.sync.SynchronizationException:
+            org.forgerock.openidm.objset.ConflictException:
+            org.forgerock.openidm.sync.SynchronizationException:
+            org.forgerock.openidm.script.ScriptException:
+            ReferenceError: \"bad\" is not defined.
+            (PropertyMapping/mappings/0/properties/3/condition#1)",
+  "token": 4,
+  "failedRecord": "<replaceable>complete record, in xml format</replaceable>"
+  "uid": "uid=jdoe,ou=people,dc=example,dc=com",
+  "_rev": "0",
+  "_id": "4"
+}</screen>
+
+    </section>
 
  <section xml:id="sync-flexible-data">
   <title>Flexible Data Model</title>
