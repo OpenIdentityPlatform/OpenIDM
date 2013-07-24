@@ -27,6 +27,7 @@ package org.forgerock.openidm.policy.internal;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,9 +42,11 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -65,7 +68,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Policy Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/policy") })
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/policy*") })
 public class PolicyService extends AbstractScriptedService {
 
     public static final String PID = "org.forgerock.openidm.policy";
@@ -76,9 +79,16 @@ public class PolicyService extends AbstractScriptedService {
     private static final Logger logger = LoggerFactory.getLogger(PolicyService.class);
 
     private ComponentContext context;
+    
+    private JsonValue configuration;
 
     public PolicyService() {
-        super(EnumSet.of(RequestType.ACTION));
+        super(EnumSet.of(RequestType.ACTION, RequestType.READ));
+    }
+
+    public PolicyService(JsonValue configuration) {
+        super(EnumSet.of(RequestType.ACTION, RequestType.READ));
+        init(configuration);
     }
 
     @Activate
@@ -88,7 +98,7 @@ public class PolicyService extends AbstractScriptedService {
         Dictionary properties = context.getProperties();
         setProperties(properties);
 
-        JsonValue configuration = getConfiguration(context);
+        configuration = getConfiguration(context);
 
         activate(context.getBundleContext(), null, configuration);
 
@@ -101,7 +111,7 @@ public class PolicyService extends AbstractScriptedService {
      */
     @Modified
     void modified(ComponentContext context) throws Exception {
-        JsonValue configuration = getConfiguration(context);
+        configuration = getConfiguration(context);
         modified(null, configuration);
         logger.info("OpenIDM Policy Service component is modified.");
     }
@@ -124,7 +134,12 @@ public class PolicyService extends AbstractScriptedService {
 
     private JsonValue getConfiguration(ComponentContext context) {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
-        JsonValue additionalPolicies = configuration.get("additionalFiles");
+        init(configuration);
+        return configuration;
+    }
+    
+    private void init(JsonValue configuration) {
+    	JsonValue additionalPolicies = configuration.get("additionalFiles");
         if (!additionalPolicies.isNull()) {
             configuration.remove("additionalFiles");
             List<String> list = new ArrayList<String>();
@@ -137,9 +152,8 @@ public class PolicyService extends AbstractScriptedService {
             }
             configuration.add("additionalPolicies", list);
         }
-        return configuration;
     }
-
+    
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final Bindings handler) throws ResourceException {
@@ -152,29 +166,34 @@ public class PolicyService extends AbstractScriptedService {
         }
 
         try {
-            bindings.put("_isDirectHttp", context
-                    .containsContext(org.forgerock.json.resource.servlet.HttpContext.class));
+        	JsonValue req = getRequestMap(request.getResourceName(), "action");
+        	req.add("_isDirectHttp", context.containsContext(org.forgerock.json.resource.servlet.HttpContext.class));
+        	req.add("value", request.getContent().getObject());
+        	req.add("action", request.getAction());
+        	handler.put("request", req.getObject());
+        	handler.put("resources", configuration.get("resources").getObject());
         } catch (Throwable e) {
-            /* Catch if the class is not loaded */
+            throw new InternalErrorException("Error setting request parameters", e);
         }
     }
-
-    // TODO Remove this reminder for old behaviour
-    public void handle(JsonValue request) {
-        JsonValue params = request.get("params");
-        JsonValue caller = params.get("_caller");
-        JsonValue parent = request.get("parent");
-        if (parent.get("_isDirectHttp").isNull()) {
-            boolean isHttp = false;
-            if (!caller.isNull() && caller.asString().equals("filterEnforcer")) {
-                parent = parent.get("parent");
-            }
-            if (!parent.isNull() && !parent.get("type").isNull()) {
-                isHttp = parent.get("type").asString().equals("http");
-            }
-            request.add("_isDirectHttp", isHttp);
-        } else {
-            request.add("_isDirectHttp", parent.get("_isDirectHttp").asBoolean());
+    
+    @Override
+    public void handleRead(final ServerContext context, final ReadRequest request,
+            final Bindings handler) throws ResourceException {
+    	super.handleRead(context, request, handler);
+    	try {
+    		JsonValue req = getRequestMap(request.getResourceName(), "read");
+        	handler.put("request", req.getObject());
+        	handler.put("resources", configuration.get("resources").getObject());
+        } catch (Throwable e) {
+            throw new InternalErrorException("Error setting request parameters", e);
         }
+    }
+    
+    private JsonValue getRequestMap(String resourceName, String method) {
+    	JsonValue req = new JsonValue(new HashMap<String, Object>());
+    	req.add("id", resourceName.substring(1));
+    	req.add("method", method);
+    	return req;
     }
 }

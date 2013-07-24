@@ -126,9 +126,9 @@ policyImpl = (function (){
     // internal-use utility function
     var getSecurityContext,
         checkExceptRoles = function (exceptRoles) {
-            var i, j, roles, role, security = getSecurityContext(request);
+            var i, j, roles, role;
             if (security !== null) {
-                roles = security["openidm-roles"];
+                roles = security["roles"];
                 if (exceptRoles) {
                     for (i = 0; i < exceptRoles.length; i++) {
                         role = exceptRoles[i];
@@ -423,9 +423,12 @@ policyProcessor = (function (policyConfig,policyImpl){
     
     getPropertyConfig = function(resource, propName) {
         var props = resource.properties,prop,i;
+        java.lang.System.out.println("props.length: " + props.length);
         for (i = 0; i < props.length; i++) {
+            java.lang.System.out.println("props[" + i + "]: " + props[i]);
             prop = props[i];
             if (prop.name === propName) {
+                java.lang.System.out.println("match");
                 return prop;
             }
         }
@@ -510,9 +513,13 @@ policyProcessor = (function (policyConfig,policyImpl){
             policyRequirements = [],
             allPolicyRequirements = getAllPolicyRequirements(policies),
             i,params,policy,validationFunc,failed,y;
-        
+        java.lang.System.out.println("propName: " + propName);
+        java.lang.System.out.println("propValue: " + propValue);
+        java.lang.System.out.println("policies: " + policies);
         for (i = 0; i < policies.length; i++) {
             params = policies[i].params;
+            java.lang.System.out.println("policy ID: " + policies[i].policyId);
+            java.lang.System.out.println("params: " + params);
             policy = getPolicy(policies[i].policyId);
             if (policy === null) {
                 throw "Unknown policy " + policies[i].policyId;
@@ -700,7 +707,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                 returnObject = getResourceWithPolicyRequirements(resource);
             }
         } else if (method === "action") {
-            action = request.params._action;
+            action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};
             if (request.id === null) {
@@ -725,8 +732,11 @@ policyProcessor = (function (policyConfig,policyImpl){
                                 getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
+                	java.lang.System.out.println("validateProperty");
                     props = request.value;
+                	java.lang.System.out.println("props: " + props);
                     for (propName in props) {
+                    	java.lang.System.out.println("propName: " + propName);
                         prop = getPropertyConfig(resource, propName);
                         if (prop !== null) {
                             policies = prop.policies;
