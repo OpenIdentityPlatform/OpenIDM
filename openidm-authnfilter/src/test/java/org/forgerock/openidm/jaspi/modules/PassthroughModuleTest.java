@@ -25,6 +25,8 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.Map;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -55,6 +57,10 @@ public class PassthroughModuleTest {
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
 
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
@@ -81,6 +87,11 @@ public class PassthroughModuleTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
+
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -109,6 +120,11 @@ public class PassthroughModuleTest {
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
 
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
+
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
@@ -135,6 +151,11 @@ public class PassthroughModuleTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
+
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -163,6 +184,11 @@ public class PassthroughModuleTest {
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
 
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
+
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
@@ -188,6 +214,11 @@ public class PassthroughModuleTest {
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
         AuthData authData = mock(AuthData.class);
+
+        Map<String, Object> map = mock(Map.class);
+        Map<String, Object> contextMap = mock(Map.class);
+        given(messageInfo.getMap()).willReturn(map);
+        given(map.get("org.forgerock.security.context")).willReturn(contextMap);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 

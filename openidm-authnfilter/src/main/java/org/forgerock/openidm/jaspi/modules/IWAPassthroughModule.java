@@ -100,6 +100,8 @@ public class IWAPassthroughModule extends IWAModule {
             AuthData authData) throws AuthException {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
+        passthroughModule.setPassThroughAuthOnRequest(messageInfo);
 
         String xOpenIDMUsername = request.getHeader("X-OpenIDM-Username");
         String xOpenIdmPassword = request.getHeader("X-OpenIDM-Password");

@@ -34,9 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -131,7 +129,7 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(passthroughModule);
+        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
@@ -161,7 +159,7 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(passthroughModule);
+        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         verifyZeroInteractions(authData);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
@@ -233,7 +231,7 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verifyZeroInteractions(passthroughModule);
+        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         verify(authData).setUsername("USERNAME");
         verify(authData).setResource("system/AD/account");
         assertEquals(authStatus, AuthStatus.SUCCESS);
