@@ -30,6 +30,7 @@ import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
@@ -83,7 +84,18 @@ public class PassthroughModule extends IDMServerAuthModule {
         String userRolesProperty = properties.get("userRoles").asString();
 
         passthroughAuthenticator = new PassthroughAuthenticator(passThroughAuth, userRolesProperty, defaultRoles);
+    }
 
+    /**
+     * Set pass through auth resource in context map on request so can be accessed by authnPopulateContext.js script.
+     *
+     * @param messageInfo The MessageInfo.
+     */
+    @SuppressWarnings("unchecked")
+    void setPassThroughAuthOnRequest(MessageInfo messageInfo) {
+        Map<String, Object> contextMap = (Map<String, Object>) messageInfo.getMap()
+                .get(IDMServerAuthModule.CONTEXT_REQUEST_KEY);
+        contextMap.put("passThroughAuth", passThroughAuth);
     }
 
     /**
@@ -103,11 +115,11 @@ public class PassthroughModule extends IDMServerAuthModule {
         LOGGER.debug("PassthroughModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
-        request.setAttribute("passThroughAuth", passThroughAuth);
 
         try {
             LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
+            //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
+            setPassThroughAuthOnRequest(messageInfo);
 
             final String username = request.getHeader("X-OpenIDM-Username");
             String password = request.getHeader("X-OpenIDM-Password");

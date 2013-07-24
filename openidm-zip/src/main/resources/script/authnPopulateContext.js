@@ -6,7 +6,7 @@ logger.debug("Augment context for: {}", security.username);
 var userDetail,
     params,
     rolesArr,
-    resource = request.attributes.passThroughAuth;
+    resource = request.attributes.get("org.forgerock.security.context").get("passThroughAuth");
 
 if (security && security.username && security.username !== "anonymous"
     && (!(security.userid && security.userid.id && security.userid.component && security["openidm-roles"]))) {
