@@ -569,6 +569,7 @@ REFERENCES configobjects
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
@@ -582,6 +583,7 @@ REFERENCES objecttypes
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
@@ -595,6 +597,7 @@ REFERENCES objecttypes
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
@@ -608,6 +611,7 @@ REFERENCES managedobjects
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
@@ -621,6 +625,7 @@ REFERENCES objecttypes
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
@@ -634,6 +639,7 @@ REFERENCES genericobjects
 (
   id
 )
+ON DELETE CASCADE
 ENABLE
 ;
 
