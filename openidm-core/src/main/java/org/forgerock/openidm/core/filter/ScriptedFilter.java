@@ -25,25 +25,33 @@
 package org.forgerock.openidm.core.filter;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.CrossCutFilter;
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.engine.Utils;
@@ -316,7 +324,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             Script script = scriptEntry.getScript(context);
 
-            script.put("request", state.request);
+            script.put("request", getRequestMap(state.request, context));
             script.put("context", context);
             script.put("_context", getLazyContext(context));
             try {
@@ -341,7 +349,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             Script script = scriptEntry.getScript(context);
 
-            script.put("request", state.request);
+            script.put("request", getRequestMap(state.request, context));
             script.put("context", context);
             script.put("response", resource);
 
@@ -367,7 +375,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             Script script = scriptEntry.getScript(context);
 
-            script.put("request", state.request);
+            script.put("request", getRequestMap(state.request, context));
             script.put("context", context);
             script.put("exception", error.toJsonValue().asMap());
 
@@ -407,5 +415,48 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             return ServerContext.saveToJson(context, persistenceConfig);
         }
         return null;
+    }
+    
+    private Map<String, Object> getRequestMap(Request request, ServerContext context) {
+    	Map<String, Object> requestMap = new HashMap<String, Object>();
+    	JsonValue value = new JsonValue(null);
+    	if (request instanceof ActionRequest) {
+    		value = ((ActionRequest)request).getContent();
+    		requestMap.put("params", ((ActionRequest)request).getAdditionalActionParameters());
+    		requestMap.put("method", "action");
+    	} else if (request instanceof CreateRequest) {
+    		value = ((CreateRequest)request).getContent();
+    		requestMap.put("method", "create");
+    	} else if (request instanceof ReadRequest) {
+    		requestMap.put("method", "read");
+    	} else if (request instanceof UpdateRequest) {
+    		value = ((UpdateRequest)request).getNewContent();
+    		requestMap.put("method", "update");
+    	} else if (request instanceof DeleteRequest) {
+    		requestMap.put("method", "delete");
+    	} else if (request instanceof PatchRequest) {
+    		requestMap.put("method", "patch");
+    	} else if (request instanceof QueryRequest) {
+    		requestMap.put("params", ((QueryRequest)request).getAdditionalQueryParameters());
+    		requestMap.put("method", "query");
+    	} else {
+    		requestMap.put("method", null);
+    	}
+    	if (context.containsContext(SecurityContext.class)) {
+    		requestMap.put("security", context.asContext(SecurityContext.class).getAuthorizationId());
+    	}
+    	if (context.containsContext(HttpContext.class)) {
+    		HttpContext httpContext = context.asContext(HttpContext.class);
+    		requestMap.put("headers", httpContext.getHeaders());
+    		requestMap.put("fromHttp", "true");
+    		requestMap.put("params", httpContext.getParameters());
+    	} else {
+    		requestMap.put("fromHttp", "false");
+    	}
+    	requestMap.put("type", request.getRequestType());
+    	requestMap.put("value", value.getObject());
+    	requestMap.put("id", request.getResourceName());
+    	
+    	return requestMap;
     }
 }
