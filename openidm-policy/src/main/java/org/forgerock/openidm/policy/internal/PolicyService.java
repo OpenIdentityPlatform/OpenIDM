@@ -162,7 +162,9 @@ public class PolicyService extends AbstractScriptedService {
             if (handler.containsKey(entry.getKey())) {
                 continue;
             }
-            bindings.put(entry.getKey(), entry.getValue());
+            if (bindings != null) {
+				bindings.put(entry.getKey(), entry.getValue());
+			}
         }
 
         try {

@@ -25,19 +25,22 @@
 var params =  {},
     result,
     enforce;
-params._action = "validateObject";
+params._actionId = "validateObject";
 params._caller = "filterEnforcer";
 
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
 if (request.id.indexOf("policy/") !== 0 && enforce !== "false") {
-    result = openidm.action("policy/" + request.id, params, request.value);
-    
-    if (!result.result) {
-        throw { 
-            "openidmCode" : 403, 
-            "message" : "Policy validation failed",
-            "detail" : result 
-        };
-    }
+	
+	result = openidm.action("policy" + request.id, params, request.value);
+
+	if (!result.result) {
+		throw {
+			"openidmCode" : 403,
+			"message" : "Policy validation failed",
+			"detail" : result
+		};
+	}
 }
+
+
