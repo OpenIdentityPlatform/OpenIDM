@@ -122,7 +122,8 @@ require([
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "org/forgerock/commons/ui/common/main"
+    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/common/util/ThemeManager"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });

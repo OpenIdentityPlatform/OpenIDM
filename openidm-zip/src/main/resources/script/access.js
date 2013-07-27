@@ -56,6 +56,12 @@ var httpAccessConfig =
            "actions"    : "*"
         },
         {  
+            "pattern"    : "config/ui/themeconfig",
+            "roles"      : "*",
+            "methods"    : "read",
+            "actions"    : "*"
+         },
+        {  
            "pattern"    : "config/ui/configuration",
            "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read",
