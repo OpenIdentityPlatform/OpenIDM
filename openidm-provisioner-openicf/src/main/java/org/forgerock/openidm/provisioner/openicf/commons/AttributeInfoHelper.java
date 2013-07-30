@@ -229,7 +229,7 @@ public class AttributeInfoHelper {
             }
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
-            throw new InternalServerErrorException("Failed build " + name + " attribute.");
+            throw new InternalServerErrorException("Failed build " + name + " attribute.", e);
         }
     }
 
