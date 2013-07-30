@@ -219,70 +219,70 @@ public class AuditServiceImpl implements AuditService {
             }
             Map<String, Object> obj = request.getContent().asMap();
 
-        logger.debug("Audit create called for {} with {}", fullId, request.getContent());
+            logger.debug("Audit create called for {} with {}", fullId, request.getContent());
 
-        if (fullId == null) {
-            throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
-        }
-
-        String[] splitTypeAndId =  splitFirstLevel(fullId);
-        String type = splitTypeAndId[0];
-        String localId = splitTypeAndId[1];
-
-        String trigger = getTrigger(context);
-
-        // Filter
-        List<String> actionFilter = actionFilters.get(type);
-        Map<String, List<String>> triggerFilter = triggerFilters.get(type);
-
-        if (triggerFilter != null && trigger != null) {
-            List<String> triggerActions = triggerFilter.get(trigger);
-            if (triggerActions == null) {
-                logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
-            } else if (!triggerActions.contains(obj.get("action"))) {
-                logger.debug("Filtered by trigger filter");
-                return;
+            if (fullId == null) {
+                throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
             }
-        }
 
-        if (actionFilter != null) {
-            // TODO: make filters that can operate on a variety of conditions
-            if (!actionFilter.contains(obj.get("action"))) {
-                logger.debug("Filtered by action filter");
-                return;
+            String[] splitTypeAndId =  splitFirstLevel(fullId);
+            String type = splitTypeAndId[0];
+            String localId = splitTypeAndId[1];
+
+            String trigger = getTrigger(context);
+
+            // Filter
+            List<String> actionFilter = actionFilters.get(type);
+            Map<String, List<String>> triggerFilter = triggerFilters.get(type);
+
+            if (triggerFilter != null && trigger != null) {
+                List<String> triggerActions = triggerFilter.get(trigger);
+                if (triggerActions == null) {
+                    logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
+                } else if (!triggerActions.contains(obj.get("action"))) {
+                    logger.debug("Filtered by trigger filter");
+                    return;
+                }
             }
-        }
 
-        // Activity log preprocessing
-        if (type.equals("activity")) {
-            processActivityLog(obj);
-        }
-
-        // Generate an ID if there is none
-        if (localId == null || localId.isEmpty()) {
-            localId = UUID.randomUUID().toString();
-            obj.put(Resource.FIELD_CONTENT_ID, localId);
-            logger.debug("Assigned id {}", localId);
-        }
-        String id = type + "/" + localId;
-
-        // Generate unified timestamp
-        if (null == obj.get("timestamp")) {
-            obj.put("timestamp", dateUtil.now());
-        }
-
-        logger.debug("Create audit entry for {} with {}", id, obj);
-        for (AuditLogger auditLogger : getAuditLoggerForEvent(type)) {
-            try {
-                auditLogger.create(context, id, obj);
-            } catch (ResourceException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
-                throw ex;
-            } catch (RuntimeException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
-                throw ex;
+            if (actionFilter != null) {
+                // TODO: make filters that can operate on a variety of conditions
+                if (!actionFilter.contains(obj.get("action"))) {
+                    logger.debug("Filtered by action filter");
+                    return;
+                }
             }
-        }
+
+            // Activity log preprocessing
+            if (type.equals("activity")) {
+                processActivityLog(obj);
+            }
+
+            // Generate an ID if there is none
+            if (localId == null || localId.isEmpty()) {
+                localId = UUID.randomUUID().toString();
+                obj.put(Resource.FIELD_CONTENT_ID, localId);
+                logger.debug("Assigned id {}", localId);
+            }
+            String id = type + "/" + localId;
+
+            // Generate unified timestamp
+            if (null == obj.get("timestamp")) {
+                obj.put("timestamp", dateUtil.now());
+            }
+
+            logger.debug("Create audit entry for {} with {}", id, obj);
+            for (AuditLogger auditLogger : getAuditLoggerForEvent(type)) {
+                try {
+                    auditLogger.create(context, id, obj);
+                } catch (ResourceException ex) {
+                    logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
+                    throw ex;
+                } catch (RuntimeException ex) {
+                    logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
+                    throw ex;
+                }
+            }
         } catch (Throwable t){
             handler.handleError(ResourceUtil.adapt(t));
         }
