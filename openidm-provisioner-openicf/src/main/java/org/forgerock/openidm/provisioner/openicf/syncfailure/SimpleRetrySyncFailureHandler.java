@@ -66,7 +66,7 @@ public class SimpleRetrySyncFailureHandler implements SyncFailureHandler {
 
         final Object token = syncFailure.get("token");
 
-        if (token == currentSyncToken) {
+        if (token != null && token.equals(currentSyncToken)) {
             currentRetries++;
         }
         else {
