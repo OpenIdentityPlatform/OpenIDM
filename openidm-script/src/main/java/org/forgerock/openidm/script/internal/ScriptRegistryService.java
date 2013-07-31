@@ -54,9 +54,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -69,6 +72,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -76,10 +80,13 @@ import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.Function;
 import org.forgerock.script.scope.FunctionFactory;
@@ -99,11 +106,11 @@ import org.slf4j.LoggerFactory;
  * @author Laszlo Hordos
  */
 @Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE,
-        description = "OpenIDM System Object Set Service", immediate = true)
+        description = "OpenIDM Script Registry Service", immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM ScriptRegistry Service"),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Script Registry Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*") })
 @References({
     @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
@@ -120,7 +127,7 @@ import org.slf4j.LoggerFactory;
             bind = "bindFunction", unbind = "unbindFunction",
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
-public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler {
+public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService {
 
     public static final Set<String> reservedNames;
 
@@ -342,8 +349,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
-                if (arguments.length == 1
-                        && (arguments[0] instanceof Map || arguments[0] instanceof JsonValue)) {
+                if (arguments.length == 1 && (arguments[0] instanceof Map || arguments[0] instanceof String 
+                        		|| arguments[0] instanceof JsonValue)) {
                     return JsonCrypto.isJsonCrypto(arguments[0] instanceof JsonValue ? (JsonValue) arguments[0]
                             : new JsonValue(arguments[0]));
                 } else {
@@ -472,12 +479,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     ScriptEntry entry = takeScript(name);
 
                 } else {
-                    throw new NotSupportedException("Unrecognized action ID '"
-                            + request.getAction() + "'. Supported action IDs: [eval, batch]");
+                    throw new NotSupportedException("Unrecognized action ID '" + request.getAction() 
+                    		+ "'. Supported action IDs: [eval, batch]");
                 }
             } else {
-                final ResourceException e =
-                        new NotSupportedException(
+                final ResourceException e = new NotSupportedException(
                                 "Actions are not supported for resource collections");
                 handler.handleError(e);
             }
@@ -546,15 +552,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     public void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Create operations are not supported");
+        final ResourceException e = new NotSupportedException("Create operations are not supported");
         handler.handleError(e);
     }
 
     public void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Delete operations are not supported");
+        final ResourceException e = new NotSupportedException("Delete operations are not supported");
         handler.handleError(e);
     }
 
@@ -566,8 +570,51 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Update operations are not supported");
+        final ResourceException e = new NotSupportedException("Update operations are not supported");
         handler.handleError(e);
+    }
+    
+    @Override
+    public void execute(Map<String, Object> context) throws ExecutionException {
+    	
+        try {
+            String scriptName = (String) context.get(CONFIG_NAME);
+            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+            JsonValue scriptValue = params.get("script").expect(Map.class).clone();
+            
+            if (scriptValue.get("name").isNull()) {
+            	if (!scriptValue.get("file").isNull()) {
+            		scriptValue.put("name", scriptValue.get("file").getObject());
+            	}
+            }
+            
+        	if (!scriptValue.isNull()) {
+        		ScriptEntry entry = takeScript(scriptValue);
+        		JsonValue input = params.get("input");
+        		execScript(new RootContext(), entry, input);
+        	} else {
+        		throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
+            }
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
+        } catch (ScriptException e) {
+			throw new ExecutionException(e);
+		} catch (ResourceException e) {
+			throw new ExecutionException(e);
+		}
+    }
+
+    private void execScript(Context context, ScriptEntry script, JsonValue value) throws ForbiddenException, InternalServerErrorException {
+        if (null != script && script.isActive()) {
+            Script executable = script.getScript(context);
+            executable.put("object", value.getObject());
+            try {
+                executable.eval(); // allows direct modification to the object
+            } catch (ScriptThrownException ste) {
+                throw new ForbiddenException(ste.getValue().toString());
+            } catch (ScriptException se) {
+                throw new InternalServerErrorException("script encountered exception", se);
+            }
+        }
     }
 }

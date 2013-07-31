@@ -104,7 +104,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Scheduler Service using Quartz"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "scheduler")
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/scheduler*")
 })
 public class SchedulerService implements RequestHandler {
     final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
@@ -463,47 +463,51 @@ public class SchedulerService implements RequestHandler {
 
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-        try {
-            try {
-            String id = request.getResourceName();
-            Map<String, Object> object = request.getContent().asMap();
-            if (id == null) {
-                id = createJobName();
-            } else {
-                id = trimTrailingSlash(id);
-            }
-            object.put("_id", id);
-            ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
+    	try { 		
+            String id = null;
+            Map<String, Object> object = null;
+    		try {
+    			id = request.getNewResourceId();
+    			object = request.getContent().asMap();
+    			if (id == null) {
+    				id = createJobName();
+    			} else {
+    				id = trimTrailingSlash(id);
+    			}
+    			object.put("_id", id);
+    			ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
-            // Check defaults
-            if (scheduleConfig.getEnabled() == null) {
-                scheduleConfig.setEnabled(true);
-            }
-            if (scheduleConfig.getPersisted() == null) {
-                scheduleConfig.setPersisted(true);
-            }
+    			// Check defaults
+    			if (scheduleConfig.getEnabled() == null) {
+    				scheduleConfig.setEnabled(true);
+    			}
+    			if (scheduleConfig.getPersisted() == null) {
+    				scheduleConfig.setPersisted(true);
+    			}
 
-            try {
-                addSchedule(scheduleConfig, id, false);
-            } catch (ParseException e) {
-                throw new BadRequestException(e);
-            } catch (ObjectAlreadyExistsException e) {
-                throw new ConflictException(e);
-            } catch (SchedulerException e) {
-                throw new InternalServerErrorException(e);
-            }
-        } catch (JsonException e) {
-            throw new BadRequestException("Error creating schedule", e);
-        }
-        } catch (Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
-        }
+    			try {
+    				addSchedule(scheduleConfig, id, false);
+    			} catch (ParseException e) {
+    				throw new BadRequestException(e);
+    			} catch (ObjectAlreadyExistsException e) {
+    				throw new ConflictException(e);
+    			} catch (SchedulerException e) {
+    				throw new InternalServerErrorException(e);
+    			}
+    		} catch (JsonException e) {
+    			throw new BadRequestException("Error creating schedule", e);
+    		}
+    		handler.handleResult(new Resource(id, null, new JsonValue(object)));
+    	} catch (Throwable t) {
+    		handler.handleError(ResourceUtil.adapt(t));
+    	}
     }
 
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = request.getResourceName();
+            String id = getResourceId(request.getResourceName());
+            
             Map<String, Object> resultMap = null;
             try {
                 Scheduler scheduler = null;
@@ -520,7 +524,6 @@ public class SchedulerService implements RequestHandler {
                 ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
                 resultMap = (Map<String, Object>)config.getConfig().getObject();
                 resultMap.put("_id", id);
-
             } catch (SchedulerException e) {
                 throw new InternalServerErrorException(e);
             }
@@ -533,7 +536,7 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = request.getResourceName();
+            String id = getResourceId(request.getResourceName());
             String rev = request.getRevision();
             Map<String, Object> object = request.getNewContent().asMap();
             try {
@@ -576,7 +579,7 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = request.getResourceName();
+            String id = getResourceId(request.getResourceName());
             try {
                 if (id == null) {
                     throw new BadRequestException("No ID specified");
@@ -609,7 +612,7 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            String id = request.getResourceName();
+            String id = getResourceId(request.getResourceName());
             Map<String, String> params = request.getAdditionalQueryParameters();
             String queryId = request.getQueryId();
             if (queryId == null) {
@@ -661,7 +664,7 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, final ResultHandler<JsonValue> handler) {
         try {
-        String id = request.getResourceName();
+        String id = getResourceId(request.getResourceName());
         Map<String, String> params = request.getAdditionalActionParameters();
         if (params.get("_action") == null) {
             throw new BadRequestException("Expecting _action parameter");
@@ -691,6 +694,7 @@ public class SchedulerService implements RequestHandler {
                 } catch (SchedulerException e) {
                     throw new InternalServerErrorException(e);
                 }
+        		handler.handleResult(new JsonValue(params));
             } else {
                 throw new BadRequestException("Unknown action: " + action);
             }
@@ -700,6 +704,15 @@ public class SchedulerService implements RequestHandler {
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
+    }
+    
+    private String getResourceId(String resourceId) throws BadRequestException {
+    	if (resourceId == null || resourceId.equals("/")) {
+    		throw new BadRequestException("Invalid Resource ID");
+    	} else if (resourceId.startsWith("/")) {
+    		return resourceId.substring(1);
+    	}
+    	return resourceId;
     }
 
     private String trimTrailingSlash(String id) {

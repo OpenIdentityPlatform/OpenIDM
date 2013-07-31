@@ -42,6 +42,11 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-quartz-fragment</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>

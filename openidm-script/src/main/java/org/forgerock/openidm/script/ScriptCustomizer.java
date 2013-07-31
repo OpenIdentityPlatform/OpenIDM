@@ -19,25 +19,25 @@ import org.forgerock.json.resource.UpdateRequest;
  */
 public interface ScriptCustomizer {
 
-    void handleCreate(ServerContext context, CreateRequest request, Bindings handler)
+    void handleCreate(ServerContext context, CreateRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handleRead(ServerContext context, ReadRequest request, Bindings handler)
+    void handleRead(ServerContext context, ReadRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handleUpdate(ServerContext context, UpdateRequest request, Bindings handler)
+    void handleUpdate(ServerContext context, UpdateRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handleAction(ServerContext context, ActionRequest request, Bindings handler)
+    void handleAction(ServerContext context, ActionRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handleDelete(ServerContext context, DeleteRequest request, Bindings handler)
+    void handleDelete(ServerContext context, DeleteRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handlePatch(ServerContext context, PatchRequest request, Bindings handler)
+    void handlePatch(ServerContext context, PatchRequest request, Bindings bindings)
             throws ResourceException;
 
-    void handleQuery(ServerContext context, QueryRequest request, Bindings handler)
+    void handleQuery(ServerContext context, QueryRequest request, Bindings bindings)
             throws ResourceException;
 
 }
