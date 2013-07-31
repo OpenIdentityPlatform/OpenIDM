@@ -134,14 +134,14 @@ function isMyTask() {
     var taskInstanceId = request.id.split("/")[2],
         taskInstance = openidm.read("workflow/taskinstance/" + taskInstanceId);
     
-    return taskInstance.assignee === request.parent.security.username;
+    return taskInstance.assignee === request.security.username;
 }
 
 function isUserCandidateForTask(taskInstanceId) {
     
     var userCandidateTasksQueryParams = {
             "_queryId": "filtered-query",
-            "taskCandidateUser": request.parent.security.username
+            "taskCandidateUser": request.security.username
         },
         userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result,
         userGroupCandidateTasksQueryParams,
@@ -155,8 +155,8 @@ function isUserCandidateForTask(taskInstanceId) {
     }
         
     roles = "";
-    for (i = 0; i < request.parent.security['openidm-roles'].length; i++) {
-        role = request.parent.security['openidm-roles'][i];
+    for (i = 0; i < request.security['roles'].length; i++) {
+        role = request.security['roles'][i];
         if (i === 0) {
             roles = role;
         } else {
@@ -186,7 +186,7 @@ function canUpdateTask() {
 function isProcessOnUsersList(processDefinitionId) {
     var processesForUserQueryParams = {
             "_queryId": "query-processes-for-user",
-            "userId": request.parent.security.userid.id
+            "userId": request.security.userid.id
         },
         processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams),
         isProcessOneOfUserProcesses = false,
@@ -257,7 +257,7 @@ function ownDataOnly() {
         userId = request.value.userId;
     }
     
-    return userId === request.parent.security.userid.id;
+    return userId === request.security.userid.id;
 
 }
 
@@ -371,7 +371,7 @@ function passesAccessConfig(id, roles, method, action) {
 
 
 function passesOriginVerification() {
-    var headers = request.parent.headers,
+    var headers = request.headers,
         origin = headers["Origin"] || headers["origin"];
 
     if (typeof (headers["X-Requested-With"]) !== "undefined" || 
@@ -396,18 +396,18 @@ function allow() {
     var roles,
         action;
     
-    if (request.parent === null || request.parent === undefined || request.parent.type !== 'http') {
+    if (request.fromHttp !== 'true') {
         return true;
     }
     
-    roles = request.parent.security['openidm-roles'];
+    roles = request.security['roles'];
     action = "";
     if (request.params && request.params._action) {
         action = request.params._action;
     }
     
     // Check REST requests against the access configuration
-    if (request.parent.type === 'http') {
+    if (request.fromHttp === 'true') {
         if (!passesOriginVerification()) {
             return false;
         }

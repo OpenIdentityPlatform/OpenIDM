@@ -85,8 +85,7 @@ public class SchedulerServiceJob implements Job {
         security.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
         security.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
         security.put("invoke-log-level", ssc.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL));
-        return new ServerContext(new SecurityContext(new RootContext(), (String) ssc
-                .get(ScheduledService.INVOKER_NAME), security), null);
+        return new ServerContext(new SecurityContext(new RootContext(), (String) ssc.get(ScheduledService.INVOKER_NAME), security), null);
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -97,7 +96,6 @@ public class SchedulerServiceJob implements Job {
 
         String invokeService = (String) data.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
         Object invokeContext = data.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
-        //ServiceTracker scheduledServiceTracker = (ServiceTracker) data.get(SchedulerService.SERVICE_TRACKER);
         ServiceTracker scheduledServiceTracker = (ServiceTracker) getServiceTracker(invokeService);
 
 
@@ -124,11 +122,11 @@ public class SchedulerServiceJob implements Job {
                 LogUtil.logAtLevel(logger, logLevel,
                         "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
                 // TODO: Migrate calls to router; pass context in request.
-                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
+                //ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
                 try {
                     scheduledService.execute(scheduledServiceContext);
                 } finally {
-                    ObjectSetContext.pop();
+                    //ObjectSetContext.pop();
                 }
                 LogUtil.logAtLevel(logger, logLevel,
                         "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());

@@ -49,6 +49,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
@@ -272,68 +273,70 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     // ----- Implementation of ScriptCustomizer interface
 
     public void handleAction(final ServerContext context, final ActionRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.ACTION)) {
             throw new NotSupportedException("Actions are not supported for resource instances");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handleCreate(final ServerContext context, final CreateRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.CREATE)) {
             throw new NotSupportedException("Create operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handleDelete(final ServerContext context, final DeleteRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.DELETE)) {
             throw new NotSupportedException("Delete operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handlePatch(final ServerContext context, final PatchRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.PATCH)) {
             throw new NotSupportedException("Patch operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handleQuery(final ServerContext context, final QueryRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.QUERY)) {
             throw new NotSupportedException("Query operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handleRead(final ServerContext context, final ReadRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
 
         if (!mask.contains(RequestType.READ)) {
             throw new NotSupportedException("Read operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     public void handleUpdate(final ServerContext context, final UpdateRequest request,
-            final Bindings handler) throws ResourceException {
+            final Bindings bindings) throws ResourceException {
         if (!mask.contains(RequestType.UPDATE)) {
             throw new NotSupportedException("Update operations are not supported");
         }
-        handleRequest(context, request, handler);
+        handleRequest(context, request, bindings);
     }
 
     protected void handleRequest(final ServerContext context, final Request request,
-            final Bindings handler) {
-        handler.put("request", request);
-        handler.put("context", context);
+            final Bindings bindings) {
+    	SecurityContext securityContext = context.asContext(SecurityContext.class);
+    	bindings.put("security", securityContext.getAuthorizationId());
+    	bindings.put("request", request);
+    	bindings.put("context", context);
 
-        handler.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
+    	bindings.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
             @Override
             public Map<String, Object> newInstance() {
                 final JsonValue serverContext;
@@ -344,7 +347,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
                     }
                 } catch (ResourceException e) {
                     logger.error("Failed to serialise the ServerContext", e);
-                    /* ignore */
                 }
                 return Collections.emptyMap();
             }
