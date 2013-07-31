@@ -107,7 +107,7 @@ public class OSGiAuthnFilterBuilder {
     @Reference(
             name = "AuthenticationConfig",
             referenceInterface = AuthenticationConfig.class,
-            policy = ReferencePolicy.DYNAMIC,
+            policy = ReferencePolicy.STATIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindAuthenticationConfig",
             unbind = "unBindAuthenticationConfig"
@@ -128,8 +128,8 @@ public class OSGiAuthnFilterBuilder {
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         ConfigurationManager.unconfigure();
-        registerAuthnFilter();
         configureAuthenticationFilter(config);
+        registerAuthnFilter();
     }
 
     /**
@@ -324,7 +324,7 @@ public class OSGiAuthnFilterBuilder {
 
         JsonValue filterConfigJson = new JsonValue(filterConfig);
 
-        servletFilterRegistration.registerFilter(filterConfigJson);
+        serviceRegistration = servletFilterRegistration.registerFilter(filterConfigJson);
     }
 
     /**
