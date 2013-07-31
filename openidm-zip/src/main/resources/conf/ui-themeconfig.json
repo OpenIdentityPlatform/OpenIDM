@@ -9,7 +9,7 @@
             "width": "226"
         },
         "lessVars": {
-            "background-color": "blue",
+            "background-color": "#f2f2f2",
             "background-image": "url('')",
             "background-repeat": "no-repeat",
             "background-position": "left top",
