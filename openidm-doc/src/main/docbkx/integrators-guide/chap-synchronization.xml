@@ -1095,13 +1095,13 @@
         <para>The <literal>maxRetries</literal> field specifies the number of
         attempts that OpenIDM should make to process the failed modification.
         The value of this property must be a positive integer, or
-        <literal>-1</literal>. A value of zero (or omitting the <literal>maxRetries</literal>
-        property) indicates that failed modifications should not be reattempted.
-        In this case, the post retry action is executed immediately when a
-        LiveSync operation fails. A value of <literal>-1</literal> (or omitting
-        the entire <literal>syncFailureHandler</literal> from the configuration)
-        indicates that failed modifications should be retried an infinite number
-        of times. In this case, no post retry action is executed.</para>
+        <literal>-1</literal>. A value of zero indicates that failed
+        modifications should not be reattempted. In this case, the post retry
+        action is executed immediately when a LiveSync operation fails. A value
+        of <literal>-1</literal> (or omitting the <literal>maxRetries</literal>
+        property, or the entire <literal>syncFailureHandler</literal> from the
+        configuration) indicates that failed modifications should be retried an
+        infinite number of times. In this case, no post retry action is executed.</para>
 
         <para>The default retry policy relies on the scheduler, or whatever
         invokes the LiveSync operation. Therefore, if retries are enabled and
