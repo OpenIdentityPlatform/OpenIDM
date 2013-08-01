@@ -423,12 +423,9 @@ policyProcessor = (function (policyConfig,policyImpl){
     
     getPropertyConfig = function(resource, propName) {
         var props = resource.properties,prop,i;
-        java.lang.System.out.println("props.length: " + props.length);
         for (i = 0; i < props.length; i++) {
-            java.lang.System.out.println("props[" + i + "]: " + props[i]);
             prop = props[i];
             if (prop.name === propName) {
-                java.lang.System.out.println("match");
                 return prop;
             }
         }
@@ -513,13 +510,8 @@ policyProcessor = (function (policyConfig,policyImpl){
             policyRequirements = [],
             allPolicyRequirements = getAllPolicyRequirements(policies),
             i,params,policy,validationFunc,failed,y;
-        java.lang.System.out.println("propName: " + propName);
-        java.lang.System.out.println("propValue: " + propValue);
-        java.lang.System.out.println("policies: " + policies);
         for (i = 0; i < policies.length; i++) {
             params = policies[i].params;
-            java.lang.System.out.println("policy ID: " + policies[i].policyId);
-            java.lang.System.out.println("params: " + params);
             policy = getPolicy(policies[i].policyId);
             if (policy === null) {
                 throw "Unknown policy " + policies[i].policyId;
@@ -732,11 +724,8 @@ policyProcessor = (function (policyConfig,policyImpl){
                                 getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
-                	java.lang.System.out.println("validateProperty");
                     props = request.value;
-                	java.lang.System.out.println("props: " + props);
                     for (propName in props) {
-                    	java.lang.System.out.println("propName: " + propName);
                         prop = getPropertyConfig(resource, propName);
                         if (prop !== null) {
                             policies = prop.policies;
@@ -774,17 +763,13 @@ additionalPolicyLoader = (function (config,impl) {
         var i,j;
         //Load additional policy scripts if configured
         for (i = 0; i < additionalPolicies.length; i++) {
-            try {
-                eval(additionalPolicies[i]);
+            eval(additionalPolicies[i]);
                 
-                for (j=0;j<config.policies.length;j++) {
-                    if (!policyImpl.hasOwnProperty(config.policies[j].policyExec) && 
-                        typeof(eval(config.policies[j].policyExec)) === "function") {
-                        impl[config.policies[j].policyExec] = eval(config.policies[j].policyExec);
-                    }
+            for (j=0;j<config.policies.length;j++) {
+                if (!policyImpl.hasOwnProperty(config.policies[j].policyExec) && 
+                    typeof(eval(config.policies[j].policyExec)) === "function") {
+                    impl[config.policies[j].policyExec] = eval(config.policies[j].policyExec);
                 }
-            } catch (error) {
-                java.lang.System.out.println("Error executing additional policy script: " + error);
             }
         }
     };
