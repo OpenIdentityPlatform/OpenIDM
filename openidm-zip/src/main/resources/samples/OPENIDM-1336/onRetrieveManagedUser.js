@@ -1,1 +1,0 @@
-object.active = (object.accountStatus.toLowerCase() === 'active')

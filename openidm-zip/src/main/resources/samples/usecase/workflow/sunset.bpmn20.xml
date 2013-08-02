@@ -136,7 +136,7 @@
                 "createDate" : requestDate,
                 "notificationType" : "warning",
                 "notificationSubtype" : "",
-                "message" : "User " + userName + " was deactivated"
+                "message" : "Contract of " + userName + " was extended"
                 ];
                 openidm.create("repo/ui/notification/", newRequesterNotification)
                 

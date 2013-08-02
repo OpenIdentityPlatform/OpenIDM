@@ -6,7 +6,7 @@
             "target" : "system/business/account",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "map = {'query': {'Equals': {'field': 'uid', 'values': [ source.userName ]}}};map;"
+                "source" : "map = {'query': {'Equals': {'field': 'userName', 'values': [ source.userName ]}}};map;"
             },
             "enableSync" : false,
             "validSource" : {

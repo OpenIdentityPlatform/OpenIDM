@@ -1,8 +1,9 @@
+/*global  objectID*/
 
 (function () {
     var params = {
  "userId" : objectID,
- "_key": "sunset"
+ "_key": "passwordChangeReminder"
 };
  
 openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, params);

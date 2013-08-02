@@ -12,7 +12,7 @@
             },
             "onRetrieve" : {
                 "type" : "text/javascript",
-                "file" : "bin/defaults/scripts/onRetrieveManagedUser.js"
+                "file" : "script/onRetrieveManagedUser.js"
             },
             "onStore" : {
                 "type" : "text/javascript",
