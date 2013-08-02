@@ -55,7 +55,7 @@
                                        type="boolean"/>
                 <activiti:formProperty id="managerDecision" name="Decision" type="enum" required="true">
                     <activiti:value id="change" name="Change"></activiti:value>
-                    <activiti:value id="nochange" name="Do not change"></activiti:value>
+                    <activiti:value id="nochange" name="Certify"></activiti:value>
                 </activiti:formProperty>
             </extensionElements>
         </userTask>

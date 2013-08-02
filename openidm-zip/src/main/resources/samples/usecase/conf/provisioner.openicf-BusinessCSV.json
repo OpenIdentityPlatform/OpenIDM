@@ -27,7 +27,7 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "filePath" : "data/business.csv",
+        "filePath" : "samples/usecase/usecase4/data/business.csv",
         "uniqueAttribute" : "uid",
         "nameAttribute" : "uid"
     },

@@ -1,3 +1,5 @@
+/*global object */
+
 function pad(number) {
     var r = String(number);
     if ( r.length === 1 ) {
@@ -17,33 +19,31 @@ function toISOString(date) {
     + 'Z';
 }
 
+function maintainLastPasswordSet(userObject) {
+    userObject.lastPasswordSet = toISOString(new Date());
+    if (userObject.passwordChange !== undefined) {
+        delete userObject.passwordChange;
+    }
+}
+
 if (object.password !== undefined){
     var params = {
         "_queryId": "for-userName",
         "uid": object.userName
     },
-    result = openidm.query("managed/user", params) 
+    result = openidm.query("managed/user", params), user, oldPassword, newPassword;
     
-    user = null
     if (result.result && result.result.length === 1) {
         user = result.result[0];
     }
     
-    var now = new Date();
-    if (user === null || (user !== null && user.password === undefined)) {
+    if (user === undefined || (user !== undefined && user.password === undefined)) {
         maintainLastPasswordSet(object);
     } else {
-        oldPassword = openidm.decrypt(user.password)
-        newPassword = openidm.decrypt(object.password)
+        oldPassword = openidm.decrypt(user.password);
+        newPassword = openidm.decrypt(object.password);
         if (oldPassword !== newPassword) {
             maintainLastPasswordSet(object);
         }
-    }
-}
-
-function maintainLastPasswordSet(userObject) {
-    userObject.lastPasswordSet = toISOString(now);
-    if (userObject.passwordChange !== undefined) {
-        delete userObject.passwordChange;
     }
 }

@@ -1,3 +1,4 @@
+/*global input, objectID */
 
 (function () {
     // Create a change patch

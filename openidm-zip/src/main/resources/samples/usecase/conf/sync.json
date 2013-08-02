@@ -63,10 +63,6 @@
                 },
                 {
                     "source" : "uid",
-                    "target" : "userName"
-                },
-                {
-                    "source" : "uid",
                     "target" : "_id"
                 },
                 {

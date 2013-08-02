@@ -1,8 +1,11 @@
+/*global source */
+
 function isSourceValid(sourceobject)
 {
-    if (sourceobject.accounts != null) {
+    var i;
+    if (sourceobject.accounts !== null) {
         for (i = 0; i < sourceobject.accounts.length; i++) {
-            if ("Business" == sourceobject.accounts[i]) {
+            if ("Business" === sourceobject.accounts[i]) {
                 return true;
             }
         }
@@ -11,4 +14,3 @@ function isSourceValid(sourceobject)
 }
 
 isSourceValid(source);
-
