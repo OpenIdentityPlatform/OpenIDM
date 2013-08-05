@@ -65,11 +65,11 @@ public interface AuditLogger {
      * the object, and the {@code _rev} property to object version if optimistic concurrency
      * is supported.
      *
-     * @param id the requested identifier to use, or {@code null} if a server-generated identifier is requested.
+     * @param type the requested type of audit object to create.
      * @param object the contents of the object to create in the object set.
      * @throws ForbiddenException if access to the object or object set is forbidden.
      */
-    void create(ServerContext context, String id, Map<String, Object> object) throws ResourceException;
+    void create(ServerContext context, String type, Map<String, Object> object) throws ResourceException;
 
     /**
      * Reads an object from the object set.

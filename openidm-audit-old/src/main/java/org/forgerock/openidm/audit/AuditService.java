@@ -31,5 +31,6 @@ import org.forgerock.json.resource.RequestHandler;
  * @author aegloff
  */
 public interface AuditService extends RequestHandler {
-    public final static String ROUTER_PREFIX = "audit";
+    /** the AuditService is "registered" on /audit */
+    public final static String ROUTER_PREFIX = "/audit";
 }

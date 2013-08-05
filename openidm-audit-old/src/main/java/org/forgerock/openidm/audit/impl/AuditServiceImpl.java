@@ -25,10 +25,9 @@ package org.forgerock.openidm.audit.impl;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,8 +74,10 @@ import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -96,7 +97,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = "service.description", value = "Audit Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX)
+    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX + "/*")
 })
 public class AuditServiceImpl implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
@@ -107,9 +108,11 @@ public class AuditServiceImpl implements AuditService {
     public final static String CONFIG_LOG_TYPE = "logType";
     public final static String CONFIG_LOG_TYPE_CSV = "csv";
     public final static String CONFIG_LOG_TYPE_REPO = "repository";
+    public final static String CONFIG_LOG_TYPE_ROUTER = "router";
 
     public final static String TYPE_RECON = "recon";
     public final static String TYPE_ACTIVITY = "activity";
+    public final static String TYPE_ACCESS = "access";
 
     public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
     public final static String QUERY_BY_MAPPING = "audit-by-mapping";
@@ -154,22 +157,23 @@ public class AuditServiceImpl implements AuditService {
         if using this with for scr 1.6.2
         Ensure we do not get bound on router whilst it is activating
     */
-/*    @Reference(
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    Object router;
-    protected void bindRouter(JsonResource router) {
-        this.router = router;
+    // ----- Declarative Service Implementation
+    ServerContext routerContext = null;
+
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    RouteService route;
+
+    private void bindRouteService(final RouteService service) throws ResourceException {
+        route = service;
+        routerContext = service.createServerContext();
     }
-    protected void unbindRouter(JsonResource router) {
-        this.router = router;
+
+    private void unbindRouteService(final RouteService service) {
+        route = null;
+        routerContext = null;
     }
-*/
+
+
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
      * against the current schema and may need processing to conform to an updated schema.
@@ -177,7 +181,6 @@ public class AuditServiceImpl implements AuditService {
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency
      *
-     * @param fullId the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
@@ -186,13 +189,15 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public void handleRead(final ServerContext context,final ReadRequest request,final ResultHandler<Resource> handler) {
         try {
-            String[] splitTypeAndId = splitFirstLevel(request.getResourceName());
+            String fullId = request.getResourceName();
+            String[] splitTypeAndId = splitFirstLevel(fullId);
             String type = splitTypeAndId[0];
-            logger.debug("Audit read called for {}", request.getResourceName());
+            logger.debug("Audit read called for {}", fullId);
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> r = auditLogger.read(context, request.getResourceName());
+            Map<String, Object> r = auditLogger.read(context, fullId);
             handler.handleResult(new Resource((String)r.get(Resource.FIELD_CONTENT_ID), null, new JsonValue(r)));
         } catch (Throwable t) {
+            t.printStackTrace();
             handler.handleError(ResourceUtil.adapt(t));
         }
     }
@@ -203,7 +208,6 @@ public class AuditServiceImpl implements AuditService {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
      * @param obj the contents of the object to create in the object set.
      * @throws NotFoundException if the specified id could not be resolved.
      * @throws ForbiddenException if access to the object or object set is forbidden.
@@ -213,21 +217,21 @@ public class AuditServiceImpl implements AuditService {
     public void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            String fullId = request.getResourceName();
-            if (request.getNewResourceId() != null) {
-                fullId = fullId + '/' + request.getNewResourceId();
-            }
-            Map<String, Object> obj = request.getContent().asMap();
-
-            logger.debug("Audit create called for {} with {}", fullId, request.getContent());
-
-            if (fullId == null) {
+            if (request.getResourceName() == null) {
                 throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
             }
 
-            String[] splitTypeAndId =  splitFirstLevel(fullId);
+            if (request.getNewResourceId() != null) {
+                logger.warn("Audit create called with new resource id " + request.getNewResourceId() +" is disallowed");
+            }
+
+            Map<String, Object> obj = request.getContent().asMap();
+
+            // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin, ip=127.0.0.1}  
+            logger.debug("Audit create called for {} with {}", request.getResourceName(), obj);
+
+            String[] splitTypeAndId =  splitFirstLevel(request.getResourceName());
             String type = splitTypeAndId[0];
-            String localId = splitTypeAndId[1];
 
             String trigger = getTrigger(context);
 
@@ -258,31 +262,29 @@ public class AuditServiceImpl implements AuditService {
                 processActivityLog(obj);
             }
 
-            // Generate an ID if there is none
-            if (localId == null || localId.isEmpty()) {
-                localId = UUID.randomUUID().toString();
-                obj.put(Resource.FIELD_CONTENT_ID, localId);
-                logger.debug("Assigned id {}", localId);
-            }
-            String id = type + "/" + localId;
+            // Generate an ID for the object
+            String localId = UUID.randomUUID().toString();
+            obj.put(Resource.FIELD_CONTENT_ID, localId);
+            logger.debug("Assigned id {}", localId);
 
             // Generate unified timestamp
             if (null == obj.get("timestamp")) {
                 obj.put("timestamp", dateUtil.now());
             }
 
-            logger.debug("Create audit entry for {} with {}", id, obj);
+            logger.debug("Create audit entry for {}/{} with {}", type, localId, obj);
             for (AuditLogger auditLogger : getAuditLoggerForEvent(type)) {
                 try {
-                    auditLogger.create(context, id, obj);
+                    auditLogger.create(context, type, obj);
                 } catch (ResourceException ex) {
-                    logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
+                    logger.warn("Failure writing audit log: {}/{} with logger {}", new Object[] {type, localId, auditLogger, ex});
                     throw ex;
                 } catch (RuntimeException ex) {
-                    logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
+                    logger.warn("Failure writing audit log: {}/{} with logger {}", new Object[] {type, localId, auditLogger, ex});
                     throw ex;
                 }
             }
+            handler.handleResult(new Resource(localId, null, new JsonValue(obj)));
         } catch (Throwable t){
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -402,7 +404,6 @@ public class AuditServiceImpl implements AuditService {
      *
      * Deletes the specified object from the object set.
      *
-     * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
@@ -434,7 +435,6 @@ public class AuditServiceImpl implements AuditService {
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found.
@@ -448,9 +448,12 @@ public class AuditServiceImpl implements AuditService {
         try {
             String[] splitTypeAndId = splitFirstLevel(request.getResourceName());
             String type = splitTypeAndId[0];
+            Map<String,String> params = new HashMap<String,String>();
+            params.putAll(request.getAdditionalQueryParameters());
+            params.put("_queryId", request.getQueryId());
             logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalQueryParameters());
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> result = auditLogger.query(context, request.getResourceName(), request.getAdditionalQueryParameters());
+            Map<String, Object> result = auditLogger.query(context, request.getResourceName(), params);
 
             for (Map<String,Object> o: (Iterable<Map<String,Object>>) result.get("result")) {
                 String id = (String) o.get(Resource.FIELD_CONTENT_ID);
@@ -548,12 +551,14 @@ public class AuditServiceImpl implements AuditService {
     // TODO: replace with common utility to handle ID, this is temporary
     // Assumes single level type
     static String[] splitFirstLevel(String id) {
-        String firstLevel = id;
+        String firstLevel = id.startsWith("/")
+                ? id.substring(1)
+                : id;
         String rest = null;
-        int firstSlashPos = id.indexOf("/");
+        int firstSlashPos = firstLevel.indexOf("/");
         if (firstSlashPos > -1) {
-            firstLevel = id.substring(0, firstSlashPos);
-            rest = id.substring(firstSlashPos + 1);
+            rest = firstLevel.substring(firstSlashPos + 1);
+            firstLevel = firstLevel.substring(0, firstSlashPos);
         }
         logger.trace("Extracted first level: {} rest: {}", firstLevel, rest);
         return new String[] { firstLevel, rest };
@@ -731,10 +736,12 @@ public class AuditServiceImpl implements AuditService {
                 String logType = (String) entry.get(CONFIG_LOG_TYPE);
                 // TDDO: make pluggable
                 AuditLogger auditLogger = null;
-                if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
+                if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
                     auditLogger = new CSVAuditLogger();
-                } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
+                } else if (CONFIG_LOG_TYPE_REPO.equalsIgnoreCase(logType)) {
                     auditLogger = new RepoAuditLogger();
+                } else if (CONFIG_LOG_TYPE_ROUTER.equalsIgnoreCase(logType)) {
+                    auditLogger = new RouterAuditLogger(routerContext);
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }
@@ -802,11 +809,60 @@ public class AuditServiceImpl implements AuditService {
     }
 
     public static Map<String, Object> formatLogEntry(Map<String, Object> entry, String type) {
-        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+        if (AuditServiceImpl.TYPE_RECON.equals(type)) {
             return AuditServiceImpl.formatReconEntry(entry);
+        } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
+            return AuditServiceImpl.formatActivityEntry(entry);
+        } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {
+            return AuditServiceImpl.formatAccessEntry(entry);
         } else {
             return entry;
         }
+    }
+
+    /**
+     * Returns an ordered audit log access entry.
+     *
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    private static Map<String,Object> formatAccessEntry(Map<String,Object> entry) {
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
+        formattedEntry.put("_id", entry.get("_id"));
+        formattedEntry.put("action", entry.get("action"));
+        formattedEntry.put("ip", entry.get("ip"));
+        formattedEntry.put("principal", entry.get("principal"));
+        formattedEntry.put("roles", entry.get("roles"));
+        formattedEntry.put("status", entry.get("status"));
+        formattedEntry.put("timestamp", entry.get("timestamp"));
+        formattedEntry.put("userid", entry.get("userid"));
+        return formattedEntry;
+    }
+
+    /**
+     * Returns an ordered audit log activity entry.
+     *
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    private static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
+        formattedEntry.put("_id", entry.get("_id"));
+        formattedEntry.put("activityId", entry.get("activityId"));
+        formattedEntry.put("timestamp", entry.get("timestamp"));
+        formattedEntry.put("action", entry.get("action"));
+        formattedEntry.put("message", entry.get("message"));
+        formattedEntry.put("objectId", entry.get("objectId"));
+        formattedEntry.put("rev", entry.get("rev"));
+        formattedEntry.put("rootActionId", entry.get("rootActionId"));
+        formattedEntry.put("parentActionId", entry.get("parentActionId"));
+        formattedEntry.put("requester", entry.get("requester"));
+        formattedEntry.put("before", entry.get("before"));
+        formattedEntry.put("after", entry.get("after"));
+        formattedEntry.put("status", entry.get("status"));
+        formattedEntry.put("changedFields", entry.get("changedFields"));
+        formattedEntry.put("passwordChanged", entry.get("passwordChanged"));
+        return formattedEntry;
     }
 
     /**
@@ -816,7 +872,7 @@ public class AuditServiceImpl implements AuditService {
      * @return the formatted entry
      */
     public static Map<String, Object> formatReconEntry(Map<String, Object> entry) {
-        Map<String, Object> formattedEntry = new HashMap<String, Object>();
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
         formattedEntry.put("_id", entry.get("_id"));
         formattedEntry.put("entryType", entry.get("entryType"));
         formattedEntry.put("timestamp", entry.get("timestamp"));
@@ -871,8 +927,31 @@ public class AuditServiceImpl implements AuditService {
         return results;
     }
 
-    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList) {
-        Map<String, Object> results = new HashMap<String, Object>();
+    public static Map<String, Object> getActivityResults(List<Map<String, Object>> entryList, boolean formatted) {
+        return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACTIVITY);
+    }
+
+    public static Map<String, Object> getAccessResults(List<Map<String, Object>> entryList, boolean formatted) {
+        return getResults(entryList, formatted, AuditServiceImpl.TYPE_ACCESS);
+    }
+    
+    private static Map<String, Object> getResults(List<Map<String, Object>> entryList, boolean formatted, String type) {
+        Map<String, Object> results = new LinkedHashMap<String, Object>();
+        if (formatted) {
+            List<Map<String, Object>> formattedList = new ArrayList<Map<String, Object>>();
+            for (Map<String, Object> entry : entryList) {
+                if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+                    formattedList.add(AuditServiceImpl.formatActivityEntry(entry));
+                } else if (type.equals(AuditServiceImpl.TYPE_ACCESS)) {
+                    formattedList.add(AuditServiceImpl.formatAccessEntry(entry));
+                } else {
+                    formattedList.add(entry);
+                }
+            }
+            results.put("result", formattedList);
+        } else {
+            results.put("result", entryList);
+        }
         results.put("result", entryList);
         return results;
     }
@@ -880,7 +959,7 @@ public class AuditServiceImpl implements AuditService {
     protected static JsonValue parseJsonString(String stringified) {
         JsonValue jsonValue = null;
         try {
-            Map parsedValue = (Map) mapper.readValue(stringified, Map.class);
+            Map parsedValue = mapper.readValue(stringified, Map.class);
             jsonValue = new JsonValue(parsedValue);
         } catch (IOException ex) {
             throw new JsonException("String passed into parsing is not valid JSON", ex);
