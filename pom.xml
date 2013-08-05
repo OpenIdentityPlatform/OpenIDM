@@ -289,7 +289,7 @@
     </properties>
 
     <modules>
-        <module>openidm-audit-old</module>
+        <module>openidm-audit</module>
         <module>openidm-cluster</module>
         <module>openidm-config</module>
         <module>openidm-core</module>
