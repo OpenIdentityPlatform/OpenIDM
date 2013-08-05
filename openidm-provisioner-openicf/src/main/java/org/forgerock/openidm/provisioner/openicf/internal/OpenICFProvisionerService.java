@@ -1554,7 +1554,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e));
             } finally {
-                measure.end();
+//              measure.end();
             }
         }
 
