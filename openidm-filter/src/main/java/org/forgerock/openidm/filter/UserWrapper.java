@@ -66,13 +66,12 @@ class UserWrapper extends HttpServletRequestWrapper {
     public UserWrapper(HttpServletRequest request, final SecurityContext securityContext) {
         super(request);
         this.securityContext = securityContext;
-            username = securityContext.getAuthenticationId();
-            if (securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_GROUPS) instanceof List) {
-                roles = (List<String>) securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_GROUPS);
-            } else {
-                roles = null;
-            }
-
+        username = securityContext.getAuthenticationId();
+        if (securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES) instanceof List) {
+            roles = (List<String>) securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES);
+        } else {
+            roles = null;
+        }
     }
 
     public SecurityContext getServerContext() {

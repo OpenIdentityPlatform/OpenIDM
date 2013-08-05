@@ -100,7 +100,6 @@ public class ResourceUtil {
         Map<String, Object> authzid = new HashMap<String, Object>();
         authzid.put(SecurityContext.AUTHZID_COMPONENT, bundleContext.getBundle().getSymbolicName());
         authzid.put(SecurityContext.AUTHZID_ROLES, "system");
-        authzid.put(SecurityContext.AUTHZID_GROUPS, "system");
         authzid.put(SecurityContext.AUTHZID_DN, "system");
         authzid.put(SecurityContext.AUTHZID_REALM, "system");
         authzid.put(SecurityContext.AUTHZID_ID, "system");
