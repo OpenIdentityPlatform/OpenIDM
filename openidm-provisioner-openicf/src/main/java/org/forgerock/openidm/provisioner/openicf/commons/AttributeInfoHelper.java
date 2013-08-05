@@ -349,7 +349,13 @@ public class AttributeInfoHelper {
     private <T> T getSingleValue(Object source, Class<T> clazz) {
         if (null == source) {
             return null;
-        } else if ((source instanceof List)) {
+        } 
+        
+        if (source instanceof JsonValue) {
+            source = ((JsonValue) source).getObject();
+        }
+        
+        if (source instanceof List) {
             List c = (List) source;
             if (c.size() < 2) {
                 if (c.isEmpty()) {
@@ -374,6 +380,11 @@ public class AttributeInfoHelper {
         if (null == source) {
             return null;
         }
+
+        if (source instanceof JsonValue) {
+            source = ((JsonValue) source).getObject();
+        }
+        
         List<T> newValues = null;
         if (source instanceof Collection) {
             newValues = new ArrayList<T>(((Collection) source).size());

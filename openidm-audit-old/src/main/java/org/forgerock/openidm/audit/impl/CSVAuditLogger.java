@@ -229,7 +229,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> query(ServerContext context, String fullId, Map<String, String> params) throws ResourceException {
-        String queryId = (String)params.get("_queryId");
+        String queryId = params.get("_queryId");
         boolean formatted = true;
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
@@ -243,24 +243,24 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 throw new NotFoundException(type + " audit log not found");
             }
 
-            String reconId = (String)params.get("reconId");
+            String reconId = params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
                 return AuditServiceImpl.getReconResults(reconEntryList, reconId, formatted);
             } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "mapping", (String)params.get("mappingName"), formatted);
+                return getReconQueryResults(reconEntryList, reconId, "mapping", params.get("mappingName"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "situation", (String)params.get("situation"), formatted);
+                return getReconQueryResults(reconEntryList, reconId, "situation", params.get("situation"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_TYPE.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return getReconQueryResults(reconEntryList, reconId, "entryType", (String)params.get("entryType"), formatted);
+                return getReconQueryResults(reconEntryList, reconId, "entryType", params.get("entryType"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_ACTIVITY_PARENT_ACTION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
-                String actionId = (String)params.get("parentActionId");
+                String actionId = params.get("parentActionId");
                 List<Map<String, Object>> rawEntryList = new ArrayList<Map<String, Object>>();
                 for (Map<String, Object> entry : reconEntryList) {
                     if (entry.get("parentActionId").equals(actionId)) {
                         rawEntryList.add(entry);
                     }
                 }
-                return AuditServiceImpl.getActivityResults(rawEntryList);
+                return AuditServiceImpl.getActivityResults(rawEntryList, formatted);
             } else {
                 throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);
             }
@@ -284,15 +284,13 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public void create(ServerContext context, String fullId, Map<String, Object> obj) throws ResourceException {
+    public void create(ServerContext context, String type, Map<String, Object> obj) throws ResourceException {
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
         // Synchronize writes so that simultaneous writes don't corrupt the file
         synchronized (lock) {
-            String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-            String type = split[0];
             try {
                 AuditServiceImpl.preformatLogEntry(type, obj);
-                createImpl(fullId, obj);
+                createImpl(type, obj);
             } finally {
                 measure.end();
             }
@@ -300,10 +298,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     }
 
 
-    private void createImpl(String fullId, Map<String, Object> obj) throws ResourceException {
-        // TODO: replace ID handling utility
-        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        String type = split[0];
+    private void createImpl(String type, Map<String, Object> obj) throws ResourceException {
 
         // Re-try once in case the writer stream became closed for some reason
         boolean retry = false;

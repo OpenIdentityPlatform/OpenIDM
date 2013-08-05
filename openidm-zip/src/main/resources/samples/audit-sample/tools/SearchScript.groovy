@@ -53,8 +53,8 @@ import groovy.sql.DataSet;
 // !!!! Each Map must contain a '__UID__' and '__NAME__' attribute.
 // This is required to build a ConnectorObject.
 
-log.debug("Entering {0} Script for {1} with qeury {2} and options {3}",
-        action, objectClass, query, options);
+// log.debug("Entering {0} Script for {1} with qeury {2} and options {3}",
+//         action, objectClass, query, options);
 
 def sql = new Sql(connection);
 def result = []
@@ -84,7 +84,7 @@ if (query != null) {
     def binding = [left:query.get("left"),right:query.get("right"),not:query.get("not")];
     def template = engine.createTemplate(wt).make(binding);
     where = template.toString();
-    log.debug("Search WHERE clause is: "+ where)
+//     log.debug("Search WHERE clause is: "+ where)
 }
 
 switch ( objectClass ) {
@@ -159,6 +159,6 @@ switch ( objectClass ) {
     log.warn("Didn't match objectClass " + objectClass);
 }
 
-log.debug("Returning {0}", result);
+// log.debug("Returning {0}", result);
 
 return result;

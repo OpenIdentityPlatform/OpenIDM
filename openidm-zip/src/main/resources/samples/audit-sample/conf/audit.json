@@ -31,6 +31,6 @@
     ],
     "exceptionFormatter" : {
         "type" : "text/javascript",
-        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+        "name" : "audit/stacktraceFormatter.js"
     }
 }
