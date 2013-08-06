@@ -312,7 +312,7 @@
         <module>openidm-servlet</module>
         <module>openidm-servletfilter-registrator</module>
         <module>openidm-quartz-fragment-old</module>
-        <module>openidm-scheduler-old</module>
+        <module>openidm-scheduler</module>
         <module>openidm-script</module>
         <module>openidm-security-jetty</module>
         <module>openidm-shell</module>
