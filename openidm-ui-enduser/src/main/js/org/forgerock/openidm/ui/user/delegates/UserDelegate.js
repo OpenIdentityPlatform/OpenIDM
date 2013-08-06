@@ -84,12 +84,18 @@ define("UserDelegate", [
     obj.getUserById = function(id, component, successCallback, errorCallback) {
         if(component === "managed/user") {
             obj.readEntity(id, function(user) {
+                if (typeof user.roles === "object" && user.roles !== null) {
+                    user.roles = user.roles.join(",");
+                }
                 successCallback(user);
             }, function() {
                 errorCallback();
             });
         } else if(component === "internal/user") {
             obj.readInternalEntity(id, function(user) {
+                if (typeof user.roles === "object" && user.roles !== null) {
+                    user.roles = user.roles.join(",");
+                }
                 if(!user.userName) {
                     user.userName = user._id;
                 }
