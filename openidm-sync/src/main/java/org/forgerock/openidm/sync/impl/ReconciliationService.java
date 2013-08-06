@@ -146,39 +146,39 @@ public class ReconciliationService
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-        String localId = getLocalId(request.getResourceName());
-        Map<String, Object> result = null;
-        result = new LinkedHashMap<String, Object>();
+            String localId = getLocalId(request.getResourceName());
+            Map<String, Object> result = null;
+            result = new LinkedHashMap<String, Object>();
 
-        if (localId == null) {
-            List<Map> runList = new ArrayList<Map>();
-            for (ReconciliationContext entry : reconRuns.values()) {
-                runList.add(entry.getSummary());
-            }
-            result.put("reconciliations", runList);
-        } else {
-            Map<String, Object> summaryMap = null;
-            // First try and get it from in memory
-            for (ReconciliationContext entry : reconRuns.values()) {
-                if (entry.getReconId().equals(localId)) {
-                    handler.handleResult(new Resource(localId, null, new JsonValue(entry.getSummary())));
-                    return;
+            if (localId == null) {
+                List<Map> runList = new ArrayList<Map>();
+                for (ReconciliationContext entry : reconRuns.values()) {
+                    runList.add(entry.getSummary());
                 }
-            }
-            // Next, if not in memory, try and get it from audit log
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("_queryId", "audit-by-recon-id-type");
-            params.put("reconId", localId);
-            params.put("entryType", "summary");
-            Map<String, Object> queryResult = null;//TODO FIXME getRouter().query("audit/recon", params);
-            summaryMap = (Map<String, Object>)queryResult.get("summary");
+                result.put("reconciliations", runList);
+            } else {
+                Map<String, Object> summaryMap = null;
+                // First try and get it from in memory
+                for (ReconciliationContext entry : reconRuns.values()) {
+                    if (entry.getReconId().equals(localId)) {
+                        handler.handleResult(new Resource(localId, null, new JsonValue(entry.getSummary())));
+                        return;
+                    }
+                }
+                // Next, if not in memory, try and get it from audit log
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("_queryId", "audit-by-recon-id-type");
+                params.put("reconId", localId);
+                params.put("entryType", "summary");
+                Map<String, Object> queryResult = null;//TODO FIXME getRouter().query("audit/recon", params);
+                summaryMap = (Map<String, Object>)queryResult.get("summary");
 
-            if (summaryMap == null) {
-                throw new NotFoundException();
+                if (summaryMap == null) {
+                    throw new NotFoundException();
+                }
+                result = (Map<String, Object>)summaryMap.get("messageDetail");
+                result.put("_id", localId);
             }
-            result = (Map<String, Object>)summaryMap.get("messageDetail");
-            result.put("_id", localId);
-        }
             handler.handleResult(new Resource(localId, null, new JsonValue(result)));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
@@ -228,50 +228,50 @@ public class ReconciliationService
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        String id = request.getResourceName();
-        JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
-        String action = paramsVal.get("_action").asString();
-        if (action == null) {
-            throw new BadRequestException("Action parameter is not present or value is null");
-        }
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            String id = request.getResourceName();
+            JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
+            String action = paramsVal.get("_action").asString();
+            if (action == null) {
+                throw new BadRequestException("Action parameter is not present or value is null");
+            }
 
-        if (id == null) {
-            // operation on collection
-            if (ReconciliationService.ReconAction.isReconAction(action)) {
-                try {
-                    JsonValue mapping = paramsVal.get("mapping").required();
-                    logger.debug("Reconciliation action of mapping {}", mapping);
-                    Boolean waitForCompletion = Boolean.FALSE;
-                    JsonValue waitParam = paramsVal.get("waitForCompletion").defaultTo(Boolean.FALSE);
-                    if (waitParam.isBoolean()) {
-                        waitForCompletion = waitParam.asBoolean();
-                    } else {
-                        waitForCompletion = Boolean.parseBoolean(waitParam.asString());
+            if (id == null) {
+                // operation on collection
+                if (ReconciliationService.ReconAction.isReconAction(action)) {
+                    try {
+                        JsonValue mapping = paramsVal.get("mapping").required();
+                        logger.debug("Reconciliation action of mapping {}", mapping);
+                        Boolean waitForCompletion = Boolean.FALSE;
+                        JsonValue waitParam = paramsVal.get("waitForCompletion").defaultTo(Boolean.FALSE);
+                        if (waitParam.isBoolean()) {
+                            waitForCompletion = waitParam.asBoolean();
+                        } else {
+                            waitForCompletion = Boolean.parseBoolean(waitParam.asString());
+                        }
+                        result.put("_id", reconcile(mapping, waitForCompletion, paramsVal));
+                    } catch (SynchronizationException se) {
+                       throw new ConflictException(se);
                     }
-                    result.put("_id", reconcile(mapping, waitForCompletion, paramsVal));
-                } catch (SynchronizationException se) {
-                   throw new ConflictException(se);
+                } else {
+                    throw new BadRequestException("Action " + action + " on reconciliation not supported " + request.getAdditionalActionParameters());
                 }
             } else {
-                throw new BadRequestException("Action " + action + " on reconciliation not supported " + request.getAdditionalActionParameters());
-            }
-        } else {
-            // operation on individual resource
-            ReconciliationContext foundRun = reconRuns.get(id);
-            if (foundRun == null) {
-                throw new NotFoundException("Reconciliation with id " + id + " not found." );
-            }
+                // operation on individual resource
+                ReconciliationContext foundRun = reconRuns.get(id);
+                if (foundRun == null) {
+                    throw new NotFoundException("Reconciliation with id " + id + " not found." );
+                }
 
-            if ("cancel".equalsIgnoreCase(action)) {
-                foundRun.cancel();
-                result.put("_id", foundRun.getReconId());
-                result.put("action", action);
-                result.put("status", "SUCCESS");
-            } else {
-                throw new BadRequestException("Action " + action + " on recon run " + id + " not supported " + request.getAdditionalActionParameters());
+                if ("cancel".equalsIgnoreCase(action)) {
+                    foundRun.cancel();
+                    result.put("_id", foundRun.getReconId());
+                    result.put("action", action);
+                    result.put("status", "SUCCESS");
+                } else {
+                    throw new BadRequestException("Action " + action + " on recon run " + id + " not supported " + request.getAdditionalActionParameters());
+                }
             }
-        }
             handler.handleResult(new JsonValue(result));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
