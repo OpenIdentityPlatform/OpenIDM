@@ -42,6 +42,13 @@ public class Param {
     }
 
     /**
+     * @return OpenIDM default certAlias
+     */
+    public static String getCertAlias() {
+        return JettyPropertyUtil.getProperty("openidm.https.keystore.cert.alias", false);
+    }
+    
+    /**
      * @return OpenIDM keystore type
      */
     public static String getKeystoreType() {

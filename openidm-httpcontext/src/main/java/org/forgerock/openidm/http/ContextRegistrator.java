@@ -68,14 +68,6 @@ public final class ContextRegistrator {
     @Reference
     private WebContainer httpService;
 
-    private void bindWebContainer(final WebContainer service) {
-       httpService = service;
-    }
-
-    private void unbindWebContainer(final WebContainer service) {
-        httpService = null;
-    }
-
     HttpContext httpContext;
 
     static ComponentContext context;

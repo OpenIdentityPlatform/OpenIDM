@@ -114,6 +114,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-api-servlet</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -154,7 +159,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui</artifactId>
+            <artifactId>openidm-ui-enduser</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>

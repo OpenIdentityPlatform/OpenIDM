@@ -22,24 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global $, define, _ */
 
-define("org/forgerock/openidm/ui/common/util/Constants", [
-    "org/forgerock/commons/ui/common/util/Constants"
-], function (commonConstants) {
-    commonConstants.context = "openidm";
+/**
+ * @author jfeasel
+ */
+define("org/forgerock/openidm/ui/admin/ConfigDelegate", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    commonConstants.OPENIDM_HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
-    commonConstants.OPENIDM_HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
-    commonConstants.OPENIDM_HEADER_PARAM_LOGOUT = "X-OpenIDM-Logout";
-    commonConstants.OPENIDM_HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
-    commonConstants.OPENIDM_HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
-
-    commonConstants.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
-    commonConstants.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
-    
-    commonConstants.LESS_VERSION = 'libs/less-1.3.3-min.js';
-
-    
-    return commonConstants;
+    var obj = new AbstractDelegate(constants.host + "/openidm/config");
+        
+    return obj;
 });

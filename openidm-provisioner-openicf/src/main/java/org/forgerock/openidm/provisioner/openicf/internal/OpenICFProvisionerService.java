@@ -192,41 +192,17 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ConnectorInfoProvider connectorInfoProvider = null;
 
-    void bindConnectorInfoProvider(final ConnectorInfoProvider service) {
-        connectorInfoProvider = service;
-    }
-
-    void unbindConnectorInfoProvider(final ConnectorInfoProvider service) {
-        connectorInfoProvider = null;
-    }
-
     /**
      * RouterRegistryService service.
      */
     @Reference(policy = ReferencePolicy.STATIC)
     protected RouterRegistryService routerRegistryService;
 
-    void bindRouterRegistryService(final RouterRegistryService service) {
-        routerRegistryService = service;
-    }
-
-    void unbindRouterRegistryService(final RouterRegistryService service) {
-        routerRegistryService = null;
-    }
-
     /**
      * Cryptographic service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService = null;
-
-    void bindCryptoService(final CryptoService service) {
-        cryptoService = service;
-    }
-
-    void unbindCryptoService(final CryptoService service) {
-        cryptoService = null;
-    }
 
     /**
      * Reference to the ThreadSafe {@code ConnectorFacade} instance.

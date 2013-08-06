@@ -297,8 +297,8 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         when(context.getProperties()).thenReturn(properties);
 
         provider = Pair.of(new ConnectorInfoProviderService(), context);
-        provider.getLeft().bindConnectorFacadeFactory(this);
-        provider.getLeft().bindConnectorInfoManager(this);
+        provider.getLeft().bindOsgiConnectorFacadeFactory(this);
+        provider.getLeft().bindOsgiConnectorInfoManager(this);
         provider.getLeft().activate(context);
 
         File[] configJsons = (new File(root, "/config/")).listFiles(new FilenameFilter() {

@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Laszlo Hordos
  */
-@Component(name = "org.forgerock.openidm.servlet", immediate = true,
+@Component(name = "org.forgerock.openidm.api-servlet", immediate = true,
         policy = ConfigurationPolicy.IGNORE)
 @Service
 @Properties({
@@ -74,24 +74,8 @@ public class ServletComponent implements EventHandler {
             target = "(service.pid=org.forgerock.openidm.router)")
     protected ConnectionFactory connectionFactory;
 
-    private void bindConnectionFactory(final ConnectionFactory service) {
-        connectionFactory = service;
-    }
-
-    private void unbindConnectionFactory(final ConnectionFactory service) {
-        connectionFactory = null;
-    }
-
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected HttpServletContextFactory servletContextFactory;
-
-    private void bindHttpServletContextFactory(final HttpServletContextFactory service) {
-        servletContextFactory = service;
-    }
-
-    private void unbindHttpServletContextFactory(final HttpServletContextFactory service) {
-        servletContextFactory = null;
-    }
 
     private ServiceRegistration serviceRegistration = null;
 
@@ -99,8 +83,10 @@ public class ServletComponent implements EventHandler {
 
     @Activate
     protected void activate(ComponentContext context) {
+        logger.debug("Try registering servlet at {}", "/openidm");
         this.context = context;
         HttpServlet servlet = new HttpServlet(connectionFactory, servletContextFactory);
+
         // TODO Read these from configuraton
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("alias", "/openidm");
@@ -114,7 +100,7 @@ public class ServletComponent implements EventHandler {
         serviceRegistration =
                 FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext()
                         .registerService(javax.servlet.http.HttpServlet.class, servlet, properties);
-        logger.debug("Registered servlet at {}", "/openidm");
+        logger.info("Registered servlet at {}", "/openidm");
     }
 
     @Deactivate
