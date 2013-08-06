@@ -47,6 +47,7 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -139,7 +140,7 @@ class ObjectMapping implements SynchronizationListener {
     private Script validTarget;
 
     /** TODO: Description. */
-    private Script correlationQuery;
+    private RegisteredScript correlationQuery;
 
     /** TODO: Description. */
     private ArrayList<PropertyMapping> properties = new ArrayList<PropertyMapping>();
@@ -214,7 +215,10 @@ class ObjectMapping implements SynchronizationListener {
         targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
         validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
         validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
-        correlationQuery = Scripts.newInstance("ObjectMapping", config.get("correlationQuery"));
+        JsonValue corrQuery = config.get("correlationQuery");
+        if (!corrQuery.isNull()) {
+            correlationQuery = new RegisteredScript(getParameters(corrQuery), Scripts.newInstance("ObjectMapping", corrQuery));
+        }
         for (JsonValue jv : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(service, jv));
         }
@@ -1811,8 +1815,10 @@ class ObjectMapping implements SynchronizationListener {
                 } else {
                     queryScope.put("source", getSourceObject().asMap());
                 }
+                JsonValue params = correlationQuery.getParameters();
+                queryScope.putAll(params.asMap());
                 try {
-                    Object query = correlationQuery.exec(queryScope);
+                    Object query = correlationQuery.getScript().exec(queryScope);
                     if (query == null || !(query instanceof Map)) {
                         throw new SynchronizationException("Expected correlationQuery script to yield a Map");
                     }
@@ -2067,6 +2073,38 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("exception", exception);
             jv.put("mapping", mappingName);
             return jv;
+        }
+    }
+    
+    /**
+     * Get the script parameters to pass to the script from the config
+     * @param val the full configuration
+     * @return the parameters
+     */
+    public JsonValue getParameters(JsonValue val) {
+        JsonValue filtered = new JsonValue(Utils.deepCopy(val.asMap()));
+        // Filter the script definition itself
+        filtered.remove("type");
+        filtered.remove("source");
+        filtered.remove("file");
+        return val;
+    }
+    
+    /**
+     * Hold the registered script and info
+     */
+    private static class RegisteredScript {
+        JsonValue parameters;
+        Script script;
+        public RegisteredScript(JsonValue parameters, Script script) {
+            this.parameters = parameters;
+            this.script = script;
+        }
+        public JsonValue getParameters() {
+            return this.parameters;
+        }
+        public Script getScript() {
+            return this.script;
         }
     }
 }
