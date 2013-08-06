@@ -161,15 +161,15 @@ public class AuditServiceImpl implements AuditService {
     ServerContext routerContext = null;
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService route;
+    RouteService routeService;
 
     private void bindRouteService(final RouteService service) throws ResourceException {
-        route = service;
+        routeService = service;
         routerContext = service.createServerContext();
     }
 
     private void unbindRouteService(final RouteService service) {
-        route = null;
+        routeService = null;
         routerContext = null;
     }
 

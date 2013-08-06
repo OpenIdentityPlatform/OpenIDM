@@ -239,28 +239,12 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
     private ConnectorInfoManager osgiConnectorInfoManager = null;
 
-    protected void bindConnectorInfoManager(final ConnectorInfoManager service) {
-        osgiConnectorInfoManager = service;
-    }
-
-    protected void unbindConnectorInfoManager(final ConnectorInfoManager service) {
-        osgiConnectorInfoManager = null;
-    }
-
     /**
      * ConnectorFacadeFactory service.
      */
     @Reference(referenceInterface = ConnectorFacadeFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
     private ConnectorFacadeFactory osgiConnectorFacadeFactory = null;
-
-    protected void bindConnectorFacadeFactory(final ConnectorFacadeFactory service) {
-        osgiConnectorFacadeFactory = service;
-    }
-
-    protected void unbindConnectorFacadeFactory(final ConnectorFacadeFactory service) {
-        osgiConnectorFacadeFactory = null;
-    }
 
     /**
      * ConnectorEventPublisher service.

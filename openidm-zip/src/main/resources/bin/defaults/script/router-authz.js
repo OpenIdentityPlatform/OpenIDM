@@ -58,6 +58,8 @@ function deepCompare(obj1, obj2) {
 }
 
 function matchesResourceIdPattern(id, pattern) {
+// TODO: Left in to force the review of id representation. Remove upon review.
+java.lang.System.out.println("*** match pattern id: " + id + " pattern: " + pattern);
     if (pattern === "*") {
         // Accept all patterns
         return true;
@@ -413,7 +415,17 @@ function allow() {
         }
         
         logger.debug("Access Check for HTTP request for resource id: " + request.id);
-        if (passesAccessConfig(request.id, roles, request.method, action)) {
+
+        // TODO: the removal of the leading slash to be compatible with  
+        // existing access.js is to be reviewed
+        id = request.id;
+        if (request.id.length > 1 && request.id.substring(0, 1) == '/') { 
+            id = request.id.substring(1);
+        }
+        if (passesAccessConfig(id, roles, request.method, action)) {
+//        if (passesAccessConfig(request.id, roles, request.method, action)) {
+
+
             logger.debug("Request allowed");
             return true;
         }

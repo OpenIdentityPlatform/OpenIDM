@@ -67,7 +67,7 @@ define("UserDelegate", [
             url: "",
             headers: headers,
             success: function (data) {
-                if(!data.username) {
+                if(!data.authenticationId) {
                     if(errorCallback) {
                         errorCallback();
                     }

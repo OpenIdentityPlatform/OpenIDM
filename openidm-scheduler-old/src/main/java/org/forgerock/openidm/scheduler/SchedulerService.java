@@ -165,13 +165,6 @@ public class SchedulerService implements RequestHandler {
 
     @Reference
     ClusterManagementService clusterManager;
-    protected void bindClusterManagementService(final ClusterManagementService service) {
-        clusterManager = service;
-    }
-
-    protected void unbindClusterManagementService(final ClusterManagementService service) {
-        clusterManager = null;
-    }
 
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {

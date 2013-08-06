@@ -81,7 +81,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <!-- Avoid transient felix resolution issues with dynamic resolution -->
+                        <DynamicImport-Package>org.forgerock.openidm.jaas</DynamicImport-Package>
                         <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
+                        <Export-Package>org.forgerock.openidm.jetty</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

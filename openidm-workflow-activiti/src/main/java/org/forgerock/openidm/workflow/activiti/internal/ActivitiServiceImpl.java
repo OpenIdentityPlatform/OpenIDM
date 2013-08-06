@@ -113,24 +113,44 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     private String jndiName;
     private boolean selfMadeProcessEngine = true;
+
     @Reference(name = "processEngine", referenceInterface = ProcessEngine.class,
     bind = "bindProcessEngine", unbind = "unbindProcessEngine",
     cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC,
     target = "(!openidm.activiti.engine=true)" //avoid register the self made service
     )
     private ProcessEngine processEngine;
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
     bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
     private ConfigurationAdmin configurationAdmin = null;
+
     /**
      * Some need to register a TransactionManager or we need to create one.
      */
     @Reference(bind = "bindTransactionManager", unbind = "unbindTransactionManager")
     private TransactionManager transactionManager;
+
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
     bind = "bindDataSource", unbind = "unbindDataSource",
     target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
+            bind = "bindPersistenceConfig", unbind = "unbindPersistenceConfig"
+    )
+    private PersistenceConfig persistenceConfig;
+
+    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)",
+            bind = "bindRouteService", unbind = "unbindRouteService"
+    )
+    RouteService repositoryRoute;
+
+    @Reference(policy = ReferencePolicy.DYNAMIC,
+            bind = "bindCryptoService", unbind = "unbindCryptoService"
+    )
+    CryptoService cryptoService;
+
     private final OpenIDMExpressionManager expressionManager = new OpenIDMExpressionManager();
     private final SharedIdentityService identityService = new SharedIdentityService();
     private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
@@ -150,12 +170,6 @@ public class ActivitiServiceImpl implements RequestHandler {
     private boolean starttls;
     private String historyLevel;
     private String workflowDir;
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
-    private PersistenceConfig persistenceConfig;
-    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
-    RouteService repositoryRoute;
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    CryptoService cryptoService;
     
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
@@ -404,7 +418,7 @@ public class ActivitiServiceImpl implements RequestHandler {
         }
         logger.info("ProcessEngine stopped.");
     }
-
+ 
     protected void bindRouteService(RouteService route) {
         repositoryRoute = route;
         this.identityService.setRouter(route);

@@ -78,11 +78,11 @@ public class InfoService extends AbstractScriptedService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private HealthInfo healthInfoSvc;
 
-    private void bindHealthInfo(final HealthInfo service) {
+    private void bindHealthInfoSvc(final HealthInfo service) {
         healthInfoSvc = service;
     }
 
-    private void unbindHealthInfo(final HealthInfo service) {
+    private void unbindHealthInfoSvc(final HealthInfo service) {
         healthInfoSvc = null;
     }
 

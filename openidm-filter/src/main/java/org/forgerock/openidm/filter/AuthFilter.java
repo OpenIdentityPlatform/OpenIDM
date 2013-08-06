@@ -444,25 +444,8 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
     RouteService repositoryRoute;
 
-    private void bindRouteService(final RouteService service) {
-        repositoryRoute = service;
-    }
-
-    private void unbindRouteService(final RouteService service) {
-        repositoryRoute = null;
-    }
-
-
     @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
-
-    private void bindCryptoService(final CryptoService service) {
-        cryptoService = service;
-    }
-
-    private void unbindCryptoService(final CryptoService service) {
-        cryptoService = null;
-    }
 
     /** TODO: Description. */
     private ComponentContext context;
