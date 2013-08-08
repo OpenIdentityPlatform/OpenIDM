@@ -31,12 +31,15 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -50,12 +53,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -71,6 +68,7 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
@@ -94,6 +92,7 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
@@ -102,6 +101,7 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.security.KeyStoreHandler;
+import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.joda.time.DateTime;
@@ -120,18 +120,34 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
      */
     private final static Logger logger = LoggerFactory.getLogger(SecurityManager.class);
 
-    private static final String BC =
-            org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
+    private static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
 
     private static final String FIELD_CERT = "cert";
+    
+    public static final String ACTION_GENERATE_CERT = "generateCert";
+    public static final String ACTION_GENERATE_CSR = "generateCSR";
+
+    public static final String DEFAULT_SIGNATURE_ALGORITHM = "SHA512WithRSAEncryption";
+    public static final String DEFAULT_ALGORITHM = "RSA";
+    public static final String DEFAULT_CERTIFICATE_TYPE = "X509";
+    public static final int DEFAULT_KEY_SIZE = 2048;
 
     private final KeyStoreHandler store;
+    
+    private final KeyStoreManager manager;    
+    
+    /**
+     * The Repository Service Accessor
+     */
+    private ServerContext accessor;
 
     private final String resourceName;
 
-    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store) {
+    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor) {
         this.store = store;
         this.resourceName = resourceName;
+        this.manager = manager;
+        this.accessor = accessor;
     }
 
     @Override
@@ -164,6 +180,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             content.put("aliases", aliasList);
             handler.handleResult(new Resource(resourceName, null, content));
         } catch (Throwable t) {
+        	t.printStackTrace();
             handler.handleError(ResourceUtil.adapt(t));
         }
     }
@@ -171,8 +188,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
     @Override
     public void updateInstance(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
-        final ResourceException e =
-                new NotSupportedException("Update operations are not supported");
+        final ResourceException e = new NotSupportedException("Update operations are not supported");
         handler.handleError(e);
     }
 
@@ -182,65 +198,66 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         @Override
         public void actionCollection(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
-            final ResourceException e =
-                    new NotSupportedException("Action operations are not supported");
+            final ResourceException e = new NotSupportedException("Action operations are not supported");
             handler.handleError(e);
         }
 
         @Override
         public void actionInstance(final ServerContext context, final String resourceId,
                 final ActionRequest request, final ResultHandler<JsonValue> handler) {
-            final ResourceException e =
-                    new NotSupportedException("Action operations are not supported");
-            handler.handleError(e);
-
             try {
-
-                if ("generateCert".equalsIgnoreCase(request.getAction())) {
-                    if (store.getStore().containsAlias(resourceId)) {
-                        handler.handleError(new ConflictException("The resource with ID '"
-                                + resourceId + "' could not be created because "
-                                + "there is already another resource with the same ID"));
-                    } else {
-
-                        String domainName =
-                                request.getContent().get("domainName").required().asString();
-                        String algorithm =
-                                request.getContent().get("algorithm").defaultTo("RSA").asString();
-                        String signatureAlgorithm =
-                                request.getContent().get("signatureAlgorithm").defaultTo(
-                                        "MD5WithRSAEncryption").asString(); // SHA256WithRSAEncryption
-                        int keySize =
-                                request.getContent().get("keySize").defaultTo(1024).asInteger();
-                        String validFrom = request.getContent().get("validFrom").asString();
-                        String validTo = request.getContent().get("validTo").asString();
-
-                        // Generate the cert
-                        Pair<X509Certificate, PrivateKey> cert =
-                                generateCertificate(domainName, algorithm, keySize,
-                                        signatureAlgorithm, validFrom, validTo);
-
-                        String password =
-                                request.getContent().get("password").defaultTo(
-                                        Param.getKeystoreKeyPassword()).asString();
-
-                        // Add it to the store and reload
-                        store.getStore().setCertificateEntry(resourceId, cert.getKey());
-                        store.getStore().setEntry(
-                                resourceId,
-                                new KeyStore.PrivateKeyEntry(cert.getValue(),
-                                        new Certificate[]{cert.getKey()}),
-                                new KeyStore.PasswordProtection(password.toCharArray()));
-                        store.store();
-
-                        reload();
-
-                        handler.handleResult(returnCertificate(resourceId, cert.getKey()));
+            	if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) || 
+                        ACTION_GENERATE_CSR.equalsIgnoreCase(request.getAction())) {
+                    if (resourceId == null) {
+                        throw ResourceException.getException(ResourceException.BAD_REQUEST, 
+                                "A valid resource ID must be specified in the request");
                     }
-                } else {
-                    handler.handleError(new BadRequestException("Unsupported action "
-                            + request.getAction()));
-                }
+                    String algorithm = request.getContent().get("algorithm").defaultTo(DEFAULT_ALGORITHM).asString();
+                    String signatureAlgorithm = request.getContent().get("signatureAlgorithm")
+                    		.defaultTo(DEFAULT_SIGNATURE_ALGORITHM).asString();
+                    int keySize = request.getContent().get("keySize").defaultTo(DEFAULT_KEY_SIZE).asInteger();
+                    JsonValue result = null;
+            		if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
+            			// Generate self-signed certificate
+            			if (store.getStore().containsAlias(resourceId)) {
+            				handler.handleError(new ConflictException("The resource with ID '" + resourceId 
+            						+ "' could not be created because there is already another resource with the same ID"));
+            			} else {
+            				String domainName = request.getContent().get("domainName").required().asString();
+            				String validFrom = request.getContent().get("validFrom").asString();
+            				String validTo = request.getContent().get("validTo").asString();
+
+            				// Generate the cert
+            				Pair<X509Certificate, PrivateKey> cert = generateCertificate(domainName, algorithm, 
+            						keySize, signatureAlgorithm, validFrom, validTo);
+
+            				String password = request.getContent().get("password").defaultTo(
+            						Param.getKeystoreKeyPassword()).asString();
+
+            				// Add it to the store and reload
+            				store.getStore().setCertificateEntry(resourceId, cert.getKey());
+            				store.getStore().setEntry( resourceId, new KeyStore.PrivateKeyEntry(cert.getValue(),
+            						new Certificate[]{cert.getKey()}), new KeyStore.PasswordProtection(password.toCharArray()));
+            				store.store();
+
+            				manager.reload();
+
+            				result = returnCertificate(resourceId, cert.getKey());
+            			}
+            		} else {
+            			// Generate CSR
+            			Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(resourceId, algorithm, 
+            					signatureAlgorithm, keySize, request.getContent());
+            			result = returnCertificateRequest(resourceId, csr.getKey());
+            			if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
+            				result.put("privateKey", getKeyMap(csr.getRight()));
+                        }
+            		}
+                    handler.handleResult(result);
+            	} else {
+            		handler.handleError(new BadRequestException("Unsupported action " + request.getAction()));
+            	}
+            	
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
             }
@@ -251,25 +268,17 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                 final ResultHandler<Resource> handler) {
             try {
 
-                Map<String, Object> resultMap = new HashMap<String, Object>();
-
                 if (null != request.getNewResourceId()) {
-
                     if (store.getStore().containsAlias(request.getNewResourceId())) {
                         handler.handleError(new ConflictException("The resource with ID '"
                                 + request.getNewResourceId() + "' could not be created because "
                                 + "there is already another resource with the same ID"));
                     } else {
-
-                        Certificate cert = generateCertificate(request.getContent());
-                        store.getStore().setCertificateEntry(request.getNewResourceId(), cert);
-                        store.store();
-                        reload();
-
-                        resultMap.put(Resource.FIELD_CONTENT_ID, request.getNewResourceId());
-
+                    	String resourceId = request.getNewResourceId();
+                    	storeCert(request.getContent(), resourceId);
+                    	manager.reload();
+                    	handler.handleResult(new Resource(resourceId, null, request.getContent()));
                     }
-
                 } else {
                     handler.handleError(new BadRequestException(
                             "A valid resource ID must be specified in the request"));
@@ -287,9 +296,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                     handler.handleError(new NotFoundException());
                 } else {
                     Certificate cert = store.getStore().getCertificate(resourceId);
-
-                    handler.handleResult(new Resource(resourceId, null, returnCertificate(
-                            resourceId, cert)));
+                    handler.handleResult(new Resource(resourceId, null, returnCertificate( resourceId, cert)));
                 }
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
@@ -300,17 +307,10 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         public void updateInstance(final ServerContext context, final String resourceId,
                 final UpdateRequest request, final ResultHandler<Resource> handler) {
             try {
-                if (!store.getStore().containsAlias(resourceId)) {
-                    handler.handleError(new NotFoundException());
-                } else {
-                    Certificate cert = generateCertificate(request.getNewContent());
-                    store.getStore().setCertificateEntry(resourceId, cert);
-                    store.store();
-                    reload();
-
-                    handler.handleResult(new Resource(resourceId, null, returnCertificate(
-                            resourceId, cert)));
-                }
+            	storeCert(request.getNewContent(), resourceId);
+            	manager.reload();
+            	Certificate cert = store.getStore().getCertificate(resourceId);
+            	handler.handleResult(new Resource(resourceId, null, returnCertificate( resourceId, cert)));
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
             }
@@ -325,9 +325,8 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                 } else {
                     store.getStore().deleteEntry(resourceId);
                     store.store();
-                    reload();
+                    manager.reload();
                 }
-
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
             }
@@ -349,21 +348,20 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             handler.handleError(e);
         }
 
-        private void reload() throws Exception {
-            TrustManagerFactory tmf =
-                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(store.getStore());
-            TrustManager[] managers = tmf.getTrustManagers();
-            SSLContext context = SSLContext.getInstance("SSL");
-            context.init(null, managers, null);
-            SSLContext.setDefault(context);
-        }
-
         private JsonValue returnCertificate(String alias, Certificate cert) throws Exception {
             JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
             content.put(Resource.FIELD_CONTENT_ID, alias);
             content.put("type", cert.getType());
-            content.put("publicKey", getPublicKeyResult(cert));
+            content.put("cert", getCertString(cert));
+            content.put("publicKey", getKeyMap(cert.getPublicKey()));
+            return content;
+        }
+
+        private JsonValue returnCertificateRequest(String alias, PKCS10CertificationRequest csr) throws Exception {
+            JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(3));
+            content.put(Resource.FIELD_CONTENT_ID, alias);
+            content.put("csr", getCertString(csr));
+            content.put("publicKey", getKeyMap(csr.getPublicKey()));
             return content;
         }
     };
@@ -446,20 +444,9 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                     new NotSupportedException("Patch operations are not supported");
             handler.handleError(e);
         }
-
-        // TODO move this out from here
-        private void reload() throws Exception {
-            KeyManagerFactory kmf =
-                    KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(store.getStore(), "changeit".toCharArray());
-            KeyManager[] managers = kmf.getKeyManagers();
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(managers, null, null);
-            SSLContext.setDefault(context);
-        }
     };
 
-    private Map<String, Object> getPublicKeyResult(Certificate cert) throws Exception {
+    /*private Map<String, Object> getPublicKeyResult(Certificate cert) throws Exception {
         Map<String, Object> publicKey = new HashMap<String, Object>(4);
         PEMWriter pemWriter = null;
         try {
@@ -475,8 +462,34 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             pemWriter.close();
         }
         return publicKey;
-    }
+    }*/
 
+    private void storeCert(JsonValue value, String alias) throws Exception{
+        boolean fromCsr = value.get("fromCSR").defaultTo(false).asBoolean();
+        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
+        if (fromCsr) {
+            PrivateKey privateKey = null;
+            String privateKeyPem = value.get("privateKey").asString();
+            if (privateKeyPem == null) {
+                privateKey = getCsrKeyPair(alias).getPrivate();
+            } else {
+                privateKey = ((KeyPair)fromPem(privateKeyPem)).getPrivate();
+            }
+            if (privateKey == null) {
+                throw new NotFoundException("No private key exists for the supplied signed certificate");
+            }
+            List<String> certStringChain = value.get("certs").required().asList(String.class);
+            Certificate [] certChain = readCertificateChain(certStringChain, type);
+            store.getStore().setEntry(alias, new PrivateKeyEntry(privateKey, certChain), 
+            		new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
+        } else {
+            String certString = value.get("cert").required().asString();
+            Certificate cert = readCertificate(certString, type);
+            store.getStore().setCertificateEntry(alias, cert);
+        }
+        store.store();
+    }
+    
     /**
      * Generates a certificate from a supplied string representation of one, and
      * a supplied type.
@@ -488,7 +501,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
      */
     private Certificate generateCertificate(JsonValue content) throws Exception {
         String certString = content.get(FIELD_CERT).required().asString();
-        String type = content.get("type").defaultTo("X509").asString();
+        //String type = content.get("type").defaultTo("X509").asString();
 
         StringReader sr = new StringReader(certString);
         PEMReader pw = new PEMReader(sr);
@@ -498,6 +511,39 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         } else {
             throw new BadRequestException("Unsupported certificate format");
         }
+    }
+    
+    private Pair<PKCS10CertificationRequest, PrivateKey> generateCSR(String alias, String algorithm, String signatureAlgorithm, int keySize, 
+            JsonValue params) throws Exception {
+
+        // Construct the distinguished name
+        StringBuilder sb = new StringBuilder(); 
+        sb.append("CN=").append(params.get("CN").required().asString().replaceAll(",", "\\\\,"));
+        sb.append(", OU=").append(params.get("OU").defaultTo("None").asString().replaceAll(",", "\\\\,"));
+        sb.append(", O=").append(params.get("O").defaultTo("None").asString().replaceAll(",", "\\\\,"));
+        sb.append(", L=").append(params.get("L").defaultTo("None").asString().replaceAll(",", "\\\\,"));
+        sb.append(", C=").append(params.get("C").defaultTo("None").asString().replaceAll(",", "\\\\,"));
+
+        // Create the principle subject name
+        X509Principal subjectName = new X509Principal(sb.toString());
+        
+        //store.getStore().
+        
+        // Generate the key pair
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
+        keyPairGenerator.initialize(keySize); 
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        PublicKey publicKey = keyPair.getPublic();
+        PrivateKey privateKey = keyPair.getPrivate();
+        
+        // Generate the certificate request
+        PKCS10CertificationRequest cr = new PKCS10CertificationRequest(signatureAlgorithm, subjectName, publicKey, null, privateKey);
+        
+        // Store the private key to use when the signed cert is return and updated
+        logger.debug("Storing private key with alias {}", alias);
+        storeCsrKeyPair(alias, keyPair);
+        
+        return Pair.of(cr, privateKey);
     }
 
     /**
@@ -512,8 +558,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             String algorithm, int keySize, String signatureAlgorithm, String validFrom,
             String validTo) throws Exception {
 
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA",
-                                                                                     // "BC"
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA","BC"
         keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
@@ -533,8 +578,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         } else {
             DateTime notBeforeDateTime = DateUtil.getDateUtil().parseIfDate(validFrom);
             if (notBeforeDateTime == null) {
-                throw new InternalServerErrorException(
-                        "Invalid date format for 'validFrom' property");
+                throw new InternalServerErrorException("Invalid date format for 'validFrom' property");
             } else {
                 notBefore = notBeforeDateTime.toDate();
             }
@@ -553,21 +597,14 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
             }
         }
 
-        // BigInteger.valueOf(Math.abs(new SecureRandom().nextLong()))
         BigInteger serial = BigInteger.valueOf(System.currentTimeMillis());
 
-        X509v3CertificateBuilder v3CertGen =
-                new JcaX509v3CertificateBuilder(builder.build(), serial, notBefore, notAfter,
-                        builder.build(), keyPair.getPublic());
+        X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(builder.build(), serial, 
+        		notBefore, notAfter, builder.build(), keyPair.getPublic());
 
-        ContentSigner sigGen =
-                new JcaContentSignerBuilder(null != signatureAlgorithm ? signatureAlgorithm
-                        : "SHA256WithRSAEncryption") // MD5WithRSAEncryption
-                        .setProvider(BC).build(keyPair.getPrivate());
+        ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(keyPair.getPrivate());
 
-        X509Certificate cert =
-                new JcaX509CertificateConverter().setProvider(BC).getCertificate(
-                        v3CertGen.build(sigGen));
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider(BC).getCertificate(v3CertGen.build(sigGen));
         cert.checkValidity(new Date());
         cert.verify(cert.getPublicKey());
 
@@ -584,14 +621,11 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
 
         AsymmetricKeyParameter caKeyParam = PrivateKeyFactory.createKey(caPrivate.getEncoded());
-        SubjectPublicKeyInfo keyInfo =
-                SubjectPublicKeyInfo.getInstance(pair.getPublic().getEncoded());
+        SubjectPublicKeyInfo keyInfo = SubjectPublicKeyInfo.getInstance(pair.getPublic().getEncoded());
 
-        PKCS10CertificationRequestHolder pk10Holder =
-                new PKCS10CertificationRequestHolder(inputCSR);
+        PKCS10CertificationRequestHolder pk10Holder = new PKCS10CertificationRequestHolder(inputCSR);
 
-        X509v3CertificateBuilder v3CertGen =
-                new X509v3CertificateBuilder(new X500Name("CN=issuer"), new BigInteger("1"),
+        X509v3CertificateBuilder v3CertGen = new X509v3CertificateBuilder(new X500Name("CN=issuer"), new BigInteger("1"),
                         new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis()
                                 + 30 * 365 * 24 * 60 * 60 * 1000), pk10Holder.getSubject(), keyInfo);
 
@@ -607,7 +641,153 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
         X509Certificate theCert = (X509Certificate) cf.generateCertificate(is1);
         is1.close();
         return theCert;
-        // return null;
     }
 
+    private Map<String, Object> getKeyMap(Key key) throws Exception {
+        Map<String, Object> keyMap = new HashMap<String, Object>();
+        keyMap.put("algorithm", key.getAlgorithm());
+        keyMap.put("format", key.getFormat());
+        keyMap.put("encoded", toPem(key));
+        return keyMap;
+    }
+
+    private String getCertString(Object object) throws Exception {
+        PEMWriter pemWriter = null;
+        StringWriter sw = null;
+        try {
+            sw = new StringWriter();
+            pemWriter = new PEMWriter(sw);
+            pemWriter.writeObject(object);
+            pemWriter.flush();
+        } finally {
+            pemWriter.close();
+        }
+        return sw.getBuffer().toString();
+    }
+
+    /**
+     * Stores a KeyPair (associated with a CSR request on the specified alias) in the repository.
+     * 
+     * @param alias the alias from the CSR
+     * @param keyPair the KeyPair object
+     * @throws JsonResourceException
+     */
+    private void storeCsrKeyPair(String alias, KeyPair keyPair) throws ResourceException {
+        if (accessor == null) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        try {
+        	String container = "/repo/security/keys";
+            String id = container + "/" + alias;
+            JsonValue oldKeyMap = null;
+            JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
+            String keyString = toPem(keyPair);
+            keyMap.put("encoded", keyString);
+            try {
+            	oldKeyMap = accessor.getConnection().read(accessor, Requests.newReadRequest(id)).getContent();
+            } catch (NotFoundException e) {
+                logger.debug("creating object " + id);
+                accessor.getConnection().create(accessor, Requests.newCreateRequest(container, alias, keyMap));
+                return;
+            }
+            keyMap.put("_rev", oldKeyMap.get("_rev").getObject());
+            accessor.getConnection().update(accessor, Requests.newUpdateRequest(container, alias, keyMap));
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+        }
+        
+    }
+    
+    /**
+     * Returns a stored KeyPair (associated with a CSR request on the specified alias) from the repository.
+     * 
+     * @param alias the alias from the CSR
+     * @return the KeyPair
+     * @throws JsonResourceException
+     */
+    private KeyPair getCsrKeyPair(String alias) throws ResourceException {
+        if (accessor == null) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        String container = "/repo/security/keys";
+        String id = container + "/" + alias;
+        Resource keyResource = accessor.getConnection().read(accessor, Requests.newReadRequest(id));
+        if (keyResource.getContent().isNull()) {
+            throw ResourceException.getException(ResourceException.NOT_FOUND, 
+            		"Cannot find stored key for alias " + alias);
+        }
+        try {
+            JsonValue key = keyResource.getContent().get("encoded");
+            String pemString = key.asString();
+            return fromPem(pemString);
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Returns a PEM String representation of a object.
+     * 
+     * @param object the object
+     * @return the PEM String representation
+     * @throws Exception
+     */
+    private String toPem(Object object) throws Exception {
+        StringWriter sw = new StringWriter(); 
+        PEMWriter pw = new PEMWriter(sw); 
+        pw.writeObject(object); 
+        pw.flush(); 
+        return sw.toString();
+    }
+    
+    /**
+     * Returns an object from a PEM String representation
+     * 
+     * @param pem the PEM String representation
+     * @return the object
+     * @throws Exception
+     */
+    private <T> T fromPem(String pem) throws Exception {
+        StringReader sr = new StringReader(pem);
+        PEMReader pw = new PEMReader(sr);
+        Object object = pw.readObject();
+        return (T)object;
+    }
+    
+    /**
+     * Reads a certificate from a supplied string representation, and a supplied type.
+     * 
+     * @param certString A String representation of a certificate
+     * @param type The type of certificate ("X509").
+     * @return The certificate
+     * @throws Exception
+     */
+    private Certificate readCertificate(String certString, String type) throws Exception {
+        StringReader sr = new StringReader(certString);
+        PEMReader pw = new PEMReader(sr);
+        Object object = pw.readObject();
+        if (object instanceof X509Certificate) {
+            return (X509Certificate)object;
+        } else {
+            throw ResourceException.getException(ResourceException.BAD_REQUEST, "Unsupported certificate format");
+        }
+    }
+    
+    /**
+     * Reads a certificate chain from a supplied string array representation, and a supplied type.
+     * 
+     * @param certStringChain an array of strings representing a certificate chain
+     * @param type the type of certificates ("X509")
+     * @return the certificate chain
+     * @throws Exception
+     */
+    private Certificate[] readCertificateChain(List<String> certStringChain, String type) throws Exception {
+        Certificate [] certChain = new Certificate[certStringChain.size()];
+        for (int i=0; i<certChain.length; i++) {
+            certChain[i] = readCertificate(certStringChain.get(i), type);
+        }
+        return certChain;
+    }
 }

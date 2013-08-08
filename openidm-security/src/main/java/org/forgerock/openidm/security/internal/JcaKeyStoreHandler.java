@@ -52,10 +52,11 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
     private String type;
     private KeyStore store;
 
-    public JcaKeyStoreHandler(String type, String location, String password) {
+    public JcaKeyStoreHandler(String type, String location, String password) throws Exception {
         this.location = location;
         this.password = password;
         this.type = type;
+        init();
     }
 
     void init() throws IOException, KeyStoreException, CertificateException,
@@ -91,4 +92,9 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
         context.init(null, managers, null);
         SSLContext.setDefault(context);
     }
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
 }

@@ -24,18 +24,12 @@
 
 package org.forgerock.openidm.security;
 
-import java.security.KeyStore;
-
 /**
- * A NAME does ...
+ * 
+ * @author ckienle
  *
- * @author Laszlo Hordos
  */
-public interface KeyStoreHandler {
+public interface KeyStoreManager {
 
-    public KeyStore getStore();
-    
-    public String getPassword();
-
-    public void store() throws Exception;
+	public void reload() throws Exception ;
 }
