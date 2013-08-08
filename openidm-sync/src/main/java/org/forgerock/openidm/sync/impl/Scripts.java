@@ -45,11 +45,14 @@ public class Scripts {
         this.registry = registry;
     }
 
-    public static Script newInstance(String id, JsonValue script) throws JsonValueException {
+    public static Script newInstance(String id, JsonValue config) throws JsonValueException {
+        if (config == null || config.isNull()) {
+            return null;
+        }
         try {
-            return new Script(instance.registry.takeScript(script));
+            return new Script(instance.registry.takeScript(config));
         } catch (ScriptException e) {
-            throw new JsonValueException(script, e);
+            throw new JsonValueException(config, e);
         }
     }
 }
