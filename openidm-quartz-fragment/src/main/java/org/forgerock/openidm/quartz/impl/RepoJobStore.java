@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
@@ -52,10 +53,8 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
-import org.forgerock.openidm.cluster.ClusterEventType;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
-
 import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -351,8 +350,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     private String getJobsRepoId(String group, String name) {
         StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("jobs/")
-                .append(getJobId(group, name)).toString();
+        return sb.append(getIdPrefix()).append("jobs/").append(getJobId(group, name)).toString();
     }
 
     /**
@@ -363,8 +361,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     private String getJobGroupsRepoId(String groupName) {
         StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("jobGroups/")
-                .append(groupName).toString();
+        return sb.append(getIdPrefix()).append("jobGroups/").append(groupName).toString();
     }
 
     /**
@@ -479,7 +476,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (retrieveCalendar(context, name) == null) {
                     // Create Calendar
                     logger.debug("Creating Calendar: {}", name);
-                    accessor.getConnection().create(accessor, Requests.newCreateRequest(getCalendarsRepoId(name), cw.getValue()));
+                    accessor.getConnection().create(accessor, getCreateRequest(getCalendarsRepoId(name), cw.getValue().asMap()));
                 } else {
                     if (!replaceExisting) {
                         throw new ObjectAlreadyExistsException(name);
@@ -557,7 +554,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                     // Create job
                     logger.debug("Creating Job {} in group {}", new Object[] {jobName,jobGroup});
-                    accessor.getConnection().create(accessor, Requests.newCreateRequest(jobId, jw.getValue()));
+                    accessor.getConnection().create(accessor, getCreateRequest(jobId, jw.getValue().asMap()));
                 }
             } catch (ResourceException e) {
                 logger.warn("Error storing job", e);
@@ -623,7 +620,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                     // Create trigger
                     logger.debug("Creating Trigger {}", triggerId);
-                    accessor.getConnection().create(accessor, Requests.newCreateRequest(triggerId, tw.getValue()));
+                    accessor.getConnection().create(accessor, getCreateRequest(triggerId, tw.getValue().asMap()));
                 }
             } catch (ResourceException e) {
                 logger.warn("Error storing trigger", e);
@@ -1643,6 +1640,12 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         }
 
     }
+    
+    private CreateRequest getCreateRequest(String id, Map<String, Object> map) {
+        String container = id.substring(0,id.lastIndexOf("/"));
+        String newId = id.substring(id.lastIndexOf("/")+1);
+        return Requests.newCreateRequest(container, newId, new JsonValue(map));
+    }
 
     private JsonValue readFromRepo(String repoId) throws ResourceException {
         try {
@@ -1716,7 +1719,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 // create if null
                 tgw = new TriggerGroupWrapper(groupName);
                 // create in repo
-                JsonValue newValue = accessor.getConnection().create(accessor, Requests.newCreateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue())).getContent();
+                JsonValue newValue = accessor.getConnection().create(accessor, 
+                		getCreateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue().asMap())).getContent();
                 tgw = new TriggerGroupWrapper(newValue);
                 // Add to list of group names
                 addTriggerGroupName(groupName);
@@ -1751,7 +1755,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 // create if null
                 jgw = new JobGroupWrapper(groupName);
                 // create in repo
-                JsonValue newValue = accessor.getConnection().create(accessor, Requests.newCreateRequest(getJobGroupsRepoId(groupName), jgw.getValue())).getContent();
+                JsonValue newValue = accessor.getConnection().create(accessor, 
+                		getCreateRequest(getJobGroupsRepoId(groupName), jgw.getValue().asMap())).getContent();
                 jgw = new JobGroupWrapper(newValue);
                 // Add to list of group names
                 addJobGroupName(groupName);
@@ -1905,7 +1910,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 map.put(instanceId, acquiredTriggerIds);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, getCreateRequest(repoId, map)).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -1963,7 +1968,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 waitingTriggersRepoList = new ArrayList<String>();
                 map.put("names", waitingTriggersRepoList);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, getCreateRequest(repoId, map)).getContent().asMap();
                 revision = (String)map.get("_rev");
             } else {
                 // else check if list exists in map
@@ -2101,7 +2106,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, getCreateRequest(repoId, map)).getContent().asMap();
             }
             return map;
         }
@@ -2127,7 +2132,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 list = new ArrayList<String>();
                 map.put(listId, list);
                 // create in repo
-                map = accessor.getConnection().create(accessor, Requests.newCreateRequest(repoId.substring(0,repoId.lastIndexOf("/")),repoId.substring(repoId.lastIndexOf("/")+1), new JsonValue(map))).getContent().asMap();
+                map = accessor.getConnection().create(accessor, getCreateRequest(repoId, map)).getContent().asMap();
             } else {
                 // else check if list exists in map
                 list = (List<String>) map.get(listId);
