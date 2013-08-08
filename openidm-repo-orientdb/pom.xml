@@ -33,51 +33,50 @@
     <artifactId>openidm-repo-orientdb</artifactId>
     <packaging>bundle</packaging>
     <name>OpenIDM Repository Bundle - OrientDB</name>
-    <description>This bundle implement the OrientDB based repositoryC</description>
+    <description>This bundle implement the OrientDB based repository</description>
 
     <properties>
-        <openidm.osgi.import.before.defaults>
-            !org.testng.annotations,com.sun.jdi*;resolution:=optional,org.apache.hadoop.io.compress;resolution:=optional
-        </openidm.osgi.import.before.defaults>
+        <openidm.osgi.import.before.defaults>!org.testng.annotations</openidm.osgi.import.before.defaults>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-config</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-
-        <!-- OrientDB -->
+        
+        <!-- OrientDB --> 
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
             <version>${orientdb.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.iq80.snappy</groupId>
-                    <artifactId>snappy</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.java.dev.jna</groupId>
-                    <artifactId>platform</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.iq80.snappy</groupId>
-            <artifactId>snappy</artifactId>
-            <version>0.3</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.xerial.snappy</groupId>
-            <artifactId>snappy-java</artifactId>
-            <version>1.0.5_1</version>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
@@ -100,13 +99,14 @@
             <artifactId>orientdb-enterprise</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
-
-        <!-- Provided OSGi Dependencies -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+<!--        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
             <scope>provided</scope>
         </dependency>
+-->
+        <!-- Provided OSGi Dependencies -->        <dependency>            <groupId>org.osgi</groupId>            <artifactId>org.osgi.core</artifactId>            <scope>provided</scope>        </dependency>
         <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -119,7 +119,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
@@ -128,23 +127,18 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -168,12 +162,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <Export-Package>
-                            org.iq80.snappy;version="0.3"
-                        </Export-Package>
-                        <Private-Package>org.forgerock.openidm.repo.orientdb.internal.*</Private-Package>
-                        <!--Bundle-Activator>org.forgerock.openidm.repo.orientdb.internal.Activator</Bundle-Activator-->
+                        <Embed-Dependency>persistence-api;scope=provided</Embed-Dependency>
+                        <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${openidm.version}</Export-Package>
+                        <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
+                        <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
