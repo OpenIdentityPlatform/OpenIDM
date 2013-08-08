@@ -225,10 +225,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         try {
             try {
                 Map<String, Object> resultMap = new HashMap<String, Object>();
+                logger.debug("Resource Name: " + request.getResourceName());
                 if ("/".equals(request.getResourceName())) {
                     // Return a list of all nodes in the cluster
                     QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
                     r.setQueryId(QUERY_INSTANCES);
+                    r.setAdditionalQueryParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
                     accessor.getConnection().query(accessor, r, new QueryResultHandler() {
@@ -250,18 +252,17 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     });
                     resultMap.put("results", list);
                 } else {
-                    logger.debug("Attempting to read instance {} from the database", instanceId);
-                    Resource instanceValue =
-                            accessor.getConnection().read(
-                                    accessor,
-                                    Requests.newReadRequest("/repo/cluster/states", request
-                                            .getResourceName()));
+                	String id = request.getResourceName().substring(1);
+                    logger.debug("Attempting to read instance {} from the database", id);
+                    ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
+                    Resource instanceValue = accessor.getConnection().read(accessor, readRequest);
                     if (!instanceValue.getContent().isNull()) {
                         resultMap.put("results", getInstanceMap(instanceValue.getContent()));
                     } else {
                         resultMap.put("results", "{}");
                     }
                 }
+                handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
             } catch (ResourceException e) {
                 e.printStackTrace();
                 throw new InternalServerErrorException(e);
@@ -319,15 +320,13 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             recoveryMap.put("state", "processing-down");
             recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
             recoveryMap.put("recoveringBy", state.getRecoveringInstanceId());
-            recoveryMap.put("recoveryStarted", dateUtil.formatDateTime(new Date(state
-                    .getRecoveryStarted())));
-            recoveryMap.put("detectedDown", dateUtil.formatDateTime(new Date(state
-                    .getDetectedDown())));
+            recoveryMap.put("recoveryStarted", dateUtil.formatDateTime(new Date(state.getRecoveryStarted())));
+            recoveryMap.put("detectedDown", dateUtil.formatDateTime(new Date(state.getDetectedDown())));
             instanceInfo.put("recovery", recoveryMap);
         }
         return instanceInfo;
     }
-
+    
     /**
      * Gets the repository ID prefix
      *
@@ -394,8 +393,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 throw new InternalServerErrorException("Repo router is null");
             }
             String repoId = getInstanceStateRepoId(instanceId);
-            UpdateRequest r =
-                    Requests.newUpdateRequest(repoId, new JsonValue(instanceState.toMap()));
+            UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(instanceState.toMap()));
             r.setRevision(instanceState.getRevision());
             accessor.getConnection().update(accessor, r);
         }
@@ -413,6 +411,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             if (accessor == null) {
                 throw new InternalServerErrorException("Repo router is null");
             }
+            String container, id;
             Map<String, Object> map;
 
             map = readFromRepo(repoId).asMap();
@@ -420,13 +419,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                map =
-                        accessor.getConnection().create(
-                                accessor,
-                                Requests.newCreateRequest(repoId.substring(0, repoId
-                                        .lastIndexOf("/")), repoId.substring(repoId
-                                        .lastIndexOf("/") + 1), new JsonValue(map))).getContent()
-                                .asMap();
+                container = repoId.substring(0, repoId.lastIndexOf("/"));
+                id = repoId.substring(repoId.lastIndexOf("/") + 1);
+	            CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
+                map = accessor.getConnection().create(accessor, createRequest).getContent().asMap();
             }
             return map;
         }
