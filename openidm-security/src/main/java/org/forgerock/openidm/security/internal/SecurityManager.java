@@ -26,12 +26,19 @@ package org.forgerock.openidm.security.internal;
 
 import java.security.Security;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.json.fluent.JsonValue;
@@ -44,12 +51,16 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.jetty.Param;
+import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.security.KeyStoreHandler;
+import org.forgerock.openidm.security.KeyStoreManager;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -68,7 +79,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Security Management Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/security/*") })
-public class SecurityManager implements RequestHandler {
+public class SecurityManager implements RequestHandler, KeyStoreManager {
 
     public static final String PID = "org.forgerock.openidm.security";
 
@@ -76,40 +87,67 @@ public class SecurityManager implements RequestHandler {
      * Setup logging for the {@link SecurityManager}.
      */
     private final static Logger logger = LoggerFactory.getLogger(SecurityManager.class);
+    
+    /**
+     * The Repository Service Accessor
+     */
+    private static ServerContext accessor;
+    
+    /** Internal object set router service. */
+    @Reference(name = "ref_SecurityManager_RepositoryService", bind = "bindRepo",
+            unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
+    protected RouteService repo;
+
+    protected void bindRepo(final RouteService service) throws ResourceException {
+        logger.debug("binding RepositoryService");
+        accessor = service.createServerContext();
+    }
+
+    protected void unbindRepo(final RouteService service) {
+        logger.debug("unbinding RepositoryService");
+        accessor = null;
+    }
 
     private final Router router = new Router();
+    
+    private KeyStoreHandler trustStoreHandler = null;
+    private KeyStoreHandler keyStoreHandler = null;
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Security Management Service {}", compContext);
         // Add the Bouncy Castle provider
         Security.addProvider(new BouncyCastleProvider());
-
+        
+        String keyStoreType = Param.getKeystoreType();
+        String keyStoreLocation = Param.getKeystoreLocation();
+        String keyStorePassword = Param.getKeystorePassword(false); 
+        
+        String trustStoreType = Param.getTruststoreType();
+        String trustStoreLocation = Param.getTruststoreLocation();
+        String trustStorePassword = Param.getTruststorePassword(false);
 
         // Set System properties
         if (System.getProperty("javax.net.ssl.keyStore") == null) {
-            System.setProperty("javax.net.ssl.keyStore", Param.getKeystoreLocation());
-            System.setProperty("javax.net.ssl.keyStorePassword", Param.getKeystorePassword(false));
-            System.setProperty("javax.net.ssl.keyStoreType", Param.getKeystoreType());
+            System.setProperty("javax.net.ssl.keyStore", keyStoreLocation);
+            System.setProperty("javax.net.ssl.keyStorePassword", keyStorePassword);
+            System.setProperty("javax.net.ssl.keyStoreType", keyStoreType);
         }
         if (System.getProperty("javax.net.ssl.trustStore") == null) {
-            System.setProperty("javax.net.ssl.trustStore", Param.getTruststoreLocation());
-            System.setProperty("javax.net.ssl.trustStorePassword", Param.getTruststorePassword(false));
-            System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
+            System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
         }
-
-        KeystoreResourceProvider provider =
-                new KeystoreResourceProvider("keystore", new JcaKeyStoreHandler(Param.getKeystoreType(),
-                        Param.getKeystoreLocation(), Param.getKeystorePassword(false)));
+        
+        keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
+        KeystoreResourceProvider provider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor);
 
         router.addRoute("/keystore", provider);
         router.addRoute("/keystore/cert", provider.CERT);
         //router.addRoute("/keystore/key", provider.KEY);
 
-        provider =
-                new KeystoreResourceProvider("truststore", new JcaKeyStoreHandler(
-                        Param.getTruststoreType(), Param.getTruststoreLocation(), Param
-                                .getTruststorePassword(false)));
+        trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
+        provider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor);
 
         router.addRoute("/truststore", provider);
         router.addRoute("/truststore/cert", provider.CERT);
@@ -120,6 +158,23 @@ public class SecurityManager implements RequestHandler {
         logger.debug("Deactivating Security Management Service {}", compContext);
         router.removeAllRoutes();
         //TODO: Release the KeyStore
+    }
+    
+    // ----- Implementation of KeyStoreManager interface
+    
+    public void reload() throws Exception {
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStoreHandler.getStore());
+        TrustManager [] trustManagers = tmf.getTrustManagers();
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStoreHandler.getStore(), keyStoreHandler.getPassword().toCharArray());
+        KeyManager [] keyManagers = kmf.getKeyManagers();
+
+        
+        SSLContext context = SSLContext.getInstance("SSL");
+        context.init(keyManagers, trustManagers, null);
+        SSLContext.setDefault(context);
     }
 
     // ----- Implementation of RequestHandler interface
