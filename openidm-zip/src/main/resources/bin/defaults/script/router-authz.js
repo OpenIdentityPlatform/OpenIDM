@@ -404,8 +404,8 @@ function allow() {
     
     roles = request.security['roles'];
     action = "";
-    if (request.params && request.params._action) {
-        action = request.params._action;
+    if (request.action) {
+        action = request.action;
     }
     
     // Check REST requests against the access configuration

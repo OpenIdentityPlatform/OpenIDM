@@ -424,6 +424,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     		value = ((ActionRequest)request).getContent();
     		requestMap.put("params", ((ActionRequest)request).getAdditionalActionParameters());
     		requestMap.put("method", "action");
+    		requestMap.put("action", ((ActionRequest)request).getAction());
     	} else if (request instanceof CreateRequest) {
     		value = ((CreateRequest)request).getContent();
     		requestMap.put("method", "create");
