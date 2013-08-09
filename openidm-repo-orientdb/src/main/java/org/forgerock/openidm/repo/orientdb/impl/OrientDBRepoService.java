@@ -29,6 +29,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -252,6 +253,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             final ResultHandler<Resource> handler) throws ResourceException {
     	
         String localId = request.getNewResourceId();//getLocalId(fullId);
+        // TODO: should CREST support server side generation of ID itself?
+        if (localId == null) {
+        	localId = UUID.randomUUID().toString(); // Generate ID server side.
+        }
         String type = stripSlash(request.getResourceName()); //getObjectType(fullId);
         // Used currently for logging
         String fullId = request.getResourceName() + localId;
