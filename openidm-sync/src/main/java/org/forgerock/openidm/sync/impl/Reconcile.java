@@ -36,11 +36,17 @@ import org.forgerock.json.fluent.JsonValue;
 public interface Reconcile {
     /**
      * Reconcile the given mapping according to the requested options
+     * @param reconAction the recon action
      * @param mapping the mapping configuration
-     * @param synchronous whether to synchrnously (TRUE) wait for the reconciliation run, or
+     * @param synchronous whether to synchronously (TRUE) wait for the reconciliation run, or
      *  to return immediately (FALSE) with the recon id, which can then be used for subsequent
      *  queries / actions on that reconciliation run.
      * @param reconParams all parameters passed to the recon invocation
      */
-    public String reconcile(JsonValue mapping, Boolean synchronous, JsonValue reconParams) throws SynchronizationException;
+    public String reconcile(
+            ReconciliationService.ReconAction reconAction,
+            JsonValue mapping,
+            Boolean synchronous,
+            JsonValue reconParams)
+        throws SynchronizationException;
 }

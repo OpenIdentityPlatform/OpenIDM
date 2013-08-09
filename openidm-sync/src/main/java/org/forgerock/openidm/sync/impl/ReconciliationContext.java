@@ -72,17 +72,25 @@ public class ReconciliationContext {
 
     /**
      * Creates the instance with info from the current call context
+     * @param reconAction the recon action
+     * @param mapping the mapping configuration
      * @param callingContext The resource call context
      * @param reconParams configuration options for the recon
      */
-    public ReconciliationContext(ObjectMapping mapping, ServerContext callingContext, JsonValue reconParams,
-            ReconciliationService service) throws BadRequestException {
+    public ReconciliationContext(
+            ReconciliationService.ReconAction reconAction,
+            ObjectMapping mapping,
+            ServerContext callingContext,
+            JsonValue reconParams,
+            ReconciliationService service)
+        throws BadRequestException {
+
         this.mapping = mapping;
         this.reconId = callingContext.getId();
         this.reconStat = new ReconciliationStatistic(this);
         this.reconParams = reconParams;
         this.service = service;
-        reconTypeHandler = createReconTypeHandler(reconParams);
+        reconTypeHandler = createReconTypeHandler(reconAction);
 
         // Initialize the executor for this recon, or null if no executor should be used
         int noOfThreads = mapping.getTaskThreads();
@@ -95,22 +103,18 @@ public class ReconciliationContext {
 
     /**
      * Factory method for the recon type handlers
-     * @param reconParams the configuration parameters
-     * @return
+     * @param reconAction the recon action
+     * @return the handler appropriate for this recon action type
      */
-    private ReconTypeHandler createReconTypeHandler(JsonValue reconParams) throws BadRequestException {
-        ReconTypeHandler handler = null;
-        switch (reconParams.get("_action").asEnum(ReconciliationService.ReconAction.class)) {
+    private ReconTypeHandler createReconTypeHandler(ReconciliationService.ReconAction reconAction) throws BadRequestException {
+        switch (reconAction) {
         case recon :
-            handler = new ReconTypeByQuery(this);
-            break;
+            return new ReconTypeByQuery(this);
         case reconById :
-            handler = new ReconTypeById(this);
-            break;
+            return new ReconTypeById(this);
         default:
-            throw new BadRequestException("Unknown action " + reconParams.get("_action").asString());
+            throw new BadRequestException("Unknown action " + reconAction.toString());
         }
-        return handler;
     }
 
     /**

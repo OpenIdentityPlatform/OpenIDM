@@ -38,7 +38,6 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonPointer;
@@ -48,7 +47,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
@@ -77,7 +75,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = "service.description", value = "OpenIDM object synchronization service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "sync")
+    @Property(name = "openidm.router.prefix", value = "/sync/*")
 })
 @Service
 public class SynchronizationService implements SingletonResourceProvider, Mappings {
@@ -98,16 +96,13 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     @Reference
     Reconcile reconService;
-    protected void bindReconcile(final Reconcile service) {
-        reconService = service;
-    }
-
-    protected void unbindReconcile(final Reconcile service) {
-        reconService = null;
-    }
 
     /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
+    @Reference(
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindScriptRegistry",
+            unbind = "unbindScriptRegistry"
+    )
     ScriptRegistry scriptRegistry;
 
     protected void bindScriptRegistry(final ScriptRegistry service) {
@@ -340,7 +335,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     result = new HashMap<String, Object>();
                     JsonValue mapping = _params.get("mapping").required();
                     logger.debug("Synchronization _action=recon, mapping={}", mapping);
-                    String reconId = reconService.reconcile(mapping, Boolean.TRUE, _params);
+                    String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params);
                     result.put("reconId", reconId);
                     result.put("_id", reconId);
                     result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
