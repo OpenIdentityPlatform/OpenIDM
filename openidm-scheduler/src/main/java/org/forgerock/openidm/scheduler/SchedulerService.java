@@ -428,17 +428,6 @@ public class SchedulerService implements RequestHandler {
     }
 
     /**
-     * Creates a random Job name.
-     *
-     * @return  A job name
-     */
-    private String createJobName() {
-        StringBuilder sb = new StringBuilder("job_");
-        sb.append(UUID.randomUUID());
-        return sb.toString();
-    }
-
-    /**
      * Determines if a job already exists.
      *
      * @param jobName       The name of the job
@@ -463,7 +452,7 @@ public class SchedulerService implements RequestHandler {
     			id = request.getNewResourceId();
     			object = request.getContent().asMap();
     			if (id == null) {
-    				id = createJobName();
+    				id = UUID.randomUUID().toString();
     			} else {
     				id = trimTrailingSlash(id);
     			}
@@ -666,7 +655,7 @@ public class SchedulerService implements RequestHandler {
         String action = (String)params.get("_action");
         try {
             if (action.equals("create")) {
-                id = createJobName();
+            	id = UUID.randomUUID().toString();
                 params.put("_id", id);
                 try {
                     if (jobExists(id, true) || jobExists(id, false)) {
