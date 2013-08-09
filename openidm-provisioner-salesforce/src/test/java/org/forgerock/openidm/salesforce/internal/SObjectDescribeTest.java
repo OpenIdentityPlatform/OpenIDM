@@ -46,7 +46,7 @@ public class SObjectDescribeTest {
         mapper.getDeserializationConfig().set (
                 DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,false);
 
-        SObjectDescribe describe = mapper.readValue(configURL, SObjectDescribe.class);
+        SObjectDescribe describe = mapper.readValue(configURL.openStream(), SObjectDescribe.class);
 
         Assert.assertTrue(describe.isCreateable());
     }

@@ -48,7 +48,7 @@ public class SalesforceConnectionTest {
         mapper.getDeserializationConfig().set(
                 DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        Map<String, Object> config = mapper.readValue(configURL, Map.class);
+        Map<String, Object> config = mapper.readValue(configURL.openStream(), Map.class);
 
         SalesforceConfiguration configuration = mapper.convertValue(config.get("configurationProperties"),
                 SalesforceConfiguration.class);
