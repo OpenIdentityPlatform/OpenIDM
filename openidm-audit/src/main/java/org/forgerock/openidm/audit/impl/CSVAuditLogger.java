@@ -245,7 +245,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
 
             String reconId = params.get("reconId");
             if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return AuditServiceImpl.getReconResults(reconEntryList, reconId, formatted);
+                return AuditServiceImpl.getReconResults(reconEntryList, formatted);
             } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
                 return getReconQueryResults(reconEntryList, reconId, "mapping", params.get("mappingName"), formatted);
             } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) && type.equals(AuditServiceImpl.TYPE_RECON)) {
@@ -277,7 +277,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 rawEntryList.add(entry);
             }
         }
-        return AuditServiceImpl.getReconResults(rawEntryList, reconId, formatted);
+        return AuditServiceImpl.getReconResults(rawEntryList, formatted);
     }
 
     /**
