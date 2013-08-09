@@ -25,8 +25,8 @@
 package org.forgerock.openidm.sync.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -56,9 +56,10 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
@@ -79,7 +80,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
         @Property(name = "service.description", value = "Reconciliation Service"),
         @Property(name = "service.vendor", value = "ForgeRock AS"),
-        @Property(name = "openidm.router.prefix", value = "recon")
+        @Property(name = "openidm.router.prefix", value = "/recon/*")
 })
 public class ReconciliationService
         implements RequestHandler, Reconcile {
@@ -113,13 +114,6 @@ public class ReconciliationService
             policy = ReferencePolicy.DYNAMIC
     )
     Mappings mappings;
-    protected void bindMappings(final Mappings service) {
-        mappings = service;
-    }
-
-    protected void unbindMappings(final Mappings service) {
-        mappings = null;
-    }
 
     /**
      * The thread pool for executing full reconciliation runs.
@@ -147,39 +141,38 @@ public class ReconciliationService
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
             String localId = getLocalId(request.getResourceName());
-            Map<String, Object> result = null;
-            result = new LinkedHashMap<String, Object>();
 
-            if (localId == null) {
+            if (localId == null || "".equals(localId)) {
                 List<Map> runList = new ArrayList<Map>();
                 for (ReconciliationContext entry : reconRuns.values()) {
                     runList.add(entry.getSummary());
                 }
+                Map<String, Object> result = new LinkedHashMap<String, Object>();
                 result.put("reconciliations", runList);
+                handler.handleResult(new Resource(localId, null, new JsonValue(result)));
             } else {
-                Map<String, Object> summaryMap = null;
                 // First try and get it from in memory
-                for (ReconciliationContext entry : reconRuns.values()) {
-                    if (entry.getReconId().equals(localId)) {
-                        handler.handleResult(new Resource(localId, null, new JsonValue(entry.getSummary())));
-                        return;
+                if (reconRuns.containsKey(localId)) {
+                    handler.handleResult(new Resource(localId, null, new JsonValue(reconRuns.get(localId).getSummary())));
+                } else {
+                    // Next, if not in memory, try and get it from audit log
+                    QueryRequest auditQuery = Requests.newQueryRequest("audit/recon");
+                    auditQuery.setQueryId("audit-by-recon-id-type");
+                    auditQuery.setAdditionalQueryParameter("reconId", localId);
+                    auditQuery.setAdditionalQueryParameter("entryType", "summary");
+
+                    ServerContext routerContext = context.asContext(RouterContext.class);
+                    Collection<Resource> queryResult = new ArrayList<Resource>();
+                    routerContext.getConnection().query(routerContext, auditQuery, queryResult);
+
+                    for (Resource resource : queryResult) {
+                        handler.handleResult(new Resource(
+                                localId,
+                                null,
+                                new JsonValue(resource.getContent().get("messageDetail").asMap())));
                     }
                 }
-                // Next, if not in memory, try and get it from audit log
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put("_queryId", "audit-by-recon-id-type");
-                params.put("reconId", localId);
-                params.put("entryType", "summary");
-                Map<String, Object> queryResult = null;//TODO FIXME getRouter().query("audit/recon", params);
-                summaryMap = (Map<String, Object>)queryResult.get("summary");
-
-                if (summaryMap == null) {
-                    throw new NotFoundException();
-                }
-                result = (Map<String, Object>)summaryMap.get("messageDetail");
-                result.put("_id", localId);
             }
-            handler.handleResult(new Resource(localId, null, new JsonValue(result)));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -227,18 +220,19 @@ public class ReconciliationService
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        ObjectSetContext.push(context);
         try {
-            Map<String, Object> result = new LinkedHashMap<String, Object>();
-            String id = request.getResourceName();
-            JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
-            String action = paramsVal.get("_action").asString();
-            if (action == null) {
+            if (request.getAction() == null) {
                 throw new BadRequestException("Action parameter is not present or value is null");
             }
 
-            if (id == null) {
+            Map<String, Object> result = new LinkedHashMap<String, Object>();
+            String id = getLocalId(request.getResourceName());
+            JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
+
+            if (id == null || "".equals(id)) {
                 // operation on collection
-                if (ReconciliationService.ReconAction.isReconAction(action)) {
+                if (ReconciliationService.ReconAction.isReconAction(request.getAction())) {
                     try {
                         JsonValue mapping = paramsVal.get("mapping").required();
                         logger.debug("Reconciliation action of mapping {}", mapping);
@@ -249,12 +243,13 @@ public class ReconciliationService
                         } else {
                             waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                         }
-                        result.put("_id", reconcile(mapping, waitForCompletion, paramsVal));
+                        result.put("_id",  reconcile(ReconAction.valueOf(request.getAction()),
+                                    mapping, waitForCompletion, paramsVal));
                     } catch (SynchronizationException se) {
                        throw new ConflictException(se);
                     }
                 } else {
-                    throw new BadRequestException("Action " + action + " on reconciliation not supported " + request.getAdditionalActionParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " + request.getAdditionalActionParameters());
                 }
             } else {
                 // operation on individual resource
@@ -263,28 +258,33 @@ public class ReconciliationService
                     throw new NotFoundException("Reconciliation with id " + id + " not found." );
                 }
 
-                if ("cancel".equalsIgnoreCase(action)) {
+                if ("cancel".equalsIgnoreCase(request.getAction())) {
                     foundRun.cancel();
                     result.put("_id", foundRun.getReconId());
-                    result.put("action", action);
+                    result.put("action", request.getAction());
                     result.put("status", "SUCCESS");
                 } else {
-                    throw new BadRequestException("Action " + action + " on recon run " + id + " not supported " + request.getAdditionalActionParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on recon run " + id + " not supported " + request.getAdditionalActionParameters());
                 }
             }
             handler.handleResult(new JsonValue(result));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
+        finally {
+            ObjectSetContext.pop();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public String reconcile(final JsonValue mapping, Boolean synchronous, JsonValue reconParams) throws SynchronizationException {
-        final ReconciliationContext reconContext = newReconContext(mapping, reconParams);
+    public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams)
+        throws SynchronizationException {
+
+        final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams);
         if (Boolean.TRUE.equals(synchronous)) {
-            reconcile(mapping, reconContext);
+            reconcile(reconContext);
         } else {
             final ServerContext threadContext = ObjectSetContext.get();
             Runnable command = new Runnable() {
@@ -292,11 +292,14 @@ public class ReconciliationService
                 public void run() {
                     try {
                         ObjectSetContext.push(threadContext);
-                        reconcile(mapping, reconContext);
+                        reconcile(reconContext);
                     } catch (SynchronizationException ex) {
                         logger.info("Reconciliation reported exception", ex);
                     } catch (Exception ex) {
                         logger.warn("Reconciliation failed with unexpected exception", ex);
+                    }
+                    finally {
+                        ObjectSetContext.pop();
                     }
                 }
             };
@@ -309,9 +312,15 @@ public class ReconciliationService
      * Allocates a new reconciliation run's context, including its identifier
      * Separate from the actual execution so that the execution can happen asynchronously,
      * whilst we hand back the identifier to the caller.
+     *
+     * @param reconAction the recon action
+     * @param mapping the mapping configuration
+     * @param reconParams
      * @return a new reconciliation context
      */
-    private ReconciliationContext newReconContext(JsonValue mapping, JsonValue reconParams) throws SynchronizationException {
+    private ReconciliationContext newReconContext(ReconAction reconAction, JsonValue mapping, JsonValue reconParams)
+        throws SynchronizationException {
+
         ReconciliationContext reconContext = null;
         if (mappings == null) {
             throw new SynchronizationException("Unknown mapping type, no mappings configured");
@@ -328,7 +337,7 @@ public class ReconciliationService
             throw new SynchronizationException("Unknown mapping type");
         }
         try {
-            reconContext = new ReconciliationContext(objMapping, context, reconParams, this);
+            reconContext = new ReconciliationContext(reconAction, objMapping, context, reconParams, this);
         } catch (BadRequestException ex) {
             throw new SynchronizationException("Failure in initializing reconciliation: "
                     + ex.getMessage(), ex);
@@ -337,12 +346,12 @@ public class ReconciliationService
     }
 
     /**
-     * Start a full reconcliation run
-     * @param mapping the object mapping to reconclie
+     * Start a full reconciliation run
+     *
      * @param reconContext a new reconciliation context. Do not re-use these contexts for more than one call to reconcile.
      * @throws SynchronizationException
      */
-    private void reconcile(JsonValue mapping, ReconciliationContext reconContext) throws SynchronizationException {
+    private void reconcile(ReconciliationContext reconContext) throws SynchronizationException {
         addReconRun(reconContext);
         try {
             reconContext.getObjectMapping().recon(reconContext); // throws SynchronizationException
@@ -394,6 +403,9 @@ public class ReconciliationService
     private String getLocalId(String id) {
         String localId = null;
         if (id != null) {
+            if (id.startsWith("/")) {
+                id = id.replaceFirst("/", "");
+            }
             int lastSlashPos = id.lastIndexOf("/");
             if (lastSlashPos > -1) {
                 localId = id.substring(0, id.lastIndexOf("/"));

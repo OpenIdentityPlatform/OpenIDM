@@ -24,10 +24,7 @@
 */
 package org.forgerock.openidm.sync.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,27 +169,33 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
                 r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
             }
-            reconContext.getService().getRouter().getConnection().query(reconContext.getService().getRouter(), r, new QueryResultHandler() {
-                @Override
-                public void handleError(ResourceException error) {
-                    // ignore
-                }
+            reconContext.getService().getRouter().getConnection().query(reconContext.getService().getRouter(), r, 
+                    new QueryResultHandler() {
+                        @Override
+                        public void handleError(ResourceException error) {
+                            // ignore
+                        }
 
-                @Override
-                public boolean handleResource(Resource resource) {
-                    String value = null;
-                    if (!caseSensitive) {
-                        value = (resource.getId() == null ? null : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId()));
-                    }
-                    ids.add(value);
-                    return true;
-                }
+                        @Override
+                        public boolean handleResource(Resource resource) {
+                            if (resource.getId() == null) {
+                                // do not add null values to collection
+                                logger.warn("Resource {0} id is null!", resource.toString());
+                            }
+                            else {
+                                ids.add(
+                                    caseSensitive
+                                    ? resource.getId()
+                                    : reconContext.getObjectMapping().getLinkType().normalizeId(resource.getId()));
+                            }
+                            return true;
+                        }
 
-                @Override
-                public void handleResult(QueryResult result) {
-                    //ignore
-                }
-            });
+                        @Override
+                        public void handleResult(QueryResult result) {
+                            //ignore
+                        }
+                    });
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
         } catch (ResourceException ose) {
