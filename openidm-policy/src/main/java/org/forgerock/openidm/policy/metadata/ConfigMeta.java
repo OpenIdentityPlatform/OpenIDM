@@ -30,7 +30,7 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.policy.internal.PolicyService;
+import org.forgerock.openidm.policy.PolicyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
