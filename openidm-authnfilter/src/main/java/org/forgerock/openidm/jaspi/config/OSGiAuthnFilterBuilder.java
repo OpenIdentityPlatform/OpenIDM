@@ -31,6 +31,7 @@ import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
@@ -305,7 +306,9 @@ public class OSGiAuthnFilterBuilder {
 
         Map<String, String> augmentSecurityContext = new HashMap<String, String>();
         augmentSecurityContext.put("type", "text/javascript");
-        augmentSecurityContext.put("file", "script/authnPopulateContext.js");
+        augmentSecurityContext.put("file",
+                IdentityServer.getFileForInstallPath("bin/defaults/script/auth/authnPopulateContext.js")
+                        .getAbsolutePath());
 
         Map<String, Object> scriptExtensions = new HashMap<String, Object>();
         scriptExtensions.put("augmentSecurityContext", augmentSecurityContext);
