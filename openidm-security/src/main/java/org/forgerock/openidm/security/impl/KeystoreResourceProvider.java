@@ -194,7 +194,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
 
     // ----- Implementation of CollectionResourceProvider interface
 
-    final CollectionResourceProvider CERT = new CollectionResourceProvider() {
+    public final CollectionResourceProvider CERT = new CollectionResourceProvider() {
         @Override
         public void actionCollection(final ServerContext context, final ActionRequest request,
                 final ResultHandler<JsonValue> handler) {
