@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.security.internal;
+package org.forgerock.openidm.security.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
