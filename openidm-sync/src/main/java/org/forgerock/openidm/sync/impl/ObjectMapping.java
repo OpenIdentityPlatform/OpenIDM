@@ -26,7 +26,6 @@ package org.forgerock.openidm.sync.impl;
 // Java SE
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -422,15 +421,9 @@ class ObjectMapping  {
     private LazyObjectAccessor createTargetObject(JsonValue target) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_CREATE_OBJ, target, null);
         LazyObjectAccessor targetObject = null;
-        StringBuilder sb = new StringBuilder();
-        sb.append(targetObjectSet);
-        if (target.get("_id").isString()) {
-            sb.append('/').append(target.get("_id").asString());
-        }
-        String id = sb.toString();
-        LOGGER.trace("Create target object {}", id);
+        LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
-            CreateRequest cr = Requests.newCreateRequest(id,null, target);
+            CreateRequest cr = Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
             Resource r =  service.getRouter().getConnection().create(service.getRouter(), cr);
             targetObject = new LazyObjectAccessor(service, targetObjectSet, r.getId(), target);
             measure.setResult(target);

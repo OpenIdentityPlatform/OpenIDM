@@ -342,14 +342,14 @@ class Link {
         JsonValue jv = toJsonValue();
         try {
             CreateRequest r = Requests.newCreateRequest(linkId(null), _id, jv);
-            mapping.getService().getRouter().getConnection().create(mapping.getService().getRouter(), r);
+            Resource resource = mapping.getService().getRouter().getConnection().create(mapping.getService().getRouter(), r);
+            this._id = resource.getId();
+            this._rev = resource.getRevision();
+            this.initialized = true;
         } catch (ResourceException ose) {
             LOGGER.debug("Failed to create link", ose);
             throw new SynchronizationException(ose);
         }
-        this._id = jv.get("_id").required().asString();
-        this._rev = jv.get("_rev").asString(); // optional
-        this.initialized = true;
     }
 
     /**
