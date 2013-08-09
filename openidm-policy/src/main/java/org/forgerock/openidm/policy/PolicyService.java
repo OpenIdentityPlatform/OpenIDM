@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.policy.internal;
+package org.forgerock.openidm.policy;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
