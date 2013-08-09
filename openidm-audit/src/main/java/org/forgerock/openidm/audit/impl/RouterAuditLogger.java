@@ -178,7 +178,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
                     });
 
             if (AuditServiceImpl.TYPE_RECON.equals(type)) {
-                return AuditServiceImpl.getReconResults(queryResults, params.get("reconId"), formatted);
+                return AuditServiceImpl.getReconResults(queryResults, formatted);
             } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
                 return AuditServiceImpl.getActivityResults(unflattenActivityList(queryResults), formatted);
             } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {

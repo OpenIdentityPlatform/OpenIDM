@@ -149,7 +149,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
                 }
             });
             if (type.equals(AuditServiceImpl.TYPE_RECON)) {
-                return AuditServiceImpl.getReconResults(queryResults, params.get("reconId"), formatted);
+                return AuditServiceImpl.getReconResults(queryResults, formatted);
             } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
                 formatActivityList(queryResults);
                 return AuditServiceImpl.getActivityResults(queryResults, formatted);

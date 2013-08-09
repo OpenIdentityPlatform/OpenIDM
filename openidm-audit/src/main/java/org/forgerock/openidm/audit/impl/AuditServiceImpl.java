@@ -882,7 +882,7 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put("message", entry.get("message"));
         formattedEntry.put("messageDetail", entry.get("messageDetail"));
         formattedEntry.put("exception", entry.get("exception"));
-        if ("".equals(entry.get("entryType"))) {
+        if ("".equals(entry.get("entryType")) || null == entry.get("entryType")) {
             // recon entry
             formattedEntry.put("actionId", entry.get("actionId"));
             formattedEntry.put("action", entry.get("action"));
@@ -897,26 +897,12 @@ public class AuditServiceImpl implements AuditService {
         return formattedEntry;
     }
 
-    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, String reconId, boolean formatted) {
+    public static Map<String, Object> getReconResults(List<Map<String, Object>> entryList, boolean formatted) {
         Map<String, Object> results = new HashMap<String, Object>();
-        List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
         if (formatted) {
-            if (reconId != null) {
-                for (Map<String, Object> entry : entryList) {
-                    if (reconId.equals(entry.get("reconId"))) {
-                        if ("start".equals(entry.get("entryType"))) {
-                            results.put("start", AuditServiceImpl.formatReconEntry(entry));
-                        } else if ("summary".equals(entry.get("entryType"))) {
-                            results.put("summary", AuditServiceImpl.formatReconEntry(entry));
-                        } else {
-                            resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
-                        }
-                    }
-                }
-            } else {
-                for (Map<String, Object> entry : entryList) {
-                    resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
-                }
+            List<Map<String, Object>> resultEntries = new ArrayList<Map<String, Object>>();
+            for (Map<String, Object> entry : entryList) {
+                resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
             }
             if (resultEntries.size() > 0) {
                 results.put("result", resultEntries);
