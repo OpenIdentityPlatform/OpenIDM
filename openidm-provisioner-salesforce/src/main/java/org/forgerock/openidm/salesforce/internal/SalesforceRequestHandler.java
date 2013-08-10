@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -56,6 +57,7 @@ import org.forgerock.openidm.salesforce.internal.metadata.MetadataResourceProvid
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +85,17 @@ public class SalesforceRequestHandler implements ProvisionerService {
 
     private SalesforceConnection connection = null;
 
+    private String organizationName = null;
+
     @Activate
     void activate(ComponentContext context) throws Exception {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+
+        Object o = context.getProperties().get("config.factory-pid");
+        if (null == o || (!(o instanceof String)) || StringUtils.isBlank((String)o)) {
+            throw new ComponentException("Factory configuration expected");
+        }
+        organizationName = (String)o;
 
         connection =
                 new SalesforceConnection(parseConfiguration(configuration
@@ -146,9 +156,9 @@ public class SalesforceRequestHandler implements ProvisionerService {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         String id = request.get("id").required().asString();
         if (id.endsWith("/")) {
-            id = id.substring(11, id.length() - 1);
+            id = id.substring(organizationName.length() + 1, id.length() - 1);
         } else {
-            id = id.substring(11);
+            id = id.substring(organizationName.length() + 1);
         }
         for (Map.Entry<Pattern, JsonResource> entry : routes.entrySet()) {
             Matcher matcher = entry.getKey().matcher(id);
@@ -163,9 +173,6 @@ public class SalesforceRequestHandler implements ProvisionerService {
         }
         throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Route not found: " + id);
     }
-
-    private static final String ID = "salesforce";
-
     @Override
     public SystemIdentifier getSystemIdentifier() {
         return new SystemIdentifier() {
@@ -176,7 +183,7 @@ public class SalesforceRequestHandler implements ProvisionerService {
 
             @Override
             public boolean is(Id id) {
-                return ID.equals(id.getSystemName());
+                return organizationName.equals(id.getSystemName());
             }
         };
     }
@@ -185,9 +192,9 @@ public class SalesforceRequestHandler implements ProvisionerService {
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         try {
-            result.put("name", ID);
+            result.put("name", organizationName);
             JsonValue request = new JsonValue(new HashMap<String, Object>(2));
-            request.put("id", "salesforce/connect/organization");
+            request.put("id", organizationName + "/connect/organization");
             request.put("method", "read");
             handle(request);
             result.put("ok", true);
@@ -201,7 +208,7 @@ public class SalesforceRequestHandler implements ProvisionerService {
     @Override
     public Map<String, Object> testConfig(JsonValue config) {
         Map<String, Object> jv = new LinkedHashMap<String, Object>();
-        jv.put("name", ID);
+        jv.put("name", organizationName);
         try {
             parseConfiguration(config.get("configurationProperties")).validate();
             jv.put("ok", true);
