@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal;
+package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import org.activiti.engine.delegate.JavaDelegate;
@@ -41,7 +41,7 @@ import org.activiti.engine.impl.context.Context;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.openidm.workflow.activiti.internal.session.OpenIDMSession;
+import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.groovy.FunctionClosure;

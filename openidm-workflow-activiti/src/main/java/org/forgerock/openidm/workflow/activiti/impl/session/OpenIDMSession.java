@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal.session;
+package org.forgerock.openidm.workflow.activiti.impl.session;
 
 import org.activiti.engine.impl.interceptor.Session;
 import org.forgerock.json.resource.PersistenceConfig;

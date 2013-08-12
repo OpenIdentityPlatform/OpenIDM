@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal.mixin;
+package org.forgerock.openidm.workflow.activiti.impl.mixin;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;

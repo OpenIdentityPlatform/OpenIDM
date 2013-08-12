@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal;
+package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.impl.variable.ValueFields;
 import org.activiti.engine.impl.variable.VariableType;

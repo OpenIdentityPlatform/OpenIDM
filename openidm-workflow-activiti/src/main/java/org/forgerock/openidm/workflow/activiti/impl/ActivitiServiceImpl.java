@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal;
+package org.forgerock.openidm.workflow.activiti.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.openidm.workflow.activiti.internal.session.OpenIDMSessionFactory;
+import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;

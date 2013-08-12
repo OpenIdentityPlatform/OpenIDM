@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal;
+package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.ArrayList;
@@ -41,9 +41,9 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
-import org.forgerock.openidm.workflow.activiti.internal.mixin.DateFormTypeMixIn;
-import org.forgerock.openidm.workflow.activiti.internal.mixin.EnumFormTypeMixIn;
-import org.forgerock.openidm.workflow.activiti.internal.mixin.TaskDefinitionMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskDefinitionMixIn;
 
 /**
  * Resource implementation of TaskDefinition related Activiti operations
