@@ -119,10 +119,12 @@ public final class ResourceServlet
         resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
-        for (Bundle aBundle : context.getBundleContext().getBundles()) {
-            if (aBundle.getSymbolicName().equals(bundleName)) {
-                this.bundle = aBundle;
-                break;
+        if (bundleName != null) {
+            for (Bundle aBundle : context.getBundleContext().getBundles()) {
+                if (bundleName.equals(aBundle.getSymbolicName())) {
+                    this.bundle = aBundle;
+                    break;
+                }
             }
         }
 
