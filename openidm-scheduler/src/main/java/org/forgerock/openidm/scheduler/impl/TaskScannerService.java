@@ -109,7 +109,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
 
 
     @Reference(
-        name = "ref_ManagedObjectService_JsonResourceRouterService",
+        name = "ref_TaskScannerService_RequestHandler",
         referenceInterface = RequestHandler.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
