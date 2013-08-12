@@ -87,8 +87,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.forgerock.openidm.crypto.internal.Activator</Bundle-Activator>
-                        <Main-Class>org.forgerock.openidm.crypto.internal.Main</Main-Class>
+                        <Bundle-Activator>org.forgerock.openidm.crypto.impl.Activator</Bundle-Activator>
+                        <Main-Class>org.forgerock.openidm.crypto.impl.Main</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>

@@ -25,7 +25,7 @@
 package org.forgerock.openidm.crypto.factory;
 
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.internal.CryptoServiceImpl;
+import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

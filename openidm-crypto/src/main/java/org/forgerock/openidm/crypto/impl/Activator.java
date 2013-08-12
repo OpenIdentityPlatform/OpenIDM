@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.crypto.internal;
+package org.forgerock.openidm.crypto.impl;
 
 import java.util.Hashtable;
 
