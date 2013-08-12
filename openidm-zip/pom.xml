@@ -158,11 +158,6 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-          <groupId>org.forgerock.openidm</groupId>
-          <artifactId>openidm-sync</artifactId>
-          <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui-enduser</artifactId>
             <version>${openidm.version}</version>
