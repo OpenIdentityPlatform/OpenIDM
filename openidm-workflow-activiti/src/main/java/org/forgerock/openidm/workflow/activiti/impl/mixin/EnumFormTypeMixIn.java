@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.workflow.activiti.internal.mixin;
+package org.forgerock.openidm.workflow.activiti.impl.mixin;
 
 import java.util.Map;
 import org.codehaus.jackson.annotate.JsonProperty;

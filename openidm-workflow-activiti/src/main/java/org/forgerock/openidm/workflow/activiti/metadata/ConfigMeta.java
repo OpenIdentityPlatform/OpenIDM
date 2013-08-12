@@ -21,11 +21,11 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal.metadata;
+package org.forgerock.openidm.workflow.activiti.metadata;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.workflow.activiti.internal.ActivitiServiceImpl;
+import org.forgerock.openidm.workflow.activiti.impl.ActivitiServiceImpl;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.slf4j.Logger;

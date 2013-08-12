@@ -21,12 +21,12 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.internal;
+package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.identity.Group;
 import org.forgerock.json.fluent.JsonValue;
 import java.util.HashMap;
-import static org.forgerock.openidm.workflow.activiti.internal.SharedIdentityService.*;
+import static org.forgerock.openidm.workflow.activiti.impl.SharedIdentityService.*;
 
 /**
  * @author $author$
