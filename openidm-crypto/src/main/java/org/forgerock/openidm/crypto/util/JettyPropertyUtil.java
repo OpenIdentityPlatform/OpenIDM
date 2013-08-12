@@ -27,7 +27,7 @@ package org.forgerock.openidm.crypto.util;
 import java.security.GeneralSecurityException;
 
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.crypto.internal.Main;
+import org.forgerock.openidm.crypto.impl.Main;
 
 /**
  * Utility for handling Jetty configuration properties, including properties

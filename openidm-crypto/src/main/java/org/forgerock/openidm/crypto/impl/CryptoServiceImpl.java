@@ -23,7 +23,7 @@
  */
 
 // TODO: Expose as a set of resource actions.
-package org.forgerock.openidm.crypto.internal;
+package org.forgerock.openidm.crypto.impl;
 
 import java.io.File;
 import java.io.FileInputStream;

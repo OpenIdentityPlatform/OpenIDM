@@ -13,7 +13,7 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
-package org.forgerock.openidm.crypto.internal;
+package org.forgerock.openidm.crypto.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

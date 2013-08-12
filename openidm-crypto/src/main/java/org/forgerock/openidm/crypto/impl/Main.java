@@ -11,7 +11,7 @@
 // You may elect to redistribute this code under either of these licenses.
 // ========================================================================
 
-package org.forgerock.openidm.crypto.internal;
+package org.forgerock.openidm.crypto.impl;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
