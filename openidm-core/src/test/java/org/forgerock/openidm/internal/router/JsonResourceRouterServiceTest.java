@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.router;
+package org.forgerock.openidm.internal.router;
 
 import java.io.File;
 import java.net.URL;
