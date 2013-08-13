@@ -99,20 +99,8 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scopeFactory;
 
-    protected void bindScriptRegistry(final ScriptRegistry service) {
-        scopeFactory = service;
-    }
-
-    protected void unbindScriptRegistry(final ScriptRegistry service) {
-        scopeFactory = null;
-    }
-
-
     @Reference(
-        name = "ref_TaskScannerService_RequestHandler",
         referenceInterface = RequestHandler.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
         policy = ReferencePolicy.STATIC,
         target = "(service.pid=org.forgerock.openidm.router)"
@@ -128,14 +116,6 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         String maxCompletedStr =
                 IdentityServer.getInstance().getProperty("openidm.taskscanner.maxcompletedruns", "100");
         maxCompletedRuns = Integer.parseInt(maxCompletedStr);
-    }
-
-    protected void bindRouter(RequestHandler router) {
-        this.router = router;
-    }
-
-    protected void unbindRouter(RequestHandler router) {
-        this.router = null;
     }
 
     /**
