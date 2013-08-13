@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.info.internal.metadata;
+package org.forgerock.openidm.info.impl.metadata;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.info.internal.HealthService;
-import org.forgerock.openidm.info.internal.InfoService;
+import org.forgerock.openidm.info.impl.HealthService;
+import org.forgerock.openidm.info.impl.InfoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;

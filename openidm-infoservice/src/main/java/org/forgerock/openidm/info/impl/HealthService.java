@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.info.internal;
+package org.forgerock.openidm.info.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
