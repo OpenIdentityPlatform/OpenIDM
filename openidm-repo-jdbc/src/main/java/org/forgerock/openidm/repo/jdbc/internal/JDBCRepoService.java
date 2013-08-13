@@ -80,6 +80,7 @@ import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.internal.pool.DataSourceFactory;
+import org.forgerock.openidm.repo.jdbc.internal.query.TableQueries;
 import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.BundleContext;
@@ -101,7 +102,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{partition}*"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/*"),
     @Property(name = "db.type", value = "JDBC") })
 public class JDBCRepoService implements RequestHandler {
 
@@ -209,6 +210,7 @@ public class JDBCRepoService implements RequestHandler {
         try {
             handler.handleResult(create(request));
         } catch (final ResourceException e) {
+        	e.printStackTrace();
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
@@ -225,8 +227,8 @@ public class JDBCRepoService implements RequestHandler {
      *             if an error was encountered during creation
      */
     public Resource create(CreateRequest request) throws ResourceException {
-        // Parse the remaining resourceName
-        String fullId = request.getResourceName();
+    	// Parse the remaining resourceName
+        String fullId = request.getResourceName() + "/" + request.getNewResourceId();
         String[] resourceName = ResourceUtil.parseResourceName(fullId);
         if (resourceName == null) {
             throw new BadRequestException(
@@ -235,7 +237,8 @@ public class JDBCRepoService implements RequestHandler {
 
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-        Map<String, Object> obj = request.getContent().asMap();
+
+    	Map<String, Object> obj = request.getContent().asMap();
 
         Connection connection = null;
         boolean retry = false;
@@ -520,8 +523,10 @@ public class JDBCRepoService implements RequestHandler {
             String fullId = request.getResourceName();
             String type = fullId;
             logger.trace("Full id: {} Extracted type: {}", fullId, type);
-            Map<String, Object> params =
-                    new HashMap<String, Object>(request.getAdditionalQueryParameters());
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.putAll(request.getAdditionalQueryParameters());
+            params.put(TableQueries.QUERY_ID, request.getQueryId());
+            params.put(TableQueries.QUERY_EXPRESSION, request.getQueryExpression());
 
             Connection connection = null;
             try {
@@ -583,31 +588,40 @@ public class JDBCRepoService implements RequestHandler {
             }
         }
     }
+    
+    private String trimStartingSlash(String id) {
+    	if (id.startsWith("/") && id.length() > 1) {
+    		return id.substring(1);
+    	}
+    	return id;
+    }
 
     // TODO: replace with common utility to handle ID, this is temporary
     private String getLocalId(String id) {
+    	String tmpId = trimStartingSlash(id);
         String localId = null;
-        int lastSlashPos = id.lastIndexOf("/");
+        int lastSlashPos = tmpId.lastIndexOf("/");
         if (lastSlashPos > -1) {
-            localId = id.substring(id.lastIndexOf("/") + 1);
+            localId = tmpId.substring(tmpId.lastIndexOf("/") + 1);
         }
-        logger.trace("Full id: {} Extracted local id: {}", id, localId);
+        logger.trace("Full id: {} Extracted local id: {}", tmpId, localId);
         return localId;
     }
 
     // TODO: replace with common utility to handle ID, this is temporary
     private String getObjectType(String id) {
+    	String tmpId = trimStartingSlash(id);
         String type = null;
-        int lastSlashPos = id.lastIndexOf("/");
+        int lastSlashPos = tmpId.lastIndexOf("/");
         if (lastSlashPos > -1) {
             int startPos = 0;
             // This should not be necessary as relative URI should not start
             // with slash
-            if (id.startsWith("/")) {
+            if (tmpId.startsWith("/")) {
                 startPos = 1;
             }
-            type = id.substring(startPos, lastSlashPos);
-            logger.trace("Full id: {} Extracted type: {}", id, type);
+            type = tmpId.substring(startPos, lastSlashPos);
+            logger.trace("Full id: {} Extracted type: {}", tmpId, type);
         }
         return type;
     }
