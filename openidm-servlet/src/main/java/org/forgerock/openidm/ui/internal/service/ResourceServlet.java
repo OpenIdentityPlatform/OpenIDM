@@ -137,9 +137,10 @@ public final class ResourceServlet
         // instance is activated
         bundleListener = new BundleListener() {
             public void bundleChanged(BundleEvent event) {
-                if (event.getBundle().getSymbolicName().equals(bundleName)) {
+            	Bundle bundle = event.getBundle();
+                if (bundle != null && bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(bundleName)) {
                     if (event.getType() == BundleEvent.STARTED) {
-                        ResourceServlet.this.bundle = event.getBundle();
+                        ResourceServlet.this.bundle = bundle;
                         logger.info("Bundle " + bundleName + " associated with servlet instance");
                     } else if (event.getType() == BundleEvent.STOPPED) {
                         ResourceServlet.this.bundle = null;
