@@ -198,6 +198,7 @@ public class ConfigurationManagerImpl
         if (null != jsonFileInstaller) {
             try {
                 jsonFileInstaller.delete();
+                jsonFileInstaller = null;
             } catch (Exception e) {
                 logger.error("Failed to disable and delete the JSON config polling", e);
             }
@@ -1078,6 +1079,7 @@ public class ConfigurationManagerImpl
             if (null != jsonFileInstaller) {
                 try {
                     jsonFileInstaller.delete();
+                    jsonFileInstaller = null;
                 } catch (IOException e) {
                     logger.debug("Failed to stop Json file monitoring.", e);
                 }
