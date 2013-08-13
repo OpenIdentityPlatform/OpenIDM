@@ -96,35 +96,24 @@ public class ManagedObjectService implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService;
 
-    private void bindCryptoService(final CryptoService service) {
-        cryptoService = service;
-    }
-
-    private void unbindCryptoService(final CryptoService service) {
-        cryptoService = null;
-    }
-
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ScriptRegistry scriptRegistry;
 
-    private void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-    }
-
-    private void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-    }
-
-    @Reference(referenceInterface = RouteService.class, policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+    /** Route service. */
+    @Reference(referenceInterface = RouteService.class,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindSyncRoute",
+            unbind = "unbindSyncRoute",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             target = "(" + ServerConstants.ROUTER_PREFIX + "=/sync*)")
     private final AtomicReference<RouteService> syncRoute = new AtomicReference<RouteService>();
 
-    private void bindRouteService(final RouteService service) {
+    private void bindSyncRoute(final RouteService service) {
         syncRoute.set(service);
     }
 
-    private void unbindRouteService(final RouteService service) {
+    private void unbindSyncRoute(final RouteService service) {
         syncRoute.set(null);
     }
 
@@ -143,7 +132,7 @@ public class ManagedObjectService implements RequestHandler {
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService,syncRoute, value);
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, value);
             if (managedRoutes.containsKey(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
@@ -157,7 +146,7 @@ public class ManagedObjectService implements RequestHandler {
 
         Set<String> tempRoutes = new HashSet<String>();
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService,syncRoute, value);
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, value);
             if (tempRoutes.contains(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
