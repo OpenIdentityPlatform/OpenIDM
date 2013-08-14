@@ -29,7 +29,7 @@
                     "target" : "name",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimName.js"
+                        "name" : "script/setScimName.js"
                     },
                     "source" : ""
                 },
@@ -37,7 +37,7 @@
                     "target" : "displayName",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimDisplayName.js"
+                        "name" : "script/setScimDisplayName.js"
                     },
                     "source" : ""
                 },
@@ -49,7 +49,7 @@
                     "target" : "profileUrl",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimProfileUrl.js"
+                        "name" : "script/setScimProfileUrl.js"
                     },
                     "source" : ""
                 },
@@ -57,7 +57,7 @@
                     "target" : "emails",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimEmails.js"
+                        "name" : "script/setScimEmails.js"
                     },
                     "source" : ""
                 },
@@ -65,7 +65,7 @@
                     "target" : "addresses",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimAddresses.js"
+                        "name" : "script/setScimAddresses.js"
                     },
                     "source" : ""
                 },
@@ -73,7 +73,7 @@
                     "target" : "phoneNumbers",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimPhoneNumbers.js"
+                        "name" : "script/setScimPhoneNumbers.js"
                     },
                     "source" : ""
                 },
@@ -81,7 +81,7 @@
                     "target" : "ims",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimIms.js"
+                        "name" : "script/setScimIms.js"
                     },
                     "source" : ""
                 },
@@ -89,7 +89,7 @@
                     "target" : "photos",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimPhotos.js"
+                        "name" : "script/setScimPhotos.js"
                     },
                     "source" : ""
                 },
@@ -117,14 +117,14 @@
                     "target" : "groups",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimGroups.js"
+                        "name" : "script/setScimGroups.js"
                     },
                     "source" : ""
                 }
             ],
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/setScimMetaCreate.js"
+                "name" : "script/setScimMetaCreate.js"
             },
             "policies" : [
                 {

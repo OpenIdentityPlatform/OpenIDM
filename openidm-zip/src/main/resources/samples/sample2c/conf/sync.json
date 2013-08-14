@@ -76,7 +76,7 @@
             "links" : "systemLdapAccounts_managedUser",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "file" : "script/ldapBackCorrelationQuery.js"
+                "name" : "script/ldapBackCorrelationQuery.js"
             },
             "properties" : [
                 {

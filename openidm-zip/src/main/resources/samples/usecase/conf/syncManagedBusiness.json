@@ -11,7 +11,7 @@
             "enableSync" : false,
             "validSource" : {
                 "type" : "text/javascript",
-                "file" : "script/isSourceValidBusiness.js"
+                "name" : "script/isSourceValidBusiness.js"
             },
             "properties" : [
                 {
@@ -118,7 +118,7 @@
             "enableSync" : false,
             "validSource" : {
                 "type" : "text/javascript",
-                "file" : "script/isSourceValidBusiness.js"
+                "name" : "script/isSourceValidBusiness.js"
             },
             "properties" : [
                 {
@@ -196,7 +196,7 @@
                     "action" : {
                         "workflowName" : "manualMatch",
                         "type" : "text/javascript",
-                        "file" : "bin/defaults/script/workflow/workflow.js"
+                        "name" : "workflow/workflow.js"
                     }
                 },
                 {
@@ -212,7 +212,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "bin/defaults/script/workflow/workflow.js"
+                        "name" : "workflow/workflow.js"
                     }
                 },
                 {
@@ -220,7 +220,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "bin/defaults/script/workflow/workflow.js"
+                        "name" : "workflow/workflow.js"
                     }
                 }
             ]

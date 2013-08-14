@@ -26,7 +26,7 @@
         "task" : {
             "script" : {
                 "type" : "text/javascript",
-                "file" : "script/sunset.js"
+                "name" : "script/sunset.js"
             }
         }
     }

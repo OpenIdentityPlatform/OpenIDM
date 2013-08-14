@@ -10,21 +10,21 @@
             },
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/onCreate.js"
+                "name" : "script/onCreate.js"
             },
             "onUpdate" : {
                 "type" : "text/javascript",
-                "file" : "script/onUpdate.js"
+                "name" : "script/onUpdate.js"
             },
             "result" : {
                 "type" : "text/javascript",
-                "file" : "script/result.js"
+                "name" : "script/result.js"
             },
             "properties" : [
                 {
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/noSource.js"
+                        "name" : "script/noSource.js"
                     },
                     "target" : "sourceTest1Nosource"
                 },
@@ -32,7 +32,7 @@
                     "source" : "",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/emptySource.js"
+                        "name" : "script/emptySource.js"
                     },
                     "target" : "sourceTestEmptySource"
                 },
@@ -40,7 +40,7 @@
                     "source" : "description",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/sourceDescription.js"
+                        "name" : "script/sourceDescription.js"
                     },
                     "target" : "sourceTestDescription"
                 },
