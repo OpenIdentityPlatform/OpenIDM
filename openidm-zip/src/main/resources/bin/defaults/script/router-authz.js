@@ -59,7 +59,6 @@ function deepCompare(obj1, obj2) {
 
 function matchesResourceIdPattern(id, pattern) {
 // TODO: Left in to force the review of id representation. Remove upon review.
-java.lang.System.out.println("*** match pattern id: " + id + " pattern: " + pattern);
     if (pattern === "*") {
         // Accept all patterns
         return true;
