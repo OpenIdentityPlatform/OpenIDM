@@ -327,6 +327,7 @@ public class KeystoreResourceProvider implements SingletonResourceProvider {
                     store.store();
                     manager.reload();
                 }
+                handler.handleResult(new Resource(resourceId, null, new JsonValue(null)));
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
             }
