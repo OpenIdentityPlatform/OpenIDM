@@ -58,7 +58,6 @@ function deepCompare(obj1, obj2) {
 }
 
 function matchesResourceIdPattern(id, pattern) {
-// TODO: Left in to force the review of id representation. Remove upon review.
     if (pattern === "*") {
         // Accept all patterns
         return true;
