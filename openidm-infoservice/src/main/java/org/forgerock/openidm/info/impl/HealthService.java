@@ -143,6 +143,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         "org.forgerock.openidm.enhanced-config",
         "org.forgerock.openidm.external-email",
         "org.forgerock.openidm.external-rest",
+        "org.forgerock.openidm.authnfilter",
         "org.forgerock.openidm.filter",
         "org.forgerock.openidm.httpcontext",
         "org.forgerock.openidm.infoservice",

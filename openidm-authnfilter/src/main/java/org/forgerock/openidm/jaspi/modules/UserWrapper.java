@@ -22,20 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import java.security.Principal;
-import java.util.ArrayList;  
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import javax.servlet.http.HttpServletRequest;  
-import javax.servlet.http.HttpServletRequestWrapper;
 
 
 /**
@@ -86,7 +84,7 @@ class UserWrapper extends HttpServletRequestWrapper {
         // For now, only suppress the password header (but not user name or re-auth)
         boolean suppress = (header.length() >= 10 && header.charAt(1) == '-' &&
                 header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") &&
-                header.equalsIgnoreCase(AuthFilter.HEADER_PASSWORD));
+                header.equalsIgnoreCase(IDMServerAuthModule.HEADER_PASSWORD));
         return suppress;
     }
 
