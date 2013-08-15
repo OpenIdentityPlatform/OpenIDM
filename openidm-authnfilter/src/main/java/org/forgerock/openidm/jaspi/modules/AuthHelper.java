@@ -1,28 +1,34 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2013 ForgeRock Inc. All rights reserved.
  */
 
-package org.forgerock.openidm.filter;
+package org.forgerock.openidm.jaspi.modules;
+
+import org.eclipse.jetty.plus.jaas.spi.UserInfo;
+import org.eclipse.jetty.util.security.Credential;
+import org.eclipse.jetty.util.security.Password;
+import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,159 +39,86 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jetty.util.security.Credential;
-import org.eclipse.jetty.util.security.Password;
+/**
+ * Helper class which performs authentication against manged internal user tables.
+ */
+public class AuthHelper {
 
-import org.forgerock.json.crypto.JsonCrypto;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.CryptoService;
-
-
-import org.forgerock.json.fluent.JsonValue;
-
-
-import org.eclipse.jetty.plus.jaas.spi.UserInfo;
-
-import org.forgerock.openidm.util.JsonUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class AuthModule {
-
-    final static Logger logger = LoggerFactory.getLogger(AuthModule.class);
-
-    // default properties set in config/system.properties
-    private final String queryId;
-    private final String queryOnResource;
-    private final String internalUserQueryId;
-    private final String queryOnInternalUserResource;
-    private final String userIdProperty;
-    private final String userCredentialProperty;
-    private final String userRolesProperty;
-    private final String gumicsizma;
-    private final List<String> defaultRoles;
+    private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
 
     private final CryptoService cryptoService;
     private final ServerContext context;
-    // configuration conf/authentication.json
 
-    public AuthModule(CryptoService cryptoService, ServerContext context, JsonValue config) {
+    private final String userIdProperty;
+    private final String userCredentialProperty;
+    private final String userRolesProperty;
+    private final List<String> defaultRoles;
+
+    /**
+     * Constructs an instance of the AuthHelper.
+     *
+     * @param userIdProperty The user id property.
+     * @param userCredentialProperty The user credential property.
+     * @param userRolesProperty The user roles property.
+     * @param defaultRoles The list of default roles.
+     */
+    public AuthHelper(CryptoService cryptoService, ServerContext context, String userIdProperty,
+            String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
+
         this.cryptoService = cryptoService;
         this.context = context;
-        defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        queryId = config.get("queryId").defaultTo("credential-query").asString();
-        gumicsizma = config.get("gumicsizma").asString();
-        queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
-        internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
-        queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
 
-        // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        userIdProperty = properties.get("userId").asString();
-        userCredentialProperty = properties.get("userCredential").asString();
-        userRolesProperty = properties.get("userRoles").asString();
+        this.userIdProperty = userIdProperty;
+        this.userCredentialProperty = userCredentialProperty;
+        this.userRolesProperty = userRolesProperty;
+        this.defaultRoles = defaultRoles;
 
-        logger.info("AuthModule config params userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
-            new Object[] {defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
-
-        if ((userIdProperty != null && userCredentialProperty == null) ||
-                (userIdProperty == null && userCredentialProperty != null)) {
-            logger.warn("AuthModule config does not fully define the necessary properties."
+        if ((userIdProperty != null && userCredentialProperty == null)
+                || (userIdProperty == null && userCredentialProperty != null)) {
+            logger.warn("AuthHelper config does not fully define the necessary properties."
                     + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
                     + " Defaulting to manual role query.", userIdProperty, userCredentialProperty);
         }
 
-        logger.info("AuthModule config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
-            new Object[] {userIdProperty, userCredentialProperty, userRolesProperty} );
+        logger.info("AuthHelper config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
+                userIdProperty, userCredentialProperty, userRolesProperty);
     }
 
     /**
-     * Authenticate the given username and password
+     * Performs the authentication using the given query id, resource, username and password.
      *
-     * @param authcid
-     *            the principal that the client used during authentication. This
-     *            might be a user name, an email address, etc. The
-     *            authentication ID may be used for logging or auditing but
-     *            SHOULD NOT be used for authorization decisions.
-     * @param password
-     *            The supplied password to validate
-     * @param authzid
-     * @return the authentication data augmented with role, id, status info.
-     *         Whether authentication was successful is carried by the status
-     *         property
+     * @param passQueryId The query id.
+     * @param passQueryOnResource The query resource.
+     * @param username The username.
+     * @param password The password.
+     * @param securityContextMapper The SecurityContextMapper object.
+     * @return True if authentication is successful, otherwise false.
      */
-    public SecurityContext authenticate(String authcid, String password,final  Map<String, Object> authzid) throws AuthException {
-        boolean authenticated = false;
-        if (gumicsizma instanceof String && !"anonymous".equals(authcid)) {
-            ActionRequest actionRequest = Requests.newActionRequest(gumicsizma, "authenticate");
-            actionRequest.setAdditionalActionParameter("username", authcid);
-            actionRequest.setAdditionalActionParameter("password", password);
-            try {
-                JsonValue result = context.getConnection().action(context, actionRequest);
-                authenticated = result.isDefined(Resource.FIELD_CONTENT_ID);
-                if (authenticated) {
-                    // This is what I was talking about. We don't have a way to
-                    // populate this. Use script to overcome it
-                    authzid.put(SecurityContext.AUTHZID_ROLES, Arrays.asList(new String[] {
-                        "openidm-admin", "openidm-authorized" }));
-                }
-            } catch (ResourceException e) {
-                logger.trace("Failed pass-through authentication of {} on {}.", authcid,
-                        gumicsizma, e);
-                /* authentication failed */
-            }
-        }
+    public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
+            SecurityContextMapper securityContextMapper) {
 
-        if (!authenticated) {
-          authenticated = authPass(queryId, queryOnResource, authcid, password, authzid);
-        }
-        if (!authenticated) {
-            // Authenticate against the internal user table if authentication against managed users failed
-            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authcid, password, authzid);
-            authzid.put(SecurityContext.AUTHZID_COMPONENT, queryOnInternalUserResource);
-        } else {
-            authzid.put(SecurityContext.AUTHZID_COMPONENT, queryOnResource);
-        }
-
-        if (!authenticated) {
-            throw new AuthException(authcid);
-        }
-
-        return new SecurityContext(new RootContext(), authcid, authzid);
-    }
-
-    private boolean authPass(String passQueryId, String passQueryOnResource,
-            String login, String password, final  Map<String, Object> authzid) {
         try {
-            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authzid);
+            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper);
             if (userInfo != null && userInfo.checkCredential(password)) {
-                authzid.put(SecurityContext.AUTHZID_ROLES, Collections.unmodifiableList(userInfo.getRoleNames()));
+                securityContextMapper.setRoles(Collections.unmodifiableList(userInfo.getRoleNames()));
                 return true;
             } else {
-                logger.debug("Authentication failed for {} due to invalid credentials", login);
+                logger.debug("Authentication failed for {} due to invalid credentials", username);
             }
         } catch (Exception ex) {
-            logger.warn("Authentication failed to get user info for {} {}", login, ex);
-            return false;
+            logger.warn("Authentication failed to get user info for {} {}", username, ex);
         }
+
         return false;
     }
 
     private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
-                                      final  Map<String, Object> authzid) throws Exception {
+            SecurityContextMapper securityContextMapper) throws Exception {
         UserInfo user = null;
         Credential credential = null;
         List<String> roleNames = new ArrayList<String>();
 
-        QueryRequest request = Requests.newQueryRequest("/repo/"+repoResource);
+        QueryRequest request = Requests.newQueryRequest("/repo/" + repoResource);
         request.setQueryId(repoQueryId);
         //TODO NPE check
         request.getAdditionalQueryParameters().put("username", username);
@@ -249,7 +182,7 @@ public class AuthModule {
                 }
             }
 
-            authzid.put(SecurityContext.AUTHZID_ID, retrId); // The internal user id can be different than the login user name
+            securityContextMapper.setUserId(retrId);  // The internal user id can be different than the login user name
             if (retrId == null) {
                 logger.warn("Query for credentials did not contain expected result property defining the user id");
             } else if (retrCred == null && retrCredPropName == null) {
@@ -258,7 +191,7 @@ public class AuthModule {
                 credential = getCredential(retrCred, retrId, username, retrCredPropName, true);
                 roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
                 logger.debug("User information for {}: id: {} credential available: {} " +
-                		"roles from repo: {} total roles: {}",
+                        "roles from repo: {} total roles: {}",
                         new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
 
                 user = new UserInfo(username, credential, roleNames);

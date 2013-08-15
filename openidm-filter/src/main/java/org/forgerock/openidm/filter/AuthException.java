@@ -25,7 +25,7 @@
 package org.forgerock.openidm.filter;
 
 /**
- * Authentication failed exception
+ * Authentication failed exception.
  *
  * @author Jamie Nelson 
  */

@@ -14,36 +14,21 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.jaspi.config;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
 
 /**
- * Holds the configuration used to register a servlet filter.
+ * Interface for injecting an implementation which contains the authentication configuration.
  *
  * @author Phill Cunnington
  */
-public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
-
-    private final JsonValue config;
+public interface AuthenticationConfig {
 
     /**
-     * Constructs a new ServletFilterRegistratorSvc instance.
+     * Returns the authentication configuration.
      *
-     * @param config The servlet filter configuration.
+     * @return The authentication configuration.
      */
-    public ServletFilterRegistratorSvc(JsonValue config) {
-        this.config = config;
-    }
-
-    /**
-     * Gets the configuration of the servlet filter.
-     *
-     * @return The servlet filter configuration.
-     */
-    @Override
-    public JsonValue getConfiguration() {
-        return config;
-    }
+    JsonValue getConfig();
 }
