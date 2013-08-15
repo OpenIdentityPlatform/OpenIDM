@@ -1187,7 +1187,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                                 jgw.removeJob(jobName);
                                 // Update job group
                                 UpdateRequest ru = Requests.newUpdateRequest(getJobGroupsRepoId(groupName), jgw.getValue());
-                                r.setRevision(jgw.getRevision());
+                                ru.setRevision(jgw.getRevision());
                                 accessor.getConnection().update(accessor, ru);
                             }
                             // Delete job
