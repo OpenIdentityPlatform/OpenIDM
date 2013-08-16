@@ -59,8 +59,11 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.security.impl.CertificateResourceProvider;
+import org.forgerock.openidm.security.impl.EntryResourceProvider;
 import org.forgerock.openidm.security.impl.JcaKeyStoreHandler;
 import org.forgerock.openidm.security.impl.KeystoreResourceProvider;
+import org.forgerock.openidm.security.impl.PrivateKeyResourceProvider;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -141,16 +144,19 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         
         keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
         KeystoreResourceProvider provider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor);
+        EntryResourceProvider certProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor);
+        EntryResourceProvider keyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor);
 
         router.addRoute("/keystore", provider);
-        router.addRoute("/keystore/cert", provider.CERT);
-        //router.addRoute("/keystore/key", provider.KEY);
+        router.addRoute("/keystore/cert", certProvider);
+        router.addRoute("/keystore/privatekey", keyProvider);
 
         trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
         provider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor);
+        certProvider = new CertificateResourceProvider("truststore", keyStoreHandler, this, accessor);
 
         router.addRoute("/truststore", provider);
-        router.addRoute("/truststore/cert", provider.CERT);
+        router.addRoute("/truststore/cert", certProvider);
     }
 
     @Deactivate
