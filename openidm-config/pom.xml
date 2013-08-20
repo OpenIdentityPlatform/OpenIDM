@@ -40,6 +40,11 @@
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>
@@ -118,7 +123,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.forgerock.openidm.config.internal.Activator</Bundle-Activator>
+                        <Bundle-Activator>org.forgerock.openidm.config.persistence.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

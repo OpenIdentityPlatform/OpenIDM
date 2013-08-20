@@ -202,8 +202,13 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      */
     //@Override
     public void handleRead2(final ServerContext context, final ReadRequest request,
-            final ResultHandler<Resource> handler) throws ResourceException{
-        String fullId = request.getResourceName();
+            final ResultHandler<Resource> handler) throws ResourceException {
+        Resource result = read(request);
+        handler.handleResult(result);
+    }
+    
+    public Resource read(ReadRequest request) throws ResourceException {
+    	String fullId = request.getResourceName();
     	String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         
@@ -222,7 +227,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
             result = DocumentUtil.toResource(doc);
             logger.trace("Completed get for id: {} result: {}", fullId, result); 
-            handler.handleResult(result);
+            return result;
         } finally {
             if (db != null) {
                 db.close();
@@ -251,8 +256,12 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //@Override
     public void handleCreate2(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) throws ResourceException {
-    	
-        String localId = request.getNewResourceId();//getLocalId(fullId);
+        Resource result = create(request);
+        handler.handleResult(result);
+    }
+    
+    public Resource create(CreateRequest request) throws ResourceException {
+    	String localId = request.getNewResourceId();//getLocalId(fullId);
         // TODO: should CREST support server side generation of ID itself?
         if (localId == null) {
         	localId = UUID.randomUUID().toString(); // Generate ID server side.
@@ -282,8 +291,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
-            handler.handleResult(new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
-    				obj.get(DocumentUtil.TAG_REV).asString(), obj));
+            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
+    				obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
@@ -326,7 +335,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //@Override
     public void handleUpdate2(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) throws ResourceException {
-        
+        Resource result = update(request);
+        handler.handleResult(result);
+    }
+    
+    public Resource update(UpdateRequest request) throws ResourceException {
     	String fullId = request.getResourceName();
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
@@ -358,8 +371,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             obj.put(DocumentUtil.TAG_ID, updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
             logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
             logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
-            handler.handleResult(new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
-    				obj.get(DocumentUtil.TAG_REV).asString(), obj));
+            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
+    				obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (OConcurrentModificationException ex) {
             db.rollback();
             throw new PreconditionFailedException("Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " + ex.getMessage(), ex);
@@ -390,6 +403,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //@Override
     public void handleDelete2(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) throws ResourceException {
+        Resource result = delete(request);
+        handler.handleResult(result);
+    }
+    
+    public Resource delete(DeleteRequest request) throws ResourceException {
     	String fullId = request.getResourceName();
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
@@ -414,7 +432,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             db.delete(existingDoc); 
             db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
-            handler.handleResult(new Resource(localId, null, new JsonValue(null)));
+            return new Resource(localId, null, new JsonValue(null));
         } catch (OConcurrentModificationException ex) {  
             db.rollback();
             throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
@@ -469,7 +487,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //@Override
     public void handleQuery2(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) throws ResourceException {
-        // TODO: replace with common utility
+        List<Resource> results = query(request);
+        for (Resource result : results) {
+        	handler.handleResource(result);
+        }
+        handler.handleResult(new QueryResult());        
+    }
+    
+    public List<Resource> query(QueryRequest request) throws ResourceException {
+    	List<Resource> results = new ArrayList<Resource>();
+    	// TODO: replace with common utility
     	String fullId = request.getResourceName(); 
         String type = fullId;
         // Whilst the URI starts with a slash, but consider relative URI
@@ -493,7 +520,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 for (ODocument entry : queryResult) {
                     Map<String, Object> convertedEntry = DocumentUtil.toMap(entry);
                     //docs.add(convertedEntry);
-                    handler.handleResource(new Resource(
+                    results.add(new Resource(
                     		(String) convertedEntry.get(DocumentUtil.TAG_ID), 
                     	    (String) convertedEntry.get(DocumentUtil.TAG_REV), 
                     	    new JsonValue(convertedEntry)));
@@ -509,7 +536,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         result.get(QueryConstants.STATISTICS_QUERY_TIME),
                         result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
             }
-            handler.handleResult(new QueryResult());
+            return results;
         } finally {
             if (db != null) {
                 db.close();

@@ -105,7 +105,7 @@ public class MappedTableHandler implements TableHandler {
         this.rawMappingConfig.putAll(mapping);
 
         explicitMapping =
-                new Mapping(tableName, new JsonValue(rawMappingConfig));
+                new Mapping(tableName, new JsonValue(rawMappingConfig), cryptoServiceAccessor);
         logger.debug("Explicit mapping: {}", explicitMapping);
 
         if (sqlExceptionHandler == null) {
@@ -527,7 +527,8 @@ class Mapping {
     ColumnMapping revMapping; // Quick access to mapping for MVCC revision
     ObjectMapper mapper = new ObjectMapper();
 
-    public Mapping(String tableName, JsonValue mappingConfig) {
+    public Mapping(String tableName, JsonValue mappingConfig, Accessor<CryptoService> cryptoServiceAccessor) {
+    	this.cryptoServiceAccessor = cryptoServiceAccessor;
         this.tableName = tableName;
         for (Map.Entry<String, Object> entry : mappingConfig.asMap().entrySet()) {
             String key = entry.getKey();

@@ -36,50 +36,38 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
-
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.ConfigurationManager;
-import org.forgerock.openidm.config.ConfigurationManager.PID;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.config.internal.ConfigurationManagerImpl;
+import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
-
-
-import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * ArtifactInstaller for JSON configurations. Based on ConfigInstaller.
+ * TODO: This service lifecycle should be bound to the ConfigurationAdmin service lifecycle.
  */
 public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationListener {
-
-    /**
-     * The key in the OSGi configuration dictionary holding the complete JSON configuration string
-     */
-    public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
-
-    /**
-     * Setup logging for the {@link JSONConfigInstaller}.
-     */
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
 
-    private final ObjectMapper mapper = new ObjectMapper().configure(
-            JsonParser.Feature.ALLOW_COMMENTS, true);
+    // The key in the OSGi configuration dictionary holding the complete JSON configuration string
+    public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
+
+    public final static String SERVICE_FACTORY_PID_ALIAS = "config.factory-pid";
 
     private static String fileEncoding = IdentityServer.getInstance()
             .getProperty("openidm.config.file.encoding", "UTF-8");
@@ -87,16 +75,45 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     private final Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
 
     private BundleContext context;
+    private ConfigurationAdmin configAdmin;
+    private ConfigCrypto configCrypto;
 
-    private final ConfigurationManagerImpl configurationManager;
+    private DelayedConfigHandler delayedConfigHandler = new DelayedConfigHandler();
 
-    public JSONConfigInstaller(BundleContext context, ConfigurationManagerImpl configurationManager) {
-        this.context = context;
-        this.configurationManager = configurationManager;
+    public void start(BundleContext ctx) {
+        configCrypto = ConfigCrypto.getInstance(ctx, delayedConfigHandler);
+
+        this.context = ctx;
+        this.configAdmin = lookupConfigAdmin(context);
+        if (this.configAdmin != null) {
+            logger.debug("Starting JSON configuration listener");
+        } else {
+            logger.debug("ConfigAdmin is not yet available for JSON configuration listener, " 
+                    + " will not handle JSON configuration files until it is available.");
+        }
+    }
+
+    public void stop(BundleContext ctx) {
+        this.context = null;
+        this.configAdmin = null;
+        logger.debug("Stopped JSON configuration listener");        
     }
 
     public boolean canHandle(File artifact) {
-        return artifact.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT);
+        if (this.configAdmin == null) {
+            // See if the configuration admin service is available now
+            this.configAdmin = lookupConfigAdmin(this.context);
+            if (this.configAdmin != null) {
+                logger.info("Detected ConfigAdmin service, starting JSON configuration listener");
+            }
+        }
+
+        if (this.configAdmin != null) {
+            logger.debug("Checking if can handle artifact: {}", artifact);
+            return artifact.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT);
+        } else {
+            return false;
+        }
     }
 
     public void install(File artifact) throws Exception {
@@ -111,36 +128,34 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     public void uninstall(File artifact) throws Exception {
         logger.debug("Artifact uninstall {}", artifact);
-        PID pid = parsePid(artifact.getName());
-        configurationManager.deleteConfiguration(pid, null);
-//        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], false);
-//        deleteConfig(artifact);
+        deleteConfig(artifact);
     }
 
-    public void configurationEvent(ConfigurationEvent configurationEvent) {
+    public void configurationEvent(ConfigurationEvent configurationEvent) {    
         logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}", 
                 new Object[] {configurationEvent, configurationEvent.getPid(), 
                 configurationEvent.getFactoryPid(), configurationEvent.getType()});
+        // Check if writing back configurations has been disabled.
+        Object obj = this.context.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
+        if (obj instanceof String) {
+            obj = Boolean.valueOf((String) obj);
+        }
+        if (Boolean.FALSE.equals(obj)) {
+            return;
+        }
 
         String factoryPid = configurationEvent.getFactoryPid();
-        //TODO do we still need this in 2.2?
         if ("org.forgerock.openidm.router".equalsIgnoreCase(factoryPid)) {
             logger.warn("Factory router config is detected. OpenIDM prevents further processing of this config!");
             return;
         }
         String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED) {
-            ConfigurationAdmin configurationAdmin = null;
             try {
-                configurationAdmin = (ConfigurationAdmin) context.getService(configurationEvent.getReference()); 
-
-                Configuration config =
-                        configurationAdmin.getConfiguration(configurationEvent.getPid(),
-                                configurationEvent.getFactoryPid()); 
-                Dictionary dict = null != config ? config.getProperties() : null;
+                Configuration config = getConfigurationAdmin().getConfiguration(pid, factoryPid);
+                Dictionary dict = config.getProperties();
                 if (dict == null) {
-                    //It never happen because the config must exist
-                    return;
+                    dict = new Properties();
                 }
                 String fileName = (String) dict.get( DirectoryWatcher.FILENAME );
                 String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
@@ -153,7 +168,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                         if (factoryPid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
                             unqualifiedFactoryPid = factoryPid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
                         }
-                        String alias = (String) dict.get(ServerConstants.CONFIG_FACTORY_PID);
+                        String alias = (String) dict.get(SERVICE_FACTORY_PID_ALIAS);
                         if (alias == null) {
                             logger.warn("Could not write out factory configuration file, as no friendly alias is set in the configuration."
                                     + " factory pid: {} assigned pid {}", factoryPid, pid);
@@ -166,8 +181,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                     }
                     logger.debug("Store config view filename in configuration {}", fileName);
                     dict.put(DirectoryWatcher.FILENAME, fileName);
-                    //TODO Do something
-                    //config.update(dict);
+                    config.update(dict);
                 }
 
                 File file = fileName != null ? fromConfigKey(fileName) : null;
@@ -203,11 +217,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 }
             } catch (Exception e) {
                 logger.info("Unable to save configuration", e);
-            } finally {
-                if (null != configurationAdmin){
-                    //Release the ConfigurationAdmin
-                    context.ungetService(configurationEvent.getReference());
-                }
             }
         } else if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {
             String fileName = pidToFile.get(pid);
@@ -227,31 +236,31 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
-//    public static ConfigurationAdmin lookupConfigAdmin(BundleContext context) {
-//        ConfigurationAdmin confAdmin = null;
-//        if (context != null) {
-//            ServiceReference configurationAdminReference =
-//                    context.getServiceReference(ConfigurationAdmin.class.getName());
-//            if (configurationAdminReference != null) {
-//                confAdmin = (org.osgi.service.cm.ConfigurationAdmin) context.getService(configurationAdminReference);
-//            }
-//        }
-//        return confAdmin;
-//    }
+    public static ConfigurationAdmin lookupConfigAdmin(BundleContext context) {
+        ConfigurationAdmin confAdmin = null;
+        if (context != null) {
+            ServiceReference configurationAdminReference = 
+                    context.getServiceReference(ConfigurationAdmin.class.getName()); 
+            if (configurationAdminReference != null) {
+                confAdmin = (org.osgi.service.cm.ConfigurationAdmin) context.getService(configurationAdminReference);
+            }
+        }
+        return confAdmin;
+    }
 
-//    public ConfigurationAdmin getConfigurationAdmin() {
-//        // TOOD: better guarding against this service not (yet) being there.
-//        if (configAdmin == null) {
-//            this.configAdmin = lookupConfigAdmin(context);
-//            if (this.configAdmin != null) {
-//                logger.info("ConfigAdmin service detected by JSON configuration listener");
-//            } else {
-//                logger.warn("JSON Configuration listener could not find ConfigAdmin service");
-//            }
-//        }
-//
-//        return configAdmin;
-//    }
+    public ConfigurationAdmin getConfigurationAdmin() {
+        // TOOD: better guarding against this service not (yet) being there.
+        if (configAdmin == null) {
+            this.configAdmin = lookupConfigAdmin(context);
+            if (this.configAdmin != null) {
+                logger.info("ConfigAdmin service detected by JSON configuration listener");
+            } else {
+                logger.warn("JSON Configuration listener could not find ConfigAdmin service");
+            }
+        }
+
+        return configAdmin;
+    }
 
     /**
      * Load the specified configuration file as hashtable. 
@@ -301,58 +310,56 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     synchronized boolean setConfig(final File f) throws Exception {
         boolean updated = false;
         try {
-            Map configuration = mapper.readValue(f,Map.class);
-            PID pid = parsePid(f.getName());
-            updated = setConfig(configuration, pid, f);
+            Dictionary ht = loadConfigFile(f);
+            String pid[] = parsePid(f.getName());
+            updated = setConfig(ht, pid, f);
         } catch (Exception ex) {
             logger.warn("Loading configuration file {} failed ", f, ex);
         }
         return updated;
     }
 
-    synchronized boolean setConfig(Map configuration, final PID pid, final File f) throws Exception {
-//        boolean updated = false;
-//        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], true);
+    synchronized boolean setConfig(Dictionary ht, final String[] pid, final File f) throws Exception {
+        boolean updated = false;
+        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], true);
 
-        return  null != configurationManager.createConfiguration(pid, new JsonValue(configuration));
-
-//        Dictionary props = config.buildServiceProperties();
-//        if (!isConfigSame(ht, props)) {
-//            try {
-//                ht = configCrypto.encrypt(pid[0], pid[1], ht);
-//                ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
-//                if (pid != null && pid[1] != null) {
-//                    ht.put(SERVICE_FACTORY_PID_ALIAS, pid[1]);
-//                }
-//                if (config.getBundleLocation() != null) {
-//                    config.setBundleLocation(null);
-//                }
-//                if (pid[1] == null) {
-//                    logger.info("Loaded changed configuration for {} from {}", pid[0], f.getName());
-//                } else {
-//                    logger.info("Loaded changed configuration for {} {} from {}",
-//                            new Object[] {pid[0], pid[1], f.getName()});
-//                }
-//                config.update(ht);
-//            } catch (WaitForMetaData ex) {
-//                logger.debug("Wait for meta data for config {}-{}", pid[0], pid[1]);
-//                DelayedConfig delayed = new DelayedConfig();
-//                delayed.pidOrFactory = pid[0];
-//                delayed.factoryAlias = pid[1];
-//                delayed.file = f;
-//                delayed.oldConfig = props;
-//                delayed.newConfig = ht;
-//                delayed.parsedConfig = configCrypto.parse(ht, pid[0] + "-" + pid[1]);
-//                delayed.configInstaller = this;
-//                delayed.configCrypto = configCrypto;
-//                delayedConfigHandler.addConfig(delayed);
-//            }
-//            updated = true;
-//        } else {
-//            logger.debug("File contents of configuration for {} from {} has not changed.", pid[1], f);
-//            updated = false;
-//        }
-//        return updated;
+        Dictionary props = config.getProperties();
+        if (!isConfigSame(ht, props)) {
+            try {
+                ht = configCrypto.encrypt(pid[0], pid[1], ht);
+                ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
+                if (pid != null && pid[1] != null) {
+                    ht.put(SERVICE_FACTORY_PID_ALIAS, pid[1]);
+                }
+                if (config.getBundleLocation() != null) {
+                    config.setBundleLocation(null);
+                }
+                if (pid[1] == null) {
+                    logger.info("Loaded changed configuration for {} from {}", pid[0], f.getName());
+                } else {
+                    logger.info("Loaded changed configuration for {} {} from {}", 
+                            new Object[] {pid[0], pid[1], f.getName()});
+                }
+                config.update(ht);
+            } catch (WaitForMetaData ex) {
+                logger.debug("Wait for meta data for config {}-{}", pid[0], pid[1]);
+                DelayedConfig delayed = new DelayedConfig();
+                delayed.pidOrFactory = pid[0];
+                delayed.factoryAlias = pid[1];
+                delayed.file = f;
+                delayed.oldConfig = props;
+                delayed.newConfig = ht;
+                delayed.parsedConfig = configCrypto.parse(ht, pid[0] + "-" + pid[1]);
+                delayed.configInstaller = this;
+                delayed.configCrypto = configCrypto;
+                delayedConfigHandler.addConfig(delayed);
+            }
+            updated = true;
+        } else {
+            logger.debug("File contents of configuration for {} from {} has not changed.", pid[1], f);
+            updated = false;
+        }
+        return updated;
     }
 
     /**
@@ -363,12 +370,12 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * @return
      * @throws Exception
      */
-//    boolean deleteConfig(File f) throws Exception {
-//        String pid[] = parsePid(f.getName());
-//        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], false);
-//        config.delete();
-//        return true;
-//    }
+    boolean deleteConfig(File f) throws Exception {
+        String pid[] = parsePid(f.getName());
+        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], false);
+        config.delete();
+        return true;
+    }
 
     String toConfigKey(File f) {
         return f.getAbsoluteFile().toURI().toString();
@@ -378,17 +385,19 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         return new File(URI.create(key));
     }
 
-    ConfigurationManager.PID parsePid(String path) {
+    String[] parsePid(String path) {
         String pid = path.substring(0, path.lastIndexOf('.'));
         int n = pid.indexOf('-');
         if (n > 0) {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
+            pid = ConfigBootstrapHelper.qualifyPid(pid);
             logger.info("Configuring service PID {} factory PID {}", pid, factoryPid);
-            return PID.serviceName( pid, factoryPid );
+            return new String[] { pid, factoryPid };
         }
         else {
-            return PID.serviceName(pid);
+            pid = ConfigBootstrapHelper.qualifyPid(pid);
+            return new String[] { pid, null };
         }
     }
 
@@ -408,66 +417,66 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         newCompare.remove( DirectoryWatcher.FILENAME );
         newCompare.remove( Constants.SERVICE_PID );
         newCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        newCompare.remove( ServerConstants.CONFIG_FACTORY_PID );
+        newCompare.remove( SERVICE_FACTORY_PID_ALIAS );
 
         Dictionary oldCompare = new Hashtable(new DictionaryAsMap(oldCfg));
         oldCompare.remove( DirectoryWatcher.FILENAME );
         oldCompare.remove( Constants.SERVICE_PID );
         oldCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        oldCompare.remove( ServerConstants.CONFIG_FACTORY_PID );
+        oldCompare.remove( SERVICE_FACTORY_PID_ALIAS );
 
         return newCompare.equals(oldCompare);
     }
 
-//    Configuration getConfiguration(String fileName, String pid, String factoryPid, boolean addIfNew) throws Exception {
-//
-//        Configuration oldConfiguration = findExistingConfiguration(fileName, pid, factoryPid);
-//        if (oldConfiguration != null) {
-//            logger.debug("Updating configuration from {}", fileName);
-//            return oldConfiguration;
-//        }
-//        else {
-//            Configuration newConfiguration;
-//            if (factoryPid != null) {
-//
-//                if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
-//                    throw new ConfigurationException(factoryPid, "router config can not be factory config");
-//                }
-//                newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
-//            }
-//            else {
-//                newConfiguration = getConfigurationAdmin().getConfiguration(pid, null);
-//            }
-//            if (addIfNew) {
-//                pidToFile.put(newConfiguration.getPid(), fileName);
-//            }
-//            return newConfiguration;
-//        }
-//    }
-//
-//    Configuration findExistingConfiguration(String fileName, String pid, String factoryPid) throws Exception {
-//
-//        String filter = null;
-//        if (null == factoryPid) {
-//            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-//        }  else {
-//            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + pid + ")(config.factory-pid=" + factoryPid + "))";
-//        }
-//
-//        Configuration[] configurations = getConfigurationAdmin().listConfigurations(filter);
-//        if (configurations != null && configurations.length > 0) {
-//            pidToFile.put(configurations[0].getPid(), fileName);
-//            return configurations[0];
-//        }
-//        else {
-//            return null;
-//        }
-//    }
+    Configuration getConfiguration(String fileName, String pid, String factoryPid, boolean addIfNew) throws Exception {
+
+        Configuration oldConfiguration = findExistingConfiguration(fileName, pid, factoryPid);
+        if (oldConfiguration != null) {
+            logger.debug("Updating configuration from {}", fileName);
+            return oldConfiguration;
+        }
+        else {
+            Configuration newConfiguration;
+            if (factoryPid != null) {
+
+                if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
+                    throw new ConfigurationException(factoryPid, "router config can not be factory config");
+                }
+                newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
+            }
+            else {
+                newConfiguration = getConfigurationAdmin().getConfiguration(pid, null);
+            }
+            if (addIfNew) {
+                pidToFile.put(newConfiguration.getPid(), fileName);
+            }
+            return newConfiguration;
+        }
+    }
+
+    Configuration findExistingConfiguration(String fileName, String pid, String factoryPid) throws Exception {
+
+        String filter = null;
+        if (null == factoryPid) {
+            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+        }  else {
+            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + pid + ")(config.factory-pid=" + factoryPid + "))";
+        }
+
+        Configuration[] configurations = getConfigurationAdmin().listConfigurations(filter);
+        if (configurations != null && configurations.length > 0) {
+            pidToFile.put(configurations[0].getPid(), fileName);
+            return configurations[0];
+        }
+        else {
+            return null;
+        }
+    }
 }
 
 /**
-* A wrapper around a dictionary access it as a Map
-*/
+ * A wrapper around a dictionary access it as a Map
+ */
 class DictionaryAsMap<U, V> extends AbstractMap<U, V> {
 
     private Dictionary<U, V> dict;
