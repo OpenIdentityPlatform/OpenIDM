@@ -23,6 +23,17 @@
  */
 package org.forgerock.openidm.repo;
 
+import java.util.List;
+
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.UpdateRequest;
+
 // JSON Resource
 //import org.forgerock.json.resource.JsonResource;
 
@@ -37,5 +48,16 @@ package org.forgerock.openidm.repo;
  * 
  * @author aegloff
  */
-public interface RepoBootService {//extends JsonResource {
+public interface RepoBootService {
+	
+	public Resource create(CreateRequest request) throws ResourceException;
+	
+	public Resource read(ReadRequest request) throws ResourceException;
+	
+	public Resource update(UpdateRequest request) throws ResourceException;
+	
+	public Resource delete(DeleteRequest request) throws ResourceException;
+	
+	public List<Resource> query(QueryRequest request) throws ResourceException;
+	
 }
