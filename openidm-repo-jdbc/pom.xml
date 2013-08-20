@@ -45,7 +45,17 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-config</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
             <version>${openidm.version}</version>
         </dependency>
 
@@ -145,7 +155,7 @@
                     <instructions>
                         <!-- Need to be able to dynamically find DB drivers -->
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <Bundle-Activator>org.forgerock.openidm.repo.jdbc.internal.Activator</Bundle-Activator>
+                        <Bundle-Activator>org.forgerock.openidm.repo.jdbc.impl.Activator</Bundle-Activator>
                         <Embed-Dependency>bonecp;guava;scope=provided</Embed-Dependency>
                     </instructions>
                 </configuration>
