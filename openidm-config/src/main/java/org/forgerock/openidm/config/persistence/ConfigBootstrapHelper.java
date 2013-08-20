@@ -37,7 +37,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -178,7 +177,7 @@ public class ConfigBootstrapHelper {
      */
     public static String getConfigFileInstallDir() {
         // Default the configuration directory if not declared
-        String dir = IdentityServer.getInstance().getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
+        String dir = System.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
         dir =  IdentityServer.getFileForProjectPath(dir).getAbsolutePath();
         logger.debug("Configuration file directory {}", dir);
         return dir;
@@ -224,7 +223,7 @@ public class ConfigBootstrapHelper {
             props.put("felix.fileinstall.dir", dir);
             props.put("felix.fileinstall.filter", filter);
             props.put("felix.fileinstall.bundles.new.start", start);
-            props.put(ServerConstants.CONFIG_FACTORY_PID,"openidm");
+            props.put("config.factory-pid","openidm");
             config.update(props);
             logger.info("Configuration from file enabled");
         } else {
@@ -234,7 +233,7 @@ public class ConfigBootstrapHelper {
         if ("true".equals(uiConfigEnabled)) {
             uiProps.put("felix.fileinstall.poll", uiPoll);
             uiProps.put("felix.fileinstall.dir", uiDir);
-            uiProps.put(ServerConstants.CONFIG_FACTORY_PID, "ui");
+            uiProps.put("config.factory-pid", "ui");
             uiConfig.update(uiProps);
             logger.info("UI file installer enabled");
         } else {
