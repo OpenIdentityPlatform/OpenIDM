@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.jdbc.internal.pool;
+package org.forgerock.openidm.repo.jdbc.impl.pool;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.codehaus.jackson.map.DeserializationConfig;

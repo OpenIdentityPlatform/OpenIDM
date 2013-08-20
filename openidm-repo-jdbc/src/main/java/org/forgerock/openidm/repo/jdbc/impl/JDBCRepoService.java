@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.repo.jdbc.internal;
+package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -79,8 +79,8 @@ import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.internal.pool.DataSourceFactory;
-import org.forgerock.openidm.repo.jdbc.internal.query.TableQueries;
+import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
+import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.BundleContext;

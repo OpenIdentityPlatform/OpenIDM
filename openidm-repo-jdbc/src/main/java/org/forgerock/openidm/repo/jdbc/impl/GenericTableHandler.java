@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.jdbc.internal;
+package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -51,8 +51,8 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.internal.query.QueryResultMapper;
-import org.forgerock.openidm.repo.jdbc.internal.query.TableQueries;
+import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
+import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
