@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  * $Id$
  */
-package org.forgerock.openidm.repo.jdbc.internal;
+package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.io.IOException;
 import java.sql.Connection;

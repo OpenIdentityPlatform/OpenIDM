@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.jdbc.internal.query;
+package org.forgerock.openidm.repo.jdbc.impl.query;
 
 import java.util.List;
 

@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.jdbc.internal.metadata;
+package org.forgerock.openidm.repo.jdbc.impl.metadata;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
-import org.forgerock.openidm.repo.jdbc.internal.JDBCRepoService;
+import org.forgerock.openidm.repo.jdbc.impl.JDBCRepoService;
 
 /**
  * Meta data provider to describe configuration requirements of this bundle

@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.jdbc.internal;
+package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
