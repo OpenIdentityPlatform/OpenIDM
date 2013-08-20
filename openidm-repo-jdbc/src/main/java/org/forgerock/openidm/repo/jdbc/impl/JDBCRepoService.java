@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -76,6 +77,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
+import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
@@ -104,7 +106,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/*"),
     @Property(name = "db.type", value = "JDBC") })
-public class JDBCRepoService implements RequestHandler {
+public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
@@ -152,15 +154,7 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
-    /**
-     * Reads a resource from the repository based on the supplied read request.
-     *
-     * @param request
-     *            the read request.
-     * @return the requested resource.
-     * @throws ResourceException
-     *             if an error was encountered during the read.
-     */
+    @Override
     public Resource read(ReadRequest request) throws ResourceException {
         // Parse the remaining resourceName
         String fullId = request.getResourceName();
@@ -217,26 +211,22 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
-    /**
-     * Creates a new resource in the repository.
-     *
-     * @param request
-     *            the create request
-     * @return the created resource
-     * @throws ResourceException
-     *             if an error was encountered during creation
-     */
+    @Override
     public Resource create(CreateRequest request) throws ResourceException {
     	// Parse the remaining resourceName
-        String fullId = request.getResourceName() + "/" + request.getNewResourceId();
-        String[] resourceName = ResourceUtil.parseResourceName(fullId);
-        if (resourceName == null) {
+        String fullId = request.getResourceName();
+        String newId = request.getNewResourceId();
+        if (newId != null) {
+        	fullId = request.getResourceName() + "/" + newId;
+        }
+        
+        String localId = getLocalId(fullId);
+        String type = getObjectType(fullId);
+        
+        if (localId == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
 
     	Map<String, Object> obj = request.getContent().asMap();
 
@@ -319,22 +309,7 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
-    /**
-     * Updates a resource in the repository
-     * <p/>
-     * This implementation requires MVCC and hence enforces that clients state
-     * what revision they expect to be updating
-     * <p/>
-     * If successful, this method updates metadata properties within the passed
-     * object, including: a new {@code _rev} value for the revised object's
-     * version
-     *
-     * @param request
-     *            the update request
-     * @return the updated resource
-     * @throws ResourceException
-     *             if an error was encountered while updating
-     */
+    @Override
     public Resource update(UpdateRequest request) throws ResourceException {
         // Parse the remaining resourceName
         String fullId = request.getResourceName();
@@ -430,6 +405,7 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
+    @Override
     public Resource delete(DeleteRequest request) throws ResourceException {
         // Parse the remaining resourceName
         Resource result = null;
@@ -520,48 +496,11 @@ public class JDBCRepoService implements RequestHandler {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            String fullId = request.getResourceName();
-            String type = fullId;
-            logger.trace("Full id: {} Extracted type: {}", fullId, type);
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.putAll(request.getAdditionalQueryParameters());
-            params.put(TableQueries.QUERY_ID, request.getQueryId());
-            params.put(TableQueries.QUERY_EXPRESSION, request.getQueryExpression());
-
-            Connection connection = null;
-            try {
-                TableHandler tableHandler = getTableHandler(type);
-                if (tableHandler == null) {
-                    throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
-                            "No handler configured for resource type " + type);
-                }
-                connection = getConnection();
-                connection.setAutoCommit(true); // Ensure we do not implicitly
-                                                // start transaction isolation
-
-                List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
-
-                for (Map<String, Object> resultMap : docs) {
-                    String id = (String) resultMap.get("_id");
-                    String rev = (String) resultMap.get("_rev");
-                    JsonValue value = new JsonValue(resultMap);
-                    Resource resultResource = new Resource(id, rev, value);
-                    handler.handleResource(resultResource);
-                }
-
-                handler.handleResult(new QueryResult());
-            } catch (SQLException ex) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
-                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
-                }
-                throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
-            } catch (ResourceException ex) {
-                logger.debug("ResourceException in query of {}", fullId, ex);
-                throw ex;
-            } finally {
-                CleanupHelper.loggedClose(connection);
-            }
+        	List<Resource> results = query(request);
+        	for (Resource result : results) {
+        		handler.handleResource(result);
+        	}
+            handler.handleResult(new QueryResult());
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
@@ -569,6 +508,51 @@ public class JDBCRepoService implements RequestHandler {
         }
     }
 
+    @Override
+    public List<Resource> query(QueryRequest request) throws ResourceException {
+    	String fullId = request.getResourceName();
+        String type = fullId;
+        logger.trace("Full id: {} Extracted type: {}", fullId, type);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.putAll(request.getAdditionalQueryParameters());
+        params.put(TableQueries.QUERY_ID, request.getQueryId());
+        params.put(TableQueries.QUERY_EXPRESSION, request.getQueryExpression());
+
+        Connection connection = null;
+        try {
+            TableHandler tableHandler = getTableHandler(type);
+            if (tableHandler == null) {
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
+            }
+            connection = getConnection();
+            connection.setAutoCommit(true); // Ensure we do not implicitly
+                                            // start transaction isolation
+
+            List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
+            List<Resource> results = new ArrayList<Resource>();
+            for (Map<String, Object> resultMap : docs) {
+                String id = (String) resultMap.get("_id");
+                String rev = (String) resultMap.get("_rev");
+                JsonValue value = new JsonValue(resultMap);
+                Resource resultResource = new Resource(id, rev, value);
+                results.add(resultResource);
+            }
+            return results;
+        } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
+                        new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
+            }
+            throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
+        } catch (ResourceException ex) {
+            logger.debug("ResourceException in query of {}", fullId, ex);
+            throw ex;
+        } finally {
+            CleanupHelper.loggedClose(connection);
+        }
+    }
+    
     @Override
     public void handleAction(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
@@ -663,11 +647,11 @@ public class JDBCRepoService implements RequestHandler {
      * @return the boot repository service. This newBuilder is not managed by
      *         SCR and needs to be manually registered.
      */
-    /*
-     * static RepoBootService getRepoBootService(JsonValue repoConfig,
-     * BundleContext context) { JDBCRepoService bootRepo = new
-     * JDBCRepoService(); bootRepo.init(repoConfig, context); return bootRepo; }
-     */
+    static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) { 
+    	JDBCRepoService bootRepo = new JDBCRepoService(); 
+    	bootRepo.init(repoConfig, context); 
+    	return bootRepo; 
+    }
 
     /**
      * Activates the JDBC Repository Service
@@ -677,18 +661,16 @@ public class JDBCRepoService implements RequestHandler {
      */
     @Activate
     void activate(ComponentContext compContext) {
-        logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        try {
-            config = enhancedConfig.getConfigurationAsJson(compContext);
-        } catch (RuntimeException ex) {
-            logger.warn(
-                    "Configuration invalid and could not be parsed, can not start JDBC repository: "
-                            + ex.getMessage(), ex);
-            throw ex;
-        }
-        init(config, compContext.getBundleContext());
-
-        logger.info("Repository started.");
+    	logger.debug("Activating Service with configuration {}", compContext.getProperties());
+    	try {
+    		config = enhancedConfig.getConfigurationAsJson(compContext);
+    	} catch (RuntimeException ex) {
+    		logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
+    				+ ex.getMessage(), ex);
+    		throw ex;
+    	}
+    	init(config, compContext.getBundleContext());
+    	logger.info("Repository started.");
     }
 
     /**
