@@ -509,7 +509,7 @@ public class SecurityManager extends SimpleJsonResource {
         if (router == null) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
         }
-        String id = "security/keys/" + alias;
+        String id = "repo/security/keys/" + alias;
         JsonValue keyMap = new JsonValue(router.read(id));
         if (keyMap.isNull()) {
             throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Cannot find stored key for alias " + alias);
