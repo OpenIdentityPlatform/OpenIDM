@@ -197,6 +197,32 @@
         }
     },
     "embeddedServer" : {
-        "enabled" : true
+        "enabled" : true,
+        "studioUi" : {
+            "enabled" : true
+        },
+        "defaultProfile" : {
+            "name" : "singleinstance"
+        },
+        "overrideConfig" : {
+            "network" : {
+                "listeners" : {
+                    "binary" : {
+                        "ipAddress" : "0.0.0.0",
+                        "portRange" : "2424-2424"
+                    },
+                    "http" : {
+                        "ipAddress" : "127.0.0.1",
+                        "portRange" : "2480-2480"
+                    }
+                }
+            },
+            "properties" : [
+                {
+                    "name" : "profiler.enabled",
+                    "value" : "false"
+                }
+            ]
+        }
     }
 }
