@@ -46,7 +46,7 @@ import groovy.sql.DataSet;
 //
 // [
 // "token": <Object> token object (could be Integer, Date, String) , [!! could be null]
-// "operation":<String> ("CREATE_OR_UPDATE"|"DELETE")  will always default to CREATE_OR_DELETE ,
+// "operation":<String> ("CREATE_OR_UPDATE"|"DELETE"),
 // "uid":<String> uid  (uid of the entry) ,
 // "previousUid":<String> prevuid (This is for rename ops) ,
 // "password":<String> password (optional... allows to pass clear text password if needed),
