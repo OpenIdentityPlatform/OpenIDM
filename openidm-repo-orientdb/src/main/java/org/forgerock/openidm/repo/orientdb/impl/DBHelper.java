@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
+import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
@@ -240,20 +242,44 @@ public class DBHelper {
             throws InvalidException {
         
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
-        ODatabaseDocumentTx db = new ODatabaseDocumentTx(dbURL); 
-        if (db.exists()) {
-            logger.info("Using DB at {}", dbURL);
-            db.open(user, password); 
-            // Check if structure changed
-            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-            populateSample(db, completeConfig);
-        } else { 
-            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-            logger.info("DB does not exist, creating {}", dbURL);
-            db.create(); 	       
-            populateSample(db, completeConfig);
-        } 
+        ODatabaseDocumentTx db = new ODatabaseDocumentTx(dbURL);
+        boolean dbExists = false;
+
+        // To add support for remote DB checking/creation one 
+        // would need to use OServerAdmin instead
+        // boolean dbExists = new OServerAdmin(dbURL).connect(user, password).existsDatabase();
+
+        // Local DB we can auto populate 
+        if (isLocalDB(dbURL)) {
+            if (db.exists()) {
+                logger.info("Using DB at {}", dbURL);
+                db.open(user, password); 
+                // Check if structure changed
+                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                populateSample(db, completeConfig);
+            } else { 
+                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                logger.info("DB does not exist, creating {}", dbURL);
+                db.create(); 	       
+                populateSample(db, completeConfig);
+            } 
+        } else {
+            logger.info("Using remote DB at {}", dbURL);
+        }
         return db;
+    }
+    
+    /**
+     * Whether the URL represents a local DB
+     * @param dbURL the OrientDB db url
+     * @return true if local, false if remote
+     * @throws InvalidException if the dbURL is null or otherwise known to be invalid
+     */
+    public static boolean isLocalDB(String dbURL) throws InvalidException {
+    	if (dbURL == null) {
+    		throw new InvalidException("dbURL is not set");
+    	}
+    	return dbURL.startsWith("local:");
     }
 
     // TODO: Review the initialization mechanism

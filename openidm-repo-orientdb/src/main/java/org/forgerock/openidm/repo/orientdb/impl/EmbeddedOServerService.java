@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -90,6 +90,9 @@ public class EmbeddedOServerService {
 
         OServerConfiguration configuration = new OServerConfiguration();
 
+        Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")
+        		.get("enabled").defaultTo(Boolean.FALSE).asBoolean();
+        
         Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
         
         if (clustered) {
@@ -136,10 +139,14 @@ public class EmbeddedOServerService {
         configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
         OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
 
-        // TODO: make configurable what address it is accessible on
-        //listener1.ipAddress = "0.0.0.0";
-        listener1.ipAddress = "127.0.0.1";
-        listener1.portRange = "2424-2424";
+
+        // Explicitly access the restructured config format, intent is to replace with a more general 
+        // default/override mechanism
+        JsonValue binaryConfig = config.get("embeddedServer").get("overrideConfig")
+        		.get("network").get("listeners").get("binary");
+                
+        listener1.ipAddress = binaryConfig.get("ipAddress").defaultTo("0.0.0.0").asString();
+        listener1.portRange = binaryConfig.get("portRange").defaultTo("2424-2424").asString();
         if (clustered) {
             listener1.protocol = "distributed";
         } else {
@@ -148,10 +155,12 @@ public class EmbeddedOServerService {
         configuration.network.listeners.add(listener1);
         OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
 
-        // TODO: make configurable what address it is accessible on
-        // listener2.ipAddress = "0.0.0.0";
-        listener2.ipAddress = "127.0.0.1";
-        listener2.portRange = "2480-2480";
+        JsonValue httpConfig = config.get("embeddedServer").get("overrideConfig")
+        		.get("network").get("listeners").get("http");
+                
+        listener2.ipAddress = httpConfig.get("ipAddress").defaultTo("127.0.0.1").asString();
+        listener2.portRange = httpConfig.get("portRange").defaultTo("2480-2480").asString();
+
         listener2.protocol = "http";
 
 //        NOTE: no longer used in 1.3
@@ -176,8 +185,10 @@ public class EmbeddedOServerService {
         listener2.parameters = new OServerParameterConfiguration[1];
         // Connection custom parameters. If not specified the global configuration will be taken
         listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
-        
-        configuration.network.listeners.add(listener2);
+
+        if (studioUiEnabled) {
+        	configuration.network.listeners.add(listener2);
+        }
 
         OServerStorageConfiguration storage1 = new OServerStorageConfiguration();
         storage1.name = "temp";

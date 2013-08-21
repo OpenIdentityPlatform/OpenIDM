@@ -253,7 +253,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         
         ODatabaseDocumentTx db = getConnection();
         try{
-            db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Update on object " + fullId + " could not find existing object.");
@@ -262,7 +261,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             logger.trace("Updated doc for id {} to save {}", fullId, updatedDoc);
             
             updatedDoc.save();
-            db.commit();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
             // Set ID to return to caller
@@ -270,10 +268,8 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
             logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
         } catch (OConcurrentModificationException ex) {
-            db.rollback();
             throw new PreconditionFailedException("Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " + ex.getMessage(), ex);
         } catch (RuntimeException e){
-            db.rollback();
             throw e;
         } finally {
             if (db != null) {
@@ -305,7 +301,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         
         ODatabaseDocumentTx db = getConnection();
         try {
-            db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Object does not exist for delete on: " + fullId);
@@ -314,13 +309,10 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             existingDoc.setVersion(ver); // State the version we expect to delete for MVCC check
 
             db.delete(existingDoc); 
-            db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
         } catch (OConcurrentModificationException ex) {  
-            db.rollback();
             throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
         } catch (RuntimeException e){
-            db.rollback();
             throw e;
         } finally {
             if (db != null) {
