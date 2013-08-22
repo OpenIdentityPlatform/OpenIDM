@@ -440,6 +440,9 @@ class ParsedId {
     public String instanceAlias;
 
     public ParsedId(String fullId) throws BadRequestException {
+        if (fullId.startsWith("/")) {
+            fullId = fullId.replace("/", "");
+        }
         String[] clauses = fullId.split("/");
         if (0 == clauses.length || clauses.length > 2) {
             throw new BadRequestException("The passed identifier to has more then one '/'");
