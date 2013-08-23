@@ -69,7 +69,10 @@ public class IDMAuthContextMapper implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         Map<String, Object> authzid = (Map<String, Object>) request.getAttribute(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
-        String authcid = (String)authzid.get("id");
+        String authcid = null;
+		if (authzid != null) {
+			authcid = (String) authzid.get("id");
+		}
         
         request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcid);
         request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHZID, authzid);
