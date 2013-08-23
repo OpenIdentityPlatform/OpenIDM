@@ -22,9 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.script.internal;
+package org.forgerock.openidm.script.impl;
 
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,6 +95,7 @@ import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
 import org.forgerock.script.scope.ResourceFunctions;
 import org.forgerock.script.source.DirectoryContainer;
+import org.forgerock.script.source.SourceUnit;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.extender.ManifestEntry;
 import org.osgi.framework.Constants;
@@ -164,6 +167,12 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final Logger logger = LoggerFactory.getLogger(ScriptRegistryService.class);
     private static final String PROP_IDENTITY_SERVER = "identityServer";
     private static final String PROP_OPENIDM = "openidm";
+    
+    private static final String SOURCE_DIRECTORY = "directory";
+    private static final String SOURCE_SUBDIRECTORIES = "subdirectories";
+    private static final String SOURCE_VISIBILITY = "visibility";
+    private static final String SOURCE_TYPE = "type";
+    
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
     private static final ConcurrentMap<String, Object> propertiesCache =
@@ -172,7 +181,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 
         setConfiguration(configuration.required().asMap());
@@ -193,16 +202,32 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 put(entry.getKey(), entry.getValue());
             }
         }
-
+        
         try {
-            addSourceUnit(new DirectoryContainer("project-script", IdentityServer
-                    .getFileForProjectPath("script").toURI().toURL()));
-            addSourceUnit(new DirectoryContainer("install-script", IdentityServer
-                    .getFileForInstallPath("bin/defaults/script").toURI().toURL()));
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        	JsonValue sources = configuration.get("sources");
+            if (!sources.isNull()) {
+            	for (String key : sources.keys()) {
+            		JsonValue source = sources.get(key);
+            		String directory = source.get(SOURCE_DIRECTORY).asString();
+            		URL directoryURL = (new File(directory)).toURI().toURL();
+            		/* TODO: Support addition config properties (currently set to defaults in commons)
+            		JsonValue subDirValue = source.get(SOURCE_SUBDIRECTORIES).defaultTo("auto-true");
+            		boolean subdirectories = true;
+            		if (subDirValue.isBoolean()) {
+            			subdirectories = subDirValue.asBoolean();
+            		} else {
+            			subdirectories = Boolean.parseBoolean(subDirValue.asString());
+            		}
+            		String type = source.get(SOURCE_TYPE).defaultTo("auto-detect").asString();
+            		String visibility = source.get(SOURCE_VISIBILITY).defaultTo("public").asString();
+            		*/
+            		DirectoryContainer dc = new DirectoryContainer(key, directoryURL);
+            		addSourceUnit(dc);
+            	}
+            }
+        } catch (Exception e) {
+            logger.error("Error loading sources", e);
+            throw e;
         }
 
         /*
@@ -387,6 +412,22 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
     }
 
+    @Override
+    public ScriptEntry takeScript(JsonValue script) throws ScriptException {
+    	System.out.println(new JsonValue(script));
+        // Check if "name" is missing and "file" is used instead
+        JsonValue scriptConfig = script.clone();
+        if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {
+        	JsonValue file = scriptConfig.get("file");
+        	if (!file.isNull()) {
+        		System.out.println(" setting file: " + file.asString());
+        		scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
+        	}
+        }
+        
+    	return super.takeScript(scriptConfig);
+    }
+    
     private static enum IdentityServerFunctions implements Function<Object> {
         getProperty {
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
