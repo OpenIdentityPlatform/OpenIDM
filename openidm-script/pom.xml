@@ -133,7 +133,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Private-Package>org.forgerock.openidm.script.internal*</Private-Package>
+                        <Private-Package>org.forgerock.openidm.script.impl*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
