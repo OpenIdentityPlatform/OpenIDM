@@ -27,6 +27,8 @@ import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.server.OServerMain;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,7 +51,11 @@ public class DocumentUtilTest {
     String orientDocClass = "Sample";
 
     @BeforeClass 
-    public void init() {
+    public void init() throws Exception {
+    	
+    	// Ensure it is bootstrapped fully
+    	OServerMain.create();
+    	
         db = new ODatabaseDocumentTx(dbURL);
         if (!db.exists()) {
             db.create();
