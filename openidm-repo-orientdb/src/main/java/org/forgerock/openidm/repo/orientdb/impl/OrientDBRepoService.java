@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -54,6 +54,7 @@ import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -202,7 +203,7 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
-        } catch (com.orientechnologies.orient.core.exception.ODatabaseException ex) {
+        } catch (ODatabaseException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
             // OrientDB may wrap the IndexException root cause.
             if (isCauseIndexException(ex, 10)) {
@@ -267,8 +268,19 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             obj.put(DocumentUtil.TAG_ID, updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
             logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
             logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
+        } catch (ODatabaseException ex) {
+        	// Without transaction the concurrent modification exception gets nested instead
+        	if (isCauseConcurrentModificationException(ex, 10)) {
+        		throw new PreconditionFailedException(
+                        "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " 
+                        + ex.getMessage(), ex);
+        	} else {
+        		throw ex;
+        	}
         } catch (OConcurrentModificationException ex) {
-            throw new PreconditionFailedException("Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " + ex.getMessage(), ex);
+            throw new PreconditionFailedException(
+                    "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " 
+                    + ex.getMessage(), ex);
         } catch (RuntimeException e){
             throw e;
         } finally {
@@ -310,8 +322,19 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
 
             db.delete(existingDoc); 
             logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
+        } catch (ODatabaseException ex) {
+        	// Without transaction the concurrent modification exception gets nested instead
+        	if (isCauseConcurrentModificationException(ex, 10)) {
+        		throw new PreconditionFailedException(
+                        "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval. "
+                        + ex.getMessage(), ex);
+        	} else {
+        		throw ex;
+        	}
         } catch (OConcurrentModificationException ex) {  
-            throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
+            throw new PreconditionFailedException(
+                    "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval."
+                    + ex.getMessage(), ex);
         } catch (RuntimeException e){
             throw e;
         } finally {
@@ -490,10 +513,37 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
      * @return
      */
     private boolean isCauseIndexException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, OIndexException.class, maxLevels);
+    }
+    
+    /**
+     * Detect if the root cause of the exception is an index constraint violation
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return
+     */
+    private boolean isCauseConcurrentModificationException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, OConcurrentModificationException.class, maxLevels);
+    }
+    
+    /**
+     * Detect if the root cause of the exception is a specific OrientDB exception
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param clazz the specific OrientDB exception to check for
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return whether the root cause is the specified exception
+     */
+    private boolean isCauseException(Throwable ex, Class clazz, int maxLevels) {
         if (maxLevels > 0) {
             Throwable cause = ex.getCause();
             if (cause != null) {
-                return cause instanceof OIndexException || isCauseIndexException(cause, maxLevels - 1);
+                return clazz.isInstance(cause) || isCauseException(cause, clazz, maxLevels - 1);
             }
         }    
         return false;
