@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.config.enhanced;
+package org.forgerock.openidm.config;
 
 /**
  * An exception that is throw for internal (possibly transient) errors in 

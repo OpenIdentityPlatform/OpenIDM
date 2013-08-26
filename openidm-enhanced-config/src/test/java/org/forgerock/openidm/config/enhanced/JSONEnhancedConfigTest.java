@@ -32,6 +32,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.SystemPropertyAccessor;
