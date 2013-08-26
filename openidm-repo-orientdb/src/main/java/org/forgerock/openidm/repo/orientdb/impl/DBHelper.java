@@ -276,10 +276,10 @@ public class DBHelper {
      * @throws InvalidException if the dbURL is null or otherwise known to be invalid
      */
     public static boolean isLocalDB(String dbURL) throws InvalidException {
-    	if (dbURL == null) {
-    		throw new InvalidException("dbURL is not set");
-    	}
-    	return dbURL.startsWith("local:");
+        if (dbURL == null) {
+            throw new InvalidException("dbURL is not set");
+        }
+        return dbURL.startsWith("local:");
     }
 
     // TODO: Review the initialization mechanism
