@@ -8,7 +8,7 @@ http://creativecommons.org/licenses/by-nc-nd/3.0/
 
 The sample demonstrates configuring a MySQL database to receive the
 audit logs for access, activity, and recon using the OpenICF ScriptedSQL
-connetor.  It can be used alongside any of the other OpenIDM samples by
+connector.  It can be used alongside any of the other OpenIDM samples by
 copying the accompanying files into the respective directories.
 
 The configuration files used in this sample are as follows:
