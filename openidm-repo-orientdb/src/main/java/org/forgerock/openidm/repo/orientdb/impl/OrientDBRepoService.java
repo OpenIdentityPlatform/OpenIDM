@@ -55,6 +55,7 @@ import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -136,7 +137,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-        	handleRead2(context, request, handler);
+            handleRead2(context, request, handler);
         } catch (Exception ex) {  
             handler.handleError(adapt(ex));
         }
@@ -145,9 +146,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public void handleCreate(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
-    	
+
         try {
-        	handleCreate2(context, request, handler);
+            handleCreate2(context, request, handler);
         } catch (Exception ex) {  
             handler.handleError(adapt(ex));
         }
@@ -157,7 +158,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
         try {
-        	handleUpdate2(context, request, handler);
+            handleUpdate2(context, request, handler);
         } catch (Exception ex) {  
             handler.handleError(adapt(ex));
         }
@@ -168,7 +169,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public void handleDelete(final ServerContext context, final DeleteRequest request,
             final ResultHandler<Resource> handler) {
         try {
-        	handleDelete2(context, request, handler);
+            handleDelete2(context, request, handler);
         } catch (Exception ex) {  
             handler.handleError(adapt(ex));
         }
@@ -177,8 +178,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
-    	try {
-        	handleQuery2(context, request, handler);
+         try {
+            handleQuery2(context, request, handler);
         } catch (Exception ex) {  
             handler.handleError(adapt(ex));
         }
@@ -208,8 +209,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource read(ReadRequest request) throws ResourceException {
-    	String fullId = request.getResourceName();
-    	String localId = getLocalId(fullId);
+        String fullId = request.getResourceName();
+        String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         
         if (fullId == null || localId == null) {
@@ -261,10 +262,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource create(CreateRequest request) throws ResourceException {
-    	String localId = request.getNewResourceId();//getLocalId(fullId);
+        String localId = request.getNewResourceId();//getLocalId(fullId);
         // TODO: should CREST support server side generation of ID itself?
         if (localId == null) {
-        	localId = UUID.randomUUID().toString(); // Generate ID server side.
+            localId = UUID.randomUUID().toString(); // Generate ID server side.
         }
         String type = stripSlash(request.getResourceName()); //getObjectType(fullId);
         // Used currently for logging
@@ -292,7 +293,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
             return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
-    				obj.get(DocumentUtil.TAG_REV).asString(), obj);
+                    obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
@@ -340,7 +341,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource update(UpdateRequest request) throws ResourceException {
-    	String fullId = request.getResourceName();
+        String fullId = request.getResourceName();
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         String orientClassName = typeToOrientClassName(type);
@@ -355,7 +356,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         
         ODatabaseDocumentTx db = getConnection();
         try{
-            db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Update on object " + fullId + " could not find existing object.");
@@ -364,7 +364,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             logger.trace("Updated doc for id {} to save {}", fullId, updatedDoc);
             
             updatedDoc.save();
-            db.commit();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
             // Set ID to return to caller
@@ -372,12 +371,19 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
             logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
             return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
-    				obj.get(DocumentUtil.TAG_REV).asString(), obj);
+                    obj.get(DocumentUtil.TAG_REV).asString(), obj);
+        } catch (ODatabaseException ex) {
+            // Without transaction the concurrent modification exception gets nested instead
+            if (isCauseConcurrentModificationException(ex, 10)) {
+                throw new PreconditionFailedException(
+                        "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " 
+                        + ex.getMessage(), ex);
+            } else {
+                throw ex;
+            }
         } catch (OConcurrentModificationException ex) {
-            db.rollback();
             throw new PreconditionFailedException("Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " + ex.getMessage(), ex);
         } catch (RuntimeException e){
-            db.rollback();
             throw e;
         } finally {
             if (db != null) {
@@ -421,7 +427,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         
         ODatabaseDocumentTx db = getConnection();
         try {
-            db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Object does not exist for delete on: " + fullId);
@@ -430,14 +435,23 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             existingDoc.setVersion(ver); // State the version we expect to delete for MVCC check
 
             db.delete(existingDoc); 
-            db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
             return new Resource(localId, null, new JsonValue(null));
+        } catch (ODatabaseException ex) {
+            // Without transaction the concurrent modification exception gets nested instead
+            if (isCauseConcurrentModificationException(ex, 10)) {
+                throw new PreconditionFailedException(
+                        "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval. "
+                        + ex.getMessage(), ex);
+            } else {
+                throw ex;
+            }
+
         } catch (OConcurrentModificationException ex) {  
-            db.rollback();
-            throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
+            throw new PreconditionFailedException(
+                    "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval."
+                    + ex.getMessage(), ex);
         } catch (RuntimeException e){
-            db.rollback();
             throw e;
         } finally {
             if (db != null) {
@@ -597,7 +611,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         String type = null;
 
         int startPos = 0;
-        // This should not be necessary as relative URI should not start with slash
         if (id.startsWith("/")) {
             startPos = 1;
         }
@@ -642,10 +655,37 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @return
      */
     private boolean isCauseIndexException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, OIndexException.class, maxLevels);
+    }
+    
+    /**
+     * Detect if the root cause of the exception is an index constraint violation
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return
+     */
+    private boolean isCauseConcurrentModificationException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, OConcurrentModificationException.class, maxLevels);
+    }
+    
+    /**
+     * Detect if the root cause of the exception is a specific OrientDB exception
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param clazz the specific OrientDB exception to check for
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return whether the root cause is the specified exception
+     */
+    private boolean isCauseException(Throwable ex, Class clazz, int maxLevels) {
         if (maxLevels > 0) {
             Throwable cause = ex.getCause();
             if (cause != null) {
-                return cause instanceof OIndexException || isCauseIndexException(cause, maxLevels - 1);
+                return clazz.isInstance(cause) || isCauseException(cause, clazz, maxLevels - 1);
             }
         }    
         return false;

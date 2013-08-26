@@ -33,7 +33,7 @@
     <artifactId>openidm-repo-orientdb</artifactId>
     <packaging>bundle</packaging>
     <name>OpenIDM Repository Bundle - OrientDB</name>
-    <description>This bundle implement the OrientDB based repository</description>
+    <description>This bundle implements the OrientDB based repository</description>
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations</openidm.osgi.import.before.defaults>
