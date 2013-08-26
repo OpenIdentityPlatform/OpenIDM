@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.json.resource.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +126,7 @@ public class DBHelper {
      * @param maxSize the orientdb pool maximum size
      * @param completeConfig
      * @return the initialized pool
-     * @throws org.forgerock.openidm.config.enhanced.InvalidException
+     * @throws org.forgerock.openidm.config.InvalidException
      */
     private static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
             int minSize, int maxSize, JsonValue completeConfig) throws InvalidException {
