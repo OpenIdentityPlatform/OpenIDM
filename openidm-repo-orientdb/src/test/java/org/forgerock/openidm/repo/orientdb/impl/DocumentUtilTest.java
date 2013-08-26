@@ -52,10 +52,6 @@ public class DocumentUtilTest {
 
     @BeforeClass 
     public void init() throws Exception {
-    	
-    	// Ensure it is bootstrapped fully
-    	OServerMain.create();
-    	
         db = new ODatabaseDocumentTx(dbURL);
         if (!db.exists()) {
             db.create();

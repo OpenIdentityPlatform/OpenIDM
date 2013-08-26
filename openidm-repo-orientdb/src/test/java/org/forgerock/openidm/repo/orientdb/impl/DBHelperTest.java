@@ -55,10 +55,6 @@ public class DBHelperTest {
         assertNotNull(db);
         db.close();
         DBHelper.closePools();
-        
-        // RC9 Requires an explicit shutdown call to cleanly exit the VM
-        OServer server = OServerMain.create();
-        server.shutdown();
     }
 
 }
