@@ -25,11 +25,16 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.fest.assertions.Condition;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
+import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
+import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.ObjectClassInfo;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.testng.Assert;
@@ -38,9 +43,12 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import static org.fest.assertions.Assertions.assertThat;
 
 public class ObjectClassInfoHelperTest {
     @Test
@@ -71,13 +79,18 @@ public class ObjectClassInfoHelperTest {
         ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
         JsonValue source = new JsonValue(new HashMap<String, Object>());
         source.put(ServerConstants.OBJECT_PROPERTY_ID, "ID_NAME");
+
+        Pair<ObjectClass, Set<Attribute>> co = helper.build(UpdateApiOp.class, source, null);
+        assertThat(co.second).doesNotSatisfy(new Condition<Collection<?>>() {
+            @Override
+            public boolean matches(Collection<?> value) {
+                return value.contains(new Name("NAME_NAME"));
+            }
+        });
+
         source.put("__NAME__", "NAME_NAME");
-
-        ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source, null);
-        Assert.assertEquals(co.getName().getNameValue(), "rename");
-
-        co = helper.build(UpdateApiOp.class, null, source, null);
-        Assert.assertEquals(co.getName().getNameValue(), "ID_NAME");
+        co = helper.build(UpdateApiOp.class, source, null);
+        assertThat(co.second).contains(new Name("NAME_NAME"));
     }
 
 

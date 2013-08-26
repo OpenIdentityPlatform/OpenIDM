@@ -187,8 +187,14 @@ public class AttributeInfoHelper {
 
     public Attribute build(Object source, CryptoService cryptoService) throws Exception {
         try {
-            JsonValue decryptedValue = new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
-            return build(attributeInfo, decryptedValue.getObject());
+            // Unwrap the source Object into a JsonValue
+            JsonValue decryptedValue = new JsonValue(source);
+            if (null != cryptoService) {
+                decryptedValue = cryptoService.decryptIfNecessary(decryptedValue);
+                return build(attributeInfo, decryptedValue.getObject());
+            } else {
+                return build(attributeInfo, decryptedValue.getObject());
+            }
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
             throw e;
