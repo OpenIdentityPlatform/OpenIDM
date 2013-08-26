@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,9 @@ import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.server.OServer;
+import com.orientechnologies.orient.server.OServerMain;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,12 +47,17 @@ import static org.fest.assertions.api.Assertions.entry;
 
 public class DocumentUtilTest {
 
-    String dbURL = "local:./target/docutiltestdb";
+    String dbURL = "local:target/docutiltestdb";
     ODatabaseDocumentTx db = null; 
     String orientDocClass = "Sample";
+    OServer server;
 
     @BeforeClass 
-    public void init() {
+    public void init() throws Exception {
+    	
+    	// Ensure it is bootstrapped fully
+    	server = OServerMain.create();
+    	
         db = new ODatabaseDocumentTx(dbURL);
         if (!db.exists()) {
             db.create();
