@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.customendpoint.internal;
+package org.forgerock.openidm.customendpoint.impl;
 
 import java.util.Dictionary;
 
