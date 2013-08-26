@@ -91,7 +91,7 @@ public class EmbeddedOServerService {
         OServerConfiguration configuration = new OServerConfiguration();
 
         Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")
-        		.get("enabled").defaultTo(Boolean.FALSE).asBoolean();
+                .get("enabled").defaultTo(Boolean.FALSE).asBoolean();
         
         Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
         
@@ -143,8 +143,8 @@ public class EmbeddedOServerService {
         // Explicitly access the restructured config format, intent is to replace with a more general 
         // default/override mechanism
         JsonValue binaryConfig = config.get("embeddedServer").get("overrideConfig")
-        		.get("network").get("listeners").get("binary");
-                
+                .get("network").get("listeners").get("binary");
+
         listener1.ipAddress = binaryConfig.get("ipAddress").defaultTo("0.0.0.0").asString();
         listener1.portRange = binaryConfig.get("portRange").defaultTo("2424-2424").asString();
         if (clustered) {
@@ -156,8 +156,8 @@ public class EmbeddedOServerService {
         OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
 
         JsonValue httpConfig = config.get("embeddedServer").get("overrideConfig")
-        		.get("network").get("listeners").get("http");
-                
+                .get("network").get("listeners").get("http");
+
         listener2.ipAddress = httpConfig.get("ipAddress").defaultTo("127.0.0.1").asString();
         listener2.portRange = httpConfig.get("portRange").defaultTo("2480-2480").asString();
 
@@ -187,7 +187,7 @@ public class EmbeddedOServerService {
         listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
 
         if (studioUiEnabled) {
-        	configuration.network.listeners.add(listener2);
+            configuration.network.listeners.add(listener2);
         }
 
         OServerStorageConfiguration storage1 = new OServerStorageConfiguration();

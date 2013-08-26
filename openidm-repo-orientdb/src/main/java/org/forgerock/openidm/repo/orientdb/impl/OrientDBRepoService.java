@@ -414,7 +414,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource delete(DeleteRequest request) throws ResourceException {
-    	String fullId = request.getResourceName();
+        String fullId = request.getResourceName();
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
         String rev = request.getRevision();
@@ -463,8 +463,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public void handlePatch(final ServerContext context, final PatchRequest request,
             final ResultHandler<Resource> handler) {
-    	// TODO: impl
-            handler.handleError(new NotSupportedException("Patch not supported yet"));
+        // TODO: impl
+        handler.handleError(new NotSupportedException("Patch not supported yet"));
     }
     
     @Override
@@ -503,15 +503,15 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             final QueryResultHandler handler) throws ResourceException {
         List<Resource> results = query(request);
         for (Resource result : results) {
-        	handler.handleResource(result);
+            handler.handleResource(result);
         }
         handler.handleResult(new QueryResult());        
     }
     
     public List<Resource> query(QueryRequest request) throws ResourceException {
-    	List<Resource> results = new ArrayList<Resource>();
-    	// TODO: replace with common utility
-    	String fullId = request.getResourceName(); 
+        List<Resource> results = new ArrayList<Resource>();
+        // TODO: replace with common utility
+        String fullId = request.getResourceName(); 
         String type = fullId;
         // Whilst the URI starts with a slash, but consider relative URI
         if (fullId != null && fullId.startsWith("/")) {
@@ -535,9 +535,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                     Map<String, Object> convertedEntry = DocumentUtil.toMap(entry);
                     //docs.add(convertedEntry);
                     results.add(new Resource(
-                    		(String) convertedEntry.get(DocumentUtil.TAG_ID), 
-                    	    (String) convertedEntry.get(DocumentUtil.TAG_REV), 
-                    	    new JsonValue(convertedEntry)));
+                            (String) convertedEntry.get(DocumentUtil.TAG_ID), 
+                            (String) convertedEntry.get(DocumentUtil.TAG_REV), 
+                            new JsonValue(convertedEntry)));
                 }
                 long convEnd = System.currentTimeMillis();
                 result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
@@ -655,7 +655,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @return
      */
     private boolean isCauseIndexException(Throwable ex, int maxLevels) {
-    	return isCauseException (ex, OIndexException.class, maxLevels);
+        return isCauseException (ex, OIndexException.class, maxLevels);
     }
     
     /**
@@ -668,7 +668,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @return
      */
     private boolean isCauseConcurrentModificationException(Throwable ex, int maxLevels) {
-    	return isCauseException (ex, OConcurrentModificationException.class, maxLevels);
+        return isCauseException (ex, OConcurrentModificationException.class, maxLevels);
     }
     
     /**
