@@ -29,12 +29,12 @@ import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.internal.router.JsonResourceRouterService;
 import org.forgerock.openidm.managed.ManagedObjectService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.router.JsonResourceRouterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
