@@ -39,6 +39,7 @@ import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
 import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
 import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
 import org.identityconnectors.common.Assertions;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -49,6 +50,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
 
@@ -100,7 +102,7 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception {
+    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
         return operations.get(operation).build(source, objectClassInfoHelper);
     }
 
@@ -116,14 +118,8 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
-        return objectClassInfoHelper.build(operation, null, source, cryptoService);
-    }
-
-
-    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception {
-        //TODO do something with ID
-        return objectClassInfoHelper.build(operation, id, source, cryptoService);
+    public Pair<ObjectClass, Set<Attribute>> build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
+        return objectClassInfoHelper.build(operation, source, cryptoService);
     }
 
 

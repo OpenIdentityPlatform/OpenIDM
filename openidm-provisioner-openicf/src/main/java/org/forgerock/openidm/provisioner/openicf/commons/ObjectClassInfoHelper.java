@@ -33,6 +33,8 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
 import org.identityconnectors.common.CollectionUtil;
+import org.identityconnectors.common.Pair;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
@@ -103,38 +105,29 @@ public class ObjectClassInfoHelper {
 
     /**
      * @param operation
-     * @param name
      * @param source
      * @param cryptoService
      * @return
      * @throws JsonResourceException if ID value can not be determined from the {@code source}
      */
-    public ConnectorObject build(Class<? extends APIOperation> operation, String name, JsonValue source, CryptoService cryptoService) throws Exception {
-        String nameValue = name;
+    public Pair<ObjectClass, Set<Attribute>> build(Class<? extends APIOperation> operation, JsonValue source, CryptoService cryptoService) throws Exception {
+        String nameValue = null;
 
-        if (null == nameValue) {
-            JsonValue o = source.get(ServerConstants.OBJECT_PROPERTY_ID);
-            if (o.isNull()) {
-                o = source.get(nameAttribute);
-            }
-            if (o.isString()) {
-                nameValue = o.asString();
-            }
+        JsonValue o = source.get(nameAttribute);
+        if (o.isString()) {
+            nameValue = Id.unescapeUid(o.asString());
         }
 
-        if (null == nameValue) {
+        if (CreateApiOp.class.isAssignableFrom(operation) && StringUtil.isBlank(o.asString())) {
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Required NAME attribute is missing");
-        } else {
-            nameValue = Id.unescapeUid(nameValue);
-            logger.trace("Build ConnectorObject {} for {}", nameValue, operation.getSimpleName());
         }
+        logger.trace("Build ConnectorObject {} for {}", nameValue, operation.getSimpleName());
 
-        ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
-        builder.setObjectClass(objectClass);
-        builder.setUid(nameValue);
-        builder.setName(nameValue);
+
+        Map<String, Attribute> builder = new HashMap<String, Attribute>();
         Set<String> keySet = source.required().asMap().keySet();
         if (CreateApiOp.class.isAssignableFrom(operation)) {
+            builder.put(Name.NAME, new Name(nameValue));
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
                         !keySet.contains(attributeInfo.getName())) {
@@ -145,10 +138,13 @@ public class ObjectClassInfoHelper {
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
                         throw new IllegalArgumentException("Required attribute {" + attributeInfo.getName() + "} value is null");
                     }
-                    builder.addAttribute(attributeInfo.build(v, cryptoService));
+                    builder.put(attributeInfo.getName(), attributeInfo.build(v, cryptoService));
                 }
             }
         } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
+            if (null != nameValue) {
+                builder.put(Name.NAME, new Name(nameValue));
+            }
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
                         !keySet.contains(attributeInfo.getName())) {
@@ -156,7 +152,7 @@ public class ObjectClassInfoHelper {
                 }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
                     Object v = source.get(attributeInfo.getName());
-                    builder.addAttribute(attributeInfo.build(v, cryptoService));
+                    builder.put(attributeInfo.getName(), attributeInfo.build(v, cryptoService));
                 }
             }
         } else {
@@ -166,14 +162,10 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 Object v = source.get(attributeInfo.getName());
-                builder.addAttribute(attributeInfo.build(v, cryptoService));
+                builder.put(attributeInfo.getName(), attributeInfo.build(v, cryptoService));
             }
         }
-        ConnectorObject result = builder.build();
-        if (logger.isTraceEnabled()) {
-            logger.trace("ConnectorObject build return: {}", SerializerUtil.serializeXmlObject(result, false));
-        }
-        return result;
+        return new Pair<ObjectClass, Set<Attribute>>(objectClass, new HashSet<Attribute>(builder.values()));
     }
 
     public JsonValue build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
