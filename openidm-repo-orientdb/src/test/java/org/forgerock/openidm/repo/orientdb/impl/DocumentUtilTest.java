@@ -25,6 +25,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.engine.local.OEngineLocal;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.server.OServer;
@@ -54,9 +55,6 @@ public class DocumentUtilTest {
 
     @BeforeClass 
     public void init() throws Exception {
-        // Ensure it is bootstrapped fully
-        server = OServerMain.create();
-
         db = new ODatabaseDocumentTx(dbURL);
         if (!db.exists()) {
             db.create();
