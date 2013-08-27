@@ -135,7 +135,8 @@ public class OperationHelperImpl implements OperationHelper {
 
     public void resetUid(Uid uid, JsonValue target) {
         if (null != uid && null != target) {
-            target.put(Resource.FIELD_CONTENT_ID, Id.escapeUid(uid.getUidValue()));
+            // TODO are we going to encode ids?
+            target.put(Resource.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);
         }
     }
 

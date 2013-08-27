@@ -1904,12 +1904,17 @@ public class OpenICFProvisionerService implements SingletonResourceProvider, Pro
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
-                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid()); // Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
+                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid()); // the value was: Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                                     }
                                                     // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
                                                     onUpdateRequest.setAdditionalActionParameter("id",
-                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                                            /* value was:
+                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString()
+                                                            are we going to encode ids?
+                                                            */
+                                                            helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue()
+                                                    );
                                                     onUpdateRequest.setContent(new JsonValue(deltaObject));
                                                     routerContext.getConnection().action(routerContext, onUpdateRequest);
 
@@ -1918,7 +1923,12 @@ public class OpenICFProvisionerService implements SingletonResourceProvider, Pro
                                                     // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
                                                     onDeleteRequest.setAdditionalActionParameter("id",
-                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                                            /* value was:
+                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString()
+                                                            are we going to encode ids?
+                                                            */
+                                                            helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue()
+                                                    );
                                                     routerContext.getConnection().action(routerContext, onDeleteRequest);
                                                     break;
                                             }

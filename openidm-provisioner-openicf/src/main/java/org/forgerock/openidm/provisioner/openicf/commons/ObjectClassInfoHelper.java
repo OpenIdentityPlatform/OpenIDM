@@ -348,7 +348,8 @@ public class ObjectClassInfoHelper {
             }
         }
         Uid uid = source.getUid();
-        result.put(Resource.FIELD_CONTENT_ID, Id.escapeUid(uid.getUidValue()));
+        // TODO are we going to escape ids?
+        result.put(Resource.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);
         if (null != uid.getRevision()) {
             //System supports Revision
             result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
