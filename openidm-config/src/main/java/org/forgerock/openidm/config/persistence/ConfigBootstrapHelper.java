@@ -34,7 +34,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
 import org.osgi.framework.BundleContext;

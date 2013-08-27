@@ -13,7 +13,7 @@
 // *
 // * Copyright © 2011 ForgeRock AS. All rights reserved.
 // */
-//package org.forgerock.openidm.config.manage;
+//package org.forgerock.openidm.config.enhanced.manage;
 //
 //import org.forgerock.openidm.objset.BadRequestException;
 //import org.testng.Assert;

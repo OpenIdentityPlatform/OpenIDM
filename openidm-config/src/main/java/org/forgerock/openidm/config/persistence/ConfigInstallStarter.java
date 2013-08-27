@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author aegloff
  */
 @Component(
-    name = "org.forgerock.openidm.config.starter",
+    name = "org.forgerock.openidm.config.enhanced.starter",
     policy = ConfigurationPolicy.OPTIONAL,
     immediate = true
 )

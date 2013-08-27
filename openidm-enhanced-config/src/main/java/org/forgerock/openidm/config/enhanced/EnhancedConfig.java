@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.config;
+package org.forgerock.openidm.config.enhanced;
 
 import java.util.Dictionary;
 import java.util.Map;
