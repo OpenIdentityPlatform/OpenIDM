@@ -1327,7 +1327,7 @@ class ObjectMapping  {
                                 if (action == Action.CREATE || action == Action.LINK) {
                                     break; // do not update target
                                 }
-                                if (getSourceObject() != null && getTargetObject() != null) {
+                               if (getSourceObject() != null && getTargetObject() != null) {
                                     JsonValue oldTarget = getTargetObject().copy();
                                     applyMappings(getSourceObject(), getTargetObject());
                                     execScript("onUpdate", onUpdateScript, oldTarget);

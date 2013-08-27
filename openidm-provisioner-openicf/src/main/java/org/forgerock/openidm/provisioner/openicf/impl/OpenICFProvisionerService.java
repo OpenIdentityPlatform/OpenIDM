@@ -21,8 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-package org.forgerock.openidm.provisioner.openicf.internal;
+package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
@@ -46,6 +45,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +63,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -86,6 +87,7 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
@@ -97,13 +99,19 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.provisioner.ProvisionerService;
+import org.forgerock.openidm.provisioner.SystemIdentifier;
+import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
+import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
+import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistryService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.util.JsonUtil;
@@ -147,9 +155,12 @@ import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
+import org.identityconnectors.framework.common.objects.SyncDelta;
+import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -164,12 +175,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laszlo Hordos
  */
-@Component(name = OpenICFProvisionerService.PID, policy = ConfigurationPolicy.REQUIRE,
-        description = "OpenIDM System Object Set Service", immediate = true)
+@Component(name = OpenICFProvisionerService.PID,
+        policy = ConfigurationPolicy.REQUIRE,
+        description = "OpenIDM OpenICF Provisioner Service",
+        immediate = true)
+@Service(value = {ProvisionerService.class})
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service") })
-public class OpenICFProvisionerService implements SingletonResourceProvider {
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM OpenICF Provisioner Service") })
+public class OpenICFProvisionerService implements SingletonResourceProvider, ProvisionerService {
 
     // Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
@@ -185,6 +199,20 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     // Monitoring event name prefix
     private static final String EVENT_PREFIX = "openidm/internal/system/";
+
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    RouteService routeService;
+    ServerContext routerContext = null;
+
+    private void bindRouteService(final RouteService service) throws ResourceException {
+        routeService = service;
+        routerContext = service.createServerContext();
+    }
+
+    private void unbindRouteService(final RouteService service) {
+        routeService = null;
+        routerContext = null;
+    }
 
     /**
      * ConnectorInfoProvider service.
@@ -210,6 +238,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     private final AtomicReference<ConnectorFacade> connectorFacade =
             new AtomicReference<ConnectorFacade>();
 
+    private boolean serviceAvailable = false;
+
+
     /**
      * Cache the SystemActions from local and {@code provisioner.json}
      * configuration.
@@ -220,10 +251,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     private final ConcurrentMap<String, RequestHandler> objectClassHandlers =
             new ConcurrentHashMap<String, RequestHandler>();
 
-    /**
-     * System name for better logging only
-     */
-    String systemName = null;
+    private JsonValue configuration = null;
+    SimpleSystemIdentifier systemIdentifier = null;
+    private OperationHelperBuilder operationHelperBuilder = null;
 
     private ConnectorFacadeCallback connectorFacadeCallback = null;
 
@@ -249,10 +279,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Activate
     protected void activate(ComponentContext context) {
         try {
-            final JsonValue configuration =
-                    JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+            configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 
-            systemName = getSystemName(context, configuration);
+            systemIdentifier = new SimpleSystemIdentifier(configuration);
 
             loadLocalSystemActions(configuration);
 
@@ -271,29 +300,26 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                         final ConnectorFacade facade = facadeFactory.newInstance(config);
 
                         if (null == facade) {
-                            logger.warn("OpenICF ConnectorFacade of {} is not available",
-                                    connectorReference);
+                            logger.warn("OpenICF ConnectorFacade of {} is not available", connectorReference);
                         } else {
                             facade.validate();
                             if (connectorFacade.compareAndSet(null, facade)) {
                                 if (null != routeEntry) {
-                                    // This should not happen but keep it in
-                                    // case
+                                    // This should not happen but keep it in case
                                     routeEntry.removeRoute();
                                 }
 
                                 if (facade.getSupportedOperations().contains(TestApiOp.class)) {
                                     try {
                                         facade.test();
-                                        logger.debug("OpenICF connector test of {} succeeded!",
-                                                systemName);
-                                    } catch (Throwable e) {
-                                        logger.error("OpenICF connector test of {} failed!",
-                                                systemName, e);
+                                        logger.debug("OpenICF connector test of {} succeeded!", systemIdentifier);
+                                        serviceAvailable = true;
+                                    } catch (Exception e) {
+                                        logger.error("OpenICF connector test of {} failed!", systemIdentifier, e);
                                     }
                                 } else {
-                                    logger.debug("OpenICF connector of {} does not support test.",
-                                            connectorReference);
+                                    logger.debug("OpenICF connector of {} does not support test.", connectorReference);
+                                    serviceAvailable = true;
                                 }
                             }
                         }
@@ -301,8 +327,10 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                         logger.error("//TODO FIX ME", t);
                     } finally {
                         logger.info("OpenICF Provisioner Service component {} is activated{}",
-                                systemName, (null != connectorFacade.get() ? "."
-                                        : " although the service is not available yet."));
+                                systemIdentifier.getName(),
+                                (null != connectorFacade.get()
+                                    ? "."
+                                    : " although the service is not available yet."));
                     }
                 }
 
@@ -312,26 +340,69 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                 }
             };
 
-            connectorInfoProvider.addConnectorFacadeCallback(connectorReference,
-                    connectorFacadeCallback);
+            connectorInfoProvider.addConnectorFacadeCallback(connectorReference, connectorFacadeCallback);
 
-            routeEntry =
-                    routerRegistryService.addRoute(RouteBuilder.newBuilder().withTemplate(
-                            "/system/" + systemName).withSingletonResourceProvider(this)
-                            .buildNext().withModeStartsWith().withTemplate(
-                                    "/system/" + systemName
-                                            + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
-                            .withRequestHandler(new ObjectClassRequestHandler()).seal());
+            routeEntry = routerRegistryService.addRoute(RouteBuilder.newBuilder()
+                    .withTemplate("/system/" + systemIdentifier.getName())
+                    .withSingletonResourceProvider(this)
+                    .buildNext()
+                    .withModeStartsWith()
+                    .withTemplate("/system/" + systemIdentifier.getName() + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
+                    .withRequestHandler(new ObjectClassRequestHandler())
+                    .seal());
 
-            logger.info("OpenICF Provisioner Service component {} is activated{}", systemName,
-                    (null != connectorFacade.get() ? "."
-                            : " although the service is not available yet."));
+            logger.info("OpenICF Provisioner Service component {} is activated{}", systemIdentifier.getName(),
+                    (null != connectorFacade.get()
+                        ? "."
+                        : " although the service is not available yet."));
         } catch (Exception e) {
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
         }
     }
 
+    private void init(JsonValue configuration) {
+        try {
+            operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), configuration,
+                    connectorInfoProvider.findConnectorInfo(connectorReference).createDefaultAPIConfiguration());
+        } catch (Exception e) {
+            logger.error("OpenICF connector configuration of {} has errors.", systemIdentifier, e);
+            throw new ComponentException("OpenICF connector configuration has errors and the service can not be initiated.", e);
+        }
+
+        try {
+            // TODO Iterate over the supported type and register
+            boolean allowModification = !configuration.get("readOnly").defaultTo(false).asBoolean();
+            if (!allowModification) {
+                logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier.getName());
+            }
+
+            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
+                    ConnectorUtil.getOperationOptionConfiguration(configuration);
+
+            for (Map.Entry<String, ObjectClassInfoHelper> entry : ConnectorUtil.getObjectTypes(
+                    configuration).entrySet()) {
+
+                objectClassHandlers.put(entry.getKey(), Resources
+                        .newCollection(new ObjectClassResourceProvider(entry.getValue(),
+                                objectOperations.get(entry.getKey()), allowModification)));
+            }
+
+            // TODO Fix this Map
+            // ValidateApiOp
+            // TestApiOp
+            // ScriptOnConnectorApiOp
+            // ScriptOnResourceApiOp
+            // SchemaApiOp
+            systemOperations = Collections.emptyMap();
+        } catch (Exception e) {
+            logger.error("OpenICF connector configuration of {} has errors.", systemIdentifier.getName(), e);
+            throw new ComponentException(
+                    "OpenICF connector configuration has errors and the service can not be initiated.",
+                    e);
+        }
+        logger.debug("OpenICF connector configuration has no errors.");
+    }
     @Deactivate
     protected void deactivate(ComponentContext context) {
         if (null != connectorFacadeCallback) {
@@ -343,7 +414,8 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             routeEntry = null;
         }
         connectorFacade.set(null);
-        logger.info("OpenICF Provisioner Service component {} is deactivated.", systemName);
+        logger.info("OpenICF Provisioner Service component {} is deactivated.", systemIdentifier.getName());
+        systemIdentifier = null;
     }
 
     private String getSystemName(ComponentContext context, JsonValue configuration) {
@@ -375,41 +447,6 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         }
     }
 
-    private void init(JsonValue configuration) {
-        try {
-            // TODO Iterate over the supported type and register
-            boolean allowModification = !configuration.get("readOnly").defaultTo(false).asBoolean();
-            if (!allowModification) {
-                logger.debug("OpenICF Provisioner Service {} is running in read-only mode",
-                        systemName);
-            }
-
-            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
-                    ConnectorUtil.getOperationOptionConfiguration(configuration);
-
-            for (Map.Entry<String, ObjectClassInfoHelper> entry : ConnectorUtil.getObjectTypes(
-                    configuration).entrySet()) {
-
-                objectClassHandlers.put(entry.getKey(), Resources
-                        .newCollection(new ObjectClassResourceProvider(entry.getValue(),
-                                objectOperations.get(entry.getKey()), allowModification)));
-            }
-
-            // TODO Fix this Map
-            // ValidateApiOp
-            // TestApiOp
-            // ScriptOnConnectorApiOp
-            // ScriptOnResourceApiOp
-            // SchemaApiOp
-            systemOperations = Collections.emptyMap();
-        } catch (Exception e) {
-            logger.error("OpenICF connector configuration of {} has errors.", systemName, e);
-            throw new ComponentException(
-                    "OpenICF connector configuration has errors and the service can not be initiated.",
-                    e);
-        }
-        logger.debug("OpenICF connector configuration has no errors.");
-    }
 
     ConnectorFacade getConnectorFacade() {
         return connectorFacade.get();
@@ -658,6 +695,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     /**
      * @return the smartevent Name for a given query
      */
+/*
     org.forgerock.openidm.smartevent.Name getQueryEventName(String objectClass, JsonValue params,
             Map<String, Object> query, String queryId) {
         String prefix = EVENT_PREFIX + systemName + "/" + objectClass + "/query/";
@@ -669,196 +707,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             return org.forgerock.openidm.smartevent.Name.get(prefix + queryId);
         }
     }
-
-    /**
-     * This newBuilder and this method can not be scheduled. The call MUST go
-     * through the {@code org.forgerock.openidm.provisioner}
-     * <p/>
-     * Invoked by the scheduler when the scheduler triggers.
-     * <p/>
-     * Synchronization object: {@code "connectorData" : "syncToken" :
-     * "1305555929000", "nativeType" : "JAVA_TYPE_LONG" },
-     * "synchronizationStatus" : { "errorStatus" : null, "lastKnownServer" :
-     * "localServer", "lastModDate" : "2011-05-16T14:47:58.587Z", "lastModNum" :
-     * 668, "lastPollDate" : "2011-05-16T14:47:52.875Z", "lastStartTime" :
-     * "2011-05-16T14:29:07.863Z", "progressMessage" : "SUCCEEDED" } }}
-     * <p/>
-     * {@inheritDoc} Synchronise the changes from the end system for the given
-     * {@code objectType}.
-     * <p/>
-     * OpenIDM takes active role in the synchronization process by asking the
-     * end system to get all changed object. Not all system is capable to
-     * fulfill this kind of request but if the end system is capable then the
-     * implementation send each changes to the
-     * {@link org.forgerock.openidm.sync.SynchronizationListener} and when it
-     * finished it return a new <b>stage</b> object.
-     * <p/>
-     * The {@code previousStage} object is the previously returned value of this
-     * method.
-     *
-     * @param previousStage
-     *            The previously returned object. If null then it's the first
-     *            execution.
-     * @param synchronizationListener
-     *            The listener to send the changes to.
-     * @return The new updated stage object. This will be the
-     *         {@code previousStage} at buildNext call.
-     * @throws IllegalArgumentException
-     *             if the value of {@code connectorData} can not be converted to
-     *             {@link SyncToken}.
-     * @throws UnsupportedOperationException
-     *             if the {@link SyncApiOp} operation is not implemented in
-     *             connector.
-     * @throws org.forgerock.json.fluent.JsonValueException
-     *             if the {@code previousStage} is not Map.
-     * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonValue)}
-     *      or any exception happed inside the connector.
-     */
-    // public JsonValue liveSynchronize(String objectType, JsonValue
-    // previousStage, final ResultHandler<Resource> synchronizationListener) {
-    // if (!serviceAvailable) return previousStage;
-    // JsonValue stage = previousStage != null ? previousStage.copy() : new
-    // JsonValue(new LinkedHashMap<String, Object>());
-    // JsonValue connectorData = stage.get("connectorData");
-    // SyncToken token = null;
-    // if (!connectorData.isNull()) {
-    // if (connectorData.isMap()) {
-    // token = ConnectorUtil.convertToSyncToken(connectorData);
-    // } else {
-    // throw new
-    // IllegalArgumentException("Illegal connectorData property. Value must be Map");
-    // }
-    // }
-    // stage.remove("lastException");
-    // try {
-    // final OperationHelper helper = operationHelperBuilder.build(objectType,
-    // stage, cryptoService);
-    // if (helper.isOperationPermitted(SyncApiOp.class)) {
-    // ConnectorFacade connector = getConnectorFacade();
-    // SyncApiOp operation = (SyncApiOp)
-    // connector.getOperation(SyncApiOp.class);
-    // if (null == operation) {
-    // throw new
-    // UnsupportedOperationException(SyncApiOp.class.getCanonicalName());
-    // }
-    // if (null == token) {
-    // token = operation.getLatestSyncToken(helper.getObjectClass());
-    // logger.debug("New LatestSyncToken has been fetched. New token is: {}",
-    // token);
-    // } else {
-    // final SyncToken[] lastToken = new SyncToken[]{token};
-    // final String[] failedRecord = new String[1];
-    // OperationOptionsBuilder operationOptionsBuilder =
-    // helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
-    // try {
-    // logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
-    // new Object[]{helper.getObjectClass().getObjectClassValue(), token});
-    // operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
-    // /**
-    // * Called to handle a delta in the stream. The Connector framework will
-    // call
-    // * this method multiple times, once for each result.
-    // * Although this method is callback, the framework will invoke it
-    // synchronously.
-    // * Thus, the framework guarantees that once an application's call to
-    // * {@link
-    // org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass,
-    // org.identityconnectors.framework.common.objects.SyncToken,
-    // org.identityconnectors.framework.common.objects.SyncResultsHandler,
-    // org.identityconnectors.framework.common.objects.OperationOptions)}
-    // SyncApiOp#sync()} returns,
-    // * the framework will no longer call this method
-    // * to handle results from that <code>sync()</code> operation.
-    // *
-    // * @param syncDelta The change
-    // * @return True iff the application wants to continue processing more
-    // * results.
-    // * @throws RuntimeException If the application encounters an exception.
-    // This will stop
-    // * iteration and the exception will propagate to
-    // * the application.
-    // */
-    // public boolean handle(SyncDelta syncDelta) {
-    // try {
-    // switch (syncDelta.getDeltaType()) {
-    // case CREATE_OR_UPDATE:
-    // Resource deltaObject = helper.build(syncDelta.getObject());
-    // if (null != syncDelta.getPreviousUid()) {
-    // deltaObject.put("_previous-id",
-    // Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
-    // }
-    // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(),
-    // null, new JsonValue(deltaObject));
-    // break;
-    // case DELETE:
-    // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString(),
-    // null);
-    // break;
-    // }
-    // lastToken[0] = syncDelta.getToken();
-    // } catch (Exception e) {
-    // failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
-    // if (logger.isDebugEnabled()) {
-    // logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
-    // }
-    // throw new ConnectorException("Failed synchronise " + syncDelta.getUid() +
-    // " object" + e.getMessage(), e);
-    // }
-    // return true;
-    // }
-    // }, operationOptionsBuilder.build());
-    // } catch (Throwable t) {
-    // Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
-    // lastException.put("throwable", t.getMessage());
-    // if (null != failedRecord[0]) {
-    // lastException.put("syncDelta", failedRecord[0]);
-    // }
-    // stage.put("lastException", lastException);
-    // if (logger.isDebugEnabled()) {
-    // logger.error("Live synchronization of {} failed on {}",
-    // new Object[]{objectType, systemName}, t);
-    // }
-    // } finally {
-    // token = lastToken[0];
-    // logger.debug("Synchronization is finished. New LatestSyncToken value: {}",
-    // token);
-    // }
-    // }
-    // if (null != token) {
-    // stage.put("connectorData", ConnectorUtil.convertFromSyncToken(token));
-    // }
-    // }
-    // } catch (ResourceException e) {
-    // if (logger.isDebugEnabled()) {
-    // logger.debug("Failed to get OperationHelper", e);
-    // }
-    // throw new RuntimeException(e);
-    // } catch (Exception e) {
-    // // catch helper.getOperationOptionsBuilder(
-    // if (logger.isDebugEnabled()) {
-    // logger.debug("Failed to get OperationOptionsBuilder", e);
-    // } throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
-    // "Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
-    //
-    // }
-    // return stage;
-    // }
-
-    private void traceObject(Request request) {
-        if (logger.isTraceEnabled()) {
-            if (null != request) {
-                try {
-                    StringWriter writer = new StringWriter();
-                    // TODO Change request.saveToJson()
-                    MAPPER.writerWithDefaultPrettyPrinter().writeValue(writer, request);
-                    logger.info("Invoke action: ", writer);
-                } catch (IOException e) {
-                    // Don't care
-                }
-            }
-        }
-    }
-
+*/
     private enum ConnectorAction {
         script;
     }
@@ -1854,4 +1703,413 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                     return startsWith(helper.filterAttribute(field, valueAssertion));
                 }
             };
+
+
+    /**
+     * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.
+     * <p/>
+     * The service which refers to this service instance can distinguish between multiple instances by this value.
+     *
+     * @return
+     */
+    public SystemIdentifier getSystemIdentifier() {
+        return systemIdentifier;
+    }
+
+    /**
+     * Gets a brief stats report about the current status of this service instance.
+     * </p/>
+     * {@code {
+     * "name" : "LDAP",
+     * "component.id" : "1",
+     * "component.name" : "org.forgerock.openidm.provisioner.openicf.ProvisionerService",
+     * "ok" : true
+     * }}
+     *
+     * @return
+     */
+    public Map<String, Object> getStatus() {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        try {
+            JsonValue jv = new JsonValue(result);
+            jv.put("name", systemIdentifier.getName());
+            ConnectorFacade connectorFacade = getConnectorFacade();
+            try {
+                connectorFacade.test();
+            } catch (UnsupportedOperationException e) {
+                jv.put("reason", "TEST UnsupportedOperation");
+            }
+            jv.put("ok", true);
+        } catch (Throwable e) {
+            result.put("error", e.getMessage());
+        }
+        return result;
+    }
+
+    public Map<String, Object> testConfig(JsonValue config) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        JsonValue jv = new JsonValue(result);
+        jv.add("name", systemIdentifier.getName());
+        jv.add("ok", false);
+        SimpleSystemIdentifier testIdentifier = null;
+        ConnectorReference connectorReference = null;
+        try {
+            testIdentifier = new SimpleSystemIdentifier(config);
+            connectorReference = ConnectorUtil.getConnectorReference(configuration);
+        } catch (JsonValueException e) {
+            jv.add("error", "OpenICF Provisioner Service configuration has errors: " + e.getMessage());
+            return result;
+        }
+
+        ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
+        if (null != connectorInfo) {
+            ConnectorFacade facade = null;
+            try {
+                ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
+                facade = connectorFacadeFactory.newInstance(connectorInfo.createDefaultAPIConfiguration());
+            } catch (Exception e) {
+                e.printStackTrace();
+                jv.add("error", "OpenICF connector configuration has errors: " +  e.getMessage());
+                return result;
+            }
+
+            if (null != facade && facade.getSupportedOperations().contains(TestApiOp.class)) {
+                try {
+                    facade.test();
+                } catch (UnsupportedOperationException e) {
+                    jv.put("reason", "TEST UnsupportedOperation");
+                } catch (Throwable e) {
+                    jv.put("error", e.getMessage());
+                    return result;
+                }
+                jv.put("ok", true);
+            } else if (null == facade) {
+                jv.add("error", "OpenICF ConnectorFacade of " + connectorReference + " is not available");
+            } else {
+                jv.add("error", "OpenICF connector of " + connectorReference + " does not support test.");
+            }
+        } else if (connectorReference.getConnectorLocation().equals(ConnectorReference.ConnectorLocation.LOCAL)) {
+            jv.add("error", "OpenICF ConnectorInfo can not be loaded for " + connectorReference + " from #LOCAL");
+        } else {
+            jv.add("error", "OpenICF ConnectorInfo for " + connectorReference + " is not available yet.");
+        }
+        return result;
+    }
+
+    /**
+     * This newBuilder and this method can not be scheduled. The call MUST go
+     * through the {@code org.forgerock.openidm.provisioner}
+     * <p/>
+     * Invoked by the scheduler when the scheduler triggers.
+     * <p/>
+     * Synchronization object: {@code "connectorData" : "syncToken" :
+     * "1305555929000", "nativeType" : "JAVA_TYPE_LONG" },
+     * "synchronizationStatus" : { "errorStatus" : null, "lastKnownServer" :
+     * "localServer", "lastModDate" : "2011-05-16T14:47:58.587Z", "lastModNum" :
+     * 668, "lastPollDate" : "2011-05-16T14:47:52.875Z", "lastStartTime" :
+     * "2011-05-16T14:29:07.863Z", "progressMessage" : "SUCCEEDED" } }}
+     * <p/>
+     * {@inheritDoc} Synchronise the changes from the end system for the given
+     * {@code objectType}.
+     * <p/>
+     * OpenIDM takes active role in the synchronization process by asking the
+     * end system to get all changed object. Not all system is capable to
+     * fulfill this kind of request but if the end system is capable then the
+     * implementation send each changes to the
+     * {@link org.forgerock.openidm.sync.SynchronizationListener} and when it
+     * finished it return a new <b>stage</b> object.
+     * <p/>
+     * The {@code previousStage} object is the previously returned value of this
+     * method.
+     *
+     * @param previousStage
+     *            The previously returned object. If null then it's the first
+     *            execution.
+     * @param synchronizationListener
+     *            The listener to send the changes to.
+     * @return The new updated stage object. This will be the
+     *         {@code previousStage} at buildNext call.
+     * @throws IllegalArgumentException
+     *             if the value of {@code connectorData} can not be converted to
+     *             {@link SyncToken}.
+     * @throws UnsupportedOperationException
+     *             if the {@link SyncApiOp} operation is not implemented in
+     *             connector.
+     * @throws org.forgerock.json.fluent.JsonValueException
+     *             if the {@code previousStage} is not Map.
+     * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonValue)}
+     *      or any exception happed inside the connector.
+     */
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage)
+        throws ResourceException {
+
+        // throw new InternalServerErrorException("TODO");
+
+        if (!serviceAvailable) {
+            return previousStage;
+        }
+
+        JsonValue stage = previousStage != null ? previousStage.copy() : new JsonValue(new LinkedHashMap<String, Object>());
+        JsonValue connectorData = stage.get("connectorData");
+        SyncToken token = null;
+        if (!connectorData.isNull()) {
+            if (connectorData.isMap()) {
+                token = ConnectorUtil.convertToSyncToken(connectorData);
+            } else {
+                throw new IllegalArgumentException("Illegal connectorData property. Value must be Map");
+            }
+        }
+        stage.remove("lastException");
+
+        try {
+            final OperationHelper helper = operationHelperBuilder.build(objectType, stage, cryptoService);
+
+            if (helper.isOperationPermitted(SyncApiOp.class)) {
+                ConnectorFacade connector = getConnectorFacade();
+                SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);
+                if (null == operation) {
+                    throw new UnsupportedOperationException(SyncApiOp.class.getCanonicalName());
+                }
+                if (null == token) {
+                    token = operation.getLatestSyncToken(helper.getObjectClass());
+                    logger.debug("New LatestSyncToken has been fetched. New token is: {}", token);
+                } else {
+                    final SyncToken[] lastToken = new SyncToken[]{token};
+                    final String[] failedRecord = new String[1];
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
+
+                    try {
+                        logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})", new Object[]{helper.getObjectClass().getObjectClassValue(), token});
+                        operation.sync(helper.getObjectClass(), token,
+                                new SyncResultsHandler() {
+                                    /**
+                                     * Called to handle a delta in the stream. The Connector framework will call
+                                     * this method multiple times, once for each result.
+                                     * Although this method is callback, the framework will invoke it synchronously.
+                                     * Thus, the framework guarantees that once an application's call to
+                                     * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)} SyncApiOp#sync() returns,
+                                     * the framework will no longer call this method
+                                     * to handle results from that <code>sync()</code> operation.
+                                     *
+                                     * @param syncDelta The change
+                                     * @return True iff the application wants to continue processing more
+                                     * results.
+                                     * @throws RuntimeException If the application encounters an exception. This will stop
+                                     * iteration and the exception will propagate to
+                                     * the application.
+                                     */
+                                    public boolean handle(SyncDelta syncDelta) {
+                                        try {
+                                            switch (syncDelta.getDeltaType()) {
+                                                case CREATE_OR_UPDATE:
+                                                    JsonValue deltaObject = helper.build(syncDelta.getObject());
+                                                    if (null != syncDelta.getPreviousUid()) {
+                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid()); // Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
+                                                    }
+                                                    // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
+                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
+                                                    onUpdateRequest.setAdditionalActionParameter("id",
+                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                                    onUpdateRequest.setContent(new JsonValue(deltaObject));
+                                                    routerContext.getConnection().action(routerContext, onUpdateRequest);
+
+                                                    break;
+                                                case DELETE:
+                                                    // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
+                                                    ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
+                                                    onDeleteRequest.setAdditionalActionParameter("id",
+                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                                    routerContext.getConnection().action(routerContext, onDeleteRequest);
+                                                    break;
+                                            }
+                                            lastToken[0] = syncDelta.getToken();
+                                        } catch (Exception e) {
+                                            failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
+                                            if (logger.isDebugEnabled()) {
+                                                logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
+                                            }
+                                            throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object" + e.getMessage(), e);
+                                        }
+                                        return true;
+                                    }
+                                }, operationOptionsBuilder.build());
+                    } catch (Throwable t) {
+                        Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
+                        lastException.put("throwable", t.getMessage());
+                        if (null != failedRecord[0]) {
+                            lastException.put("syncDelta", failedRecord[0]);
+                        }
+                        stage.put("lastException", lastException);
+                        if (logger.isDebugEnabled()) {
+                            logger.error("Live synchronization of {} failed on {}", new Object[]{objectType, systemIdentifier.getName()}, t);
+                        }
+                    } finally {
+                        token = lastToken[0];
+                        logger.debug("Synchronization is finished. New LatestSyncToken value: {}", token);
+                    }
+                }
+                if (null != token) {
+                    stage.put("connectorData", ConnectorUtil.convertFromSyncToken(token));
+                }
+            }
+        } catch (ResourceException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to get OperationHelper", e);
+            }
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to get OperationOptionsBuilder", e);
+            }
+
+            throw new InternalServerErrorException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+        }
+        return stage;
+    }
+
+    // public JsonValue liveSynchronize(String objectType, JsonValue
+    // previousStage, final ResultHandler<Resource> synchronizationListener) {
+    // if (!serviceAvailable) return previousStage;
+    // JsonValue stage = previousStage != null ? previousStage.copy() : new
+    // JsonValue(new LinkedHashMap<String, Object>());
+    // JsonValue connectorData = stage.get("connectorData");
+    // SyncToken token = null;
+    // if (!connectorData.isNull()) {
+    // if (connectorData.isMap()) {
+    // token = ConnectorUtil.convertToSyncToken(connectorData);
+    // } else {
+    // throw new
+    // IllegalArgumentException("Illegal connectorData property. Value must be Map");
+    // }
+    // }
+    // stage.remove("lastException");
+    // try {
+    // final OperationHelper helper = operationHelperBuilder.build(objectType,
+    // stage, cryptoService);
+    // if (helper.isOperationPermitted(SyncApiOp.class)) {
+    // ConnectorFacade connector = getConnectorFacade();
+    // SyncApiOp operation = (SyncApiOp)
+    // connector.getOperation(SyncApiOp.class);
+    // if (null == operation) {
+    // throw new
+    // UnsupportedOperationException(SyncApiOp.class.getCanonicalName());
+    // }
+    // if (null == token) {
+    // token = operation.getLatestSyncToken(helper.getObjectClass());
+    // logger.debug("New LatestSyncToken has been fetched. New token is: {}",
+    // token);
+    // } else {
+    // final SyncToken[] lastToken = new SyncToken[]{token};
+    // final String[] failedRecord = new String[1];
+    // OperationOptionsBuilder operationOptionsBuilder =
+    // helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
+    // try {
+    // logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
+    // new Object[]{helper.getObjectClass().getObjectClassValue(), token});
+    // operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
+    // /**
+    // * Called to handle a delta in the stream. The Connector framework will
+    // call
+    // * this method multiple times, once for each result.
+    // * Although this method is callback, the framework will invoke it
+    // synchronously.
+    // * Thus, the framework guarantees that once an application's call to
+    // * {@link
+    // org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass,
+    // org.identityconnectors.framework.common.objects.SyncToken,
+    // org.identityconnectors.framework.common.objects.SyncResultsHandler,
+    // org.identityconnectors.framework.common.objects.OperationOptions)}
+    // SyncApiOp#sync()} returns,
+    // * the framework will no longer call this method
+    // * to handle results from that <code>sync()</code> operation.
+    // *
+    // * @param syncDelta The change
+    // * @return True iff the application wants to continue processing more
+    // * results.
+    // * @throws RuntimeException If the application encounters an exception.
+    // This will stop
+    // * iteration and the exception will propagate to
+    // * the application.
+    // */
+    // public boolean handle(SyncDelta syncDelta) {
+    // try {
+    // switch (syncDelta.getDeltaType()) {
+    // case CREATE_OR_UPDATE:
+    // Resource deltaObject = helper.build(syncDelta.getObject());
+    // if (null != syncDelta.getPreviousUid()) {
+    // deltaObject.put("_previous-id",
+    // Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
+    // }
+    // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(),
+    // null, new JsonValue(deltaObject));
+    // break;
+    // case DELETE:
+    // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString(),
+    // null);
+    // break;
+    // }
+    // lastToken[0] = syncDelta.getToken();
+    // } catch (Exception e) {
+    // failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
+    // if (logger.isDebugEnabled()) {
+    // logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
+    // }
+    // throw new ConnectorException("Failed synchronise " + syncDelta.getUid() +
+    // " object" + e.getMessage(), e);
+    // }
+    // return true;
+    // }
+    // }, operationOptionsBuilder.build());
+    // } catch (Throwable t) {
+    // Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
+    // lastException.put("throwable", t.getMessage());
+    // if (null != failedRecord[0]) {
+    // lastException.put("syncDelta", failedRecord[0]);
+    // }
+    // stage.put("lastException", lastException);
+    // if (logger.isDebugEnabled()) {
+    // logger.error("Live synchronization of {} failed on {}",
+    // new Object[]{objectType, systemName}, t);
+    // }
+    // } finally {
+    // token = lastToken[0];
+    // logger.debug("Synchronization is finished. New LatestSyncToken value: {}",
+    // token);
+    // }
+    // }
+    // if (null != token) {
+    // stage.put("connectorData", ConnectorUtil.convertFromSyncToken(token));
+    // }
+    // }
+    // } catch (ResourceException e) {
+    // if (logger.isDebugEnabled()) {
+    // logger.debug("Failed to get OperationHelper", e);
+    // }
+    // throw new RuntimeException(e);
+    // } catch (Exception e) {
+    // // catch helper.getOperationOptionsBuilder(
+    // if (logger.isDebugEnabled()) {
+    // logger.debug("Failed to get OperationOptionsBuilder", e);
+    // } throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
+    // "Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+    //
+    // }
+    // return stage;
+    // }
+
+    private void traceObject(Request request) {
+        if (logger.isTraceEnabled()) {
+            if (null != request) {
+                try {
+                    StringWriter writer = new StringWriter();
+                    // TODO Change request.saveToJson()
+                    MAPPER.writerWithDefaultPrettyPrinter().writeValue(writer, request);
+                    logger.info("Invoke action: ", writer);
+                } catch (IOException e) {
+                    // Don't care
+                }
+            }
+        }
+    }
+
 }
