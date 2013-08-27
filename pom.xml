@@ -249,10 +249,10 @@
         <jackson.version>1.9.10</jackson.version>
         <restlet.version>2.0.15</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-        <authnfilter.commons.version>1.0.0-SNAPSHOT</authnfilter.commons.version>
+        <authnfilter.commons.version>1.0.1</authnfilter.commons.version>
         
         <!-- Commons JSON versions -->
-        <commons.util.version>1.1.0-SNAPSHOT</commons.util.version>
+        <commons.util.version>1.1.0</commons.util.version>
         <commons.json-fluent.version>1.2.0</commons.json-fluent.version>
         <commons.json-patch.version>1.0.0</commons.json-patch.version>
         <commons.json-crypto.version>1.1.0</commons.json-crypto.version>
