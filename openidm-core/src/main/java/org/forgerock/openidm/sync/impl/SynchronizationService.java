@@ -82,7 +82,12 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     /** TODO: Description. */
     private enum Action {
-        onCreate, onUpdate, onDelete, recon, performAction
+        onCreate, onUpdate, onDelete, recon, performAction;
+
+        public static Action fromString(String value) {
+            // use JsonValue .asEnum as it does cool case-insensitive tricks
+            return new JsonValue(value).asEnum(Action.class);
+        }
     }
 
     /** TODO: Description. */
@@ -308,33 +313,34 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         try {
             ObjectSetContext.push(context);
         String id = request.getResourceName();
-        if (id != null) { // operation on entire set only... for now
+        // FIXME - original test was id!=null, added other stuff -brmiller
+        if (id != null && !"/".equals(id)) {
             throw new NotFoundException();
         }
         Map<String, Object> result = null;
         JsonValue _params = new JsonValue(request.getAdditionalActionParameters(), new JsonPointer("params"));
-        Action action = _params.get("_action").required().asEnum(Action.class);
+        Action action = new JsonValue(request.getAction()).asEnum(Action.class);
         try {
             switch (action) {
                 case onCreate:
                     id = _params.get("id").required().asString();
-                    logger.debug("Synchronization _action=onCreate, id={}", id);
-                    onCreate(id, _params.get("_entity").expect(Map.class));
+                    logger.debug("Synchronization action=onCreate, id={}", id);
+                    onCreate(id, request.getContent());
                     break;
                 case onUpdate:
                     id = _params.get("id").required().asString();
-                    logger.debug("Synchronization _action=onUpdate, id={}", id);
-                    onUpdate(id, null, _params.get("_entity").expect(Map.class));
+                    logger.debug("Synchronization action=onUpdate, id={}", id);
+                    onUpdate(id, null, request.getContent());
                     break;
                 case onDelete:
                     id = _params.get("id").required().asString();
-                    logger.debug("Synchronization _action=onDelete, id={}", id);
+                    logger.debug("Synchronization action=onDelete, id={}", id);
                     onDelete(id, null);
                     break;
                 case recon:
                     result = new HashMap<String, Object>();
                     JsonValue mapping = _params.get("mapping").required();
-                    logger.debug("Synchronization _action=recon, mapping={}", mapping);
+                    logger.debug("Synchronization action=recon, mapping={}", mapping);
                     String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params);
                     result.put("reconId", reconId);
                     result.put("_id", reconId);
@@ -342,7 +348,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     result.put("comment2", "Deprecated return property reconId, use _id instead.");
                     break;
                 case performAction:
-                    logger.debug("Synchronization _action=performAction, params={}", _params);
+                    logger.debug("Synchronization action=performAction, params={}", _params);
                     performAction(_params);
                     result = new HashMap<String, Object>();
                     //result.put("status", performAction(_params));
