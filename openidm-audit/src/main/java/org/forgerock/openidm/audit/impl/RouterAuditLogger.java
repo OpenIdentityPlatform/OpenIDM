@@ -45,7 +45,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;

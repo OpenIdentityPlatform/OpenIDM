@@ -168,7 +168,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         "org.ops4j.pax.web.pax-web-jetty-bundle",
         "org.forgerock.openidm.repo-jdbc",
         "org.forgerock.openidm.repo-orientdb",
-        "org.forgerock.openidm.config",
+        "org.forgerock.openidm.config.enhanced",
         "org.forgerock.openidm.crypto",
         "org.forgerock.openidm.cluster"
         // For now, default to not check for the workflow engine
@@ -191,7 +191,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
     private List<String> requiredServices = new ArrayList<String>();
     /* @formatter:off */
     private String[] defaultRequiredServices = new String[] {
-            //"org.forgerock.openidm.config",
+            //"org.forgerock.openidm.config.enhanced",
             "org.forgerock.openidm.provisioner",
             "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
             "org.forgerock.openidm.external.rest",

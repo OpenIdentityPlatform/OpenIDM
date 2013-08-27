@@ -24,7 +24,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.config;
+package org.forgerock.openidm.config.enhanced;
 
 /**
  * An exception that is throw for Invalid Configurations.

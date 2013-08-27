@@ -41,8 +41,8 @@ import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.metadata.WaitForMetaData;

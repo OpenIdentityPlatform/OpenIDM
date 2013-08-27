@@ -61,8 +61,8 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 @Component(
-        name = "org.forgerock.openidm.config",
+        name = "org.forgerock.openidm.config.enhanced",
         immediate = true,
         policy = ConfigurationPolicy.OPTIONAL
 )
