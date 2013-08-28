@@ -1,0 +1,6 @@
+// sample onSyncFailure script that calls the internal dead-letter queue handler
+(function () {
+    // do some local work...
+    failureHandlers.deadLetterQueue.invoke(syncFailure, failureCause);
+    // do some local work...
+}());
