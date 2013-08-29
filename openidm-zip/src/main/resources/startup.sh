@@ -1,8 +1,24 @@
 #!/bin/sh
+# 
+# Copyright 2013 ForgeRock, Inc.
+#
+# The contents of this file are subject to the terms of the Common Development and
+# Distribution License (the License). You may not use this file except in compliance 
+# with the License.
+#
+# You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for 
+# the specific language governing permission and limitations under the License.
+#
+# When distributing Covered Software, include this CDDL Header Notice in each file 
+# and include the License file at legal/CDDLv1.0.txt. If applicable, add the 
+# following below the CDDL Header, with the fields enclosed by brackets [] 
+# replaced by your own identifying information: 
+# "Portions copyright [year] [name of copyright owner]".
+#
 
 # clean up left over pid files if necessary
 cleanupPidFile() {
-  if [ -f $OPENIDM_PID_FILE ]; then
+  if [ -f "$OPENIDM_PID_FILE" ]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
   trap - EXIT
@@ -22,19 +38,16 @@ while [ -h "$PRG" ]; do
   fi
 done
 
-echo $PRG
+echo "Executing "$PRG"..."
 
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-# Make the script location the current directory
-cd $PRGDIR
-
 # Only set OPENIDM_HOME if not already set
-[ -z "$OPENIDM_HOME" ] && OPENIDM_HOME=`cd "$PRGDIR" >/dev/null; pwd`
+[ -z "$OPENIDM_HOME" ] && OPENIDM_HOME=`(cd "$PRGDIR" >/dev/null; pwd)`
 
 # Only set OPENIDM_PID_FILE if not already set
-[ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
+[ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE="$OPENIDM_HOME"/.openidm.pid
 
 # Only set OPENIDM_OPTS if not already set
 [ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="${openidm.options}"
@@ -72,7 +85,10 @@ echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
 echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 
 # Keep track of this pid
-echo $$ > $OPENIDM_PID_FILE
+echo $$ > "$OPENIDM_PID_FILE"
+
+# Make the script location the current directory
+cd "$PRGDIR"
 
 # start in normal mode
 exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
@@ -80,6 +96,8 @@ exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Djava.awt.headless=true \
-	org.forgerock.commons.launcher.Main -c bin/launcher.json "$@"
+	org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json "$@"
 
 # org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
+
+cd -
