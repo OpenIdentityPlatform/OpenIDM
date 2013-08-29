@@ -37,6 +37,7 @@ import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.router.RouteService;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -104,6 +105,10 @@ public class OSGiAuthnFilterBuilder {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    // Insure that the auth filters are registered after the web container is brought up
+    @Reference
+    private WebContainer httpService;
+    
     @Reference(
             name = "AuthenticationConfig",
             referenceInterface = AuthenticationConfig.class,
