@@ -65,19 +65,22 @@
 
   <para>If you want to query the internal noSQL database, you can download 
   OrientDB (version <?eval ${orientdbVersion}?>) from <link 
-  xlink:href="http://code.google.com/p/orient/downloads/list" />.
+  xlink:href="https://github.com/orientechnologies/orientdb/wiki/Download" />.
   You will find the shell console in the <filename>bin</filename> directory. 
   Start OrientDB console using either <command>console.sh</command> or 
   <command>console.bat</command>, and then connect to the running OpenIDM with 
   the <command>connect</command> command.</para>
 
-  <screen>$ /path/to/orientdb-<?eval ${orientdbVersion}?>/bin/console.sh
-&gt;
-&gt; connect remote:localhost/openidm admin admin
+  <screen>$ /path/to/orientdb-graphed-<?eval ${orientdbVersion}?>/bin/console.sh
+OrientDB console v.1.5.0 (build @BUILD@) www.orientechnologies.com
+Type 'help' to display all the commands supported.
 
+Installing extensions for GREMLIN language v.2.4.0-SNAPSHOT
+
+orientdb&gt; connect remote:localhost/openidm admin admin
 Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 
-&gt;</screen>
+orientdb&gt; </screen>
 
   <variablelist>
    <para>When you have connected to the database, you might find the following
