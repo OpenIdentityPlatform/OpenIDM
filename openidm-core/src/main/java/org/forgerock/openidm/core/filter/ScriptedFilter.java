@@ -333,7 +333,9 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             } catch (Throwable t) {
                 logger.debug("Filter/{} script {} encountered exception at {}", onRequest.getRight()
                         .getName(), onRequest.getLeft(), t);
-                throw Utils.adapt(t);
+                ResourceException re = Utils.adapt(t);
+                logger.debug("ResourceException detail: " + re.getDetail());
+                throw re;
             }
         }
         return CONTINUE;
@@ -420,14 +422,17 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     private Map<String, Object> getRequestMap(Request request, ServerContext context) {
     	Map<String, Object> requestMap = new HashMap<String, Object>();
     	JsonValue value = new JsonValue(null);
+    	String id = request.getResourceName();
     	if (request instanceof ActionRequest) {
     		value = ((ActionRequest)request).getContent();
     		requestMap.put("params", ((ActionRequest)request).getAdditionalActionParameters());
     		requestMap.put("method", "action");
     		requestMap.put("action", ((ActionRequest)request).getAction());
     	} else if (request instanceof CreateRequest) {
-    		value = ((CreateRequest)request).getContent();
+    		CreateRequest createRequest = (CreateRequest)request;
+    		value = createRequest.getContent();
     		requestMap.put("method", "create");
+            id = createRequest.getResourceName() + "/" + createRequest.getNewResourceId();
     	} else if (request instanceof ReadRequest) {
     		requestMap.put("method", "read");
     	} else if (request instanceof UpdateRequest) {
@@ -456,7 +461,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     	}
     	requestMap.put("type", request.getRequestType());
     	requestMap.put("value", value.getObject());
-    	requestMap.put("id", request.getResourceName());
+    	requestMap.put("id", id);
     	
     	return requestMap;
     }
