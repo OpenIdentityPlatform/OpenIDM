@@ -414,13 +414,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     @Override
     public ScriptEntry takeScript(JsonValue script) throws ScriptException {
-    	System.out.println(new JsonValue(script));
         // Check if "name" is missing and "file" is used instead
         JsonValue scriptConfig = script.clone();
         if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {
         	JsonValue file = scriptConfig.get("file");
         	if (!file.isNull()) {
-        		System.out.println(" setting file: " + file.asString());
         		scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
         	}
         }
