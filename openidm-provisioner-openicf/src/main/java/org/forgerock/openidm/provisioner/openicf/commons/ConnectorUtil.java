@@ -812,6 +812,8 @@ public class ConnectorUtil {
                     return (T) source;
                 } else if (List.class.isAssignableFrom(sourceClass)) {
                     return (T) source;
+                } else if (sourceClass.isArray()) {
+                    return (T) Arrays.asList(source); //Items in array may need to be converted too.
                 } else if (sourceClass == QualifiedUid.class) {
                     //@TODO: Not null safe!!!
                     Map<String, Object> v = new HashMap<String, Object>(2);
