@@ -19,37 +19,24 @@ package org.forgerock.openidm.jaspi.config;
 import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * Context mapper for IDM that will convert the request headers/attributes/parameters set by the authentication and
- * authorization filters into what IDM expects/requires.
+ * Extension of the JASPI Authentication Filter that adds context mapping that will convert the request
+ * headers/attributes/parameters set by the authentication and authorization filters into what IDM expects/requires.
  *
  * @author Phill Cunnington
  */
-public class IDMAuthContextMapper implements Filter {
+public class IDMAuthContextMapper extends AuthNFilter {
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-    }
-
-    /**
-     * Copies the authentication principal header, set by the authentication filter, into the request as an attribute
-     * with the key SecurityContextFactory.ATTRIBUTE_AUTHCID and copies the authentication context attribute, set
-     * by the authentication filter, into the request as an attributes with the key
-     * SecurityContextFactory.ATTRIBUTES_AUTHZID.
+     * Wraps the FilterChain in an AuthContextFilterChainWrapper and passes this to the commons AuthnFilter.
      *
      * @param servletRequest {@inheritDoc}
      * @param servletResponse {@inheritDoc}
@@ -61,29 +48,7 @@ public class IDMAuthContextMapper implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
 
-        if ((!HttpServletRequest.class.isAssignableFrom(servletRequest.getClass())
-                || !HttpServletResponse.class.isAssignableFrom(servletResponse.getClass()))) {
-            throw new ServletException("Unsupported protocol");
-        }
-
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-
-        Map<String, Object> authzid = (Map<String, Object>) request.getAttribute(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
-        String authcid = null;
-		if (authzid != null) {
-			authcid = (String) authzid.get("id");
-		}
-        
-        request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcid);
-        request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHZID, authzid);
-
-        filterChain.doFilter(request, servletResponse);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void destroy() {
+        FilterChain filterChainWrapper = new AuthContextFilterChainWrapper(filterChain);
+        super.doFilter(servletRequest, servletResponse, filterChainWrapper);
     }
 }
