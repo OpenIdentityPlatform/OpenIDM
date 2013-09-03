@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -39,16 +39,15 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
+import org.forgerock.openidm.script.RegisteredScript;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.Utils;
-import org.forgerock.openidm.script.javascript.ScriptableWrapper;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -60,6 +59,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laszlo Hordos
  * @author aegloff
+ * @author ckienle
  */
 @Component(name = EndpointsService.PID, policy = ConfigurationPolicy.OPTIONAL,
         description = "OpenIDM Custom Endpoints Service", immediate = true)
@@ -161,20 +161,6 @@ public class EndpointsService implements JsonResource {
         return effectiveConfig;
     }
 
-    /**
-     * Get the script parameters to pass to the script from the config
-     * @param val the full configuration
-     * @return the parameters
-     */
-    public JsonValue getParameters(JsonValue val) {
-        JsonValue filtered = new JsonValue(Utils.deepCopy(val.asMap()));
-        // Filter the script definition itself
-        filtered.remove("type");
-        filtered.remove("source");
-        filtered.remove("file");
-        return val;
-    }
-
     @Deactivate
     protected void deactivate(ComponentContext context) {
         // Remove all resource context registrations and script instances
@@ -195,7 +181,7 @@ public class EndpointsService implements JsonResource {
             String resourceContext = scriptConfig.get(CONFIG_RESOURCE_CONTEXT).asString();
             if (resourceContext != null) {
                 Script script = Scripts.newInstance((String)context.getProperties().get(Constants.SERVICE_PID), scriptConfig);
-                scripts.put(resourceContext, new RegisteredScript(getParameters(scriptConfig), script, scriptConfig));
+                scripts.put(resourceContext, new RegisteredScript(script, scriptConfig));
                 logger.info("Registered custom endpoint at : {} with {}", resourceContext, scriptConfig.get("file"));
             } else {
                 logger.warn("Invalid configuration {} : {}", configName, scriptConfig);
@@ -295,30 +281,6 @@ public class EndpointsService implements JsonResource {
         @Override
         public String getName() {
             return this.name;
-        }
-    }
-
-    /**
-     * Hold the registered script and info
-     * @author aegloff
-     */
-    private static class RegisteredScript {
-        JsonValue parameters;
-        Script script;
-        JsonValue scriptConfig;
-        public RegisteredScript(JsonValue parameters, Script script, JsonValue scriptConfig) {
-            this.parameters = parameters;
-            this.script = script;
-            this.scriptConfig = scriptConfig;
-        }
-        public JsonValue getParameters() {
-            return this.parameters;
-        }
-        public Script getScript() {
-            return this.script;
-        }
-        public JsonValue getScriptConfig() {
-            return this.scriptConfig;
         }
     }
 }
