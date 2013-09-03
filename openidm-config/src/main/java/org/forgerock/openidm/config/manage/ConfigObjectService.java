@@ -106,7 +106,7 @@ public class ConfigObjectService implements RequestHandler {
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-        	String id = request.getResourceName();
+            String id = ParsedId.stripSlash(request.getResourceName());
             Resource resource = new Resource(id, null, new JsonValue(read(id)));
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -133,7 +133,9 @@ public class ConfigObjectService implements RequestHandler {
         Map<String, Object> result = null;
 
         try {
-            if (fullId == null) {
+
+            
+            if (fullId == null || fullId.length() == 0) {
                 // List all configurations
                 result = new HashMap<String, Object>();
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
@@ -189,9 +191,10 @@ public class ConfigObjectService implements RequestHandler {
     public void handleCreate(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
         try {
-        	String id = request.getNewResourceId();
-        	JsonValue content = request.getContent();
-        	create(id, content.asMap());
+            String id = request.getNewResourceId();
+            String resourceName = ParsedId.stripSlash(request.getResourceName());
+            JsonValue content = request.getContent();
+            create(resourceName, id, content.asMap());
             Resource resource = new Resource(id, null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -200,26 +203,27 @@ public class ConfigObjectService implements RequestHandler {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
-    
+
     /**
      * Creates a new object in the object set.
      * <p/>
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param resourceName for multi-instance config, the factory pid to use
+     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
      * @param obj    the contents of the object to create in the object set.
      * @throws NotFoundException           if the specified id could not be resolved.
      * @throws ForbiddenException          if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void create(String fullId, Map<String, Object> obj) throws ResourceException {
-        logger.debug("Invoking create configuration {} {}", fullId, obj);
-        if (fullId == null) {
+    public void create(String resourceName, String id, Map<String, Object> obj) throws ResourceException {
+        logger.debug("Invoking create configuration {} {} {}", new Object[]{resourceName, id, obj});
+        if (id == null || id.length() == 0) {
             throw new BadRequestException("The passed identifier to create is null");
         }
-        ParsedId parsedId = new ParsedId(fullId);
+        ParsedId parsedId = new ParsedId(resourceName, id);
         try {
             Configuration config = null;
             if (parsedId.isFactoryConfig()) {
@@ -243,16 +247,16 @@ public class ConfigObjectService implements RequestHandler {
             }
 
             config.update(dict);
-            logger.debug("Created new configuration for {} with {}", fullId, dict);
+            logger.debug("Created new configuration for {} with {}", parsedId, dict);
         } catch (ResourceException ex) {
             throw ex;
         } catch (WaitForMetaData ex) {
-            logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", fullId, ex);
+            logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", parsedId, ex);
             throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
-                    + fullId + ", retry later.", ex);
+                    + parsedId + ", retry later.", ex);
         } catch (Exception ex) {
-            logger.warn("Failure to create configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to create configuration for {}", parsedId, ex);
+            throw new InternalServerErrorException("Failure to create configuration for " + parsedId + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -260,10 +264,10 @@ public class ConfigObjectService implements RequestHandler {
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
         try {
-        	String id = request.getResourceName();
-        	String rev = request.getRevision();
-        	JsonValue content = request.getNewContent();
-        	update(id, rev, content.asMap());
+            String id =  ParsedId.stripSlash(request.getResourceName());
+            String rev = request.getRevision();
+            JsonValue content = request.getNewContent();
+            update(id, rev, content.asMap());
             Resource resource = new Resource(id, null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -272,7 +276,7 @@ public class ConfigObjectService implements RequestHandler {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
-    
+
     /**
      * Updates the specified object in the object set.
      * <p/>
@@ -319,9 +323,9 @@ public class ConfigObjectService implements RequestHandler {
     public void handleDelete(ServerContext context, DeleteRequest request,
             ResultHandler<Resource> handler) {
         try {
-        	String id = request.getResourceName();
-        	String rev = request.getRevision();
-        	delete(id, rev);
+            String id =  ParsedId.stripSlash(request.getResourceName());
+            String rev = request.getRevision();
+            delete(id, rev);
             Resource resource = new Resource(id, null, new JsonValue(null));
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -330,7 +334,7 @@ public class ConfigObjectService implements RequestHandler {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
-    
+
     /**
      * Deletes the specified object from the object set.
      *
@@ -369,14 +373,20 @@ public class ConfigObjectService implements RequestHandler {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
     }
-    
+
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
-        final ResourceException e = new NotSupportedException("Patch operations are not supported");
+        final ResourceException e = new NotSupportedException("Query operations are not supported");
         handler.handleError(e);
     }
-    
+
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        final ResourceException e = new NotSupportedException("Action operations are not supported");
+        handler.handleError(e);
+    }
+
     /**
      * Locate an existing configuration based on its id, which can be
      * a pid or for factory configurations the <factory pid>/<alias>
@@ -424,12 +434,6 @@ public class ConfigObjectService implements RequestHandler {
     protected void deactivate(ComponentContext context) {
         logger.debug("Deactivating configuration management service");
     }
-
-	@Override
-	public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-		// TODO Auto-generated method stub
-		
-	}
 }
 
 class ParsedId {
@@ -439,9 +443,28 @@ class ParsedId {
     public String factoryPid;
     public String instanceAlias;
 
+    /**
+     * @param resourceName the relative uri of the resource, without the id
+     * @param id the local id
+     */
+    public ParsedId(String resourceName, String id) throws BadRequestException {
+        if (resourceName == null || resourceName.length() == 0) {
+            // single-instance config
+            pid = id;
+        } else {
+            // multi-instance config
+            factoryPid = stripSlash(resourceName);
+            instanceAlias = id;
+        }
+    }
+
+    /**
+     * @param fullId the relative uri of the resource, 
+     * including the resource name and the local id
+     */
     public ParsedId(String fullId) throws BadRequestException {
         if (fullId.startsWith("/")) {
-            fullId = fullId.replace("/", "");
+            fullId = stripSlash(fullId);
         }
         String[] clauses = fullId.split("/");
         if (0 == clauses.length || clauses.length > 2) {
@@ -499,6 +522,19 @@ class ParsedId {
             return qualifyPid(factoryPid);
         } else {
             return qualifyPid(pid);
+        }
+    }
+
+    /**
+     * Strips the leading slash if present
+     * @param id the id with or without leading slash
+     * @return the id without leading slash, null if null id
+     */
+    static String stripSlash(String id) {
+        if (id == null || !id.startsWith("/")) {
+            return id;
+        } else {
+            return id.substring(1);
         }
     }
 
