@@ -43,11 +43,10 @@ import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.script.RegisteredScript;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
-import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -62,6 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Paul C. Bryan
  * @author aegloff
+ * @author ckienle
  */
 class ObjectMapping implements SynchronizationListener {
 
@@ -217,7 +217,7 @@ class ObjectMapping implements SynchronizationListener {
         validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
         JsonValue corrQuery = config.get("correlationQuery");
         if (!corrQuery.isNull()) {
-            correlationQuery = new RegisteredScript(getParameters(corrQuery), Scripts.newInstance("ObjectMapping", corrQuery));
+            correlationQuery = new RegisteredScript(Scripts.newInstance("ObjectMapping", corrQuery), corrQuery);
         }
         for (JsonValue jv : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(service, jv));
@@ -2073,38 +2073,6 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("exception", exception);
             jv.put("mapping", mappingName);
             return jv;
-        }
-    }
-    
-    /**
-     * Get the script parameters to pass to the script from the config
-     * @param val the full configuration
-     * @return the parameters
-     */
-    public JsonValue getParameters(JsonValue val) {
-        JsonValue filtered = new JsonValue(Utils.deepCopy(val.asMap()));
-        // Filter the script definition itself
-        filtered.remove("type");
-        filtered.remove("source");
-        filtered.remove("file");
-        return val;
-    }
-    
-    /**
-     * Hold the registered script and info
-     */
-    private static class RegisteredScript {
-        JsonValue parameters;
-        Script script;
-        public RegisteredScript(JsonValue parameters, Script script) {
-            this.parameters = parameters;
-            this.script = script;
-        }
-        public JsonValue getParameters() {
-            return this.parameters;
-        }
-        public Script getScript() {
-            return this.script;
         }
     }
 }
