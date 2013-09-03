@@ -71,9 +71,11 @@ import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.quartz.impl.RepoJobStore;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -166,6 +168,23 @@ public class SchedulerService implements RequestHandler {
     @Reference
     ClusterManagementService clusterManager;
 
+    /** Internal object set router service. */
+    @Reference(name = "ref_SchedulerService_RepositoryService", bind = "bindRepo",
+            unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
+    protected RouteService repo;
+
+    protected void bindRepo(final RouteService service) throws ResourceException {
+        logger.debug("binding RepositoryService");
+        RepoJobStore.setAccessor(service.createServerContext());
+    }
+
+    protected void unbindRepo(final RouteService service) {
+        logger.debug("unbinding RepositoryService");
+        RepoJobStore.setAccessor(null);
+    }
+    
+    
+    
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
