@@ -105,10 +105,6 @@ public class OSGiAuthnFilterBuilder {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    // Insure that the auth filters are registered after the web container is brought up
-    @Reference
-    private WebContainer httpService;
-    
     @Reference(
             name = "AuthenticationConfig",
             referenceInterface = AuthenticationConfig.class,
@@ -136,7 +132,6 @@ public class OSGiAuthnFilterBuilder {
         ConfigurationManager.unconfigure();
         configureAuthenticationFilter(config);
         registerAuthnFilter();
-        registerContextMapper();
     }
 
     /**
@@ -287,7 +282,6 @@ public class OSGiAuthnFilterBuilder {
     }
 
     private ServiceRegistration authnFilterRegistration;
-    private ServiceRegistration contextMapperRegistration;
 
     /**
      * Registers the Authentication Filter in OSGi.
@@ -318,37 +312,11 @@ public class OSGiAuthnFilterBuilder {
         filterConfig.put("initParams", initParams);
         filterConfig.put("scriptExtensions", scriptExtensions);
         filterConfig.put("urlPatterns", urlPatterns);
-        filterConfig.put("filterClass", AuthNFilter.class.getCanonicalName());
-
-        JsonValue filterConfigJson = new JsonValue(filterConfig);
-
-        authnFilterRegistration = servletFilterRegistration.registerFilter(filterConfigJson);
-    }
-
-    /**
-     * Registers the Authentication Context Mapper in OSGi.
-     *
-     * @throws Exception If a problem occurs whilst registering the filter.
-     */
-    private void registerContextMapper() throws Exception {
-
-        Map<String, String> initParams = new HashMap<String, String>();
-
-        List<String> urlPatterns = new ArrayList<String>();
-        urlPatterns.add("/openidm/*");
-
-        Map<String, Object> filterConfig = new HashMap<String, Object>();
-        filterConfig.put("classPathURLs", new ArrayList<String>());
-        filterConfig.put("systemProperties", new HashMap<String, Object>());
-        filterConfig.put("requestAttributes", new HashMap<String, Object>());
-        filterConfig.put("initParams", initParams);
-        filterConfig.put("scriptExtensions", new HashMap<String, Object>());
-        filterConfig.put("urlPatterns", urlPatterns);
         filterConfig.put("filterClass", IDMAuthContextMapper.class.getCanonicalName());
 
         JsonValue filterConfigJson = new JsonValue(filterConfig);
 
-        contextMapperRegistration = servletFilterRegistration.registerFilter(filterConfigJson);
+        authnFilterRegistration = servletFilterRegistration.registerFilter(filterConfigJson);
     }
 
     /**
@@ -364,15 +332,6 @@ public class OSGiAuthnFilterBuilder {
                 logger.info("Unregistered authentication filter.");
             } catch (Exception ex) {
                 logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
-            }
-        }
-        if (contextMapperRegistration != null) {
-            try {
-                contextMapperRegistration.unregister();
-                logger.info("Unregistered auth context mapper filter.");
-            } catch (Exception ex) {
-                logger.warn("Failure reported during unregistering of auth context mapper filter: {}", ex.getMessage(),
-                        ex);
             }
         }
     }
