@@ -224,6 +224,10 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         }
         return true;
     }
+    
+    public static void setAccessor(ServerContext accessor) {
+    	RepoJobStore.accessor = accessor;
+    }
 
     public boolean setClusterService() {
         if (clusterManager == null) {
