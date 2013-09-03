@@ -268,7 +268,7 @@ public class OSGiAuthnFilterBuilder {
     @Reference(
             name = "ref_ServletFilterRegistration",
             referenceInterface = ServletFilterRegistration.class,
-            policy = ReferencePolicy.DYNAMIC,
+            policy = ReferencePolicy.STATIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindServletFilterRegistration",
             unbind = "unbindServletFilterRegistration"

@@ -614,7 +614,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             startPos = 1;
         }
         type = id.substring(startPos);
-        logger.info("Full id: {}, extracted type: {}", id, type);
+        logger.debug("Full id: {}, extracted type: {}", id, type);
 
         return type;
     }
