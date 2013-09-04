@@ -31,9 +31,7 @@ import org.slf4j.LoggerFactory;
  * or abusing ServiceTrackerCustomizer for this purpose.
  *
  * @author aegloff
- * @deprecated Use the native OSGi classes instead
  */
-@Deprecated
 public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
 
     private final static Logger logger = LoggerFactory.getLogger(ServiceTrackerNotifier.class);
