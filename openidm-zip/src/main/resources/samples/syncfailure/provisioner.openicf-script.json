@@ -1,0 +1,14 @@
+{
+   "syncFailureHandler" :
+      {
+         "maxRetries" : 5,
+         "postRetryAction" : 
+            {
+               "script" :
+                  {
+                     "type" : "text/javascript",
+                     "file" : "script/onSyncFailure.js"
+                  }
+             }
+      }
+}
