@@ -21,8 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-package org.forgerock.openidm.provisioner.openicf.internal;
+package org.forgerock.openidm.provisioner.openicf;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -80,6 +79,8 @@ import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
+import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
+import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
@@ -122,30 +123,31 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laszlo Hordos
  */
-@Component(name = ConnectorInfoProviderService.PID, policy = ConfigurationPolicy.OPTIONAL,
-        description = "OpenICF Connector Info Service", immediate = true)
+@Component(name = ConnectorInfoProviderService.PID,
+		policy = ConfigurationPolicy.OPTIONAL,
+		description = "OpenICF Connector Info Service",
+		immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service") })
-@References({ @Reference(name = "osgiConnectorEventPublisher",
-        referenceInterface = ConnectorEventPublisher.class, bind = "bindConnectorEventPublisher",
-        unbind = "unbindConnectorEventPublisher",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC) })
-public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider,
-        ConfigurationService {
-
+@References({
+    @Reference(name = "osgiConnectorEventPublisher",
+            referenceInterface = ConnectorEventPublisher.class,
+            bind = "bindConnectorEventPublisher",
+            unbind = "unbindConnectorEventPublisher",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC) })
+public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConfigurationService {
     /**
      * Setup logging for the {@link OpenICFProvisionerService}.
      */
-    private final static Logger logger = LoggerFactory
-            .getLogger(ConnectorInfoProviderService.class);
+    private final static Logger logger = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
 
     // Public Constants
     public static final String DEFAULT_CONNECTORS_LOCATION = "connectors";
     public static final String PROPERTY_OPENICF_CONNECTOR_URL = "connectorsLocation";
-    public static final String PID =
-            "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider";
+    public static final String PID = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider";
 
     // Private
     private Map<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>> remoteFrameworkConnectionInfo =
@@ -177,8 +179,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         public void handleEvent(ConnectorEvent connectorEvent) {
             if (null == connectorEvent)
                 return;
-            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent
-                    .getTopic(), connectorEvent.getSource());
+            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent.getTopic(), connectorEvent.getSource());
 
             MetaDataProviderCallback cb = callback[0];
             if (null != cb && ConnectorEvent.CONNECTOR_REGISTERED.equals(connectorEvent.getTopic())) {

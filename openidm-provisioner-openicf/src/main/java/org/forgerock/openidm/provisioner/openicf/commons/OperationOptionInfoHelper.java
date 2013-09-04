@@ -28,7 +28,9 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.identityconnectors.framework.common.objects.OperationOptionInfo;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.forgerock.json.schema.validator.Constants.*;
@@ -61,7 +63,9 @@ public class OperationOptionInfoHelper {
     }
 
     public OperationOptionInfoHelper(JsonValue configuration) throws JsonValueException {
-        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean() ? OnActionPolicy.THROW_EXCEPTION : OnActionPolicy.ALLOW;
+        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean()
+            ? OnActionPolicy.THROW_EXCEPTION
+            : OnActionPolicy.ALLOW;
 
         JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
@@ -90,7 +94,9 @@ public class OperationOptionInfoHelper {
     }
 
     public OperationOptionInfoHelper(JsonValue configuration, OperationOptionInfoHelper globalOption) throws JsonValueException {
-        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(globalOption.getOnActionPolicy().equals(OnActionPolicy.THROW_EXCEPTION)).asBoolean() ? OnActionPolicy.THROW_EXCEPTION : OnActionPolicy.ALLOW;
+        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(globalOption.getOnActionPolicy().equals(OnActionPolicy.THROW_EXCEPTION)).asBoolean()
+            ? OnActionPolicy.THROW_EXCEPTION
+            : OnActionPolicy.ALLOW;
         attributes = new HashSet<AttributeInfoHelper>(globalOption.getAttributes());
         JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
@@ -114,6 +120,10 @@ public class OperationOptionInfoHelper {
         }
     }
 
+    public boolean isDenied() {
+        return !OnActionPolicy.ALLOW.equals(getOnActionPolicy());
+    }
+
     public OnActionPolicy getOnActionPolicy() {
         return onActionPolicy;
     }
@@ -126,16 +136,15 @@ public class OperationOptionInfoHelper {
         return null != supportedObjectTypes ? Collections.unmodifiableSet(supportedObjectTypes) : null;
     }
 
-/*    public OperationOptionsBuilder build(Map<String, String> additionalParameters, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
+    public OperationOptionsBuilder build(JsonValue source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
         OperationOptionsBuilder builder = new OperationOptionsBuilder();
-        if (null != additionalParameters) {
+        if (null != source && !source.isNull()) {
             //Get the explicit options object if defied.
             Object o = source.get("_options");
             Map<String, Object> options = null;
             if (o instanceof Map) {
                 options = (Map<String, Object>) o;
             }
-
 
             for (AttributeInfoHelper helper : attributes) {
                 helper.build(builder, source.get(helper.getName()));
@@ -144,7 +153,7 @@ public class OperationOptionInfoHelper {
             builder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
         }
         return builder;
-    }*/
+    }
 
     public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet) {
         return build(operationOptionInfoSet, null);

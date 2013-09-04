@@ -21,7 +21,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
 package org.forgerock.openidm.provisioner.openicf;
 
 import java.util.List;
@@ -53,8 +52,7 @@ public interface ConnectorInfoProvider {
      * @param connectorReference
      * @param handler
      */
-    public void addConnectorFacadeCallback(ConnectorReference connectorReference,
-            ConnectorFacadeCallback handler);
+    public void addConnectorFacadeCallback(ConnectorReference connectorReference, ConnectorFacadeCallback handler);
 
     /**
      *
@@ -74,8 +72,7 @@ public interface ConnectorInfoProvider {
      * Tests the {@link APIConfiguration Configuration} with the connector.
      *
      * @param configuration
-     * @throws RuntimeException
-     *             if the configuration is not valid or the test failed.
+     * @throws RuntimeException if the configuration is not valid or the test failed.
      */
     public void testConnector(APIConfiguration configuration) throws ResourceException;
 
