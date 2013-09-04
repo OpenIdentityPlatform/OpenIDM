@@ -36,6 +36,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.provisioner.Id;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.security.GuardedString;
@@ -257,6 +258,80 @@ public class ObjectClassInfoHelper {
         return new HashSet<Attribute>(result.values());
     }
 
+    /**
+     * @param operation
+     * @param name
+     * @param source
+     * @param cryptoService
+     * @return
+     * @throws JsonResourceException if ID value can not be determined from the {@code source}
+     */
+    public ConnectorObject build(Class<? extends APIOperation> operation, String name, JsonValue source, CryptoService cryptoService) throws Exception {
+        String nameValue = name;
+
+        if (null == nameValue) {
+            JsonValue o = source.get(Resource.FIELD_CONTENT_ID);
+            if (o.isNull()) {
+                o = source.get(nameAttribute);
+            }
+            if (o.isString()) {
+                nameValue = o.asString();
+            }
+        }
+
+        if (null == nameValue) {
+            throw new BadRequestException("Required NAME attribute is missing");
+        } else {
+            nameValue = Id.unescapeUid(nameValue);
+            logger.trace("Build ConnectorObject {} for {}", nameValue, operation.getSimpleName());
+        }
+
+        ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
+        builder.setObjectClass(objectClass);
+        builder.setUid(nameValue);
+        builder.setName(nameValue);
+        Set<String> keySet = source.required().asMap().keySet();
+        if (CreateApiOp.class.isAssignableFrom(operation)) {
+            for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
+                    continue;
+                }
+                if (attributeInfo.getAttributeInfo().isCreateable()) {
+                    Object v = source.get(attributeInfo.getName());
+                    if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
+                        throw new IllegalArgumentException("Required attribute {" + attributeInfo.getName() + "} value is null");
+                    }
+                    builder.addAttribute(attributeInfo.build(v, cryptoService));
+                }
+            }
+        } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
+            for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
+                    continue;
+                }
+                if (attributeInfo.getAttributeInfo().isUpdateable()) {
+                    Object v = source.get(attributeInfo.getName());
+                    builder.addAttribute(attributeInfo.build(v, cryptoService));
+                }
+            }
+        } else {
+            for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
+                    continue;
+                }
+                Object v = source.get(attributeInfo.getName());
+                builder.addAttribute(attributeInfo.build(v, cryptoService));
+            }
+        }
+        ConnectorObject result = builder.build();
+        if (logger.isTraceEnabled()) {
+            logger.trace("ConnectorObject build return: {}", SerializerUtil.serializeXmlObject(result, false));
+        }
+        return result;
+    }
 
     public Resource build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
@@ -273,7 +348,8 @@ public class ObjectClassInfoHelper {
             }
         }
         Uid uid = source.getUid();
-        result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
+        // TODO are we going to escape ids?
+        result.put(Resource.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);
         if (null != uid.getRevision()) {
             //System supports Revision
             result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
