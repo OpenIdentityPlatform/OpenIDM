@@ -687,7 +687,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             updateResourceConfig(resource, request.id);
         }
         if (method === "read") {
-            if (request.id === null) {
+            if (request.id === null || request.id === "") {
                 compArray = [];
                 for (i = 0; i < resources.length; i++) {
                     rsrc = resources[i];
