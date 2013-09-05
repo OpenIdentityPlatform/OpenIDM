@@ -40,11 +40,11 @@
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-<!--        <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-quartz-fragment</artifactId>
             <version>${openidm.version}</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
