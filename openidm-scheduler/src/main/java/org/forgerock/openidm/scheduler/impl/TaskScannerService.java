@@ -66,6 +66,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ObjectSetContext;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
@@ -79,7 +80,7 @@ import javax.script.ScriptException;
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM TaskScanner Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "taskscanner")
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/taskscanner*")
 })
 @Service
 public class TaskScannerService implements RequestHandler, ScheduledService {
@@ -99,16 +100,11 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scopeFactory;
 
-    @Reference(
-        referenceInterface = RequestHandler.class,
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private RequestHandler router;
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    RouteService routeService;
 
-    private ServerContext accessor() {
-        return new ServerContext(new RootContext(), Resources.newInternalConnection(router));
+    private ServerContext accessor() throws ResourceException {
+        return new ServerContext(routeService.createServerContext());
     }
 
     @Activate
@@ -135,7 +131,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         try {
             String id = request.getResourceName();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            if (id == null) {
+            if (id == null || "/".equals(id)) {
                 List<Map<String, Object>> taskList = new ArrayList<Map<String, Object>>();
                 for (TaskScannerContext entry : taskScanRuns.values()) {
                     Map<String, Object> taskData = buildTaskData(entry);
@@ -143,6 +139,9 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
                 result.put("tasks", taskList);
             } else {
+            	if (id.startsWith("/")) {
+            		id = id.substring(1);
+            	}
                 TaskScannerContext foundRun = taskScanRuns.get(id);
                 if (foundRun == null) {
                     throw new NotFoundException("Task with id '" + id + "' not found." );
@@ -169,23 +168,22 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
             String id = request.getResourceName();
-            Map<String, Object> params = request.getContent().asMap();
+            Map<String, String> params = request.getAdditionalActionParameters();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-            if (params.get("_action") == null) {
-                throw new BadRequestException("Expecting _action parameter");
-            }
-
-            String action = (String) params.get("_action");
-            if (id == null) {
+            String action = request.getAction();
+            if (id == null || "/".equals(id)) {
                 try {
                     if ("execute".equalsIgnoreCase(action)) {
                         try {
+                        	ObjectSetContext.push(context);
                             result.put("_id", onExecute(id, params));
                         } catch (JsonProcessingException e) {
                             throw new InternalServerErrorException(e);
                         } catch (IOException e) {
                             throw new InternalServerErrorException(e);
+                        } finally {
+                        	ObjectSetContext.pop();
                         }
                     } else {
                         throw new BadRequestException("Unknown action: " + action);
@@ -232,9 +230,9 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      * @throws JsonProcessingException
      * @throws IOException
      */
-    private String onExecute(String id, Map<String, Object> params)
+    private String onExecute(String id, Map<String, String> params)
             throws ExecutionException, JsonProcessingException, IOException, ScriptException {
-        String name = (String) params.get("name");
+        String name = params.get("name");
         JsonValue config;
         try {
             config = accessor().getConnection().read(accessor(), Requests.newReadRequest("config/" + name)).getContent();
@@ -251,7 +249,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         addTaskScanRun(context);
         TaskScannerJob taskScanJob = null;
         try {
-            taskScanJob = new TaskScannerJob(context, router, scopeFactory);
+            taskScanJob = new TaskScannerJob(context, routeService, scopeFactory);
         } catch (ScriptException e) {
             throw new ExecutionException(e);
         }
