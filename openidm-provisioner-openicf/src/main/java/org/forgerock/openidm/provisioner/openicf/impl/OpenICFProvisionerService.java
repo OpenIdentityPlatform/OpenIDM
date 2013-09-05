@@ -114,7 +114,7 @@ import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerF
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
-import org.forgerock.openidm.router.RouterRegistryService;
+import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -257,7 +257,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * RouterRegistryService service.
      */
     @Reference(policy = ReferencePolicy.STATIC)
-    protected RouterRegistryService routerRegistryService;
+    protected RouterRegistry routerRegistryService;
 
     /**
      * Cryptographic service.
