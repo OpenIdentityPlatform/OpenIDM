@@ -60,13 +60,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laszlo Hordos
  */
-public abstract class AbstractRouterRegistry implements ServiceFactory<RouterRegistryService>,
+public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         ServiceTrackerCustomizer<Object, RouteEntryImpl> {
 
     /**
-     * Setup logging for the {@link AbstractRouterRegistry}.
+     * Setup logging for the {@link RouterRegistryImpl}.
      */
-    final static Logger logger = LoggerFactory.getLogger(AbstractRouterRegistry.class);
+    final static Logger logger = LoggerFactory.getLogger(RouterRegistryImpl.class);
 
     protected final BundleContext context;
 
@@ -84,11 +84,11 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
     // the routerTracker.getTrackingCount when the router were last got
     protected int routerCount;
 
-    protected AbstractRouterRegistry(BundleContext context) {
+    protected RouterRegistryImpl(BundleContext context) {
         this(context, null);
     }
 
-    protected AbstractRouterRegistry(BundleContext context,
+    protected RouterRegistryImpl(BundleContext context,
             ServiceTracker<Router, Router> routerTracker) {
         if (null == context) {
             throw new NullPointerException("Failure the BundleContext value is null.");
@@ -109,7 +109,11 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
         activate();
     }
 
-    protected abstract void activate();
+    protected void activate() {
+        isActive.compareAndSet(false, true);
+        getInternalRouter();
+        resourceTracker.open();
+    }
 
     protected void deactivate() {
         isActive.compareAndSet(true, false);
@@ -190,14 +194,18 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
     // ----- Implementation of ServiceFactory interface
 
     @Override
-    public RouterRegistryService getService(Bundle bundle,
-            ServiceRegistration<RouterRegistryService> registration) {
+    public RouterRegistry getService(Bundle bundle,
+            ServiceRegistration<RouterRegistry> registration) {
+// TODO: reduce logging level
+        logger.info("getService RouterRegistryService {}", bundle);
         return new RouterRegistryServiceImpl(bundle, this);
     }
 
     @Override
     public void ungetService(Bundle bundle,
-            ServiceRegistration<RouterRegistryService> registration, RouterRegistryService service) {
+            ServiceRegistration<RouterRegistry> registration, RouterRegistry service) {
+// TODO: reduce logging level
+        logger.info("ungetService RouterRegistryService {}", bundle);
         ((RouterRegistryServiceImpl) service).dispose();
     }
 
@@ -269,12 +277,12 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
         return internalRouter.get();
     }
 
-    protected static class RouterRegistryServiceImpl implements RouterRegistryService {
+    protected static class RouterRegistryServiceImpl implements RouterRegistry {
 
         protected Bundle bundle;
-        protected AbstractRouterRegistry registry;
+        protected RouterRegistryImpl registry;
 
-        public RouterRegistryServiceImpl(Bundle bundle, AbstractRouterRegistry registry) {
+        public RouterRegistryServiceImpl(Bundle bundle, RouterRegistryImpl registry) {
             this.bundle = bundle;
             this.registry = registry;
         }
@@ -474,6 +482,8 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
 
 class RouteServiceFactory implements ServiceFactory<RouteService> {
 
+    final static Logger logger = LoggerFactory.getLogger(RouteServiceFactory.class);
+    
     protected final AtomicReference<Router> internalRouter;
 
     RouteServiceFactory(final AtomicReference<Router> internalRouter) {
@@ -481,11 +491,15 @@ class RouteServiceFactory implements ServiceFactory<RouteService> {
     }
 
     public RouteService getService(Bundle bundle, ServiceRegistration<RouteService> registration) {
+// TODO: reduce logging level
+        logger.info("getService RouteService {}", bundle);
         return new RouteServiceImpl(bundle, internalRouter);
     }
 
     public void ungetService(Bundle bundle, ServiceRegistration<RouteService> registration,
             RouteService service) {
+// TODO: reduce logging level
+        logger.info("ungetService RouteService {}", bundle);
         ((RouteServiceImpl) service).dispose();
     }
 }

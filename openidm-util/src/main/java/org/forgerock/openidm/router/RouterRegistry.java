@@ -31,7 +31,7 @@ import org.forgerock.json.resource.ConnectionProvider;
  *
  * @author Laszlo Hordos
  */
-public interface RouterRegistryService extends ConnectionProvider /* RequestHandler */{
+public interface RouterRegistry extends ConnectionProvider /* RequestHandler */{
 
     public RouteEntry addRoute(RouteBuilder routeBuilder);
 

@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.router;
+package org.forgerock.openidm.router.impl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

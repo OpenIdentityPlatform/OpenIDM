@@ -34,7 +34,7 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.router.JsonResourceRouterService;
+import org.forgerock.openidm.router.impl.JsonResourceRouterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

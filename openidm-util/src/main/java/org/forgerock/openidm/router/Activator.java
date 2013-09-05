@@ -47,7 +47,7 @@ import org.osgi.framework.ServiceRegistration;
 // TODO Delete this when openidm-core is migrated
 public class Activator implements BundleActivator {
 
-    private AnonymousClass a = null;
+    private RouterRegistryImpl routerRegistry;
 
     private ServiceRegistration factoryServiceRegistration = null;
     private ServiceRegistration<RequestHandler> routerServiceRegistration = null;
@@ -55,14 +55,15 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        a = new AnonymousClass(context);
+        //a = new AnonymousClass(context);
+        routerRegistry = new RouterRegistryImpl(context);
         Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
         properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
-        properties.put(Constants.SERVICE_PID, RouterRegistryService.class.getName());
+        properties.put(Constants.SERVICE_PID, RouterRegistry.class.getName());
 
         factoryServiceRegistration =
-                context.registerService(RouterRegistryService.class.getName(), a, properties);
+                context.registerService(RouterRegistry.class.getName(), routerRegistry, properties);
 
         properties = new Hashtable<String, Object>(5);
         properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
@@ -70,9 +71,9 @@ public class Activator implements BundleActivator {
         properties.put("org.forgerock.openidm.router", "true");
 
         routerServiceRegistration =
-                context.registerService(RequestHandler.class, a.getInternalRouter(), properties);
+                context.registerService(RequestHandler.class, routerRegistry.getInternalRouter(), properties);
 
-        final Connection connection = Resources.newInternalConnection(a.getInternalRouter());
+        final Connection connection = Resources.newInternalConnection(routerRegistry.getInternalRouter());
 
         // TODO move this to core when it's cleaned
         persistenceConfigRegistration =
@@ -95,8 +96,8 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        if (null != a) {
-            a.deactivate();
+        if (null != routerRegistry) {
+            routerRegistry.deactivate();
         }
         if (null != persistenceConfigRegistration) {
             persistenceConfigRegistration.unregister();
@@ -111,20 +112,4 @@ public class Activator implements BundleActivator {
             routerServiceRegistration = null;
         }
     }
-
-    // TODO Replace this later
-    private class AnonymousClass extends AbstractRouterRegistry {
-
-        private AnonymousClass(BundleContext context) {
-            super(context);
-        }
-
-        @Override
-        protected void activate() {
-            isActive.compareAndSet(false, true);
-            getInternalRouter();
-            resourceTracker.open();
-        }
-    }
-
 }
