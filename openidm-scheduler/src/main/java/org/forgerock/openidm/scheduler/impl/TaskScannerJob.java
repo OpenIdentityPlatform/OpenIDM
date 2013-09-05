@@ -49,6 +49,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ObjectSetContext;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.script.Script;
@@ -66,14 +67,14 @@ public class TaskScannerJob {
     private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
 
     private TaskScannerContext context;
-    private RequestHandler router;
+    private RouteService routeService;
     private ScriptRegistry scopeFactory;
     private ScriptEntry script;
 
-    public TaskScannerJob(TaskScannerContext context, RequestHandler router, ScriptRegistry scopeFactory)
+    public TaskScannerJob(TaskScannerContext context, RouteService routeService, ScriptRegistry scopeFactory)
             throws ExecutionException, ScriptException {
         this.context = context;
-        this.router = router;
+        this.routeService = routeService;
         this.scopeFactory = scopeFactory;
 
         JsonValue scriptValue = context.getScriptValue();
@@ -539,12 +540,8 @@ public class TaskScannerJob {
         }
     }
 
-    private ServerContext accessor() {
-        return new ServerContext(new RootContext(), Resources.newInternalConnection(router));
-    }
-
-    private Map<String, Object> newScope() {
-        return new HashMap<String, Object>();
+    private ServerContext accessor() throws ResourceException {
+    	return new ServerContext(routeService.createServerContext());
     }
 
 }
