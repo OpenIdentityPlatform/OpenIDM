@@ -49,11 +49,16 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
@@ -78,7 +83,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = "openidm.router.prefix", value = "/sync/*")
 })
 @Service
-public class SynchronizationService implements SingletonResourceProvider, Mappings {
+public class SynchronizationService implements SingletonResourceProvider, Mappings, ScheduledService {
 
     /** TODO: Description. */
     private enum Action {
@@ -96,9 +101,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private volatile ArrayList<ObjectMapping> mappings = null;
 
-    /** TODO: Description. */
-    private ComponentContext context;
-
     @Reference
     Reconcile reconService;
 
@@ -109,6 +111,9 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             unbind = "unbindScriptRegistry"
     )
     ScriptRegistry scriptRegistry;
+    
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    RouteService routeService;
 
     protected void bindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = service;
@@ -121,7 +126,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     @Activate
     protected void activate(ComponentContext context) {
-        this.context = context;
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
             mappings = new ArrayList<ObjectMapping>();
@@ -134,12 +138,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     @Deactivate
     protected void deactivate(ComponentContext context) {
         mappings = null;
-        this.context = null;
     }
 
     @Modified
     protected void modified(ComponentContext context) {
-        this.context = context;
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         ArrayList<ObjectMapping> newMappings = new ArrayList<ObjectMapping>();
         try {
@@ -248,55 +250,52 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     /**
      * @deprecated Use {@code sync} resource interface.
      */
-//    @Deprecated
-//    private JsonValue newFauxContext(JsonValue mapping) {
-//        JsonValue context = JsonResourceContext.newContext("resource", ObjectSetContext.get());
-//        context.put("method", "action");
-//        context.put("id", "sync");
-//        HashMap<String, Object> params = new HashMap<String, Object>();
-//        params.put("mapping", mapping == null ? null : mapping.getObject());
-//        context.put("params", params);
-//        return context;
-//    }
+    @Deprecated
+    private ServerContext newFauxContext(JsonValue mapping) throws ResourceException {
+        ServerContext context = new ServerContext("sync", routeService.createServerContext());
+        return context;
+    }
 
     /**
      * @deprecated Use {@code sync} resource interface.
      */
-//    @Override // ScheduledService
-//    @Deprecated // use resource interface
-//    public void execute(Map<String, Object> context) throws ExecutionException {
-//        try {
-//            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
-//            String action = params.get("action").asString();
-//
-//            // "reconcile" in schedule config is the legacy equivalent of the action "recon"
-//            if ("reconcile".equals(action)
-//                    || ReconciliationService.ReconAction.isReconAction(action)) {
-//                JsonValue mapping = params.get("mapping");
-//                ObjectSetContext.push(newFauxContext(mapping));
-//
-//                // Legacy support for spelling recon action as reconcile
-//                if ("reconcile".equals(action)) {
-//                    params.put("_action", ReconciliationService.ReconAction.recon.toString());
-//                } else {
-//                    params.put("_action", action);
-//                }
-//
-//                try {
-//                    reconService.reconcile(mapping, Boolean.TRUE, params);
-//                } finally {
-//                    ObjectSetContext.pop();
-//                }
-//            } else {
-//                throw new ExecutionException("Action '" + action +
-//                        "' configured in schedule not supported.");
-//            }
-//        } catch (JsonValueException jve) {
-//            throw new ExecutionException(jve);
-//        } catch (SynchronizationException se) {
-//            throw new ExecutionException(se);
-//        }
-//    }
+    @Override // ScheduledService
+    @Deprecated // use resource interface
+    public void execute(Map<String, Object> context) throws ExecutionException {
+        try {
+            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+            String action = params.get("action").asString();
+
+            // "reconcile" in schedule config is the legacy equivalent of the action "recon"
+            if ("reconcile".equals(action)
+                    || ReconciliationService.ReconAction.isReconAction(action)) {
+                JsonValue mapping = params.get("mapping");
+                ObjectSetContext.push(newFauxContext(mapping));
+
+                // Legacy support for spelling recon action as reconcile
+                if ("reconcile".equals(action)) {
+                    params.put("_action", ReconciliationService.ReconAction.recon.toString());
+                } else {
+                    params.put("_action", action);
+                }
+
+                try {
+                    reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, params);
+                } finally {
+                    ObjectSetContext.pop();
+                }
+            } else {
+                throw new ExecutionException("Action '" + action +
+                        "' configured in schedule not supported.");
+            }
+        } catch (ResourceException re) {
+            throw new ExecutionException(re);
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
+        } catch (SynchronizationException se) {
+            throw new ExecutionException(se);
+        }
+    }
 
     /**
      *
