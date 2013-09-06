@@ -108,8 +108,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
                     OSGiAuthnFilterBuilder.getRouter().createServerContext(), userIdProperty, userCredentialProperty,
                     userRolesProperty, defaultRoles);
         } catch (ResourceException e) {
-            //TODO
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.debug(e.getMessage(), e);
         }
     }
 
@@ -147,8 +146,6 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             return AuthStatus.SEND_FAILURE;
         }
         securityContextMapper.setResource(queryOnResource);
-//        logger.debug("Found valid session for {} id {} with roles {}", securityContextMapper.getUsername(), securityContextMapper.getUserId(),
-//                securityContextMapper.getRoles());
 
         if (authenticated) {
             clientSubject.getPrincipals().add(new Principal() {
