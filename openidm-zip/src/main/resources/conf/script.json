@@ -29,7 +29,7 @@
             "type": "auto-detect"
         },
         "project": {
-            "directory": "&{launcher.install.location}/script",
+            "directory": "&{launcher.project.location}/script",
             "subdirectories": "true",
             "visibility": "public",
             "type": "auto-detect"
