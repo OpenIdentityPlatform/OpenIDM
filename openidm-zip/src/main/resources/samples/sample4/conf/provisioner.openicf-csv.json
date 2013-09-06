@@ -32,6 +32,10 @@
         "nameAttribute" : "uid",
         "passwordAttribute" : "password"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "account" : {
             "$schema" : "http://json-schema.org/draft-03/schema",

@@ -34,6 +34,10 @@
         "xmlFilePath" : "samples/sample5/data/xml_AD_Data.xml",
         "createFileIfNotExists" : true
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "account" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
