@@ -46,6 +46,10 @@
         "updateScriptFileName" : "&{launcher.project.location}/tools/UpdateScript.groovy",
         "syncScriptFileName" : "&{launcher.project.location}/tools/SyncScript.groovy"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" : {
         "group" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
