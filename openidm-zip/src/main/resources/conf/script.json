@@ -28,14 +28,20 @@
             "visibility": "public",
             "type": "auto-detect"
         },
-        "project": {
-            "directory": "&{launcher.project.location}/script",
+        "install": {
+            "directory": "&{launcher.install.location}",
             "subdirectories": "true",
             "visibility": "public",
             "type": "auto-detect"
         },
-        "install": {
-            "directory": "&{launcher.install.location}",
+        "project": {
+            "directory": "&{launcher.project.location}",
+            "subdirectories": "true",
+            "visibility": "public",
+            "type": "auto-detect"
+        },
+        "project-script": {
+            "directory": "&{launcher.project.location}/script",
             "subdirectories": "true",
             "visibility": "public",
             "type": "auto-detect"
