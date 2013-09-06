@@ -57,7 +57,7 @@
                 "_id" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "objectid",
+                    "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
                 "entryType" : {
@@ -167,7 +167,7 @@
                 "_id" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "objectid",
+                    "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
                 "activityId" : {
@@ -265,7 +265,7 @@
                 "_id" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "objectid",
+                    "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
                 "action" : {
