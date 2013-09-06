@@ -40,6 +40,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -62,7 +63,9 @@ import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -76,7 +79,7 @@ import java.util.Map;
         policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM System Object Set Service",
         immediate = true)
-@Service(value = {ScheduledService.class})
+@Service(value = {ScheduledService.class, SingletonResourceProvider.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
@@ -86,6 +89,9 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     private final static LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(SystemObjectSetService.class);
 
+    public final static String ACTION_CREATE_CONFIGURATION = "CREATECONFIGURATION";
+    public final static String ACTION_TEST_CONFIGURATION = "testConfig";
+    public final static String ACTION_TEST_CONNECTOR = "test";
     public final static String ACTION_LIVE_SYNC = "liveSync";
     public final static String ACTION_ACTIVE_SYNC = "activeSync";
 
@@ -118,8 +124,8 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     protected void bindProvisionerServices(ProvisionerService service, Map properties) {
         provisionerServices.put(service.getSystemIdentifier(), service);
 //        logger.info("ProvisionerService {} is bound with system identifier {}.",
- //               properties.get(ComponentConstants.COMPONENT_ID),
-  //              service.getSystemIdentifier());
+//                properties.get(ComponentConstants.COMPONENT_ID),
+//                service.getSystemIdentifier());
     }
 
     protected void unbindProvisionerServices(ProvisionerService service, Map properties) {
@@ -134,23 +140,55 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        if ("CREATECONFIGURATION".equalsIgnoreCase(request.getAction())) {
+        if (ACTION_CREATE_CONFIGURATION.equalsIgnoreCase(request.getAction())) {
             if (null != configurationService) {
+                try {
+                    handler.handleResult(configurationService.configure(request.getContent()));
+                } catch (ResourceException e) {
+                    handler.handleError(e);
+                } catch (Exception e) {
+                    handler.handleError(new InternalServerErrorException(e));
+                } 
+            } else {
+                handler.handleError(new ServiceUnavailableException("The required service is not available"));
+            }
+        } else if (ACTION_TEST_CONFIGURATION.equalsIgnoreCase(request.getAction())) {
             try {
-                handler.handleResult(configurationService.configure(request.getContent()));
+                JsonValue config = request.getContent();
+                if (!config.get("id").isNull()) {
+                    throw new BadRequestException("A system ID must not be specified in the request");
+                }
+                ProvisionerService ps = locateServiceForTest(config.get("name"));
+                if (ps == null) {
+                    throw new BadRequestException("Invalid configuration to test: no 'name' specified");
+                }
+                handler.handleResult(new JsonValue(ps.testConfig(config)));
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e));
-            } } else {
-                handler.handleError(new ServiceUnavailableException("The required service is not available"));
+            }
+        } else if (ACTION_TEST_CONNECTOR.equalsIgnoreCase(request.getAction())) {
+            try {
+                ProvisionerService ps = locateServiceForTest(request.getContent().get("id"));
+                if (ps != null) {
+                    handler.handleResult(new JsonValue(ps.getStatus()));
+                } else {
+                    List<Object> list = new ArrayList<Object>();
+                    for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+                        list.add(entry.getValue().getStatus());
+                    }
+                    handler.handleResult(new JsonValue(list));
+                }
+            } catch (ResourceException e) {
+                handler.handleError(e);
+            } catch (Exception e) {
+                handler.handleError(new InternalServerErrorException(e));
             }
         } else {
             handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
         }
     }
-
-
 
     @Override
     public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
@@ -332,5 +370,20 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             }
         }
         throw new ServiceUnavailableException("System: " + identifier + " is not available.");
+    }
+
+    private ProvisionerService locateServiceForTest(JsonValue requestId) throws ResourceException {
+        if (requestId.isNull()) {
+            return null;
+        }
+
+        Id id = new Id(requestId.asString() + "/test");
+        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+            if (entry.getKey().is(id)) {
+                return entry.getValue();
+            }
+        }
+
+        throw new NotFoundException("System: " + requestId.asString() + " is not available.");
     }
 }

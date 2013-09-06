@@ -672,7 +672,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 */
     private enum ConnectorAction {
-        script;
+        script,
+        test;
+
+        public static ConnectorAction fromActionValue(String action) {
+            try {
+                return valueOf(action.toLowerCase());
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
     }
 
     @Override
@@ -686,165 +695,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     public void actionInstance(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
+            switch (ConnectorAction.fromActionValue(request.getAction())) {
+                case script:
+                    handleScriptAction(request, handler);
+                    break;
 
-            if (ConnectorAction.script.name().equalsIgnoreCase(request.getAction())) {
-                // TODO NPE check
-                if (StringUtils.isBlank(request.getAdditionalActionParameters().get(
-                        SystemAction.SCRIPT_ID))) {
-                    handler.handleError(new BadRequestException("Missing required parameter: "
-                            + SystemAction.SCRIPT_ID));
-                    return;
-                }
-                SystemAction action =
-                        localSystemActionCache.get(request.getAdditionalActionParameters().get(
-                                SystemAction.SCRIPT_ID));
+                case test:
+                    handleTestAction(request, handler);
+                    break;
 
-                String systemType = connectorReference.getConnectorKey().getConnectorName();
-                List<ScriptContextBuilder> scriptContextBuilderList =
-                        action.getScriptContextBuilders(systemType);
-                if (null != scriptContextBuilderList) {
-                    // OperationHelper helper = operationHelperBuilder
-                    // .build(id.getObjectType(),
-                    // params, cryptoService);
-
-                    JsonValue result = new JsonValue(new HashMap<String, Object>());
-
-                    boolean onConnector =
-                            !"resource".equalsIgnoreCase(request.getAdditionalActionParameters()
-                                    .get(SystemAction.SCRIPT_EXECUTE_MODE));
-
-                    final ConnectorFacade facade =
-                            getConnectorFacade0(handler, onConnector ? ScriptOnConnectorApiOp.class
-                                    : ScriptOnResourceApiOp.class);
-                    if (null != facade) {
-
-                        String variablePrefix =
-                                request.getAdditionalActionParameters().get(
-                                        SystemAction.SCRIPT_VARIABLE_PREFIX);
-
-                        List<Map<String, Object>> resultList =
-                                new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
-                        result.put("actions", resultList);
-
-                        for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
-                            boolean isShell =
-                                    contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
-                            for (Map.Entry<String, String> entry : request
-                                    .getAdditionalActionParameters().entrySet()) {
-                                if (entry.getKey().startsWith("_")) {
-                                    continue;
-                                }
-                                Object value = entry.getValue();
-                                Object newValue = value;
-                                if (isShell) {
-                                    if ("password".equalsIgnoreCase(entry.getKey())) {
-                                        if (value instanceof String) {
-                                            newValue =
-                                                    new GuardedString(((String) value)
-                                                            .toCharArray());
-                                        } else {
-                                            throw new BadRequestException(
-                                                    "Invalid type for password.");
-                                        }
-                                    }
-                                    if ("username".equalsIgnoreCase(entry.getKey())) {
-                                        if (value instanceof String == false) {
-                                            throw new BadRequestException(
-                                                    "Invalid type for username.");
-                                        }
-                                    }
-                                    if ("workingdir".equalsIgnoreCase(entry.getKey())) {
-                                        if (value instanceof String == false) {
-                                            throw new BadRequestException(
-                                                    "Invalid type for workingdir.");
-                                        }
-                                    }
-                                    if ("timeout".equalsIgnoreCase(entry.getKey())) {
-                                        if (value instanceof String == false
-                                                && value instanceof Number == false) {
-                                            throw new BadRequestException(
-                                                    "Invalid type for timeout.");
-                                        }
-                                    }
-                                    contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                                    continue;
-                                }
-
-                                if (null != value) {
-                                    if (value instanceof Collection) {
-                                        newValue =
-                                                Array.newInstance(Object.class,
-                                                        ((Collection) value).size());
-                                        int i = 0;
-                                        for (Object v : (Collection) value) {
-                                            if (null == v
-                                                    || FrameworkUtil.isSupportedAttributeType(v
-                                                            .getClass())) {
-                                                Array.set(newValue, i, v);
-                                            } else {
-                                                // Serializable may not be
-                                                // acceptable
-                                                Array.set(newValue, i,
-                                                        v instanceof Serializable ? v : v
-                                                                .toString());
-                                            }
-                                            i++;
-                                        }
-
-                                    } else if (value.getClass().isArray()) {
-                                        // TODO implement the array support
-                                        // later
-                                    } else if (!FrameworkUtil.isSupportedAttributeType(value
-                                            .getClass())) {
-                                        // Serializable may not be acceptable
-                                        newValue =
-                                                value instanceof Serializable ? value : value
-                                                        .toString();
-                                    }
-                                }
-                                contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                            }
-                            // contextBuilder.addScriptArgument("openidm_id",
-                            // id.toString());
-
-                            // ScriptContext scriptContext =
-                            // script.getScriptContextBuilder().build();
-                            OperationOptionsBuilder operationOptionsBuilder =
-                                    new OperationOptionsBuilder();
-
-                            // It's necessary to keep the backward compatibility
-                            // with Waveset IDM
-                            if (null != variablePrefix && isShell) {
-                                operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
-                            }
-
-                            Map<String, Object> actionResult = new HashMap<String, Object>(2);
-                            try {
-                                Object scriptResult = null;
-                                if (onConnector) {
-                                    scriptResult =
-                                            facade.runScriptOnConnector(contextBuilder.build(),
-                                                    operationOptionsBuilder.build());
-                                } else {
-                                    scriptResult =
-                                            facade.runScriptOnResource(contextBuilder.build(),
-                                                    operationOptionsBuilder.build());
-                                }
-                                actionResult.put("result", ConnectorUtil.coercedTypeCasting(
-                                        scriptResult, Object.class));
-                            } catch (Throwable t) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.error("Script execution error.", t);
-                                }
-                                actionResult.put("error", t.getMessage());
-                            }
-                            resultList.add(actionResult);
-                        }
-                    }
-                }
-            } else {
-                handler.handleError(new BadRequestException("Unsupported action: "
-                        + request.getAction()));
+                default:
+                    handler.handleError(new BadRequestException("Unsupported action: " + request.getAction()));
             }
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -870,6 +731,135 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         final ResourceException e =
                 new NotSupportedException("Update operations are not supported");
         handler.handleError(e);
+    }
+
+    private void handleScriptAction(final ActionRequest request, final ResultHandler<JsonValue> handler) throws ResourceException {
+
+        // TODO NPE check
+        if (StringUtils.isBlank(request.getAdditionalActionParameters().get(SystemAction.SCRIPT_ID))) {
+            handler.handleError(new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID));
+            return;
+        }
+        SystemAction action = localSystemActionCache.get(request.getAdditionalActionParameters().get(SystemAction.SCRIPT_ID));
+
+        String systemType = connectorReference.getConnectorKey().getConnectorName();
+        List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
+        if (null != scriptContextBuilderList) {
+            // OperationHelper helper = operationHelperBuilder
+            // .build(id.getObjectType(),
+            // params, cryptoService);
+
+            JsonValue result = new JsonValue(new HashMap<String, Object>());
+
+            boolean onConnector = !"resource".equalsIgnoreCase(
+                    request.getAdditionalActionParameters().get(SystemAction.SCRIPT_EXECUTE_MODE));
+
+            final ConnectorFacade facade = getConnectorFacade0(handler,
+                    onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
+
+            if (null != facade) {
+                String variablePrefix = request.getAdditionalActionParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+
+                List<Map<String, Object>> resultList =
+                        new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
+                result.put("actions", resultList);
+
+                for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
+                    boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
+                    for (Map.Entry<String, String> entry : request.getAdditionalActionParameters().entrySet()) {
+                        if (entry.getKey().startsWith("_")) {
+                            continue;
+                        }
+                        Object value = entry.getValue();
+                        Object newValue = value;
+                        if (isShell) {
+                            if ("password".equalsIgnoreCase(entry.getKey())) {
+                                if (value instanceof String) {
+                                    newValue = new GuardedString(((String) value).toCharArray());
+                                } else {
+                                    throw new BadRequestException("Invalid type for password.");
+                                }
+                            }
+                            if ("username".equalsIgnoreCase(entry.getKey())) {
+                                if (value instanceof String == false) {
+                                    throw new BadRequestException("Invalid type for username.");
+                                }
+                            }
+                            if ("workingdir".equalsIgnoreCase(entry.getKey())) {
+                                if (value instanceof String == false) {
+                                    throw new BadRequestException("Invalid type for workingdir.");
+                                }
+                            }
+                            if ("timeout".equalsIgnoreCase(entry.getKey())) {
+                                if (!(value instanceof String) && !(value instanceof Number)) {
+                                    throw new BadRequestException("Invalid type for timeout.");
+                                }
+                            }
+                            contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                            continue;
+                        }
+
+                        if (null != value) {
+                            if (value instanceof Collection) {
+                                newValue =
+                                        Array.newInstance(Object.class,
+                                                ((Collection) value).size());
+                                int i = 0;
+                                for (Object v : (Collection) value) {
+                                    if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                        Array.set(newValue, i, v);
+                                    } else {
+                                        // Serializable may not be
+                                        // acceptable
+                                        Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                                    }
+                                    i++;
+                                }
+
+                            } else if (value.getClass().isArray()) {
+                                // TODO implement the array support later
+                            } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                                // Serializable may not be acceptable
+                                newValue = value instanceof Serializable ? value : value.toString();
+                            }
+                        }
+                        contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                    }
+                    // contextBuilder.addScriptArgument("openidm_id", id.toString());
+
+                    // ScriptContext scriptContext = script.getScriptContextBuilder().build();
+                    OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+
+                    // It's necessary to keep the backward compatibility with Waveset IDM
+                    if (null != variablePrefix && isShell) {
+                        operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+                    }
+
+                    Map<String, Object> actionResult = new HashMap<String, Object>(2);
+                    try {
+                        Object scriptResult = null;
+                        if (onConnector) {
+                            scriptResult = facade.runScriptOnConnector(
+                                    contextBuilder.build(), operationOptionsBuilder.build());
+                        } else {
+                            scriptResult = facade.runScriptOnResource(
+                                    contextBuilder.build(), operationOptionsBuilder.build());
+                        }
+                        actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+                    } catch (Throwable t) {
+                        if (logger.isDebugEnabled()) {
+                            logger.error("Script execution error.", t);
+                        }
+                        actionResult.put("error", t.getMessage());
+                    }
+                    resultList.add(actionResult);
+                }
+            }
+        }
+    }
+
+    private void handleTestAction(ActionRequest request, ResultHandler<JsonValue> handler) {
+        handler.handleResult(new JsonValue(getStatus()));
     }
 
     /**
