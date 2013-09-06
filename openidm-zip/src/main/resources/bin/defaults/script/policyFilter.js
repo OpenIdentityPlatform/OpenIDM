@@ -36,7 +36,7 @@ if (request.id.indexOf("policy/") !== 0 && enforce !== "false") {
 
 	if (!result.result) {
 		throw {
-			"openidmCode" : 403,
+			"code" : 403,
 			"message" : "Policy validation failed",
 			"detail" : result
 		};

@@ -436,7 +436,7 @@ load(identityServer.getProjectLocation() + "/script/access.js");
 if (!allow()) {
 //    java.lang.System.out.println(request);
     throw { 
-        "openidmCode" : 403, 
+        "code" : 403,
         "message" : "Access denied"
     };
 }

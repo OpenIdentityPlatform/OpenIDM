@@ -42,7 +42,7 @@
 
 if (request.method !== "query") {
     throw { 
-        "openidmCode" : 403, 
+        "code" : 403,
         "message" : "Access denied"
     };
 }
@@ -116,7 +116,7 @@ if (request.method !== "query") {
     }
     else { // apparently they have provided an unsupported action
         throw { 
-            "openidmCode" : 403, 
+            "code" : 403,
             "message" : "Access denied"
         };
     }
