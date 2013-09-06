@@ -54,14 +54,14 @@
             openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
         } else {
             throw { 
-                "openidmCode" : 403, 
+                "code" : 403,
                 "message" : "Access denied"
             };
         }
         
     } else {
         throw { 
-            "openidmCode" : 403, 
+            "code" : 403,
             "message" : "Access denied"
         };
     }

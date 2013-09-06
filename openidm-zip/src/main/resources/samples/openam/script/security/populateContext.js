@@ -37,12 +37,12 @@ if (userDetail && userDetail.result && userDetail.result.length === 1) {
 } else {
     if (userDetail && userDetail.result && userDetail.result.length > 1) {
         throw { 
-            "openidmCode" : 403, 
+            "code" : 403,
             "message" : "Access denied, user detail retrieved ambiguous"
         };
     } else {
         throw {
-            "openidmCode" : 403,
+            "code" : 403,
             "message" : "Access denied, no user detail could be retrieved"
         };
     }
