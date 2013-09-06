@@ -46,7 +46,6 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -65,9 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Auth Filter
@@ -150,8 +147,10 @@ public class AuthFilter implements HttpServletContextFactory, SingletonResourceP
         SecurityContext securityContext = securityContextFactory.createContext(request);
         String authcid = securityContext.getAuthenticationId();
 
-        if (authcid == null || authcid.equals("")) {
-            securityContext = new SecurityContext(new RootContext(), "anonymous", null);
+        if (StringUtils.isEmpty(authcid)) {
+            logger.warn("Rejecting invocation as required context to allow invocation not populated");
+            throw ResourceException.getException(ResourceException.UNAVAILABLE,
+                    "Rejecting invocation as required context to allow invocation not populated");
         }
         return securityContext;
     }
