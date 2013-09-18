@@ -40,6 +40,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
@@ -74,7 +75,6 @@ import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.openidm.core.ServerConstants;
@@ -83,7 +83,6 @@ import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
 import org.joda.time.DateTime;
 import org.osgi.framework.Constants;
@@ -215,6 +214,8 @@ public class SecurityManager extends SimpleJsonResource {
                     try {
                         storeCert(value, store, alias);
                         resultMap.put("_id", alias);
+                    } catch (JsonResourceException e) {
+                        throw e;
                     } catch (Exception e) {
                         throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, 
                                 "Failed to store certificate: " + e.getMessage(), e);
@@ -253,6 +254,7 @@ public class SecurityManager extends SimpleJsonResource {
             }
             List<String> certStringChain = value.get("certs").required().asList(String.class);
             Certificate [] certChain = readCertificateChain(certStringChain, type);
+            verify(privateKey, certChain[0]);
             store.addPrivateKey(alias, privateKey, certChain);
         } else {
             String certString = value.get("cert").required().asString();
@@ -742,6 +744,36 @@ public class SecurityManager extends SimpleJsonResource {
         SSLContext.setDefault(context);
     }
     
+    /**
+     * Verifies that the supplied private key and signed certificate match by signing/verifying some test data.
+     * 
+     * @param privateKey A private key
+     * @param publicKey A public key
+     * @throws JsonResourceException if the verification fails, or an error is encountered.
+     */
+    private void verify(PrivateKey privateKey, Certificate cert) throws JsonResourceException {
+        PublicKey publicKey = cert.getPublicKey();
+        byte[] data = { 65, 66, 67, 68, 69, 70, 71, 72, 73, 74 };
+        boolean verified;
+        try {
+            Signature signer = Signature.getInstance(privateKey.getAlgorithm());
+            signer.initSign(privateKey);
+            signer.update(data);
+            byte[] signed = signer.sign();
+            Signature verifier = Signature.getInstance(publicKey.getAlgorithm());
+            verifier.initVerify(publicKey);
+            verifier.update(data);
+            verified = verifier.verify(signed);
+        } catch (Exception e) {
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, 
+                    "Error verifying private key and signed certificate", e);
+        }
+        if (!verified) {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
+                    "Private key does not match signed certificate");
+        }
+    }
+
     /**
      * A wrapper class for a truststore or keystore.  Contains methods for storing,
      * reloading, and adding certificates to the store.
