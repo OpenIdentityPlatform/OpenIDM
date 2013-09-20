@@ -122,7 +122,7 @@ public class SalesforceConnection extends ClientResource {
 
     private OAuthUser authentication = null;
 
-    public SalesforceConnection(ClientResource resource) {
+    public SalesforceConnection(final ClientResource resource) {
         super(resource);
     }
 
@@ -249,7 +249,7 @@ public class SalesforceConnection extends ClientResource {
 
     private void authenticate() throws JsonResourceException {
         Representation body = null;
-        ClientResource cr = super.getChild(new Reference(""));
+        final ClientResource cr = super.getChild(new Reference(""));
         try {
             revokeAccessToken();
 
@@ -277,23 +277,27 @@ public class SalesforceConnection extends ClientResource {
         // REVOKE
         if (null != authentication) {
             logger.debug("Attempt to revoke AccessToken!");
-            ClientResource revoke = super.getChild(new Reference("./revoke"));
-            revoke.setFollowingRedirects(true);
-            revoke.getReference().addQueryParameter("token", authentication.getAccessToken());
-            revoke.setMethod(Method.GET);
-            revoke.handle();
+            final ClientResource cr = super.getChild(new Reference("./revoke"));
+            try {
+                cr.setFollowingRedirects(true);
+                cr.getReference().addQueryParameter("token", authentication.getAccessToken());
+                cr.setMethod(Method.GET);
+                cr.handle();
 
-            if (revoke.getResponse().getStatus().isError()) {
-                // TODO is it expired?
-                logger.error("Failed to revoke token - status:{} response:{} ", revoke
-                        .getResponse().getStatus(),
-                        null != revoke.getResponse().getEntity() ? revoke.getResponse()
-                                .getEntityAsText() : "");
-            } else {
-                logger.info("Succeed to revoke token - status:{} response:{} ", revoke
-                        .getResponse().getStatus(),
-                        null != revoke.getResponse().getEntity() ? revoke.getResponse()
-                                .getEntityAsText() : "");
+                if (cr.getResponse().getStatus().isError()) {
+                    // TODO is it expired?
+                    logger.error("Failed to revoke token - status:{} response:{} ", cr
+                            .getResponse().getStatus(), null != cr.getResponse().getEntity() ? cr
+                            .getResponse().getEntityAsText() : "");
+                } else {
+                    logger.info("Succeed to revoke token - status:{} response:{} ", cr
+                            .getResponse().getStatus(), null != cr.getResponse().getEntity() ? cr
+                            .getResponse().getEntityAsText() : "");
+                }
+            } finally {
+                if (null != cr) {
+                    cr.release();
+                }
             }
         }
     }
@@ -365,12 +369,22 @@ public class SalesforceConnection extends ClientResource {
     }
 
     public void test() throws JsonResourceException {
-        ClientResource resource = getChild("services/data/" + getVersion());
-        test(resource, true);
+        final ClientResource cr = getChild("services/data/" + getVersion());
+        try {
+            test(cr, true);
+        } finally {
+            if (null != cr) {
+                cr.release();
+            }
+        }
     }
 
     public String getVersion() {
         return "v" + Double.toString(configuration.getVersion());
+    }
+
+    public Double getAPIVersion() {
+        return configuration.getVersion();
     }
 
     private void test(ClientResource resource, boolean tryReauth) throws JsonResourceException {

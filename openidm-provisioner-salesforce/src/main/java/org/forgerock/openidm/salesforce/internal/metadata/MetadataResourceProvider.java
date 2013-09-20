@@ -208,7 +208,8 @@ public class MetadataResourceProvider extends SimpleJsonResource {
                 query.setFolder("*");
 
                 FileProperties[] results =
-                        getConnection().listMetadata(new ListMetadataQuery[] { query }, 28.0);
+                        getConnection().listMetadata(new ListMetadataQuery[] { query },
+                                sfconnection.getAPIVersion());
 
                 for (FileProperties file : results) {
                     JsonValue metadataResource =
@@ -299,10 +300,10 @@ public class MetadataResourceProvider extends SimpleJsonResource {
         packageTypeMembers.setName(metaClass.getSimpleName());
         packageTypeMembers.setMembers(new String[] { "*" });
         Package p = new Package();
-        p.setVersion("28.0");
+        p.setVersion(Double.toString(sfconnection.getAPIVersion()));
         p.setTypes(new PackageTypeMembers[] { packageTypeMembers });
         RetrieveRequest retrieveRequest = new RetrieveRequest();
-        retrieveRequest.setApiVersion(28.0);
+        retrieveRequest.setApiVersion(sfconnection.getAPIVersion());
         retrieveRequest.setUnpackaged(p);
 
         AsyncResult asyncResult = getConnection().retrieve(retrieveRequest);

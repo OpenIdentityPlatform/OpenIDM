@@ -22,6 +22,7 @@ import org.restlet.data.Form;
 public class SalesforceConfiguration {
 
     private final static String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
+    public static final double API_VERSION = 28.0;
 
     // Exposed configuration properties.
 
@@ -158,7 +159,7 @@ public class SalesforceConfiguration {
 
     private String instanceUrl = null;
 
-    private double version = 27.0;
+    private double version = API_VERSION;
 
     public String getLoginUrl() {
         return loginUrl != null ? loginUrl : LOGIN_URL;

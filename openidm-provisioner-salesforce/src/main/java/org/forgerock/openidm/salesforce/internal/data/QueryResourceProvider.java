@@ -50,26 +50,31 @@ public class QueryResourceProvider extends SimpleJsonResource {
                 new StringBuilder("services/data/").append(connection.getVersion()).append('/')
                         .append("query");
 
-        ClientResource rc = connection.getChild(sb.toString());
-
-        rc.getReference().addQueryParameter("q", queryExpression);
-        rc.setMethod(org.restlet.data.Method.GET);
-        logger.debug("Attempt to execute query: {}?{}", rc.getReference(), rc.getReference()
-                .getQuery());
-        handleRequest(rc, true);
-        Representation body = rc.getResponse().getEntity();
-
         ResultHandler handler = new ResultHandler();
-        handler.handleResource(null);
+        final ClientResource cr = connection.getChild(sb.toString());
+        try {
+            cr.getReference().addQueryParameter("q", queryExpression);
+            cr.setMethod(org.restlet.data.Method.GET);
+            logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr.getReference()
+                    .getQuery());
+            handleRequest(cr, true);
+            Representation body = cr.getResponse().getEntity();
 
-        if (null != body && body instanceof EmptyRepresentation == false) {
-            JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-            JsonValue result = new JsonValue(rep.getObject());
-            for (JsonValue record : result.get("records")) {
-                if (record.isDefined("Id")) {
-                    record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+            handler.handleResource(null);
+
+            if (null != body && body instanceof EmptyRepresentation == false) {
+                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
+                JsonValue result = new JsonValue(rep.getObject());
+                for (JsonValue record : result.get("records")) {
+                    if (record.isDefined("Id")) {
+                        record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+                    }
+                    handler.handleResource(record);
                 }
-                handler.handleResource(record);
+            }
+        } finally {
+            if (null != cr) {
+                cr.release();
             }
         }
 

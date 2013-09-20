@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A NAME does ...
- * 
+ *
  * @author Laszlo Hordos
  */
 public class GenericResourceProvider extends SimpleJsonResource {
@@ -47,19 +47,25 @@ public class GenericResourceProvider extends SimpleJsonResource {
         String type = context.getMatcher().group(1);
         String id = context.getMatcher().group(2);
 
-        ClientResource rc = getClientResource(type, id);
-        handleRequest(rc, true);
-        Representation body = rc.getResponse().getEntity();
-        if (null != body && body instanceof EmptyRepresentation == false) {
-            JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-            JsonValue result = new JsonValue(rep.getObject());
-            if (result.isDefined("Id")) {
-                result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("Id").required()
-                        .asString());
+        final ClientResource cr = getClientResource(type, id);
+        try {
+            handleRequest(cr, true);
+            Representation body = cr.getResponse().getEntity();
+            if (null != body && body instanceof EmptyRepresentation == false) {
+                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
+                JsonValue result = new JsonValue(rep.getObject());
+                if (result.isDefined("Id")) {
+                    result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("Id").required()
+                            .asString());
+                }
+                return result;
+            } else {
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND);
             }
-            return result;
-        } else {
-            throw new JsonResourceException(JsonResourceException.NOT_FOUND);
+        } finally {
+            if (null != cr) {
+                cr.release();
+            }
         }
     }
 

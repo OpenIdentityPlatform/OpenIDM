@@ -131,6 +131,11 @@
                         <!--Export-Package>
                             org.forgerock.openidm.salesforce;version=${openidm.version},
                         </Export-Package-->
+                        <Import-Package>
+                            com.google.appengine.api.urlfetch;resolution:=optional,
+                            org.stringtemplate.v4;resolution:=optional,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

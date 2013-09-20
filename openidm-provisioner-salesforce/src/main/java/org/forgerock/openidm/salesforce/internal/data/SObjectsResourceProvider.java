@@ -66,31 +66,35 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                     "Type not supported: " + type);
         }
 
-        ClientResource rc = getClientResource(type, null);
+        final ClientResource cr = getClientResource(type, null);
+        try {
+            JsonValue create = new JsonValue(describe.beforeCreate(request.get("value")));
+            logger.error("Create sobjects/{} \n content: \n{}\n", type, create);
 
-        JsonValue create = new JsonValue(describe.beforeCreate(request.get("value")));
-        logger.error("Create sobjects/{} \n content: \n{}\n", type, create);
-
-        rc.getRequest().setEntity(new JacksonRepresentation<Map>(create.asMap()));
-        rc.setMethod(org.restlet.data.Method.POST);
-        handleRequest(rc, true);
-        Representation body = rc.getResponse().getEntity();
-        if (null != body && body instanceof EmptyRepresentation == false) {
-            JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-            JsonValue result = new JsonValue(rep.getObject());
-            if (result.get("success").asBoolean()) {
-                result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("id").getObject());
-            }
-            if (result.isDefined("errors")) {
-                if (result.get("errors").size() > 0) {
-                    throw new JsonResourceException(500, "Failed to create FIX ME");
+            cr.getRequest().setEntity(new JacksonRepresentation<Map>(create.asMap()));
+            cr.setMethod(org.restlet.data.Method.POST);
+            handleRequest(cr, true);
+            Representation body = cr.getResponse().getEntity();
+            if (null != body && body instanceof EmptyRepresentation == false) {
+                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
+                JsonValue result = new JsonValue(rep.getObject());
+                if (result.get("success").asBoolean()) {
+                    result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("id").getObject());
                 }
+                if (result.isDefined("errors")) {
+                    if (result.get("errors").size() > 0) {
+                        throw new JsonResourceException(500, "Failed to create FIX ME");
+                    }
+                }
+                return result;
+            } else {
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
             }
-            return result;
-        } else {
-            throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+        } finally {
+            if (null != cr) {
+                cr.release();
+            }
         }
-
     }
 
     @Override
@@ -98,19 +102,26 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
 
         String[] ids = getIds();
         if (ids.length == 2) {
-            ClientResource rc = getClientResource(ids[0], ids[1]);
-            handleRequest(rc, true);
-            Representation body = rc.getResponse().getEntity();
-            if (null != body && body instanceof EmptyRepresentation == false) {
-                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-                JsonValue result = new JsonValue(rep.getObject());
-                if (result.isDefined("Id")) {
-                    result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("Id").required()
-                            .asString());
+            final ClientResource cr = getClientResource(ids[0], ids[1]);
+            try {
+                handleRequest(cr, true);
+                Representation body = cr.getResponse().getEntity();
+                if (null != body && body instanceof EmptyRepresentation == false) {
+                    JacksonRepresentation<Map> rep =
+                            new JacksonRepresentation<Map>(body, Map.class);
+                    JsonValue result = new JsonValue(rep.getObject());
+                    if (result.isDefined("Id")) {
+                        result.put(ServerConstants.OBJECT_PROPERTY_ID, result.get("Id").required()
+                                .asString());
+                    }
+                    return result;
+                } else {
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
-                return result;
-            } else {
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND);
+            } finally {
+                if (null != cr) {
+                    cr.release();
+                }
             }
         } else {
             throw new JsonResourceException(JsonResourceException.FORBIDDEN,
@@ -126,32 +137,39 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                         .append("/query");
         if (params.isDefined(QueryConstants.QUERY_EXPRESSION)) {
 
-            ClientResource rc = connection.getChild(sb.toString());
+            final ClientResource cr = connection.getChild(sb.toString());
+            try {
+                cr.getReference().addQueryParameter(
+                        "q",
+                        request.get("params").get(QueryConstants.QUERY_EXPRESSION).required()
+                                .asString());
+                cr.setMethod(org.restlet.data.Method.GET);
+                logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr
+                        .getReference().getQuery());
+                handleRequest(cr, true);
+                Representation body = cr.getResponse().getEntity();
+                List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
+                JsonValue searchResult = new JsonValue(new HashMap<String, Object>(1));
+                searchResult.put(QueryConstants.QUERY_RESULT, queryResult);
 
-            rc.getReference().addQueryParameter(
-                    "q",
-                    request.get("params").get(QueryConstants.QUERY_EXPRESSION).required()
-                            .asString());
-            rc.setMethod(org.restlet.data.Method.GET);
-            logger.debug("Attempt to execute query: {}?{}", rc.getReference(), rc.getReference()
-                    .getQuery());
-            handleRequest(rc, true);
-            Representation body = rc.getResponse().getEntity();
-            List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
-            JsonValue searchResult = new JsonValue(new HashMap<String, Object>(1));
-            searchResult.put(QueryConstants.QUERY_RESULT, queryResult);
-
-            if (null != body && body instanceof EmptyRepresentation == false) {
-                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-                JsonValue result = new JsonValue(rep.getObject());
-                for (JsonValue record : result.get("records")) {
-                    if (record.isDefined("Id")) {
-                        record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
+                if (null != body && body instanceof EmptyRepresentation == false) {
+                    JacksonRepresentation<Map> rep =
+                            new JacksonRepresentation<Map>(body, Map.class);
+                    JsonValue result = new JsonValue(rep.getObject());
+                    for (JsonValue record : result.get("records")) {
+                        if (record.isDefined("Id")) {
+                            record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id")
+                                    .asString());
+                        }
+                        queryResult.add(record.asMap());
                     }
-                    queryResult.add(record.asMap());
+                }
+                return searchResult;
+            } finally {
+                if (null != cr) {
+                    cr.release();
                 }
             }
-            return searchResult;
         } else {
             String queryId = params.get(QueryConstants.QUERY_ID).required().asString();
             String queryExpression = connection.getQueryExpression(queryId);
@@ -212,27 +230,34 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                         "Type not supported: " + type);
             }
 
-            ClientResource rc = getClientResource(ids[0], ids[1]);
-            rc.setMethod(SalesforceConnection.PATCH);
+            final ClientResource cr = getClientResource(ids[0], ids[1]);
+            try {
+                cr.setMethod(SalesforceConnection.PATCH);
 
-            JsonValue update = new JsonValue(describe.beforeUpdate(request.get("value")));
-            logger.info("Update sobjects/{} \n content: \n{}\n", type, update);
+                JsonValue update = new JsonValue(describe.beforeUpdate(request.get("value")));
+                logger.info("Update sobjects/{} \n content: \n{}\n", type, update);
 
-            rc.getRequest().setEntity(new JacksonRepresentation<Map>(update.asMap()));
+                cr.getRequest().setEntity(new JacksonRepresentation<Map>(update.asMap()));
 
-            handleRequest(rc, true);
+                handleRequest(cr, true);
 
-            Representation body = rc.getResponse().getEntity();
-            if (null != body && body instanceof EmptyRepresentation == false) {
-                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-                JsonValue result = new JsonValue(rep.getObject());
-                // result.put(ServerConstants.OBJECT_PROPERTY_ID,
-                // result.get("Id").required().asString());
-                return result;
-            } else {
-                JsonValue result = new JsonValue(new HashMap<String, Object>());
-                result.put(ServerConstants.OBJECT_PROPERTY_ID, ids[1]);
-                return result;
+                Representation body = cr.getResponse().getEntity();
+                if (null != body && body instanceof EmptyRepresentation == false) {
+                    JacksonRepresentation<Map> rep =
+                            new JacksonRepresentation<Map>(body, Map.class);
+                    JsonValue result = new JsonValue(rep.getObject());
+                    // result.put(ServerConstants.OBJECT_PROPERTY_ID,
+                    // result.get("Id").required().asString());
+                    return result;
+                } else {
+                    JsonValue result = new JsonValue(new HashMap<String, Object>());
+                    result.put(ServerConstants.OBJECT_PROPERTY_ID, ids[1]);
+                    return result;
+                }
+            } finally {
+                if (null != cr) {
+                    cr.release();
+                }
             }
             // JacksonRepresentation<Map> rep = new
             // JacksonRepresentation<Map>(rc.handle(), Map.class);
@@ -247,20 +272,27 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
     protected JsonValue delete(JsonValue request) throws JsonResourceException {
         String[] ids = getIds();
         if (ids.length == 2) {
-            ClientResource rc = getClientResource(ids[0], ids[1]);
-            rc.setMethod(org.restlet.data.Method.DELETE);
-            handleRequest(rc, true);
-            Representation body = rc.getResponse().getEntity();
-            if (null != body && body instanceof EmptyRepresentation == false) {
-                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
-                JsonValue result = new JsonValue(rep.getObject());
-                // result.put(ServerConstants.OBJECT_PROPERTY_ID,
-                // result.get("Id").required().asString());
-                return result;
-            } else {
-                JsonValue result = new JsonValue(new HashMap<String, Object>());
-                result.put(ServerConstants.OBJECT_PROPERTY_ID, ids[1]);
-                return result;
+            final ClientResource cr = getClientResource(ids[0], ids[1]);
+            try {
+                cr.setMethod(org.restlet.data.Method.DELETE);
+                handleRequest(cr, true);
+                Representation body = cr.getResponse().getEntity();
+                if (null != body && body instanceof EmptyRepresentation == false) {
+                    JacksonRepresentation<Map> rep =
+                            new JacksonRepresentation<Map>(body, Map.class);
+                    JsonValue result = new JsonValue(rep.getObject());
+                    // result.put(ServerConstants.OBJECT_PROPERTY_ID,
+                    // result.get("Id").required().asString());
+                    return result;
+                } else {
+                    JsonValue result = new JsonValue(new HashMap<String, Object>());
+                    result.put(ServerConstants.OBJECT_PROPERTY_ID, ids[1]);
+                    return result;
+                }
+            } finally {
+                if (null != cr) {
+                    cr.release();
+                }
             }
         } else {
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
@@ -273,26 +305,32 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
             synchronized (schema) {
                 describe = schema.get(type);
                 if (null == describe) {
-                    ClientResource rc = getClientResource(type, "describe");
-                    rc.setMethod(org.restlet.data.Method.GET);
+                    final ClientResource cr = getClientResource(type, "describe");
+                    try {
+                        cr.setMethod(org.restlet.data.Method.GET);
 
-                    handleRequest(rc, true);
-                    Representation body = rc.getResponse().getEntity();
-                    if (null != body && body instanceof EmptyRepresentation == false) {
-                        try {
-                            JacksonRepresentation<Map> rep =
-                                    new JacksonRepresentation<Map>(body, Map.class);
-                            describe = SObjectDescribe.newInstance(rep.getObject());
-                        } catch (Exception e) {
-                            logger.error("Failed to parse the Describe from: {}, response: ", rc
-                                    .getReference(), body);
+                        handleRequest(cr, true);
+                        Representation body = cr.getResponse().getEntity();
+                        if (null != body && body instanceof EmptyRepresentation == false) {
+                            try {
+                                JacksonRepresentation<Map> rep =
+                                        new JacksonRepresentation<Map>(body, Map.class);
+                                describe = SObjectDescribe.newInstance(rep.getObject());
+                            } catch (Exception e) {
+                                logger.error("Failed to parse the Describe from: {}, response: ",
+                                        cr.getReference(), body);
+                            }
                         }
-                    }
-                    if (null == describe) {
-                        throw new JsonResourceException(JsonResourceException.NOT_FOUND,
-                                "Metadata not found for type: " + type);
-                    } else {
-                        schema.put(type, describe);
+                        if (null == describe) {
+                            throw new JsonResourceException(JsonResourceException.NOT_FOUND,
+                                    "Metadata not found for type: " + type);
+                        } else {
+                            schema.put(type, describe);
+                        }
+                    } finally {
+                        if (null != cr) {
+                            cr.release();
+                        }
                     }
                 }
             }
