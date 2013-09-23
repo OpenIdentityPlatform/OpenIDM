@@ -500,7 +500,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m
+                    -Xmx1024m -Xms1024m
                 </openidm.options>
             </properties>
             <dependencies>
@@ -520,7 +520,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Dlogback.configurationFile=conf/logging-config.xml
+                    -Xmx1024m -Xms1024m -Dlogback.configurationFile=conf/logging-config.xml
                 </openidm.options>
             </properties>
             <dependencies>
