@@ -36,6 +36,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.SecretKeyEntry;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -51,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -147,9 +150,10 @@ public class SecurityManager extends SimpleJsonResource {
         // Set System properties
         String keystoreLocation = System.getProperty("javax.net.ssl.keyStore");
         String truststoreLocation = System.getProperty("javax.net.ssl.trustStore");
+        String keystorePassword = Param.getKeystorePassword(false);
         if (keystoreLocation == null) {
             System.setProperty("javax.net.ssl.keyStore", Param.getKeystoreLocation());
-            System.setProperty("javax.net.ssl.keyStorePassword", Param.getKeystorePassword(false));
+            System.setProperty("javax.net.ssl.keyStorePassword", keystorePassword);
             System.setProperty("javax.net.ssl.keyStoreType", Param.getKeystoreType());
         }
         if (truststoreLocation == null) {
@@ -157,6 +161,23 @@ public class SecurityManager extends SimpleJsonResource {
             System.setProperty("javax.net.ssl.trustStorePassword", Param.getTruststorePassword(false));
             System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
         }
+        
+        String privateKeyAlias = Param.getProperty("openidm.https.keystore.cert.alias");
+        try {
+            StoreWrapper storeWrapper = createStore("keystore");
+            Key privateKey = storeWrapper.getStore().getKey(privateKeyAlias, keystorePassword.toCharArray());
+            if (privateKey == null) {
+                String dn = "CN=local.openidm.forgerock.org, OU=None, O=OpenIDM Self-Signed Certificate L=None, C=None";
+                CertificateWrapper certWrapper = generateCertificate(dn, DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, 
+                        DEFAULT_SIGNATURE_ALGORITHM, null, null);
+                storeWrapper.addPrivateKey(privateKeyAlias, certWrapper.getPrivateKey(), new Certificate[]{certWrapper.getCertificate()});
+                storeWrapper.store();
+                reloadStore(storeWrapper);
+            }
+        } catch (Exception e) {
+            logger.warn("Error initializing keys", e);
+        }
+        
     }
     
     @Deactivate
@@ -377,10 +398,11 @@ public class SecurityManager extends SimpleJsonResource {
                 if (ACTION_GENERATE_CERT.equalsIgnoreCase(action.asString())) {
                     // Set parameters
                     String domainName = value.get("domainName").required().asString();
+                    String dn = "CN=" + domainName + ", OU=None, O=None L=None, C=None";
                     String validFrom = value.get("validFrom").asString();
                     String validTo = value.get("validTo").asString();
                     // Generate the certificate
-                    CertificateWrapper certWrapper = generateCertificate(domainName, algorithm, keySize, signatureAlgorithm, validFrom, validTo);
+                    CertificateWrapper certWrapper = generateCertificate(dn, algorithm, keySize, signatureAlgorithm, validFrom, validTo);
 
                     // Add it to the store and reload
                     store.addCert(alias, certWrapper.getCertificate());
@@ -629,7 +651,7 @@ public class SecurityManager extends SimpleJsonResource {
      * @return  The generated certificate
      * @throws Exception
      */
-    private CertificateWrapper generateCertificate(String domainName, String algorithm, int keySize, 
+    private CertificateWrapper generateCertificate(String dn, String algorithm, int keySize, 
             String signatureAlgorithm, String validFrom, String validTo) throws Exception {
         
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
@@ -664,10 +686,10 @@ public class SecurityManager extends SimpleJsonResource {
         }
         
         v3CertGen.setSerialNumber(BigInteger.valueOf(Math.abs(new SecureRandom().nextLong())));  
-        v3CertGen.setIssuerDN(new X509Principal("CN=" + domainName + ", OU=None, O=None L=None, C=None"));  
+        v3CertGen.setIssuerDN(new X509Principal(dn));  
         v3CertGen.setNotBefore(notBefore);  
         v3CertGen.setNotAfter(notAfter);  
-        v3CertGen.setSubjectDN(new X509Principal("CN=" + domainName + ", OU=None, O=None L=None, C=None")); 
+        v3CertGen.setSubjectDN(new X509Principal(dn)); 
         
         v3CertGen.setPublicKey(keyPair.getPublic());  
         v3CertGen.setSignatureAlgorithm(signatureAlgorithm); 
@@ -824,6 +846,10 @@ public class SecurityManager extends SimpleJsonResource {
         
         public void addPrivateKey(String alias, PrivateKey privateKey, Certificate [] chain) throws Exception {
             store.setEntry(alias, new PrivateKeyEntry(privateKey, chain), new KeyStore.PasswordProtection(password.toCharArray()));
+        }
+        
+        public void addSecretKey(String alias, SecretKey secretKey) throws Exception {
+            store.setEntry(alias, new SecretKeyEntry(secretKey), new KeyStore.PasswordProtection(password.toCharArray()));
         }
    
         public void store() throws Exception {

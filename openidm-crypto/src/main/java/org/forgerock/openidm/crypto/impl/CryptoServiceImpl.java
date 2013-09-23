@@ -21,42 +21,24 @@ package org.forgerock.openidm.crypto.impl;
 // Java SE
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.KeyStore.SecretKeyEntry;
+import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
-// OSGi Framework
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// Apache Felix Maven SCR Plugin
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonTransformer;
-
-// JSON Crypto
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
@@ -64,11 +46,16 @@ import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
-
-// OpenIDM
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.util.JsonUtil;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Cryptography Service
@@ -124,7 +111,8 @@ public class CryptoServiceImpl implements CryptoService {
                 String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
                 String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
                 String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
-
+                String alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
+                
                 try {
                     LOGGER.info("Activating cryptography service of type: {} provider: {} location: {}", new Object[] {type, provider, location});
                     KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
@@ -132,6 +120,12 @@ public class CryptoServiceImpl implements CryptoService {
                     if (null != in) {
                         char[] clearPassword = Main.unfold(password);
                         ks.load(in, password == null ? null : clearPassword);
+                        Key key = ks.getKey(alias, clearPassword);
+                        if (key == null) {
+                            // Initialize the keys
+                            LOGGER.debug("Initializing secrety key entry in the keystore");
+                            generateDefaultKey(ks, alias, location, clearPassword);
+                        }
                         keySelector = new SimpleKeyStoreSelector(ks, new String(clearPassword));
                         Enumeration<String> aliases = ks.aliases();
                         while (aliases.hasMoreElements()) {
@@ -155,6 +149,27 @@ public class CryptoServiceImpl implements CryptoService {
         } catch (JsonValueException jve) {
             LOGGER.error("Exception when loading CryptoService configuration", jve);
             throw new ComponentException("Configuration error", jve);
+        }
+    }
+    
+    /**
+     * Generates a default secret key entry in the keystore.
+     * 
+     * @param ks the keystore
+     * @param alias the alias of the secret key
+     * @param location the keystore location
+     * @param password the keystore password
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
+    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password) throws IOException, GeneralSecurityException {
+        SecretKey newKey = KeyGenerator.getInstance("AES").generateKey();
+        ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
+        OutputStream out = new FileOutputStream(location);
+        try {
+            ks.store(out, password);
+        } finally {
+            out.close();
         }
     }
 
