@@ -56,4 +56,11 @@ public interface AuditLogger extends ObjectSet {
      * @return whether to use this logger for reads/queries.
      */
     boolean isUsedForQueries();
+
+    /**
+     * Returns whether to ignore logging failures
+     *
+     * @return whether to ignore logging failures
+     */
+    boolean isIgnoreLoggingFailures();
 }

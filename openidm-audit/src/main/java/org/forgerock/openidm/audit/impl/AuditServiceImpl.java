@@ -25,8 +25,6 @@ package org.forgerock.openidm.audit.impl;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -240,10 +238,14 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 auditLogger.create(id, obj);
             } catch (ObjectSetException ex) {
                 logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
-                throw ex;
+                if (!auditLogger.isIgnoreLoggingFailures()) {
+                    throw ex;
+                }
             } catch (RuntimeException ex) {
                 logger.warn("Failure writing audit log: {} with logger {}", new Object[] {id, auditLogger, ex});
-                throw ex;
+                if (!auditLogger.isIgnoreLoggingFailures()) {
+                    throw ex;
+                }
             }
         }
     }
