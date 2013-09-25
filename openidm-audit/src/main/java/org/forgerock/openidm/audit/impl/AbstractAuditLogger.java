@@ -37,8 +37,14 @@ public abstract class AbstractAuditLogger implements AuditLogger {
     /** config token to determine whether to use this logger for queries */
     public final static String CONFIG_LOG_USE_FOR_QUERIES = "useForQueries";
 
-    /** whether to use this logger for reads/queries */
+    /** config token to determine whether a logging failure is fatal */
+    public final static String CONFIG_LOG_IGNORE_LOGGING_FAILURES = "ignoreLoggingFailures";
+
+    /** whether to use this logger for reads/queries (default: false) */
     boolean useForQueries;
+
+    /** whether to ignore a logging failure exception (default: false) */
+    boolean ignoreLoggingFailures;
 
     /**
      * Set base configuration for all loggers from config.
@@ -48,7 +54,9 @@ public abstract class AbstractAuditLogger implements AuditLogger {
      */
     public void setConfig(Map config, BundleContext ctx) {
         useForQueries = config.containsKey(CONFIG_LOG_USE_FOR_QUERIES)
-            && (Boolean) config.get(CONFIG_LOG_USE_FOR_QUERIES);
+                && (Boolean) config.get(CONFIG_LOG_USE_FOR_QUERIES);
+        ignoreLoggingFailures = config.containsKey(CONFIG_LOG_IGNORE_LOGGING_FAILURES)
+                && (Boolean) config.get(CONFIG_LOG_IGNORE_LOGGING_FAILURES);
     }
     
     /**
@@ -64,6 +72,15 @@ public abstract class AbstractAuditLogger implements AuditLogger {
     public boolean isUsedForQueries()
     {
         return useForQueries;
+    }
+
+    /**
+     * Returns whether a logging failure should be ignored
+     *
+     * @return whether logging failures should be ignored
+     */
+    public boolean isIgnoreLoggingFailures() {
+        return ignoreLoggingFailures;
     }
 
 }
