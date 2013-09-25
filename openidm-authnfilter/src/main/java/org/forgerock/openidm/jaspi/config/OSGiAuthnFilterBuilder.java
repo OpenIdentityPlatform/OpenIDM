@@ -130,7 +130,9 @@ public class OSGiAuthnFilterBuilder {
     protected void activate(ComponentContext context) throws Exception {
         ConfigurationManager.unconfigure();
         configureAuthenticationFilter(config);
-        registerAuthnFilter();
+        String authnPopulateScriptLocation = config.get("serverAuthConfig").get("authnPopulateContextScript")
+                .defaultTo("bin/defaults/script/auth/authnPopulateContext.js").asString();
+        registerAuthnFilter(authnPopulateScriptLocation);
     }
 
     /**
@@ -155,6 +157,8 @@ public class OSGiAuthnFilterBuilder {
         // For each ServerAuthConfig
         for (String serverAuthConfigKey : serverAuthConfig.keys()) {
             if ("auditLogger".equals(serverAuthConfigKey)) {
+                continue;
+            } else if ("authnPopulateContextScript".equals(serverAuthConfigKey)) {
                 continue;
             } else {
                 AuthContextConfiguration authContextConfiguration = configuration.addAuthContext(serverAuthConfigKey);
@@ -299,16 +303,14 @@ public class OSGiAuthnFilterBuilder {
      *
      * @throws Exception If a problem occurs whilst registering the filter.
      */
-    private void registerAuthnFilter() throws Exception {
+    private void registerAuthnFilter(String authnPopulateScriptLocation) throws Exception {
 
         Map<String, String> initParams = new HashMap<String, String>();
         initParams.put("moduleConfiguration", "idmAuth");
 
         Map<String, String> augmentSecurityContext = new HashMap<String, String>();
         augmentSecurityContext.put("type", "text/javascript");
-        augmentSecurityContext.put("file",
-                IdentityServer.getFileForInstallPath("bin/defaults/script/auth/authnPopulateContext.js")
-                        .getAbsolutePath());
+        augmentSecurityContext.put("file", authnPopulateScriptLocation);
 
         Map<String, Object> scriptExtensions = new HashMap<String, Object>();
         scriptExtensions.put("augmentSecurityContext", augmentSecurityContext);
