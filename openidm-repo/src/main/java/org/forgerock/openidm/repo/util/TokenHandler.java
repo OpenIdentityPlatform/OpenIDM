@@ -90,10 +90,24 @@ public class TokenHandler {
      * specified replacement string for all tokens.
      * 
      * @param queryString the query with tokens to replace
-     * @param replacement
+     * @param replacement the replacement string
      * @return the query with all tokens replaced
      */
     public String replaceTokens(String queryString, String replacement) {
+        return replaceTokens(queryString, replacement, new String[] {});
+    }
+
+    /**
+     * Replaces a query string with tokens of format ${token-name} with the
+     * specified replacement string for all tokens.
+     *
+     * @param queryString the query with tokens to replace
+     * @param replacement the replacement string
+     * @param nonReplacementTokenPrefixes optional array of prefixes that, if found as part of a token,
+     *      will not be replaced
+     * @return the query with all tokens replaced
+     */
+    public String replaceTokens(String queryString, String replacement, String... nonReplacementTokenPrefixes) {
         Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {
@@ -102,13 +116,38 @@ public class TokenHandler {
             if (origToken != null) {
                 // OrientDB token is of format :token-name
                 matcher.appendReplacement(buf, "");
-                buf.append(replacement);
+                // if token has one of the "non-replacement" prefixes, leave it alone
+                if (tokenStartsWithPrefix(origToken, nonReplacementTokenPrefixes)) {
+                    buf.append("${" + origToken + "}");
+                }
+                else {
+                    buf.append(replacement);
+                }
             }
         }
         matcher.appendTail(buf);
         return buf.toString();
     }
-    
+
+    /**
+     * Returns whether the token starts with one of the prefixes passed.
+     *
+     * @param token the token to interrogate
+     * @param prefixes a list of prefixes
+     * @return whether the passed token starts with one of the prefixes
+     */
+    private boolean tokenStartsWithPrefix(String token, String... prefixes) {
+        String[] tokenParts = token.split(":", 2);
+        if (tokenParts.length == 2) {
+            for (String prefix : prefixes) {
+                if (prefix.equals(tokenParts[0])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Extracts all the token names in the query string  of format ${token-name} 
      * 
@@ -155,9 +194,45 @@ public class TokenHandler {
         matcher.appendTail(buf);
         return buf.toString();
     }
-    
 
-    
+    /**
+     * Replaces some tokens in a query string with tokens of format ${token-name}
+     * where token-name represents a list of values.  The numberOfReplacements Map tells
+     * how many replacements to produce (comma-separated) for each token.  The replacement
+     * (for all tokens) is provided. Tokens that have no replacement defined stay in the
+     * original token format.
+     *
+     * @param queryString the query with OpenIDM format tokens ${token}
+     * @param numberOfReplacements the number of replacements to replace a ${token} with
+     * @param replacement the replacement values/tokens
+     * @return the query with any defined replacement values/tokens replaced, and the remaining tokens
+     * left in the original format
+     */
+    public String replaceListTokens(String queryString, Map<String, Integer> numberOfReplacements, String replacement) {
+        Matcher matcher = tokenPattern.matcher(queryString);
+        StringBuffer buf = new StringBuffer();
+        while (matcher.find()) {
+            String origToken = matcher.group(1);
+            if (origToken != null) {
+                matcher.appendReplacement(buf, "");
+                Integer length = numberOfReplacements.get(origToken);
+                if (length != null) {
+                    for (int i = 0; i < length; i++) {
+                        buf.append(replacement);
+                        if (i != length - 1) {
+                            buf.append(", ");
+                        }
+                    }
+                }
+                else {
+                    buf.append("${" + origToken + "}");
+                }
+            }
+        }
+        matcher.appendTail(buf);
+        return buf.toString();
+    }
+
     /**
      * Replaces a query string with tokens of format ${token-name} with the 
      * token format in OrientDB, which is of the form :token-name.
