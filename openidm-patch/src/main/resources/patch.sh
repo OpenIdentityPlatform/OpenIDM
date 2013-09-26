@@ -174,6 +174,7 @@ inconsistent state.\n\n"
     if [ -f $OPENIDM_HOME/$f ]; then
       auditCmd "cp -pr $OPENIDM_HOME/$f $ARCHIVE_DIR/$f"
     else
+      log "\nERROR: Missing $OPENIDM_HOME/$f while creating archive."
       abortBackupAndFail
     fi
   done
