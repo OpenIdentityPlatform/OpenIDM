@@ -1,0 +1,43 @@
+OpenIDM 2.1.1 Patch Release
+===========================
+
+Bugs Fixed
+----------
+OPENIDM-1433 - OpenIDM renames entry on update (OpenIDM ICF glue code sets 
+               __NAME__ to __UID__)
+OPENIDM-1367 - Multiple boot.properties files loaded at startup when alternate 
+               project location specified via the '-p' parameter
+OPENIDM-1415 - Need to enable cascade delete on foreign keys within Oracle schema
+
+
+Applying the Patch
+------------------
+
+Unix
+----
+1. Stop the OpenIDM instance to be patched using the shutdown.sh script
+2. Execute the patch script as follows:
+   ./patch.sh -h OPENIDM_HOME
+3. Re-start the OpenIDM instance using the startup.sh script
+
+Windows
+-------
+TBD
+
+
+Backing out the Patch
+---------------------
+
+Unix
+----
+1. Stop the OpenIDM instance to be patched using the shutdown.sh script
+2. Execute the patch script as follows:
+   ./patch.sh -h OPENIDM_HOME -r PATCH_ARCHIVE
+3. Re-start the OpenIDM instance using the startup.sh script
+
+Windows
+-------
+TBD
+
+--------------------------------------------------------------------------------
+Copyright (c) 2013 ForgeRock AS. All Rights Reserved
