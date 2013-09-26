@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,16 +27,17 @@ import java.util.Hashtable;
 
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
-
+import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Crypto bundle activator
+ * 
  * @author aegloff
+ * @author ckienle
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -50,6 +51,7 @@ public class Activator implements BundleActivator {
         ensureJettyFragmentResolved(context);
         
         cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
+        cryptoSvc.activate(context);
         
         // Register crypto service 
         Hashtable<String, String> prop = new Hashtable<String, String>();
@@ -60,6 +62,7 @@ public class Activator implements BundleActivator {
         prop.put("service.description", "OpenIDM cryptography service");
         prop.put("service.vendor", "ForgeRock AS");
         context.registerService(CryptoService.class.getName(), cryptoSvc, prop);
+        context.registerService(CryptoUpdateService.class.getName(), cryptoSvc, null);
         logger.info("Registered cryptography service");
         
         logger.debug("Crypto bundle started");
