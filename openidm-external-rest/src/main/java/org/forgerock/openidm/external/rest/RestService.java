@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright ¬© 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,13 +23,13 @@
  */
 package org.forgerock.openidm.external.rest;
 
-import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +50,7 @@ import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetExceptionFactory;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
@@ -85,6 +86,7 @@ import org.restlet.engine.util.Base64;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 import org.restlet.util.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -299,21 +301,39 @@ public class RestService extends ObjectSetJsonResource {
             rep.setMediaType(mediaType);
             
             Representation representation = null;
-            if ("get".equalsIgnoreCase(method)) {
-                representation = cr.get();
-            } else if ("post".equalsIgnoreCase(method)) {
-                representation = cr.post(rep);
-            } else if ("put".equalsIgnoreCase(method)) {
-                representation = cr.put(rep);
-            } else if ("delete".equalsIgnoreCase(method)) {
-                representation = cr.delete();
-            } else if ("head".equalsIgnoreCase(method)) {
-                representation = cr.head();
-            } else if ("options".equalsIgnoreCase(method)) {
-                // TODO: media type arg?
-                representation = cr.options();
-            } else {
-                throw new BadRequestException("Unknown method " + method);
+            try {
+                if ("get".equalsIgnoreCase(method)) {
+                    representation = cr.get();
+                } else if ("post".equalsIgnoreCase(method)) {
+                    representation = cr.post(rep);
+                } else if ("put".equalsIgnoreCase(method)) {
+                    representation = cr.put(rep);
+                } else if ("delete".equalsIgnoreCase(method)) {
+                    representation = cr.delete();
+                } else if ("head".equalsIgnoreCase(method)) {
+                    representation = cr.head();
+                } else if ("options".equalsIgnoreCase(method)) {
+                    // TODO: media type arg?
+                    representation = cr.options();
+                } else {
+                    throw new BadRequestException("Unknown method " + method);
+                }
+            } catch (ResourceException e) {
+                int code = e.getStatus().getCode();
+                String text = null;
+                Representation responseEntity = cr.getResponseEntity();
+                if (responseEntity != null) {
+                    text = cr.getResponseEntity().getText();
+                }
+                if (text != null) {
+                    Map<String, Object> detail = new HashMap<String, Object>();
+                    detail.put("_body", text);
+                    throw ObjectSetExceptionFactory.getInstance(code, "Error while processing " 
+                            + method + " request: " + e.getMessage(), detail, e);
+                } else {
+                    throw ObjectSetExceptionFactory.getInstance(code, "Error while processing "
+                            + method + " request: " + e.getMessage(), e);
+                }
             }
             
             String text = representation.getText();
