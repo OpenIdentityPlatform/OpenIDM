@@ -62,6 +62,10 @@ public class TableQueries {
 
     final static Logger logger = LoggerFactory.getLogger(TableQueries.class);
     
+    public static final String PREFIX_INT = "int";
+    
+    public static final String PREFIX_LIST = "list";
+    
     // Monitoring event name prefix
     static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/jdbc/raw/query/";
     
@@ -263,22 +267,68 @@ public class TableQueries {
             throws SQLException {
         String queryStr = info.getQueryString();
         List<String> tokenNames = info.getTokenNames();
-        PreparedStatement statement = getPreparedStatement(con, queryStr); 
+
+        // replace ${list:variable} tokens with the correct number of bind variables
+        Map<String, Integer> listReplacements = new HashMap<String, Integer>();
+        for (String tokenName : tokenNames) {
+            String[] tokenParts = tokenName.split(":", 2);
+            if (PREFIX_LIST.equals(tokenParts[0]) && params.containsKey(tokenParts[1])) {
+                listReplacements.put(tokenName, ((String) params.get(tokenParts[1])).split(",").length);
+            }
+        }
+        if (listReplacements.size() > 0) {
+            TokenHandler tokenHandler = new TokenHandler();
+            queryStr = tokenHandler.replaceListTokens(queryStr, listReplacements, "?");
+        }
+
+        PreparedStatement statement = getPreparedStatement(con, queryStr);
         int count = 1; // DB column count starts at 1
         for (String tokenName : tokenNames) {
-            Object objValue =  params.get(tokenName);
-            String value = null;
-            if (objValue != null) {
-                value = objValue.toString();
+            String[] tokenParts = tokenName.split(":", 2);
+            if (tokenParts.length == 1) {
+                // handle single value - assume String
+                Object objValue =  params.get(tokenName);
+                String value = null;
+                if (objValue != null) {
+                    value = objValue.toString();
+                }
+                statement.setString(count, value);
+                count++;
             }
-            statement.setString(count, value);
-            count++;
+            else {
+            	Object objValue =  params.get(tokenParts[1]);
+                if (PREFIX_INT.equals(tokenParts[0])) {
+                    // handle single integer value
+                	Integer int_value = null;
+                	if (objValue != null) {
+                    	int_value = Integer.parseInt(objValue.toString());
+                	}
+                	statement.setInt(count, int_value);
+                    count++;
+                } else if (PREFIX_LIST.equals(tokenParts[0])) {
+                    // handle list of values - presently assumes Strings, TODO support integer lists
+                	if (objValue != null) {
+                        for (String list_value : objValue.toString().split(",")) {
+                    		// if list value is surrounded by single quotes remove them
+                    		if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
+                    			list_value = list_value.substring(1, list_value.length()-1);
+                    		}
+                    		statement.setString(count, list_value);
+                    		count++;
+                    	}
+                	}
+                	else {
+                		statement.setString(count,null);
+                		count++;
+                	}
+                }
+            }
         }
         logger.debug("Prepared statement: {}", statement);
 
         return statement;
     }
-    
+
     /**
      * Set the pre-configured queries for generic tables, 
      * which are identified by a query identifier and can be
@@ -348,7 +398,7 @@ public class TableQueries {
             
             // Convert to ? for prepared statement, populate token replacement info
             List<String> tokenNames = tokenHandler.extractTokens(tempQueryString);
-            String queryString = tokenHandler.replaceTokens(tempQueryString, "?");
+            String queryString = tokenHandler.replaceTokens(tempQueryString, "?", PREFIX_LIST);
         
             QueryInfo queryInfo = new QueryInfo(queryString, tokenNames);
             queries.put(queryName, queryInfo);
