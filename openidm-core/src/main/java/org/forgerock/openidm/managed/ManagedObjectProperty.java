@@ -1,51 +1,53 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
 package org.forgerock.openidm.managed;
 
 // Java SE
 import java.util.Map;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// JSON Fluent
+import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Crypto
-import org.forgerock.json.crypto.JsonCrypto;
-import org.forgerock.json.crypto.JsonEncryptor;
-import org.forgerock.json.crypto.JsonCryptoException;
-
-// OpenIDM
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.ScriptThrownException;
+import org.forgerock.openidm.script.Scripts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A property defined within an managed object. Provides for the specification of triggers
  * to execute during the lifecycle of a managed object.
  *
  * @author Paul C. Bryan
+ * @author ckienle
  */
 class ManagedObjectProperty {
 
@@ -76,6 +78,12 @@ class ManagedObjectProperty {
 
     /** String that indicates the privacy level of the property. */
     private Scope scope;
+    
+    /** The CryptoService implementation */
+    private CryptoService cryptoService;
+    
+    /** The encryption configuration */
+    private JsonValue encryptionValue;
 
     /**
      * Constructs a new managed object property.
@@ -90,20 +98,31 @@ class ManagedObjectProperty {
         onRetrieve = Scripts.newInstance("ManagedObjectProperty", config.get("onRetrieve"));
         onStore = Scripts.newInstance("ManagedObjectProperty", config.get("onStore"));
         onValidate = Scripts.newInstance("ManagedObjectProperty", config.get("onValidate"));
-        JsonValue encryptionValue = config.get("encryption");
+        encryptionValue = config.get("encryption");
         if (!encryptionValue.isNull()) {
-            try {
-                encryptor = service.getCryptoService().getEncryptor(
-                 encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
-                 encryptionValue.get("key").required().asString());
-            } catch (JsonCryptoException jce) {
-                throw new JsonValueException(encryptionValue, jce);
-            }
+            cryptoService = service.getCryptoService();
+            setEncryptor();
         }
 
         scope = config.get("scope").asEnum(Scope.class);
         if (scope == null) {
             scope = Scope.PUBLIC;
+        }
+    }
+
+    /**
+     * A synchronized method for setting the excryptor is if hasn't already been set and 
+     * there exists an encryption configuration.
+     */
+    private synchronized void setEncryptor() {
+        if (encryptor == null && !encryptionValue.isNull()) {
+            try {
+                encryptor = service.getCryptoService().getEncryptor(
+                        encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
+                        encryptionValue.get("key").required().asString());
+            } catch (JsonCryptoException jce) {
+                LOGGER.warn("Unable to set encryptor");
+            }
         }
     }
 
@@ -180,6 +199,7 @@ class ManagedObjectProperty {
      */
     void onStore(JsonValue value) throws InternalServerErrorException {
         execScript("onStore", onStore, value);
+        setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
             if (service.getCryptoService() == null) {
                 String msg = name + "property encryption service not available";

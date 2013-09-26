@@ -24,8 +24,11 @@
 
 package org.forgerock.openidm.security;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
@@ -52,7 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -78,15 +80,21 @@ import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
+import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.jetty.Config;
 import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.util.encode.Base64;
 import org.joda.time.DateTime;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -124,22 +132,26 @@ public class SecurityManager extends SimpleJsonResource {
     public static final String DEFAULT_CERTIFICATE_TYPE = "X509";
     public static final int DEFAULT_KEY_SIZE = 2048;
 
-    @Reference(
-            name = "ref_SecurityManager_JsonResourceRouterService",
-            referenceInterface = JsonResource.class,
-            bind = "bindRouter",
-            unbind = "unbindRouter",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.DYNAMIC,
-            target = "(service.pid=org.forgerock.openidm.router)"
-            )
     protected ObjectSet router;
-    protected void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
+
+    @Reference(
+            name = "ref_SecurityManager_RepositoryService",
+            bind = "bindRepo",
+            unbind = "unbindRepo"
+            )
+    protected RepositoryService repo;
+    protected void bindRepo(RepositoryService repo) {
+        logger.debug("binding RepositoryService");
+        this.router = new JsonResourceObjectSet(repo);
     }
-    protected void unbindRouter(JsonResource router) {
+    protected void unbindRepo(RepositoryService repo) {
+        logger.debug("unbinding RepositoryService");
         this.router = null;
     }
+
+    
+    @Reference
+    private CryptoUpdateService cryptoUpdateService;
     
     @Activate
     void activate(ComponentContext compContext) throws ParseException {
@@ -162,17 +174,35 @@ public class SecurityManager extends SimpleJsonResource {
             System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
         }
         
+        String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+        
         String privateKeyAlias = Param.getProperty("openidm.https.keystore.cert.alias");
         try {
-            StoreWrapper storeWrapper = createStore("keystore");
-            Key privateKey = storeWrapper.getStore().getKey(privateKeyAlias, keystorePassword.toCharArray());
-            if (privateKey == null) {
-                String dn = "CN=local.openidm.forgerock.org, OU=None, O=OpenIDM Self-Signed Certificate L=None, C=None";
-                CertificateWrapper certWrapper = generateCertificate(dn, DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, 
-                        DEFAULT_SIGNATURE_ALGORITHM, null, null);
-                storeWrapper.addPrivateKey(privateKeyAlias, certWrapper.getPrivateKey(), new Certificate[]{certWrapper.getCertificate()});
+            StoreWrapper storeWrapper = null;
+            if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
+                // Read keystore
+                storeWrapper = readKeystore();
+                // Update keystore
                 storeWrapper.store();
                 reloadStore(storeWrapper);
+                // Update CryptoService
+                cryptoUpdateService.updateKeySelector(storeWrapper.getStore(), keystorePassword);
+            } else {
+                storeWrapper = createStore("keystore");
+                Key privateKey = storeWrapper.getStore().getKey(privateKeyAlias, keystorePassword.toCharArray());
+                CertificateWrapper certWrapper = null;
+                if (privateKey == null) {
+                    String dn = "CN=local.openidm.forgerock.org, OU=None, O=OpenIDM Self-Signed Certificate L=None, C=None";
+                    certWrapper = generateCertificate(dn, DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, 
+                            DEFAULT_SIGNATURE_ALGORITHM, null, null);
+                    storeWrapper.addPrivateKey(privateKeyAlias, certWrapper.getPrivateKey(), new Certificate[]{certWrapper.getCertificate()});
+                    storeWrapper.store();
+                    reloadStore(storeWrapper);
+                    privateKey = certWrapper.getPrivateKey();
+                }
+                if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                    storeKeystore(storeWrapper.getLocation());
+                }
             }
         } catch (Exception e) {
             logger.warn("Error initializing keys", e);
@@ -499,27 +529,98 @@ public class SecurityManager extends SimpleJsonResource {
      * @throws JsonResourceException
      */
     private void storeCsrKeyPair(String alias, KeyPair keyPair) throws JsonResourceException {
-        if (router == null) {
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
-        }
+        String id = "security/keys/" + alias;
+        String encoded;
         try {
-            String id = "repo/security/keys/" + alias;
-            JsonValue oldKeyMap = null;
-            JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
-            String keyString = toPem(keyPair);
-            keyMap.put("encoded", keyString);
-            try {
-                oldKeyMap = new JsonValue(router.read(id));
-            } catch (NotFoundException e) {
-                logger.debug("creating object " + id);
-                router.create(id, keyMap.asMap());
-                return;
-            }
-            router.update(id, oldKeyMap.get("_rev").asString(), keyMap.asMap());          
+            encoded = toPem(keyPair);          
         } catch (Exception e) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e);
         }
+        JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
+        keyMap.put("encoded", encoded);
+        storeInRepo(id, keyMap); 
+    }
+    
+    /**
+     * Reads the keystore from the repository
+     * 
+     * @return A StoreWrapper containing the keystore
+     * @throws JsonResourceException
+     */
+    private StoreWrapper readKeystore() throws JsonResourceException {
+        StoreWrapper storeWrapper = null;
+        JsonValue keystoreValue = readFromRepo("security/keystore");
+        String keystoreString = keystoreValue.get("keystoreString").asString();
+        byte [] keystoreBytes = Base64.decode(keystoreString.getBytes());
+        ByteArrayInputStream bais = new ByteArrayInputStream(keystoreBytes);
+        try {
+            storeWrapper = createKeyStore(bais);
+        } catch (Exception e) {
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Error creating keystore from store bytes");
+        }
+        return storeWrapper;
+    }
+    
+    /**
+     * Stores the keystore in the repository
+     * 
+     * @param keystoreLocation the local location of the keystore to store
+     * @throws IOException
+     * @throws JsonResourceException
+     */
+    private void storeKeystore(String keystoreLocation) throws IOException, JsonResourceException {
+        byte [] keystoreBytes = null;
+        FileInputStream fin = null;
+        File file = new File(keystoreLocation);
+
+        try {
+            fin = new FileInputStream(file);
+            keystoreBytes = new byte[(int) file.length()];
+            fin.read(keystoreBytes);
+        } finally {
+            fin.close();
+        }
         
+        String keystoreString = new String(Base64.encode(keystoreBytes));
+        String id = "security/keystore";
+        JsonValue value = new JsonValue(new HashMap<String, Object>());
+        value.add("keystoreString", keystoreString);
+        storeInRepo(id, value);
+    }
+    
+    /**
+     * Reads an object from the repository
+     * @param id the object's id
+     * @return the object
+     * @throws JsonResourceException
+     */
+    private JsonValue readFromRepo(String id) throws JsonResourceException {
+        if (router == null) {
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        JsonValue keyMap = new JsonValue(router.read(id));
+        return keyMap;
+    }
+    
+    /**
+     * Stores an object in the repository
+     * @param id the object's id
+     * @param value the value of the object to store
+     * @throws JsonResourceException
+     */
+    private void storeInRepo(String id, JsonValue value) throws JsonResourceException {
+        if (router == null) {
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        JsonValue oldValue = null;
+        try {
+            oldValue = new JsonValue(router.read(id));
+        } catch (NotFoundException e) {
+            logger.debug("creating object " + id);
+            router.create(id, value.asMap());
+            return;
+        }
+        router.update(id, oldValue.get("_rev").asString(), value.asMap());
     }
     
     /**
@@ -533,7 +634,7 @@ public class SecurityManager extends SimpleJsonResource {
         if (router == null) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, "Repo router is null");
         }
-        String id = "repo/security/keys/" + alias;
+        String id = "security/keys/" + alias;
         JsonValue keyMap = new JsonValue(router.read(id));
         if (keyMap.isNull()) {
             throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Cannot find stored key for alias " + alias);
@@ -704,10 +805,43 @@ public class SecurityManager extends SimpleJsonResource {
      * Creates a truststore or keystore object and returns an instance of StoreWrapper.
      * 
      * @param name the name of the store to create ("truststore" or "keystore"
-     * @return and instance of StoreWrapper representing the created store. 
+     * @return an instance of StoreWrapper representing the created store. 
      * @throws Exception
      */
     public StoreWrapper createStore(String name) throws Exception {
+        StoreWrapper sw = createDefaultStore(name);
+        InputStream in = new FileInputStream(sw.getLocation());
+        KeyStore store = createKeyStore(sw.getType(), sw.getPassword(), in);
+        sw.setStore(store);
+        return sw;
+    }
+    
+    /**
+     * Creates a keystore object from a given InputStream and returns an instance of StoreWrapper.
+     * 
+     * @param in an InputStream for the store
+     * @return an instance of StoreWrapper representing the created store. 
+     * @throws Exception
+     */
+    public StoreWrapper createKeyStore(InputStream in) throws Exception {
+        StoreWrapper sw = createDefaultStore("keystore");
+        KeyStore store = createKeyStore(sw.getType(), sw.getPassword(), in);
+        sw.setStore(store);
+        return sw;
+    }
+    
+    private KeyStore createKeyStore(String type, String password, InputStream in) throws Exception{
+        KeyStore store = null;
+        try {
+            store = KeyStore.getInstance(type);     
+            store.load(in, password.toCharArray());
+        } finally {
+            in.close();
+        }
+        return store;
+    }
+    
+    private StoreWrapper createDefaultStore(String name) {
         String type = null;
         String location = null;
         String password = null;
@@ -722,17 +856,7 @@ public class SecurityManager extends SimpleJsonResource {
         } else {
             return null;
         }
-        
-        KeyStore store = null;
-        InputStream in = new FileInputStream(location);
-        try {
-            store = KeyStore.getInstance(type);     
-            store.load(in, password.toCharArray());
-        } finally {
-            in.close();
-        }
-        
-        return new StoreWrapper(name, location, password, type, store);
+        return new StoreWrapper(name, location, password, type);
     }
     
     private void reloadStore(StoreWrapper storeWrapper) throws Exception {
@@ -811,6 +935,17 @@ public class SecurityManager extends SimpleJsonResource {
         public StoreWrapper(String name,
                 String location,
                 String password,
+                String type) {
+            this.name = name;
+            this.location = location;
+            this.password = password;
+            this.type = type;
+            this.store = null;
+        }
+        
+        public StoreWrapper(String name,
+                String location,
+                String password,
                 String type,
                 KeyStore store) {
             this.name = name;
@@ -826,6 +961,10 @@ public class SecurityManager extends SimpleJsonResource {
         
         public KeyStore getStore() {
             return store;
+        }
+        
+        public void setStore(KeyStore store) {
+            this.store = store;
         }
 
         public String getLocation() {
