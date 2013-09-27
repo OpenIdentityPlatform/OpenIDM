@@ -60,6 +60,31 @@ ADD CONSTRAINT PRIMARY PRIMARY KEY
 ENABLE
 ;
 
+-- DROP TABLE uinotification CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table uinotification ...
+CREATE TABLE uinotification (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  notificationType VARCHAR2(255 CHAR) NOT NULL,
+  createDate VARCHAR2(255 CHAR) NOT NULL,
+  message VARCHAR2(4000 CHAR) NOT NULL,
+  requester VARCHAR2(255 CHAR),
+  receiverId VARCHAR2(38 CHAR) NOT NULL,
+  requesterId VARCHAR2(255 CHAR),
+  notificationSubtype VARCHAR2(255 CHAR)
+);
+
+PROMPT Creating Primary Key Constraint PRIMARY_0 on table uinotification ... 
+ALTER TABLE uinotification
+ADD CONSTRAINT PRIMARY_0 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
 -- DROP TABLE auditactivity CASCADE CONSTRAINTS;
 
 
