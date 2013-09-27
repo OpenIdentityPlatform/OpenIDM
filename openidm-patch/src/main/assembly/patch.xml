@@ -37,6 +37,14 @@
                 <include>**/*.sh</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/openidm-zip/openidm</directory>
+            <outputDirectory>/openidm-2.1.1-patch</outputDirectory>
+            <includes>
+                <include>bin/defaults/script/policy.js</include>
+                <include>db/scripts/oracle/openidm.sql</include>
+            </includes>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>

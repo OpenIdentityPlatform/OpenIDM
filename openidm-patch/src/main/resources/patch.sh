@@ -19,6 +19,8 @@ TMP_LOG_FILE=$(mktemp /tmp/openidm_patch.XXXXXXXXXX) || { echo "Failed to create
 
 # The list of obsolete bundles
 obsoleteFiles=(
+"bin/defaults/script/policy.js"
+"db/scripts/oracle/openidm.sql"
 "bundle/openidm-audit-2.1.0.jar"
 "bundle/openidm-config-2.1.0.jar"
 "bundle/openidm-core-2.1.0.jar"
@@ -51,6 +53,8 @@ obsoleteFiles=(
 
 # The list of updated bundles
 upgradeFiles=(
+"bin/defaults/script/policy.js"
+"db/scripts/oracle/openidm.sql"
 "bundle/openidm-audit-2.1.1.jar"
 "bundle/openidm-config-2.1.1.jar"
 "bundle/openidm-core-2.1.1.jar"
@@ -110,11 +114,18 @@ missingOption() {
   exit 1
 }
 
+missingArgument() {
+  log "ERROR: Required argument not specified.\n"
+  printUsage
+  exit 1
+}
+
 verifyIdmHome() {
   # Perform a basic sanity check
   log "Verifying OpenIDM instance in $OPENIDM_HOME\n"
   if [ ! -f "$OPENIDM_HOME/bin/launcher.json" ]; then
     log "Invalid OPENIDM_HOME specified: $OPENIDM_HOME\n"
+    ABORT_FAST=true
     abort "BAD_OPENIDM_HOME"
   fi
 }
@@ -153,7 +164,7 @@ performBackup() {
   # Backup the files being removed or replaced
   [ -z $ARCHIVE_DIR ] && ARCHIVE_DIR=$OPENIDM_HOME/.patch/$DATE_TIME
   if [ ! -d "$ARCHIVE_DIR" ]; then
-     auditCmd "mkdir -p ${ARCHIVE_DIR}/bundle"
+     auditCmd "mkdir ${ARCHIVE_DIR}"
   fi
   log "Archive directory is: $ARCHIVE_DIR\n\n"
 
@@ -172,9 +183,12 @@ inconsistent state.\n\n"
   for f in "${obsoleteFiles[@]}"
   do
     if [ -f $OPENIDM_HOME/$f ]; then
+      if [ ! -d "$ARCHIVE_DIR/`dirname $f`" ]; then
+         auditCmd "mkdir -p $ARCHIVE_DIR/`dirname $f`"
+      fi
       auditCmd "cp -pr $OPENIDM_HOME/$f $ARCHIVE_DIR/$f"
     else
-      log "\nERROR: Missing $OPENIDM_HOME/$f while creating archive."
+      logAudit "Missing file: $OPENIDM_HOME/$f\n"
       abortBackupAndFail
     fi
   done
@@ -266,6 +280,9 @@ logPatchHistory() {
 }
 
 abort() {
+  if [ -n "$ABORT_FAST" ]; then
+    exit 1
+  fi
   log "$DATE_TIME: $1\n"
   PATCH_FAILED=$1
   logPatchHistory
@@ -328,13 +345,18 @@ do
   esac
 done
 
-log "Logfile: $TMP_LOG_FILE\n"
+# Make sure the mandatory arguments were supplied
+if [ -z $OPENIDM_HOME ]; then
+  missingArgument
+fi
 
-# Log the upgrade and status to the history
-logPatchHistory
+log "Logfile: $TMP_LOG_FILE\n"
 
 # Validate OPENIDM_HOME and ensure it is a valid OpenIDM directory
 verifyIdmHome
+
+# Log the upgrade and status to the history
+logPatchHistory
 
 # Abort if OpenIDM is currently running
 abortIfRunning
