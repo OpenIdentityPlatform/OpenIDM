@@ -681,10 +681,12 @@ function processRequest() {
                 var props = request.value;
                 for (var propName in props) {
                     var prop = getPropertyConfig(resource, propName);
-                    var policies = prop.policies;
-                    // Validate
-                    var policyRequirements = validate(policies, fullObject, propName, 
-                            props[propName], failedPolicyRequirements);
+                    if (prop !== null) {
+                        var policies = prop.policies;
+                        // Validate
+                        var policyRequirements = validate(policies, fullObject, propName, 
+                                props[propName], failedPolicyRequirements);
+                    }
                 }
             } else {
                 throw "Unsupported action: " + action;
