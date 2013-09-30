@@ -199,6 +199,13 @@ public class SecurityManager extends SimpleJsonResource {
                     storeWrapper.store();
                     reloadStore(storeWrapper);
                     privateKey = certWrapper.getPrivateKey();
+
+                    try {
+                        Config.updateConfig(null);
+                    } catch (NullPointerException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
                 if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
                     storeKeystore(storeWrapper.getLocation());
@@ -331,6 +338,7 @@ public class SecurityManager extends SimpleJsonResource {
                     store.getStore().deleteEntry(alias);
                     store.store();
                     reloadStore(store);
+                    Config.updateConfig(null);
                 } else {
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
                             "A valid alias must be specified");
