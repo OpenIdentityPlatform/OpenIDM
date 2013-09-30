@@ -48,22 +48,24 @@ public class Config {
      */
     public static void updateConfig(Dictionary propsToUpdate) throws Exception {
         BundleContext context = FrameworkUtil.getBundle(Param.class).getBundleContext();
-        ServiceReference configAdminRef = context.getServiceReference(ConfigurationAdmin.class.getName());
-        if (configAdminRef != null) {
-            ConfigurationAdmin confAdmin = (ConfigurationAdmin) context.getService(configAdminRef);
-            Configuration configuration = confAdmin.getConfiguration("org.ops4j.pax.web");
-            
-            if (propsToUpdate != null) {
-                Dictionary props = configuration.getProperties();
-                Enumeration keys = propsToUpdate.keys();
-                while (keys.hasMoreElements()) {
-                    String key = (String)keys.nextElement();
-                    props.put(key, propsToUpdate.get(key));
+        if (context != null) {
+            ServiceReference configAdminRef = context.getServiceReference(ConfigurationAdmin.class.getName());
+            if (configAdminRef != null) {
+                ConfigurationAdmin confAdmin = (ConfigurationAdmin) context.getService(configAdminRef);
+                Configuration configuration = confAdmin.getConfiguration("org.ops4j.pax.web");
+
+                if (propsToUpdate != null) {
+                    Dictionary props = configuration.getProperties();
+                    Enumeration keys = propsToUpdate.keys();
+                    while (keys.hasMoreElements()) {
+                        String key = (String)keys.nextElement();
+                        props.put(key, propsToUpdate.get(key));
+                    }
+                    configuration.update(props);
+                } else {
+                    configuration.update();
                 }
-                configuration.update(props);
-            } else {
-                configuration.update();
-            }
-        }  
+            }  
+        }
     }
 }

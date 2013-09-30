@@ -42,6 +42,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
@@ -79,6 +80,7 @@ public final class ResourceServlet
     private String bundleName;
     private String resourceDir;
     private String contextRoot;
+    private BundleContext bundleContext;
     
     private List<String> extFolders;
     
@@ -151,7 +153,8 @@ public final class ResourceServlet
             }
         };
 
-        context.getBundleContext().addBundleListener(bundleListener);
+        bundleContext = context.getBundleContext();
+        bundleContext.addBundleListener(bundleListener);
 
         // TODO rework this into an extension config when we support serving extensions from other locations
         extFolders = new ArrayList<String>();
@@ -167,8 +170,8 @@ public final class ResourceServlet
     
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        if (bundleListener != null) {
-            bundle.getBundleContext().removeBundleListener(bundleListener);
+        if (bundleListener != null && bundleContext != null) {
+            bundleContext.removeBundleListener(bundleListener);
         }
         webContainer.unregister(contextRoot);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
