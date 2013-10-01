@@ -2,7 +2,7 @@
 CREATE SCHEMA "openidm" AUTHORIZATION "openidm";
 
 -- -----------------------------------------------------
--- Table "openidm"."auditactivity"
+-- Table "openidm"."objecttypes"
 -- -----------------------------------------------------
 
 CREATE TABLE "openidm"."objecttypes" (
@@ -39,7 +39,7 @@ CREATE TABLE "openidm"."genericobjectproperties" (
   "genericobjects_id" BIGINT NOT NULL,
   "propkey" VARCHAR(255) NOT NULL,
   "proptype" VARCHAR(32) DEFAULT NULL,
-  "propvalue" TEXT,
+  "propvalue" TEXT NULL,
   CONSTRAINT "fk_genericobjectproperties_genericobjects" FOREIGN KEY ("genericobjects_id") REFERENCES "openidm"."genericobjects" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
 );
 CREATE INDEX "fk_genericobjectproperties_genericobjects" ON "openidm"."genericobjectproperties" ("genericobjects_id");
@@ -56,7 +56,7 @@ CREATE TABLE "openidm"."managedobjects" (
   "objecttypes_id" BIGINT NOT NULL,
   "objectid" VARCHAR(255) NOT NULL,
   "rev" VARCHAR(38) NOT NULL,
-  "fullobject" TEXT,
+  "fullobject" TEXT NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "fk_managedobjects_objectypes" FOREIGN KEY ("objecttypes_id") REFERENCES "openidm"."objecttypes" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
 );
@@ -73,13 +73,12 @@ CREATE TABLE "openidm"."managedobjectproperties" (
   "managedobjects_id" BIGINT NOT NULL,
   "propkey" VARCHAR(255) NOT NULL,
   "proptype" VARCHAR(32) DEFAULT NULL,
-  "propvalue" TEXT,
+  "propvalue" TEXT NULL,
   CONSTRAINT "fk_managedobjectproperties_managedobjects" FOREIGN KEY ("managedobjects_id") REFERENCES "openidm"."managedobjects" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 CREATE INDEX "fk_managedobjectproperties_managedobjects" ON "openidm"."managedobjectproperties" ("managedobjects_id");
 CREATE INDEX "idx_managedobjectproperties_prop" ON "openidm"."managedobjectproperties" ("propkey","propvalue");
-
 
 
 -- -----------------------------------------------------
@@ -160,13 +159,13 @@ CREATE TABLE "openidm"."auditactivity" (
   "activityid" VARCHAR(511) DEFAULT NULL,
   "activitydate" VARCHAR(29) DEFAULT NULL,
   "activity" VARCHAR(24) DEFAULT NULL,
-  "message" TEXT,
+  "message" TEXT NULL,
   "subjectid" VARCHAR(511) DEFAULT NULL,
   "subjectrev" VARCHAR(38) DEFAULT NULL,
-  "requester" TEXT,
-  "approver" TEXT,
-  "subjectbefore" TEXT,
-  "subjectafter" TEXT,
+  "requester" TEXT NULL,
+  "approver" TEXT NULL,
+  "subjectbefore" TEXT NULL,
+  "subjectafter" TEXT NULL,
   "changedfields" VARCHAR(255) DEFAULT NULL,
   "passwordchanged" VARCHAR(5) DEFAULT NULL,
   "status" VARCHAR(7) DEFAULT NULL,
@@ -193,7 +192,11 @@ CREATE TABLE "openidm"."auditrecon" (
   "situation" VARCHAR(24) DEFAULT NULL,
   "activity" VARCHAR(24) DEFAULT NULL,
   "status" VARCHAR(7) DEFAULT NULL,
-  "message" TEXT,
+  "message" TEXT NULL,
+  "actionid" VARCHAR(255) NULL ,
+  "exceptiondetail" TEXT NULL ,
+  "mapping" TEXT NULL ,
+  "messagedetail" TEXT NULL ,
   PRIMARY KEY ("objectid")
 );
 
@@ -210,6 +213,88 @@ CREATE TABLE "openidm"."internaluser" (
   PRIMARY KEY ("objectid")
 );
 
+-- -----------------------------------------------------
+-- Table "openidm"."schedulerobjects"
+-- -----------------------------------------------------
+
+CREATE TABLE "openidm"."schedulerobjects" (
+  "id" BIGSERIAL NOT NULL,
+  "objecttypes_id" BIGINT NOT NULL,
+  "objectid" VARCHAR(255) NOT NULL,
+  "rev" VARCHAR(38) NOT NULL,
+  "fullobject" TEXT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "fk_schedulerobjects_objectypes" FOREIGN KEY ("objecttypes_id") REFERENCES "openidm"."objecttypes" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE UNIQUE INDEX "idx-schedulerobjects_object" ON "openidm"."schedulerobjects" ("objecttypes_id","objectid");
+CREATE INDEX "fk_schedulerobjects_objectypes" ON "openidm"."schedulerobjects" ("objecttypes_id");
+
+
+-- -----------------------------------------------------
+-- Table "openidm"."schedulerobjectproperties"
+-- -----------------------------------------------------
+
+CREATE TABLE "openidm"."schedulerobjectproperties" (
+  "schedulerobjects_id" BIGINT NOT NULL,
+  "propkey" VARCHAR(255) NOT NULL,
+  "proptype" VARCHAR(32) DEFAULT NULL,
+  "propvalue" TEXT NULL,
+  CONSTRAINT "fk_schedulerobjectproperties_schedulerobjects" FOREIGN KEY ("schedulerobjects_id") REFERENCES "openidm"."schedulerobjects" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE INDEX "fk_schedulerobjectproperties_schedulerobjects" ON "openidm"."schedulerobjectproperties" ("schedulerobjects_id");
+CREATE INDEX "idx_schedulerobjectproperties_prop" ON "openidm"."schedulerobjectproperties" ("propkey","propvalue");
+
+
+-- -----------------------------------------------------
+-- Table "openidm"."clusterobjects"
+-- -----------------------------------------------------
+
+CREATE TABLE "openidm"."clusterobjects" (
+  "id" BIGSERIAL NOT NULL,
+  "objecttypes_id" BIGINT NOT NULL,
+  "objectid" VARCHAR(255) NOT NULL,
+  "rev" VARCHAR(38) NOT NULL,
+  "fullobject" TEXT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "fk_clusterobjects_objectypes" FOREIGN KEY ("objecttypes_id") REFERENCES "openidm"."objecttypes" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE UNIQUE INDEX "idx-clusterobjects_object" ON "openidm"."clusterobjects" ("objecttypes_id","objectid");
+CREATE INDEX "fk_clusterobjects_objectypes" ON "openidm"."clusterobjects" ("objecttypes_id");
+
+
+-- -----------------------------------------------------
+-- Table "openidm"."clusterobjectproperties"
+-- -----------------------------------------------------
+
+CREATE TABLE "openidm"."clusterobjectproperties" (
+  "clusterobjects_id" BIGINT NOT NULL,
+  "propkey" VARCHAR(255) NOT NULL,
+  "proptype" VARCHAR(32) DEFAULT NULL,
+  "propvalue" TEXT NULL,
+  CONSTRAINT "fk_clusterobjectproperties_clusterobjects" FOREIGN KEY ("clusterobjects_id") REFERENCES "openidm"."clusterobjects" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE INDEX "fk_clusterobjectproperties_clusterobjects" ON "openidm"."clusterobjectproperties" ("clusterobjects_id");
+CREATE INDEX "idx_clusterobjectproperties_prop" ON "openidm"."clusterobjectproperties" ("propkey","propvalue");
+
+
+-- -----------------------------------------------------
+-- Table "openidm"."uinotification"
+-- -----------------------------------------------------
+CREATE TABLE "openidm"."uinotification" (
+  "objectid" VARCHAR(38) NOT NULL ,
+  "rev" VARCHAR(38) NOT NULL ,
+  "notificationType" VARCHAR(255) NOT NULL ,
+  "createDate" VARCHAR(255) NOT NULL ,
+  "message" TEXT NOT NULL ,
+  "requester" VARCHAR(255) NULL ,
+  "receiverId" VARCHAR(38) NOT NULL ,
+  "requesterId" VARCHAR(38) NULL ,
+  "notificationSubtype" VARCHAR(255) NULL ,
+  PRIMARY KEY ("objectid") );
 
 
 -- -----------------------------------------------------
@@ -220,3 +305,7 @@ INSERT INTO "openidm"."internaluser" ("objectid", "rev", "pwd", "roles") VALUES 
 INSERT INTO "openidm"."internaluser" ("objectid", "rev", "pwd", "roles") VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');
 
 COMMIT;
+-- -------------------------------------------
+-- openidm database user
+-- ------------------------------------------
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA openidm TO openidm;
