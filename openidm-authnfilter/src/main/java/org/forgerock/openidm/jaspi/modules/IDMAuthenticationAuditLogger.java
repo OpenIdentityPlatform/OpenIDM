@@ -49,8 +49,8 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
     @Override
     public void audit(MessageInfo messageInfo) {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Map<String, Object> map = (Map<String, Object>) request.getAttribute(
-                IDMServerAuthModule.CONTEXT_REQUEST_KEY);
+        Map<String, Object> map = (Map<String, Object>) messageInfo.getMap()
+                .get(IDMServerAuthModule.CONTEXT_REQUEST_KEY);
         String username = (String) map.get(IDMServerAuthModule.USERNAME_ATTRIBUTE);
         String userId = (String) map.get(IDMServerAuthModule.USERID_ATTRIBUTE);
         List<String> roles = (List<String>) map.get(IDMServerAuthModule.ROLES_ATTRIBUTE);
