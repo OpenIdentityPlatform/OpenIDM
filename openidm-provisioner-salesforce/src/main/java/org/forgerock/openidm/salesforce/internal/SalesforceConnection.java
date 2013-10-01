@@ -195,14 +195,16 @@ public class SalesforceConnection extends ClientResource {
             // Sync the threads
             synchronized (this) {
                 // Second check
-                if (authentication.getAccessToken().equals(expired)) {
+                if (authentication.getAccessToken().equals(expired)
+                        && (System.currentTimeMillis() - authentication.issued.getTime() > 300000)) {
                     authenticate();
                     if (authentication.getAccessToken().equals(expired)) {
-                        logger.warn("Expired token was not revoked and couldn't be refreshed");
-                        return false;
+                        logger.warn("Expired token was successfully extended");
                     } else {
                         logger.info("Expired token was successfully refreshed");
                     }
+                } else {
+                    logger.info("Expired token was refreshed by other thread");
                 }
             }
         }
@@ -217,14 +219,16 @@ public class SalesforceConnection extends ClientResource {
             // Sync the threads
             synchronized (this) {
                 // Second check
-                if (authentication.getAuthorization().equals(expired)) {
+                if (authentication.getAuthorization().equals(expired)
+                        && (System.currentTimeMillis() - authentication.issued.getTime() > 300000)) {
                     authenticate();
                     if (authentication.getAuthorization().equals(expired)) {
-                        logger.warn("Expired token was not revoked and couldn't be refreshed");
-                        return false;
+                        logger.warn("Expired token was successfully extended");
                     } else {
                         logger.info("Expired token was successfully refreshed");
                     }
+                } else {
+                    logger.info("Expired token was refreshed by other thread");
                 }
             }
         }
@@ -251,8 +255,6 @@ public class SalesforceConnection extends ClientResource {
         Representation body = null;
         final ClientResource cr = super.getChild(new Reference(""));
         try {
-            revokeAccessToken();
-
             body = cr.post(configuration.getAuthenticationForm().getWebRepresentation());
             if (body instanceof EmptyRepresentation == false) {
                 authentication = createJson(new JacksonRepresentation<Map>(body, Map.class));
@@ -277,7 +279,11 @@ public class SalesforceConnection extends ClientResource {
         // REVOKE
         if (null != authentication) {
             logger.debug("Attempt to revoke AccessToken!");
-            final ClientResource cr = super.getChild(new Reference("./revoke"));
+            // final ClientResource cr = super.getChild(new
+            // Reference("./revoke"));
+            final ClientResource cr =
+                    new ClientResource(getContext(), new Reference(authentication
+                            .getBaseReference(), "./services/oauth2/revoke").toUri());
             try {
                 cr.setFollowingRedirects(true);
                 cr.getReference().addQueryParameter("token", authentication.getAccessToken());
