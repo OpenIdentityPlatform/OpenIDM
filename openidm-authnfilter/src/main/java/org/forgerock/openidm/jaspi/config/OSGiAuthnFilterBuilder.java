@@ -90,6 +90,7 @@ import java.util.Map;
  *
  * @author Jonathan Scudder
  * @author Phill Cunnington
+ * @author brmiller
  */
 @Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Properties({
@@ -102,6 +103,12 @@ public class OSGiAuthnFilterBuilder {
     public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
 
     private static final String DEFAULT_LOGGER_CLASS_NAME = IDMAuthenticationAuditLogger.class.getCanonicalName();
+
+    // config tokens
+    private static final String CONFIG_SERVER_AUTH_CONFIG = "serverAuthConfig";
+    private static final String CONFIG_AUDIT_LOGGER = "auditLogger";
+    private static final String CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT = "authnPopulateContextScript";
+    private static final String CONFIG_ADDITIONAL_URL_PATTERNS = "additionalUrlPatterns";
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -130,9 +137,12 @@ public class OSGiAuthnFilterBuilder {
     protected void activate(ComponentContext context) throws Exception {
         ConfigurationManager.unconfigure();
         configureAuthenticationFilter(config);
-        String authnPopulateScriptLocation = config.get("serverAuthConfig").get("authnPopulateContextScript")
+        String authnPopulateScriptLocation = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT)
                 .defaultTo("bin/defaults/script/auth/authnPopulateContext.js").asString();
-        registerAuthnFilter(authnPopulateScriptLocation);
+        List<String> additionalUrlPatterns = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS).isList()
+                ? config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS).asList(String.class)
+                : new ArrayList<String>(0);
+        registerAuthnFilter(authnPopulateScriptLocation, additionalUrlPatterns);
     }
 
     /**
@@ -151,14 +161,14 @@ public class OSGiAuthnFilterBuilder {
         JsonValue serverAuthConfig = jsonConfig.get("serverAuthConfig").required();
 
         Configuration configuration = new Configuration();
-        String auditLoggerClassName = serverAuthConfig.get("auditLogger").defaultTo(DEFAULT_LOGGER_CLASS_NAME).asString();
+        String auditLoggerClassName = serverAuthConfig.get(CONFIG_AUDIT_LOGGER).defaultTo(DEFAULT_LOGGER_CLASS_NAME).asString();
         configuration.setAuditLoggerClassName(auditLoggerClassName);
 
         // For each ServerAuthConfig
         for (String serverAuthConfigKey : serverAuthConfig.keys()) {
-            if ("auditLogger".equals(serverAuthConfigKey)) {
-                continue;
-            } else if ("authnPopulateContextScript".equals(serverAuthConfigKey)) {
+            if (CONFIG_AUDIT_LOGGER.equals(serverAuthConfigKey)
+                    || CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT.equals(serverAuthConfigKey)
+                    || CONFIG_ADDITIONAL_URL_PATTERNS.equals(serverAuthConfigKey)) {
                 continue;
             } else {
                 AuthContextConfiguration authContextConfiguration = configuration.addAuthContext(serverAuthConfigKey);
@@ -301,9 +311,12 @@ public class OSGiAuthnFilterBuilder {
     /**
      * Registers the Authentication Filter in OSGi.
      *
+     * @param authnPopulateScriptLocation
+     * @param additionalUrlPatterns additional url patterns to which to apply the filter
      * @throws Exception If a problem occurs whilst registering the filter.
      */
-    private void registerAuthnFilter(String authnPopulateScriptLocation) throws Exception {
+    private void registerAuthnFilter(String authnPopulateScriptLocation, List<String> additionalUrlPatterns)
+            throws Exception {
 
         Map<String, String> initParams = new HashMap<String, String>();
         initParams.put("moduleConfiguration", "idmAuth");
@@ -317,6 +330,7 @@ public class OSGiAuthnFilterBuilder {
 
         List<String> urlPatterns = new ArrayList<String>();
         urlPatterns.add("/openidm/*");
+        urlPatterns.addAll(additionalUrlPatterns);
 
         Map<String, Object> filterConfig = new HashMap<String, Object>();
         filterConfig.put("classPathURLs", new ArrayList<String>());
