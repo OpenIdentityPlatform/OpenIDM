@@ -135,8 +135,21 @@ public class DBHelper {
         // Enable transaction log
         OGlobalConfiguration.TX_USE_LOG.setValue(true);
         
-        // Immediate disk sync for commit 
-        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
+        // Conservative defaults to immediately disk sync.
+        // Can be relaxed via config for reliable (RAID) hardware
+        
+        // Immediate disk sync for every record operation, OrientDB setting for nonTX.recordUpdate.synch
+        boolean nonTxRecordUpdateSync = completeConfig.get("nonTransactionRecordUpdateSync")
+                .defaultTo(Boolean.TRUE).asBoolean();
+        OGlobalConfiguration.NON_TX_RECORD_UPDATE_SYNCH.setValue(nonTxRecordUpdateSync);
+        
+        // Immediate disk sync for each transaction log, OrientDB setting for tx.log.sync
+        boolean txLogSync = completeConfig.get("transactionLogSynch").defaultTo(Boolean.TRUE).asBoolean();
+        OGlobalConfiguration.TX_LOG_SYNCH.setValue(txLogSync);
+        
+        // Immediate disk sync for commit, OrientDB setting for tx.commit.sync
+        boolean txCommitSync = completeConfig.get("transactionCommitSynch").defaultTo(Boolean.TRUE).asBoolean();
+        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(txCommitSync);
         
         // Have the storage closed when the DB is closed.
         OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(false);
