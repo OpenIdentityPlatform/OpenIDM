@@ -25,6 +25,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
@@ -243,12 +244,18 @@ public class PassthroughModuleTest {
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject serviceSubject = new Subject();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> contextMap = new HashMap<String, Object>();
+        map.put(IDMServerAuthModule.CONTEXT_REQUEST_KEY, contextMap);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getMap()).willReturn(map);
 
         //When
         AuthStatus authStatus = passthroughModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
-        verifyZeroInteractions(messageInfo);
     }
 }
