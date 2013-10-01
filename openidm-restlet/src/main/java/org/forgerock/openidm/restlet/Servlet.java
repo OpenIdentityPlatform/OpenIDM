@@ -61,6 +61,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
 // SLF4J
+import org.restlet.ext.servlet.ServletUtils;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -307,6 +308,9 @@ public class Servlet extends RestletRouterServlet {
                     security.get(USERID).get(USERID_COMPONENT).required();
                     security.get(USERID).get(USERID_ID).required();
                     security.get(OPENIDM_ROLES).required();
+
+                    HttpServletRequest httpServletRequest = ServletUtils.getRequest(request);
+                    httpServletRequest.setAttribute("org.forgerock.security.authzid", security.asMap());
                 } else {
                     logger.warn("Rejecting invocation as required context to allow invocation not populated");
                     throw new RuntimeException("Rejecting invocation as required context to allow invocation not populated");

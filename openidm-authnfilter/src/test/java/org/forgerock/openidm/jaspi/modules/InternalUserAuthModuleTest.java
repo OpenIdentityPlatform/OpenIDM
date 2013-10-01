@@ -25,6 +25,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
@@ -209,8 +210,10 @@ public class InternalUserAuthModuleTest {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> messageInfoMap = mock(Map.class);
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> contextMap = new HashMap<String, Object>();
         Subject serviceSubject = new Subject();
+        messageInfoMap.put(IDMServerAuthModule.CONTEXT_REQUEST_KEY, contextMap);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -223,8 +226,7 @@ public class InternalUserAuthModuleTest {
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
-        verify(messageInfo).getMap();
-        verify(messageInfoMap).put("skipSession", true);
+        assertEquals(messageInfoMap.get("skipSession"), true);
     }
 
     @Test
@@ -232,8 +234,10 @@ public class InternalUserAuthModuleTest {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> messageInfoMap = mock(Map.class);
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> contextMap = new HashMap<String, Object>();
         Subject serviceSubject = new Subject();
+        messageInfoMap.put(IDMServerAuthModule.CONTEXT_REQUEST_KEY, contextMap);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -246,6 +250,5 @@ public class InternalUserAuthModuleTest {
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
-        verify(messageInfo, never()).getMap();
     }
 }

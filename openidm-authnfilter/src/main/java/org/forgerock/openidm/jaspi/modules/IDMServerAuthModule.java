@@ -211,6 +211,16 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
         if (Boolean.parseBoolean(noSession)) {
             messageInfo.getMap().put("skipSession", true);
+        } else {
+            Map<String, Object> messageInfoParams = messageInfo.getMap();
+            Map<String, Object> contextMap = (Map<String, Object>) messageInfoParams.get(CONTEXT_REQUEST_KEY);
+
+            JsonValue authzid = new JsonValue(request.getAttribute("org.forgerock.security.authzid"));
+
+            contextMap.put(USERID_ATTRIBUTE, authzid.get("userid").get("id").asString());
+            contextMap.put(USERNAME_ATTRIBUTE, authzid.get("username").asString());
+            contextMap.put(ROLES_ATTRIBUTE, authzid.get("openidm-roles").asList(String.class));
+            request.setAttribute(CONTEXT_REQUEST_KEY, contextMap);
         }
 
         return AuthStatus.SEND_SUCCESS;

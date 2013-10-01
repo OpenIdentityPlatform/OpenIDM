@@ -236,6 +236,13 @@ public class IWAModuleTest {
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject serviceSubject = new Subject();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> contextMap = new HashMap<String, Object>();
+        map.put(IDMServerAuthModule.CONTEXT_REQUEST_KEY, contextMap);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getMap()).willReturn(map);
 
         //When
         AuthStatus authStatus = iwaModule.secureResponse(messageInfo, serviceSubject);

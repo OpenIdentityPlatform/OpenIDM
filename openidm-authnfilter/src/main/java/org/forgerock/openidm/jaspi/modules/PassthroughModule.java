@@ -164,7 +164,7 @@ public class PassthroughModule extends IDMServerAuthModule {
      */
     @Override
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+        return super.secureResponse(messageInfo, serviceSubject);
     }
 
     /**
