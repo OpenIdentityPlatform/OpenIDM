@@ -77,7 +77,7 @@ public class PublisherTest {
      * is set at a lax level. 
      * Real performance (printed on standard out) should be much higher
     */
-    @Test
+    @Test(enabled = false)
     public void performanceSmokeTest() throws Exception {
 
         int warmup = 100000;
