@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.2.0-SNAPSHOT</version>
+            <version>1.1.2.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.forgerock.openicf.framework</groupId>
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>1.1.2.0-SNAPSHOT</version>
+            <version>1.1.2.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -220,7 +220,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
-                                    <version>1.1.2.0-SNAPSHOT</version>
+                                    <version>1.1.2.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
