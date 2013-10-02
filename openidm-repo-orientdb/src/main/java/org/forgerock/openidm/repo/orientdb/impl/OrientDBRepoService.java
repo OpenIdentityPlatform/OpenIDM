@@ -96,6 +96,8 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     public static final String CONFIG_DB_URL = "dbUrl";
     public static final String CONFIG_USER = "user";
     public static final String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_POOL_MIN_SIZE = "poolMinSize";
+    public static final String CONFIG_POOL_MAX_SIZE = "poolMaxSize";
     public static final String CONFIG_DB_STRUCTURE = "dbStructure";
     public static final String CONFIG_ORIENTDB_CLASS = "orientdbClass";
     public static final String CONFIG_INDEX = "index";
@@ -104,13 +106,17 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
     
+    // Default settings for pool size min and max
+    public static final int DEFAULT_POOL_MIN_SIZE = 5;
+    public static final int DEFAULT_POOL_MAX_SIZE = 20;
+    
     ODatabaseDocumentPool pool;
 
     String dbURL; 
     String user;
     String password;
-    int poolMinSize = 5; 
-    int poolMaxSize = 20;
+    int poolMinSize;
+    int poolMaxSize;
 
     // Current configuration
     JsonValue existingConfig;
@@ -582,7 +588,7 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     }
     
     /**
-     * Initialize the instnace with the given configuration.
+     * Initialize the instance with the given configuration.
      * 
      * This can configure managed (DS/SCR) instances, as well as explicitly instantiated
      * (bootstrap) instances.
@@ -595,6 +601,8 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             logger.info("Use DB at dbURL: {}", dbURL);
             user = getUser(config);
             password = getPassword(config);
+            poolMinSize = getPoolMinSize(config);
+            poolMaxSize = getPoolMaxSize(config);
 
             Map map = config.get(CONFIG_QUERIES).asMap();
             Map<String, String> queryMap = (Map<String, String>) map;
@@ -628,6 +636,14 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
     }
     
+    private int getPoolMinSize(JsonValue config) {
+        return config.get(CONFIG_POOL_MIN_SIZE).defaultTo(DEFAULT_POOL_MIN_SIZE).asInteger();
+    }
+    
+    private int getPoolMaxSize(JsonValue config) {
+        return config.get(CONFIG_POOL_MAX_SIZE).defaultTo(DEFAULT_POOL_MAX_SIZE).asInteger();
+    }
+    
     /**
      * Handle an existing activated service getting changed; 
      * e.g. configuration changes or dependency changes
@@ -648,16 +664,17 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         if (existingConfig != null 
                 && dbURL.equals(getDBUrl(newConfig))
                 && user.equals(getUser(newConfig))
-                && password.equals(getPassword(newConfig))) {
+                && password.equals(getPassword(newConfig))
+                && poolMinSize == getPoolMinSize(newConfig)
+                && poolMaxSize == getPoolMaxSize(newConfig)) {
             // If the DB pool settings don't change keep the existing pool
             logger.info("(Re-)initialize repository with latest configuration.");
-            init(newConfig);
         } else {
             // If the DB pool settings changed do a more complete re-initialization
             logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");
-            deactivate(compContext);
-            activate(compContext);
+            DBHelper.closePool(dbURL, pool);
         }
+        init(newConfig);
         
         existingConfig = newConfig;
         logger.debug("Repository service modified");
