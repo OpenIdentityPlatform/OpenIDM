@@ -139,9 +139,9 @@ public class OSGiAuthnFilterBuilder {
         configureAuthenticationFilter(config);
         String authnPopulateScriptLocation = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT)
                 .defaultTo("bin/defaults/script/auth/authnPopulateContext.js").asString();
-        List<String> additionalUrlPatterns = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS).isList()
-                ? config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS).asList(String.class)
-                : new ArrayList<String>(0);
+        List<String> additionalUrlPatterns = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS)
+                .defaultTo(new ArrayList<String>(0)).asList(String.class);
+
         registerAuthnFilter(authnPopulateScriptLocation, additionalUrlPatterns);
     }
 
