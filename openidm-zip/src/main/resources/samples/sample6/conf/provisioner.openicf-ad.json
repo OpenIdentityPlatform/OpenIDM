@@ -10,7 +10,7 @@
    "connectorRef" :
       {
           "bundleName"    : "org.forgerock.openicf.connectors.ldap-connector",
-          "bundleVersion" : "1.1.1.0-SNAPSHOT",
+          "bundleVersion" : "1.1.1.0",
           "connectorName" : "org.identityconnectors.ldap.LdapConnector"
       },
    "poolConfigOption" :
