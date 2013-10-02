@@ -60,6 +60,9 @@ public class DBHelper {
      * Also can initialize/create/update the DB to meet the passed
      * configuration if setupDB is enabled
      * 
+     * An existing pool currently does not get resized to the passed min max settings,
+     * only newly created pools.
+     * 
      * Do not close the returned pool directly as it may be used by others.
      * 
      * To cleanly shut down the application, call closePools at the end
@@ -87,6 +90,7 @@ public class DBHelper {
             }
             logger.debug("Getting pool {}", dbURL);
             pool = pools.get(dbURL);
+
             if (pool == null) {
                 pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
                 pools.put(dbURL, pool);
@@ -115,6 +119,20 @@ public class DBHelper {
             }
         }
         pools = new HashMap(); // release all our closed pool references
+    }
+    
+    /**
+     * Close and remove a pool managed by this helper
+     */
+    public synchronized static void closePool(String dbUrl, ODatabaseDocumentPool pool) {
+        logger.debug("Close DB pool for {} {}", dbUrl, pool);
+        try {
+            pools.remove(dbUrl);
+            pool.close();
+            logger.trace("Closed pool for {} {}", dbUrl, pool);
+        } catch (Exception ex) {
+            logger.info("Failure reported in closing pool {} {}", new Object[] {dbUrl, pool, ex});
+        }
     }
     
     /**
@@ -165,10 +183,10 @@ public class DBHelper {
             if (pool != null) {
                 pool.close();
             }
-            pool = ODatabaseDocumentPool.global();
-            // Moving from 0.9.25 to 1.0 RC had to change this
-            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
-            //pool.setup(minSize, maxSize);
+            // Use our own sized pool, rather than the global one
+            // pool = ODatabaseDocumentPool.global();
+            pool = new ODatabaseDocumentPool();
+            pool.setup(minSize, maxSize);
             warmUpPool(pool, dbURL, user, password, 1);
             
             boolean finalTry = (retryCount >= maxRetry);
