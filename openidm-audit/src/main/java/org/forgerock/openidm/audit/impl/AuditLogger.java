@@ -59,6 +59,13 @@ public interface AuditLogger {
     boolean isUsedForQueries();
 
     /**
+     * Returns whether to ignore logging failures
+     *
+     * @return whether to ignore logging failures
+     */
+    boolean isIgnoreLoggingFailures();
+
+    /**
      * Creates a new object in the object set.
      * <p>
      * On completion, this method sets the {@code _id} property to the assigned identifier for
@@ -85,9 +92,6 @@ public interface AuditLogger {
      * @return the requested object.
      */
     Map<String, Object> read(ServerContext context, String id) throws ResourceException;
-
-
-
 
     /**
      * Performs a query on the specified object and returns the associated result. The
