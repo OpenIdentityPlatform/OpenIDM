@@ -68,6 +68,7 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
         }
         List<String> certStringChain = value.get("certs").required().asList(String.class);
         Certificate [] certChain = readCertificateChain(certStringChain, type);
+        verify(privateKey, certChain[0]);
         store.getStore().setEntry(alias, new PrivateKeyEntry(privateKey, certChain), 
         		new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
         store.store();
