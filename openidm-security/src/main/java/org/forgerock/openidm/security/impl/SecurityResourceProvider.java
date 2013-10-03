@@ -32,6 +32,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
@@ -426,6 +427,36 @@ public class SecurityResourceProvider {
             return fromPem(pemString);
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Verifies that the supplied private key and signed certificate match by signing/verifying some test data.
+     * 
+     * @param privateKey A private key
+     * @param publicKey A public key
+     * @throws JsonResourceException if the verification fails, or an error is encountered.
+     */
+    protected void verify(PrivateKey privateKey, Certificate cert) throws ResourceException {
+        PublicKey publicKey = cert.getPublicKey();
+        byte[] data = { 65, 66, 67, 68, 69, 70, 71, 72, 73, 74 };
+        boolean verified;
+        try {
+            Signature signer = Signature.getInstance(privateKey.getAlgorithm());
+            signer.initSign(privateKey);
+            signer.update(data);
+            byte[] signed = signer.sign();
+            Signature verifier = Signature.getInstance(publicKey.getAlgorithm());
+            verifier.initVerify(publicKey);
+            verifier.update(data);
+            verified = verifier.verify(signed);
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, 
+                    "Error verifying private key and signed certificate", e);
+        }
+        if (!verified) {
+            throw ResourceException.getException(ResourceException.BAD_REQUEST, 
+                    "Private key does not match signed certificate");
         }
     }
 }
