@@ -42,7 +42,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
-import org.forgerock.openidm.repo.jdbc.impl.TokenHandler;
+import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
