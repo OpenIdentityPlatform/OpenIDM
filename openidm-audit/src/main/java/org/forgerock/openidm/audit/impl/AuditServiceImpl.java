@@ -278,10 +278,14 @@ public class AuditServiceImpl implements AuditService {
                     auditLogger.create(context, type, obj);
                 } catch (ResourceException ex) {
                     logger.warn("Failure writing audit log: {}/{} with logger {}", new Object[] {type, localId, auditLogger, ex});
-                    throw ex;
+                    if (!auditLogger.isIgnoreLoggingFailures()) {
+                        throw ex;
+                    }
                 } catch (RuntimeException ex) {
                     logger.warn("Failure writing audit log: {}/{} with logger {}", new Object[] {type, localId, auditLogger, ex});
-                    throw ex;
+                    if (!auditLogger.isIgnoreLoggingFailures()) {
+                        throw ex;
+                    }
                 }
             }
             handler.handleResult(new Resource(localId, null, new JsonValue(obj)));
