@@ -14,7 +14,7 @@
     "scriptExtensions" : {
         "augmentSecurityContext" : {
             "type" : "text/javascript",
-            "name" : "script/security/populateContext.js"
+            "file" : "script/security/populateContext.js"
         }
     },
     "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"

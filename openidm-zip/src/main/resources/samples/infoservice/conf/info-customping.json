@@ -1,5 +1,5 @@
 {
     "infocontext" : "ping",
     "type" : "text/javascript",
-    "name" : "script/info/customping.js"
+    "file" : "script/info/customping.js"
 }

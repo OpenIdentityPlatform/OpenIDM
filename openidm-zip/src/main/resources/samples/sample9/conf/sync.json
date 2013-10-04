@@ -72,7 +72,7 @@
                     "action" : {
                         "workflowName" : "managedUserApproval",
                         "type" : "text/javascript",
-                        "name" : "workflow/workflow.js"
+                        "file" : "workflow/workflow.js"
                     }
                 },
                 {

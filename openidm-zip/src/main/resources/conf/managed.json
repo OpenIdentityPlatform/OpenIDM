@@ -4,11 +4,11 @@
             "name" : "user",
             "onCreateFIXME" : {
                 "type" : "text/javascript",
-                "name" : "ui/onCreate-user-set-default-fields.js"
+                "file" : "ui/onCreate-user-set-default-fields.js"
             },
             "onDelete" : {
                 "type" : "text/javascript",
-                "name" : "ui/onDelete-user-cleanup.js"
+                "file" : "ui/onDelete-user-cleanup.js"
             },
             "properties" : [
                 {

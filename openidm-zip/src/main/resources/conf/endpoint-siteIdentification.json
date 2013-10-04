@@ -1,4 +1,4 @@
 {
     "type" : "text/javascript",
-    "name" : "ui/getSiteIdentificationForLogin.js"
+    "file" : "ui/getSiteIdentificationForLogin.js"
 }
