@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -38,6 +39,8 @@ public class TokenHandler {
     public static final String PREFIX_UNQUOTED = "unquoted";
 
     public static final String PREFIX_DOTNOTATION = "dotnotation";
+
+    public static final String PREFIX_LIST = "list";
 
     final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);
     
@@ -75,6 +78,11 @@ public class TokenHandler {
             	String replacement = params.get(tokenKey);
 /*
                 Object replacement = params.get(tokenKey);
+
+                if (PREFIX_LIST.equals(tokenPrefix)) {
+                    // quote each element and split on ,
+                    replacement = Arrays.asList(("'" + replacement.toString().replaceAll(",", "','") + "'").split(","));
+                }
 
                 if (replacement instanceof List) {
                     StringBuffer commaSeparated = new StringBuffer();
