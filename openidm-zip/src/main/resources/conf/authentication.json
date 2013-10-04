@@ -8,6 +8,7 @@
     },
     "defaultUserRoles" : [ ],
     "serverAuthConfig" : {
+        "authnPopulateContextScript": "&{launcher.install.location}/bin/defaults/script/auth/authnPopulateContext.js",
         "idmAuth" : {
             "sessionModule" : {
                 "name" : "JWT_SESSION",
