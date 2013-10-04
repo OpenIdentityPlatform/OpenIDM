@@ -13,6 +13,7 @@
             {
                 "location":"bundle",
                 "includes":[
+                    "**/openidm-security-*.jar",
                     "**/org.apache.servicemix.transaction-*.jar"
                 ],
                 "start-level":2,
@@ -52,7 +53,6 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-security-*.jar",
                     "**/openidm-cluster*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/groovy-all*.jar"

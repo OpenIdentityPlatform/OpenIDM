@@ -1,4 +1,4 @@
 {
     "type" : "text/javascript",
-    "name" : "ui/notification/userNotifications.js"
+    "file" : "ui/notification/userNotifications.js"
 }

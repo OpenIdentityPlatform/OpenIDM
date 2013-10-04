@@ -1,4 +1,4 @@
 {
     "type" : "text/javascript",
-    "name" : "workflow/getprocessesforuser.js"
+    "file" : "workflow/getprocessesforuser.js"
 }

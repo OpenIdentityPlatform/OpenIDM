@@ -78,7 +78,7 @@
                     "target" : "manager",
                     "transform" : {
                         "type" : "text/javascript",
-                        "name" : "script/transformHRManager.js"
+                        "file" : "script/transformHRManager.js"
                     }
                 },
                 {
@@ -86,7 +86,7 @@
                     "target" : "accounts",
                     "transform" : {
                         "type" : "text/javascript",
-                        "name" : "script/transformHRAccounts.js"
+                        "file" : "script/transformHRAccounts.js"
                     }
                 }
             ],

@@ -4,11 +4,11 @@
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "name" : "script/onCreate-user-set-default-fields.js"
+                "file" : "script/onCreate-user-set-default-fields.js"
             },
             "onDelete" : {
                 "type" : "text/javascript",
-                "name" : "ui/onDelete-user-cleanup.js"
+                "file" : "ui/onDelete-user-cleanup.js"
             },
             "properties" : [
                 {

@@ -1,5 +1,5 @@
 {
     "type" : "text/javascript",
-    "name" : "policy.js",
+    "file" : "policy.js",
     "resources" : [ ]
 }

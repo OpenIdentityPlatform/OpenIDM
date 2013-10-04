@@ -1,4 +1,4 @@
 {
     "type" : "text/javascript",
-    "name" : "workflow/getavailableuserstoassign.js"
+    "file" : "workflow/getavailableuserstoassign.js"
 }

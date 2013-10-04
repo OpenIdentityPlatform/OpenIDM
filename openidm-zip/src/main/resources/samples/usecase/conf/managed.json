@@ -4,19 +4,19 @@
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "name" : "ui/onCreate-user-set-default-fields.js"
+                "file" : "ui/onCreate-user-set-default-fields.js"
             },
             "onDelete" : {
                 "type" : "text/javascript",
-                "name" : "ui/onDelete-user-cleanup.js"
+                "file" : "ui/onDelete-user-cleanup.js"
             },
             "onRetrieve" : {
                 "type" : "text/javascript",
-                "name" : "script/onRetrieveManagedUser.js"
+                "file" : "script/onRetrieveManagedUser.js"
             },
             "onStore" : {
                 "type" : "text/javascript",
-                "name" : "script/onStoreManagedUser.js"
+                "file" : "script/onStoreManagedUser.js"
             },
             "properties" : [
                 {
