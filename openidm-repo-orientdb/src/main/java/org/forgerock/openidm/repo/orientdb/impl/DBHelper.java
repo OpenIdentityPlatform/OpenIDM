@@ -404,9 +404,7 @@ public class DBHelper {
         
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
-        String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":"
-                + "\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},"
-                + "\"type\":\"x-simple-encryption\"}}";
+        String defaultAdminPwd = "openidm-admin";
         String defaultAdminRoles = "openidm-admin,openidm-authorized";
         populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, 
                 defaultAdminPwd, defaultAdminRoles);

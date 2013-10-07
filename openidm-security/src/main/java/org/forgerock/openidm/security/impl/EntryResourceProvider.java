@@ -153,6 +153,12 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
 		final ResourceException e = new NotSupportedException("Query operations are not supported");
         handler.handleError(e);
 	}
+	
+	public abstract void createDefaultEntry(String alias) throws Exception;
+	
+	public boolean hasEntry(String alias) throws Exception {
+        return store.getStore().containsAlias(alias);
+    }
 
 	protected abstract void storeEntry(JsonValue value, String alias) throws Exception;
 	

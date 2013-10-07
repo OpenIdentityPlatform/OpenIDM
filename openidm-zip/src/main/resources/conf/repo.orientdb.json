@@ -183,6 +183,15 @@
                     }
                 ]
             },
+            "security" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "audit_recon" : {
                 "index" : [
                     {

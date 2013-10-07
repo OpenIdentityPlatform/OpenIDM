@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -39,41 +40,42 @@ import org.slf4j.LoggerFactory;
  * Crypto bundle activator
  *
  * @author aegloff
+ * @author ckienle
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
-
-    private ServiceRegistration<CryptoService> cryptoSvc;
+    
+    private ServiceRegistration<CryptoService> cryptoServiceRegistration;
+    private ServiceRegistration<CryptoUpdateService> updateServiceRegistration;
 
     public void start(BundleContext context) throws Exception {
         logger.debug("Crypto bundle starting");
 
         // Force fragment to resolve
         ensureJettyFragmentResolved(context);
+        
+        CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
+        cryptoSvc.activate(context);
 
         // Register crypto service
         Hashtable<String, String> prop = new Hashtable<String, String>();
         prop.put("service.pid", "org.forgerock.openidm.crypto");
-        // FIXME: Weird... CryptoServiceImpl is not a JsonResource (or legacy
-        // ObjectSet).
-        // Why are we trying to register a router prefix then? Reserving for
-        // future use?
-        // prop.put("openidm.router.prefix", "crypto");
         prop.put(Constants.SERVICE_DESCRIPTION, "OpenIDM cryptography service");
         prop.put(Constants.SERVICE_VENDOR, "ForgeRock AS");
-        cryptoSvc =
-                context.registerService(CryptoService.class, CryptoServiceFactory.getInstance(),
-                        prop);
-        logger.info("Registered cryptography service");
+        cryptoServiceRegistration = context.registerService(CryptoService.class, cryptoSvc, prop);
+        logger.info("Registered Crypto Service");
+        updateServiceRegistration = context.registerService(CryptoUpdateService.class, cryptoSvc, null);
+        logger.info("Registered Crypto Update Service");
 
         logger.debug("Crypto bundle started");
     }
 
     public void stop(BundleContext context) {
-        if (cryptoSvc != null) {
-            cryptoSvc.unregister();
-            // TODO Fix me
-            // cryptoSvc.deactivate(context);
+        if (cryptoServiceRegistration != null) {
+            cryptoServiceRegistration.unregister();
+        }
+        if (updateServiceRegistration != null) {
+            updateServiceRegistration.unregister();
         }
         logger.debug("Crypto bundle stopped");
     }

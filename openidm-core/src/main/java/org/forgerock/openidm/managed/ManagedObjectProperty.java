@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * of triggers to execute during the lifecycle of a managed object.
  *
  * @author Paul C. Bryan
+ * @author ckienle
  */
 class ManagedObjectProperty {
 
@@ -77,10 +78,16 @@ class ManagedObjectProperty {
     private final ScriptEntry onStore;
 
     /** TODO: Description. */
-    private final JsonEncryptor encryptor;
+    private JsonEncryptor encryptor;
 
     /** String that indicates the privacy level of the property. */
     private final Scope scope;
+    
+    /** The CryptoService implementation */
+    private CryptoService cryptoService;
+    
+    /** The encryption configuration */
+    private JsonValue encryptionValue;
 
     /**
      * Constructs a new managed object property.
@@ -99,6 +106,7 @@ class ManagedObjectProperty {
     public ManagedObjectProperty(final ScriptRegistry scriptRegistry,
             final CryptoService cryptoService, JsonValue config) throws JsonValueException,
             ScriptException {
+        this.cryptoService = cryptoService;
         name = config.get("name").required().asString();
         if (config.isDefined("onRetrieve")) {
             onRetrieve = scriptRegistry.takeScript(config.get("onRetrieve"));
@@ -115,21 +123,28 @@ class ManagedObjectProperty {
         } else {
             onValidate = null;
         }
-        JsonValue encryptionValue = config.get("encryption");
+        encryptionValue = config.get("encryption");
         if (!encryptionValue.isNull()) {
-            try {
-                encryptor =
-                        cryptoService.getEncryptor(encryptionValue.get("cipher").defaultTo(
-                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER).asString(),
-                                encryptionValue.get("key").required().asString());
-            } catch (JsonCryptoException jce) {
-                throw new JsonValueException(encryptionValue, jce);
-            }
-        } else {
-            encryptor = null;
+            setEncryptor();
         }
 
         scope = config.get("scope").defaultTo(Scope.PUBLIC.name()).asEnum(Scope.class);
+    }
+
+    /**
+     * A synchronized method for setting the excryptor is if hasn't already been set and 
+     * there exists an encryption configuration.
+     */
+    private synchronized void setEncryptor() {
+        if (encryptor == null && !encryptionValue.isNull()) {
+            try {
+                encryptor = cryptoService.getEncryptor(
+                        encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
+                        encryptionValue.get("key").required().asString());
+            } catch (JsonCryptoException jce) {
+                logger.warn("Unable to set encryptor");
+            }
+        }
     }
 
     /**
@@ -224,6 +239,7 @@ class ManagedObjectProperty {
      */
     void onStore(ServerContext context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
+        setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
 
             if (JsonCrypto.isJsonCrypto(value)) {

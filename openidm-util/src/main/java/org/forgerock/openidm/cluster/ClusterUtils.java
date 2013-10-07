@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,28 +21,27 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-package org.forgerock.openidm.security;
-
-import java.security.KeyStore;
+package org.forgerock.openidm.cluster;
 
 /**
- * Handles Access to a Java KeyStore
- *
- * @author Laszlo Hordos
+ * Contains cluster specific labels and utilities
+ * 
  * @author ckienle
  */
-public interface KeyStoreHandler {
+public class ClusterUtils {
 
-    public KeyStore getStore();
+    /*
+     * Stand-alone (non-clustered) instance
+     */
+    public static final String TYPE_STANDALONE = "standalone";
     
-    public void setStore(KeyStore keystore) throws Exception;
+    /*
+     * The first instance in a cluster
+     */
+    public static final String TYPE_CLUSTERED_FIRST = "clustered-first";
     
-    public String getPassword();
-    
-    public String getLocation();
-    
-    public String getType();
-
-    public void store() throws Exception;
+    /*
+     * Additional instances in a cluster
+     */
+    public static final String TYPE_CLUSTERED_ADDITIONAL = "clustered-additional";
 }

@@ -27,14 +27,20 @@ package org.forgerock.openidm.crypto.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.KeyStore.SecretKeyEntry;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
@@ -42,13 +48,14 @@ import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.openidm.cluster.ClusterUtils;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -60,7 +67,7 @@ import org.slf4j.LoggerFactory;
  * @author Paul C. Bryan
  * @author aegloff
  */
-public class CryptoServiceImpl implements CryptoService {
+public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
 
     /**
      * Setup logging for the {@link CryptoServiceImpl}.
@@ -68,7 +75,7 @@ public class CryptoServiceImpl implements CryptoService {
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     /** TODO: Description. */
-    private SimpleKeyStoreSelector keySelector;
+    private UpdatableKeyStoreSelector keySelector;
 
     /** TODO: Description. */
     private final ArrayList<JsonTransformer> decryptionTransformers =
@@ -109,13 +116,11 @@ public class CryptoServiceImpl implements CryptoService {
             int keyCount = 0;
             String password = IdentityServer.getInstance().getProperty("openidm.keystore.password");
             if (password != null) { // optional
-                String type =
-                        IdentityServer.getInstance().getProperty("openidm.keystore.type",
-                                KeyStore.getDefaultType());
-                String provider =
-                        IdentityServer.getInstance().getProperty("openidm.keystore.provider");
-                String location =
-                        IdentityServer.getInstance().getProperty("openidm.keystore.location");
+                String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+                String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
+                String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
+                String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
+                String alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
 
                 try {
                     logger.info(
@@ -128,7 +133,15 @@ public class CryptoServiceImpl implements CryptoService {
                     if (null != in) {
                         char[] clearPassword = Main.unfold(password);
                         ks.load(in, password == null ? null : clearPassword);
-                        keySelector = new SimpleKeyStoreSelector(ks, new String(clearPassword));
+                        if (instanceType.equals(ClusterUtils.TYPE_STANDALONE) || instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                            Key key = ks.getKey(alias, clearPassword);
+                            if (key == null) {
+                                // Initialize the keys
+                                logger.debug("Initializing secrety key entry in the keystore");
+                                generateDefaultKey(ks, alias, location, clearPassword);
+                            }
+                        }
+                        keySelector = new UpdatableKeyStoreSelector(ks, new String(clearPassword));
                         Enumeration<String> aliases = ks.aliases();
                         while (aliases.hasMoreElements()) {
                             logger.info("Available cryptography key: {}", aliases.nextElement());
@@ -156,6 +169,32 @@ public class CryptoServiceImpl implements CryptoService {
             logger.error("Exception when loading CryptoService configuration", jve);
             throw jve;
         }
+    }
+
+    /**
+     * Generates a default secret key entry in the keystore.
+     * 
+     * @param ks the keystore
+     * @param alias the alias of the secret key
+     * @param location the keystore location
+     * @param password the keystore password
+     * @throws IOException
+     * @throws GeneralSecurityException
+     */
+    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password) throws IOException, GeneralSecurityException {
+        SecretKey newKey = KeyGenerator.getInstance("AES").generateKey();
+        ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
+        OutputStream out = new FileOutputStream(location);
+        try {
+            ks.store(out, password);
+        } finally {
+            out.close();
+        }
+    }
+    
+    public void updateKeySelector(KeyStore ks, String password) {
+        keySelector.update(ks, password);
+        decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
     }
 
     public void deactivate(BundleContext context) {

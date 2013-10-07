@@ -24,7 +24,9 @@
 
 package org.forgerock.openidm.security;
 
+import java.security.Key;
 import java.security.Security;
+import java.security.cert.Certificate;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -56,7 +58,11 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
+import org.forgerock.openidm.jetty.Config;
 import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.security.impl.CertificateResourceProvider;
@@ -111,6 +117,9 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         accessor = null;
     }
 
+    @Reference
+    private CryptoUpdateService cryptoUpdateService;
+
     private final Router router = new Router();
     
     private KeyStoreHandler trustStoreHandler = null;
@@ -143,20 +152,54 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         }
         
         keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
-        KeystoreResourceProvider provider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor);
-        EntryResourceProvider certProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor);
-        EntryResourceProvider keyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor);
+        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor);
+        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor);
+        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor);
 
-        router.addRoute("/keystore", provider);
-        router.addRoute("/keystore/cert", certProvider);
-        router.addRoute("/keystore/privatekey", keyProvider);
+        router.addRoute("/keystore", keystoreProvider);
+        router.addRoute("/keystore/cert", keystoreCertProvider);
+        router.addRoute("/keystore/privatekey", privateKeyProvider);
 
         trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
-        provider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor);
-        certProvider = new CertificateResourceProvider("truststore", keyStoreHandler, this, accessor);
+        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor);
+        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, accessor);
 
-        router.addRoute("/truststore", provider);
-        router.addRoute("/truststore/cert", certProvider);
+        router.addRoute("/truststore", truststoreProvider);
+        router.addRoute("/truststore/cert", truststoreCertProvider);
+        
+        String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+        
+        String privateKeyAlias = Param.getProperty("openidm.https.keystore.cert.alias");
+        try {
+            if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
+                // Load keystore from repository
+                keystoreProvider.loadKeystoreFromRepo();
+                // Reload the SSL context
+                reload();
+                // Update CryptoService
+                cryptoUpdateService.updateKeySelector(keyStoreHandler.getStore(), keyStorePassword);
+            } else {
+                // Check if the default private key alias exists
+                if (!privateKeyProvider.hasEntry(privateKeyAlias)) {
+                    // Create the default private key
+                    privateKeyProvider.createDefaultEntry(privateKeyAlias);
+                    // Reload the SSL context
+                    reload();
+
+                    try {
+                        Config.updateConfig(null);
+                    } catch (NullPointerException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                    keystoreProvider.saveKeystoreToRepo();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error initializing keys", e);
+        }
     }
 
     @Deactivate
