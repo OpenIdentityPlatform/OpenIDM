@@ -21,28 +21,22 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-
-package org.forgerock.openidm.security;
+package org.forgerock.openidm.crypto.factory;
 
 import java.security.KeyStore;
 
 /**
- * Handles Access to a Java KeyStore
- *
- * @author Laszlo Hordos
+ * An interface for updating the Crypto Service with a new keystore
+ * 
  * @author ckienle
  */
-public interface KeyStoreHandler {
+public interface CryptoUpdateService {
 
-    public KeyStore getStore();
-    
-    public void setStore(KeyStore keystore) throws Exception;
-    
-    public String getPassword();
-    
-    public String getLocation();
-    
-    public String getType();
-
-    public void store() throws Exception;
+    /**
+     * Updates the Crypto Service KeySelector with a new keystore
+     * 
+     * @param ks the new keystore to use
+     * @param password the keystore password
+     */
+    public void updateKeySelector(KeyStore ks, String password);
 }

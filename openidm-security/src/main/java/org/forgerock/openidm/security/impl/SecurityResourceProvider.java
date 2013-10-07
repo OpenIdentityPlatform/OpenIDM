@@ -63,6 +63,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.DateUtil;
@@ -262,29 +263,59 @@ public class SecurityResourceProvider {
     }
 
     /**
-     * Generates a self signed certificate from a given domain name.
+     * Generates a self signed certificate using the given properties.
      *
-     * @param domainName
-     *            the domain name to use for the new certificate
+     * @param commonName the common name to use for the new certificate
+     * @param algorithm the algorithm to use
+     * @param keySize the keysize to use
+     * @param signatureAlgorithm the signature algorithm to use
+     * @param validFrom when the certificate is valid from
+     * @param validTo when the certificate is valid until
      * @return The generated certificate
      * @throws Exception
      */
-    protected Pair<X509Certificate, PrivateKey> generateCertificate(String domainName,
-            String algorithm, int keySize, String signatureAlgorithm, String validFrom,
+    protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
+    		String algorithm, int keySize, String signatureAlgorithm, String validFrom,
             String validTo) throws Exception {
+    	return generateCertificate(commonName, "None", "None", "None", "None", "None",
+    			algorithm, keySize, signatureAlgorithm, validFrom, validTo);
+    }
 
+    	
+    /**
+     * Generates a self signed certificate using the given properties.
+     *
+     * @param commonName the subject's common name
+     * @param organization the subject's organization name
+     * @param organizationUnit the subject's organization unit name
+     * @param stateOrProvince the subject's state or province
+     * @param country the subject's country code
+     * @param locatity the subject's locality
+     * @param algorithm the algorithm to use
+     * @param keySize the keysize to use
+     * @param signatureAlgorithm the signature algorithm to use
+     * @param validFrom when the certificate is valid from
+     * @param validTo when the certificate is valid until
+     * @return The generated certificate
+     * @throws Exception
+     */
+    protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
+    		String organization, String organizationUnit, String stateOrProvince, 
+    		String country, String locatity, String algorithm, int keySize, 
+    		String signatureAlgorithm, String validFrom, String validTo) throws Exception {
+    	
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA","BC"
         keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
         // Generate self-signed certificate
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.C, "None");
-        builder.addRDN(BCStyle.ST, "None");
-        builder.addRDN(BCStyle.L, "None");
-        builder.addRDN(BCStyle.OU, "None");
-        builder.addRDN(BCStyle.O, "None");
-        builder.addRDN(BCStyle.CN, domainName);
+        builder.addRDN(BCStyle.C, country);
+        builder.addRDN(BCStyle.ST, stateOrProvince);
+        builder.addRDN(BCStyle.L, locatity);
+        builder.addRDN(BCStyle.OU, organizationUnit);
+        builder.addRDN(BCStyle.O, organization);
+        builder.addRDN(BCStyle.CN, commonName);
 
         Date notBefore = null;
         Date notAfter = null;
@@ -383,24 +414,49 @@ public class SecurityResourceProvider {
         }
         try {
         	String container = "/repo/security/keys";
-            String id = container + "/" + alias;
-            JsonValue oldKeyMap = null;
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
-            String keyString = toPem(keyPair);
-            keyMap.put("encoded", keyString);
-            try {
-            	oldKeyMap = accessor.getConnection().read(accessor, Requests.newReadRequest(id)).getContent();
-            } catch (NotFoundException e) {
-                logger.debug("creating object " + id);
-                accessor.getConnection().create(accessor, Requests.newCreateRequest(container, alias, keyMap));
-                return;
-            }
-            keyMap.put("_rev", oldKeyMap.get("_rev").getObject());
-            accessor.getConnection().update(accessor, Requests.newUpdateRequest(container, alias, keyMap));
+            storeInRepo(container, alias, keyMap);
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
         }
         
+    }
+    
+    /**
+     * Reads an object from the repository
+     * @param id the object's id
+     * @return the object
+     * @throws JsonResourceException
+     */
+    protected JsonValue readFromRepo(String id) throws ResourceException {
+        if (accessor == null) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        JsonValue keyMap = new JsonValue(accessor.getConnection().read(accessor, Requests.newReadRequest(id)).getContent());
+        return keyMap;
+    }
+    
+    /**
+     * Stores an object in the repository
+     * @param id the object's id
+     * @param value the value of the object to store
+     * @throws JsonResourceException
+     */
+    protected void storeInRepo(String container, String id, JsonValue value) throws ResourceException {
+        if (accessor == null) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
+        }
+        Resource oldResource;
+        try {
+            oldResource = accessor.getConnection().read(accessor, Requests.newReadRequest(id));
+        } catch (NotFoundException e) {
+            logger.debug("creating object " + id);
+            accessor.getConnection().create(accessor, Requests.newCreateRequest(container, id, value));
+            return;
+        }
+        UpdateRequest updateRequest = Requests.newUpdateRequest(container, id, value);
+        updateRequest.setRevision(oldResource.getRevision());
+        accessor.getConnection().update(accessor, updateRequest);
     }
     
     /**

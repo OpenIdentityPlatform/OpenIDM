@@ -70,10 +70,18 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
         }
     }
 
+    @Override
     public KeyStore getStore() {
         return store;
     }
 
+    @Override
+    public void setStore(KeyStore keystore) throws Exception {
+        store = keystore;
+        store();
+    }
+
+    @Override
     public void store() throws Exception {
         OutputStream out = new FileOutputStream(location);
         try {
@@ -83,18 +91,17 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
         }
     }
 
-    public void reload() throws Exception {
-        TrustManagerFactory tmf =
-                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(store);
-        TrustManager[] managers = tmf.getTrustManagers();
-        SSLContext context = SSLContext.getInstance("SSL");
-        context.init(null, managers, null);
-        SSLContext.setDefault(context);
-    }
-
 	@Override
 	public String getPassword() {
 		return password;
 	}
+
+    @Override
+    public String getLocation() {
+        return location;
+    }
+
+    public String getType() {
+        return type;
+    }
 }

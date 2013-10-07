@@ -24,13 +24,18 @@
 
 package org.forgerock.openidm.security.impl;
 
-import java.security.Key;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -53,6 +58,7 @@ import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,5 +176,53 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
             ResultHandler<Resource> handler) {
         final ResourceException e = new NotSupportedException("Update operations are not supported");
         handler.handleError(e);
+    }
+    
+    /**
+     * Loads the keystore from the repository and stores it locally
+     */
+    public void loadKeystoreFromRepo() throws ResourceException {
+        JsonValue keystoreValue = readFromRepo("/repo/security/keystore");
+        String keystoreString = keystoreValue.get("keystoreString").asString();
+        byte [] keystoreBytes = Base64.decode(keystoreString.getBytes());
+        ByteArrayInputStream bais = new ByteArrayInputStream(keystoreBytes);
+        try {
+            KeyStore keystore = null;
+            try {
+                keystore = KeyStore.getInstance(store.getType());     
+                keystore.load(bais, store.getPassword().toCharArray());
+            } finally {
+                bais.close();
+            }
+            store.setStore(keystore);
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Error creating keystore from store bytes", e);
+        }
+    }
+    
+    /**
+     * Saves the local keystore to the respository
+     */
+    public void saveKeystoreToRepo() throws ResourceException {
+        byte [] keystoreBytes = null;
+        FileInputStream fin = null;
+        File file = new File(store.getLocation());
+
+        try {
+            try {
+                fin = new FileInputStream(file);
+                keystoreBytes = new byte[(int) file.length()];
+                fin.read(keystoreBytes);
+            } finally {
+                fin.close();
+            }
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+        }
+        
+        String keystoreString = new String(Base64.encode(keystoreBytes));
+        JsonValue value = new JsonValue(new HashMap<String, Object>());
+        value.add("keystoreString", keystoreString);
+        storeInRepo("/repo/security", "keystore", value);
     }
 }

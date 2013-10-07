@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * with decrypting configuration.
  *
  * @author aegloff
+ * @author ckienle
  */
 public class CryptoServiceFactory {
 
@@ -54,7 +55,6 @@ public class CryptoServiceFactory {
     public static synchronized CryptoService getInstance() {
         if (instance == null) {
             instance = new CryptoServiceImpl();
-            instance.activate(null);
         }
         return instance;
     }
