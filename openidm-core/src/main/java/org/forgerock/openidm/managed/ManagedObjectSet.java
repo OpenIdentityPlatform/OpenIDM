@@ -557,10 +557,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
 
             // decrypt any incoming encrypted properties
-            JsonValue jv = decrypt(request.getContent());
-            execScript(context, "onCreate", onCreate, jv);
+            JsonValue value = decrypt(request.getContent());
+            execScript(context, "onCreate", onCreate, value);
             // includes per-property encryption
-            onStore(context, jv);
+            onStore(context, value);
 
             // Map<String, String> uriTemplateVariables =
             // ContextUtil.getUriTemplateVariables(context);
@@ -580,11 +580,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // }
 
             CreateRequest createRequest = Requests.copyOfCreateRequest(request);
+            createRequest.setContent(value);
             createRequest.setResourceName(repoId(null));
 
             Resource _new = context.getConnection().create(context, createRequest);
 
-            logActivity(context, managedId(_new.getId()), null, null, jv);
+            logActivity(context, managedId(_new.getId()), null, null, value);
 
             onCreate(context, managedId(_new.getId()), _new /* TODO fix jv */);
 
