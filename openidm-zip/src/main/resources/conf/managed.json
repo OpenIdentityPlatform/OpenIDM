@@ -2,7 +2,7 @@
     "objects" : [
         {
             "name" : "user",
-            "onCreateFIXME" : {
+            "onCreate" : {
                 "type" : "text/javascript",
                 "file" : "ui/onCreate-user-set-default-fields.js"
             },
