@@ -134,7 +134,13 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
         messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
 
-        AuthStatus authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        AuthStatus authStatus;
+        try {
+            authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, authData);
+        } catch (AuthException e) {
+            contextMap.put(OPENIDM_AUTH_STATUS, false);
+            throw e;
+        }
 
         if (AuthStatus.SUCCESS.equals(authStatus)) {
             HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
