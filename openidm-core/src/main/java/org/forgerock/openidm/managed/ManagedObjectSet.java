@@ -587,7 +587,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             logActivity(context, managedId(_new.getId()), null, null, value);
 
-            onCreate(context, managedId(_new.getId()), _new /* TODO fix jv */);
+            onCreate(context, managedId(_new.getId()), _new);
 
             // TODO Check the relative id
             handler.handleResult(_new);
