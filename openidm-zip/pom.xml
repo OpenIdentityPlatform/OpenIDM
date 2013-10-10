@@ -66,11 +66,11 @@
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-shell</artifactId>
             <version>${openidm.version}</version>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-rest</artifactId>
@@ -440,6 +440,13 @@
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>databasetable-connector</artifactId>
             <version>1.1.0.0</version>
+        </dependency>
+        
+        <!-- Restlet -->
+        <dependency>
+            <groupId>org.restlet.osgi</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <version>2.1.2</version>
         </dependency>
     </dependencies>
     <build>
