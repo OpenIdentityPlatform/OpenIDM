@@ -224,26 +224,18 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
 
         try {
             Resource responseValue = accessor.read(null, Requests.newReadRequest("config"));
-            Iterator<JsonValue> iterator =
-                    responseValue.getContent().get(QueryResult.FIELD_RESULT).iterator();
-            URI configSet = new URI("config/");
-            String bkpPostfix =
-                    "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date())
-                            + ".bkp";
+            Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
+            String bkpPostfix = "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date()) + ".bkp";
             while (iterator.hasNext()) {
                 String id = iterator.next().get("_id").required().asString();
                 if (!id.startsWith("org.apache")) {
                     try {
-                        responseValue =
-                                accessor.read(null, Requests.newReadRequest(configSet.resolve(id)
-                                        .toString()));
+                        responseValue = accessor.read(null, Requests.newReadRequest("config/" + id));
                         if (null != responseValue.getContent()
                                 && !responseValue.getContent().isNull()) {
                             File configFile = new File(targetDir, id.replace("/", "-") + ".json");
                             if (configFile.exists()) {
-                                configFile.renameTo(new File(configFile.getParentFile(), configFile
-                                        .getName()
-                                        + bkpPostfix));
+                                configFile.renameTo(new File(configFile.getParentFile(), configFile.getName() + bkpPostfix));
                             }
                             getMapper().writerWithDefaultPrettyPrinter().writeValue(configFile,
                                     responseValue.getContent().getObject());
@@ -257,6 +249,7 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
         } catch (ResourceException e) {
             session.getConsole().append("Remote operation failed: ").println(e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             session.getConsole().append("Operation failed: ").println(e.getMessage());
         }
     }

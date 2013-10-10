@@ -100,8 +100,7 @@ public class HttpRemoteJsonResource implements Connection {
         acceptedMediaTypes.add(new Preference(MediaType.APPLICATION_JSON));
         remoteClient.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
 
-        ChallengeResponse rc =
-                new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
+        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
         remoteClient.setChallengeResponse(rc);
 
         // -------------------------------------
@@ -221,7 +220,16 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource read(org.forgerock.json.resource.Context context, ReadRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        return null;
+        ClientResource clientResource = getClientResource(request);
+        Representation response = clientResource.get();
+        
+        if (!clientResource.getStatus().isSuccess()) {
+            throw org.forgerock.json.resource.ResourceException.getException(clientResource
+                    .getStatus().getCode(), clientResource.getStatus().getDescription(),
+                    clientResource.getStatus().getThrowable());
+        }
+        JsonValue result = getResponse(clientResource);
+        return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
     @Override
@@ -240,6 +248,42 @@ public class HttpRemoteJsonResource implements Connection {
     public FutureResult<Resource> updateAsync(org.forgerock.json.resource.Context context,
             UpdateRequest request, ResultHandler<? super Resource> handler) {
         throw new NotImplementedException();
+    }
+    
+    public ClientResource getClientResource(Request request) {
+        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + request.getResourceName());
+        List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
+        acceptedMediaTypes.add(new Preference(MediaType.APPLICATION_JSON));
+        clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
+
+        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
+        clientResource.setChallengeResponse(rc);
+        return clientResource;
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public JsonValue getResponse(ClientResource clientResource) 
+            throws org.forgerock.json.resource.ResourceException {
+        Representation response = clientResource.get();
+        
+        if (!clientResource.getStatus().isSuccess()) {
+            throw org.forgerock.json.resource.ResourceException.getException(clientResource
+                    .getStatus().getCode(), clientResource.getStatus().getDescription(),
+                    clientResource.getStatus().getThrowable());
+        }
+
+        JsonValue result = null;
+
+        if (null != response && response instanceof EmptyRepresentation == false) {
+            try {
+                result = new JsonValue(new JacksonRepresentation(response, Map.class).getObject());
+            } catch (IOException e) {
+                throw new InternalServerErrorException(e);
+            }
+        } else {
+            result = new JsonValue(null);
+        }
+        return result;
     }
 
     public JsonValue handle(Request jsonRequest)
