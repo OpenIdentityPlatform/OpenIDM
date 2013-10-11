@@ -88,18 +88,17 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
     }
 
     @Descriptor("Imports the configuration set from local file/directory")
-    public void configimport(
-            CommandSession session,
-            @Descriptor("Replace the entire config set by deleting the additional configuration") @Parameter(
-                    names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true",
-                    absentValue = "false") boolean replaceall,
+    public void configimport(CommandSession session,
+            @Descriptor("Replace the entire config set by deleting the additional configuration") 
+            @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", 
+            absentValue = "false") boolean replaceall,
             @Descriptor("source directory") String source) {
+        PrintStream console = session.getConsole();
         File file = IdentityServer.getFileForPath(source);
-        session.getConsole().println(
-                "...................................................................");
+        console.println("...................................................................");
         if (file.isDirectory()) {
-            session.getConsole().println("[ConfigImport] Load JSON configuration files from:");
-            session.getConsole().append("[ConfigImport] \t").println(file.getAbsolutePath());
+            console.println("[ConfigImport] Load JSON configuration files from:");
+            console.append("[ConfigImport] \t").println(file.getAbsolutePath());
 
             FileFilter filter = new FileFilter() {
                 public boolean accept(File f) {
@@ -113,14 +112,10 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                 if (subFile.isDirectory())
                     continue;
                 String configName = subFile.getName().replaceFirst("-", "/");
-                configName =
-                        ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName
-                                .length() - 5));
+                configName = ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName.length() - 5));
                 if (configName.indexOf("-") > -1) {
-                    session.getConsole()
-                            .append("[WARN] ")
-                            .append("Invalid file name found with multiple '-' character. The normalized config id: ")
-                            .println(configName);
+                    console.append("[WARN] Invalid file name found with multiple '-' character. The normalized config id: ");
+                    console.println(configName);
                 }
                 localConfigSet.put(configName, subFile);
             }
@@ -130,24 +125,21 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
             Map<String, JsonValue> remoteConfigSet = new HashMap<String, JsonValue>();
             try {
                 Resource responseValue = accessor.read(null, Requests.newReadRequest("config"));
-                Iterator<JsonValue> iterator =
-                        responseValue.getContent().get(QueryResult.FIELD_RESULT).iterator();
+                Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
                 while (iterator.hasNext()) {
-
                     JsonValue configValue = iterator.next();
                     // TODO catch JsonValueExceptions
-                    String id =
-                            ConfigBootstrapHelper.unqualifyPid(configValue.get("_id").required()
-                                    .asString());
+                    String id = ConfigBootstrapHelper.unqualifyPid(configValue.get("_id").required().asString());
+                    // Remove apache configurations
                     if (!id.startsWith("org.apache")) {
                         remoteConfigSet.put(id, configValue);
                     }
                 }
             } catch (ResourceException e) {
-                session.getConsole().append("Remote operation failed: ").println(e.getMessage());
+                console.append("Remote operation failed: ").println(e.getMessage());
                 return;
             } catch (Exception e) {
-                session.getConsole().append("Operation failed: ").println(e.getMessage());
+                console.append("Operation failed: ").println(e.getMessage());
                 return;
             }
 
@@ -155,9 +147,8 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                 try {
                     if (remoteConfigSet.containsKey(entry.getKey())) {
                         // Update
-                        UpdateRequest updateRequest =
-                                Requests.newUpdateRequest("config", entry.getKey(), new JsonValue(
-                                        getMapper().readValue(entry.getValue(), Map.class)));
+                        UpdateRequest updateRequest = Requests.newUpdateRequest("config", entry.getKey(), new JsonValue(
+                                getMapper().readValue(entry.getValue(), Map.class)));
 
                         accessor.update(null, updateRequest);
                         // Do not remove the remote old config if the update
@@ -165,15 +156,14 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                         remoteConfigSet.remove(entry.getKey());
                     } else {
                         // Create
-                        CreateRequest createRequest =
-                                Requests.newCreateRequest("config", entry.getKey(), new JsonValue(
-                                        getMapper().readValue(entry.getValue(), Map.class)));
-                        accessor.create(null, createRequest);
+                        CreateRequest createRequest = Requests.newCreateRequest("config", entry.getKey(), new JsonValue(
+                                getMapper().readValue(entry.getValue(), Map.class)));
+                        Resource createdResource = accessor.create(null, createRequest);
                     }
-                    prettyPrint(session.getConsole(), "ConfigImport", entry.getKey(), null);
+                    prettyPrint(console, "ConfigImport", entry.getKey(), null);
                 } catch (Exception e) {
-                    prettyPrint(session.getConsole(), "ConfigImport", entry.getKey(), e
-                            .getMessage());
+                    e.printStackTrace();
+                    prettyPrint(console, "ConfigImport", entry.getKey(), e.getMessage());
                 }
             }
 
@@ -182,26 +172,25 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                 for (String configId : remoteConfigSet.keySet()) {
                     if ("authentication".equals(configId) || "router".equals(configId)
                             || "audit".equals(configId) || configId.startsWith("repo")) {
-                        prettyPrint(session.getConsole(), "ConfigDelete", configId,
-                                "Protected configuration can not be deleted");
+                        prettyPrint(console, "ConfigDelete", configId, "Protected configuration can not be deleted");
                         continue;
                     }
 
                     try {
                         accessor.delete(null, Requests.newDeleteRequest("config", configId));
-                        prettyPrint(session.getConsole(), "ConfigDelete", configId, null);
+                        prettyPrint(console, "ConfigDelete", configId, null);
                     } catch (Exception e) {
-                        prettyPrint(session.getConsole(), "ConfigDelete", configId, e.getMessage());
+                        prettyPrint(console, "ConfigDelete", configId, e.getMessage());
                     }
                 }
             }
 
         } else if (file.exists()) {
             // TODO import archive file
-            session.getConsole().println("Input path must be a directory not a file.");
+            console.println("Input path must be a directory not a file.");
         } else {
-            session.getConsole().append("[ConfigImport] ").append(
-                    "Configuration directory not found at: ").println(file.getAbsolutePath());
+            console.append("[ConfigImport] Configuration directory not found at: ");
+            console.println(file.getAbsolutePath());
         }
     }
 

@@ -26,10 +26,12 @@ package org.forgerock.openidm.shell.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -39,12 +41,14 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.FutureResult;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
@@ -155,7 +159,8 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource create(org.forgerock.json.resource.Context context, CreateRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        return null;
+        JsonValue result = handle(request, request.getResourceName() + "/" + request.getNewResourceId());
+        return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
     @Override
@@ -220,15 +225,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource read(org.forgerock.json.resource.Context context, ReadRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        ClientResource clientResource = getClientResource(request);
-        Representation response = clientResource.get();
-        
-        if (!clientResource.getStatus().isSuccess()) {
-            throw org.forgerock.json.resource.ResourceException.getException(clientResource
-                    .getStatus().getCode(), clientResource.getStatus().getDescription(),
-                    clientResource.getStatus().getThrowable());
-        }
-        JsonValue result = getResponse(clientResource);
+        JsonValue result = handle(request, request.getResourceName());
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
@@ -241,7 +238,8 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource update(org.forgerock.json.resource.Context context, UpdateRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        return null;
+        JsonValue result = handle(request, request.getResourceName());
+        return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
     @Override
@@ -250,10 +248,10 @@ public class HttpRemoteJsonResource implements Connection {
         throw new NotImplementedException();
     }
     
-    public ClientResource getClientResource(Request request) {
-        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + request.getResourceName());
+    public ClientResource getClientResource(Reference ref) {
+        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + ref.toString());
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
-        acceptedMediaTypes.add(new Preference(MediaType.APPLICATION_JSON));
+        acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
 
         ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
@@ -262,10 +260,9 @@ public class HttpRemoteJsonResource implements Connection {
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public JsonValue getResponse(ClientResource clientResource) 
+    public JsonValue getResponse(ClientResource clientResource, Representation response) 
             throws org.forgerock.json.resource.ResourceException {
-        Representation response = clientResource.get();
-        
+        // Check if the request failed
         if (!clientResource.getStatus().isSuccess()) {
             throw org.forgerock.json.resource.ResourceException.getException(clientResource
                     .getStatus().getCode(), clientResource.getStatus().getDescription(),
@@ -273,9 +270,9 @@ public class HttpRemoteJsonResource implements Connection {
         }
 
         JsonValue result = null;
-
         if (null != response && response instanceof EmptyRepresentation == false) {
             try {
+                // Parse the response
                 result = new JsonValue(new JacksonRepresentation(response, Map.class).getObject());
             } catch (IOException e) {
                 throw new InternalServerErrorException(e);
@@ -286,12 +283,11 @@ public class HttpRemoteJsonResource implements Connection {
         return result;
     }
 
-    public JsonValue handle(Request jsonRequest)
+    public JsonValue handle(Request request, String id)
             throws org.forgerock.json.resource.ResourceException {
         Representation response = null;
         ClientResource clientResource = null;
         try {
-            String id = jsonRequest.getResourceName();
             Reference remoteRef = new Reference(id);
 
             // Prepare query params
@@ -303,50 +299,44 @@ public class HttpRemoteJsonResource implements Connection {
                     }
                 }
             }
-            clientResource = remoteClient.getChild(remoteRef);
+            
+            // Get the client resource corresponding to this request's resource name
+            clientResource = getClientResource(remoteRef);
 
-            // Prepare payload
-            Representation request = null;
-            JsonValue value = new JsonValue(null);// jsonRequest.get("value");
+            // Payload
+            Representation representation = null;
+            JsonValue value = getRequestValue(request);
             if (!value.isNull()) {
-                request = new JacksonRepresentation<Map>(value.expect(Map.class).asMap());
+                representation = new JacksonRepresentation<Map>(value.expect(Map.class).asMap());
             }
 
-            // Prepare ETag
+            // ETag
             Conditions conditions = new Conditions();
-            JsonValue rev = null;// jsonRequest.get("rev");
 
-            switch (jsonRequest.getRequestType()) {
+            switch (request.getRequestType()) {
             case CREATE:
-                // TODO Use condition when
-                // org.forgerock.json.resource.restlet.JsonServerResource#doHandle()
-                // is fixed
-                // conditions.setNoneMatch(Arrays.asList(Tag.ALL));
+                conditions.setNoneMatch(Arrays.asList(Tag.ALL));
                 clientResource.getRequest().setConditions(conditions);
-                response = clientResource.put(request);
+                response = clientResource.put(representation);
                 break;
             case READ:
-                if (!rev.isNull()) {
-                    conditions.setMatch(getTag(rev.asString()));
-                    clientResource.getRequest().setConditions(conditions);
-                }
                 response = clientResource.get();
                 break;
             case UPDATE:
-                conditions.setMatch(getTag(rev.required().asString()));
+                conditions.setMatch(getTag(((UpdateRequest)request).getRevision()));
                 clientResource.getRequest().setConditions(conditions);
-                response = clientResource.put(request);
+                response = clientResource.put(representation);
                 break;
             case DELETE:
-                conditions.setMatch(getTag(rev.required().asString()));
+                conditions.setMatch(getTag(((DeleteRequest)request).getRevision()));
                 clientResource.getRequest().setConditions(conditions);
                 response = clientResource.delete();
                 break;
             case PATCH:
-                conditions.setMatch(getTag(rev.required().asString()));
+                conditions.setMatch(getTag(((PatchRequest)request).getRevision()));
                 clientResource.getRequest().setConditions(conditions);
                 clientResource.setMethod(PATCH);
-                clientResource.getRequest().setEntity(request);
+                clientResource.getRequest().setEntity(representation);
                 response = clientResource.handle();
                 break;
             case QUERY:
@@ -376,6 +366,7 @@ public class HttpRemoteJsonResource implements Connection {
         } catch (JsonValueException jve) {
             throw new BadRequestException(jve);
         } catch (ResourceException e) {
+            e.printStackTrace();
             StringBuilder sb = new StringBuilder(e.getStatus().getDescription());
             if (null != clientResource) {
                 try {
@@ -392,6 +383,24 @@ public class HttpRemoteJsonResource implements Connection {
                 response.release();
             }
         }
+    }
+    
+    private JsonValue getRequestValue(Request request) throws Exception {
+        switch (request.getRequestType()) {
+        case CREATE:
+            return ((CreateRequest)request).getContent();
+        case UPDATE:
+            return new JsonValue(((UpdateRequest)request).getNewContent());
+        case PATCH:
+            ObjectMapper mapper = new ObjectMapper();
+            List<PatchOperation> ops = ((PatchRequest)request).getPatchOperations();
+            JsonValue value = new JsonValue(new ArrayList<Object>());
+            for (PatchOperation op : ops) {
+               value.add(new JsonValue(mapper.readValue(op.toString(), Object.class)));
+            }
+            return value;
+        }
+        return new JsonValue(null);
     }
 
     private List<Tag> getTag(String tag) {
