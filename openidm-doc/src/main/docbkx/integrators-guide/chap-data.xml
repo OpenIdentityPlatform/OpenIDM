@@ -391,8 +391,15 @@ var results = openidm.query("system/ScriptedSQL/account", params)
      }
    ]
  }
-}
-                            </programlisting>
+}</programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><literal>NAND Filter</literal></term>
+                        <listitem>
+                            <para>A filter that filters out matched entries
+                            by negating the AND boolean operator on two
+                            filters.</para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -427,28 +434,13 @@ var results = openidm.query("system/ScriptedSQL/account", params)
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term><literal>NOT Filter</literal></term>
+                        <term><literal>NOR Filter</literal></term>
                         <listitem>
                             <para>A filter that filters out matched entries
-                            by negating another filter.</para>
-                            <para>Example:</para>
-                            <programlisting language="javascript">{
-  "query":{
-    "NOT":[
-      {
-        "Equals":{
-          "field":"lastname",
-          "values":[
-            "Doe"
-          ]
-        }
-      }
-    ]
-  }
-}
-</programlisting>
-                </listitem>
-                </varlistentry>
+                            by negating the OR boolean operator on two
+                            filters.</para>
+                        </listitem>
+                    </varlistentry>
                 </variablelist>
 
     </section>
