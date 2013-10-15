@@ -175,6 +175,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource delete(org.forgerock.json.resource.Context context, DeleteRequest request)
             throws org.forgerock.json.resource.ResourceException {
+        handle(request, request.getResourceName(), null);
         return null;
     }
 
@@ -331,7 +332,7 @@ public class HttpRemoteJsonResource implements Connection {
                 response = clientResource.put(representation);
                 break;
             case DELETE:
-                conditions.setMatch(getTag(((DeleteRequest)request).getRevision()));
+                conditions.setMatch(Arrays.asList(Tag.ALL));
                 clientResource.getRequest().setConditions(conditions);
                 response = clientResource.delete();
                 break;
