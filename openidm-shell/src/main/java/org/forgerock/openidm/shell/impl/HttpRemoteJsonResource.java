@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,6 @@ import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.UpdateRequest;
@@ -142,7 +142,9 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public JsonValue action(org.forgerock.json.resource.Context context, ActionRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        return null;
+        JsonValue params = new JsonValue(request.getAdditionalActionParameters());
+        JsonValue result = handle(request, request.getResourceName(), params);
+        return result;
     }
 
     @Override
@@ -159,7 +161,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource create(org.forgerock.json.resource.Context context, CreateRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        JsonValue result = handle(request, request.getResourceName() + "/" + request.getNewResourceId());
+        JsonValue result = handle(request, request.getResourceName() + "/" + request.getNewResourceId(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
@@ -225,7 +227,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource read(org.forgerock.json.resource.Context context, ReadRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        JsonValue result = handle(request, request.getResourceName());
+        JsonValue result = handle(request, request.getResourceName(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
@@ -238,7 +240,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public Resource update(org.forgerock.json.resource.Context context, UpdateRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        JsonValue result = handle(request, request.getResourceName());
+        JsonValue result = handle(request, request.getResourceName(), null);
         return new Resource(result.get("_id").asString(), result.get("_rev").asString(), result);
     }
 
@@ -249,7 +251,7 @@ public class HttpRemoteJsonResource implements Connection {
     }
     
     public ClientResource getClientResource(Reference ref) {
-        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + ref.toString());
+        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + "/" + ref.toString());
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
         acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
@@ -283,25 +285,24 @@ public class HttpRemoteJsonResource implements Connection {
         return result;
     }
 
-    public JsonValue handle(Request request, String id)
+    public JsonValue handle(Request request, String id, JsonValue params)
             throws org.forgerock.json.resource.ResourceException {
         Representation response = null;
         ClientResource clientResource = null;
         try {
             Reference remoteRef = new Reference(id);
-
-            // Prepare query params
-            JsonValue params = new JsonValue(null);// jsonRequest.get("params");
-            if (!params.isNull()) {
-                for (Map.Entry<String, Object> entry : params.expect(Map.class).asMap().entrySet()) {
-                    if (entry.getValue() instanceof String) {
-                        remoteRef.addQueryParameter(entry.getKey(), (String) entry.getValue());
-                    }
-                }
-            }
             
             // Get the client resource corresponding to this request's resource name
             clientResource = getClientResource(remoteRef);
+
+            // Prepare query params
+            if (params != null && !params.isNull()) {
+                for (Map.Entry<String, Object> entry : params.expect(Map.class).asMap().entrySet()) {
+                    if (entry.getValue() instanceof String) {
+                        clientResource.addQueryParameter(entry.getKey(), (String) entry.getValue());
+                    }
+                }
+            }
 
             // Payload
             Representation representation = null;
@@ -343,7 +344,8 @@ public class HttpRemoteJsonResource implements Connection {
                 response = clientResource.get();
                 break;
             case ACTION:
-                response = clientResource.post(request);
+                //clientResource.getRequest().setEntity(representation);
+                response = clientResource.post(representation);
                 break;
             default:
                 throw new BadRequestException();
@@ -366,7 +368,6 @@ public class HttpRemoteJsonResource implements Connection {
         } catch (JsonValueException jve) {
             throw new BadRequestException(jve);
         } catch (ResourceException e) {
-            e.printStackTrace();
             StringBuilder sb = new StringBuilder(e.getStatus().getDescription());
             if (null != clientResource) {
                 try {
@@ -399,6 +400,13 @@ public class HttpRemoteJsonResource implements Connection {
                value.add(new JsonValue(mapper.readValue(op.toString(), Object.class)));
             }
             return value;
+        case ACTION:
+            JsonValue content = ((ActionRequest)request).getContent();
+            if (content != null && !content.isNull()) {
+                return content;
+            } else {
+                return new JsonValue(new HashMap<String, Object>());
+            }
         }
         return new JsonValue(null);
     }
