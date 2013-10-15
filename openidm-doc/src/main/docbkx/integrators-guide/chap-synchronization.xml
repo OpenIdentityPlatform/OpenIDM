@@ -2075,7 +2075,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <listitem>
       <para>The target qualifies and a link is found. But the source object is
       missing. Detected during change events and reconciliation. Default action:
-      "DELETE".</para>
+      "EXCEPTION".</para>
      </listitem>
     </varlistentry>
    </variablelist>
