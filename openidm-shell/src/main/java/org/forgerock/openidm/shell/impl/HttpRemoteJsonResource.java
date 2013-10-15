@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
@@ -255,7 +256,8 @@ public class HttpRemoteJsonResource implements Connection {
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
         acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
-
+        clientResource.getLogger().setLevel(Level.WARNING);
+        
         ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
         clientResource.setChallengeResponse(rc);
         return clientResource;
