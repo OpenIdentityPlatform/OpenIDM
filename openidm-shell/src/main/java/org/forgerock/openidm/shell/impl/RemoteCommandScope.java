@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -162,7 +160,6 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                     }
                     prettyPrint(console, "ConfigImport", entry.getKey(), null);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     prettyPrint(console, "ConfigImport", entry.getKey(), e.getMessage());
                 }
             }
@@ -238,7 +235,6 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
         } catch (ResourceException e) {
             session.getConsole().append("Remote operation failed: ").println(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
             session.getConsole().append("Operation failed: ").println(e.getMessage());
         }
     }
@@ -267,9 +263,8 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
 
             // Common request attributes
             ActionRequest request = Requests.newActionRequest("system", "CREATECONFIGURATION");
-
-            // JsonValue params = new JsonValue(new HashMap());
-            // params.put(ServerConstants.ACTION_NAME, "CREATECONFIGURATION");
+            request.setAdditionalActionParameter(ActionRequest.FIELD_ACTION, "CREATECONFIGURATION");
+            request.setAdditionalActionParameter("_action", "CREATECONFIGURATION");
 
             final Connection accessor = getRouter();
 
@@ -285,8 +280,7 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                     List<Object> connectorRefs = connectorRef.asList();
                     if (connectorRefs.size() > 0) {
                         for (int i = 0; i < connectorRefs.size(); i++) {
-                            Map<String, String> connectorKey =
-                                    (Map<String, String>) connectorRefs.get(i);
+                            Map<String, String> connectorKey = (Map<String, String>) connectorRefs.get(i);
                             String displayName = connectorKey.get("displayName");
                             if (null == displayName) {
                                 displayName = connectorKey.get("connectorName");
@@ -294,17 +288,14 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                             String version = connectorKey.get("bundleVersion");
                             String connectorHostRef = connectorKey.get("connectorHostRef");
 
-                            session.getConsole().append(Integer.toString(i)).append(". ").append(
-                                    displayName);
+                            session.getConsole().append(Integer.toString(i)).append(". ").append(displayName);
                             if (null != connectorHostRef) {
-                                session.getConsole().append(" Remote (").append(connectorHostRef)
-                                        .append(")");
+                                session.getConsole().append(" Remote (").append(connectorHostRef).append(")");
                             }
                             session.getConsole().append(" version ").println(version);
                         }
 
-                        session.getConsole().append(Integer.toString(connectorRef.size())).println(
-                                ". Exit");
+                        session.getConsole().append(Integer.toString(connectorRef.size())).println(". Exit");
                         Scanner input = new Scanner(session.getKeyboard());
                         int index = -1;
                         do {
@@ -322,8 +313,7 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                     session.getConsole().println("There is no available connector!");
                 }
             } else {
-                session.getConsole().append("Configuration was found and picked up from: ")
-                        .println(finalConfig.getAbsolutePath());
+                session.getConsole().append("Configuration was found and picked up from: ").println(finalConfig.getAbsolutePath());
                 configuration = getMapper().readValue(finalConfig, Map.class);
             }
 
@@ -335,11 +325,9 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
             request.setContent(new JsonValue(configuration));
 
             responseValue = accessor.action(null, request);
-            responseValue.put("name", name);
-            getMapper().writerWithDefaultPrettyPrinter().writeValue(finalConfig,
-                    responseValue.getObject());
-            session.getConsole()
-                    .append("Edit the configuration file and run the command again. The configuration was saved to ")
+            ((Map<String, Object>)responseValue.getObject()).put("name", name);
+            getMapper().writerWithDefaultPrettyPrinter().writeValue(finalConfig, responseValue.getObject());
+            session.getConsole().append("Edit the configuration file and run the command again. The configuration was saved to ")
                     .println(finalConfig.getAbsolutePath());
 
         } catch (ResourceException e) {

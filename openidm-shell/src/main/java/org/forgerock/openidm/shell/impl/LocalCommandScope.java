@@ -49,6 +49,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
 /**
@@ -84,16 +85,12 @@ public class LocalCommandScope extends CustomCommandScope {
         "-e", "--export" }, presentValue = "true", absentValue = "false") boolean doExport,
             @Descriptor("key alias") String alias) {
         if (doImport ^ doExport) {
-            String type =
-                    IdentityServer.getInstance().getProperty("openidm.keystore.type",
-                            KeyStore.getDefaultType());
+            String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
             String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
             String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
 
             try {
-                KeyStore ks =
-                        (provider == null || provider.trim().length() == 0 ? KeyStore
-                                .getInstance(type) : KeyStore.getInstance(type, provider));
+                KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
                 if (location != null) {
                     File configFile = IdentityServer.getFileForInstallPath(location);
                     if (configFile.exists()) {
@@ -101,14 +98,10 @@ public class LocalCommandScope extends CustomCommandScope {
                         try {
                             in = new FileInputStream(configFile);
                             if (null != in) {
-                                session.getConsole().append("Use KeyStore from: ").println(
-                                        configFile.getAbsolutePath());
+                                session.getConsole().append("Use KeyStore from: ").println(configFile.getAbsolutePath());
                                 // TODO Don't use the System in OSGi.
-                                char[] passwordArray =
-                                        System.console()
-                                                .readPassword("Please enter the password: ");
-                                char[] passwordCopy =
-                                        Arrays.copyOf(passwordArray, passwordArray.length);
+                                char[] passwordArray = System.console().readPassword("Please enter the password: ");
+                                char[] passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
                                 Arrays.fill(passwordArray, ' ');
                                 ks.load(in, passwordCopy);
                                 if (null != in) {
@@ -116,43 +109,28 @@ public class LocalCommandScope extends CustomCommandScope {
                                     in = null;
                                 }
                                 if (doExport) {
-                                    KeyStore.Entry key =
-                                            ks.getEntry(alias, new KeyStore.PasswordProtection(
-                                                    passwordCopy));
+                                    KeyStore.Entry key = ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
                                     if (key instanceof KeyStore.SecretKeyEntry) {
-                                        KeyStore.SecretKeyEntry secretKeyEntry =
-                                                (KeyStore.SecretKeyEntry) key;
-                                        session.getConsole().append("[OK] ")
-                                                .println(secretKeyEntry);
-                                        StringBuilder sb =
-                                                new StringBuilder(secretKeyEntry.getSecretKey()
-                                                        .getAlgorithm());
-                                        sb.append(":").append(
-                                                new BigInteger(1, secretKeyEntry.getSecretKey()
-                                                        .getEncoded()).toString(16));
+                                        KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) key;
+                                        session.getConsole().append("[OK] ").println(secretKeyEntry);
+                                        StringBuilder sb = new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
+                                        sb.append(":").append(new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded()).toString(16));
                                         session.getConsole().println(sb);
                                     } else {
-                                        session.getConsole()
-                                                .println(
-                                                        "SecretKeyEntry with this alias is not in KeyStore");
+                                        session.getConsole().println("SecretKeyEntry with this alias is not in KeyStore");
                                     }
                                 } else if (doImport) {
                                     if (ks.containsAlias(alias)) {
-                                        session.getConsole().println(
-                                                "KeyStore contains a key with this alias");
+                                        session.getConsole().println("KeyStore contains a key with this alias");
                                     } else {
                                         session.getConsole().println("Enter the key: ");
                                         Scanner scanner = new Scanner(session.getKeyboard());
                                         String[] tokens = scanner.nextLine().split(":");
                                         if (tokens.length == 2) {
-                                            byte[] encoded =
-                                                    new BigInteger(tokens[1], 16).toByteArray();
-                                            javax.crypto.SecretKey mySecretKey =
-                                                    new SecretKeySpec(encoded, tokens[0]);
-                                            KeyStore.SecretKeyEntry skEntry =
-                                                    new KeyStore.SecretKeyEntry(mySecretKey);
-                                            ks.setEntry(alias, skEntry,
-                                                    new KeyStore.PasswordProtection(passwordCopy));
+                                            byte[] encoded = new BigInteger(tokens[1], 16).toByteArray();
+                                            javax.crypto.SecretKey mySecretKey = new SecretKeySpec(encoded, tokens[0]);
+                                            KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(mySecretKey);
+                                            ks.setEntry(alias, skEntry, new KeyStore.PasswordProtection(passwordCopy));
                                             FileOutputStream fos = null;
                                             try {
                                                 fos = new FileOutputStream(configFile);
@@ -174,8 +152,7 @@ public class LocalCommandScope extends CustomCommandScope {
                             }
                         }
                     } else {
-                        session.getConsole().append("KeyStore file: ").append(
-                                configFile.getAbsolutePath()).println(" does not exists.");
+                        session.getConsole().append("KeyStore file: ").append(configFile.getAbsolutePath()).println(" does not exists.");
                     }
                 }
             } catch (Exception e) {
@@ -231,12 +208,14 @@ public class LocalCommandScope extends CustomCommandScope {
             presentValue = "false", absentValue = "true") boolean isString,
             @Descriptor("source string to encrypt") String name) {
         try {
-            JsonValue secure =
-                    CryptoServiceFactory.getInstance().encrypt(
-                            new JsonValue(isString ? name : mapper.readValue(name, Object.class)),
-                            ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
-                            IdentityServer.getInstance().getProperty("openidm.config.crypto.alias",
-                                    "openidm-config-default"));
+            CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
+            cryptoSvc.activate(null);
+            
+            JsonValue value = new JsonValue(isString ? name : mapper.readValue(name, Object.class));
+            String cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
+            String alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
+            JsonValue secure = cryptoSvc.encrypt(value, cipher, alias);
+                            
             StringWriter wr = new StringWriter();
             mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
             session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
