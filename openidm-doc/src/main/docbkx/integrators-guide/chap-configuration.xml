@@ -1089,5 +1089,41 @@ x
     <citetitle>Authorization</citetitle></link> section.</para>
 
   </section>
+
+<!-- Add this when OrientDB is supported in production
+  <section xml:id="orientdb-perf">
+      <title>Tuning the Performance of the OrientDB Repository</title>
+      <para>By default, the embedded OrientDB repository assumes an
+      environment with unreliable (non-RAID) hardware. These settings might
+      not be appropriate in other environments.</para>
+
+      <para>To improve performance in a deployment that runs on reliable
+      (RAID) hardware, change the following settings in the OrientDB
+        configuration file
+        (<filename>/path/to/openidm/conf/repo.orientdb.json</filename>):</para>
+
+        <screen>
+"transactionCommitSynch" : false,
+"transactionLogSynch" : false,
+"nonTransactionRecordUpdateSync" : false
+        </screen>
+
+        <para>By default, these parameters are all set to <literal>true</literal>,
+            which implies the following:</para>
+        <simplelist>
+            <member><literal>transactionCommitSynch</literal> - The storage
+                is synchronized after each transaction commit.</member>
+            <member><literal>transactionLogSynch</literal> - A disk synch is
+                executed for each log entry, which slows down transactions but
+                guarantees transaction reliability on non-reliable drives.</member>
+            <member><literal>nonTransactionRecordUpdateSync</literal> - A disk
+                synch is executed at every record operation. This slows down
+                record updates but guarantee reliability on unreliable drives.</member>
+        </simplelist>
+
+    </section>
+
+    -->
+
   
 </chapter>
