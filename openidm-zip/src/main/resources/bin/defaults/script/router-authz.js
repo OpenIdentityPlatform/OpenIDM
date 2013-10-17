@@ -186,7 +186,7 @@ function canUpdateTask() {
 function isProcessOnUsersList(processDefinitionId) {
     var processesForUserQueryParams = {
             "_queryId": "query-processes-for-user",
-            "userId": request.security.userid.id
+            "userId": request.security.id
         },
         processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams),
         isProcessOneOfUserProcesses = false,
@@ -257,7 +257,7 @@ function ownDataOnly() {
         userId = request.value.userId;
     }
     
-    return userId === request.security.userid.id;
+    return userId === request.security.id;
 
 }
 
