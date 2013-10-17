@@ -253,7 +253,7 @@ public class HttpRemoteJsonResource implements Connection {
     }
     
     public ClientResource getClientResource(Reference ref) {
-        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + "/" + ref.toString());
+        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm" + ref.toString());
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
         acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
