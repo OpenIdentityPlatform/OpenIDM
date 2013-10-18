@@ -91,7 +91,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     private final static Logger logger = LoggerFactory.getLogger(ManagedObjectSet.class);
 
     /** The managed objects service that instantiated this managed object set. */
-    private final CryptoService service;
+    private final CryptoService cryptoService;
 
     /** Name of the managed object type. */
     private final String name;
@@ -120,9 +120,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /** Script to execute once an object is retrieved from the repository. */
     private final ScriptEntry onRetrieve;
 
-    /**
-     * Script to execute when an object is about to be stored in the repository.
-     */
+    /** Script to execute when an object is about to be stored in the repository. */
     private final ScriptEntry onStore;
 
     /** Properties for which triggers are executed during object set operations. */
@@ -137,19 +135,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Constructs a new managed object set.
      *
-     * @param service
-     *            the managed object service
-     * @param config
-     *            configuration object to use to initialize managed object set.
-     * @throws JsonValueException
-     *             if the configuration is malformed.
-     */
-
-    /**
-     * Constructs a new managed object set.
-     *
      * @param scriptRegistry
      * @param cryptoService
+     *            the cryptographic service
+     * @param syncRoute
      * @param config
      *            configuration object to use to initialize managed object set.
      * @throws JsonValueException
@@ -159,9 +148,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *             invalid.
      */
     public ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
-                            final AtomicReference<RouteService> syncRefrence, JsonValue config) throws JsonValueException, ScriptException {
-        this.service = cryptoService;
-        this.syncRoute = syncRefrence;
+                            final AtomicReference<RouteService> syncRoute, JsonValue config)
+            throws JsonValueException, ScriptException {
+        this.cryptoService = cryptoService;
+        this.syncRoute = syncRoute;
         name = config.get("name").required().asString();
         if (name.trim().isEmpty() || name.indexOf('{') > 0 | name.indexOf('}') > 0) {
             throw new JsonValueException(config.get("name"), "Failed to validate the name");
@@ -226,22 +216,22 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         if (null != onCreate) {
             onCreate.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onRead) {
             onRead.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onUpdate) {
             onUpdate.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onDelete) {
             onDelete.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onValidate) {
             onValidate.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onRetrieve) {
             onRetrieve.deleteScriptListener(this);
         }
-        if (null != onCreate) {
+        if (null != onStore) {
             onStore.deleteScriptListener(this);
         }
     }
@@ -354,14 +344,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * Decrypt the value
      *
      * @param value
-     *            an json value with poentially encrypted value(s)
+     *            a json value with potentially encrypted value(s)
      * @return object with values decrypted
      * @throws InternalServerErrorException
      *             if decryption failed for any reason
      */
     private JsonValue decrypt(final JsonValue value) throws InternalServerErrorException {
         try {
-            return service.decrypt(value); // makes a copy, which we can modify
+            return cryptoService.decrypt(value); // makes a copy, which we can modify
         } catch (JsonException je) {
             throw new InternalServerErrorException(je);
         }
@@ -371,7 +361,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * Decrypt the value
      *
      * @param value
-     *            an json value with poentially encrypted value(s)
+     *            a json value with potentially encrypted value(s)
      * @return object with values decrypted
      * @throws InternalServerErrorException
      *             if decryption failed for any reason
@@ -380,7 +370,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
             // makes a copy, which we can modify
             return new Resource(value.getId(), value.getRevision(),
-                    null != value.getContent() ? service.decrypt(value.getContent()) : null);
+                    null != value.getContent() ? cryptoService.decrypt(value.getContent()) : null);
         } catch (JsonException je) {
             throw new InternalServerErrorException(je);
         }
@@ -455,7 +445,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
         }
         onStore(context, newValue); // performs per-property encryption
-        //
+
         UpdateRequest request = Requests.newUpdateRequest(repoId(id), newValue);
         request.setRevision(rev);
         Resource response = context.getConnection().update(context, request);
