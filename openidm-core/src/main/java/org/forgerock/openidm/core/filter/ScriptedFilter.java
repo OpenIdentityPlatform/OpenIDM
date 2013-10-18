@@ -32,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.CrossCutFilter;
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
@@ -451,7 +452,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     	if (context.containsContext(SecurityContext.class)) {
     		requestMap.put("security", context.asContext(SecurityContext.class).getAuthorizationId());
     	}
-    	if (context.containsContext(HttpContext.class)) {
+    	if (isFromHttp(context)) {
     		HttpContext httpContext = context.asContext(HttpContext.class);
     		requestMap.put("headers", httpContext.getHeaders());
     		requestMap.put("fromHttp", "true");
@@ -464,5 +465,13 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     	requestMap.put("id", id);
     	
     	return requestMap;
+    }
+    
+    private boolean isFromHttp(ServerContext context) {
+        Context c = context.getParent();
+        if (c != null && c.getParent() != null && HttpContext.class.isAssignableFrom(c.getParent().getClass())) {
+            return true;
+        }
+        return false;
     }
 }
