@@ -98,7 +98,6 @@
      "threadCount" : "10"
  },
  "scheduler" : {
-     "instanceId" : "scheduler-example",
      "executePersistentSchedules" : "true",
      "instanceTimeout" : "60000",
      "instanceRecoveryTimeout" : "60000",
@@ -121,11 +120,6 @@
      <para><literal>threadCount</literal> specifies the maximum number of 
      threads that are available for the concurrent execution of scheduled 
      tasks.</para>
-   </listitem>
-   <listitem>
-     <para><literal>instanceID</literal> can be any string, but must be unique 
-     for all schedulers working as if they are the same 'logical' Scheduler 
-     within a cluster.</para>
    </listitem>
    <listitem>
      <para><literal>instanceTimeout</literal> specifies the number of
@@ -167,12 +161,22 @@
      configure additional properties for the Quartz Scheduler.</para>
    </listitem>
   </itemizedlist>
+
+     <note>
+         <para>In clustered environments, the scheduler service obtains an
+         <literal>instanceID</literal> from the cluster management service.
+         This behavior differs from OpenIDM 2.1.0 (in which the scheduler
+         service specified the instance ID). Therefore, if you used the
+         scheduler service in OpenIDM 2.1.0, you will need to migrate any
+         reference to assigned instance IDs, allowing them to be provided by
+         the cluster management service.</para>
+     </note>
   
   <para>For details of all the configurable properties for the Quartz Scheduler, 
   see the <link xlink:show="new" 
   xlink:href="http://www.quartz-scheduler.org/documentation/quartz-2.1.x/configuration/ConfigMain"
   ><citetitle>Quartz Scheduler Configuration Reference</citetitle></link>.</para>
- 
+
   <para>Each schedule configuration file, <filename>openidm/conf/schedule-
   <replaceable>schedule-name</replaceable>.json</filename> has the following 
   format:</para>
