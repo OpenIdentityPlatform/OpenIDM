@@ -108,7 +108,7 @@
  <xinclude:include href='chap-mail.xml' />
  <xinclude:include href='chap-best-practices.xml' />
  <xinclude:include href='chap-troubleshooting.xml' />
-
+ <xinclude:include href="chap-advanced.xml" />
  <xinclude:include href="appendix-file-layout.xml" />
  <xinclude:include href="appendix-ports-used.xml" />
  <xinclude:include href='appendix-objects.xml' />
