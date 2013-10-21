@@ -34,7 +34,7 @@
     <name>OpenIDM Utility Bundle</name>
     <description>This bundle contains the common utilities</description>
     <properties>
-        <openidm.osgi.import.defaults>org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>org.forgerock.json.resource.servlet,org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>
