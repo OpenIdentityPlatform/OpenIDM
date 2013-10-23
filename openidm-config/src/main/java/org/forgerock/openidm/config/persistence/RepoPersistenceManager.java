@@ -197,8 +197,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         
         try {
             if (isReady(0) && requireRepository) {
-                //String id = pidToId(pid);
-            	ReadRequest readRequest = Requests.newReadRequest(pid);
+                String id = pidToId(pid);
+            	ReadRequest readRequest = Requests.newReadRequest(id);
                 Resource existing = repo.read(readRequest);
                 logger.debug("Config loaded {} {}", pid, existing);
                 result = mapToDict(existing.getContent().asMap());
