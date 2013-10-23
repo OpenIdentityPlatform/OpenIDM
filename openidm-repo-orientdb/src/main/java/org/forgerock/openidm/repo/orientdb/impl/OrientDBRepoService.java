@@ -25,41 +25,21 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService; 
-import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
-import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
-
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
-import com.orientechnologies.orient.core.exception.ODatabaseException;
-import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
-import com.orientechnologies.orient.core.index.OIndexException;
-import com.orientechnologies.orient.core.record.impl.ODocument;
-
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
@@ -71,21 +51,35 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.PreconditionRequiredException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.core.PropertyUtil;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepoBootService;
+import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
+import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
+import com.orientechnologies.orient.core.exception.ODatabaseException;
+import com.orientechnologies.orient.core.index.OIndexException;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 /**
  * Repository service implementation using OrientDB
  * @author aegloff
@@ -317,8 +311,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     /**
      * Updates the specified object in the object set. 
      * <p>
-     * This implementation requires MVCC and hence enforces that clients state what revision they expect 
-     * to be updating
+     * This implementation does not require MVCC and use the current revision if no revision
+     * is specified in the request.
      * 
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
@@ -347,9 +341,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         JsonValue obj = request.getNewContent();
         String rev = request.getRevision();
         
-        if (rev == null) {
-            throw new ConflictException("Object passed into update does not have revision it expects set.");
-        } else {
+        if (rev != null) {
             obj.put(DocumentUtil.TAG_REV, rev);
         }
         
