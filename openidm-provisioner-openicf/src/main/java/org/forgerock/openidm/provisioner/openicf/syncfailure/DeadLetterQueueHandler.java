@@ -61,7 +61,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
     public void invoke(Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 
-        final String resourceContainer = new StringBuffer("repo/synchronisation/deadLetterQueue/")
+        final String resourceContainer = new StringBuilder("repo/synchronisation/deadLetterQueue/")
             .append(syncFailure.get("systemIdentifier"))
             .toString();
         final String resourceId = syncFailure.get("token").toString();
