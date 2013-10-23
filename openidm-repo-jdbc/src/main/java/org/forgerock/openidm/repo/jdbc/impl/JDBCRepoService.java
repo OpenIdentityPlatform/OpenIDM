@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
@@ -141,6 +142,10 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     JsonValue config;
+    
+    /** CryptoService for detecting whether a value is encrypted */
+    @Reference
+    protected CryptoService cryptoService;
 
     @Override
     public void handleRead(ServerContext context, ReadRequest request,
@@ -323,6 +328,10 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         String type = getObjectType(fullId);
         Map<String, Object> obj = request.getNewContent().asMap();
         String rev = request.getRevision();
+        
+        if (rev == null) {
+            rev = read(Requests.newReadRequest(fullId)).getRevision();
+        }
 
         Connection connection = null;
         Integer previousIsolationLevel = null;
@@ -511,7 +520,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
     @Override
     public List<Resource> query(QueryRequest request) throws ResourceException {
     	String fullId = request.getResourceName();
-        String type = fullId;
+        String type = trimStartingSlash(fullId);
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
         Map<String, Object> params = new HashMap<String, Object>();
         params.putAll(request.getAdditionalQueryParameters());
@@ -975,7 +984,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
         final Accessor<CryptoService> cryptoServiceAccessor = new Accessor<CryptoService>() {
             public CryptoService access() {
-                return null;
+                return cryptoService;
             }
         };
 
