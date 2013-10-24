@@ -88,15 +88,17 @@ import org.slf4j.LoggerFactory;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/cluster*") })
 public class ClusterManager implements RequestHandler, ClusterManagementService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ClusterManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
-    private final static Object repoLock = new Object();
-    private final static Object startupLock = new Object();
+    private static final String REPO_ID_PREFIX = "/repo/cluster/";
+
+    private static final Object repoLock = new Object();
+    private static final Object startupLock = new Object();
 
     public static final String PID = "org.forgerock.openidm.cluster";
 
-    private final static String QUERY_FAILED_INSTANCE = "query-cluster-instances";
-    private final static String QUERY_INSTANCES = "query-all";
+    private static final String QUERY_FAILED_INSTANCE = "query-cluster-instances";
+    private static final String QUERY_INSTANCES = "query-all";
 
     /**
      * The instance ID
@@ -226,7 +228,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             try {
                 Map<String, Object> resultMap = new HashMap<String, Object>();
                 logger.debug("Resource Name: " + request.getResourceName());
-                if ("/".equals(request.getResourceName())) {
+                if (request.getResourceName().isEmpty()) {
                     // Return a list of all nodes in the cluster
                     QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
                     r.setQueryId(QUERY_INSTANCES);
@@ -252,7 +254,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     });
                     resultMap.put("results", list);
                 } else {
-                	String id = request.getResourceName().substring(1);
+                	String id = request.getResourceName();
                     logger.debug("Attempting to read instance {} from the database", id);
                     ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
                     Resource instanceValue = accessor.getConnection().read(accessor, readRequest);
@@ -328,25 +330,14 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     }
     
     /**
-     * Gets the repository ID prefix
-     *
-     * @return the repository ID prefix
-     */
-    private String getIdPrefix() {
-        return "/repo/cluster/";
-    }
-
-    /**
      * Gets the Instance State repository ID.
      */
     private String getInstanceStateRepoId(String instanceId) {
-        StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("states/").append(instanceId).toString();
+        return new StringBuilder(REPO_ID_PREFIX).append("states/").append(instanceId).toString();
     }
 
     private String getInstanceStateRepoResource() {
-        StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("states").toString();
+        return new StringBuilder(REPO_ID_PREFIX).append("states").toString();
     }
 
     public void register(String listenerId, ClusterEventListener listener) {

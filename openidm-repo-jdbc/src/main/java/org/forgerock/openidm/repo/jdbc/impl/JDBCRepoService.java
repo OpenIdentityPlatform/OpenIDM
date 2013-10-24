@@ -85,7 +85,6 @@ import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.util.Accessor;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -161,16 +160,13 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public Resource read(ReadRequest request) throws ResourceException {
-        // Parse the remaining resourceName
-        String fullId = request.getResourceName();
-        String[] resourceName = ResourceUtil.parseResourceName(fullId);
-        if (resourceName == null) {
+        if (request.getResourceNameObject().size() < 2) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
-
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
+        // Parse the remaining resourceName
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
 
         Connection connection = null;
         Resource result = null;
@@ -183,24 +179,23 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                 throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
-            result = handler.read(fullId, type, localId, connection);
+            result = handler.read(request.getResourceName(), type, localId, connection);
+            return result;
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SQL Exception in read of {} with error code {}, sql state {}",
-                        new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
+                        new Object[] { request.getResourceName(), ex.getErrorCode(), ex.getSQLState(), ex });
             }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
         } catch (ResourceException ex) {
-            logger.debug("ResourceException in read of {}", fullId, ex);
+            logger.debug("ResourceException in read of {}", request.getResourceName(), ex);
             throw ex;
         } catch (IOException ex) {
-            logger.debug("IO Exception in read of {}", fullId, ex);
+            logger.debug("IO Exception in read of {}", request.getResourceName(), ex);
             throw new InternalServerErrorException("Conversion of read object failed", ex);
         } finally {
             CleanupHelper.loggedClose(connection);
         }
-
-        return result;
     }
 
     @Override
@@ -218,20 +213,18 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public Resource create(CreateRequest request) throws ResourceException {
-    	// Parse the remaining resourceName
-        String fullId = request.getResourceName();
-        String newId = request.getNewResourceId();
-        if (newId != null) {
-        	fullId = request.getResourceName() + "/" + newId;
-        }
-        
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
-        
-        if (localId == null) {
+        if (request.getNewResourceId() == null) {
             throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to read.");
+                    "The repository requires clients to supply an identifier for the object to create.");
         }
+        if (request.getResourceNameObject().isEmpty()) {
+            throw new BadRequestException(
+                    "The respository requires clients to supply a type for the object to create.");
+        }
+        // Parse the remaining resourceName
+        final String type = request.getResourceName();
+        final String localId = request.getNewResourceId();
+        final String fullId = type + "/" + localId;
 
     	Map<String, Object> obj = request.getContent().asMap();
 
@@ -316,22 +309,18 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public Resource update(UpdateRequest request) throws ResourceException {
-        // Parse the remaining resourceName
-        String fullId = request.getResourceName();
-        String[] resourceName = ResourceUtil.parseResourceName(fullId);
-        if (resourceName == null) {
+        if (request.getResourceNameObject().size() < 2) {
             throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to read.");
+                    "The repository requires clients to supply an identifier for the object to update.");
         }
+        // Parse the remaining resourceName
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
 
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
         Map<String, Object> obj = request.getNewContent().asMap();
-        String rev = request.getRevision();
-        
-        if (rev == null) {
-            rev = read(Requests.newReadRequest(fullId)).getRevision();
-        }
+        String rev = request.getRevision() != null && !"".equals(request.getRevision())
+                ? request.getRevision()
+                : read(Requests.newReadRequest(request.getResourceName())).getRevision();
 
         Connection connection = null;
         Integer previousIsolationLevel = null;
@@ -351,14 +340,14 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                 connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 connection.setAutoCommit(false);
 
-                handler.update(fullId, type, localId, rev, obj, connection);
+                handler.update(request.getResourceName(), type, localId, rev, obj, connection);
 
                 connection.commit();
-                logger.debug("Commited updated object for id: {}", fullId);
+                logger.debug("Commited updated object for id: {}", request.getResourceName());
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in update of {} with error code {}, sql state {}",
-                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
+                            new Object[] { request.getResourceName(), ex.getErrorCode(), ex.getSQLState(), ex });
                 }
                 rollback(connection);
                 if (handler.isRetryable(ex, connection)) {
@@ -372,15 +361,15 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                             + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
-                logger.debug("ResourceException in update of {}", fullId, ex);
+                logger.debug("ResourceException in update of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw ex;
             } catch (java.io.IOException ex) {
-                logger.debug("IO Exception in update of {}", fullId, ex);
+                logger.debug("IO Exception in update of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw new InternalServerErrorException("Conversion of object to update failed", ex);
             } catch (RuntimeException ex) {
-                logger.debug("Runtime Exception in update of {}", fullId, ex);
+                logger.debug("Runtime Exception in update of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw new InternalServerErrorException(
                         "Updating object failed with unexpected failure: " + ex.getMessage(), ex);
@@ -399,7 +388,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         } while (retry);
 
         // Return the newly created resource
-        return read(Requests.newReadRequest(fullId));
+        return read(Requests.newReadRequest(request.getResourceName()));
     }
 
     @Override
@@ -416,24 +405,20 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public Resource delete(DeleteRequest request) throws ResourceException {
-        // Parse the remaining resourceName
-        Resource result = null;
-        String fullId = request.getResourceName();
-        String[] resourceName = ResourceUtil.parseResourceName(fullId);
-        if (resourceName == null) {
+        if (request.getResourceNameObject().size() < 2) {
             throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to read.");
+                    "The repository requires clients to supply an identifier for the object to update.");
         }
-
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
-        String rev = request.getRevision();
-
-        if (rev == null) {
+        if (request.getRevision() == null) {
             throw new ConflictException(
                     "Object passed into delete does not have revision it expects set.");
         }
 
+        // Parse the remaining resourceName
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
+
+        Resource result = null;
         Connection connection = null;
         boolean retry = false;
         int tryCount = 0;
@@ -451,21 +436,21 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                 connection.setAutoCommit(false);
 
                 // Read in the resource before deleting
-                result = handler.read(fullId, type, localId, connection);
+                result = handler.read(request.getResourceName(), type, localId, connection);
 
-                handler.delete(fullId, type, localId, rev, connection);
+                handler.delete(request.getResourceName(), type, localId, request.getRevision(), connection);
 
                 connection.commit();
-                logger.debug("Commited deleted object for id: {}", fullId);
+                logger.debug("Commited deleted object for id: {}", request.getResourceName());
             } catch (IOException ex) {
-                logger.debug("IO Exception in delete of {}", fullId, ex);
+                logger.debug("IO Exception in delete of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(),
                         ex);
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in delete of {} with error code {}, sql state {}",
-                            new Object[] { fullId, ex.getErrorCode(), ex.getSQLState(), ex });
+                            new Object[] { request.getResourceName(), ex.getErrorCode(), ex.getSQLState(), ex });
                 }
                 rollback(connection);
                 if (handler.isRetryable(ex, connection)) {
@@ -479,11 +464,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                             + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
-                logger.debug("ResourceException in delete of {}", fullId, ex);
+                logger.debug("ResourceException in delete of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw ex;
             } catch (RuntimeException ex) {
-                logger.debug("Runtime Exception in delete of {}", fullId, ex);
+                logger.debug("Runtime Exception in delete of {}", request.getResourceName(), ex);
                 rollback(connection);
                 throw new InternalServerErrorException(
                         "Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
@@ -587,36 +572,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
     		return id.substring(1);
     	}
     	return id;
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-    	String tmpId = trimStartingSlash(id);
-        String localId = null;
-        int lastSlashPos = tmpId.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            localId = tmpId.substring(tmpId.lastIndexOf("/") + 1);
-        }
-        logger.trace("Full id: {} Extracted local id: {}", tmpId, localId);
-        return localId;
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectType(String id) {
-    	String tmpId = trimStartingSlash(id);
-        String type = null;
-        int lastSlashPos = tmpId.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            int startPos = 0;
-            // This should not be necessary as relative URI should not start
-            // with slash
-            if (tmpId.startsWith("/")) {
-                startPos = 1;
-            }
-            type = tmpId.substring(startPos, lastSlashPos);
-            logger.trace("Full id: {} Extracted type: {}", tmpId, type);
-        }
-        return type;
     }
 
     Connection getConnection() throws SQLException {

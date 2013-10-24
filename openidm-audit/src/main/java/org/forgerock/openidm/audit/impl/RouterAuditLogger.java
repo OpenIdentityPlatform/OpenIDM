@@ -43,10 +43,8 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.InvalidException;
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -103,10 +101,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> read(ServerContext context, String fullId) throws ResourceException {
-        final String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        final String type = split[0];
-        final String id = split[1];
+    public Map<String, Object> read(ServerContext context, String type, String id) throws ResourceException {
 
         Map<String, Object> result = new HashMap<String, Object>();
 
@@ -115,7 +110,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             params.put("_queryId", "query-all-ids");
             params.put("fields", "*");
 
-            QueryRequest request = Requests.newQueryRequest(location + "/" + type);
+            QueryRequest request = Requests.newQueryRequest(getRouterLocation(type));
             request.setQueryId("query-all-ids");
             request.getAdditionalQueryParameters().putAll(params);
             Set<Resource> results = new HashSet<Resource>();
@@ -129,7 +124,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             }
             result.put("entries", entries);
         } else {
-            ReadRequest request = Requests.newReadRequest(location + "/" + type, id);
+            ReadRequest request = Requests.newReadRequest(getRouterLocation(type), id);
             Map<String, Object> entry = routerContext.getConnection().read(context, request).getContent().asMap();
             result = AuditServiceImpl.formatLogEntry(unflattenActivityEntry(entry), type);
         }
@@ -141,11 +136,8 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String fullId, Map<String, String> params) 
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params)
         throws ResourceException {
-
-        final String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        final String type = split[0];
 
         try {
             boolean formatted = true;
@@ -154,7 +146,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
                 formatted = false;
             }
 
-            QueryRequest request = Requests.newQueryRequest(location + "/" + type);
+            QueryRequest request = Requests.newQueryRequest(getRouterLocation(type));
             request.setQueryId(params.get("_queryId"));
             request.getAdditionalQueryParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
@@ -202,7 +194,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
         try {
             AuditServiceImpl.preformatLogEntry(type, object);
             Map<String, Object> sanitized = sanitizeObject(object);
-            CreateRequest request = Requests.newCreateRequest(location + "/" + type, new JsonValue(sanitized));
+            CreateRequest request = Requests.newCreateRequest(getRouterLocation(type), new JsonValue(sanitized));
             routerContext.getConnection().create(context, request);
         } catch (IOException e) {
             throw new InternalServerErrorException("Unable to stringify object to be logged", e);
@@ -273,6 +265,10 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             }
         }
         return sanitized;
+    }
+
+    private String getRouterLocation(String type) {
+        return new StringBuilder(location).append("/").append(type).toString();
     }
 
 }

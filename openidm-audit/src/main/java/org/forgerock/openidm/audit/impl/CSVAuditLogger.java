@@ -118,13 +118,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> read(ServerContext context, String fullId) throws ResourceException {
-        Map<String, Object> result = new HashMap<String, Object>();
-        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        String type = split[0];
-        String id = split[1];
-
+    public Map<String, Object> read(ServerContext context, String type, String id) throws ResourceException {
         try {
+            Map<String, Object> result = new HashMap<String, Object>();
             List<Map<String, Object>> entriesList = new ArrayList<Map<String, Object>>();
             List<Map<String, Object>> entryList = getEntryList(type);
             if (entryList == null) {
@@ -141,10 +137,10 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                 throw new NotFoundException("Audit log entry with id " + id + " not found");
             }
             result.put("entries", entriesList);
+            return result;
         } catch (Exception e) {
             throw new BadRequestException(e);
         }
-        return result;
     }
 
     /**
@@ -228,11 +224,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String fullId, Map<String, String> params) throws ResourceException {
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException {
         String queryId = params.get("_queryId");
         boolean formatted = true;
-        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        String type = split[0];
         try {
             if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
                 formatted = false;

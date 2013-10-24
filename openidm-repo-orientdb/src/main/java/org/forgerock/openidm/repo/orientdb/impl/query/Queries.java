@@ -31,7 +31,6 @@ import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryRequest;
@@ -87,12 +86,12 @@ public class Queries {
         QueryInfo foundQueryInfo = null;
         params.put(QueryConstants.RESOURCE_NAME, orientClassName); 
         
-        String queryExpression = request.getQueryExpression(); //(String) params.get(QueryConstants.QUERY_EXPRESSION);
+        String queryExpression = request.getQueryExpression();
         String queryId = null;
         if (queryExpression != null) {
             foundQueryInfo = resolveInlineQuery(type, params, database);
         } else {
-            queryId = request.getQueryId(); //(String) params.get(QueryConstants.QUERY_ID);
+            queryId = request.getQueryId();
             if (queryId == null) {
                 throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
                         + " to identify/define a query must be passed in the parameters. " + params);

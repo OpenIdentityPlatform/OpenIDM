@@ -187,14 +187,16 @@ public class AuditServiceImpl implements AuditService {
      * @return the requested object.
      */
     @Override
-    public void handleRead(final ServerContext context,final ReadRequest request,final ResultHandler<Resource> handler) {
+    public void handleRead(final ServerContext context, final ReadRequest request, final ResultHandler<Resource> handler) {
         try {
-            String fullId = request.getResourceName();
-            String[] splitTypeAndId = splitFirstLevel(fullId);
-            String type = splitTypeAndId[0];
-            logger.debug("Audit read called for {}", fullId);
+            final String type = request.getResourceNameObject().head(1).toString();
+            final String id = request.getResourceNameObject().size() > 1
+                    ? request.getResourceNameObject().tail(1).toString()
+                    : null;
+
+            logger.debug("Audit read called for {}", request.getResourceName());
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> r = auditLogger.read(context, fullId);
+            Map<String, Object> r = auditLogger.read(context, type, id);
             handler.handleResult(new Resource((String)r.get(Resource.FIELD_CONTENT_ID), null, new JsonValue(r)));
         } catch (Throwable t) {
             t.printStackTrace();
@@ -230,8 +232,7 @@ public class AuditServiceImpl implements AuditService {
             // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin, ip=127.0.0.1}  
             logger.debug("Audit create called for {} with {}", request.getResourceName(), obj);
 
-            String[] splitTypeAndId =  splitFirstLevel(request.getResourceName());
-            String type = splitTypeAndId[0];
+            String type = request.getResourceNameObject().head(1).toString();
 
             String trigger = getTrigger(context);
 
@@ -450,14 +451,13 @@ public class AuditServiceImpl implements AuditService {
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         try {
-            String[] splitTypeAndId = splitFirstLevel(request.getResourceName());
-            String type = splitTypeAndId[0];
+            final String type = request.getResourceNameObject().head(1).toString();
             Map<String,String> params = new HashMap<String,String>();
             params.putAll(request.getAdditionalQueryParameters());
             params.put("_queryId", request.getQueryId());
             logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalQueryParameters());
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> result = auditLogger.query(context, request.getResourceName(), params);
+            Map<String, Object> result = auditLogger.query(context, type, params);
 
             for (Map<String,Object> o: (Iterable<Map<String,Object>>) result.get("result")) {
                 String id = (String) o.get(Resource.FIELD_CONTENT_ID);
@@ -550,22 +550,6 @@ public class AuditServiceImpl implements AuditService {
         else {
             return globalAuditLoggers;
         }
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    // Assumes single level type
-    static String[] splitFirstLevel(String id) {
-        String firstLevel = id.startsWith("/")
-                ? id.substring(1)
-                : id;
-        String rest = null;
-        int firstSlashPos = firstLevel.indexOf("/");
-        if (firstSlashPos > -1) {
-            rest = firstLevel.substring(firstSlashPos + 1);
-            firstLevel = firstLevel.substring(0, firstSlashPos);
-        }
-        logger.trace("Extracted first level: {} rest: {}", firstLevel, rest);
-        return new String[] { firstLevel, rest };
     }
 
     @Activate
