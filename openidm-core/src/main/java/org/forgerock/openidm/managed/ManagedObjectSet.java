@@ -35,7 +35,6 @@ import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -46,8 +45,9 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -61,6 +61,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -76,6 +77,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Paul C. Bryan
  * @author aegloff
+ * @author brmiller
  */
 // TODO Consider to use filter instead of Collection Provider
 class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
@@ -424,8 +426,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
     }
 
-    private Resource update(final ServerContext context, String id, String rev, Resource oldValue,
-            JsonValue newValue) throws ResourceException {
+    private Resource update(final ServerContext context, String id, String rev, Resource oldValue, JsonValue newValue)
+            throws ResourceException {
         if (newValue.equals(oldValue.getContent())) { // object hasn't changed
             return new Resource(id, rev, null);
         }
@@ -469,49 +471,59 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     private JsonValue patchAction(final ServerContext context, final ActionRequest request)
             throws ResourceException {
 
+        if (!request.getContent().required().isList()) {
+            throw new BadRequestException(
+                    "The request could nto be processed because the provided content is not a JSON array");
+        }
+
         QueryRequest queryRequest = Requests.newQueryRequest(repoId(null));
-        // TODO build the query request
+        queryRequest.setQueryId(request.getAdditionalActionParameters().get("_queryId"));
+        for (Map.Entry<String,String> entry : request.getAdditionalActionParameters().entrySet()) {
+            queryRequest.setAdditionalQueryParameter(entry.getKey(), entry.getValue());
+        }
 
         final JsonValue[] lastError = new JsonValue[1];
 
+        /*
         final JsonValue patch = request.getContent().required().expect(List.class);
+        */
+        final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
 
-        final QueryResultHandler handler = new QueryResultHandler() {
-            @Override
-            public void handleError(final ResourceException error) {
-                lastError[0] = error.toJsonValue();
-            }
-
-            @Override
-            public boolean handleResource(Resource resource) {
-                // TODO This should not fail on first error and the response
-                // should contains each result
-
-                try {
-                    Object before = resource.getContent().getObject();
-                    JsonPatch.patch(resource.getContent(), patch);
-                    if (before != request.getContent().getObject()) {
-                        lastError[0] =
-                                new ConflictException("replacing the root value is not supported")
-                                        .toJsonValue();
+        context.getConnection().query(context, queryRequest,
+                new QueryResultHandler() {
+                    @Override
+                    public void handleError(final ResourceException error) {
+                        lastError[0] = error.toJsonValue();
                     }
-                } catch (JsonValueException jve) {
-                    lastError[0] =
-                            new ConflictException(jve.getMessage(), jve).setDetail(
-                                    jve.getJsonValue()).toJsonValue();
-                }
 
-                return null != lastError[0];
-            }
+                    @Override
+                    public boolean handleResource(Resource resource) {
+                        // TODO This should not fail on first error and the response
+                        // should contains each result
 
-            @Override
-            public void handleResult(QueryResult result) {
-                // we don't care
-            }
-        };
+                        try {
+                            JsonValue before = resource.getContent().copy();
+                            JsonValuePatch.apply(resource.getContent(), operations);
+
+                            if (before != resource.getContent().getObject()) {
+                                lastError[0] = new ConflictException("replacing the root value is not supported")
+                                        .toJsonValue();
+                            }
+                        } catch (ResourceException e) {
+                            lastError[0] = new ConflictException(e.getMessage(), e).toJsonValue();
+                        }
+
+                        return null != lastError[0];
+                    }
+
+                    @Override
+                    public void handleResult(QueryResult result) {
+                        // do we care?
+                    }
+                });
 
         // JsonValue results = new
-        // JsonValue(service.getRouter().query(repoId(null),
+        // JsonValue(cryptoService.getRouter().query(repoId(null),
         // params.asMap()), new
         // JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
         // if (!results.isList()) {
@@ -591,8 +603,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void readInstance(final ServerContext context, String resourceId, ReadRequest request,
             ResultHandler<Resource> handler) {
-        // public Map<String, Object> read(String id) throws ResourceException
-        // {
         logger.debug("Read name={} id={}", name, resourceId);
         try {
 
@@ -615,8 +625,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void updateInstance(final ServerContext context,final String resourceId,final  UpdateRequest request,
             final ResultHandler<Resource> handler) {
-        // public void update(String id, String rev, Map<String, Object> object)
-        // throws ResourceException {
         logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
 
@@ -646,7 +654,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void deleteInstance(final ServerContext context, final String resourceId, DeleteRequest request,
             ResultHandler<Resource> handler) {
-        // public void delete(String id, String rev) throws ResourceException {
         logger.debug("Delete {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
         try {
@@ -675,69 +682,92 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
     }
 
+    // TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
     @Override
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
             ResultHandler<Resource> handler) {
-        // TODO: Consider dropping this Patch object abstraction and just
-        // process a patch document directly?
-        // public void patch(String id, String rev, Patch patch) throws
-        // ResourceException {
-        // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll
-        // work for now with patch action.
-        // boolean forceUpdate = (rev == null);
-        // boolean retry = forceUpdate;
-        // String _rev = rev;
-        //
-        // do {
-        // logger.debug("patch name={} id={}", name, id);
-        // idRequired(id);
-        // noSubObjects(id);
-        // JsonValue oldValue = new
-        // JsonValue(service.getRouter().read(repoId(id))); // Get the oldest
-        // value for diffing in the log
-        // JsonValue decrypted = decrypt(oldValue); // decrypt any incoming
-        // encrypted properties
-        //
-        // // If we haven't defined a rev, we need to get the current rev
-        // if (rev == null) {
-        // _rev = decrypted.get("_rev").asString();
-        // }
-        //
-        // JsonValue newValue = decrypted.copy();
-        // patch.apply(newValue.asMap());
-        // JsonValue params = new JsonValue(new HashMap<String, Object>());
-        // // Validate policies on the patched object
-        // params.add("_action", "validateObject");
-        // params.add("value", newValue);
-        // if (isPublicContext()) {
-        // ObjectSetContext.get().add("_isDirectHttp", true);
-        // }
-        //
-        // if (enforcePolicies) {
-        // JsonValue result = new JsonValue(service.getRouter().action("policy/"
-        // + managedId(id), params.asMap()));
-        // if (!result.isNull() && !result.get("result").asBoolean()) {
-        // logger.debug("Requested patch failed policy validation: {}", result);
-        // throw new ForbiddenException("Failed policy validation",
-        // result.asMap());
-        // }
-        // }
-        //
-        // try {
-        // update(id, _rev, decrypted, newValue);
-        // retry = false;
-        // logger.debug("Patch successful!");
-        // logActivity(id, "Patch " + patch, oldValue, newValue);
-        // } catch (PreconditionFailedException e) {
-        // if (forceUpdate) {
-        // logger.debug("Unable to update due to revision conflict. Retrying.");
-        // } else {
-        // // If it fails and we're not trying to force an update, we gave it
-        // our best shot
-        // handler.handleError( e);
-        // }
-        // }
-        // } while(retry);
+        try {
+            Resource resource = patchResource(context, request.getResourceName(), resourceId, request.getRevision(), request.getPatchOperations());
+            handler.handleResult(resource);
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        }
+    }
+
+    private Resource patchResource(ServerContext context, String resourceName, String resourceId, String revision,
+            List<PatchOperation> patchOperations)
+        throws ResourceException {
+
+        // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll work for now with patch action.
+
+        boolean forceUpdate = (revision == null);
+        boolean retry = forceUpdate;
+        String _rev = revision;
+
+        do {
+            logger.debug("patch name={} id={}", name, resourceName);
+            try {
+                idRequired(resourceName);
+                noSubObjects(resourceName);
+
+                // Get the oldest value for diffing in the log
+                // JsonValue oldValue = new JsonValue(cryptoService.getRouter().read(repoId(id)));
+                ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
+                Resource oldValue = context.getConnection().read(context, readRequest);
+
+                JsonValue decrypted = decrypt(oldValue.getContent()); // decrypt any incoming encrypted properties
+
+                // If we haven't defined a rev, we need to get the current rev
+                if (revision == null) {
+                    _rev = decrypted.get("_rev").asString();
+                }
+
+                JsonValue newValue = decrypted.copy();
+                boolean modified = JsonValuePatch.apply(newValue, patchOperations);
+                if (!modified) {
+                    return null;
+                }
+
+                if (enforcePolicies) {
+                    // Validate policies on the patched object
+                    // JsonValue params = new JsonValue(new HashMap<String, Object>());
+                    // params.add("_action", "validateObject");
+                    // params.add("value", newValue);
+                    ActionRequest policyAction = Requests.newActionRequest(
+                            "/policy" + managedId(resourceName), "validateObject");
+                    policyAction.setContent(newValue);
+                    if (isPublicContext(context)) {
+                        // ObjectSetContext.get().add("_isDirectHttp", true);
+                        // ??  or does PolicyService already do this?
+                        policyAction.setAdditionalActionParameter("_isDirectHttp", "true");
+                    }
+
+                    // JsonValue result = new JsonValue(cryptoService.getRouter().action("policy/"+ managedId(id), params.asMap()));
+                    JsonValue result = context.getConnection().action(context, policyAction);
+                    if (!result.isNull() && !result.get("result").asBoolean()) {
+                        logger.debug("Requested patch failed policy validation: {}", result);
+                        throw new ForbiddenException("Failed policy validation" + result.toString());
+                    }
+                }
+
+                Resource resource = update(context, resourceId, _rev, oldValue, newValue);
+                retry = false;
+                logger.debug("Patch successful!");
+                // ActivityLog.log(context, request.getRequestType(), "Patch " + patchOperations.toString(),
+                //        resourceName, oldValue.getContent(), newValue, Status.SUCCESS);
+                return resource;
+            } catch (PreconditionFailedException e) {
+                if (forceUpdate) {
+                    logger.debug("Unable to update due to revision conflict. Retrying.");
+                } else {
+                    // If it fails and we're not trying to force an update, we gave it our best shot
+                    throw e;
+                }
+            } catch (ResourceException e) {
+                throw e;
+            }
+        } while (retry);
+        return null;
     }
 
     @Override
@@ -780,9 +810,29 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
             ResultHandler<JsonValue> handler) {
-        final ResourceException e =
-                new NotSupportedException("Actions are not supported for resource instances");
-        handler.handleError(e);
+        // final ResourceException e = new NotSupportedException("Actions are not supported for resource instances");
+        // handler.handleError(e);
+
+        try {
+            Action action = Action.valueOf(request.getAction());
+            logActivity(context, request.getResourceName(), "Action: " + request.getAction(), null, null);
+            switch (action) {
+                case patch:
+                    final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
+                    Resource resource = patchResource(context, request.getResourceName(), resourceId, null, operations);
+                    handler.handleResult(resource.getContent());
+                    break;
+                default:
+                    throw new BadRequestException("Action" + request.getAction() + " is not supported.");
+            }
+        } catch (IllegalArgumentException e) {
+            handler.handleError(new BadRequestException("Action:" + request.getAction()
+                    + " is not supported for resource collection", e));
+        } catch (BadRequestException e) {
+            handler.handleError(e);
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        }
     }
 
     /**
@@ -794,19 +844,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * to perform to yield a single object to patch.
      */
     @Override
-    public void actionCollection(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
-        // public Map<String, Object> action(String id, Map<String, Object>
-        // params) throws ResourceException {
+    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         logger.debug("action name={} id={}", name, request.getResourceName());
 
         try {
             Action action = Action.valueOf(request.getAction());
-            logActivity(context, request.getResourceName(), "Action: " + request.getAction(),
-                    null, null);
+            logActivity(context, request.getResourceName(), "Action: " + request.getAction(), null, null);
             switch (action) {
-            case patch:
-                handler.handleResult(patchAction(context, request));
+                case patch:
+                    handler.handleResult(patchAction(context, request));
             }
         } catch (IllegalArgumentException e) {
             handler.handleError(new BadRequestException("Action:" + request.getAction()
@@ -845,6 +891,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @return the supplied JsonValue with private properties culled
      */
     private Resource cullPrivateProperties(Resource jv) {
+        // TODO Should this return a copy of the Resource?
         for (ManagedObjectProperty property : properties) {
             if (property.isPrivate()) {
                 jv.getContent().remove(property.getName());
@@ -884,7 +931,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             } catch (NotFoundException e) {
                 logger.error("Failed to sync onCreate {}:{}",name, id, e);
             }
-        }else {
+        } else {
             logger.warn("Sync service was not available.");
         }
     }
