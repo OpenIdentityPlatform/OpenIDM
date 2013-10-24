@@ -58,6 +58,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
@@ -80,6 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author aegloff
  * @author ckienle
+ * @author brmiller
  */
 @Component(
         name = "org.forgerock.openidm.config.enhanced",
@@ -106,8 +108,7 @@ public class ConfigObjectService implements RequestHandler {
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            String id = ParsedId.stripSlash(request.getResourceName());
-            Resource resource = new Resource(id, null, new JsonValue(read(id)));
+            Resource resource = new Resource(request.getResourceName(), null, new JsonValue(read(request.getResourceNameObject())));
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -122,20 +123,19 @@ public class ConfigObjectService implements RequestHandler {
      * The object may contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OpenIDM.
      *
-     * @param fullId the identifier of the object to retrieve from the object set.
+     * @param resourceName the identifier of the resource to retrieve from the object set.
      * @return the requested object.
      * @throws NotFoundException   if the specified object could not be found.
      * @throws ForbiddenException  if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
      */
-    public Map<String, Object> read(String fullId) throws ResourceException {
-        logger.debug("Invoking read {}", fullId);
+    public Map<String, Object> read(ResourceName resourceName) throws ResourceException {
+        logger.debug("Invoking read {}", resourceName.toString());
         Map<String, Object> result = null;
 
         try {
 
-            
-            if (fullId == null || fullId.length() == 0) {
+            if (resourceName.isEmpty()) {
                 // List all configurations
                 result = new HashMap<String, Object>();
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
@@ -151,13 +151,10 @@ public class ConfigObjectService implements RequestHandler {
                         }
                         String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
                         String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
-                        String id = null;
                         // If there is an alias for factory config is available, make a nicer ID then the internal PID
-                        if (factoryPid != null && alias != null) {
-                            id = factoryPid + "/" + alias;
-                        } else {
-                            id = pid;
-                        }
+                        String id = factoryPid != null && alias != null
+                                ? factoryPid + "/" + alias
+                                : pid;
 
                         configEntry.put("_id", id);
                         configEntry.put("pid", pid);
@@ -168,21 +165,21 @@ public class ConfigObjectService implements RequestHandler {
                 result.put("configurations", configList);
                 logger.debug("Read list of configurations with {} entries", configList.size());
             } else {
-                Configuration config = findExistingConfiguration(fullId);
+                Configuration config = findExistingConfiguration(new ParsedId(resourceName));
                 if (config == null) {
-                    throw new NotFoundException("No configuration exists for id " + fullId);
+                    throw new NotFoundException("No configuration exists for id " + resourceName.toString());
                 }
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-                JsonValue value = enhancedConfig.getConfiguration(props, context.getBundleContext(), fullId);
+                JsonValue value = enhancedConfig.getConfiguration(props, context.getBundleContext(), resourceName.toString());
                 result = value.asMap();
-                logger.debug("Read configuration for service {}", fullId);
+                logger.debug("Read configuration for service {}", resourceName);
             }
         } catch (ResourceException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.warn("Failure to load configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to load configuration for " + fullId + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to load configuration for {}", resourceName, ex);
+            throw new InternalServerErrorException("Failure to load configuration for " + resourceName + ": " + ex.getMessage(), ex);
         }
         return result;
     }
@@ -191,11 +188,9 @@ public class ConfigObjectService implements RequestHandler {
     public void handleCreate(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String id = request.getNewResourceId();
-            String resourceName = ParsedId.stripSlash(request.getResourceName());
             JsonValue content = request.getContent();
-            create(resourceName, id, content.asMap());
-            Resource resource = new Resource(id, null, content);
+            create(request.getResourceNameObject(), request.getNewResourceId(), content.asMap());
+            Resource resource = new Resource(request.getNewResourceId(), null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -218,8 +213,8 @@ public class ConfigObjectService implements RequestHandler {
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void create(String resourceName, String id, Map<String, Object> obj) throws ResourceException {
-        logger.debug("Invoking create configuration {} {} {}", new Object[]{resourceName, id, obj});
+    public void create(ResourceName resourceName, String id, Map<String, Object> obj) throws ResourceException {
+        logger.debug("Invoking create configuration {} {} {}", new Object[] { resourceName.toString(), id, obj });
         if (id == null || id.length() == 0) {
             throw new BadRequestException("The passed identifier to create is null");
         }
@@ -227,13 +222,13 @@ public class ConfigObjectService implements RequestHandler {
         try {
             Configuration config = null;
             if (parsedId.isFactoryConfig()) {
-                String qualifiedFactoryPid = ParsedId.qualifyPid(parsedId.factoryPid);
+                String qualifiedFactoryPid = ConfigBootstrapHelper.qualifyPid(parsedId.factoryPid);
                 if ("org.forgerock.openidm.router".equalsIgnoreCase(qualifiedFactoryPid)) {
                     throw new BadRequestException("router config can not be factory config");
                 }
                 config = configAdmin.createFactoryConfiguration(qualifiedFactoryPid, null);
             } else {
-                String qualifiedPid = ParsedId.qualifyPid(parsedId.pid);
+                String qualifiedPid = ConfigBootstrapHelper.qualifyPid(parsedId.pid);
                 config = configAdmin.getConfiguration(qualifiedPid, null);
             }
             if (config.getProperties() != null) {
@@ -247,16 +242,16 @@ public class ConfigObjectService implements RequestHandler {
             }
 
             config.update(dict);
-            logger.debug("Created new configuration for {} with {}", parsedId, dict);
+            logger.debug("Created new configuration for {} with {}", parsedId.toString(), dict);
         } catch (ResourceException ex) {
             throw ex;
         } catch (WaitForMetaData ex) {
-            logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", parsedId, ex);
+            logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", parsedId.toString(), ex);
             throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
-                    + parsedId + ", retry later.", ex);
+                    + parsedId.toString() + ", retry later.", ex);
         } catch (Exception ex) {
-            logger.warn("Failure to create configuration for {}", parsedId, ex);
-            throw new InternalServerErrorException("Failure to create configuration for " + parsedId + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to create configuration for {}", parsedId.toString(), ex);
+            throw new InternalServerErrorException("Failure to create configuration for " + parsedId.toString() + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -264,11 +259,10 @@ public class ConfigObjectService implements RequestHandler {
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String id =  ParsedId.stripSlash(request.getResourceName());
             String rev = request.getRevision();
             JsonValue content = request.getNewContent();
-            update(id, rev, content.asMap());
-            Resource resource = new Resource(id, null, content);
+            update(request.getResourceNameObject(), rev, content.asMap());
+            Resource resource = new Resource(request.getResourceName(), null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -286,7 +280,7 @@ public class ConfigObjectService implements RequestHandler {
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param resourceName the identifier of the resource to be updated
      * @param rev    the version of the object to update; or {@code null} if not provided.
      * @param obj    the contents of the object to put in the object set.
      * @throws ConflictException           if version is required but is {@code null}.
@@ -295,27 +289,31 @@ public class ConfigObjectService implements RequestHandler {
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ResourceException {
-        logger.debug("Invoking update configuration {} {}", fullId, rev);
-        if (fullId == null) {
-            throw new BadRequestException("The passed identifier to update is null");
+    public void update(ResourceName resourceName, String rev, Map<String, Object> obj) throws ResourceException {
+        logger.debug("Invoking update configuration {} {}", resourceName.toString(), rev);
+        if (resourceName.isEmpty()) {
+            throw new BadRequestException("The passed identifier to update is empty");
         }
+        else if (resourceName.size() > 2) {
+            throw new BadRequestException("The passed identifier to update has more than two parts");
+        }
+
         try {
-            ParsedId parsedId = new ParsedId(fullId);
-            Configuration config = findExistingConfiguration(fullId);
+            ParsedId parsedId = new ParsedId(resourceName);
+            Configuration config = findExistingConfiguration(parsedId);
 
             Dictionary existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
+                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not update the configuration.");
             }
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonValue(obj));
             config.update(existingConfig);
-            logger.debug("Updated existing configuration for {} with {}", fullId, existingConfig);
+            logger.debug("Updated existing configuration for {} with {}", resourceName.toString(), existingConfig);
         } catch (ResourceException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.warn("Failure to update configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to update configuration for " + fullId + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to update configuration for {}", resourceName.toString(), ex);
+            throw new InternalServerErrorException("Failure to update configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -323,10 +321,9 @@ public class ConfigObjectService implements RequestHandler {
     public void handleDelete(ServerContext context, DeleteRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String id =  ParsedId.stripSlash(request.getResourceName());
             String rev = request.getRevision();
-            delete(id, rev);
-            Resource resource = new Resource(id, null, new JsonValue(null));
+            delete(request.getResourceNameObject(), rev);
+            Resource resource = new Resource(request.getResourceName(), null, new JsonValue(null));
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -338,32 +335,32 @@ public class ConfigObjectService implements RequestHandler {
     /**
      * Deletes the specified object from the object set.
      *
-     * @param fullId the identifier of the object to be deleted.
+     * @param resourceName the identifier of the resource to be deleted.
      * @param rev    the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException           if the specified object could not be found.
      * @throws ForbiddenException          if access to the object is forbidden.
      * @throws ConflictException           if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
-    public void delete(String fullId, String rev) throws ResourceException {
-        logger.debug("Invoking delete configuration {} {}", fullId, rev);
-        if (fullId == null) {
+    public void delete(ResourceName resourceName, String rev) throws ResourceException {
+        logger.debug("Invoking delete configuration {} {}", resourceName.toString(), rev);
+        if (resourceName.isEmpty()) {
             throw new BadRequestException("The passed identifier to delete is null");
         }
         try {
-            Configuration config = findExistingConfiguration(fullId);
+            Configuration config = findExistingConfiguration(new ParsedId(resourceName));
 
             Dictionary existingConfig = config.getProperties();
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + fullId + ", can not delete the configuration.");
+                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not delete the configuration.");
             }
             config.delete();
-            logger.debug("Deleted configuration for {}", fullId);
+            logger.debug("Deleted configuration for {}", resourceName.toString());
         } catch (ResourceException ex) {
             throw ex;
         } catch (Exception ex) {
-            logger.warn("Failure to delete configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to delete configuration for " + fullId + ": " + ex.getMessage(), ex);
+            logger.warn("Failure to delete configuration for {}", resourceName.toString(), ex);
+            throw new InternalServerErrorException("Failure to delete configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex);
         }
     }
 
@@ -397,15 +394,14 @@ public class ConfigObjectService implements RequestHandler {
      * @throws IOException
      * @throws InvalidSyntaxException
      */
-    Configuration findExistingConfiguration(String fullId) throws IOException, InvalidSyntaxException, BadRequestException {
-        ParsedId parsedId = new ParsedId(fullId);
+    Configuration findExistingConfiguration(ParsedId parsedId) throws IOException, InvalidSyntaxException, BadRequestException {
 
         String filter = null;
         if (parsedId.isFactoryConfig()) {
-            String factoryPid = ParsedId.qualifyPid(parsedId.factoryPid);
+            String factoryPid = ConfigBootstrapHelper.qualifyPid(parsedId.factoryPid);
             filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS + "=" + parsedId.instanceAlias + "))";
         } else {
-            String pid = ParsedId.qualifyPid(parsedId.pid);
+            String pid = ConfigBootstrapHelper.qualifyPid(parsedId.pid);
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
         }
         logger.trace("List configurations with filter: {}", filter);
@@ -443,56 +439,41 @@ class ParsedId {
     public String factoryPid;
     public String instanceAlias;
 
-    /**
-     * @param resourceName the relative uri of the resource, without the id
-     * @param id the local id
-     */
-    public ParsedId(String resourceName, String id) throws BadRequestException {
-        if (resourceName == null || resourceName.length() == 0) {
-            // single-instance config
-            pid = id;
-        } else {
-            // multi-instance config
-            factoryPid = stripSlash(resourceName);
-            instanceAlias = id;
-        }
-    }
+    public ParsedId(ResourceName resourceName) throws BadRequestException {
+        // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
+        ResourceName stripped = resourceName.toString().contains(" ")
+                ? ResourceName.valueOf(resourceName.toString().replaceAll(" ", "_"))
+                : resourceName;
 
-    /**
-     * @param fullId the relative uri of the resource, 
-     * including the resource name and the local id
-     */
-    public ParsedId(String fullId) throws BadRequestException {
-        if (fullId.startsWith("/")) {
-            fullId = stripSlash(fullId);
+        switch (stripped.size()) {
+            case 2:
+                factoryPid = stripped.parent().toString();
+                instanceAlias = stripped.leaf();
+                break;
+
+            case 1:
+                pid = stripped.toString();
+                break;
+
+            default:
+                throw new BadRequestException("The passed resourceName has more than two parts");
         }
-        String[] clauses = fullId.split("/");
-        if (0 == clauses.length || clauses.length > 2) {
-            throw new BadRequestException("The passed identifier to has more then one '/'");
-        }
-        switch (clauses.length) {
-            case 2: {
-                // Do blank check StringUtils.isBlank()
-                if ((null != clauses[1]) && (!"".equals(clauses[1].trim()))) {
-                    instanceAlias = clauses[1].trim();
-                }
-            }
-            case 1: {
-                if ((null == clauses[0]) || ("".equals(clauses[0].trim()))) {
-                    throw new BadRequestException("The passed Factory identifier has no pid");
-                } else {
-                    if (null == instanceAlias) {
-                        pid = clauses[0].trim();
-                    } else {
-                        factoryPid = clauses[0].trim();
-                    }
-                }
-            }
-        }
+
         if (null != factoryPid) {
             logger.trace("Factory configuration pid: {} instance alias: {}", factoryPid, instanceAlias);
         } else {
             logger.trace("Managed service configuration pid: {}", pid);
+        }
+    }
+
+    public ParsedId(ResourceName resourceName, String id) throws BadRequestException {
+        if (resourceName.isEmpty()) {
+            // single-instance config
+            pid = id;
+        } else {
+            // multi-instance config
+            factoryPid = resourceName.toString();
+            instanceAlias = id;
         }
     }
 
@@ -503,47 +484,22 @@ class ParsedId {
         return (instanceAlias != null);
     }
 
-    /*
-    * Make the PID fully qualified with the default context for OpenIDM
-    */
-    public static String qualifyPid(String pid) {
-        return ConfigBootstrapHelper.qualifyPid(pid);
-    }
-
     /**
      * Get the qualified pid of the managed service or managed factory depending on the configuration represented
-     * Some APIs do not distinguish beween single managed service PID and managed factory PID
+     * Some APIs do not distinguish between single managed service PID and managed factory PID
      *
      * @return the qualified pid if this ID represents a managed service configuration, or the managed factory PID
      *         if it represents a managed factory configuration
      */
     public String getPidOrFactoryPid() {
-        if (isFactoryConfig()) {
-            return qualifyPid(factoryPid);
-        } else {
-            return qualifyPid(pid);
-        }
-    }
-
-    /**
-     * Strips the leading slash if present
-     * @param id the id with or without leading slash
-     * @return the id without leading slash, null if null id
-     */
-    static String stripSlash(String id) {
-        if (id == null || !id.startsWith("/")) {
-            return id;
-        } else {
-            return id.substring(1);
-        }
+        return isFactoryConfig()
+                ? ConfigBootstrapHelper.qualifyPid(factoryPid)
+                : ConfigBootstrapHelper.qualifyPid(pid);
     }
 
     public String toString() {
-        if (isFactoryConfig()) {
-            return factoryPid + "-" + instanceAlias;
-        } else {
-            return pid;
-        }
+        return isFactoryConfig()
+                ? (factoryPid + "-" + instanceAlias)
+                : pid;
     }
 }
-

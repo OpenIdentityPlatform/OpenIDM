@@ -140,17 +140,16 @@ public class ReconciliationService
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            String localId = getLocalId(request.getResourceName());
-
-            if (localId == null || "".equals(localId)) {
+            if (request.getResourceNameObject().isEmpty()) {
                 List<Map> runList = new ArrayList<Map>();
                 for (ReconciliationContext entry : reconRuns.values()) {
                     runList.add(entry.getSummary());
                 }
                 Map<String, Object> result = new LinkedHashMap<String, Object>();
                 result.put("reconciliations", runList);
-                handler.handleResult(new Resource(localId, null, new JsonValue(result)));
+                handler.handleResult(new Resource("", null, new JsonValue(result)));
             } else {
+                final String localId = request.getResourceNameObject().leaf();
                 // First try and get it from in memory
                 if (reconRuns.containsKey(localId)) {
                     handler.handleResult(new Resource(localId, null, new JsonValue(reconRuns.get(localId).getSummary())));
@@ -227,10 +226,9 @@ public class ReconciliationService
             }
 
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            String id = getLocalId(request.getResourceName());
             JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
 
-            if (id == null || "".equals(id)) {
+            if (request.getResourceNameObject().isEmpty()) {
                 // operation on collection
                 if (ReconciliationService.ReconAction.isReconAction(request.getAction())) {
                     try {
@@ -253,6 +251,7 @@ public class ReconciliationService
                 }
             } else {
                 // operation on individual resource
+                final String id = request.getResourceNameObject().leaf();
                 ReconciliationContext foundRun = reconRuns.get(id);
                 if (foundRun == null) {
                     throw new NotFoundException("Reconciliation with id " + id + " not found." );
@@ -397,37 +396,6 @@ public class ReconciliationService
             }
             reconRuns.put(reconContext.getReconId(), reconContext);
         }
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-        String localId = null;
-        if (id != null) {
-            if (id.startsWith("/")) {
-                id = id.replaceFirst("/", "");
-            }
-            int lastSlashPos = id.lastIndexOf("/");
-            if (lastSlashPos > -1) {
-                localId = id.substring(0, id.lastIndexOf("/"));
-            } else {
-                localId = id;
-            }
-            logger.trace("Full id: {} Extracted local id: {}", id, localId);
-        }
-        return localId;
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectField(String id) {
-        String type = null;
-        if (id != null) {
-            int slashPos = id.indexOf("/");
-            if (slashPos > -1) {
-                type = id.substring(slashPos+1, id.length());
-                logger.trace("Full id: {} Extracted type: {}", id, type);
-            }
-        }
-        return type;
     }
 
     @Activate

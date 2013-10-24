@@ -26,6 +26,7 @@ package org.forgerock.openidm.audit.impl;
 import java.util.Map;
 
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ServerContext;
 
 import org.osgi.framework.BundleContext;
@@ -86,12 +87,15 @@ public interface AuditLogger {
      * {@code _rev} will be set in the returned object. If optimistic concurrency is not
      * supported, then {@code _rev} must be {@code null} or absent.
      *
-     * @param id the identifier of the object to retrieve from the object set.
+     *
+     *
+     * @param type
+     * @param localId
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @return the requested object.
      */
-    Map<String, Object> read(ServerContext context, String id) throws ResourceException;
+    Map<String, Object> read(ServerContext context, String type, String localId) throws ResourceException;
 
     /**
      * Performs a query on the specified object and returns the associated result. The
@@ -101,12 +105,14 @@ public interface AuditLogger {
      * The query result is a JSON object structure composed of basic Java types; its overall
      * structure is defined by the implementation.
      *
-     * @param id identifies the object to query.
+     *
+     *
+     * @param type
      * @param params the parameters of the query to perform.
      * @return the query result object.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object or the specified query is forbidden.
      */
-    Map<String, Object> query(ServerContext context, String id, Map<String, String> params) throws ResourceException;
+    Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException;
 
 }

@@ -78,7 +78,6 @@ import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.quartz.CronTrigger;
@@ -464,41 +463,33 @@ public class SchedulerService implements RequestHandler {
 
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-    	try { 		
-            String id = null;
-            Map<String, Object> object = null;
-    		try {
-    			id = request.getNewResourceId();
-    			object = request.getContent().asMap();
-    			if (id == null) {
-    				id = UUID.randomUUID().toString();
-    			} else {
-    				id = trimTrailingSlash(id);
-    			}
-    			object.put("_id", id);
-    			ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
+    	try {
+            String id = request.getNewResourceId() == null
+                    ? UUID.randomUUID().toString()
+                    : trimTrailingSlash(request.getNewResourceId()); // is the trim necessary?
+            Map<String, Object> object = request.getContent().asMap();
+            object.put("_id", id);
 
-    			// Check defaults
-    			if (scheduleConfig.getEnabled() == null) {
-    				scheduleConfig.setEnabled(true);
-    			}
-    			if (scheduleConfig.getPersisted() == null) {
-    				scheduleConfig.setPersisted(true);
-    			}
+            ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
-    			try {
-    				addSchedule(scheduleConfig, id, false);
-    			} catch (ParseException e) {
-    				throw new BadRequestException(e);
-    			} catch (ObjectAlreadyExistsException e) {
-    				throw new ConflictException(e);
-    			} catch (SchedulerException e) {
-    				throw new InternalServerErrorException(e);
-    			}
-    		} catch (JsonException e) {
-    			throw new BadRequestException("Error creating schedule", e);
-    		}
+            // Check defaults
+            if (scheduleConfig.getEnabled() == null) {
+                scheduleConfig.setEnabled(true);
+            }
+            if (scheduleConfig.getPersisted() == null) {
+                scheduleConfig.setPersisted(true);
+            }
+
+            addSchedule(scheduleConfig, id, false);
     		handler.handleResult(new Resource(id, null, new JsonValue(object)));
+        } catch (ParseException e) {
+            handler.handleError(new BadRequestException(e.getMessage(), e));
+        } catch (ObjectAlreadyExistsException e) {
+            handler.handleError(new ConflictException(e.getMessage(), e));
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        } catch (JsonException e) {
+            handler.handleError(new BadRequestException("Error creating schedule", e));
     	} catch (Throwable t) {
     		handler.handleError(ResourceUtil.adapt(t));
     	}
@@ -507,28 +498,26 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = getResourceId(request.getResourceName());
-            
-            Map<String, Object> resultMap = null;
-            try {
-                Scheduler scheduler = null;
-                JobDetail job = null;
-                if (jobExists(id, true)) {
-                    scheduler = persistentScheduler;
-                } else if (jobExists(id, false)) {
-                    scheduler = inMemoryScheduler;
-                } else {
-                    throw new NotFoundException("Schedule does not exist");
-                }
-                job = scheduler.getJobDetail(id, GROUP_NAME);
-                JobDataMap dataMap = job.getJobDataMap();
-                ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
-                resultMap = (Map<String, Object>)config.getConfig().getObject();
-                resultMap.put("_id", id);
-            } catch (SchedulerException e) {
-                throw new InternalServerErrorException(e);
+            if (request.getResourceNameObject().isEmpty()) {
+                throw new BadRequestException("Empty resourceId");
             }
-            handler.handleResult(new Resource(id, null, new JsonValue(resultMap)));
+            
+            Scheduler scheduler = null;
+            if (jobExists(request.getResourceName(), true)) {
+                scheduler = persistentScheduler;
+            } else if (jobExists(request.getResourceName(), false)) {
+                scheduler = inMemoryScheduler;
+            } else {
+                throw new NotFoundException("Schedule does not exist");
+            }
+            JobDetail job = scheduler.getJobDetail(request.getResourceName(), GROUP_NAME);
+            JobDataMap dataMap = job.getJobDataMap();
+            ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
+            Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
+            resultMap.put("_id", request.getResourceName());
+            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -537,41 +526,35 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = getResourceId(request.getResourceName());
-            String rev = request.getRevision();
-            Map<String, Object> object = request.getNewContent().asMap();
-            try {
-                if (id == null) {
-                    throw new BadRequestException( "No ID specified");
-                }
-                object.put("_id", id);
-
-                // Default incoming config to "persisted" if not specified
-                Object persistedValue = object.get(SchedulerService.SCHEDULE_PERSISTED);
-                if (persistedValue == null) {
-                    object.put(SchedulerService.SCHEDULE_PERSISTED, new Boolean(true));
-                }
-
-                ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
-
-                try {
-                    if (!jobExists(id, scheduleConfig.getPersisted())) {
-                        throw new NotFoundException();
-                    } else {
-                        // Update the Job
-                        addSchedule(scheduleConfig, id, true);
-                        handler.handleResult(new Resource(id, null, new JsonValue(null)));
-                    }
-                } catch (ParseException e) {
-                    throw new BadRequestException(  e);
-                } catch (ObjectAlreadyExistsException e) {
-                    throw new ConflictException(e);
-                } catch (SchedulerException e) {
-                    throw new InternalServerErrorException(e);
-                }
-            } catch (JsonException e) {
-                throw new BadRequestException("Error updating schedule", e);
+            if (request.getResourceNameObject().isEmpty()) {
+                throw new BadRequestException("Empty resourceId");
             }
+            Map<String, Object> object = request.getNewContent().asMap();
+            object.put("_id", request.getResourceName());
+
+            // Default incoming config to "persisted" if not specified
+            Object persistedValue = object.get(SchedulerService.SCHEDULE_PERSISTED);
+            if (persistedValue == null) {
+                object.put(SchedulerService.SCHEDULE_PERSISTED, new Boolean(true));
+            }
+
+            ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
+
+            if (!jobExists(request.getResourceName(), scheduleConfig.getPersisted())) {
+                throw new NotFoundException();
+            } else {
+                // Update the Job
+                addSchedule(scheduleConfig, request.getResourceName(), true);
+                handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+            }
+        } catch (ParseException e) {
+            handler.handleError(new BadRequestException(e.getMessage(), e));
+        } catch (ObjectAlreadyExistsException e) {
+            handler.handleError(new ConflictException(e.getMessage(), e));
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        } catch (JsonException e) {
+            handler.handleError(new BadRequestException("Error updating schedule", e));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -580,26 +563,22 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
-            String id = getResourceId(request.getResourceName());
-            try {
-                if (id == null) {
-                    throw new BadRequestException("No ID specified");
-                }
-                try {
-                    if (jobExists(id, true)) {
-                        persistentScheduler.deleteJob(id, GROUP_NAME);
-                    } else if (jobExists(id, false)) {
-                        inMemoryScheduler.deleteJob(id, GROUP_NAME);
-                    } else {
-                        throw new NotFoundException("Schedule does not exist");
-                    }
-                    handler.handleResult(new Resource(id, null, new JsonValue(null)));
-                } catch (SchedulerException e) {
-                    throw new InternalServerErrorException(e);
-                }
-            } catch (JsonException e) {
-                throw new BadRequestException( "Error updating schedule", e);
+            if (request.getResourceNameObject().isEmpty()) {
+                throw new BadRequestException("Empty resourceId");
             }
+
+            if (jobExists(request.getResourceName(), true)) {
+                persistentScheduler.deleteJob(request.getResourceName(), GROUP_NAME);
+            } else if (jobExists(request.getResourceName(), false)) {
+                inMemoryScheduler.deleteJob(request.getResourceName(), GROUP_NAME);
+            } else {
+                throw new NotFoundException("Schedule does not exist");
+            }
+            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+        } catch (JsonException e) {
+            handler.handleError(new BadRequestException("Error updating schedule", e));
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -613,50 +592,45 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-            String id = getResourceId(request.getResourceName());
-            Map<String, String> params = request.getAdditionalQueryParameters();
             String queryId = request.getQueryId();
             if (queryId == null) {
                 throw new BadRequestException( "query-id parameters");
             }
             Map<String, Object> resultMap = null;
-            try {
-                try {
-                    if (queryId.equals("query-all-ids")) {
-                        // Query all the Job IDs in both schedulers
-                        String[] persistentJobNames = null;
-                        persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
-                        String[] inMemoryJobNames = inMemoryScheduler.getJobNames(GROUP_NAME);
-                        List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
-                        if (persistentJobNames != null) {
-                            for (String job : persistentJobNames) {
-                                Map<String, String> idMap = new HashMap<String, String>();
-                                idMap.put("_id", job);
-                                resultList.add(idMap);
-                            }
-                        }
-                        if (inMemoryJobNames != null) {
-                            for (String job : inMemoryJobNames) {
-                                Map<String, String> idMap = new HashMap<String, String>();
-                                idMap.put("_id", job);
-                                resultList.add(idMap);
-                            }
-                        }
-                        resultMap = new HashMap<String, Object>();
-                        resultMap.put(QueryResult.FIELD_RESULT, resultList);
-                    } else {
-                        throw new ForbiddenException( "Unsupported query-id: " + queryId);
+            if (queryId.equals("query-all-ids")) {
+                // Query all the Job IDs in both schedulers
+                String[] persistentJobNames = null;
+                persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
+                String[] inMemoryJobNames = inMemoryScheduler.getJobNames(GROUP_NAME);
+                List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
+                if (persistentJobNames != null) {
+                    for (String job : persistentJobNames) {
+                        Map<String, String> idMap = new HashMap<String, String>();
+                        idMap.put("_id", job);
+                        resultList.add(idMap);
                     }
-                } catch (SchedulerException e) {
-                    throw new InternalServerErrorException( e);
                 }
-            } catch (JsonException e) {
-                throw new BadRequestException("Error updating schedule", e);
+                if (inMemoryJobNames != null) {
+                    for (String job : inMemoryJobNames) {
+                        Map<String, String> idMap = new HashMap<String, String>();
+                        idMap.put("_id", job);
+                        resultList.add(idMap);
+                    }
+                }
+                resultMap = new HashMap<String, Object>();
+                resultMap.put(QueryResult.FIELD_RESULT, resultList);
+            } else {
+                throw new ForbiddenException( "Unsupported query-id: " + queryId);
             }
+
             for (Map<String, String> r: (List<Map<String, String>>)resultMap.get(QueryResult.FIELD_RESULT)){
                 handler.handleResource(new Resource(r.get("_id"), null, new JsonValue(r)));
             }
             handler.handleResult(new QueryResult());
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        } catch (JsonException e) {
+            handler.handleError(new BadRequestException("Error updating schedule", e));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -665,55 +639,42 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, final ResultHandler<JsonValue> handler) {
         try {
-        String id = getResourceId(request.getResourceName());
-        Map<String, String> params = request.getAdditionalActionParameters();
-        if (params.get("_action") == null) {
-            throw new BadRequestException("Expecting _action parameter");
-        }
+            Map<String, String> params = request.getAdditionalActionParameters();
 
-        String action = (String)params.get("_action");
-        try {
-            if (action.equals("create")) {
-            	id = UUID.randomUUID().toString();
+            if (params.get("_action") == null) {
+                throw new BadRequestException("Expecting _action parameter");
+            }
+
+            String action = params.get("_action");
+            if ("create".equals(action)) {
+                String id = UUID.randomUUID().toString();
                 params.put("_id", id);
-                try {
-                    if (jobExists(id, true) || jobExists(id, false)) {
-                        throw new BadRequestException("Schedule already exists");
-                    }
-                    CreateRequest r = Requests.newCreateRequest(id, new JsonValue(params));
-                    handleCreate(context, r, new ResultHandler<Resource>() {
-                        @Override
-                        public void handleError(ResourceException error) {
-                            handler.handleError(error);
-                        }
-
-                        @Override
-                        public void handleResult(Resource result) {
-                            handler.handleResult(result.getContent());
-                        }
-                    });
-                } catch (SchedulerException e) {
-                    throw new InternalServerErrorException(e);
+                if (jobExists(id, true) || jobExists(id, false)) {
+                    throw new BadRequestException("Schedule already exists");
                 }
-        		handler.handleResult(new JsonValue(params));
+                CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
+                handleCreate(context, createRequest, new ResultHandler<Resource>() {
+                    @Override
+                    public void handleError(ResourceException error) {
+                        handler.handleError(error);
+                    }
+
+                    @Override
+                    public void handleResult(Resource result) {
+                        handler.handleResult(result.getContent());
+                    }
+                });
+                handler.handleResult(new JsonValue(params));
             } else {
                 throw new BadRequestException("Unknown action: " + action);
             }
+        } catch (SchedulerException e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         } catch (JsonException e) {
-            throw new BadRequestException("Error updating schedule", e);
-        }
+            handler.handleError(new BadRequestException("Error updating schedule", e));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
-    }
-    
-    private String getResourceId(String resourceId) throws BadRequestException {
-    	if (resourceId == null || resourceId.equals("/")) {
-    		throw new BadRequestException("Invalid Resource ID");
-    	} else if (resourceId.startsWith("/")) {
-    		return resourceId.substring(1);
-    	}
-    	return resourceId;
     }
 
     private String trimTrailingSlash(String id) {
@@ -721,13 +682,6 @@ public class SchedulerService implements RequestHandler {
             return id.substring(0, id.length()-1);
         }
         return id;
-    }
-
-    public boolean isConfigured() {
-        if (schedulerConfig == null) {
-            return false;
-        }
-        return true;
     }
 
     public void initPersistentScheduler(ComponentContext compContext) throws SchedulerException {

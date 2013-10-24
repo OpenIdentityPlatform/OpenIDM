@@ -131,7 +131,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         try {
             String id = request.getResourceName();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            if (id == null || "/".equals(id)) {
+            if (request.getResourceNameObject().isEmpty()) {
                 List<Map<String, Object>> taskList = new ArrayList<Map<String, Object>>();
                 for (TaskScannerContext entry : taskScanRuns.values()) {
                     Map<String, Object> taskData = buildTaskData(entry);
@@ -139,12 +139,9 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
                 result.put("tasks", taskList);
             } else {
-            	if (id.startsWith("/")) {
-            		id = id.substring(1);
-            	}
-                TaskScannerContext foundRun = taskScanRuns.get(id);
+                TaskScannerContext foundRun = taskScanRuns.get(request.getResourceName());
                 if (foundRun == null) {
-                    throw new NotFoundException("Task with id '" + id + "' not found." );
+                    throw new NotFoundException("Task with id '" + request.getResourceName() + "' not found." );
                 }
                 result = buildTaskData(foundRun);
             }
@@ -167,17 +164,16 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-            String id = request.getResourceName();
             Map<String, String> params = request.getAdditionalActionParameters();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
 
             String action = request.getAction();
-            if (id == null || "/".equals(id)) {
+            if (request.getResourceNameObject().isEmpty()) {
                 try {
                     if ("execute".equalsIgnoreCase(action)) {
                         try {
                         	ObjectSetContext.push(context);
-                            result.put("_id", onExecute(id, params));
+                            result.put("_id", onExecute(request.getResourceName(), params));
                         } catch (JsonProcessingException e) {
                             throw new InternalServerErrorException(e);
                         } catch (IOException e) {
@@ -194,9 +190,9 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 }
             } else {
                 // operation on individual resource
-                TaskScannerContext foundRun = taskScanRuns.get(id);
+                TaskScannerContext foundRun = taskScanRuns.get(request.getResourceName());
                 if (foundRun == null) {
-                    throw new NotFoundException("Task with id '" + id + "' not found." );
+                    throw new NotFoundException("Task with id '" + request.getResourceName() + "' not found." );
                 }
 
                 if ("cancel".equalsIgnoreCase(action)) {
@@ -205,7 +201,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                     result.put("action", action);
                     result.put("status", "SUCCESS");
                 } else {
-                    throw new BadRequestException("Action '" + action + "' on Task '" + id + "' not supported " + params);
+                    throw new BadRequestException("Action '" + action + "' on Task '" + request.getResourceName() + "' not supported " + params);
                 }
             }
 

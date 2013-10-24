@@ -202,25 +202,21 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource read(ReadRequest request) throws ResourceException {
-        String fullId = request.getResourceName();
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
-        
-        if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: " + fullId + " local identifier: " + localId);
-        } else if (type == null) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
+        if (request.getResourceNameObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to read: " + request.getResourceName());
         }
-        
+
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
         Resource result = null;
         ODatabaseDocumentTx db = getConnection();
         try {
             ODocument doc = predefinedQueries.getByID(localId, type, db);
             if (doc == null) {
-                throw new NotFoundException("Object " + fullId + " not found in " + type);
+                throw new NotFoundException("Object " + localId + " not found in " + type);
             }
             result = DocumentUtil.toResource(doc);
-            logger.trace("Completed get for id: {} result: {}", fullId, result); 
+            logger.trace("Completed get for id: {} result: {}", request.getResourceName(), result);
             return result;
         } finally {
             if (db != null) {
@@ -255,24 +251,22 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource create(CreateRequest request) throws ResourceException {
-        String localId = request.getNewResourceId();//getLocalId(fullId);
-        // TODO: should CREST support server side generation of ID itself?
-        if (localId == null) {
-            localId = UUID.randomUUID().toString(); // Generate ID server side.
+        if (request.getResourceNameObject().isEmpty()) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + request.getResourceName());
         }
-        String type = stripSlash(request.getResourceName()); //getObjectType(fullId);
+
+        final String type = request.getResourceName();
+        // TODO: should CREST support server side generation of ID itself?
+        final String localId = (request.getNewResourceId() == null || "".equals(request.getNewResourceId()))
+                ? UUID.randomUUID().toString() // Generate ID server side.
+                : request.getNewResourceId();
+
         // Used currently for logging
-        String fullId = request.getResourceName() + localId;
-        
+        String fullId = request.getResourceName() + "/" + localId;
+
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getContent();
  
-        if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: " + fullId + " local identifier: " + localId);
-        } else if (type == null) {
-            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
-        }
-        
         obj.put(DocumentUtil.TAG_ID, localId);
         
         ODatabaseDocumentTx db = getConnection();
@@ -285,8 +279,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
-            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
-                    obj.get(DocumentUtil.TAG_REV).asString(), obj);
+            return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), obj.get(DocumentUtil.TAG_REV).asString(),  obj);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
@@ -311,9 +304,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     /**
      * Updates the specified object in the object set. 
      * <p>
-     * This implementation does not require MVCC and use the current revision if no revision
+     * This implementation does not require MVCC and uses the current revision if no revision
      * is specified in the request.
-     * 
+     * <p>
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
@@ -334,33 +327,36 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource update(UpdateRequest request) throws ResourceException {
-        String fullId = request.getResourceName();
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
+        if (request.getResourceNameObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourceName());
+        }
+
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
+
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getNewContent();
-        String rev = request.getRevision();
-        
-        if (rev != null) {
-            obj.put(DocumentUtil.TAG_REV, rev);
+
+        if (request.getRevision() != null && !"".equals(request.getRevision())) {
+            obj.put(DocumentUtil.TAG_REV, request.getRevision());
         }
-        
+
         ODatabaseDocumentTx db = getConnection();
         try{
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
-                throw new NotFoundException("Update on object " + fullId + " could not find existing object.");
+                throw new NotFoundException("Update on object " + request.getResourceName() + " could not find existing object.");
             }
             ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, orientClassName);
-            logger.trace("Updated doc for id {} to save {}", fullId, updatedDoc);
+            logger.trace("Updated doc for id {} to save {}", request.getResourceName(), updatedDoc);
             
             updatedDoc.save();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
             // Set ID to return to caller
             obj.put(DocumentUtil.TAG_ID, updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
-            logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
-            logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
+            logger.debug("Committed update for id: {} revision: {}", request.getResourceName(), updatedDoc.getVersion());
+            logger.trace("Update payload for id: {} doc: {}", request.getResourceName(), updatedDoc);
             return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), 
                     obj.get(DocumentUtil.TAG_REV).asString(), obj);
         } catch (ODatabaseException ex) {
@@ -405,28 +401,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     public Resource delete(DeleteRequest request) throws ResourceException {
-        String fullId = request.getResourceName();
-        String localId = getLocalId(fullId);
-        String type = getObjectType(fullId);
-        String rev = request.getRevision();
+        if (request.getResourceNameObject().size() < 2) {
+            throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourceName());
+        }
 
-        if (rev == null) {
+        if (request.getRevision() == null || "".equals(request.getRevision())) {
             throw new ConflictException("Object passed into delete does not have revision it expects set.");
-        } 
-        
-        int ver = DocumentUtil.parseVersion(rev); // This throws ConflictException if parse fails
+        }
+
+        final String type = request.getResourceNameObject().parent().toString();
+        final String localId = request.getResourceNameObject().leaf();
+
+        int ver = DocumentUtil.parseVersion(request.getRevision()); // This throws ConflictException if parse fails
         
         ODatabaseDocumentTx db = getConnection();
         try {
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
-                throw new NotFoundException("Object does not exist for delete on: " + fullId);
+                throw new NotFoundException("Object does not exist for delete on: " + request.getResourceName());
             }
             
             existingDoc.setVersion(ver); // State the version we expect to delete for MVCC check
 
             db.delete(existingDoc); 
-            logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
+            logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
             return new Resource(localId, null, new JsonValue(null));
         } catch (ODatabaseException ex) {
             // Without transaction the concurrent modification exception gets nested instead
@@ -501,14 +499,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     
     public List<Resource> query(QueryRequest request) throws ResourceException {
         List<Resource> results = new ArrayList<Resource>();
-        // TODO: replace with common utility
-        String fullId = request.getResourceName(); 
-        String type = fullId;
-        // Whilst the URI starts with a slash, but consider relative URI
-        if (fullId != null && fullId.startsWith("/")) {
-            type = fullId.substring(1);
-        }
-        logger.trace("Full id: {} Extracted type: {}", fullId, type);
+
+        logger.trace("Full id: {} Extracted type: {}", request.getResourceName(), request.getResourceName());
         
         // TODO: Statistics is not returned in result anymore
         // TODO: result is not needed in map form anymore
@@ -518,7 +510,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             //List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
             //result.put(QueryConstants.QUERY_RESULT, docs);
             long start = System.currentTimeMillis();
-            List<ODocument> queryResult = queries.query(type, request, db); 
+            List<ODocument> queryResult = queries.query(request.getResourceName(), request, db);
             long end = System.currentTimeMillis();
             if (queryResult != null) {
                 long convStart = System.currentTimeMillis();
@@ -587,46 +579,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         return db;
     }
 
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-        String localId = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            localId = id.substring(id.lastIndexOf("/") + 1);
-        }
-        logger.trace("Full id: {} Extracted local id: {}", id, localId);
-        return localId;
-    }
-    
-    private static String stripSlash(String id) {
-        String type = null;
-
-        int startPos = 0;
-        if (id.startsWith("/")) {
-            startPos = 1;
-        }
-        type = id.substring(startPos);
-        logger.debug("Full id: {}, extracted type: {}", id, type);
-
-        return type;
-    }
-    
-    // TODO: replace with common utility to handle ID, this is temporary
-    private static String getObjectType(String id) {
-        String type = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            int startPos = 0;
-            // This should not be necessary as relative URI should not start with slash
-            if (id.startsWith("/")) {
-                startPos = 1;
-            }
-            type = id.substring(startPos, lastSlashPos);
-            logger.trace("Full id: {} Extracted type: {}", id, type);
-        }
-        return type;
-    }
-    
     public static String typeToOrientClassName(String type) {
         return type.replace("/", "_");
     }

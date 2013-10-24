@@ -45,7 +45,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -311,51 +310,47 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             ResultHandler<JsonValue> handler) {
         try {
             ObjectSetContext.push(context);
-        String id = request.getResourceName();
-        // FIXME - original test was id!=null, added other stuff -brmiller
-        if (id != null && !"/".equals(id)) {
-            throw new NotFoundException();
-        }
-        Map<String, Object> result = null;
-        JsonValue _params = new JsonValue(request.getAdditionalActionParameters(), new JsonPointer("params"));
-        Action action = new JsonValue(request.getAction()).asEnum(Action.class);
-        try {
-            switch (action) {
-                case onCreate:
-                    id = _params.get("id").required().asString();
-                    logger.debug("Synchronization action=onCreate, id={}", id);
-                    onCreate(id, request.getContent());
-                    break;
-                case onUpdate:
-                    id = _params.get("id").required().asString();
-                    logger.debug("Synchronization action=onUpdate, id={}", id);
-                    onUpdate(id, null, request.getContent());
-                    break;
-                case onDelete:
-                    id = _params.get("id").required().asString();
-                    logger.debug("Synchronization action=onDelete, id={}", id);
-                    onDelete(id, null);
-                    break;
-                case recon:
-                    result = new HashMap<String, Object>();
-                    JsonValue mapping = _params.get("mapping").required();
-                    logger.debug("Synchronization action=recon, mapping={}", mapping);
-                    String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params);
-                    result.put("reconId", reconId);
-                    result.put("_id", reconId);
-                    result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
-                    result.put("comment2", "Deprecated return property reconId, use _id instead.");
-                    break;
-                case performAction:
-                    logger.debug("Synchronization action=performAction, params={}", _params);
-                    performAction(_params);
-                    result = new HashMap<String, Object>();
-                    //result.put("status", performAction(_params));
-                    break;
+            Map<String, Object> result = null;
+            JsonValue _params = new JsonValue(request.getAdditionalActionParameters(), new JsonPointer("params"));
+            Action action = new JsonValue(request.getAction()).asEnum(Action.class);
+            try {
+                String id = null;
+                switch (action) {
+                    case onCreate:
+                        id = _params.get("id").required().asString();
+                        logger.debug("Synchronization action=onCreate, id={}", id);
+                        onCreate(id, request.getContent());
+                        break;
+                    case onUpdate:
+                        id = _params.get("id").required().asString();
+                        logger.debug("Synchronization action=onUpdate, id={}", id);
+                        onUpdate(id, null, request.getContent());
+                        break;
+                    case onDelete:
+                        id = _params.get("id").required().asString();
+                        logger.debug("Synchronization action=onDelete, id={}", id);
+                        onDelete(id, null);
+                        break;
+                    case recon:
+                        result = new HashMap<String, Object>();
+                        JsonValue mapping = _params.get("mapping").required();
+                        logger.debug("Synchronization action=recon, mapping={}", mapping);
+                        String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params);
+                        result.put("reconId", reconId);
+                        result.put("_id", reconId);
+                        result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
+                        result.put("comment2", "Deprecated return property reconId, use _id instead.");
+                        break;
+                    case performAction:
+                        logger.debug("Synchronization action=performAction, params={}", _params);
+                        performAction(_params);
+                        result = new HashMap<String, Object>();
+                        //result.put("status", performAction(_params));
+                        break;
+                }
+            } catch (SynchronizationException se) {
+                throw new ConflictException(se);
             }
-        } catch (SynchronizationException se) {
-            throw new ConflictException(se);
-        }
             handler.handleResult(new JsonValue(result));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));

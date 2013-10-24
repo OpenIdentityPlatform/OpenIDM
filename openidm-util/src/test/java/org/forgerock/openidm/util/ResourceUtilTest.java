@@ -35,42 +35,8 @@ import org.testng.annotations.Test;
  * @author Laszlo Hordos
  */
 public class ResourceUtilTest {
-    @Test
-    public void testParseResourceName() throws Exception {
-        assertThat(ResourceUtil.parseResourceName(null)).isNull();
-        assertThat(ResourceUtil.parseResourceName(" ")).isNull();
-        assertThat(ResourceUtil.parseResourceName(" // ")).isNull();
-        assertThat(ResourceUtil.parseResourceName("/")).isNull();
-        assertThat(ResourceUtil.parseResourceName(" / / ")).isNull();
-        assertThat(ResourceUtil.parseResourceName("resourceName")).containsOnly("resourceName");
-        assertThat(ResourceUtil.parseResourceName("/resourceName")).containsOnly("resourceName");
-        assertThat(ResourceUtil.parseResourceName("/resourceName/")).containsOnly("resourceName");
-        assertThat(ResourceUtil.parseResourceName("resourceName/resourceId")).containsOnly(
-                "resourceName", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("/resourceName/resourceId")).containsOnly(
-                "resourceName", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("/resourceName/resourceId/")).containsOnly(
-                "resourceName", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("resourceName/resourceId/")).containsOnly(
-                "resourceName", "resourceId");
 
-        assertThat(ResourceUtil.parseResourceName("resourceName/type/resourceId")).containsOnly(
-                "resourceName/type", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("/resourceName/type/resourceId")).containsOnly(
-                "resourceName/type", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("/resourceName/type/resourceId/")).containsOnly(
-                "resourceName/type", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("resourceName/type/resourceId/")).containsOnly(
-                "resourceName/type", "resourceId");
-
-        assertThat(ResourceUtil.parseResourceName("resourceName/ /resourceId")).containsOnly(
-                "resourceName", "resourceId");
-        assertThat(ResourceUtil.parseResourceName(" / /resourceName/resourceId")).containsOnly(
-                "resourceName", "resourceId");
-        assertThat(ResourceUtil.parseResourceName("resourceName/resourceId/ / ")).containsOnly(
-                "resourceName", "resourceId");
-    }
-
+    /*
     @Test
     public void testURLParser() throws Exception {
         ResourceUtil.URLParser p0 = ResourceUtil.URLParser.parse("/resourceName/resourceId");
@@ -109,4 +75,5 @@ public class ResourceUtilTest {
         p1 = p0.next();
         Assert.assertEquals(p1, p0);
     }
+    */
 }

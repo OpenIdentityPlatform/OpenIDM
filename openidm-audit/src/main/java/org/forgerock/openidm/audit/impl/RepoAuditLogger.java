@@ -52,7 +52,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Audit logger that logs to a repository
+ *
  * @author aegloff
+ * @author brmiller
  */
 public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
@@ -62,13 +64,8 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      */
     public static final Name EVENT_AUDIT_CREATE = Name.get("openidm/internal/audit/repo/create");
 
-    BundleContext ctx;
-
-    String repoPrefix = "/repo" + AuditService.ROUTER_PREFIX;
-
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         super.setConfig(config, ctx);
-        this.ctx = ctx;
     }
 
     public void cleanup() {
@@ -78,39 +75,31 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> read(ServerContext context, String fullId) throws ResourceException {
+    public Map<String, Object> read(ServerContext context, String type, String id) throws ResourceException {
         Map<String, String> params = new HashMap<String, String>();
         params.put("_queryId", "query-all");
         params.put("fields", "*");
-        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        String type = split[0];
-        String id = split[1];
         Map<String, Object> result = new HashMap<String, Object>();
-        try {
-            List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
-            if (id == null) {
-                QueryRequest request = Requests.newQueryRequest(repoPrefix + fullId);
-                request.setQueryId("query-all");
-                request.getAdditionalQueryParameters().putAll(params);
-                Set<Resource> r = new HashSet<Resource>();
-                context.getConnection().query(context, request, r);
-                for (Resource entry : r) {
-                    entries.add(AuditServiceImpl.formatLogEntry(entry.getContent().asMap(), type));
-                }
-                formatActivityList(entries);
-                result.put("entries", entries);
-            } else {
-                ReadRequest request = Requests.newReadRequest(repoPrefix + fullId);
-                Map<String, Object> entry = context.getConnection().read(context,request).getContent().asMap();
-                formatActivityEntry(entry);
-                result = AuditServiceImpl.formatLogEntry(entry, type);
-            }
 
-        } catch (ResourceException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            throw ex;
+        List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
+        if (id == null) {
+            QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
+            request.setQueryId("query-all");
+            request.getAdditionalQueryParameters().putAll(params);
+            Set<Resource> r = new HashSet<Resource>();
+            context.getConnection().query(context, request, r);
+            for (Resource entry : r) {
+                entries.add(AuditServiceImpl.formatLogEntry(entry.getContent().asMap(), type));
+            }
+            formatActivityList(entries);
+            result.put("entries", entries);
+        } else {
+            ReadRequest request = Requests.newReadRequest(getRepoTarget(type));
+            Map<String, Object> entry = context.getConnection().read(context,request).getContent().asMap();
+            formatActivityEntry(entry);
+            result = AuditServiceImpl.formatLogEntry(entry, type);
         }
+
         return result;
     }
 
@@ -118,16 +107,14 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String fullId, Map<String, String> params) throws ResourceException {
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException {
         String queryId = params.get("_queryId");
         boolean formatted = true;
-        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
-        String type = split[0];
         try {
             if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
                 formatted = false;
             }
-            QueryRequest request = Requests.newQueryRequest(repoPrefix + fullId);
+            QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
             request.setQueryId(queryId);
             request.getAdditionalQueryParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
@@ -195,14 +182,12 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
     }
 
     private void createImpl(ServerContext context, String type, Map<String, Object> obj) throws ResourceException {
-        try {
-            CreateRequest request = Requests.newCreateRequest(
-                    repoPrefix + "/" + type, (String) obj.get(Resource.FIELD_CONTENT_ID), new JsonValue(obj));
-            context.getConnection().create(context, request);
-        } catch (ResourceException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            throw ex;
-        }
+        CreateRequest request = Requests.newCreateRequest(
+                getRepoTarget(type), (String) obj.get(Resource.FIELD_CONTENT_ID), new JsonValue(obj));
+        context.getConnection().create(context, request);
+    }
+
+    private String getRepoTarget(String type) {
+        return new StringBuilder("/repo").append(AuditService.ROUTER_PREFIX).append("/").append(type).toString();
     }
 }

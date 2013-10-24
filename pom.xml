@@ -256,7 +256,7 @@
         <authnfilter.commons.version>1.2.0-SNAPSHOT</authnfilter.commons.version>
 
         <!-- Commons JSON versions -->
-        <commons.forgerock-rest.version>2.0.1-SNAPSHOT</commons.forgerock-rest.version>
+        <commons.forgerock-rest.version>2.1.0-SNAPSHOT</commons.forgerock-rest.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults/>
