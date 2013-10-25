@@ -38,13 +38,350 @@
   <primary>Security</primary>
  </indexterm>
 
- <para>After following the guidance in this chapter, make sure that you test
- your installation to verify that it behaves as expected before putting it
- into production.</para>
+    <para>OpenIDM provides a security management service, that manages keystore
+    and truststore files.
+    The security service is accessible over the REST interface, enabling you to
+    read and import SSL certificates, and to generate certificate signing
+    requests.
+    This chapter describes the security management service and its REST interface.</para>
 
- <para>Out of the box, OpenIDM is set up for ease of development and
- deployment. When deploying OpenIDM in production, take the following
- precautions.</para>
+    <para>In addition, the chapter outlines the specific security procedures
+    that you should follow before deploying OpenIDM in a production environment.
+    </para>
+
+
+
+    <!--TODO Integrate post-CREST merge into trunk
+    With CREST, the security service changes slightly wrt the end points and
+    resource providers that service them. CREST has the following endpoints:
+
+"openidm/security/keystore"
+"openidm/security/truststore"
+
+  These are serviced by SingletonResourceProviders where the
+  keystore/truststore themselves are the resource. These endpoints are used
+  to do reads on the keystore/truststore (as a whole), or any special actions
+  (such as "generateCert" and "generateCSR").  When forming action request for
+  this endpoint, all properties (including "alias") need to be contained in
+  the request data.
+
+  So, the alias is not provided in the URL, but in the data object, for example:
+
+  a request like this "http://localhost:8080/openidm/security/keystore/openidm-localhost?_action=generateCSR"
+
+  must be reworked as "http://localhost:8080/openidm/security/keystore/?_action=generateCSR"
+
+  '{ "alias" : "openidm-localhost", "domainName" : "www.example.com" .... }'.
+
+"openidm/security/keystore/cert"
+"openidm/security/keystore/privatekey"
+"openidm/security/truststore/cert"
+
+  These are service by CollectionResourceProviders that provide access to
+  certificates and private keys within the keystore and truststore.  All CRUD
+  requests on certs and keys will need to use these endpoints.  Also, since these
+  are collections, you need to include the alias (resource ID) in the request URL
+  (for example "openidm/security/keystore/privatekey/openidm-localhost").
+
+  -->
+
+ <section xml:id="security-management-service">
+     <title>Accessing the Security Management Service</title>
+
+     <para>OpenIDM stores keystore and truststore files in a folder named
+     <filename>/path/to/openidm/security</filename>. These files can be managed
+     by using the <command>keytool</command> command, or over the REST
+     interface, at the URL
+     <literal>http://localhost:8080/openidm/security</literal>. For information
+     about using the <command>keytool</command> command, see
+     <link xlink:href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html" />.
+     </para>
+
+     <para>The following sections describe how to manage certificates and keys over
+     REST.</para>
+
+     <example xml:id="display-keystore-over-rest">
+         <title>To Display the Contents of the Keystore</title>
+
+         <para>When OpenIDM is first deployed (but not yet started) there is a
+         single entry in the keystore, with the alias
+         <literal>openidm-local-openidm-forgerock-org</literal>. This is an
+         internal private key and should not be modified.
+         </para>
+
+         <para>OpenIDM generates a symmetric key and a private key the first
+         time the server is started. After startup, you can display the
+         contents of the keystore over REST, as follows:</para>
+
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ http://localhost:8080/openidm/security/keystore
+ {
+  "aliases": [
+    "openidm-sym-default",
+    "openidm-localhost",
+    "openidm-local-openidm-forgerock-org"
+  ],
+  "type": "JCEKS",
+  "provider": {
+    "KeyGenerator.Blowfish": "com.sun.crypto.provider.BlowfishKeyGenerator",
+    "Alg.Alias.KeyFactory.DH": "DiffieHellman",
+  ...
+  }</screen>
+
+         <itemizedlist>
+             <para>By default, OpenIDM includes the following aliases:</para>
+             <listitem>
+                 <para><literal>openidm-sym-default</literal> - the default
+                 symmetric key that is used, for example, to encrypt the
+                 configuration.</para>
+             </listitem>
+             <listitem>
+                 <para><literal>openidm-localhost</literal> - the default
+                 alias that is used by the Jetty web server to service SSL
+                 requests. This alias references a private key and a self-signed
+                 certificate. You can use the self-signed certificate for
+                 testing purposes. When you deploy OpenIDM in a production
+                 environment, you should replace the self-signed certificate
+                 with a certificate that has been signed by a certificate
+                 authority.</para>
+             </listitem>
+             <listitem>
+                 <para><literal>openidm-local-openidm-forgerock-org</literal>
+                 - an internal private key.</para>
+             </listitem>
+         </itemizedlist>
+     </example>
+
+     <section xml:id="csr-over-rest">
+         <title>To Generate a Certificate Signing Request Over REST</title>
+
+         <para>To request a signed certificate, generate a certificate signing
+         request (CSR) over REST, as described in this section. The details of
+         the CSR are specified in JSON format, for example:</para>
+             <programlisting language="javascript">{
+"DN" : "www.example.com",
+"OU" : "HR",
+"L"  : "Cupertino",
+"C"  : "US",}</programlisting>
+
+         <para>For information about the complete contents of a CSR, see
+         <link xlink:href="http://www.sslshopper.com/what-is-a-csr-certificate-signing-request.html" />.
+         </para>
+
+         <para>To generate a CSR over the REST interface, include the private
+         key alias in the URL.
+         The following example, uses the default alias
+         (<literal>openidm-localhost</literal>).
+         If you have created your own private key for this request, specify its
+         alias instead of <literal>openidm-localhost</literal>.
+         Specify <literal> "returnPrivateKey" : true</literal> to return the
+         private key along with the request. </para>
+
+         <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ --data '{"CN" : "www.example.com",
+ "OU" : "HR",
+ "L"  : "Cupertino",
+ "C"  : "US",
+ "returnPrivateKey" : true}'
+ "http://localhost:8080/openidm/security/keystore/openidm-localhost?_action=generateCSR"
+
+{
+  "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmjCCAYICAQAwVzEYMBYGA1UEAwwPd3d3LmV4YW
+             1wbGUuY29tMQswCQYDVQQL\nDAJIUjENMAsGA1UECgwETm9uZTESMBAGA1UEBwwJQ3VwZXJ0aW5v
+             MQswCQYDVQQG\nEwJVUzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKwC7WFOutmzW0
+             GR\nuyWdzKDlJlT/XDz9/g4UOR9FdKgfvWIxOF1LbsFBqmlJrk/pq1x8BqSwKr1JjbFc\nlyY/bC
+             YV+jwsl8zt0XSgVQvKaYTHyl6HYwQue3n9DpFozuWUQKgkcEtwV5KAn7uv\n2V0aZHHPwNUZi2XT
+             5nLipjeb0JeBN2eheGMhuzNIO0xOeHYaj7xjUvXDuK9FaJvd\n+9zA4fvEEn5iwgveEaPlVABfUO
+             p5No9D4E4vkGdIvd42ygFll+e8OkuYuwqRKbSs\nnj/YhnBZyXXUiAjx5G0Ce94LpcmWJG3AW5TV
+             MSITg2VeWydKMZ/aoGL85cSbqZXW\nLGJAaHMCAwEAATANBgkqhkiG9w0BAQ0FAAOCAQEAUaxG0x
+             NRQkZyywBkqWzSi1BA\nHbe9vNrZHj7bXk8w806kBaQoaSmEPVlS0dtsRUwiwdxxvzsVTkZYe46k
+             4NJU0nFn\nVYCDT3ij9VuNcbZcK7DC9aL71n2g4va4wQ3vq1XsY8zMu/7VEvUd97rgiQ2wTA1O\n
+             payk6Tdjw089Ea7nCjKW2FofxCjvhHaOOAS58ptV9aqRprxSaq6esk9kPWGqtpDF\nkjKHSUE1dK
+             b0Tcsh8meqAIwLE57vGkvpoZ2jLQN40IbfazhECk/inxhtnNJgPhvz\nM4l8LnPC3oirKGtSTZVW
+             hvf9faTNbVYBC3jFZz9HEh1655y/v/ekdAj/ZXP/fw==\n
+           -----END CERTIFICATE REQUEST-----\n",
+  "_id": "openidm-localhost",
+  "privateKey": {
+    "algorithm": "RSA",
+    "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOUm
+             VP9cPP3+DhQ5H0V0qB+9YjE4\nXUtuwUGqaUmuT+mrXHwGpLAqvUmNsVyXJj9sJhX6PCyXzO3RdK
+             BVC8pphMfKXodj\nBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpkcc/A1RmLZdPmcuKmN5vQl4E3
+             Z6F4\nYyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh+8QSfmLCC94Ro+VUAF9Q6nk2j0Pg\nTi+Q
+             Z0i93jbKAWWX57w6S5i7CpEptKyeP9iGcFnJddSICPHkbQJ73gulyZYkbcBb\nlNUxIhODZV5bJ0
+             oxn9qgYvzlxJupldYsYkBocwIDAQABAoIBAGmfpopRIPWbaBb8\nWNIBcuz9qSsaX1ZolP+qNWVZ
+             bgfq7Y0FMlo/frQXEYBzqSETGJHC6wVn0+bF6scV\nVw86dLtyVWVr8I77HdoitfZ2hZLuZ/rh4d
+             BohpPi63YoyJs7DPTy4y2/v1aLuwoy\nMiQ0l6c3bm6sr+eIVgMH4A9Xk5/jzAHVTCBrvfTYZnh6
+             qD4Qmiuj8pQn79HQV8NK\nLt/5kmV1+uGj78jg7NR06NjNsa4L3mNZSiqsn2haPXZAnBjKfWApxe
+             GugURgNBCO\ncmYqCDZLvpMy4S/qoRBu+6qdYGprb+tHshBYNywuDkrgszhwgr5yRm8VQ60T9tM/
+             \nceKM+TECgYEA2Az2DkpC9TjJHPJG7x4boRRVqV5YRgPf5MrU+7PxDMb+EauXXUXg\nsch9Eeon
+             30yINqSv6FwATLVlkzQpZLkkJ6GJqAxUmPjRslAuosiSJqKaWamDUDbz\nSu/7iANJWvRGayqZsa
+             GQqFwM0Xpfp/EiBGe757k0D02u8sAv94A75bsCgYEAy9FQ\nMwDU3CaDzgv0qgR1ojXkSW0dCbv0
+             QPEkKZ2Ik7JbXzwVGzfdv2VUVrzRKBGReYzn\nGg/s4HbZkYy4O+SJo44n/5iO2pgKG5MEDFHSpw
+             X54Rm+qabT2fQ2lFJ/myWKsPgJ\n4gZ9bUvcemCcLLzsiAphueulQp49eOLnkzPlQKkCgYEAy7A0
+             jrZuuDjoStUUET5G\neC/urvZWrPPcMx0TfZZhTVWSlWA8HWDS/WnymGA1ZS4HQdU0TxHl6mwerp
+             C/8ckn\nEAIZAQlW/L2hHcbAoRIN0ET+1kedmJOl/mGQt+O5Vfn1JfYM3s5ezouyPhBsfK43\nDw
+             Ypvsb6EO+BYDXXQzVvwx8CgYB9o67LcfTFLNzNFCOi9pLJBm2OMbvXt0wPCFch\nbCG34hdfMntU
+             RvDjvgPqYASSrZm+kvQW5cBAciMWDOe4y91ovAW+En3lFBoO+2Zg\nbcPr/8wUTblxfQxU660Fa4
+             GL0u2Wv5/f+94vlLb5nTpIfcFU7wllAXTjBwaf0Uet\nPy1P2QKBgQDPoyJqPi2TdN7ZQYcoXAM4
+             Gl5Yv9oO16RC917XH6SLvj0ePmdLgBXo\nrR6aAmOjLzFp9jiytWZqVR9DbAWd2YNpvQav4Gude3
+             lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
+             6w==\n-----END RSA PRIVATE KEY-----\n",
+    "format": "PKCS#8"
+  },
+  "publicKey": {
+    "algorithm": "RSA",
+    "encoded": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr
+             ALtYU662bNbQZG7JZ3M\noOUmVP9cPP3+DhQ5H0V0qB+9YjE4XUtuwUGqaUmuT+mrXHwGpLAqvUm
+             NsVyXJj9s\nJhX6PCyXzO3RdKBVC8pphMfKXodjBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpk\
+             ncc/A1RmLZdPmcuKmN5vQl4E3Z6F4YyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh\n+8QSfmLCC
+             94Ro+VUAF9Q6nk2j0PgTi+QZ0i93jbKAWWX57w6S5i7CpEptKyeP9iG\ncFnJddSICPHkbQJ73gu
+             lyZYkbcBblNUxIhODZV5bJ0oxn9qgYvzlxJupldYsYkBo\ncwIDAQAB\n-----END PUBLIC KEY
+             -----\n",
+    "format": "X.509"
+  }
+}</screen>
+
+         <para>This sample request returns the CSR, the private key associated
+         with the request, and the public key.
+         The security management service stores the private key in the
+         repository.
+         When the signed certificate is returned by the certificate authority
+         and you import the certificate into the keystore, you do not need to
+         supply the private key.
+         The security management service locates the private key in the
+         repository, adds the certificate chain, and loads it into the
+         keystore.</para>
+
+         <para>If you will be importing the signed certificate into the keystore
+         of an OpenIDM instance that is not connected to the repository in which
+         this private key was stored, you must include the private key when you
+         import the signed certificate.
+         Setting <literal>"returnPrivateKey" : true</literal> in the CSR enables
+         you to maintain a copy of the private key for this purpose.</para>
+
+         <para>Send the output from
+         <literal>"csr": "-----BEGIN CERTIFICATE REQUEST----- ... -----END CERTIFICATE REQUEST-----</literal>
+         to your certificate authority for signature.</para>
+
+     </section>
+
+     <section xml:id="import-signed-cert-over-rest">
+         <title>To Import a Signed Certificate into the Keystore</title>
+         <para>When a signed certificate is returned by the certificate authority,
+         import it into the keystore by running a RESTful <literal>PUT</literal>
+         command on the keystore alias. Include the CA root certificate in the
+         command. If you are not importing the certificate into the same keystore
+         as the one from which the CSR was generated, include the private key in
+         the PUT request.</para>
+
+         <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request PUT
+ --data '{
+    "fromCSR": true,
+    "certs": [
+        "-----BEGIN CERTIFICATE-----\n
+MIIGcDCCBVigAwIBAgIDC23tMA0GCSqGSIb3DQEBBQUAMIGMMQswCQYDVQQGEwJJ\n
+TDEWMBQGA1UEChMNU3RhcnRDb20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0\n
+YWwgQ2VydGlmaWNhdGUgU2lnbmluZzE4MDYGA1UEAxMvU3RhcnRDb20gQ2xhc3Mg\n
+MSBQcmltYXJ5IEludGVybWVkaWF0ZSBTZXJ2ZXIgQ0EwHhcNMTMwODA3MTMyODAz\n
+WhcNMTQwODA4MDY0NTM5WjB2MRkwFwYDVQQNExBwZ3BDaGU4cEJPZnptVE9KMQsw\n
+CQYDVQQGEwJHQjEjMCEGA1UEAxMadGVzdC1jb25uZWN0LmZvcmdlcm9jay5jb20x\n
+JzAlBgkqhkiG9w0BCQEWGHBvc3RtYXN0ZXJAZm9yZ2Vyb2NrLmNvbTCCASIwDQYJ\n
+KoZIhvcNAQEBBQADggEPADCCAQoCggEBAJRWGbnMGs+uGKU6ZrlTaaFdPczLqZnv\n
+D37T0FOc/X3XXHxSVH94FDk7N4ansP2o6BsDWttIkM2AXkX3efMRaNpgxg7l4+DL\n
+opV6H1RkrRba2Lom6Hp2pgkqvOBfd1ZMOmLbjUHt0jhypnIzu7TVwtTH7Ywsrx9F\n
+uR9d4veYdW70IeQ64EhUG3RJBGG++AYJZCOjgEfbCwAYe/NoX/YVu+aMreHMR/+0\n
+CV0YXKvHZgytcwZIc5WkQYaSWQA9lDWZzt5XjCErCATfiGEQ0k02QgpEfNTXxwQs\n
+kfxh//O/qbfOWmloGwVU/2NY+5z3ZW8/eCksmiL1gGAYQAd+9+WI7BsCAwEAAaOC\n
+Au4wggLqMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgOoMBMGA1UdJQQMMAoGCCsGAQUF\n
+BwMBMB0GA1UdDgQWBBR2zHzb71ZOHSwDZk28L9It3PvOtzAfBgNVHSMEGDAWgBTr\n
+QjTQmLCrn/Qbawj3zGQu7w4sRTA0BgNVHREELTArghp0ZXN0LWNvbm5lY3QuZm9y\n
+Z2Vyb2NrLmNvbYINZm9yZ2Vyb2NrLmNvbTCCAVYGA1UdIASCAU0wggFJMAgGBmeB\n
+DAECATCCATsGCysGAQQBgbU3AQIDMIIBKjAuBggrBgEFBQcCARYiaHR0cDovL3d3\n
+dy5zdGFydHNzbC5jb20vcG9saWN5LnBkZjCB9wYIKwYBBQUHAgIwgeowJxYgU3Rh\n
+cnRDb20gQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwAwIBARqBvlRoaXMgY2VydGlm\n
+aWNhdGUgd2FzIGlzc3VlZCBhY2NvcmRpbmcgdG8gdGhlIENsYXNzIDEgVmFsaWRh\n
+dGlvbiByZXF1aXJlbWVudHMgb2YgdGhlIFN0YXJ0Q29tIENBIHBvbGljeSwgcmVs\n
+aWFuY2Ugb25seSBmb3IgdGhlIGludGVuZGVkIHB1cnBvc2UgaW4gY29tcGxpYW5j\n
+ZSBvZiB0aGUgcmVseWluZyBwYXJ0eSBvYmxpZ2F0aW9ucy4wNQYDVR0fBC4wLDAq\n
+oCigJoYkaHR0cDovL2NybC5zdGFydHNzbC5jb20vY3J0MS1jcmwuY3JsMIGOBggr\n
+BgEFBQcBAQSBgTB/MDkGCCsGAQUFBzABhi1odHRwOi8vb2NzcC5zdGFydHNzbC5j\n
+b20vc3ViL2NsYXNzMS9zZXJ2ZXIvY2EwQgYIKwYBBQUHMAKGNmh0dHA6Ly9haWEu\n
+c3RhcnRzc2wuY29tL2NlcnRzL3N1Yi5jbGFzczEuc2VydmVyLmNhLmNydDAjBgNV\n
+HRIEHDAahhhodHRwOi8vd3d3LnN0YXJ0c3NsLmNvbS8wDQYJKoZIhvcNAQEFBQAD\n
+ggEBAKVOAHtXTrgISj7XvE4/lLxAfIP56nlhpoLu8CqVlLK6eK4zCQRyTiFYx3xq\n
+VQMSNVgQIdimjEsMz8o5/fDrCrozsT6sqxIPFsdgdskPyz9YyC9Y/AVBuECxabQr\n
+B//0STicfdPg8PuDYtI64/INA47d/gtb57RaTFYxKs6bU8vtObinDJCwT33x4tvt\n
+ob18DwB3/PeTbWyVUIxB0nvfm89dys0SF2alaA/bLuy0B7rdlppd4dOMpmiD0tnI\n
+DORtr5HOD1xGiixZWzA1V2pTmF/hJZbhmEgBUSIyPK5Z9pZPephMf+/KrovbQqKr\n
+6SEjgs7dGwpo6fA2mfCH5cCrid0=\n
+-----END CERTIFICATE-----",
+        "-----BEGIN CERTIFICATE-----\n
+MIIDdTCCAl2gAwIBAgILBAAAAAABFUtaw5QwDQYJKoZIhvcNAQEFBQAwVzELMAkG\n
+A1UEBhMCQkUxGTAXBgNVBAoTEEdsb2JhbFNpZ24gbnYtc2ExEDAOBgNVBAsTB1Jv\n
+b3QgQ0ExGzAZBgNVBAMTEkdsb2JhbFNpZ24gUm9vdCBDQTAeFw05ODA5MDExMjAw\n
+MDBaFw0yODAxMjgxMjAwMDBaMFcxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9i\n
+YWxTaWduIG52LXNhMRAwDgYDVQQLEwdSb290IENBMRswGQYDVQQDExJHbG9iYWxT\n
+aWduIFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDaDuaZ\n
+jc6j40+Kfvvxi4Mla+pIH/EqsLmVEQS98GPR4mdmzxzdzxtIK+6NiY6arymAZavp\n
+xy0Sy6scTHAHoT0KMM0VjU/43dSMUBUc71DuxC73/OlS8pF94G3VNTCOXkNz8kHp\n
+1Wrjsok6Vjk4bwY8iGlbKk3Fp1S4bInMm/k8yuX9ifUSPJJ4ltbcdG6TRGHRjcdG\n
+snUOhugZitVtbNV4FpWi6cgKOOvyJBNPc1STE4U6G7weNLWLBYy5d4ux2x8gkasJ\n
+U26Qzns3dLlwR5EiUWMWea6xrkEmCMgZK9FGqkjWZCrXgzT/LCrBbBlDSgeF59N8\n
+9iFo7+ryUp9/k5DPAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8E\n
+BTADAQH/MB0GA1UdDgQWBBRge2YaRQ2XyolQL30EzTSo//z9SzANBgkqhkiG9w0B\n
+AQUFAAOCAQEA1nPnfE920I2/7LqivjTFKDK1fPxsnCwrvQmeU79rXqoRSLblCKOz\n
+yj1hTdNGCbM+w6DjY1Ub8rrvrTnhQ7k4o+YviiY776BQVvnGCv04zcQLcFGUl5gE\n
+38NflNUVyRRBnMRddWQVDf9VMOyGj/8N7yy5Y0b2qvzfvGn9LhJIZJrglfCm7ymP\n
+AbEVtQwdpf5pLGkkeB6zpxxxYu7KyJesF12KwvhHhm4qxFYxldBniYUr+WymXUad\n
+DKqC5JlR3XC321Y9YeRq4VzW9v493kHMB65jUr9TU/Qr6cf9tveCX4XSQRjbgbME\n
+HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==\n
+-----END CERTIFICATE-----"
+    ],
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\n
+zDot5q3vP9YjCihMZMkSa0zT2Zt+8S+mC0EVuYuTVhVpqrVNtkP1mlt+CYqmDffY\n
+sGuD6SMrT6+SeAzX2uYFgY4+s8yaRWBcr0C5Z7yihilM6BK+IJ4is9kaW5VFr1Ph\n
+wRKvSeFHBGh2wLNpjVSNPzLMDZBtkVi9Ny/xD5C3M1Gah0PGmnrPGCP8tr1Lshv4\n
+PxYJwzHzouTdQDkLYlCjMN++NmIYfx7zrbEYV4VzXMxgNq7d3+d5dlVfE8xpAjSR\n
+Lqlamib+doe1oWOQ2WiS6baBAH+Gw5rgqfwhJbCY/UlbCpuJ6kl7TLvTrFp8YpvB\n
+Iv1GD0yuwSued3a+AxMFuIzTBYd2rC6rHq+eF4eHd/Q/Sbm9+9VuW/h8dW3LGvbE\n
+5SUUhNw6uSkOZmZ0z/+FLbwoLPCASukY9biSd+12KJf4N42WZxID+9mJTp1j/Bv7\n
+n29oGfZ3vav8PqG+F987hSyWEIdGTMfIxwaUrdYe1fmbUCxv0suMcYTRbAs9g3cm\n
+eCNxbZBYC/fL+Nlj5NjZ+gxA/tEXV7wWynPZW3mZny6fQpDTDMslqsoFZR+rAUzH\n
+ViePuLbCdxIC5heUyqvDBbeOzgQWOu6SZjX+mAQpo0DPKt1KDP4DKv9EW92sIwW3\n
+AnFg98sje0DZ+zfsnevGioQMJrG0JSnqTYADxHaauu7NWndkfMZisfNIKA0u+ajU\n
+AbP8xFXIP5JU8O4tWmlbxAbMOYfrZHabFNZx4DH1OVOJqdJIVx0KER0GSZd50D6W\n
+QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
+-----END RSA PRIVATE KEY-----"
+ }'
+ "http://localhost:8080/openidm/security/keystore/openidm-localhost"
+
+{
+    "_id": "openidm-localhost"
+}</screen>
+
+         <para>If the import is successful, the command returns the alias of
+         the keystore to which the signed certificate was added.</para>
+     </section>
+
+ </section>
+
+ <section xml:id="security-precautions">
+     <title>Security Precautions for a Production Environment</title>
+
+     <para>Out of the box, OpenIDM is set up for ease of development and
+     deployment. When you deploy OpenIDM in production, there are specific
+     precautions you should take to minimize security breaches. After following
+     the guidance in this section, make sure that you test your installation
+     to verify that it behaves as expected before putting it into production.</para>
 
  <section xml:id="security-ssl-https">
   <title>Use SSL and HTTPS</title>
@@ -71,23 +408,34 @@
 
  <section xml:id="rest-over-https">
      <title>Restrict REST Access to the HTTPS Port</title>
-     <para>Use certificates to secure REST access, over HTTPS. The following
-     procedure shows how to generate a self-signed certificate to secure REST
-     calls, over HTTPS. Note that in production systems, it is recommended that
-     you use a key that has been signed by a certificate authority.</para>
+
+     <para>Use certificates to secure REST access, over HTTPS. OpenIDM generates
+     a self-signed certificate when it first starts up. You can use this
+     certificate to test secure REST access. Note that in production systems,
+     it is recommended that you replace this certificate with a certificate
+     that has been signed by a certificate authority.</para>
+
+     <para>The following procedure shows how to secure REST access using the
+     default self-signed certificate.</para>
+
      <procedure>
          <step>
-             <para>Extract the certificate that is installed with OpenIDM.</para>
+             <para>Extract the certificate that is generated when OpenIDM
+             starts up.</para>
+
              <screen>$ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null</screen>
+
              <para>This command outputs the entire certificate to the terminal.</para>
          </step>
          <step>
-             <para>Using any text editor, create a file named <filename>server.crt</filename>.
-             Copy the portion of the certificate from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal>
+             <para>Using any text editor, create a file named
+             <filename>self-signed.crt</filename>. Copy the portion of the
+             certificate from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal>
              to <literal>­­­­­END CERTIFICATE­­­­­</literal> and paste it into the
-             <filename>server.crt</filename> file. Your <filename>server.crt</filename>
-             file should now contain something like the following:</para>
-             <screen>$ more server.crt
+             <filename>self-signed.crt</filename> file. Your
+             <filename>self-signed.crt</filename> file should now contain
+             something like the following:</para>
+             <screen>$ more self-signed.crt
 -----BEGIN CERTIFICATE-----
 MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
 cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
@@ -100,113 +448,15 @@ wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
 m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
 UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
 s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
------END CERTIFICATE-----
-             </screen>
+-----END CERTIFICATE-----</screen>
          </step>
          <step>
-             <para>Generate a private, self-signed key as follows:</para>
-             <substeps>
-                 <step>
-                     <para>Generate an encrypted 1024-bit RSA key, and save it
-                     to a file named <filename>localhost.key</filename>. Enter
-                     a pass phrase for the key as requested.</para>
-                     <screen>$ openssl genrsa -des3 -out localhost.key 1024
-Generating RSA private key, 1024 bit long modulus
-.........++++++
-.........................++++++
-e is 65537 (0x10001)
-Enter pass phrase for localhost.key:
-Verifying - Enter pass phrase for localhost.key:</screen>
-                 </step>
-                 <step>
-                     <para>Generate a certificate request using the key you
-                     created in the previous step, and save it to a file named
-                     <filename>localhost.csr</filename>. Enter any required
-                     information to create the DN for the request.</para>
-                     <screen>$ openssl req -new -key localhost.key -out localhost.csr</screen>
-                     <para>This step creates a file, <filename>localhost.csr</filename>,
-                     that contains the details of the certificate request.</para>
-                 </step>
-                 <step>
-                     <para>Sign the certificate with the key you created in the
-                     previous step, and generate a certificate that is valid
-                     for one year in a file named <filename>localhost.crt</filename>.
-                     The <literal>x509</literal> subcommand enables you to
-                     retrieve the information that is stored in the SSL certificate.
-                     Output will depend on the details that you entered in the
-                     certificate request.</para>
-                     <screen width="90">
-$ openssl x509 -req -days 365 -in localhost.csr -signkey localhost.key -out localhost.crt
-Signature ok
-subject=/C=FR/ST=Il-DE-FRANCE/L=Paris/O=example.com
-Getting Private key
-Enter pass phrase for localhost.key:
-                     </screen>
-                     <para>The contents of <filename>localhost.crt</filename> should
-                     now be something like this:</para>
-                     <screen>$ more localhost.crt
------BEGIN CERTIFICATE-----
-MIIB/zCCAWgCCQD6VdiF6rX2czANBgkqhkiG9w0BAQUFADBEMQswCQYDVQQGEwJa
-QTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UEChMLZXhh
-bXBsZS5jb20wHhcNMTMwMTI1MTIzNzIyWhcNMTQwMTI1MTIzNzIyWjBEMQswCQYD
-VQQGEwJaQTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UE
-ChMLZXhhbXBsZS5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAONLO82s
-wKA0tWkbR66DajwQKNO9QlYwZvcK4X7MFOcwex+8j2vvG5HCB0BW2Gm72mFTWei8
-gVgQDP1oe/yTWDZRaiJ8rGWdvpgH1Cmxcd3N1AhhRya1I2j5wxrc9ZsyyTYCg2fd
-pFfULrUXSd9QlB2qQZz7kb4ksT/mSwPiGqvFAgMBAAEwDQYJKoZIhvcNAQEFBQAD
-gYEA3WrP8NKjXwQzE0vabYmdUhPHt3PF8EMMwVJ+h8G9Dwmtll0P/kLybXdHF1P/
-SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
-63WQPzvAeriO51JC0ysMVe5vf+lO0t+J8W6SfPTKwoXDQhY=
------END CERTIFICATE-----
-                     </screen>
-                 </step>
-             </substeps>
-         </step>
-         <step>
-             <para>Combine the contents of <filename>server.crt</filename> and
-             <filename>localhost.crt</filename> to create a Privacy Enhanced
-             Mail Certificate (<literal>.pem</literal>) file named
-             <filename>CA.pem</filename>.</para>
-             <screen>$ cat server.crt localhost.crt &gt; CA.pem</screen>
-             <para>The contents of <filename>CA.pem</filename> should be
-             something like the following (a concatenation of
-             <filename>server.crt</filename> and <filename>localhost.crt</filename>).</para>
-             <screen>$ more CA.pem
------BEGIN CERTIFICATE-----
-MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
-cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
-c3QwHhcNMTEwODE3MTMzNTEwWhcNMjEwODE3MTMzNTEwWjA+MSgwJgYDVQQKEx9P
-cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
-c3QwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKwMkyvHS5yHAnI7+tXUIbfI
-nQfhcTChpWNPTHc/cli/+Ta1InTpN8vRScPoBG0BjCaIKnVVl2zZ5ya74UKgwAVe
-oJQ0xDZvIyeC9PlvGoqsdtH/Ihi+T+zzZ14oVxn74qWoxZcvkG6rWEOd42QzpVhg
-wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
-m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
-UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
-s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
------END CERTIFICATE-----
------BEGIN CERTIFICATE-----
-MIIB/zCCAWgCCQD6VdiF6rX2czANBgkqhkiG9w0BAQUFADBEMQswCQYDVQQGEwJa
-QTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UEChMLZXhh
-bXBsZS5jb20wHhcNMTMwMTI1MTIzNzIyWhcNMTQwMTI1MTIzNzIyWjBEMQswCQYD
-VQQGEwJaQTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UE
-ChMLZXhhbXBsZS5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAONLO82s
-wKA0tWkbR66DajwQKNO9QlYwZvcK4X7MFOcwex+8j2vvG5HCB0BW2Gm72mFTWei8
-gVgQDP1oe/yTWDZRaiJ8rGWdvpgH1Cmxcd3N1AhhRya1I2j5wxrc9ZsyyTYCg2fd
-pFfULrUXSd9QlB2qQZz7kb4ksT/mSwPiGqvFAgMBAAEwDQYJKoZIhvcNAQEFBQAD
-gYEA3WrP8NKjXwQzE0vabYmdUhPHt3PF8EMMwVJ+h8G9Dwmtll0P/kLybXdHF1P/
-SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
-63WQPzvAeriO51JC0ysMVe5vf+lO0t+J8W6SfPTKwoXDQhY=
------END CERTIFICATE-----
-             </screen>
-         </step>
-         <step>
-             <para>Test REST access on the HTTPS port, using the certificate
-             that you created in the previous step. For example:</para>
+             <para>Test REST access on the HTTPS port, referencing the
+             self-signed certificate in the command. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username:openidm-admin"
  --header "X-OpenIDM-Password:openidm-admin"
- --cacert CA.pem
+ --cacert self-signed.crt
  --request GET
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
 {
@@ -218,20 +468,20 @@ SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
         }
     ],
     "query-time-ms": 1
-}
-             </screen>
+}</screen>
              <note>
                  <para>If you receive the response
                  <literal>curl: (52) Empty reply from server</literal>, check
-                 that you have, in fact, used <literal>https</literal> and not
-                 <literal>http</literal> in the URL.</para>
+                 that you have, in fact, used <literal>https</literal> (not
+                 <literal>http</literal>) and the secure port in the URL.</para>
              </note>
          </step>
+
      </procedure>
  </section>
 
  <section xml:id="security-encrypt-data">
-  <title>Encrypt Data Internally &amp; Externally</title>
+  <title>Encrypt Data Internally and Externally</title>
   <indexterm>
    <primary>Security</primary>
    <secondary>Encryption</secondary>
@@ -410,7 +660,7 @@ HTTP/1.1 204 No Content</screen>
     <secondary>Encryption</secondary>
    </indexterm>
 
-   <para>By default, OpenIDM uses an symmetric encryption key with alias
+   <para>By default, OpenIDM uses a symmetric encryption key with alias
    <literal>openidm-sym-default</literal>. Change this default key before
    deploying OpenIDM in production.</para>
 
@@ -624,8 +874,8 @@ password=<replaceable>password</replaceable></programlisting>
  <section xml:id="security-protect-repo">
   <title>Protect the OpenIDM Repository</title>
 
-  <para>Use the JDBC repository. OrientDB is not yet supported for production
-  use.</para>
+  <para>Use the JDBC or MSSQL repositories. OrientDB is not yet supported for
+  production use.</para>
 
   <para>Use a strong password for the JDBC connection. Do not rely on default
   passwords.</para>
@@ -665,4 +915,6 @@ password=<replaceable>password</replaceable></programlisting>
   service such as OpenIDM to be started at boot and shut down at system
   shutdown.</para>
  </section>
+
+     </section>
 </chapter>
