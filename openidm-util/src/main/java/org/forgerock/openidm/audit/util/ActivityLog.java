@@ -93,15 +93,15 @@ public class ActivityLog {
         return result;
     }
 
-    public static void log(ServerContext router, Request request, String message, String objectId,
+    public static void log(ServerContext router, RequestType requestType, String message, String objectId,
             JsonValue before, JsonValue after, Status status) throws ResourceException {
-        if (request == null) {
+        if (requestType == null) {
             throw new NullPointerException("Request can not be null when audit.");
         }
         // TODO: convert to flyweight?
         try {
             Map<String, Object> activity =
-                    buildLog(router, request, message, objectId, before, after, status);
+                    buildLog(router, requestType, message, objectId, before, after, status);
             // TODO: UPGRADE
             router.getConnection().create(new ServerContext(router),
                     Requests.newCreateRequest("audit/activity", new JsonValue(activity)));
@@ -114,7 +114,7 @@ public class ActivityLog {
         }
     }
 
-    private static Map<String, Object> buildLog(Context context, Request request, String message,
+    private static Map<String, Object> buildLog(Context context, RequestType requestType, String message,
             String objectId, JsonValue before, JsonValue after, Status status) {
         String rev = null;
         if (after != null && after.get(Resource.FIELD_CONTENT_REVISION).isString()) {
@@ -123,12 +123,11 @@ public class ActivityLog {
             rev = before.get(Resource.FIELD_CONTENT_REVISION).asString();
         }
 
-        String method = request.getRequestType().name();
+        String method = requestType.name();
 
         // TODO: make configurable
         if (method != null
-                && (RequestType.READ.equals(request.getRequestType()) || RequestType.QUERY
-                        .equals(request.getRequestType()))) {
+                && (RequestType.READ.equals(requestType) || RequestType.QUERY.equals(requestType))) {
             before = null;
             after = null;
         }

@@ -246,6 +246,7 @@ public class AuditServiceImpl implements AuditService {
                     logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
                 } else if (!triggerActions.contains(obj.get("action"))) {
                     logger.debug("Filtered by trigger filter");
+                    handler.handleResult(new Resource(null, null, new JsonValue(obj)));
                     return;
                 }
             }
@@ -254,6 +255,7 @@ public class AuditServiceImpl implements AuditService {
                 // TODO: make filters that can operate on a variety of conditions
                 if (!actionFilter.contains(obj.get("action"))) {
                     logger.debug("Filtered by action filter");
+                    handler.handleResult(new Resource(null, null, new JsonValue(obj)));
                     return;
                 }
             }

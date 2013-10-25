@@ -52,6 +52,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -59,6 +60,8 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.servlet.HttpContext;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
@@ -379,26 +382,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Log the activities on the managed object
-     *
-     * @param id
-     *            unqualified managed object id
-     * @param msg
-     *            optional message
-     * @param before
-     *            object state to log as before the operation
-     * @param after
-     *            object state to log as after the operation.
-     * @throws ResourceException
-     *             if logging the activiy fails
-     */
-    private void logActivity(ServerContext context, String id, String msg, JsonValue before,
-            JsonValue after) throws ResourceException {
-        // ActivityLog.log(context, msg, managedId(id), before, after,
-        // Status.SUCCESS);
-    }
-
-    /**
      * Forbid the use of sub objects
      *
      * @param id
@@ -587,7 +570,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             Resource _new = context.getConnection().create(context, createRequest);
 
-            logActivity(context, managedId(_new.getId()), null, null, value);
+            ActivityLog.log(context, request.getRequestType(), "create", managedId(_new.getId()),
+                    null, _new.getContent(), Status.SUCCESS);
 
             onCreate(context, managedId(_new.getId()), _new);
 
@@ -611,7 +595,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             onRetrieve(context, resource);
             execScript(context, "onRead", onRead, resource.getContent());
-            logActivity(context, resourceId, null, resource.getContent(), null);
+            ActivityLog.log(context, request.getRequestType(), "read", managedId(resource.getId()),
+                    null, resource.getContent(), Status.SUCCESS);
 
             handler.handleResult(isPublicContext(context) ? cullPrivateProperties(resource)
                     : resource);
@@ -641,8 +626,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             handler.handleResult(update(context, resourceId, request.getRevision(), _old, _new));
 
-            // TODO Fix the Auditing
-            logActivity(context, resourceId, null, _old.getContent(), _new);
+            ActivityLog.log(context, request.getRequestType(), "update", managedId(_old.getId()),
+                    _old.getContent(), _new, Status.SUCCESS);
 
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -669,8 +654,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 deleteRequest.setRevision(resource.getRevision());
             }
             Resource deletedResource = context.getConnection().delete(context, deleteRequest);
-            // TODO Fix the Auditing
-            logActivity(context, resourceId, null, resource.getContent(), null);
+
+            ActivityLog.log(context, request.getRequestType(), "delete", managedId(resource.getId()),
+                    resource.getContent(), null, Status.SUCCESS);
 
             onDelete(context, resourceId, resource);
 
@@ -687,15 +673,16 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
             ResultHandler<Resource> handler) {
         try {
-            Resource resource = patchResource(context, request.getResourceName(), resourceId, request.getRevision(), request.getPatchOperations());
+            Resource resource = patchResource(context, request.getRequestType(), request.getResourceName(),
+                    resourceId, request.getRevision(), request.getPatchOperations());
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
     }
 
-    private Resource patchResource(ServerContext context, String resourceName, String resourceId, String revision,
-            List<PatchOperation> patchOperations)
+    private Resource patchResource(ServerContext context, RequestType requestType, String resourceName,
+            String resourceId, String revision, List<PatchOperation> patchOperations)
         throws ResourceException {
 
         // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll work for now with patch action.
@@ -753,8 +740,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 Resource resource = update(context, resourceId, _rev, oldValue, newValue);
                 retry = false;
                 logger.debug("Patch successful!");
-                // ActivityLog.log(context, request.getRequestType(), "Patch " + patchOperations.toString(),
-                //        resourceName, oldValue.getContent(), newValue, Status.SUCCESS);
+                ActivityLog.log(context, requestType, "Patch " + patchOperations.toString(), managedId(resourceId),
+                        oldValue.getContent(), newValue, Status.SUCCESS);
                 return resource;
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
@@ -778,6 +765,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         QueryRequest repoRequest = Requests.copyOfQueryRequest(request);
         repoRequest.setResourceName(repoId(null));
 
+        final List<Map<String,Object>> results = new ArrayList<Map<String,Object>>();
         try {
             context.getConnection().query(context, repoRequest, new QueryResultHandler() {
                 @Override
@@ -787,6 +775,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                 @Override
                 public boolean handleResource(Resource resource) {
+                    results.add(resource.getContent().asMap());
                     if (isPublicContext(context)) {
                         // If it came over a public interface we have to cull
                         // each resulting object
@@ -800,11 +789,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     handler.handleResult(result);
                 }
             });
+
+            ActivityLog.log(context, request.getRequestType(),
+                    "query: " + request.getQueryId() + ", parameters: " + request.getAdditionalQueryParameters(),
+                    request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
         } catch (ResourceException e) {
             handler.handleError(e);
         }
-        // logActivity(context, repoRequest.getResourceName(),
-        // "Query parameters " + params, new JsonValue(result), null);
     }
 
     @Override
@@ -815,11 +806,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             Action action = Action.valueOf(request.getAction());
-            logActivity(context, request.getResourceName(), "Action: " + request.getAction(), null, null);
+            ActivityLog.log(context, request.getRequestType(), "Action: " + request.getAction(), managedId(resourceId),
+                    null, null, Status.SUCCESS);
             switch (action) {
                 case patch:
                     final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
-                    Resource resource = patchResource(context, request.getResourceName(), resourceId, null, operations);
+                    Resource resource = patchResource(context, request.getRequestType(), request.getResourceName(), resourceId, null, operations);
                     handler.handleResult(resource.getContent());
                     break;
                 default:
@@ -849,7 +841,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             Action action = Action.valueOf(request.getAction());
-            logActivity(context, request.getResourceName(), "Action: " + request.getAction(), null, null);
+            ActivityLog.log(context, request.getRequestType(), "Action: " + request.getAction(), request.getResourceName(),
+                    null, null, Status.SUCCESS);
             switch (action) {
                 case patch:
                     handler.handleResult(patchAction(context, request));
