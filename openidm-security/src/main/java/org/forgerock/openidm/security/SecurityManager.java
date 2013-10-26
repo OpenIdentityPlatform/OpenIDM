@@ -192,7 +192,7 @@ public class SecurityManager extends SimpleJsonResource {
                 Key privateKey = storeWrapper.getStore().getKey(privateKeyAlias, keystorePassword.toCharArray());
                 CertificateWrapper certWrapper = null;
                 if (privateKey == null) {
-                    String dn = "CN=local.openidm.forgerock.org, OU=None, O=OpenIDM Self-Signed Certificate L=None, C=None";
+                    String dn = "CN=localhost, OU=None, O=OpenIDM Self-Signed Certificate, L=None, C=None";
                     certWrapper = generateCertificate(dn, DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, 
                             DEFAULT_SIGNATURE_ALGORITHM, null, null);
                     storeWrapper.addPrivateKey(privateKeyAlias, certWrapper.getPrivateKey(), new Certificate[]{certWrapper.getCertificate()});
