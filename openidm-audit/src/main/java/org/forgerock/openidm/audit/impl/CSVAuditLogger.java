@@ -154,7 +154,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     private List<Map<String, Object>> getEntryList(String type) throws Exception {
         List<Map<String, Object>> entryList = new ArrayList<Map<String, Object>>();
         CellProcessor [] processors = null;
-        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
+        if (AuditServiceImpl.TYPE_RECON.equals(type)) {
             processors = new CellProcessor[] {
                     new NotNull(), // _id
                     new Optional(), // action
@@ -174,7 +174,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // targetObjectId
                     new NotNull() // timestamp
             };
-        } else if (type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {
+        } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
             processors = new CellProcessor[] {
                     new NotNull(), // _id
                     new Optional(), // action
@@ -186,11 +186,21 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // objectId
                     new Optional(), // parentActionId
                     new Optional(), // passwordChanged
-                    new Optional(), // requester
                     new Optional(), // rev
                     new Optional(), // rootActionId
                     new Optional(), // status
                     new NotNull() // timestamp
+            };
+        } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {
+            processors = new CellProcessor[] {
+                    new NotNull(), // _id
+                    new Optional(), // action
+                    new Optional(), // ip
+                    new Optional(), // principal
+                    new Optional(new ParseJsonValue()), // roles
+                    new Optional(), // status
+                    new NotNull(), // timestamp
+                    new Optional() // userid
             };
         } else {
             throw new InternalServerErrorException("Error parsing entries: unknown type " + type);
