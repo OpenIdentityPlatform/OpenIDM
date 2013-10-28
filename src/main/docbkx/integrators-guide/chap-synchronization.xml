@@ -166,6 +166,64 @@
 
    </section>
 
+   <section xml:id="recon-details">
+       <title>Obtaining Details of a Reconciliation Run</title>
+
+       <para>You can display the details of a particular reconciliation
+       run over REST by specifying the reconciliation run ID in the
+       URL. For example, the following call shows the details of the
+       reconciliation run initiated in the previous section:</para>
+
+       <screen>$curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e
+{
+    "_id": "0890ad62-4738-4a3f-8b8e-f3c83bbf212e",
+    "mapping": "systemLdapAccounts_managedUser",
+    "state": "SUCCESS",
+    "stage": "COMPLETED_SUCCESS",
+    "stageDescription": "reconciliation completed.",
+    "progress": {
+        "source": {
+            "existing": {
+                "processed": 2,
+                "total": "2"
+            }
+        },
+        "target": {
+            "existing": {
+                "processed": 0,
+                "total": "0"
+            },
+            "created": 2
+        },
+        "links": {
+            "existing": {
+                "processed": 0,
+                "total": "0"
+            },
+            "created": 2
+        }
+    },
+    "situationSummary": {
+        "SOURCE_IGNORED": 0,
+        "MISSING": 0,
+        "FOUND": 0,
+        "AMBIGUOUS": 0,
+        "UNQUALIFIED": 0,
+        "CONFIRMED": 0,
+        "SOURCE_MISSING": 0,
+        "ABSENT": 2,
+        "TARGET_IGNORED": 0,
+        "UNASSIGNED": 0
+    },
+    "started": "2013-10-28T13:16:29.479Z",
+    "ended": "2013-10-28T13:16:29.971Z"
+}</screen>
+   </section>
+
    <section xml:id="canceling-recons">
     <title>Canceling a Reconciliation Run</title>
 
