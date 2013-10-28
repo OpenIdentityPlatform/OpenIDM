@@ -202,8 +202,6 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     @Override
     public void filterGenericResult(final ServerContext context, final ScriptState state,
             final Resource result, final ResultHandler<Resource> handler) {
-        handler.handleResult(result);
-        logger.info("Result");
         if (null != onResponse) {
             logger.info("Filter GenericError response: {}.", context.getId());
             try {
