@@ -111,6 +111,8 @@ mysql&gt; show tables;
 | auditaccess               |
 | auditactivity             |
 | auditrecon                |
+| clusterobjectproperties   |
+| clusterobjects            |
 | configobjectproperties    |
 | configobjects             |
 | genericobjectproperties   |
