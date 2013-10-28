@@ -128,16 +128,13 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
         final ScriptState state = new ScriptState(request);
         try {
             switch (evaluateOnRequest(context, state)) {
-            case CONTINUE: {
-                handler.handleContinue(context, state);
-                break;
-            }
-            case SKIP: {
-                break;
-            }
-            case STOP: {
-                break;
-            }
+                case CONTINUE:
+                    handler.handleContinue(context, state);
+                    break;
+                case SKIP:
+                    break;
+                case STOP:
+                    break;
             }
         } catch (ResourceException e) {
             logger.error("Failed the execute the onRequest script", e);
@@ -148,26 +145,22 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     @Override
     public void filterActionResult(final ServerContext context, final ScriptState state,
             final JsonValue result, final ResultHandler<JsonValue> handler) {
-        if (null != onResponse) {
-            handler.handleResult(result);
-        } else {
-            handler.handleResult(result);
-        }
+        handler.handleResult(result);
     }
 
     @Override
     public void filterActionError(final ServerContext context, final ScriptState state,
             final ResourceException error, final ResultHandler<JsonValue> handler) {
-        if (null != onFailure) {
-            logger.info("Filter GenericError response: {}.", context.getId());
-            try {
-                evaluateOnFailure(context, state, error, handler);
-            } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
-                // TODO combine the messages
-                handler.handleError(error);
-            }
-        } else {
+        if (null == onFailure) {
+            handler.handleError(error);
+        }
+
+        logger.info("Filter GenericError response: {}.", context.getId());
+        try {
+            evaluateOnFailure(context, state, error, handler);
+        } catch (ResourceException e) {
+            logger.error("Failed the execute the onFailure script", e);
+            // TODO combine the messages
             handler.handleError(error);
         }
     }
@@ -182,16 +175,13 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
         final ScriptState state = new ScriptState(request);
         try {
             switch (evaluateOnRequest(context, state)) {
-            case CONTINUE: {
-                handler.handleContinue(context, state);
-                break;
-            }
-            case SKIP: {
-                break;
-            }
-            case STOP: {
-                break;
-            }
+                case CONTINUE:
+                    handler.handleContinue(context, state);
+                    break;
+                case SKIP:
+                    break;
+                case STOP:
+                    break;
             }
         } catch (ResourceException e) {
             logger.error("Failed the execute the onRequest script", e);
@@ -202,19 +192,19 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     @Override
     public void filterGenericResult(final ServerContext context, final ScriptState state,
             final Resource result, final ResultHandler<Resource> handler) {
-        if (null != onResponse) {
-            logger.info("Filter GenericError response: {}.", context.getId());
-            try {
-                evaluateOnResponse(context, state, result);
-            } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
-                // TODO combine the messages
-                // Todo What to do here?
-                // handler.handleError(e);
-            } finally {
-                handler.handleResult(result);
-            }
-        } else {
+        if (null == onResponse) {
+            handler.handleResult(result);
+        }
+
+        logger.info("Filter GenericError response: {}.", context.getId());
+        try {
+            evaluateOnResponse(context, state, result);
+        } catch (ResourceException e) {
+            logger.error("Failed the execute the onFailure script", e);
+            // TODO combine the messages
+            // Todo What to do here?
+            // handler.handleError(e);
+        } finally {
             handler.handleResult(result);
         }
     }
@@ -222,16 +212,16 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     @Override
     public void filterGenericError(final ServerContext context, final ScriptState state,
             final ResourceException error, final ResultHandler<Resource> handler) {
-        if (null != onFailure) {
-            logger.info("Filter GenericError response: {}.", context.getId());
-            try {
-                evaluateOnFailure(context, state, error, handler);
-            } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
-                // TODO combine the messages
-                handler.handleError(error);
-            }
-        } else {
+        if (null == onFailure) {
+            handler.handleError(error);
+        }
+
+        logger.info("Filter GenericError response: {}.", context.getId());
+        try {
+            evaluateOnFailure(context, state, error, handler);
+        } catch (ResourceException e) {
+            logger.error("Failed the execute the onFailure script", e);
+            // TODO combine the messages
             handler.handleError(error);
         }
     }
@@ -245,16 +235,13 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
         final ScriptState state = new ScriptState(request);
         try {
             switch (evaluateOnRequest(context, state)) {
-            case CONTINUE: {
-                handler.handleContinue(context, state);
-                break;
-            }
-            case SKIP: {
-                break;
-            }
-            case STOP: {
-                break;
-            }
+                case CONTINUE:
+                    handler.handleContinue(context, state);
+                    break;
+                case SKIP:
+                    break;
+                case STOP:
+                    break;
             }
         } catch (ResourceException e) {
             logger.error("Failed the execute the onRequest script", e);
@@ -266,47 +253,42 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     @Override
     public void filterQueryResource(final ServerContext context, final ScriptState state,
             final Resource resource, final QueryResultHandler handler) {
-        if (null != onResponse) {
-            logger.debug("Filter GenericError response: {}.", context.getId());
-            try {
-                evaluateOnResponse(context, state, resource);
-            } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
-                // TODO combine the messages
-                // Todo What to do here?
-                // handler.handleError(e);
-            } finally {
-                handler.handleResource(resource);
-            }
-        } else {
+        if (null == onResponse) {
             handler.handleResource(resource);
         }
 
+        logger.debug("Filter GenericError response: {}.", context.getId());
+        try {
+            evaluateOnResponse(context, state, resource);
+        } catch (ResourceException e) {
+            logger.error("Failed the execute the onFailure script", e);
+            // TODO combine the messages
+            // Todo What to do here?
+            // handler.handleError(e);
+        } finally {
+            handler.handleResource(resource);
+        }
     }
 
     @Override
     public void filterQueryResult(final ServerContext context, final ScriptState state,
             QueryResult result, final QueryResultHandler handler) {
-        if (null != onResponse) {
-            handler.handleResult(result);
-        } else {
-            handler.handleResult(result);
-        }
+        handler.handleResult(result);
     }
 
     @Override
     public void filterQueryError(final ServerContext context, final ScriptState state,
             final ResourceException error, final QueryResultHandler handler) {
-        if (null != onFailure) {
-            logger.debug("Filter GenericError response: {}.", context.getId());
-            try {
-                evaluateOnFailure(context, state, error, handler);
-            } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
-                // TODO combine the messages
-                handler.handleError(error);
-            }
-        } else {
+        if (null == onFailure) {
+            handler.handleError(error);
+        }
+
+        logger.debug("Filter GenericError response: {}.", context.getId());
+        try {
+            evaluateOnFailure(context, state, error, handler);
+        } catch (ResourceException e) {
+            logger.error("Failed the execute the onFailure script", e);
+            // TODO combine the messages
             handler.handleError(error);
         }
     }
