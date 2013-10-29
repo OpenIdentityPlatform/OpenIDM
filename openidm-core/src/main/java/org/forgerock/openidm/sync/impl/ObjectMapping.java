@@ -383,8 +383,9 @@ class ObjectMapping  {
             result.put(QueryResult.FIELD_RESULT, list);
 
             QueryRequest r = Requests.newQueryRequest(targetObjectSet);
-            r.setQueryId((String)query.get(QueryRequest.FIELD_QUERY_ID));
-            r.setQueryExpression((String)query.get(QueryRequest.FIELD_QUERY_EXPRESSION));
+            // FIXME Decide what to do wrt query constants and leading underscores
+            r.setQueryId((String)query.get("_" + QueryRequest.FIELD_QUERY_ID));
+            r.setQueryExpression((String)query.get("_" + QueryRequest.FIELD_QUERY_EXPRESSION));
             for (Map.Entry<String, Object> e: query.entrySet()) {
                 r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
             }
