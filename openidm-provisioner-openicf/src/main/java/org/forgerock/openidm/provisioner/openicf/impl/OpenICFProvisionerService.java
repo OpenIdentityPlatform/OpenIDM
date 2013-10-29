@@ -374,7 +374,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 traceObject(METHOD, id, value);
                 switch (METHOD) {
                     case create:
-                        before = value;
+                        before = null;
                         after = create(id, value.required(), params);
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
                         return after;
@@ -383,7 +383,12 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
                         return after;
                     case update:
-                        before = value;
+                        try {
+                            before = read(id, params);
+                        } catch (Exception e) {
+                            logger.info("Operation read of {} failed before update", id, e);
+                            throw e;
+                        }
                         after = update(id, rev, value.required(), params);
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
                         return after;
@@ -392,6 +397,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                             before = read(id, params);
                         } catch (Exception e) {
                             logger.info("Operation read of {} failed before delete", id, e);
+                            throw e;
                         }
                         after = delete(id, rev, params);
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
