@@ -485,13 +485,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                         // should contains each result
 
                         try {
-                            JsonValue before = resource.getContent().copy();
-                            JsonValuePatch.apply(resource.getContent(), operations);
+                            Resource decrypted = decrypt(resource);
+                            JsonValue newValue = decrypted.getContent().copy();
+                            JsonValuePatch.apply(newValue, operations);
 
-                            if (before != resource.getContent().getObject()) {
-                                lastError[0] = new ConflictException("replacing the root value is not supported")
-                                        .toJsonValue();
-                            }
+                            Resource updated = update(context, resource.getId(), resource.getRevision(), decrypted, newValue);
+                            ActivityLog.log(context, request.getRequestType(), "Patch " + operations.toString(), managedId(resource.getId()),
+                                    resource.getContent(), updated.getContent(), Status.SUCCESS);
                         } catch (ResourceException e) {
                             lastError[0] = new ConflictException(e.getMessage(), e).toJsonValue();
                         }
