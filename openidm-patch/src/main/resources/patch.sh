@@ -164,7 +164,7 @@ performBackup() {
   # Backup the files being removed or replaced
   [ -z $ARCHIVE_DIR ] && ARCHIVE_DIR=$OPENIDM_HOME/.patch/$DATE_TIME
   if [ ! -d "$ARCHIVE_DIR" ]; then
-     auditCmd "mkdir ${ARCHIVE_DIR}"
+     auditCmd "mkdir -p ${ARCHIVE_DIR}"
   fi
   log "Archive directory is: $ARCHIVE_DIR\n\n"
 
