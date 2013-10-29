@@ -32,7 +32,7 @@ enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true
 
 if (request.id.indexOf("policy/") !== 0 && enforce !== "false") {
 	
-	result = openidm.action("policy" + request.id, params, request.value);
+	result = openidm.action("policy/" + request.id, params, request.value);
 
 	if (!result.result) {
 		throw {
