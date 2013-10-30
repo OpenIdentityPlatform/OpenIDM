@@ -2577,54 +2577,63 @@ return id;
  
   <para>List available connectors using the following command.</para>
  
-  <screen width="83"><?dbfo pgwide="1"?>$ curl
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+ --request POST
+ "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <itemizedlist>
    <para>Available connectors are installed in
    <filename>openidm/connectors</filename>. OpenIDM bundles the following
    connectors.</para>
-   <listitem><para>csvfile</para></listitem>
+   <listitem><para>csv file</para></listitem>
+   <listitem><para>database table</para></listitem>
    <listitem><para>ldap</para></listitem>
-   <listitem><para>scriptedsql</para></listitem>
+   <listitem><para>scripted sql</para></listitem>
    <listitem><para>xml</para></listitem>
   </itemizedlist>
 
-  <para>The command above therefore should return the following output
-  (formatted here with lines folded to make it easier to read.)</para>
+  <para>The command above therefore should return the following output.</para>
 
   <programlisting xml:id="step1-return" language="javascript">
 {
   "connectorRef": [
     {
-      "connectorName": "org.identityconnectors.ldap.LdapConnector",
-      "bundleName":
-        "org.forgerock.openicf.connectors.ldap-connector",
-      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+      "bundleVersion": "1.1.0.1",
+      "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
+      "displayName": "CSV File Connector",
+      "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     {
-      "connectorName": "com.forgerock.openicf.xml.XMLConnector",
-      "bundleName":
-        "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+      "bundleVersion": "1.1.0.0",
+      "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
+      "displayName": "Database Table Connector",
+      "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector"
     },
     {
-      "connectorHostRef":
-       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
-      "bundleName":
-       "org.forgerock.openicf.connectors.scriptedsql-connector",
-      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+      "bundleVersion": "1.1.0.1",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "displayName": "LDAP Connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
     {
-      "connectorHostRef":
-       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-      "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
-      "bundleName":
-       "org.forgerock.openicf.connectors.csvfile-connector",
-      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+      "bundleVersion": "1.1.1.0",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "displayName": "LDAP Connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
+    {
+      "bundleVersion": "1.1.0.1",
+      "bundleName": "org.forgerock.openicf.connectors.scriptedsql-connector",
+      "displayName": "Scripted SQL Connector",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
+    },
+    {
+      "bundleVersion": "1.1.0.1",
+      "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+      "displayName": "XML Connector",
+      "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
   ]
 }</programlisting>
@@ -2633,14 +2642,17 @@ return id;
   connectors by copying JSON objects from the list into the body of the REST
   command, as shown below for the XML connector.</para>
 
-  <screen width="83"><?dbfo pgwide="1"?>$ curl
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  -d '{"connectorRef":
- {"connectorName":"com.forgerock.openicf.xml.XMLConnector",
- "bundleName":"org.forgerock.openicf.connectors.file.openicf-xml-connector",
- "bundleVersion":"<?eval ${openicfBundleVersion}?>"}}' 
- --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+ {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
+ "displayName": "XML Connector",
+ "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+ "bundleVersion": "1.1.0.1"}
+ }'
+ --request POST
+ "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <para>The command returns a core connector configuration. The core connector
   configuration returned is not yet functional. It does not contain
@@ -2651,101 +2663,99 @@ return id;
 
   <programlisting language="javascript">
 {
-    "connectorRef": {
-        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
-        "bundleName":
-            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-        "bundleVersion": "<?eval ${openicfBundleVersion}?>"
-    },
-    "poolConfigOption": {
-        "maxObjects": 10,
-        "maxIdle": 10,
-        "maxWait": 150000,
-        "minEvictableIdleTimeMillis": 120000,
-        "minIdle": 1
-    },
-    "resultsHandlerConfig": {
-        "enableNormalizingResultsHandler": true,
-        "enableFilteredResultsHandler": true,
-        "enableCaseInsensitiveFilter": false,
-        "enableAttributesToGetSearchResultsHandler": true
-    },
-    "operationTimeout": {
-        "CREATE": -1,
-        "UPDATE": -1,
-        "DELETE": -1,
-        "TEST": -1,
-        "SCRIPT_ON_CONNECTOR": -1,
-        "SCRIPT_ON_RESOURCE": -1,
-        "GET": -1,
-        "RESOLVEUSERNAME": -1,
-        "AUTHENTICATE": -1,
-        "SEARCH": -1,
-        "VALIDATE": -1,
-        "SYNC": -1,
-        "SCHEMA": -1
-    },
-    "configurationProperties": {
-        "xmlFilePath": null,
-        "xsdFilePath": null,
-        "xsdIcfFilePath": null
-    }
+  "configurationProperties": {
+    "xsdIcfFilePath": null,
+    "xsdFilePath": null,
+    "createFileIfNotExists": false,
+    "xmlFilePath": null
+  },
+  "operationTimeout": {
+    "SCHEMA": -1,
+    "SYNC": -1,
+    "VALIDATE": -1,
+    "SEARCH": -1,
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "UPDATE": -1,
+    "DELETE": -1,
+    "TEST": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableFilteredResultsHandler": true,
+    "enableNormalizingResultsHandler": true
+  },
+  "poolConfigOption": {
+    "minIdle": 1,
+    "minEvictableIdleTimeMillis": 120000,
+    "maxWait": 150000,
+    "maxIdle": 10,
+    "maxObjects": 10
+  },
+  "connectorRef": {
+    "bundleVersion": "1.1.0.1",
+    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+    "displayName": "XML Connector",
+    "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+  }
 }</programlisting>
  
   <para>To generate the final configuration, add the missing
   "configurationProperties" to the core configuration, and use the updated
   core configuration as the body for the next command.</para>
   
-  <screen width="83"><?dbfo pgwide="1"?>$ curl
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --data '{
-   "connectorRef" :
-      {
-         "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
-         "bundleName" :
-             "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-         "bundleVersion" : "<?eval ${openicfBundleVersion}?>"
-      },
-   "poolConfigOption" :
-      {
-         "maxObjects" : 10,
-         "maxIdle" : 10,
-         "maxWait" : 150000,
-         "minEvictableIdleTimeMillis" : 120000,
-         "minIdle" : 1
-      },
-   "resultsHandlerConfig" :
-      {
-         "enableNormalizingResultsHandler" : true,
-         "enableFilteredResultsHandler" : true,
-         "enableCaseInsensitiveFilter" : false,
-         "enableAttributesToGetSearchResultsHandler" : true
-      },
-   "operationTimeout" :
-      {
-         "CREATE" : -1,
-         "UPDATE" : -1,
-         "DELETE" : -1,
-         "TEST" : -1,
-         "SCRIPT_ON_CONNECTOR" : -1,
-         "SCRIPT_ON_RESOURCE" : -1,
-         "GET" : -1,
-         "RESOLVEUSERNAME" : -1,
-         "AUTHENTICATE" : -1,
-         "SEARCH" : -1,
-         "VALIDATE" : -1,
-         "SYNC" : -1,
-         "SCHEMA" : -1
-      },
-   "configurationProperties" :
-      {
-         "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
-         "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
-         "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml"
-      }
- }'
- --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+{
+  "configurationProperties":
+    {
+      "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+      "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+      "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml",
+      "createFileIfNotExists": false
+  },
+  "operationTimeout": {
+    "SCHEMA": -1,
+    "SYNC": -1,
+    "VALIDATE": -1,
+    "SEARCH": -1,
+    "AUTHENTICATE": -1,
+    "CREATE": -1,
+    "UPDATE": -1,
+    "DELETE": -1,
+    "TEST": -1,
+    "SCRIPT_ON_CONNECTOR": -1,
+    "SCRIPT_ON_RESOURCE": -1,
+    "GET": -1,
+    "RESOLVEUSERNAME": -1
+  },
+  "resultsHandlerConfig": {
+    "enableAttributesToGetSearchResultsHandler": true,
+    "enableFilteredResultsHandler": true,
+    "enableNormalizingResultsHandler": true
+  },
+  "poolConfigOption": {
+    "minIdle": 1,
+    "minEvictableIdleTimeMillis": 120000,
+    "maxWait": 150000,
+    "maxIdle": 10,
+    "maxObjects": 10
+  },
+  "connectorRef": {
+    "bundleVersion": "1.1.0.1",
+    "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+    "displayName": "XML Connector",
+    "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+  }
+}'
+ --request POST
+ "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <note>
    <para>Notice the single quotes around the argument to the
@@ -2764,10 +2774,9 @@ return id;
 {
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
-        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
-        "bundleName":
-            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-        "bundleVersion": "<?eval ${openicfBundleVersion}?>-EA"
+        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
+        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion": "1.1.0.1"
     },
     "poolConfigOption": {
         "maxObjects": 10,
@@ -2905,4 +2914,198 @@ return id;
   You might therefore want to reduce the schema to a minimum on the external
   resource before you run the final command.</para>
  </section>
+
+    <section xml:id="systems-over-rest">
+        <title>Checking the Status of External Systems Over REST</title>
+
+        <para>After a connection has been configured, external systems are
+        accessible over the REST interface at the URL
+        <literal>http://localhost:8080/openidm/system/<replaceable>connector-name</replaceable></literal>.
+        Aside from accessing the data objects within the external systems, you
+        can test the availability of the systems themselves.</para>
+
+        <para>To list the external systems that are connected to an OpenIDM
+        instance, use the <literal>test</literal> action on the URL
+        <literal>http://localhost:8080/openidm/system/</literal>. The following
+        example shows two external LDAP servers connected to OpenIDM:
+        </para>
+
+        <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/?_action=test"
+[
+  {
+    "ok": true,
+    "name": "ldap1"
+  },
+  {
+    "ok": true,
+    "name": "ldap2"
+  }
+]</screen>
+
+        <para>The status of the system is provided by the <literal>ok</literal>
+        parameter. If the connection is available, the value of this parameter
+        is <literal>true</literal>.</para>
+
+        <para>To obtain the status for a single system, include the name of
+        the connector in the URL, for example:</para>
+
+        <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ldap1/?_action=test"
+{
+  "ok": true,
+  "name": "ldap1"
+}</screen>
+
+        <para>If there is a problem with the connection, the request returns
+        an error message. In the following example, the LDAP server named
+        <literal>ldap1</literal> is down.</para>
+
+        <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ldap1/?_action=test"
+{
+  "error": "javax.naming.CommunicationException: localhost:1389
+            [Root exception is java.net.ConnectException: Connection refused]",
+  "name": "ldap"
+}</screen>
+
+        <para>To test the validity of a connector configuration, use the
+        <literal>testConfig</literal> action and include the configuration
+        in the command. For example:</para>
+
+        <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data '{
+    "name" : "xmlfile",
+    "connectorRef" : {
+        "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion" : "1.1.0.1",
+        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+    },
+    "producerBufferSize" : 100,
+    "connectorPoolingSupported" : true,
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "TEST" : -1,
+        "AUTHENTICATE" : -1,
+        "SEARCH" : -1,
+        "VALIDATE" : -1,
+        "GET" : -1,
+        "UPDATE" : -1,
+        "DELETE" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SYNC" : -1,
+        "SCHEMA" : -1
+    },
+    "configurationProperties" : {
+        "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+        "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml"
+    },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "description" : {
+                    "type" : "string",
+                    "nativeName" : "__DESCRIPTION__",
+                    "nativeType" : "string"
+                },
+                "firstname" : {
+                    "type" : "string",
+                    "nativeName" : "firstname",
+                    "nativeType" : "string"
+                },
+                "email" : {
+                    "type" : "string",
+                    "nativeName" : "email",
+                    "nativeType" : "string"
+                },
+                "_id" : {
+                    "type" : "string",
+                    "nativeName" : "__UID__"
+                },
+                "password" : {
+                    "type" : "string",
+                    "nativeName" : "password",
+                    "nativeType" : "string"
+                },
+                "name" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "lastname" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "lastname",
+                    "nativeType" : "string"
+                },
+                "mobileTelephoneNumber" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "mobileTelephoneNumber",
+                    "nativeType" : "string"
+                },
+                "securityQuestion" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "securityQuestion",
+                    "nativeType" : "string"
+                },
+                "securityAnswer" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "securityAnswer",
+                    "nativeType" : "string"
+                },
+                "roles" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "roles",
+                    "nativeType" : "string"
+                }
+            }
+        }
+    },
+    "operationOptions" : { }
+}'
+ --request POST
+ "http://localhost:8080/openidm/system?_action=testConfig"</screen>
+
+        <para>If the configuration is valid, the command returns
+        <literal>"ok": true</literal>, for example:</para>
+
+        <screen>{
+    "name": "xmlfile",
+    "ok": true
+}</screen>
+
+    </section>
 </chapter>
