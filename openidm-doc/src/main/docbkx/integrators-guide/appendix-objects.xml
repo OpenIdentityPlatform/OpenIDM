@@ -716,9 +716,9 @@
    example, when mapping to multiple target systems, or when decoupling the
    availability of systems&#8212;to more fully report and audit on all object
    changes during reconciliation, and to build up views that are different from
-   the original source, such transformed and combined or virtual views. Managed
-   objects can also be allowed to act as an authoritative source if no other
-   appropriate source is available.</para>
+   the original source, such as transformed and combined or virtual views.
+   Managed objects can also be allowed to act as an authoritative source if no
+   other appropriate source is available.</para>
 
    <para>Other object types exist for other settings that should be available
    to a script, such as configuration or look-up tables that do not need audit
@@ -742,6 +742,39 @@
         }
     ]
 }</programlisting>
+
+       <para>If you are using OrientDB as a repository, you must make the
+       corresponding addition to the <filename>conf/repo.orientdb.json</filename>
+       file. The following example adds the <literal>foobar</literal> object
+       after the <literal>managed_user</literal> object to the database
+       structure.</para>
+
+       <programlisting language="javascript">
+"dbStructure" : {
+    ...
+    "managed_user" : {
+        "index" : [
+            {
+                "propertyName" : "_openidm_id",
+                "propertyType" : "string",
+                "indexType" : "unique"
+            }
+        ]
+    },
+    "managed_foobar" : {
+        "index" : [
+            {
+                "propertyName" : "_openidm_id",
+                "propertyType" : "string",
+                "indexType" : "unique"
+            }
+        ]
+    },
+    ...</programlisting>
+
+       <para>If you are using one of the supported SQL databases as a
+       repository, there is no need to update the repository configuration
+       file.</para>
   </section>
 
    <section xml:id="managed-objects-declarative">
