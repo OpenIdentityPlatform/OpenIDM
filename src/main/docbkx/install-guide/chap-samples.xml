@@ -699,11 +699,6 @@ $ </screen>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
      </listitem>
      <listitem>
-     <para>In <filename>openidm/samples/sample3/conf/provisioner.openicf-scriptedsql.json</filename>, 
-     edit the paths to the scripts (starting with 
-     <literal>/opt/openidm/</literal>) to match your installation.</para>
-     </listitem>
-     <listitem>
       <para>Start OpenIDM with the configuration for sample 3.</para>
       <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample3</screen>    
