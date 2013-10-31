@@ -64,10 +64,7 @@ public class AuthContextFilterChainWrapper implements FilterChain {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         Map<String, Object> authzid = (Map<String, Object>) request.getAttribute(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
-        String authcid = null;
-        if (authzid != null) {
-            authcid = (String) authzid.get("id");
-        }
+        String authcid = request.getHeader(AuthNFilter.ATTRIBUTE_AUTH_PRINCIPAL);
 
         request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcid);
         request.setAttribute(SecurityContextFactory.ATTRIBUTE_AUTHZID, authzid);

@@ -448,8 +448,13 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     		requestMap.put("method", null);
     	}
     	if (context.containsContext(SecurityContext.class)) {
-    		requestMap.put("security", context.asContext(SecurityContext.class).getAuthorizationId());
+    	    SecurityContext securityContext = context.asContext(SecurityContext.class);
+    	    Map<String, Object> security = new HashMap<String, Object>();
+    	    security.putAll(securityContext.getAuthorizationId());
+    	    security.put("username", securityContext.getAuthenticationId());
+    		requestMap.put("security", security);
     	}
+    	
     	if (isFromHttp(context)) {
     		HttpContext httpContext = context.asContext(HttpContext.class);
     		requestMap.put("headers", httpContext.getHeaders());
