@@ -164,7 +164,7 @@ openidm.node.id=instance1</screen>
                 </listitem>
                 <listitem>
                    <para><literal>instanceTimeout</literal> specifies the length
-                    of time (in seconds) that an instance can be "down" before the
+                    of time (in milliseconds) that an instance can be "down" before the
                     instance is considered to be in recovery mode.</para>
                 </listitem>
                 <listitem>
@@ -182,6 +182,9 @@ openidm.node.id=instance1</screen>
                     an offset (in milliseconds) for the checkin timing, per
                     instance, when a number of instances in a cluster are started
                     simultaneously.</para>
+                    <para>Specifying a checkin offset prevents a situation in
+                    which all the instances in a cluster check in at the same
+                    time, and place a strain on the cluster manager resource.</para>
                 </listitem>
             </itemizedlist>
 
