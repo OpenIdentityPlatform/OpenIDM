@@ -342,11 +342,11 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
 
     public boolean evaluateOnResponse(final ServerContext context, final ScriptState state,
                                      final Resource resource) throws ResourceException {
-        if (onFailure != null) {
-            ScriptEntry scriptEntry = onFailure.getRight();
+        if (onResponse != null) {
+            ScriptEntry scriptEntry = onResponse.getRight();
             if (!scriptEntry.isActive()) {
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
-                        + onFailure.getRight().getName());
+                        + onResponse.getRight().getName());
             }
             Script script = scriptEntry.getScript(context);
 
@@ -358,8 +358,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
-                logger.debug("Filter/{} script {} encountered exception at {}", onFailure.getRight()
-                        .getName(), onFailure.getLeft(), t);
+                logger.debug("Filter/{} script {} encountered exception at {}", onResponse.getRight()
+                        .getName(), onResponse.getLeft(), t);
                 throw Utils.adapt(t);
             }
         }
