@@ -194,7 +194,7 @@ public class PolicyService extends AbstractScriptedService {
     
     private JsonValue getRequestMap(String resourceName, String method) {
     	JsonValue req = new JsonValue(new HashMap<String, Object>());
-    	req.add("id", resourceName.substring(1));
+    	req.add("id", resourceName);
     	req.add("method", method);
     	return req;
     }
