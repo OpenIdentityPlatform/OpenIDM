@@ -43,9 +43,9 @@
 
     <para>To ensure availability of the identity management service, you can
     deploy multiple OpenIDM instances in a cluster. In a clustered environment,
-    all instances point to the same external relational database. The database
-    itself might or might not be clustered, depending on your particular
-    availability strategy.</para>
+    all instances point to the same external database. The database itself
+    might or might not be clustered, depending on your particular availability
+    strategy.</para>
 
     <para>In a clustered environment, if an instance becomes unavailable or
     fails to check in with the cluster management service, another instance in
