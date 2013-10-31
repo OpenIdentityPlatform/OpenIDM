@@ -29,6 +29,8 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.security.Principal;
 import java.util.Map;
 
 /**
@@ -119,8 +121,13 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
         messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
 
-        SecurityContextMapper securityContextMapper = new SecurityContextMapper();
+        final SecurityContextMapper securityContextMapper = new SecurityContextMapper();
         AuthStatus authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
+        clientSubject.getPrincipals().add(new Principal() {
+            public String getName() {
+                return securityContextMapper.getAuthcid();
+            }
+        });
 
         contextMap.putAll(securityContextMapper.getAuthzid());
         boolean authSuccess = AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.SEND_SUCCESS.equals(authStatus);
