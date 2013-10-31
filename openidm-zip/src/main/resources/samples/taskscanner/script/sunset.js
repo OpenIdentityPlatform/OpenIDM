@@ -3,7 +3,7 @@
 
 (function () {
     // Create a change patch
-    var patch = [{ "replace" : "active", "value" : false }];
+    var patch = [{ "operation" : "replace", "field" : "active", "value" : false }];
     
     logger.debug("Performing Sunset Task on {} ({})", input.email, objectID);
 

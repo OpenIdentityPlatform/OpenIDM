@@ -2,7 +2,7 @@
 
 (function () {
     // Create a change patch
-    var patch = [{ "replace" : "accountStatus", "value" : 'active' }];
+    var patch = [{ "operation" : "replace", "field" : "accountStatus", "value" : 'active' }];
     
     logger.debug("Performing Sunrise Task on {} ({})", input.email, objectID);
 
