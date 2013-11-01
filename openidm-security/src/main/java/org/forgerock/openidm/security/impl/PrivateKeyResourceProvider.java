@@ -88,7 +88,7 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     @Override
     public void createDefaultEntry(String alias) throws Exception {
-        Pair<X509Certificate, PrivateKey> pair = generateCertificate("local.openidm.forgerock.org", 
+        Pair<X509Certificate, PrivateKey> pair = generateCertificate("localhost", 
                 "OpenIDM Self-Signed Certificate", "None", "None", "None", "None",
                 DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, DEFAULT_SIGNATURE_ALGORITHM, null, null);
         Certificate cert = pair.getKey();
