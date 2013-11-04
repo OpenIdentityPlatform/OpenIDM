@@ -26,6 +26,7 @@ package org.forgerock.openidm.repo.jdbc.impl.query;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
@@ -145,7 +146,7 @@ public class TableQueries {
      * @throws InternalServerErrorException if the preparing or executing the query fails because of configuration or DB issues
      */
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con) 
-            throws BadRequestException, InternalServerErrorException {
+            throws BadRequestException, ObjectSetException {
         
         List<Map<String, Object>> result = null; 
         params.put(QueryConstants.RESOURCE_NAME, type); 
