@@ -146,11 +146,12 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             return AuthStatus.SEND_FAILURE;
         }
         securityContextMapper.setResource(queryOnResource);
-
+        
+        final String authcid = securityContextMapper.getAuthcid();
         if (authenticated) {
             clientSubject.getPrincipals().add(new Principal() {
                 public String getName() {
-                    return headerLogin;
+                    return authcid;
                 }
             });
         }
