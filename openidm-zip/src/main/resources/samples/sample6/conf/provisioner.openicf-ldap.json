@@ -98,6 +98,11 @@
          "maintainLdapGroupMembership" : false,
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },
+   "syncFailureHandler" :
+      {
+         "maxRetries" : 5,
+         "postRetryAction" : "dead-letter-queue"
+      }
    "objectTypes" :
       {
          "account" :
