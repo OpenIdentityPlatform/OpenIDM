@@ -296,16 +296,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         }
     }
 
-    /**
-     *
-     * @deprecated Use the discovery engine.
-     */
-    private void performAction(JsonValue params) throws SynchronizationException {
-        ObjectMapping mapping = getMapping(params.get("mapping").required().asString());
-        mapping.performAction(params);
-    }
-
-    @Override // ObjectSetJsonResource
+    @Override
     public void actionInstance(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
         try {
@@ -343,7 +334,8 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                         break;
                     case performAction:
                         logger.debug("Synchronization action=performAction, params={}", _params);
-                        performAction(_params);
+                        ObjectMapping objectMapping = getMapping(_params.get("mapping").required().asString());
+                        objectMapping.performAction(_params);
                         result = new HashMap<String, Object>();
                         //result.put("status", performAction(_params));
                         break;
