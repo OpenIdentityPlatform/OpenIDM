@@ -51,6 +51,7 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
 
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -590,11 +591,12 @@ class ObjectMapping  {
         String reconId = params.get("reconId").asString();
         ServerContext context = ObjectSetContext.get();
         if (reconId != null) {
-            //context.add("trigger", "recon");
+            context = new TriggerContext(context, "recon");
+            ObjectSetContext.push(context);
         }
 
         try {
-            Context rootContext = ObjectSetContext.get().asContext(RootContext.class);
+            Context rootContext = context.asContext(RootContext.class);
             Action action = params.get("action").required().asEnum(Action.class);
             SyncOperation op = null;
             ReconEntry entry = null;
@@ -686,7 +688,7 @@ class ObjectMapping  {
             }
         } finally {
             if (reconId != null) {
-                //context.remove("trigger");
+                ObjectSetContext.pop(); // pop the TriggerContext
             }
         }
     }
@@ -731,8 +733,9 @@ class ObjectMapping  {
         reconContext.setStage(ReconStage.ACTIVE_QUERY_ENTRIES);
         ServerContext context = ObjectSetContext.get();
         try {
-            //context.add("trigger", "recon");
-            Context rootContext = ObjectSetContext.get().asContext(RootContext.class);
+            context = new TriggerContext(context, "recon");
+            ObjectSetContext.push(context);
+            Context rootContext = context.asContext(RootContext.class);
             logReconStart(reconId, rootContext, context);
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
@@ -816,7 +819,7 @@ class ObjectMapping  {
             reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } finally {
-            //context.remove("trigger");
+            ObjectSetContext.pop(); // pop the TriggerContext
             if (!reconContext.getStatistics().hasEnded()) {
                 reconContext.getStatistics().reconEnd();
             }
