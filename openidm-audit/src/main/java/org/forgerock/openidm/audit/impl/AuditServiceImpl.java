@@ -78,6 +78,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -384,17 +385,20 @@ public class AuditServiceImpl implements AuditService {
      * Searches ObjectSetContext for the value of "trigger" and return it.
      */
     private String getTrigger(Context context) {
-//        String trigger = null;
-//        // Loop through parent contexts, and return highest "trigger"
-//        while (!context.isNull()) {
-//            JsonValue tmp = context.get("trigger");
-//            if (!tmp.isNull()) {
-//                trigger = tmp.asString();
-//            }
-//            context = context.get("parent");
-//        }
-//        return trigger;
-        return "FIXME";
+        /*
+        String trigger = null;
+        // Loop through parent contexts, and return highest "trigger"
+        while (context != null) {
+            JsonValue tmp = (JsonValue) context.getParams().get("trigger");
+            if (!tmp.isNull()) {
+                trigger = tmp.asString();
+            }
+            context = context.getParent();
+        }
+        */
+        return context.containsContext(TriggerContext.class)
+                ? context.asContext(TriggerContext.class).getTrigger()
+                : null;
     }
 
     /**

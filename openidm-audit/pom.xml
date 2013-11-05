@@ -49,6 +49,11 @@
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>net.sf.supercsv</groupId>
