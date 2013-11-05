@@ -83,17 +83,19 @@ import java.util.Map;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/system")
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = SystemObjectSetService.ROUTER_PREFIX)
 })
 public class SystemObjectSetService implements ScheduledService, SingletonResourceProvider {
 
     private final static LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(SystemObjectSetService.class);
 
-    public final static String ACTION_CREATE_CONFIGURATION = "CREATECONFIGURATION";
-    public final static String ACTION_TEST_CONFIGURATION = "testConfig";
-    public final static String ACTION_TEST_CONNECTOR = "test";
-    public final static String ACTION_LIVE_SYNC = "liveSync";
-    public final static String ACTION_ACTIVE_SYNC = "activeSync";
+    public static final String ROUTER_PREFIX =  "/system";
+
+    public static final String ACTION_CREATE_CONFIGURATION = "CREATECONFIGURATION";
+    public static final String ACTION_TEST_CONFIGURATION = "testConfig";
+    public static final String ACTION_TEST_CONNECTOR = "test";
+    public static final String ACTION_LIVE_SYNC = "liveSync";
+    public static final String ACTION_ACTIVE_SYNC = "activeSync";
 
     @Reference(referenceInterface = ProvisionerService.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
