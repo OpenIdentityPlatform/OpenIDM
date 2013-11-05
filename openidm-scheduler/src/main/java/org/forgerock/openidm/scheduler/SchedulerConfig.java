@@ -208,7 +208,7 @@ public class SchedulerConfig {
     public Properties toProps() {
         StringBuilder propThreadPoolPriority = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadPriority");
         StringBuilder propThreadPoolCount = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadCount");
-        Properties props = new Properties(); 
+        Properties props = new Properties(this.props);
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, getInstanceName());
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, getInstanceId());
         props.put(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, getRmiExport());
