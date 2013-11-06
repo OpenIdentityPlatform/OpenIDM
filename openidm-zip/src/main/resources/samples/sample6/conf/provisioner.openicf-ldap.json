@@ -102,7 +102,7 @@
       {
          "maxRetries" : 5,
          "postRetryAction" : "dead-letter-queue"
-      }
+      },
    "objectTypes" :
       {
          "account" :
