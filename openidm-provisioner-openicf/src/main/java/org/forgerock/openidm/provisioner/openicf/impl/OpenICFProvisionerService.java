@@ -84,7 +84,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +113,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
 
     // Monitoring event name prefix
     private static final String EVENT_PREFIX = "openidm/internal/system/";
+
+    private static final int UNAUTHORIZED_ERROR_CODE = 401;
 
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
@@ -476,7 +477,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 }
                 ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
                         e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 if (logger.isDebugEnabled()) {
                     logger.error("Invalid password has been provided to operation {} for system object: {}",
@@ -484,7 +485,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 }
                 ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
                         e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+                throw new JsonResourceException(UNAUTHORIZED_ERROR_CODE, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 if (logger.isDebugEnabled()) {
                     logger.error("Operation {} failed with UnknownUidException on system object: {}",
@@ -500,7 +501,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 }
                 ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
                         e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+                throw new JsonResourceException(UNAUTHORIZED_ERROR_CODE, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 if (logger.isDebugEnabled()) {
                     logger.error("Permission was denied on {} operation for system object: {}",
