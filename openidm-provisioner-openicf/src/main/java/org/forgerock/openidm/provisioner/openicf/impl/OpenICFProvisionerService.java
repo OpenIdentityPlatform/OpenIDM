@@ -87,6 +87,7 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -96,6 +97,8 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -1840,37 +1843,33 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      */
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
+                                            // 'id' value was:
+                                            // helper.resolveQualifiedId(syncDelta.getUid()).toString()
+                                            // Q: are we going to encode ids?
+                                            final String id = helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue();
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previous-id", syncDelta.getPreviousUid()); // the value was: Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                                     }
-                                                    // previously 
+
+                                                    // previously
                                                     // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
-                                                    onUpdateRequest.setAdditionalActionParameter("id",
-                                                            /* value was:
-                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString()
-                                                            are we going to encode ids?
-                                                            */
-                                                            helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue()
-                                                    );
+                                                    onUpdateRequest.setAdditionalActionParameter("id", id);
                                                     onUpdateRequest.setContent(new JsonValue(deltaObject));
                                                     routerContext.getConnection().action(routerContext, onUpdateRequest);
 
+                                                    ActivityLog.log(routerContext, RequestType.ACTION, "sync-update", id, deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
+                                                    // previously
                                                     // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
-                                                    onDeleteRequest.setAdditionalActionParameter("id",
-                                                            /* value was:
-                                                            helper.resolveQualifiedId(syncDelta.getUid()).toString()
-                                                            are we going to encode ids?
-                                                            */
-                                                            helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue()
-                                                    );
+                                                    onDeleteRequest.setAdditionalActionParameter("id", id);
                                                     routerContext.getConnection().action(routerContext, onDeleteRequest);
+                                                    ActivityLog.log(routerContext, RequestType.ACTION, "sync-delete", id, null, null, Status.SUCCESS);
                                                     break;
                                             }
                                         } catch (Exception e) {
