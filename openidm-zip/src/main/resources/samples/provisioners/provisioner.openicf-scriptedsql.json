@@ -56,6 +56,10 @@
         "updateScriptFileName" : "/opt/openidm/samples/scriptedsql/UpdateScript.groovy",
         "syncScriptFileName" : "/opt/openidm/samples/scriptedsql/SyncScript.groovy"
     },
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
     "objectTypes" :
     {
         "group" :

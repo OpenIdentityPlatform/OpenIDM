@@ -85,28 +85,46 @@ public class SyncFailureHandlerFactoryImplTest {
 
     @Test
     public void testCreateNoConfig() throws Exception {
-        Assert.assertTrue(factory.create(null) instanceof NullSyncFailureHandler);
-        Assert.assertTrue(factory.create(new JsonValue(null)) instanceof NullSyncFailureHandler);
-        Assert.assertTrue(factory.create(new JsonValue(new HashMap<String,Object>())) instanceof NullSyncFailureHandler);
+        SyncFailureHandler handler = factory.create(null);
+        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+    }
+
+    @Test
+    public void testCreateNullConfig() throws Exception {
+        SyncFailureHandler handler = factory.create(new JsonValue(null));
+        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+    }
+
+    @Test
+    public void testCreateEmptyConfig() throws Exception {
+        SyncFailureHandler handler = factory.create(new JsonValue(new HashMap<String,Object>()));
+        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
+    }
+
+    @Test
+    public void testCreateInfiniteRetry() throws Exception {
+        JsonValue config = parseJsonString("{\"maxRetries\":-1}");
+        SyncFailureHandler handler = factory.create(config);
+        Assert.assertTrue(handler instanceof InfiniteRetrySyncFailureHandler);
     }
 
     @Test
     public void testCreateLoggedIgnore() throws Exception {
-        JsonValue config = parseJsonString("{\"postRetryAction\":\"logged-ignore\"}");
+        JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":\"logged-ignore\"}");
         SyncFailureHandler handler = factory.create(config);
         Assert.assertTrue(handler instanceof LoggedIgnoreHandler);
     }
 
     @Test
     public void testCreateDeadLetterQueue() throws Exception {
-        JsonValue config = parseJsonString("{\"postRetryAction\":\"dead-letter-queue\"}");
+        JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":\"dead-letter-queue\"}");
         SyncFailureHandler handler = factory.create(config);
         Assert.assertTrue(handler instanceof DeadLetterQueueHandler);
     }
 
     @Test
     public void testCreateScript() throws Exception {
-        JsonValue config = parseJsonString("{\"postRetryAction\":{\"script\":{\"type\":\"text/javascript\",\"file\":\"script/onSyncFailure.js\"}}}");
+        JsonValue config = parseJsonString("{\"maxRetries\":0,\"postRetryAction\":{\"script\":{\"type\":\"text/javascript\",\"file\":\"script/onSyncFailure.js\"}}}");
         SyncFailureHandler handler = factory.create(config);
         Assert.assertTrue(handler instanceof ScriptedSyncFailureHandler);
     }

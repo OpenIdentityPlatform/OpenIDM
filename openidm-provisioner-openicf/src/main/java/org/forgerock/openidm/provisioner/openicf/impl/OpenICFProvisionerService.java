@@ -894,7 +894,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                     syncFailure.put("objectType", objectType);
                                     syncFailure.put("uid", syncDelta.getUid().getUidValue());
                                     syncFailure.put("failedRecord", failedRecord[0]);
-                                    syncFailureHandler.invoke(new JsonValue(syncFailure), e);
+                                    syncFailureHandler.invoke(syncFailure, e);
                                 }
                                 // success (either by original sync or by failure handler)
                                 lastToken[0] = syncDelta.getToken();
@@ -908,10 +908,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                             lastException.put("syncDelta", failedRecord[0]);
                         }
                         stage.put("lastException", lastException);
-                        if (logger.isDebugEnabled()) {
-                            logger.error("Live synchronization of {} failed on {}",
-                                    new Object[]{objectType, systemIdentifier.getName()}, t);
-                        }
+                        logger.warn("Live synchronization of {} failed on {}",
+                                new Object[]{objectType, systemIdentifier.getName()}, t);
                     } finally {
                         token = lastToken[0];
                         logger.debug("Synchronization is finished. New LatestSyncToken value: {}", token);

@@ -5,9 +5,10 @@ For projects using the syncFailureHandler for live-sync, add the stanza
         "postRetryAction" : <retry strategy>
     },
 
-to provisioner.openicf-<target>.json.  Number of retries is an integer.  Set to zero or omit "maxRetries" 
-for no retry strategy.  OpenIDM will employ the "postRetryAction" after the retries are exhausted or
-if no retries are configured.  The possibilities for retry strategy are
+to provisioner.openicf-*.json.  Number of retries is an integer.  Set to -1 or omit "maxRetries" 
+for "infinite" retries and no sync failure handler.  OpenIDM will employ the "postRetryAction" 
+after the number of failures specified by "maxRetries" are exhausted.  The possibilities for 
+retry strategy are
 
     "postRetryAction" : "logged-ignore"
 

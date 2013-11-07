@@ -1,6 +1,6 @@
 // sample onSyncFailure script that just logs the error
 (function () {
-    logger.warn("onSyncFailure script invoked with systemIdentifier: {} objecType: {} failedRecordUid: {} failedRecord: {} exception {}", 
+    logger.warn("onSyncFailure script invoked with systemIdentifier: {} objectType: {} failedRecordUid: {} failedRecord: {} exception {}", 
         syncFailure.systemIdentifier, 
         syncFailure.objectType, 
         syncFailure.uid,
