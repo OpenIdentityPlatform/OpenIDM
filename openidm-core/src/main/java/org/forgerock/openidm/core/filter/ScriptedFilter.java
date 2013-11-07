@@ -431,7 +431,9 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     		CreateRequest createRequest = (CreateRequest)request;
     		value = createRequest.getContent();
     		requestMap.put("method", "create");
-            id = createRequest.getResourceName() + "/" + createRequest.getNewResourceId();
+    		if (createRequest.getNewResourceId() != null) {
+    		    id = createRequest.getResourceName() + "/" + createRequest.getNewResourceId();
+    		}
     	} else if (request instanceof ReadRequest) {
     		requestMap.put("method", "read");
     	} else if (request instanceof UpdateRequest) {
