@@ -24,8 +24,10 @@
 
 package org.forgerock.openidm.core.filter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,6 +39,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.CrossCutFilter;
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
@@ -443,6 +446,12 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     		requestMap.put("method", "delete");
     	} else if (request instanceof PatchRequest) {
     		requestMap.put("method", "patch");
+    		List<PatchOperation> ops = ((PatchRequest)request).getPatchOperations();
+    		JsonValue opsValue = new JsonValue(new ArrayList<Object>());
+    		for (PatchOperation op : ops) {
+    		    opsValue.add(op.toJsonValue().getObject());
+    		}
+    		value = opsValue;
     	} else if (request instanceof QueryRequest) {
     		requestMap.put("params", ((QueryRequest)request).getAdditionalQueryParameters());
     		requestMap.put("method", "query");
