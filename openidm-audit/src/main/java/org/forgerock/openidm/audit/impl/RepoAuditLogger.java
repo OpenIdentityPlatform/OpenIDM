@@ -94,8 +94,8 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             formatActivityList(entries);
             result.put("entries", entries);
         } else {
-            ReadRequest request = Requests.newReadRequest(getRepoTarget(type));
-            Map<String, Object> entry = context.getConnection().read(context,request).getContent().asMap();
+            ReadRequest request = Requests.newReadRequest(getRepoTarget(type), id);
+            Map<String, Object> entry = context.getConnection().read(context, request).getContent().asMap();
             formatActivityEntry(entry);
             result = AuditServiceImpl.formatLogEntry(entry, type);
         }
