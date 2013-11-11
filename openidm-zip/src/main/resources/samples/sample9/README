@@ -34,8 +34,8 @@ To try the sample, follow these steps.
 
     6. Approve the requests.
    
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}'
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/26?_action=complete" --data '{"requestApproved": "true"}'
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}' -H "Content-Type: application/json"
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/26?_action=complete" --data '{"requestApproved": "true"}' -H "Content-Type: application/json"
 
     7. Query the managed users created by the asynchronous reconciliation after 
        the approval step.
