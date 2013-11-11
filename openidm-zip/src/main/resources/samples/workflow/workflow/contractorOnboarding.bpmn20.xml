@@ -357,7 +357,7 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                 email:email, startDate:startDate, endDate:endDate, password:password, description:description,
                 provisionToXML:provisionToXML]
 
-                openidm.create('managed/user', user)
+                openidm.create('managed/user',null, user)
                 
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
             </script>
@@ -402,8 +402,8 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                                         "notificationSubtype" : "",
                                         "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
                                 ];
-                openidm.create("repo/ui/notification/", newRequesterNotification)
-                openidm.create("repo/ui/notification/", newContractorNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newContractorNotification)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -423,7 +423,7 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                                         "notificationSubtype" : "",
                                         "message" : "Your request to create user " + userName + " was denied."
                                 ];
-                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 
             </script>
         </scriptTask>
