@@ -188,8 +188,8 @@ var httpAccessConfig =
         {
             "pattern"   : "workflow/processinstance/",
             "roles"     : "openidm-authorized",
-            "methods"   : "action",
-            "actions"   : "createProcessInstance",
+            "methods"   : "create",
+            "actions"   : "*",
             "customAuthz": "isAllowedToStartProcess()"
         },
         {
