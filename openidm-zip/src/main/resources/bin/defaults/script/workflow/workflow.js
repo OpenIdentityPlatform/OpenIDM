@@ -54,7 +54,7 @@
          */
         recon.actionParam._key = workflowName;
         logger.trace("asynchronous reconciliation: Start '{}' process", recon.actionParam._key);
-        openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, recon.actionParam);
+        openidm.create('workflow/processinstance', null, recon.actionParam);
     }
     
     /*
