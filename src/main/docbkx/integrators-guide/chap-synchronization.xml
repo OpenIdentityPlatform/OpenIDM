@@ -1929,7 +1929,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         },
         {
             "situation": "FOUND",
-            "action": "IGNORE"
+            "action": "UPDATE"
         },
         {
             "situation": "ABSENT",
@@ -1937,19 +1937,19 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         },
         {
             "situation": "AMBIGUOUS",
-            "action": "IGNORE"
+            "action": "EXCEPTION"
         },
         {
             "situation": "MISSING",
-            "action": "IGNORE"
+            "action": "EXCEPTION"
         },
         {
             "situation": "UNQUALIFIED",
-            "action": "IGNORE"
+            "action": "DELETE"
         },
         {
             "situation": "UNASSIGNED",
-            "action": "IGNORE"
+            "action": "EXCEPTION"
         }
     ]
 }</programlisting>
