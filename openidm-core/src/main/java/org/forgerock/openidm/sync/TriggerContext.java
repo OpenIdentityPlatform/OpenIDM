@@ -27,7 +27,6 @@ import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.PersistenceConfig;
@@ -45,54 +44,33 @@ public class TriggerContext extends ServerContext {
     // persisted attribute name
     private static final String ATTR_TRIGGER_SOURCE = "trigger-source";
 
-    public static final TriggerContext loadFromJsoin(final JsonValue savedContext, final PersistenceConfig config) 
-        throws ResourceException {
-
-        final String className = savedContext.get(ATTR_CLASS).required().asString();
-        try {
-            final Class<? extends TriggerContext> clazz = Class.forName(className, true,
-                    config.getClassLoader()).asSubclass(TriggerContext.class);
-            final Constructor<? extends TriggerContext> constructor = clazz.getDeclaredConstructor(
-                    JsonValue.class, PersistenceConfig.class);
-            return constructor.newInstance(savedContext, config);
-        }
-        catch (final Exception e) {
-            throw new IllegalArgumentException(
-                    "Unable to instantiate TriggerContext implementatino class '" + className + "'",
-                    e);
-        }
-    }
-
-    public static final JsonValue saveToJson(final TriggerContext context, final PersistenceConfig config) 
-        throws ResourceException {
-
-        final JsonValue savedContext = new JsonValue(new LinkedHashMap<String, Object>(4));
-        context.saveToJson(savedContext, config);
-        return savedContext;
-    }
-
-
     /** the trigger source */
     private String trigger;
 
-    public TriggerContext(final Context parent) {
-        this(parent, null);
-    }
-
     /**
-     * Constructor
+     * Create a new trigger context from an existing (parent) context and the source of the trigger.
      *
-     * @param parent the parent context
-     * @param trigger the trigger
+     * @param parent the parent server context
+     * @param trigger the trigger source
      */
-    public TriggerContext(final Context parent, final String trigger) {
+    public TriggerContext(final ServerContext parent, final String trigger) {
         super(/*checkNotNull(*/parent/*)*/); // !@#$%@#$% - org.forgerock.json.resource.Resources.checkNotNull is package privet...
         this.trigger = trigger;
     }
 
-    protected TriggerContext(final JsonValue savedContext, final PersistenceConfig config)
-        throws ResourceException {
-
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param config
+     *            The persistence configuration.
+     * @throws ResourceException
+     *             If the JSON representation could not be parsed.
+     */
+    public TriggerContext(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
         super(savedContext, config);
         this.trigger = savedContext.get(ATTR_TRIGGER_SOURCE).asString();
     }
@@ -103,6 +81,15 @@ public class TriggerContext extends ServerContext {
      */
     public String getTrigger() {
         return trigger;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
+            throws ResourceException {
+        super.saveToJson(savedContext, config);
+        savedContext.put(ATTR_TRIGGER_SOURCE, trigger);
     }
 
 }
