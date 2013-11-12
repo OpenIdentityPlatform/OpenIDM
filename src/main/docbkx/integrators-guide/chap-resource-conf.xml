@@ -61,15 +61,15 @@
  <para>Connectors are configured through files named
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
  where <replaceable>name</replaceable> corresponds to the name of the
- connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
- in the connector <replaceable>name</replaceable>.</emphasis> A number of 
- sample connectors are available in the <filename>openidm/samples/provisioners
- </filename> directory. To use these connectors, edit the configuration files 
- as required, and copy them to the <filename>openidm/conf</filename> directory.
- </para>
+ connector.  A number of sample connectors are available in the
+ <filename>openidm/samples/provisioners</filename> directory. To use these
+ connectors, edit the configuration files as required, and copy them to the
+ <filename>openidm/conf</filename> directory. If you create your own connector
+ configurations, <emphasis>do not include dash characters ( <literal>-</literal> )
+ in the connector <replaceable>name</replaceable>.</emphasis></para>
 
  <section xml:id="openidm-openicf">
-  <title>About OpenIDM &amp; OpenICF</title>
+  <title>About OpenIDM and OpenICF</title>
 
   <para>The following figure shows how OpenIDM can connect to resources
   through an OpenICF server. In most cases, the OpenICF server runs as part
@@ -193,8 +193,7 @@
    <term>port</term>
    <listitem>
     <para>string, optional</para>
-    <para>
-     Remote port to connect to. Default value: 8759</para>
+    <para>Remote port to connect to. Default value: 8759</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -552,7 +551,7 @@
    names, like <literal>last-name</literal>, as dashes in names make
    JavaScript syntax more complex. If you cannot avoid the dash, then write
    <literal>source['last-name']</literal> instead of
-   <literal>source.last-name</literal> in the java script scripts.</para>
+   <literal>source.last-name</literal> in the JavaScript scripts.</para>
   </note>
 
   <variablelist xml:id="operation-options">
@@ -719,10 +718,9 @@
 {
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
-        "bundleName":
-            "org.forgerock.openicf.connectors.file.file.openicf-xml-connector",
-        "bundleVersion": "<?eval ${openicfBundleVersion}?>",
-        "connectorName": "com.forgerock.openicf.xml.XMLConnector"
+        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion": "1.1.0.1",
+        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
 }</programlisting>
 
@@ -770,9 +768,9 @@
    <title>Generic LDAP Connector</title>
 
    <para>The following excerpt shows the <literal>connectorRef</literal>
-   configuration property for connection to an LDAP server. When using the
+   configuration property for connection to an LDAP server. When you use the
    connect .jar provided in <filename>openidm/connectors</filename>, and
-   when using a local connector server, the <literal>connectorHostRef</literal>
+   when you use a local connector server, the <literal>connectorHostRef</literal>
    property is optional.</para>
 
    <programlisting language="javascript">
@@ -780,9 +778,8 @@
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.identityconnectors.ldap.LdapConnector",
-        "bundleName":
-            "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+        "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+        "bundleVersion": "1.1.1.0"
     }
 }</programlisting>
 
@@ -1122,19 +1119,11 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
   <section xml:id="active-directory-connector">
    <title>Active Directory Connector</title>
 
-   <para>In contrast to most other connectors, the Active Directory connector
-   is written not in Java, but instead in .NET. OpenICF should connect to
-   Active Directory over ADSI, the native connection protocol for Active
-   Directory. The connector therefore requires a connector server that has
-   access to the ADSI .dll files.</para>
-
-<!--OPENIDM-824 adds this as instructions
-   <para>See the <link xlink:show="new"
-   xlink:href="http://openicf.forgerock.org/connector-framework-internal/connector_server.html"
-   >OpenICF Connnector Server</link> page for instructions on installing a .NET
-   connector server. Take care to set the key as described in the
-   instructions.</para>
-   -->
+   <para>Unlike most other connectors, the Active Directory connector is
+   written not in Java, but in C# for the .Net platform. OpenICF should
+   connect to Active Directory over ADSI, the native connection protocol for
+   Active Directory. The connector therefore requires a connector server that
+   has access to the ADSI .dll files.</para>
 
    <section xml:id="install-.net-connector">
     <title>Installing and Configuring a .NET Connector</title>
@@ -1147,310 +1136,452 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
     deployed within the C# connector server, to any authenticated application.
     </para>
 
-    <note>
         <itemizedlist>
+            <para>Before you start, take note of the following:</para>
             <listitem>
-                <para>The .NET connector server requires version 4.0.30319
-                    of the .NET framework.</para>
+                <para>The .NET connector server requires the .NET framework.
+                Make sure that the .NET framework (version 4.0.30319 or later)
+                has been installed.</para>
             </listitem>
             <listitem>
                 <para>By default, the connector server outputs log messages to
-                    <filename>C:> </filename>. If you do not have permission to
+                    <literal>C:\</literal>. If you do not have permission to
                     write to the root of the hard drive, an error is generated.
                     To change the location of the log file, set the
                     <literal>initializeData</literal> parameter in the trace
                     settings of the configuration file.</para>
             </listitem>
-
         </itemizedlist>
 
-    </note>
-
-
    <procedure>
-    <title>Installing the .NET Connector Server</title>
+    <title>Installing and Starting the .NET Connector Server</title>
     <step>
-     <para>Download the OPENICF .NET Connector Server from the OpenIDM download
-     page under the ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
-     xlink:show="new">Open Stack download page</link>.
-     </para>
+        <para>Download the OPENICF .NET Connector Server from the OpenIDM
+        download page under the ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
+        xlink:show="new">Open Stack download page</link>.</para>
     </step>
     <step>
-     <para>Execute ServiceInstall-<?eval ${openicfBundleVersion}?>-dotnet.msi.
-     </para>
+        <para>Execute the <literal>ServiceInstall-1.1.1.1-dotnet.msi</literal>
+        installation file and complete the wizard.</para>
+        <para>When the wizard has completed, the Connector Server is installed
+        as a Windows Service.</para>
     </step>
     <step>
-     <para>Complete the wizard.
-     </para>
+        <para>Open the Windows Services console and make sure that the
+        Connector Server is listed there.</para>
+        <para>The name of the service is
+        <literal>OpenICF Connector Server</literal>, by default.</para>
     </step>
-   </procedure>
-   <para>When the wizard has run, the Connector Server is installed as a
-   Windows Service.</para>
-
-   <procedure>
-    <title>Running the .NET Connector Server</title>
-    <para>The .NET Connector Server can be started one of two ways.
-    </para>
-    <step>
-     <para>In the Microsoft Service Console, go to <literal>Start</literal>, type 
-     <literal>Services</literal>, <literal>Services</literal>.
-     </para>
-     <para>or</para>
-    </step>
-    <step>
-     <para>In the command prompt, go to <literal>Start</literal>, type <literal>cmd</literal>,
-     then <literal>cmd</literal> again.
-     </para>
-    </step>
-    <step>
-     <para>Change the directory to the location where the Connector Server was installed.
-     The default location is <literal>Program Files/Identity Connectors/Connector Server</literal>.
-     </para>
-    </step>
-    <step>
-     <para>Enter <literal>cd Program Files (x86)/Identity Connectors/Connector Server</literal>.
-     </para>
-    </step>
-    <step>
-     <para>Start the server with the following command: 
-      <screen>ConnectorServer.exe/run</screen>.
-     </para>
-    </step>    
    </procedure>
 
    <procedure>
-    <title>Configuring the .NET Connector Server</title>
-     <para>After starting the Microsoft Services Console, follow these steps to configure
-     the .NET Connector Server.
-     </para>
-     <step>
-      <para>Check to see if the Connector Server is currently running. If so, stop it. 
-      All configuration changes require that the Connector Server be stopped and
-      restarted after the changes are saved.
-      </para>
+       <title>Configuring the .NET Connector Server</title>
+       <para>After you have installed the .NET Connector Server, as described
+       in the previous section, follow these steps to configure the Connector
+       Server.</para>
+
+       <step>
+           <para>Make sure that the Connector Server is not currently running.
+           If it is running, use the Services console to stop it.</para>
+       </step>
+       <step>
+           <para>At the command prompt, change to the directory where the
+           Connector Server was installed.</para>
+           <screen>c:\> cd "c:\Program Files (x86)\Identity Connectors\Connector Server"</screen>
+       </step>
+       <step xml:id="key-step">
+           <para>Set the key for the Connector Server by using the
+           <command>setkey</command> command, substituting any string value for
+           the <literal>secret</literal>. For example:</para>
+           <screen>ConnectorServer.exe /setkey <replaceable>secret</replaceable>
+Key Updated.</screen>
+           <para>This key is used by clients connecting to the Connector Server.
+           Whatever key you set here must also be set in the OpenIDM connector
+           info provider configuration file
+           (<literal>provisioner.openicf.connectorinfoprovider.json</literal>).</para>
      </step>
      <step>
-      <para>At the command prompt (click <literal>Start</literal>, <literal>Run</literal>,
-      then type <literal>cmd</literal>, set the key for the Connector Server by changing
-      to the directory where the Connector Server was installed and executing the
-      following command, using a string value for <literal>newkey</literal>:
-      </para>
-      <screen>ConnectorServer.exe /setkey &lt;newkey&gt;</screen>
-      <para>This key is used by clients connecting to the Connector Server.</para>
-     </step>
-     <step>
-      <para>Review the <filename>ConnectorServer.exe.config</filename> file to verify
-      additional configuration, including the port, address, and SSL settings in
-      the <filename>AppSettings</filename>.
+         <para>Edit the Connector Server connection settings.</para>
+         <para>The Connector Server configuration is saved in a file named
+         <filename>ConnectorServer.exe.config</filename> (in the directory in
+         which the Connector Server is installed).</para>
+         <para>Check and edit this file, as necessary, to reflect your
+         installation. In particular, check the connection settings, under the
+         <literal>AppSettings</literal> item.</para>
      
-     <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
+         <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
 &lt;add key="connectorserver.usessl" value="false" /&gt;
 &lt;add key="connectorserver.certificatestorename" value="ConnectorServerSSLCertificate" /&gt;
-&lt;add key="connectorserver.ipaddress" value="0.0.0.0" /&gt;
-</screen>
-      </para>
-      <para>The port can be set by changing the value of <literal>connectorserver.port</literal>.
-      The listening socket can be bound to a particular address, or can be left as 0.0.0.0.
-      </para>
-      <para>To configure the server to use SSL, set the value of
-      <literal>connectorserver.usessl</literal> to <literal>true</literal> and set
-      the value of <filename>connectorserver.certifacatestorename</filename> to
-      the certificate store name.
-      </para>
+&lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;</screen>
+
+         <variablelist>
+             <varlistentry>
+                 <term><literal>connectorserver.port</literal></term>
+                 <listitem>
+                     <para>Specifies the port on which the Connector Server
+                     listens.</para>
+                     <note>
+                     <para>If Windows firewall is enabled, you must create an
+                     inbound port rule to open the TCP port for the connector
+                     server (8759 by default). If you do not open the TCP port,
+                     OpenIDM will be unable to contact the Connector Server.
+                     For more information, see the Microsoft documentation on
+                     <link xlink:show="new" xlink:href="http://technet.microsoft.com/en-us/library/cc947814(v=ws.10).aspx"
+                     >creating an inbound port rule</link>.</para>
+                     </note>
+                 </listitem>
+             </varlistentry>
+             <varlistentry>
+                 <term><literal>connectorserver.usessl</literal></term>
+                 <listitem>
+                     <para>Indicates whether client connections to the
+                     Connector Server should be over SSL. This property is set
+                     to <literal>false</literal> by default.</para>
+                     <para>To secure connections to the Connector Server, set
+                     this property to <literal>true</literal> and install the
+                     server certificate into your certificate store, using the
+                     following command:</para>
+                     <screen>ConnectorServer.exe /installCert <replaceable>certificate-store</replaceable></screen>
+                 </listitem>
+             </varlistentry>
+             <varlistentry>
+                 <term><literal>connectorserver.certificatestorename</literal></term>
+                 <listitem><para>Specifies the name of the certificate store,
+                 into which your server certificate has been installed.</para></listitem>
+             </varlistentry>
+             <varlistentry>
+                 <term><literal>connectorserver.ifaddress</literal></term>
+                 <listitem>
+                     <para>Specifies a single IP address from which connections
+                     will be accepted.</para>
+                     <para>If you set a value here (other than the default
+                     <literal>0.0.0.0</literal>) connections from all IP
+                     addresses other than the one specified are denied.</para>
+                 </listitem>
+             </varlistentry>
+         </variablelist>
      </step>
      <step>
-      <para>Trace settings are also in the configuration file.
-      </para>
+      <para>Check the trace settings, in the same configuration file, under
+      the <literal>system.diagnostics</literal> item.</para>
       <screen>&lt;system.diagnostics&gt;
-&lt;trace autoflush="true" indentsize="4"&gt;
-&lt;listeners&gt;
-&lt;remove name="Default" /&gt;
-&lt;add name="myListener" type="System.Diagnostics.TextWriterTraceListener" 
-initializeData="c:\connectorserver2.log" traceOutputOptions="DateTime"&gt;
-&lt;filter type="System.Diagnostics.EventTypeFilter" initializeData="Information" /&gt;
-&lt;/add&gt;
-&lt;/listeners&gt;
-&lt;/trace&gt;
-&lt;/system.diagnostics&gt;
-      </screen>
+  &lt;trace autoflush="true" indentsize="4"&gt;
+    &lt;listeners&gt;
+      &lt;remove name="Default" /&gt;
+      &lt;add
+          name="myListener"
+          type="System.Diagnostics.TextWriterTraceListener"
+          initializeData="c:\connectorserver2.log"
+          traceOutputOptions="DateTime"&gt;
+          &lt;filter
+            type="System.Diagnostics.EventTypeFilter"
+            initializeData="Information" /&gt;
+      &lt;/add&gt;
+    &lt;/listeners&gt;
+  &lt;/trace&gt;
+&lt;/system.diagnostics&gt;</screen>
       <para>The Connector Server uses the standard .NET trace mechanism. 
-      For more information about the tracing options, see <link xlink:show="new"
+      For more information about tracing options, see <link xlink:show="new"
       xlink:href="http://msdn.microsoft.com/en-us/library/15t15zda(v=vs.71).aspx"
       >Microsoft's .NET documentation</link> for <literal>System.Diagnostics</literal>.
       </para>
-      <note>
-       <para>The default settings are a good starting point, but for less tracing, 
-       you can change the EventTypeFilter's initializeData to "Warning" or "Error". 
+       <para>The default trace settings are a good starting point. For less
+       tracing, you can change the EventTypeFilter's initializeData to "Warning"
+       or "Error".
        For very verbose logging you can set the value to "Verbose" or "All". The 
-       amount of logging performed has a direct effect on the performance of the 
-       Connector Servers, so be careful of the setting.
-       </para>
-      </note>
+       level of logging performed has a direct effect on the performance of the
+       Connector Servers, so take care when setting this level.</para>
      </step>
+  </procedure>
+
+  <procedure>
+     <title>Configuring the Active Directory Connector</title>
      <step>
-      <para>Download the AD Connector from the OpenIDM download page under the
-      ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
+      <para>Download the Active Directory Connector from the OpenIDM download
+      page under the ForgeRock <link xlink:href="http://forgerock.com/download-stack/"
       xlink:show="new">Open Stack download page</link>.
       </para>
      </step>
      <step>
-      <para>Unzip the directory in the Connector Server folder.
+      <para>Extract the contents of the AD Connector zip file into the
+      directory in which you installed the Connector Server (by default
+      <literal>c:\Program Files (x86)\Identity Connectors\Connector Server></literal>.
       </para>
+         <note>
+           <para>If the account that is used to install the Active Directory
+           connector is different from the account under which the Connector
+           Server runs, you must give the Connector Server runtime account the
+           rights to access the Active Directory connector log files.</para>
+         </note>
      </step>
      <step>
-      <para>Start the Connector Server service.
-      </para>
+        <para>Start the .NET Connector Server in one of the following ways.
+        </para>
+        <substeps>
+            <step>
+                <para>Start the server as a Windows service, by using the
+                Microsoft Services Console.</para>
+                <para>Locate the connector server service
+                (<literal>OpenICF Connector Server</literal>), and click
+                 <literal>Start the service</literal>.</para>
+                <para>The service is executed with the credentials of the
+                "run as" user (<literal>System</literal>, by default).</para>
+            </step>
+            <step>
+                <para>Start the server as a Windows service, by using the
+                command line.</para>
+                <para>In the Windows Command Prompt, run the following command:</para>
+                <screen>net start ConnectorServerService</screen>
+                <para>To stop the service in this manner, run the following
+                command:</para>
+                <screen>net stop ConnectorServerService</screen>
+            </step>
+            <step>
+                <para>Start the server without using Windows services.</para>
+                <para>In the Windows Command Prompt, change directory to the
+                location where the Connector Server was installed. The default
+                location is
+                <literal>c:\Program Files (x86)\Identity Connectors\Connector Server</literal>.
+                </para>
+                <para>Start the server with the following command:</para>
+                <screen>ConnectorServer.exe /run</screen>
+                <para>Note that this command starts the Connector Server with
+                the credentials of the current user. It does not start the
+                server as a Windows service.</para>
+            </step>
+        </substeps>
      </step>
     </procedure>
 
     <procedure>
-    <title>Configuring the .NET Connector Server with OpenIDM</title>
-     <para>When you configure remote connectors, you must use the connector 
-     info provider service to connect through remote connector servers. 
-     The configuration is stored in the configuration file, 
-     <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>. 
-     A sample can be found under <literal>openidm/samples/provisioners/</literal>.
-     </para>
-     <step>
-      <para>Make sure that OpenIDM is running and copy the 
-      <filename>provisioner.openicf.connectorinfoprovider.json</filename> to 
-      <literal>/path/to/openidm/conf</literal> and edit it as needed.
-      </para>
-      <screen>$ cd path/to/openidm
-$ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/
-      </screen>
-     </step>
-     <step>
-      <para>Create the connector file <filename>provisioner.openicf-ad.json</filename> 
-      in <literal>conf/ directory</literal>. The following is an example of what the
-      <literal>name</literal>, <literal>bundleVersion</literal>, and a few other
-      configuration properties will look like.
-      </para>
-      <screen>
-      {
-"name" : "ad",
-"connectorRef" : {
-"connectorHostRef" : "dotnet",
-"connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
-"bundleName" : "ActiveDirectory.Connector",
-"bundleVersion" : "1.0.0.0"
-},
-"poolConfigOption" : {
-"maxObjects" : 10,
-"maxIdle" : 10,
-"maxWait" : 150000,
-"minEvictableIdleTimeMillis" : 120000,
-"minIdle" : 1
-},
-"operationTimeout" : {
-"SYNC" : -1,
-"TEST" : -1,
-"SEARCH" : -1,
-"RESOLVEUSERNAME" : -1,
-"SCRIPT_ON_CONNECTOR" : -1,
-"VALIDATE" : -1,
-"DELETE" : -1,
-"UPDATE" : -1,
-"AUTHENTICATE" : -1,
-"CREATE" : -1,
-"SCRIPT_ON_RESOURCE" : -1,
-"GET" : -1,
-"SCHEMA" : -1
-},
-"configurationProperties" : {
-"DirectoryAdminName" : "EXAMPLE\\Administrator",
-"DirectoryAdminPassword" : {
-"$crypto" : {
-"value" : {
-"iv" : "QJctjWJi9w2uPLsO2Pucfw==",
-"data" : "Akqzk1PW0m9QP5cfOMIuYw==",
-"cipher" : "AES/CBC/PKCS5Padding",
-"key" : "openidm-sym-default"
-},
-"type" : "x-simple-encryption"
-}
-},
-"ObjectClass" : "User",
-"Container" : "dc=example,dc=com",
-"CreateHomeDirectory" : true,
-"LDAPHostName" : "10.0.0.2",
-"SearchChildDomains" : false,
-"DomainName" : "example",
-"SyncGlobalCatalogServer" : null,
-"SyncDomainController" : null,
-"SearchContext" : ""
-}</screen>
-     </step>
-     <step>
-      <para>Edit the <literal>configurationProperties</literal> according to your 
-      setup and make sure that the <literal>bundleVersion</literal> is the same
-      version as <filename>ActiveDirectory.Connector.dll</filename> in the Windows
-      Connector Server folder. (Right click on the <literal>dll</literal>, 
-      <literal>properties</literal>, <literal>tab details</literal>, and <literal>Product 
-      version</literal>.)
-      </para>
-     </step>
-     <step>
-      <para>Make sure the connector was installed properly using the following command:
-      </para>
-      <screen>scr list
-      </screen>
-      <para>This should return all of the installed modules, including the following:
-      </para>
-      <screen>
-[  24] [active       ] org.forgerock.openidm.provisioner.openicf</screen>
-      <note>
-       <para>The number may differ. Make sure to note the number returned.</para>
-      </note>
-      <para>Review the content of the connector using the following command, using 
-      the number returned from the previous step:
-      </para>
-      <screen>scr info &lt;your number&gt;</screen>
-     </step>
-     <step>
-      <para>Create the <filename>sync.json</filename> file where you define mappings
-      of various attributes and behaviors during reconciliation. The following is a 
-      simple example of a <filename>sync.json</filename>.
-      </para>
-      <screen>{ 
-"mappings" : [ 
-{ 
-"name" : "systemADAccounts_managedUser", 
-"source" : "system/ad/account", 
-"target" : "managed/user", 
-"properties" : [ 
- { 
-   "source" : "sAMAccountName", 
-    "target" : "userName" 
- }, 
- { 
-    "source" : "sn", 
-    "target" : "lastname" 
- }, 
- { 
-    "source" : "givenName", 
-    "target" : "firstname" 
-    } 
-   ] 
-  }
- ]
-}</screen>
-     </step>
+        <title>Configuring the .NET Connector Server with OpenIDM</title>
+        <para>When you configure OpenIDM to use a remote connector, you must
+        specify one or more remote connector servers by using the connector
+        info provider service. The connector info provider configuration is
+        stored in the file
+        <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
+        A sample connector info provider configuration file is located in
+        <literal>openidm/samples/provisioners/</literal>.</para>
 
+        <para>To configure OpenIDM to use the remote .NET connector server,
+        follow these steps:</para>
+
+        <step>
+            <para>Start OpenIDM, if it is not already running.</para>
+        </step>
+        <step>
+            <para>Copy the sample connector info provider configuration file
+            to the <filename>openidm/conf</filename> directory.</para>
+            <screen>$ cd /path/to/openidm
+$ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/</screen>
+        </step>
+        <step>
+            <para>Edit the connector info provider configuration, providing
+            the details of the remote connector server.</para>
+            <programlisting language="javascript">{
+    "connectorsLocation" : "connectors",
+    "remoteConnectorServers" : [
+        {
+            "name" : "dotnet",
+            "host" : "127.0.0.1",
+            "port" : 8759,
+            "useSSL" : false,
+            "timeout" : 0,
+            "key" : "secret"
+        }
+    ]
+}</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term><literal>name</literal></term>
+                    <listitem>
+                        <para>Specifies the name of the connection to the .NET
+                        server. The name can be any string. This property is
+                        referenced in the connector configuration file
+                        (<filename>provisioner.openicf-ad.json</filename> with the
+                        <literal>"connectorHostRef"</literal> property.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>host</literal></term>
+                    <listitem>
+                        <para>Specifies the IP address of the host on which the
+                        Connector Server is installed.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>port</literal></term>
+                    <listitem>
+                        <para>Specifies the port on which the Connector Server
+                        listens and matches the <literal>connectorserver.port</literal>
+                        property in the
+                        <filename>ConnectorServer.exe.config</filename> file.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>useSSL</literal></term>
+                    <listitem>
+                        <para>Specifies whether the connection to the Connector
+                        Server should be secured, and matches the
+                        <literal>"connectorserver.usessl"</literal> property in
+                        the <filename>ConnectorServer.exe.config</filename>
+                        file.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>timeout</literal></term>
+                    <listitem><para>Specifies the length of time, in seconds,
+                    that OpenIDM should attempt to connect to the Connector
+                    Server before abandoning the attempt. If this property is
+                    set to <literal>0</literal>, the connection attempt will
+                    never timeout.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>key</literal></term>
+                    <listitem>
+                        <para>Specifies the connector server key. This must be
+                        the same as the key that you specified in Step 3 of the
+                        previous procedure.</para>
+                        <para>The string value you enter here is encrypted as
+                        soon as the file is saved.</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </step>
+        <step>
+            <para>Copy the sample Active Directory connector configuration
+            file to the <filename>openidm/conf</filename> directory.</para>
+            <screen>$ cd /path/to/openidm
+$ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
+        </step>
+        <step>
+            <para>Edit the Active Directory connector configuration.</para>
+            <para>Specifically, edit the <literal>"configurationProperties"</literal>
+            according to your Active Directory deployment</para>
+            <para>Also, check that the <literal>bundleVersion</literal> of the
+            connector is the same as the version of the
+            <filename>ActiveDirectory.Connector.dll</filename> in the Connector
+            Server directory. To check the .dll version, right click on the
+            <literal>ActiveDirectory.Connector.dll</literal> file and select
+            <literal>Properties</literal>. Click on <literal>Tab Details</literal>,
+            and select <literal>Product Version</literal>.</para>
+            <para>The following configuration extract shows sample values for
+            the <literal>"configurationProperties"</literal>:</para>
+      <screen>...
+   "connectorRef" :
+      {
+         "connectorHostRef" : "dotnet",
+         "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+         "bundleName" : "ActiveDirectory.Connector",
+         "bundleVersion" : "1.1.0.0"
+      },          ...
+   "configurationProperties" :
+      {
+         "DirectoryAdminName" : "EXAMPLE\\Administrator",
+         "DirectoryAdminPassword" : "MyPassw0rd",
+         "ObjectClass" : "User",
+         "Container" : "dc=ad,dc=example,dc=com",
+         "CreateHomeDirectory" : true,
+         "LDAPHostName" : "192.0.2.0",
+         "SearchChildDomains" : false,
+         "DomainName" : "example",
+         "SyncGlobalCatalogServer" : null,
+         "SyncDomainController" : null,
+         "SearchContext" : ""
+      },</screen>
+            <para>The <literal>"DirectoryAdminName"</literal> and
+            <literal>"DirectoryAdminPassword"</literal> must specify the
+            credentials of an administrator account in Active Directory, that
+            the connector will use to bind to the server.</para>
+            <para>The <literal>"DirectoryAdminName"</literal> can be specified
+            as a bindDN or in the format <replaceable>DomainName</replaceable>
+            \<replaceable>samaccountname</replaceable>.</para>
+            <para>The updated configuration is applied immediately.</para>
+     </step>
      <step>
-      <para>Run the reconciliation with the following command. 
+         <para>Check that the connector has been configured correctly by
+         running the following command in the OSGi console:</para>
+         <screen>scr list</screen>
+         <para>This command returns all of the installed modules. The openicf
+         provisioner module should be active, as follows:</para>
+         <screen>[29] [active] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider</screen>
+         <para>The number of the module may differ. Make a note of the number,
+         for use in the commands that follow.</para>
+     </step>
+     <step>
+         <para>Review the content of the connector using the following command
+         in the OSGi console,(substituting the module number returned in the
+         previous step):</para>
+         <screen>scr info 29</screen>
+     </step>
+     <step>
+         <para>The connector is now configured. To verify the configuration,
+         perform a RESTful GET request on the remote system URL, for example:</para>
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/system/ad/account?_queryId=query-all-ids"</screen>
+         <para>Such a request should return the user accounts in your Active
+         Directory server.</para>
+     </step>
+     <step performance="optional">
+         <para>
+         To configure reconciliation or liveSync between OpenIDM and Active
+         Directory, create a synchronization configuration file
+         (<filename>sync.json</filename>) in the
+         <literal>openidm/conf</literal> directory.</para>
+         <para>The synchronization configuration file defines the attribute
+         mappings and policies that are used during reconciliation.</para>
+         <para>The following is a simple example of a <filename>sync.json</filename>
+         file for Active Directory.</para>
+      <screen>{
+    "mappings" : [
+        {
+            "name" : "systemADAccounts_managedUser",
+            "source" : "system/ad/account",
+            "target" : "managed/user",
+            "properties" : [
+                { "source" : "cn", "target" : "displayName" },
+                { "source" : "description", "target" : "description" },
+                { "source" : "givenName", "target" : "givenName" },
+                { "source" : "mail", "target" : "email" },
+                { "source" : "sn", "target" : "familyName" },
+                { "source" : "sAMAccountName", "target" : "userName" }
+            ],
+            "policies" : [
+                { "situation" : "CONFIRMED", "action" : "UPDATE" },
+                { "situation" : "FOUND", "action" : "UPDATE" },
+                { "situation" : "ABSENT", "action" : "CREATE" },
+                { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
+                { "situation" : "MISSING", "action" : "UNLINK" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
+                { "situation" : "UNQUALIFIED", "action" : "DELETE" },
+                { "situation" : "UNASSIGNED", "action" : "DELETE" }
+            ]
+        }
+    ]
+}</screen>
+     </step>
+     <step>
+      <para>To test the synchronization, run a reconciliation operation by
+      running the following command.
       </para>
       <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: 
 openidm-admin" --request POST  "http://localhost:8080/openidm/recon?
 _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
-      <para>This will return a reconciliation id similar to the following:
+      <para>If reconciliation is successful, the command returns a reconciliation
+      ID, similar to the following:
       </para>
       <screen>{"_id":"0629d920-e29f-4650-889f-4423632481ad"}</screen>
      </step>
      <step>
       <para>Check the internal repository (OrientDB or MySQL) to make sure that
-      the users were reconciled. For information about connecting to OrientDB,
-      see <link xlink:href="install-guide#before-you-begin-sample"
+      the users in your Active Directory server were reconciled provisioned
+      into the repository.</para>
+      <para>For information about connecting to OrientDB, see
+      <link xlink:href="install-guide#before-you-begin-sample"
       xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Before You Begin</citetitle></link> in the
       <citetitle>Installation Guide</citetitle>. For information about using
@@ -1469,8 +1600,6 @@ _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
     section provides directions for setting up the standalone connecter on
     Unix/Linux and Windows.
     </para>
-    
-       
 
    <procedure>
     <title>Installing a Standalone Connector Server for Unix/Linux</title>
@@ -2502,7 +2631,7 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
    a specific script, you can disable autocommit mode in the script or scripts 
    for each action that requires a manual commit.</para>
    
-   <!--  TO DO Test this example before committing this section 
+   <!--TODO Test this example before committing this section
    <para>The following example edits the <literal>CreateScript.groovy</literal> 
    sample script to disable autocommit for CREATE actions in the 
    scripted SQL connector, adds a manual commit statement to the 
