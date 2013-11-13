@@ -23,10 +23,10 @@
  */
 package org.forgerock.openidm.sync;
 
-import java.lang.reflect.Constructor;
-import java.util.LinkedHashMap;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.PersistenceConfig;
@@ -38,8 +38,6 @@ import org.forgerock.json.resource.PersistenceConfig;
  * @author brmiller
  */
 public class TriggerContext extends ServerContext {
-
-    private static final String ATTR_CLASS = "class";
 
     // persisted attribute name
     private static final String ATTR_TRIGGER_SOURCE = "trigger-source";
@@ -53,8 +51,8 @@ public class TriggerContext extends ServerContext {
      * @param parent the parent server context
      * @param trigger the trigger source
      */
-    public TriggerContext(final ServerContext parent, final String trigger) {
-        super(/*checkNotNull(*/parent/*)*/); // !@#$%@#$% - org.forgerock.json.resource.Resources.checkNotNull is package privet...
+    public TriggerContext(final Context parent, final String trigger) {
+        super(checkNotNull(parent, "Cannot instantiate TriggerContext with null parent Context"));
         this.trigger = trigger;
     }
 
