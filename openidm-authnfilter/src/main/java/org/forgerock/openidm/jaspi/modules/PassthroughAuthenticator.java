@@ -66,8 +66,10 @@ public class PassthroughAuthenticator {
      * @param password The user's password.
      * @param securityContextMapper The SecurityContextMapper object.
      * @return <code>true</code> if authentication is successful.
+     * @throws AuthException if there is a problem whilst attempting to authenticate the user.
      */
-    public boolean authenticate(String username, String password, SecurityContextMapper securityContextMapper) {
+    public boolean authenticate(String username, String password, SecurityContextMapper securityContextMapper)
+            throws AuthException {
 
         if (!StringUtils.isEmpty(passThroughAuth) && !"anonymous".equals(username)) {
             ActionRequest actionRequest = Requests.newActionRequest(passThroughAuth, "authenticate");
@@ -83,8 +85,15 @@ public class PassthroughAuthenticator {
                     securityContextMapper.setResource(passThroughAuth);
                 }
             } catch (ResourceException e) {
-                logger.trace("Failed pass-through authentication of {} on {}.", username, password, e);
-                /* authentication failed */
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Failed pass-through authentication of {} on {}.", username, passThroughAuth, e);
+                }
+                if (e.isServerError()) { // HTTP server-side error
+                    throw new AuthException("Failed pass-through authentication of " + username + " on "
+                            + passThroughAuth + ".");
+                }
+                //authentication failed
+                return false;
             }
 
             //TODO need to look at setting resource on authz and setting roles on authz, as well as what uses this to ensure security context is populated, like the old Servlet class used to do!
