@@ -257,6 +257,7 @@
 
         <!-- Commons JSON versions -->
         <commons.forgerock-rest.version>2.1.0-SNAPSHOT</commons.forgerock-rest.version>
+        <commons.forgerock-util.version>1.2.0-SNAPSHOT</commons.forgerock-util.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults/>
@@ -448,6 +449,11 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-iwa-module</artifactId>
                 <version>${authnfilter.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.util</groupId>
+                <artifactId>forgerock-util</artifactId>
+                <version>${commons.forgerock-util.version}</version>
             </dependency>
 
             <!-- Commons -->
