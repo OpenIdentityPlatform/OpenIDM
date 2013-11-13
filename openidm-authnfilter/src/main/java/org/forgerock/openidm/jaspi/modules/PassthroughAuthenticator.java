@@ -105,11 +105,16 @@ public class PassthroughAuthenticator {
                         return true;
                     }
                 } catch (JsonResourceException e) {
-                    logger.trace("Failed pass-through authentication of {} on {}.",
-                            authData.getUsername(), passThroughAuth, e);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Failed pass-through authentication of {} on {}.",
+                                authData.getUsername(), passThroughAuth, e);
+                    }
+                    if (e.isServerError()) {
+                        throw new AuthException("Failed pass-through authentication of " + authData.getUsername()
+                                + " on " + passThroughAuth + ".");
+                    }
                     //authentication failed
-                    throw new AuthException("Failed pass-through authentication of " + authData.getUsername() + " on "
-                            + passThroughAuth + ".");
+                    return false;
                 }
             }
         }
