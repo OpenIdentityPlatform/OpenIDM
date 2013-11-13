@@ -898,9 +898,7 @@ public class AuditServiceImpl implements AuditService {
             for (Map<String, Object> entry : entryList) {
                 resultEntries.add(AuditServiceImpl.formatReconEntry(entry));
             }
-            if (resultEntries.size() > 0) {
-                results.put("result", resultEntries);
-            }
+            results.put("result", resultEntries);
         } else {
             results.put("result", entryList);
         }
