@@ -101,25 +101,56 @@ import org.slf4j.LoggerFactory;
     @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX + "/*")
 })
 public class AuditServiceImpl implements AuditService {
-    final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
-    private final static ObjectMapper mapper;
+    private static final Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
+    private static final ObjectMapper mapper;
 
     // Keys in the JSON configuration
-    public final static String CONFIG_LOG_TO = "logTo";
-    public final static String CONFIG_LOG_TYPE = "logType";
-    public final static String CONFIG_LOG_TYPE_CSV = "csv";
-    public final static String CONFIG_LOG_TYPE_REPO = "repository";
-    public final static String CONFIG_LOG_TYPE_ROUTER = "router";
+    public static final String CONFIG_LOG_TO = "logTo";
+    public static final String CONFIG_LOG_TYPE = "logType";
+    public static final String CONFIG_LOG_TYPE_CSV = "csv";
+    public static final String CONFIG_LOG_TYPE_REPO = "repository";
+    public static final String CONFIG_LOG_TYPE_ROUTER = "router";
 
-    public final static String TYPE_RECON = "recon";
-    public final static String TYPE_ACTIVITY = "activity";
-    public final static String TYPE_ACCESS = "access";
+    // Types of logs
+    public static final String TYPE_RECON = "recon";
+    public static final String TYPE_ACTIVITY = "activity";
+    public static final String TYPE_ACCESS = "access";
 
-    public final static String QUERY_BY_RECON_ID = "audit-by-recon-id";
-    public final static String QUERY_BY_MAPPING = "audit-by-mapping";
-    public final static String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
-    public final static String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
-    public final static String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
+    // Recognized queries
+    public static final String QUERY_BY_RECON_ID = "audit-by-recon-id";
+    public static final String QUERY_BY_MAPPING = "audit-by-mapping";
+    public static final String QUERY_BY_RECON_ID_AND_SITUATION = "audit-by-recon-id-situation";
+    public static final String QUERY_BY_RECON_ID_AND_TYPE = "audit-by-recon-id-type";
+    public static final String QUERY_BY_ACTIVITY_PARENT_ACTION = "audit-by-activity-parent-action";
+
+    // Log property keys
+    public static final String LOG_ID = "_id";
+
+    public static final String ACCESS_LOG_ACTION = "action";
+    public static final String ACCESS_LOG_IP = "ip";
+    public static final String ACCESS_LOG_PRINCIPAL = "principal";
+    public static final String ACCESS_LOG_ROLES = "roles";
+    public static final String ACCESS_LOG_STATUS = "status";
+    public static final String ACCESS_LOG_TIMESTAMP = "timestamp";
+    public static final String ACCESS_LOG_USERID = "userid";
+
+    // activity log property key constants are in org.forgerock.util.ActivityLog
+
+    public static final String RECON_LOG_ENTRY_TYPE = "entryType";
+    public static final String RECON_LOG_TIMESTAMP = "recon_log_timestamp";
+    public static final String RECON_LOG_RECON_ID = "recon_log_reconId";
+    public static final String RECON_LOG_ROOT_ACTION_ID = "recon_log_rootActionId";
+    public static final String RECON_LOG_STATUS = "recon_log_status";
+    public static final String RECON_LOG_MESSAGE = "recon_log_message";
+    public static final String RECON_LOG_MESSAGE_DETAIL = "recon_log_messageDetail";
+    public static final String RECON_LOG_EXCEPTION = "recon_log_exception";
+    public static final String RECON_LOG_ACTION_ID = "recon_log_actionId";
+    public static final String RECON_LOG_ACTION = "recon_log_action";
+    public static final String RECON_LOG_AMBIGUOUS_TARGET_OBJECT_IDS = "recon_log_ambiguousTargetObjectIds";
+    public static final String RECON_LOG_RECONCILING = "recon_log_reconciling";
+    public static final String RECON_LOG_SITUATION = "recon_log_situation";
+    public static final String RECON_LOG_SOURCE_OBJECT_ID = "recon_log_sourceObjectId";
+    public static final String RECON_LOG_TARGET_OBJECT_ID = "recon_log_targetObjectId";
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -822,14 +853,14 @@ public class AuditServiceImpl implements AuditService {
      */
     private static Map<String,Object> formatAccessEntry(Map<String,Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
-        formattedEntry.put("_id", entry.get("_id"));
-        formattedEntry.put("action", entry.get("action"));
-        formattedEntry.put("ip", entry.get("ip"));
-        formattedEntry.put("principal", entry.get("principal"));
-        formattedEntry.put("roles", entry.get("roles"));
-        formattedEntry.put("status", entry.get("status"));
-        formattedEntry.put("timestamp", entry.get("timestamp"));
-        formattedEntry.put("userid", entry.get("userid"));
+        formattedEntry.put(LOG_ID, entry.get(LOG_ID));
+        formattedEntry.put(ACCESS_LOG_ACTION, entry.get(ACCESS_LOG_ACTION));
+        formattedEntry.put(ACCESS_LOG_IP, entry.get(ACCESS_LOG_IP));
+        formattedEntry.put(ACCESS_LOG_PRINCIPAL, entry.get(ACCESS_LOG_PRINCIPAL));
+        formattedEntry.put(ACCESS_LOG_ROLES, entry.get(ACCESS_LOG_ROLES));
+        formattedEntry.put(ACCESS_LOG_STATUS, entry.get(ACCESS_LOG_STATUS));
+        formattedEntry.put(ACCESS_LOG_TIMESTAMP, entry.get(ACCESS_LOG_TIMESTAMP));
+        formattedEntry.put(ACCESS_LOG_USERID, entry.get(ACCESS_LOG_USERID));
         return formattedEntry;
     }
 
@@ -841,21 +872,21 @@ public class AuditServiceImpl implements AuditService {
      */
     private static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
-        formattedEntry.put("_id", entry.get("_id"));
-        formattedEntry.put("activityId", entry.get("activityId"));
-        formattedEntry.put("timestamp", entry.get("timestamp"));
-        formattedEntry.put("action", entry.get("action"));
-        formattedEntry.put("message", entry.get("message"));
-        formattedEntry.put("objectId", entry.get("objectId"));
-        formattedEntry.put("rev", entry.get("rev"));
-        formattedEntry.put("rootActionId", entry.get("rootActionId"));
-        formattedEntry.put("parentActionId", entry.get("parentActionId"));
-        formattedEntry.put("requester", entry.get("requester"));
-        formattedEntry.put("before", entry.get("before"));
-        formattedEntry.put("after", entry.get("after"));
-        formattedEntry.put("status", entry.get("status"));
-        formattedEntry.put("changedFields", entry.get("changedFields"));
-        formattedEntry.put("passwordChanged", entry.get("passwordChanged"));
+        formattedEntry.put(LOG_ID, entry.get(LOG_ID));
+        formattedEntry.put(ActivityLog.ACTIVITY_ID, entry.get(ActivityLog.ACTIVITY_ID));
+        formattedEntry.put(ActivityLog.TIMESTAMP, entry.get(ActivityLog.TIMESTAMP));
+        formattedEntry.put(ActivityLog.ACTION, entry.get(ActivityLog.ACTION));
+        formattedEntry.put(ActivityLog.MESSAGE, entry.get(ActivityLog.MESSAGE));
+        formattedEntry.put(ActivityLog.OBJECT_ID, entry.get(ActivityLog.OBJECT_ID));
+        formattedEntry.put(ActivityLog.REVISION, entry.get(ActivityLog.REVISION));
+        formattedEntry.put(ActivityLog.ROOT_ACTION_ID, entry.get(ActivityLog.ROOT_ACTION_ID));
+        formattedEntry.put(ActivityLog.PARENT_ACTION_ID, entry.get(ActivityLog.PARENT_ACTION_ID));
+        formattedEntry.put(ActivityLog.REQUESTER, entry.get(ActivityLog.REQUESTER));
+        formattedEntry.put(ActivityLog.BEFORE, entry.get(ActivityLog.BEFORE));
+        formattedEntry.put(ActivityLog.AFTER, entry.get(ActivityLog.AFTER));
+        formattedEntry.put(ActivityLog.STATUS, entry.get(ActivityLog.STATUS));
+        formattedEntry.put(ActivityLog.CHANGED_FIELDS, entry.get(ActivityLog.CHANGED_FIELDS));
+        formattedEntry.put(ActivityLog.PASSWORD_CHANGED, entry.get(ActivityLog.PASSWORD_CHANGED));
         return formattedEntry;
     }
 
@@ -867,24 +898,24 @@ public class AuditServiceImpl implements AuditService {
      */
     public static Map<String, Object> formatReconEntry(Map<String, Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
-        formattedEntry.put("_id", entry.get("_id"));
-        formattedEntry.put("entryType", entry.get("entryType"));
-        formattedEntry.put("timestamp", entry.get("timestamp"));
-        formattedEntry.put("reconId", entry.get("reconId"));
-        formattedEntry.put("rootActionId", entry.get("rootActionId"));
-        formattedEntry.put("status", entry.get("status"));
-        formattedEntry.put("message", entry.get("message"));
-        formattedEntry.put("messageDetail", entry.get("messageDetail"));
-        formattedEntry.put("exception", entry.get("exception"));
-        if ("".equals(entry.get("entryType")) || null == entry.get("entryType")) {
+        formattedEntry.put(LOG_ID, entry.get(LOG_ID));
+        formattedEntry.put(RECON_LOG_ENTRY_TYPE, entry.get(RECON_LOG_ENTRY_TYPE));
+        formattedEntry.put(RECON_LOG_TIMESTAMP, entry.get(RECON_LOG_TIMESTAMP));
+        formattedEntry.put(RECON_LOG_RECON_ID, entry.get(RECON_LOG_RECON_ID));
+        formattedEntry.put(RECON_LOG_ROOT_ACTION_ID, entry.get(RECON_LOG_ROOT_ACTION_ID));
+        formattedEntry.put(RECON_LOG_STATUS, entry.get(RECON_LOG_STATUS));
+        formattedEntry.put(RECON_LOG_MESSAGE, entry.get(RECON_LOG_MESSAGE));
+        formattedEntry.put(RECON_LOG_MESSAGE_DETAIL, entry.get(RECON_LOG_MESSAGE_DETAIL));
+        formattedEntry.put(RECON_LOG_EXCEPTION, entry.get(RECON_LOG_EXCEPTION));
+        if ("".equals(entry.get(RECON_LOG_ENTRY_TYPE)) || null == entry.get(RECON_LOG_ENTRY_TYPE)) {
             // recon entry
-            formattedEntry.put("actionId", entry.get("actionId"));
-            formattedEntry.put("action", entry.get("action"));
-            formattedEntry.put("ambiguousTargetObjectIds", entry.get("ambiguousTargetObjectIds"));
-            formattedEntry.put("reconciling", entry.get("reconciling"));
-            formattedEntry.put("situation", entry.get("situation"));
-            formattedEntry.put("sourceObjectId", entry.get("sourceObjectId"));
-            formattedEntry.put("targetObjectId", entry.get("targetObjectId"));
+            formattedEntry.put(RECON_LOG_ACTION_ID, entry.get(RECON_LOG_ACTION_ID));
+            formattedEntry.put(RECON_LOG_ACTION, entry.get(RECON_LOG_ACTION));
+            formattedEntry.put(RECON_LOG_AMBIGUOUS_TARGET_OBJECT_IDS, entry.get(RECON_LOG_AMBIGUOUS_TARGET_OBJECT_IDS));
+            formattedEntry.put(RECON_LOG_RECONCILING, entry.get(RECON_LOG_RECONCILING));
+            formattedEntry.put(RECON_LOG_SITUATION, entry.get(RECON_LOG_SITUATION));
+            formattedEntry.put(RECON_LOG_SOURCE_OBJECT_ID, entry.get(RECON_LOG_SOURCE_OBJECT_ID));
+            formattedEntry.put(RECON_LOG_TARGET_OBJECT_ID, entry.get(RECON_LOG_TARGET_OBJECT_ID));
         } else {
             formattedEntry.put("mapping", entry.get("mapping"));
         }

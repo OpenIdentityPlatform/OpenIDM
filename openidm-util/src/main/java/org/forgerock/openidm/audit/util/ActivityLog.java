@@ -29,12 +29,12 @@ import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.DateUtil;
@@ -52,20 +52,20 @@ public class ActivityLog {
     private final static boolean suspendException;
     private static DateUtil dateUtil;
 
-    public final static String TIMESTAMP = "timestamp";
-    public final static String ACTION = "action";
-    public final static String MESSAGE = "message";
-    public final static String OBJECT_ID = "objectId";
-    public final static String REVISION = "rev";
-    public final static String ACTIVITY_ID = "activityId";
-    public final static String ROOT_ACTION_ID = "rootActionId";
-    public final static String PARENT_ACTION_ID = "parentActionid";
-    public final static String REQUESTER = "requester";
-    public final static String BEFORE = "before";
-    public final static String AFTER = "after";
-    public final static String STATUS = "status";
-    public final static String CHANGED_FIELDS = "changedFields";
-    public final static String PASSWORD_CHANGED = "passwordChanged";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String ACTION = "action";
+    public static final String MESSAGE = "message";
+    public static final String OBJECT_ID = "objectId";
+    public static final String REVISION = "rev";
+    public static final String ACTIVITY_ID = "activityId";
+    public static final String ROOT_ACTION_ID = "rootActionId";
+    public static final String PARENT_ACTION_ID = "parentActionId";
+    public static final String REQUESTER = "requester";
+    public static final String BEFORE = "before";
+    public static final String AFTER = "after";
+    public static final String STATUS = "status";
+    public static final String CHANGED_FIELDS = "changedFields";
+    public static final String PASSWORD_CHANGED = "passwordChanged";
 
     /**
      * Creates a Jackson object mapper. By default, it calls
@@ -73,37 +73,28 @@ public class ActivityLog {
      * 
      */
     static {
-        String config =
-                IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
+        String config = IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
         suspendException = "suspend".equals(config);
         // TODO Allow for configured dateUtil
         dateUtil = DateUtil.getDateUtil("UTC");
     }
 
-    public static String getRequester(JsonValue request) {
-        String result = null;
-        while (request != null && !request.isNull()) {
-            JsonValue user = request.get("security").get("username");
-            if (user.isString()) {
-                result = user.asString();
-                break;
-            }
-            request = request.get("parent");
-        }
-        return result;
+    public static String getRequester(Context context) {
+        SecurityContext securityContext = context.asContext(SecurityContext.class);
+        return securityContext != null
+                ? securityContext.getAuthenticationId()
+                : null;
     }
 
-    public static void log(ServerContext router, RequestType requestType, String message, String objectId,
+    public static void log(ServerContext context, RequestType requestType, String message, String objectId,
             JsonValue before, JsonValue after, Status status) throws ResourceException {
         if (requestType == null) {
             throw new NullPointerException("Request can not be null when audit.");
         }
         // TODO: convert to flyweight?
         try {
-            Map<String, Object> activity =
-                    buildLog(router, requestType, message, objectId, before, after, status);
-            // TODO: UPGRADE
-            router.getConnection().create(new ServerContext(router),
+            Map<String, Object> activity = buildLog(context, requestType, message, objectId, before, after, status);
+            context.getConnection().create(new ServerContext(context),
                     Requests.newCreateRequest("audit/activity", new JsonValue(activity)));
         } catch (ResourceException ex) {
             logger.warn("Failed to write activity log {}", ex);
@@ -132,7 +123,6 @@ public class ActivityLog {
             after = null;
         }
 
-        // TODO: UPGRADE (Get the parent and the root context id)
         Context root = context.asContext(RootContext.class);
         Context parent = context.getParent();
 
@@ -145,8 +135,7 @@ public class ActivityLog {
         activity.put(ACTIVITY_ID, context.getId());
         activity.put(ROOT_ACTION_ID, root.getId());
         activity.put(PARENT_ACTION_ID, parent.getId());
-        // TODO: UPGRADE (Get the Requester)
-        // activity.put(REQUESTER, getRequester(request));
+        activity.put(REQUESTER, getRequester(context));
         activity.put(BEFORE, JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
         activity.put(AFTER, JsonUtil.jsonIsNull(after) ? null : after.getWrappedObject());
         activity.put(STATUS, status == null ? null : status.toString());
