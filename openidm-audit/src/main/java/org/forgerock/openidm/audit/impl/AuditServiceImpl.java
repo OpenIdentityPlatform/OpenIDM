@@ -137,20 +137,20 @@ public class AuditServiceImpl implements AuditService {
     // activity log property key constants are in org.forgerock.util.ActivityLog
 
     public static final String RECON_LOG_ENTRY_TYPE = "entryType";
-    public static final String RECON_LOG_TIMESTAMP = "recon_log_timestamp";
-    public static final String RECON_LOG_RECON_ID = "recon_log_reconId";
-    public static final String RECON_LOG_ROOT_ACTION_ID = "recon_log_rootActionId";
-    public static final String RECON_LOG_STATUS = "recon_log_status";
-    public static final String RECON_LOG_MESSAGE = "recon_log_message";
-    public static final String RECON_LOG_MESSAGE_DETAIL = "recon_log_messageDetail";
-    public static final String RECON_LOG_EXCEPTION = "recon_log_exception";
-    public static final String RECON_LOG_ACTION_ID = "recon_log_actionId";
-    public static final String RECON_LOG_ACTION = "recon_log_action";
-    public static final String RECON_LOG_AMBIGUOUS_TARGET_OBJECT_IDS = "recon_log_ambiguousTargetObjectIds";
-    public static final String RECON_LOG_RECONCILING = "recon_log_reconciling";
-    public static final String RECON_LOG_SITUATION = "recon_log_situation";
-    public static final String RECON_LOG_SOURCE_OBJECT_ID = "recon_log_sourceObjectId";
-    public static final String RECON_LOG_TARGET_OBJECT_ID = "recon_log_targetObjectId";
+    public static final String RECON_LOG_TIMESTAMP = "timestamp";
+    public static final String RECON_LOG_RECON_ID = "reconId";
+    public static final String RECON_LOG_ROOT_ACTION_ID = "rootActionId";
+    public static final String RECON_LOG_STATUS = "status";
+    public static final String RECON_LOG_MESSAGE = "message";
+    public static final String RECON_LOG_MESSAGE_DETAIL = "messageDetail";
+    public static final String RECON_LOG_EXCEPTION = "exception";
+    public static final String RECON_LOG_ACTION_ID = "actionId";
+    public static final String RECON_LOG_ACTION = "action";
+    public static final String RECON_LOG_AMBIGUOUS_TARGET_OBJECT_IDS = "ambiguousTargetObjectIds";
+    public static final String RECON_LOG_RECONCILING = "reconciling";
+    public static final String RECON_LOG_SITUATION = "situation";
+    public static final String RECON_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
+    public static final String RECON_LOG_TARGET_OBJECT_ID = "targetObjectId";
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
