@@ -416,12 +416,19 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
+uniqueMember: uid=bjensen,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top</programlisting>
    
-   <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
-   is also imported with the <filename>Example.ldif</filename> file.</para> 
+   <para>The users with DNs <literal>uid=jdoe,ou=People,dc=example,dc=com</literal>
+   and <literal>uid=bjensen,ou=People,dc=example,dc=com</literal> are also
+   imported with the <filename>Example.ldif</filename> file. (The user
+   <literal>bjensen</literal> is essentially a "dummy" user, provided for
+   compliance with RFC 4519, which stipulates that every
+   <literal>groupOfUniqueNames</literal> object must contain at least one
+   <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+   used in this sample.)</para>
   </section>
   
   <section xml:id="install-sample2c">
@@ -469,11 +476,15 @@ $ curl
             "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
             "_rev": "0"
         }
+        {
+            "_id": "e90640e1-e426-4a36-8282-1caf36f3324a",
+            "_rev": "0"
+        }
     ],
     "conversion-time-ms": 0
  }</programlisting>
 
-   <para>To retrieve the user, get the object by ID.</para>
+   <para>Retrieve John Doe's user object by his ID.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -481,7 +492,7 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
  
-   <para>Your user's object should contain a property like: </para>
+   <para>The user object should contain a property like: </para>
    
    <screen>"ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"]</screen>
    
@@ -512,7 +523,16 @@ $ curl
    to <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and, as a 
    result, the user will be removed from the one LDAP group and added to 
    the other LDAP group on OpenDJ.</para>
-   
+
+   <para>Retrieve John Doe's user object again and notice the changed
+   <literal>"ldapGroups"</literal> property.</para>
+
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+
    <para>By default, automatic synchronization is enabled. This means that 
    when you update a managed object, any mappings defined in the 
    <filename>sync.json</filename> file are automatically executed to update 
