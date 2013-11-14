@@ -241,11 +241,10 @@ class ManagedObjectProperty {
         execScript(context, "onStore", onStore, value);
         setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
-
-            if (JsonCrypto.isJsonCrypto(value)) {
+            if (!cryptoService.isEncrypted(value)) {
                 try {
-                    value.put(name, new JsonCrypto(encryptor.getType(), encryptor.encrypt(value
-                            .get(name))).toJsonValue().getObject());
+                    value.put(name,
+                            new JsonCrypto(encryptor.getType(), encryptor.encrypt(value.get(name))).toJsonValue());
                 } catch (JsonCryptoException jce) {
                     String msg = name + " property encryption exception";
                     logger.debug(msg, jce);
