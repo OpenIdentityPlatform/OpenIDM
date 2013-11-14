@@ -186,6 +186,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
                     new Optional(), // objectId
                     new Optional(), // parentActionId
                     new Optional(), // passwordChanged
+                    new Optional(), // requester
                     new Optional(), // rev
                     new Optional(), // rootActionId
                     new Optional(), // status
