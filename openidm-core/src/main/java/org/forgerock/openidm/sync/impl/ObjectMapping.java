@@ -51,6 +51,7 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
 
@@ -58,6 +59,7 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.script.exception.ScriptThrownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -890,7 +892,7 @@ class ObjectMapping  {
         entry.exception = se;
         while (throwable.getCause() != null) { // want message associated with original cause
             if (jre == null && throwable instanceof ResourceException) {
-                jre = (ResourceException)throwable;
+                jre = (ResourceException) throwable;
             }
             throwable = throwable.getCause();
         }
@@ -900,7 +902,7 @@ class ObjectMapping  {
             entry.message = throwable.getMessage();
         }
         if (jre != null) {
-            entry.messageDetail = ((ResourceException)jre).toJsonValue();
+            entry.messageDetail = jre.toJsonValue();
         }
     }
 
@@ -1520,9 +1522,15 @@ class ObjectMapping  {
                 }
                 try {
                     script.exec(scope);
+                } catch (ScriptThrownException se) {
+                    LOGGER.debug("{} script encountered exception", name + " " + type, se);
+                    throw new SynchronizationException(
+                            se.toResourceException(ResourceException.INTERNAL_ERROR,
+                                    name + " " + type + " script encountered exception"));
                 } catch (ScriptException se) {
                     LOGGER.debug("{} script encountered exception", name + " " + type, se);
-                    throw new SynchronizationException(se);
+                    throw new SynchronizationException(
+                            new InternalErrorException(name + " " + type + " script encountered exception", se));
                 }
             }
         }
