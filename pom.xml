@@ -337,6 +337,7 @@
         <module>openidm-upgrade</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-workflow-remote</module>
+        <module>openidm-patch-base</module>
         <module>openidm-zip</module>
     </modules>
 
