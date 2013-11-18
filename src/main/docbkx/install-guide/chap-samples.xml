@@ -187,6 +187,12 @@ sn: Doe
 mail: jdoe@example.com
 description: Created for OpenIDM
 </programlisting>
+      <para>There is an additional user, <literal>bjensen</literal> in the
+      sample LDIF file. This user is essentially a "dummy" user, provided for
+      compliance with RFC 4519, which stipulates that every
+      <literal>groupOfUniqueNames</literal> object must contain at least one
+      <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+      used in this sample.)</para>
   </section>
 
   <section xml:id="install-sample2">
@@ -578,6 +584,7 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
+uniqueMember: uid=bjensen,ou=People,dc=example,dc=com
 uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
@@ -586,6 +593,13 @@ objectClass: top
    
    <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
    is also imported with the <filename>Example.ldif</filename> file.</para>
+
+   <para>There is an additional user, <literal>bjensen</literal> in the
+   sample LDIF file. This user is essentially a "dummy" user, provided for
+   compliance with RFC 4519, which stipulates that every
+   <literal>groupOfUniqueNames</literal> object must contain at least one
+   <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+   used in this sample.)</para>
   </section>  
   
   <section xml:id="install-sample2d">
