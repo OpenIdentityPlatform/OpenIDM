@@ -16,13 +16,15 @@
 
 package org.forgerock.openidm.filterregistration;
 
+import javax.servlet.Filter;
+
 import org.forgerock.json.fluent.JsonValue;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Interface for registering servlet filters in OSGi.
  *
  * @author Phill Cunnington
+ * @author ckienle
  */
 public interface ServletFilterRegistration {
 
@@ -30,8 +32,16 @@ public interface ServletFilterRegistration {
      * Parses the given servlet filter configuration and registers a servlet filter in OSGi.
      *
      * @param config The servlet filter configuration.
-     * @return The ServiceRegistration.
+     * @return The registered Filter.
      * @throws Exception If a problem occurs registering the servlet filter.
      */
-    ServiceRegistration registerFilter(JsonValue config) throws Exception;
+    RegisteredFilter registerFilter(JsonValue config) throws Exception;
+
+    /**
+     * Unregisters a servlet filter in OSGi.
+     *
+     * @param filter The registered Filter.
+     * @throws Exception If a problem occurs unregistering the servlet filter.
+     */
+    void unregisterFilter(RegisteredFilter filter) throws Exception;
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,7 +38,6 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
@@ -52,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * for applying uniform security handling
  *
  * @author aegloff
+ * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.http.contextregistrator", 
         immediate = true,
@@ -87,8 +87,7 @@ public final class ContextRegistrator {
         httpContext = httpService.createDefaultHttpContext();
         Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
         contextProps.put("openidm.contextid", "shared");
-        contextProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "openidm");
-        //TODO: Consider the HttpContextMapping it allows to configure the path
+        contextProps.put("httpContext.id", "openidm");
         context.getBundleContext().registerService(HttpContext.class.getName(), httpContext, contextProps);
         logger.debug("Registered OpenIDM shared http context");
         

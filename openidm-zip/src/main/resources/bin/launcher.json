@@ -81,7 +81,6 @@
                     "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
-                    "**/pax-web-extender-whiteboard*.jar",
                     "**/openidm-scheduler*.jar",
                     "**/groovy-all*.jar"
                 ]
@@ -97,7 +96,6 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/pax-web-extender-whiteboard*.jar",
                     "**/openidm-scheduler*.jar"
                 ],
                 "start-level":12,

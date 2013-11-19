@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright Â© 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.filterregistration.impl;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -25,20 +28,18 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.filterregistration.RegisteredFilter;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Takes configuration to register and de-register configured servlet filters, 
  * with support to load the filter or supporting classes off a defined class path.
  *
  * @author aegloff
+ * @author ckienle
  */
 @Component(
     name = "org.forgerock.openidm.servletfilter", 
@@ -48,9 +49,8 @@ import java.util.Map;
 )
 public class ServletFilterConfiguration {
     private final static Logger logger = LoggerFactory.getLogger(ServletFilterConfiguration.class);
-
-    // Handle to registered servlet filter
-    private ServiceRegistration serviceRegistration;
+    
+    private RegisteredFilter registeredFilter;
     
     // Original setting of system properties
     Map<String, String> origSystemProperties = new HashMap<String, String>();
@@ -84,7 +84,7 @@ public class ServletFilterConfiguration {
 
         logger.debug("Parsed servlet filter config: {}", config);
 
-        serviceRegistration = servletFilterRegistration.registerFilter(config);
+        registeredFilter = servletFilterRegistration.registerFilter(config);
         logger.info("Successfully registered servlet filter {}", context.getProperties());
 
         origSystemProperties = new HashMap<String, String>();
@@ -103,9 +103,9 @@ public class ServletFilterConfiguration {
      */
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (serviceRegistration != null) {
+        if (registeredFilter != null) {
             try {
-                serviceRegistration.unregister();
+                servletFilterRegistration.unregisterFilter(registeredFilter);
                 logger.info("Unregistered servlet filter {}.", context.getProperties());
             } catch (Exception ex) {
                 logger.warn("Failure reported during unregistering of servlet filter {}: {}", 

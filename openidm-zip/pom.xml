@@ -267,18 +267,7 @@
             <artifactId>ops4j-base-lang</artifactId>
             <version>1.4.0</version>
         </dependency>
-
-        <!-- Jetty-based web container and whiteboard -->
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-whiteboard</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        
         <!--
                 <dependency>
                     <groupId>org.apache.felix</groupId>

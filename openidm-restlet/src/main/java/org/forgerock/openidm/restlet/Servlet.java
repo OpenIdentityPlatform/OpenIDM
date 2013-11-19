@@ -11,93 +11,67 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.restlet;
 
 // Java SE
-import java.util.ArrayList;
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Dictionary;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-// Java Servlet
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// OSGi
-import org.forgerock.openidm.http.ContextRegistrator;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-
-// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
-
-// SLF4J
-import org.restlet.ext.servlet.ServletUtils;
-import org.restlet.resource.ResourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// Restlet
-import org.restlet.Request;
-import org.restlet.Restlet;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Resource
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
-
-// JSON Resource Restlet
 import org.forgerock.json.resource.restlet.JsonResourceRestlet;
-
-// Restlet Utilities
-import org.forgerock.restlet.RestletRouterServlet;
-
 import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
-import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.restlet.RestletRouterServlet;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.NamespaceException;
+import org.restlet.Request;
+import org.restlet.Restlet;
+import org.restlet.ext.servlet.ServletUtils;
+import org.restlet.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to handle the REST interface.
  *
  * @author Paul C. Bryan
  * @author aegloff
+ * @author ckienle
  */
 @Component(
     name = "org.forgerock.openidm.restlet",
@@ -122,12 +96,9 @@ public class Servlet extends RestletRouterServlet {
     
     /** TODO: Description. */
     private static final String PATH_PROPERTY = "openidm.restlet.path";
-
-    /** TODO: Description. */
-    private ComponentContext context;
-
-    /** TODO: Description. */
-    private ServiceRegistration serviceRegistration;
+    
+    @Reference
+    private WebContainer webContainer;
     
     // Optional scripts to augment/populate the security context
     List<Script> augmentSecurityContext = new CopyOnWriteArrayList<Script>();
@@ -218,26 +189,14 @@ public class Servlet extends RestletRouterServlet {
 
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
-        this.context = context;
-        JsonValue config = new JsonValue(new HashMap());
-
         String alias = "/openidm";
-        DefaultServletMapping servletMapping = new DefaultServletMapping();
-        servletMapping.setHttpContextId("openidm");
-        servletMapping.setAlias(alias);
-        servletMapping.setServlet(this);
-        servletMapping.setServletName("OpenIDM REST");
-        //All WebApplication elements must be registered with the same BundleContext
-        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(ServletMapping.class.getName(), servletMapping, null);
+        webContainer.registerServlet(alias, this, new Hashtable(), webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered servlet at {}", alias);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-        }
-        this.context = null;
+        webContainer.unregisterServlet(this);
     }
 
     @Override
