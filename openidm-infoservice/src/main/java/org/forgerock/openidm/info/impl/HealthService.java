@@ -146,7 +146,6 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         "org.forgerock.openidm.security-jetty",
         "org.forgerock.openidm.jetty-fragment",
         "org.forgerock.openidm.quartz-fragment",
-        "org.ops4j.pax.web.pax-web-extender-whiteboard",
         "org.forgerock.openidm.scheduler",
         "org.ops4j.pax.web.pax-web-jetty-bundle",
         "org.forgerock.openidm.repo-jdbc",

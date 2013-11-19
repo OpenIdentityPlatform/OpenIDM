@@ -55,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-whiteboard</artifactId>
+            <artifactId>pax-web-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
