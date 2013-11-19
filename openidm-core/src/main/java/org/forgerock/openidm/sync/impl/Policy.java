@@ -139,7 +139,8 @@ class Policy {
                 actionParam = ((ObjectMapping.SourceSyncOperation)syncOperation).toJsonValue();
             }
             if (null != actionParam){
-                actionParam.put(ActionRequest.FIELD_ACTION,"performAction");
+                //FIXME Decide if leading underscore should be used here or not
+                actionParam.put("_" + ActionRequest.FIELD_ACTION,"performAction");
                 recon.put("actionParam",actionParam.getObject());
             }
 
