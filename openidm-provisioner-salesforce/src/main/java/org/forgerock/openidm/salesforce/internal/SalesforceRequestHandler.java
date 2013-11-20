@@ -79,9 +79,12 @@ public class SalesforceRequestHandler implements ProvisionerService {
         }
         organizationName = (String)o;
 
-        connection =
-                new SalesforceConnection(parseConfiguration(configuration
-                        .get("configurationProperties")));
+        if (!configuration.get("enabled").defaultTo(true).asBoolean()) {
+            logger.info("Salesforce Connector {} is disabled, \"enabled\" set to false in configuration", organizationName);
+            return;
+        }
+        
+        connection = new SalesforceConnection(parseConfiguration(configuration.get("configurationProperties")));
         connection.test();
 
         AbstractAsyncResourceProvider async = new AsyncJobResourceProvider(connection);
