@@ -154,6 +154,10 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         try {
             jsonConfiguration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
+            if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {
+                logger.info("OpenICF Provisioner Service {} is disabled, \"enabled\" set to false in configuration", systemIdentifier.getName());
+                return;
+            }
             allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
             if (!allowModification) {
                 logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier);
