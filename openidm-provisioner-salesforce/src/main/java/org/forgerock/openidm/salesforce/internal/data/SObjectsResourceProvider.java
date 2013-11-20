@@ -69,7 +69,7 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
         final ClientResource cr = getClientResource(type, null);
         try {
             JsonValue create = new JsonValue(describe.beforeCreate(request.get("value")));
-            logger.error("Create sobjects/{} \n content: \n{}\n", type, create);
+            logger.trace("Create sobjects/{} \n content: \n{}\n", type, create);
 
             cr.getRequest().setEntity(new JacksonRepresentation<Map>(create.asMap()));
             cr.setMethod(org.restlet.data.Method.POST);
