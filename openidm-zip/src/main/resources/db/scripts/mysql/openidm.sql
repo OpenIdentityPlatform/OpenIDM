@@ -151,7 +151,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
+  `rootactionid` VARCHAR(255) NULL ,
   `reconid` VARCHAR(36) NULL ,
   `reconciling` VARCHAR(12) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
@@ -171,9 +171,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rootactionid` VARCHAR(511) NULL ,
-  `parentactionid` VARCHAR(511) NULL ,
-  `activityid` VARCHAR(511) NULL ,
+  `rootactionid` VARCHAR(255) NULL ,
+  `parentactionid` VARCHAR(255) NULL ,
+  `activityid` VARCHAR(255) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
   `message` TEXT NULL ,
