@@ -16,6 +16,14 @@
 
 package org.forgerock.openidm.jaspi.config;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.security.auth.message.AuthException;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -32,22 +40,15 @@ import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.filterregistration.RegisteredFilter;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.security.auth.message.AuthException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Configures the authentication chains based on configuration obtained through OSGi.
@@ -89,6 +90,7 @@ import java.util.Map;
  * @author Jonathan Scudder
  * @author Phill Cunnington
  * @author brmiller
+ * @author ckienle
  */
 @Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Properties({
@@ -107,6 +109,8 @@ public class OSGiAuthnFilterBuilder {
     private static final String CONFIG_AUDIT_LOGGER = "auditLogger";
     private static final String CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT = "authnPopulateContextScript";
     private static final String CONFIG_ADDITIONAL_URL_PATTERNS = "additionalUrlPatterns";
+    
+    private static final int DEFAULT_FILTER_ORDER = 100;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -293,7 +297,7 @@ public class OSGiAuthnFilterBuilder {
         this.servletFilterRegistration = null;
     }
 
-    private ServiceRegistration authnFilterRegistration;
+    private RegisteredFilter filter;
 
     /**
      * Registers the Authentication Filter in OSGi.
@@ -327,22 +331,23 @@ public class OSGiAuthnFilterBuilder {
         filterConfig.put("scriptExtensions", scriptExtensions);
         filterConfig.put("urlPatterns", urlPatterns);
         filterConfig.put("filterClass", AuthNFilter.class.getCanonicalName());
+        filterConfig.put("order", DEFAULT_FILTER_ORDER);
 
         JsonValue filterConfigJson = new JsonValue(filterConfig);
 
-        authnFilterRegistration = servletFilterRegistration.registerFilter(filterConfigJson);
+        filter = servletFilterRegistration.registerFilter(filterConfigJson);
     }
 
     /**
-     * De-registers the authentication filter.
+     * Unregisters the authentication filter.
      *
      * @param context The ComponentContext.
      */
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (authnFilterRegistration != null) {
+        if (filter != null) {
             try {
-                authnFilterRegistration.unregister();
+                servletFilterRegistration.unregisterFilter(filter);
                 logger.info("Unregistered authentication filter.");
             } catch (Exception ex) {
                 logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);

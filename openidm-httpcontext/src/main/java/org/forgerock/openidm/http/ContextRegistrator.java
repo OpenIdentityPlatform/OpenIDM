@@ -37,17 +37,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.ops4j.pax.web.extender.whiteboard.ErrorPageMapping;
-import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.ListenerMapping;
-import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
-import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
-import org.ops4j.pax.web.extender.whiteboard.WelcomeFileMapping;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
@@ -58,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * security handling
  * 
  * @author aegloff
+ * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.http.context", immediate = true,
         policy = ConfigurationPolicy.IGNORE)
@@ -89,11 +81,10 @@ public final class ContextRegistrator {
 
     @Activate
     protected void activate(ComponentContext context) throws Exception {
-        this.context = context;
+        ContextRegistrator.context = context;
         httpContext = httpService.createDefaultHttpContext();
         Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
         contextProps.put("openidm.contextid", "shared");
-        contextProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, OPENIDM);
         // TODO: Consider the HttpContextMapping it allows to configure the path
         context.getBundleContext().registerService(HttpContext.class.getName(), httpContext,
                 contextProps);
@@ -208,41 +199,6 @@ public final class ContextRegistrator {
             configurator.deactivate(httpService, httpContext, context);
             logger.debug("Deactivated security configurator {}", configurator.getClass().getName());
         }
-    }
-
-    public ServiceRegistration registerServletMapping(ServletMapping mapping) {
-        return context.getBundleContext().registerService(ServletMapping.class.getName(), mapping,
-                null);
-    }
-
-    public ServiceRegistration registerFilterMapping(FilterMapping mapping) {
-        return context.getBundleContext().registerService(FilterMapping.class.getName(), mapping,
-                null);
-    }
-
-    public ServiceRegistration registerListenerMapping(ListenerMapping mapping) {
-        return context.getBundleContext().registerService(ListenerMapping.class.getName(), mapping,
-                null);
-    }
-
-    public ServiceRegistration registerWelcomeFileMapping(WelcomeFileMapping mapping) {
-        return context.getBundleContext().registerService(WelcomeFileMapping.class.getName(),
-                mapping, null);
-    }
-
-    public ServiceRegistration registerResourceMapping(ResourceMapping mapping) {
-        return context.getBundleContext().registerService(ResourceMapping.class.getName(), mapping,
-                null);
-    }
-
-    public ServiceRegistration registerExtenderConstants(ExtenderConstants mapping) {
-        return context.getBundleContext().registerService(ExtenderConstants.class.getName(),
-                mapping, null);
-    }
-
-    public ServiceRegistration registerErrorPageMapping(ErrorPageMapping mapping) {
-        return context.getBundleContext().registerService(ErrorPageMapping.class.getName(),
-                mapping, null);
     }
 
     public String getHttpContextId() {

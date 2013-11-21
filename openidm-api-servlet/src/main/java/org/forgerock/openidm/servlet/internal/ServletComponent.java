@@ -24,8 +24,9 @@
 
 package org.forgerock.openidm.servlet.internal;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
+
+import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -40,14 +41,13 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.servlet.HttpServlet;
 import org.forgerock.json.resource.servlet.HttpServletContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.http.ContextRegistrator;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * A NAME does ...
  * 
  * @author Laszlo Hordos
+ * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.api-servlet", immediate = true,
         policy = ConfigurationPolicy.IGNORE)
@@ -77,38 +78,24 @@ public class ServletComponent implements EventHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected HttpServletContextFactory servletContextFactory;
 
-    private ServiceRegistration serviceRegistration = null;
-
-    private ComponentContext context = null;
+    @Reference
+    private WebContainer webContainer;
+    
+    private HttpServlet servlet;
 
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.debug("Try registering servlet at {}", "/openidm");
-        this.context = context;
-        HttpServlet servlet = new HttpServlet(connectionFactory, servletContextFactory);
+        servlet = new HttpServlet(connectionFactory, servletContextFactory);
 
-        // TODO Read these from configuraton
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("alias", "/openidm");
-        properties.put("httpContext.id", "openidm");
-        properties.put("servletNames", "OpenIDM REST");
-
-        /*
-         * All WebApplication elements must be registered with the same
-         * BundleContext
-         */
-        serviceRegistration =
-                FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext()
-                        .registerService(javax.servlet.http.HttpServlet.class, servlet, properties);
+        String alias = "/openidm";
+        webContainer.registerServlet(alias, servlet, new Hashtable(), webContainer.getDefaultSharedHttpContext());
         logger.info("Registered servlet at {}", "/openidm");
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-        }
-        this.context = null;
+        webContainer.unregisterServlet(servlet);
     }
 
     @Override
@@ -116,7 +103,11 @@ public class ServletComponent implements EventHandler {
         // TODO: receive the OpenIDM started event and enable the full HTTP
         // service
         if (event.getTopic().equals("org/forgerock/openidm/servlet/ACTIVATE")) {
-            activate(context);
+            try {
+                activate(null);
+            } catch (Exception e) {
+                logger.error("Error activating api-servlet", e);
+            }
         } else if (event.getTopic().equals("org/forgerock/openidm/servlet/DEACTIVATE")) {
             deactivate(null);
         }

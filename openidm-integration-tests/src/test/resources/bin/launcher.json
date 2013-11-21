@@ -68,7 +68,6 @@
                     "**/org.apache.felix.fileinstall*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
-                    "**/pax-web-extender-whiteboard*.jar",
                     "**/openidm-scheduler*.jar"
                 ]
             },
@@ -83,7 +82,6 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/pax-web-extender-whiteboard*.jar",
                     "**/openidm-scheduler*.jar"
                 ],
                 "start-level":12,
