@@ -30,14 +30,12 @@ import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
 import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.router.RouteService;
-import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -328,7 +326,7 @@ public class OSGiAuthnFilterBuilder {
         filterConfig.put("initParams", initParams);
         filterConfig.put("scriptExtensions", scriptExtensions);
         filterConfig.put("urlPatterns", urlPatterns);
-        filterConfig.put("filterClass", IDMAuthContextMapper.class.getCanonicalName());
+        filterConfig.put("filterClass", AuthNFilter.class.getCanonicalName());
 
         JsonValue filterConfigJson = new JsonValue(filterConfig);
 
