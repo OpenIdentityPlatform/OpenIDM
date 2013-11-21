@@ -89,6 +89,11 @@ public class SalesforceRequestHandler implements ProvisionerService {
         }
         organizationName = (String)o;
 
+        if (!configuration.get("enabled").defaultTo(true).asBoolean()) {
+            logger.info("Salesforce Connector {} is disabled, \"enabled\" set to false in configuration", organizationName);
+            return;
+        }
+
         SalesforceConfiguration config = null;
         try {
          config = parseConfiguration(configuration
@@ -99,10 +104,6 @@ public class SalesforceRequestHandler implements ProvisionerService {
                     "Configuration invalid and could not be used, can not start Salesforce Connector: "
                             + ex.getMessage(), ex);
             throw ex;
-        }
-        if (!configuration.get("enabled").defaultTo(true).asBoolean()) {
-            logger.info("Salesforce Connector {} is disabled, \"enabled\" set to false in configuration", organizationName);
-            return;
         }
 
         connection = new SalesforceConnection(parseConfiguration(configuration.get("configurationProperties")));
