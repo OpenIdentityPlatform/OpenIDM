@@ -77,10 +77,13 @@ public class MetadataResourceProvider extends SimpleJsonResource {
 
     private final SalesforceConnection sfconnection;
 
-    private final MetadataConnection connection;
+    private MetadataConnection connection;
 
     public MetadataResourceProvider(final SalesforceConnection connection) {
         this.sfconnection = connection;
+    }
+
+    private void init() throws JsonResourceException {
         try {
             this.connection = new MetadataConnection(sfconnection.getConnectorConfig("Soap/m"));
             this.connection.getConfig().setTraceMessage(logger.isTraceEnabled());
@@ -126,6 +129,13 @@ public class MetadataResourceProvider extends SimpleJsonResource {
     }
 
     protected MetadataConnection getConnection() throws JsonResourceException {
+        if (null == connection) {
+            synchronized (this) {
+                if (null == connection) {
+                    init();
+                }
+            }
+        }
         return connection;
     }
 

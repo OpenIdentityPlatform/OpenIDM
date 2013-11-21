@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
@@ -32,11 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A NAME does ...
+ * The SObjectsResourceProvider is an adapter for Salesforce Data API.
  *
  * @author Laszlo Hordos
  */
-
 public class SObjectsResourceProvider extends SimpleJsonResource {
 
     /**
@@ -144,7 +142,7 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                         request.get("params").get(QueryConstants.QUERY_EXPRESSION).required()
                                 .asString());
                 cr.setMethod(org.restlet.data.Method.GET);
-                logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr
+                logger.trace("Attempt to execute query: {}?{}", cr.getReference(), cr
                         .getReference().getQuery());
                 handleRequest(cr, true);
                 Representation body = cr.getResponse().getEntity();
@@ -235,7 +233,7 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                 cr.setMethod(SalesforceConnection.PATCH);
 
                 JsonValue update = new JsonValue(describe.beforeUpdate(request.get("value")));
-                logger.info("Update sobjects/{} \n content: \n{}\n", type, update);
+                logger.trace("Update sobjects/{} \n content: \n{}\n", type, update);
 
                 cr.getRequest().setEntity(new JacksonRepresentation<Map>(update.asMap()));
 
@@ -259,10 +257,6 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                     cr.release();
                 }
             }
-            // JacksonRepresentation<Map> rep = new
-            // JacksonRepresentation<Map>(rc.handle(), Map.class);
-            // JsonValue result = new JsonValue(rep.getObject());
-            // return new JsonValue(new HashMap<String,Object>());
         } else {
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
         }
@@ -360,31 +354,8 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
             } else {
                 throw e;
             }
-            // throw new ResourceException(response.getStatus());
         }
-
     }
-
-    // private JsonResourceException getJsonResourceException(ClientResource rc)
-    // {
-    // JsonResourceException jre =
-    // new JsonResourceException(rc.getResponse().getStatus().getCode(),
-    // rc.getResponse()
-    // .getStatus().getDescription());
-    // Representation error = rc.getResponse().getEntity();
-    // if (null != error) {
-    // Map<String, Object> details = new HashMap<String, Object>();
-    // for (Object o : new JacksonRepresentation<List>(error,
-    // List.class).getObject()) {
-    // if (o instanceof Map) {
-    // details.put((String) ((Map) o).get("errorCode"), o);
-    // }
-    // }
-    // jre.setDetail(details);
-    // }
-    // logger.error("Remote REST error: \n{}\n", jre.toJsonValue().toString());
-    // return jre;
-    // }
 
     private ClientResource getClientResource(String type, String id) {
         StringBuilder sb =
@@ -405,156 +376,6 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
             return new String[] { m.group(1) };
         } else {
             return new String[] { m.group(1), m.group(2) };
-        }
-    }
-
-    // Custom
-
-    private void updateCollaborationGroupMemberships(String collaborationGroup, List<Object> members)
-            throws JsonResourceException {
-        JsonValue request = new JsonValue(new HashMap<String, Object>());
-        Map<String, Object> params = new HashMap<String, Object>(1);
-        params.put(
-                QueryConstants.QUERY_EXPRESSION,
-                "SELECT Id, MemberId, CollaborationGroup.OwnerId from CollaborationGroupMember where CollaborationGroupId = '"
-                        + collaborationGroup + "'");
-        request.put("params", params);
-        JsonValue response = query(request);
-
-        for (JsonValue item : response.get(QueryConstants.QUERY_RESULT)) {
-            if (!members.remove(members.contains(item.get("MemberId").asString()))) {
-                if (item.get("MemberId").asString().equals(
-                        item.get(new JsonPointer("CollaborationGroup/OwnerId")).asString())) {
-                    logger.info("Skip to remove the owner");
-                    break;
-                }
-                logger.info(
-                        "Attempt to delete member: sobjects/User/{} from sobjects/CollaborationGroup/{}",
-                        item.get("MemberId").asString(), collaborationGroup);
-                request = new JsonValue(new HashMap<String, Object>());
-                request.put("id", "sobjects/CollaborationGroupMember/" + item.get("Id").asString());
-
-                try {
-                    delete(request);
-                } catch (JsonResourceException e) {
-                    logger.error(
-                            "Failed to delete member: sobjects/User/{} from sobjects/CollaborationGroup/{}",
-                            item.get("MemberId").asString(), collaborationGroup);
-                }
-            }
-        }
-
-        for (Object newMember : members) {
-            logger.info(
-                    "Attempt to add new member: sobjects/User/{} to sobjects/CollaborationGroup/{}",
-                    newMember, collaborationGroup);
-            Map value = new HashMap<String, Object>();
-            value.put("CollaborationGroupId", collaborationGroup);
-            value.put("MemberId", newMember);
-            value.put("CollaborationRole", "Standard");
-            value.put("NotificationFrequency", "N");
-            request = new JsonValue(new HashMap<String, Object>());
-            request.put("id", "sobjects/CollaborationGroupMember");
-            request.put("value", value);
-            try {
-                create(request);
-            } catch (JsonResourceException e) {
-                logger.info(
-                        "Failed to add new member: sobjects/User/{} to sobjects/CollaborationGroup/{}",
-                        newMember, collaborationGroup);
-            }
-        }
-    }
-
-    private void updateGroupMemberships(String group, List<Object> members)
-            throws JsonResourceException {
-        JsonValue request = new JsonValue(new HashMap<String, Object>());
-        Map<String, Object> params = new HashMap<String, Object>(1);
-        params.put(QueryConstants.QUERY_EXPRESSION,
-                "SELECT Id, UserOrGroupId from GroupMember where GroupId = '" + group + "'");
-        request.put("params", params);
-        JsonValue response = query(request);
-
-        for (JsonValue item : response.get(QueryConstants.QUERY_RESULT)) {
-            if (!members.remove(members.contains(item.get("UserOrGroupId").asString()))) {
-                logger.info("Attempt to delete member: sobjects/User/{} from sobjects/Group/{}",
-                        item.get("UserOrGroupId").asString(), group);
-                request = new JsonValue(new HashMap<String, Object>());
-                request.put("id", "sobjects/GroupMember/" + item.get("Id").asString());
-
-                try {
-                    delete(request);
-                } catch (JsonResourceException e) {
-                    logger.error(
-                            "Failed to delete member: sobjects/User/{} from sobjects/Group/{}",
-                            item.get("UserOrGroupId").asString(), group);
-                }
-            }
-        }
-
-        for (Object newMember : members) {
-            logger.info("Attempt to add new member: sobjects/User/{} to sobjects/Group/{}",
-                    newMember, group);
-            Map value = new HashMap<String, Object>();
-            value.put("GroupId", group);
-            value.put("UserOrGroupId", newMember);
-            request = new JsonValue(new HashMap<String, Object>());
-            request.put("id", "sobjects/GroupMember");
-            request.put("value", value);
-            try {
-                create(request);
-            } catch (JsonResourceException e) {
-                logger.info("Failed to add new member: sobjects/User/{} to sobjects/Group/{}",
-                        newMember, group);
-            }
-        }
-    }
-
-    private void updatePermissionSetAssignments(String permissionSet, List<Object> members)
-            throws JsonResourceException {
-        JsonValue request = new JsonValue(new HashMap<String, Object>());
-        Map<String, Object> params = new HashMap<String, Object>(1);
-        params.put(QueryConstants.QUERY_EXPRESSION,
-                "SELECT Id, AssigneeId from PermissionSetAssignment where PermissionSetId = '"
-                        + permissionSet + "'");
-        request.put("params", params);
-        JsonValue response = query(request);
-
-        for (JsonValue item : response.get(QueryConstants.QUERY_RESULT)) {
-            if (!members.remove(members.contains(item.get("AssigneeId").asString()))) {
-
-                logger.info(
-                        "Attempt to delete member: sobjects/User/{} from sobjects/PermissionSet/{}",
-                        item.get("AssigneeId").asString(), permissionSet);
-                request = new JsonValue(new HashMap<String, Object>());
-                request.put("id", "sobjects/PermissionSetAssignment/" + item.get("Id").asString());
-
-                try {
-                    delete(request);
-                } catch (JsonResourceException e) {
-                    logger.error(
-                            "Failed to delete member: sobjects/User/{} from sobjects/PermissionSet/{}",
-                            item.get("AssigneeId").asString(), permissionSet);
-                }
-            }
-        }
-
-        for (Object newMember : members) {
-            logger.info("Attempt to add new member: sobjects/User/{} to sobjects/PermissionSet/{}",
-                    newMember, permissionSet);
-            Map value = new HashMap<String, Object>();
-            value.put("PermissionSetId", permissionSet);
-            value.put("AssigneeId", newMember);
-            request = new JsonValue(new HashMap<String, Object>());
-            request.put("id", "sobjects/PermissionSetAssignment");
-            request.put("value", value);
-            try {
-                create(request);
-            } catch (JsonResourceException e) {
-                logger.info(
-                        "Failed to add new member: sobjects/User/{} to sobjects/PermissionSet/{}",
-                        newMember, permissionSet);
-            }
         }
     }
 }

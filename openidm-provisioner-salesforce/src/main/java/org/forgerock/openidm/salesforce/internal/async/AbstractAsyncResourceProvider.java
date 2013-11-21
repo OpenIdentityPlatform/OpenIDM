@@ -20,7 +20,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.salesforce.internal.SalesforceConnection;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +31,8 @@ import com.sforce.async.JobInfo;
 import com.sforce.async.Result;
 
 /**
- * A NAME does ...
- * 
+ * The AbstractAsyncResourceProvider is an adapter for the Salesforce Bulk API.
+ *
  * @author Laszlo Hordos
  */
 public abstract class AbstractAsyncResourceProvider extends SimpleJsonResource {
@@ -48,10 +47,13 @@ public abstract class AbstractAsyncResourceProvider extends SimpleJsonResource {
 
     private final SalesforceConnection sfconnection;
 
-    private final BulkConnection connection;
+    private BulkConnection connection;
 
     protected AbstractAsyncResourceProvider(final SalesforceConnection connection) {
         this.sfconnection = connection;
+    }
+
+    private void init() throws JsonResourceException {
         try {
             this.connection = new BulkConnection(sfconnection.getConnectorConfig("async"));
             this.connection.getConfig().setTraceMessage(logger.isTraceEnabled());
@@ -65,13 +67,20 @@ public abstract class AbstractAsyncResourceProvider extends SimpleJsonResource {
                 this.connection.getConfig().setTraceMessage(false);
             }
         } catch (AsyncApiException e) {
-            logger.error("", e);
-            throw new ComponentException("Failed to initiate the Async service", e);
+            throw new JsonResourceException(JsonResourceException.UNAVAILABLE,
+                    "Failed to initiate the Async service", e);
         }
     }
 
     protected BulkConnection getConnection(boolean refresh) throws JsonResourceException,
             AsyncApiException {
+        if (null == connection) {
+            synchronized (this) {
+                if (null == connection) {
+                    init();
+                }
+            }
+        }
         if (refresh) {
             if (!sfconnection.refreshAccessToken(connection.getConfig())) {
                 throw new ServiceUnavailableException("Session is expired and can not be renewed");

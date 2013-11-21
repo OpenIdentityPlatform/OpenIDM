@@ -40,6 +40,7 @@ import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,21 +72,55 @@ public class SalesforceRequestHandler implements ProvisionerService {
 
     @Activate
     void activate(ComponentContext context) throws Exception {
-        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        JsonValue configuration = null;
+        try {
+            configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        } catch (RuntimeException ex) {
+            logger.warn(
+                    "Configuration invalid and could not be parsed, can not start Salesforce Connector: "
+                    + ex.getMessage(), ex);
+            throw ex;
+        }
 
         Object o = context.getProperties().get("config.factory-pid");
         if (null == o || (!(o instanceof String)) || StringUtils.isBlank((String)o)) {
+            logger.warn("Configuration invalid, factory configuration expected");
             throw new ComponentException("Factory configuration expected");
         }
         organizationName = (String)o;
 
+        SalesforceConfiguration config = null;
+        try {
+         config = parseConfiguration(configuration
+                .get("configurationProperties"));
+        } catch (Exception ex) {
+            //Invalid configuration value, permanent error.
+            logger.warn(
+                    "Configuration invalid and could not be used, can not start Salesforce Connector: "
+                            + ex.getMessage(), ex);
+            throw ex;
+        }
         if (!configuration.get("enabled").defaultTo(true).asBoolean()) {
             logger.info("Salesforce Connector {} is disabled, \"enabled\" set to false in configuration", organizationName);
             return;
         }
-        
+
         connection = new SalesforceConnection(parseConfiguration(configuration.get("configurationProperties")));
         connection.test();
+
+        try {
+            connection = new SalesforceConnection(config);
+            connection.test();
+        } catch (ResourceException e){
+            //authenticate or the test throws this, temporary error
+            logger.warn("TODO define message that explains that the service is temporary not available now, can not start Salesforce Connector: ");
+        } catch (Exception ex) {
+            //Invalid configuration value, permanent error.
+            logger.warn(
+                    "Configuration invalid and could not be validated, can not start Salesforce Connector: "
+                            + ex.getMessage(), ex);
+            throw ex;
+        }
 
         AbstractAsyncResourceProvider async = new AsyncJobResourceProvider(connection);
 
@@ -120,7 +155,6 @@ public class SalesforceRequestHandler implements ProvisionerService {
         routes.put(Pattern.compile("\\Qmetadata/\\E(([^/])+)"), meta);
         routes.put(Pattern.compile("\\Qmetadata/\\E([^/]+)/(([^/]+))"), meta);
 
-        logger.info("OAUTH Token: {}", connection.getOAuthUser().getAuthorization());
     }
 
     @Deactivate
@@ -158,6 +192,7 @@ public class SalesforceRequestHandler implements ProvisionerService {
         }
         throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Route not found: " + id);
     }
+
     @Override
     public SystemIdentifier getSystemIdentifier() {
         return new SystemIdentifier() {

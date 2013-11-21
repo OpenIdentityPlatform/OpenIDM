@@ -26,7 +26,6 @@ import org.restlet.Response;
 import org.restlet.Uniform;
 import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Method;
 import org.restlet.data.Preference;
@@ -35,7 +34,6 @@ import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.engine.Engine;
 import org.restlet.engine.http.header.ChallengeWriter;
-import org.restlet.engine.http.header.HeaderConstants;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.EmptyRepresentation;
 import org.restlet.representation.Representation;
@@ -126,8 +124,7 @@ public class SalesforceConnection extends ClientResource {
         super(resource);
     }
 
-    public SalesforceConnection(SalesforceConfiguration configuration0)
-            throws JsonResourceException {
+    public SalesforceConnection(SalesforceConfiguration configuration0){
         super(new Context(), configuration0.getLoginUrl());
         configuration0.validate();
         this.configuration = configuration0;
@@ -185,7 +182,7 @@ public class SalesforceConnection extends ClientResource {
         acceptedMediaTypes.add(new Preference(MediaType.APPLICATION_JSON));
         getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
 
-        authenticate();
+        // authenticate();
     }
 
     public boolean refreshAccessToken(final ConnectorConfig config) throws JsonResourceException {
@@ -312,7 +309,7 @@ public class SalesforceConnection extends ClientResource {
         return null != queryId ? configuration.getPredefinedQueries().get(queryId) : null;
     }
 
-    public ConnectorConfig getConnectorConfig(String api) {
+    public ConnectorConfig getConnectorConfig(String api) throws JsonResourceException {
         if (StringUtils.isBlank(api)) {
             throw new IllegalArgumentException();
         }
@@ -446,42 +443,20 @@ public class SalesforceConnection extends ClientResource {
         ClientResource result = null;
 
         if ((relativeRef != null) && relativeRef.isRelative()) {
-            result = new SalesforceConnection(this);
-            result.setReference(new Reference(authentication.getBaseReference(), relativeRef)
-                    .getTargetRef());
-            // -------------------------------------
-            // Add user-defined extension headers
-            // -------------------------------------
-            // Series<Header> additionalHeaders = (Series<Header>)
-            // result.getRequest().getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
-            // if (additionalHeaders == null) {
-            // additionalHeaders = new Series<Header>(Header.class);
-            // result.getRequest().getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS,
-            // additionalHeaders);
-            // }
-            // additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION,
-            // authentication.getAuthorization());
+            try {
+                OAuthUser oAuthUser = getOAuthUser();
+                result = new SalesforceConnection(this);
 
-            Form additionalHeaders = null;
-            Object o = result.getRequest().getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
-            if (o instanceof Form) {
-                additionalHeaders = (Form) o;
-            } else {
-                additionalHeaders = new Form();
-                result.getRequest().getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS,
-                        additionalHeaders);
+                result.setReference(new Reference(oAuthUser.getBaseReference(), relativeRef)
+                        .getTargetRef());
+            } catch (JsonResourceException e) {
+                throw new ResourceException(Status.SERVER_ERROR_SERVICE_UNAVAILABLE, e);
             }
 
             result.setChallengeResponse(new ChallengeResponse(ChallengeScheme.HTTP_OAUTH,
                     authentication.getAuthorization()));
 
-            // additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION,
-            // authentication.getAuthorization());
-
-            additionalHeaders.add("X-PrettyPrint", "1");
         } else {
-            // doError(Status.CLIENT_ERROR_BAD_REQUEST,
-            // "The child URI is not relative.");
             throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST);
         }
         return result;
@@ -569,7 +544,14 @@ public class SalesforceConnection extends ClientResource {
         return null;
     }
 
-    public OAuthUser getOAuthUser() {
+    public OAuthUser getOAuthUser() throws JsonResourceException {
+        if (null == authentication) {
+            synchronized (this) {
+                if (null == authentication) {
+                    authenticate();
+                }
+            }
+        }
         return authentication;
     }
 
