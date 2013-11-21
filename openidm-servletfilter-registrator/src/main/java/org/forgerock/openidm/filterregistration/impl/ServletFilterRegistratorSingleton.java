@@ -32,9 +32,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.ServletRequest;
 
@@ -42,16 +46,14 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.filterregistration.RegisteredFilter;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
 import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
-import org.forgerock.openidm.http.ContextRegistrator;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
+import org.ops4j.pax.web.service.WebContainer;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Takes configuration to register and de-register configured servlet filters, 
  * with support to load the filter or supporting classes off a defined class path
+ * 
  * @author aegloff
+ * @author ckienle
  */
 
 @Component(
@@ -74,7 +78,14 @@ public class ServletFilterRegistratorSingleton implements ServletFilterRegistrat
     private final static Logger logger = LoggerFactory.getLogger(ServletFilterRegistratorSingleton.class);
 
     // Context of this scr component 
-    private ComponentContext context;
+    private BundleContext bundleContext;
+    
+    @Reference
+    private WebContainer webContainer;
+    
+    private List<RegisteredFilterImpl> filters = new ArrayList<RegisteredFilterImpl>();
+    
+    private final static Object registrationLock = new Object();
     
     /**
      * Initialises the ComponentContext.
@@ -83,7 +94,7 @@ public class ServletFilterRegistratorSingleton implements ServletFilterRegistrat
      */
     @Activate
     public void activate(ComponentContext context) {
-        this.context = context;
+        bundleContext = context.getBundleContext();
     }
 
     /**
@@ -93,14 +104,55 @@ public class ServletFilterRegistratorSingleton implements ServletFilterRegistrat
      */
     @Deactivate
     public void deactivate(ComponentContext context) {
-        this.context = null;
+        bundleContext = null;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ServiceRegistration registerFilter(JsonValue config) throws Exception {
+    public RegisteredFilter registerFilter(JsonValue config) throws Exception {
+        synchronized (registrationLock) {
+            RegisteredFilterImpl newFilter = new RegisteredFilterImpl(config);
+            // Unregister existing filters if necessary
+            for (RegisteredFilter regFilter : filters) {
+                unregisterFilterWithWebContainer(regFilter.getFilter());
+            }
+            // Add new filter
+            filters.add(newFilter);
+            // Sort the filters
+            Collections.sort(filters);
+            // Register all filters
+            Exception failedRegistrationException = null;
+            for (RegisteredFilterImpl regFilter : filters) {
+                try {
+                    regFilter.setFilter(registerFilterWithWebContainer(regFilter.getConfig()));
+                } catch (Exception e) {
+                    logger.error("Error registering filter {}", config);
+                    if (regFilter.equals(newFilter)) {
+                        failedRegistrationException = e;
+                    }
+                }
+            }
+            // Throw the exception if the new filter failed to register
+            if (failedRegistrationException != null) {
+                filters.remove(newFilter);
+                throw failedRegistrationException;
+            }
+            logger.info("Successfully registered servlet filter {}", config);
+            // Register ServletFilterRegistrator service
+            registerFilterService(newFilter.getConfig());
+            return newFilter;
+        }
+    }
+    
+    /**
+     * Registers a servlet filter configuration
+     * @param config the filter configuration
+     * @return the registered Filter
+     * @throws Exception
+     */
+    private Filter registerFilterWithWebContainer(JsonValue config) throws Exception {
         // Get required info from config
         String filterClass = config.get("filterClass").required().asString();
         logger.info("Using filter class: {}", filterClass);
@@ -169,24 +221,38 @@ public class ServletFilterRegistratorSingleton implements ServletFilterRegistrat
             Thread.currentThread().setContextClassLoader(origCL);
         }
 
-        Filter proxiedFilter = (Filter)
-                Proxy.newProxyInstance(
-                        filter.getClass().getClassLoader(),
-                        new Class[] { Filter.class },
+        // Create filter
+        Filter proxiedFilter = (Filter)Proxy.newProxyInstance(filter.getClass().getClassLoader(), new Class[]{Filter.class},
                         new FilterProxy(filter, filterCL, preInvokeReqAttributes));
-        
-        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
-        filterMapping.setFilter(proxiedFilter);
-        filterMapping.setHttpContextId(httpContextId);
-        filterMapping.setServletNames(servletNames.toArray(new String[0]));
-        filterMapping.setUrlPatterns(urlPatterns.toArray(new String[0]));
-        filterMapping.setInitParams(initParams);
 
-        ServiceRegistration serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
+        // Register filter
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        for (String key : initParams.keySet()) {
+            props.put(key, initParams.get(key));
+        }
+        String [] urlPatternsArray = urlPatterns.toArray(new String[urlPatterns.size()]);
+        String [] servletNamesArray = servletNames.toArray(new String[servletNames.size()]);
+        webContainer.registerFilter(proxiedFilter, urlPatternsArray, servletNamesArray, props, webContainer.getDefaultSharedHttpContext());
+        return proxiedFilter;
+    }
+    
+    private void registerFilterService(JsonValue config) {
+        // Register ServletFilterRegistrator service
         ServletFilterRegistrator servletFilterRegistrator = new ServletFilterRegistratorSvc(config);
-        context.getBundleContext().registerService(ServletFilterRegistrator.class.getName(), servletFilterRegistrator, null);
-        logger.info("Successfully registered servlet filter {}", config);
-        return serviceRegistration;
+        bundleContext.registerService(ServletFilterRegistrator.class.getName(), servletFilterRegistrator, null);
+    }
+
+    @Override
+    public void unregisterFilter(RegisteredFilter filter) throws Exception {
+        synchronized (registrationLock) {
+            unregisterFilterWithWebContainer(filter.getFilter());
+            filters.remove(filter);
+            logger.info("Successfully unregistered servlet filter {}", filter);
+        }
+    }
+    
+    public void unregisterFilterWithWebContainer(Filter filter) {
+        webContainer.unregisterFilter(filter);
     }
     
     /**

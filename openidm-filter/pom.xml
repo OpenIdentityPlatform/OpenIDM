@@ -72,11 +72,6 @@
             <version>8.1.9.v20130131</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-whiteboard</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>
