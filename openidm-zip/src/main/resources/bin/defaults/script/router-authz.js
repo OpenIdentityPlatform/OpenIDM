@@ -287,7 +287,6 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     if (request.method === "patch" || (request.method === "action" && request.params._action === "patch")) {
         // check each of the fields they are attempting to patch and make sure they are approved
         for (i in params) {
-        	java.lang.System.out.println(typeof params[i].field);
             if ((params[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].field)))) {
                 return false;
             }
