@@ -281,7 +281,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             jsonConfiguration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
-
+            
+            if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {
+                logger.info("OpenICF Provisioner Service {} is disabled, \"enabled\" set to false in configuration", systemIdentifier.getName());
+                return;
+            }
+            
             loadLocalSystemActions(jsonConfiguration);
 
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
