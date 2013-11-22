@@ -68,6 +68,7 @@ import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptContext;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
@@ -900,6 +901,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @return true if it came over http, false otherwise
      */
     private boolean isPublicContext(Context context) {
+        if (context.containsContext(ScriptContext.class)) {
+            return false;
+        }
         return context.containsContext(HttpContext.class);
     }
 
