@@ -34,7 +34,7 @@
     <name>OpenIDM Utility Bundle</name>
     <description>This bundle contains the common utilities</description>
     <properties>
-        <openidm.osgi.import.defaults>org.forgerock.json.resource.servlet,org.forgerock.script,org.forgerock.openidm.sync,org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>org.forgerock.script,org.forgerock.openidm.sync,org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>
@@ -48,6 +48,10 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>

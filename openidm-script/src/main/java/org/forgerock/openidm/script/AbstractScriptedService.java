@@ -53,6 +53,7 @@ import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.ScriptUtil;
 import org.forgerock.script.Scope;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
@@ -333,7 +334,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
             final Bindings bindings) {
     	SecurityContext securityContext = context.asContext(SecurityContext.class);
     	bindings.put("security", securityContext.getAuthorizationId());
-    	bindings.put("request", request);
+    	bindings.put("request", ScriptUtil.getRequestMap(request, context));
     	bindings.put("context", context);
 
     	bindings.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
