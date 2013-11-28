@@ -2011,8 +2011,10 @@ public class RepoJobStore implements JobStore {
                 map.put(list, names);
             }
             boolean result = names.remove(name);
-            // update repo
-            accessor.update(id, rev, new JsonValue(map));
+            if (result) {
+                // update repo
+                accessor.update(id, rev, new JsonValue(map));
+            }
             return result;
         }
 
