@@ -2086,10 +2086,12 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 map.put(list, names);
             }
             boolean result = names.remove(name);
-            // update repo
-            UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(map));
-            r.setRevision(rev);
-            accessor.getConnection().update(accessor, r);
+            if (result) {
+                // update repo
+                UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(map));
+                r.setRevision(rev);
+                accessor.getConnection().update(accessor, r);
+            }
             return result;
         }
 
