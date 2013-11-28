@@ -24,10 +24,20 @@
 
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import static org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.logger;
 
 public class MSSQLTableHandler extends GenericTableHandler {
 
@@ -53,9 +63,84 @@ public class MSSQLTableHandler extends GenericTableHandler {
                         + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ?");
         result.put(QueryDefinition.UPDATEQUERYSTR,
                 "UPDATE obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? FROM "
-                        + mainTable + " obj WHERE obj.id = ?");
+                        + mainTable + " obj WHERE obj.id = ? AND obj.rev = ?");
 
         return result;
 
     }
+    
+    /* (non-Javadoc)
+    * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+    */
+    @Override
+    public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection)
+            throws SQLException, IOException, PreconditionFailedException, NotFoundException, InternalServerErrorException {
+        logger.debug("Update with fullid {}", fullId);
+
+        int revInt = Integer.parseInt(rev);
+        ++revInt;
+        String newRev = Integer.toString(revInt);
+        obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
+
+        ResultSet rs = null;
+        PreparedStatement updateStatement = null;
+        PreparedStatement deletePropStatement = null;
+        try {
+            rs = readForUpdate(fullId, type, localId, connection);
+            String existingRev = rs.getString("rev");
+            long dbId = rs.getLong("id");
+            long objectTypeDbId = rs.getLong("objecttypes_id");
+            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
+    
+            if (!existingRev.equals(rev)) {
+                throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
+            }
+            updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
+            deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
+    
+            // Support changing object identifier
+            String newLocalId = (String) obj.get("_id");
+            if (newLocalId != null && !localId.equals(newLocalId)) {
+                logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
+            } else {
+                newLocalId = localId; // If it hasn't changed, use the existing ID
+                obj.put("_id", newLocalId); // Ensure the ID is saved in the object
+            }
+            String objString = mapper.writeValueAsString(obj);
+    
+            logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
+            updateStatement.setString(1, newLocalId);
+            updateStatement.setString(2, newRev);
+            updateStatement.setString(3, objString);
+            updateStatement.setLong(4, dbId);
+            updateStatement.setString(5, existingRev);
+            logger.debug("Update statement: {}", updateStatement);
+            int updateCount = updateStatement.executeUpdate();
+            logger.trace("Updated rows: {} for {}", updateCount, fullId);
+            if (updateCount == 0) {
+                throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + ", has changed since retrieval.");
+            } else if (updateCount > 1) {
+                throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
+            }
+    
+            JsonValue jv = new JsonValue(obj);
+            // TODO: only update what changed?
+            logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
+            deletePropStatement.setString(1, type);
+            deletePropStatement.setString(2, localId);
+            logger.debug("Update properties del statement: {}", deletePropStatement);
+            int deleteCount = deletePropStatement.executeUpdate();
+            logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
+            writeValueProperties(fullId, dbId, localId, jv, connection);
+        } finally {
+            if (rs != null) {
+                // Ensure associated statement also is closed
+                Statement rsStatement = rs.getStatement();
+                CleanupHelper.loggedClose(rs);
+                CleanupHelper.loggedClose(rsStatement);
+            }
+            CleanupHelper.loggedClose(updateStatement);
+            CleanupHelper.loggedClose(deletePropStatement);
+        }
+    }    
 }
