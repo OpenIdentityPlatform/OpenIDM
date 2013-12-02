@@ -33,9 +33,6 @@ import java.sql.Statement;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import static org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.logger;
 
@@ -74,7 +71,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
     */
     @Override
     public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException, PreconditionFailedException, NotFoundException, InternalServerErrorException {
+            throws SQLException, IOException, org.forgerock.json.resource.PreconditionFailedException, org.forgerock.json.resource.NotFoundException, org.forgerock.json.resource.InternalServerErrorException {
         logger.debug("Update with fullid {}", fullId);
 
         int revInt = Integer.parseInt(rev);
@@ -91,13 +88,13 @@ public class MSSQLTableHandler extends GenericTableHandler {
             long dbId = rs.getLong("id");
             long objectTypeDbId = rs.getLong("objecttypes_id");
             logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
-    
+
             if (!existingRev.equals(rev)) {
-                throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
+                throw new org.forgerock.json.resource.PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
             }
             updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
             deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
-    
+
             // Support changing object identifier
             String newLocalId = (String) obj.get("_id");
             if (newLocalId != null && !localId.equals(newLocalId)) {
@@ -107,8 +104,8 @@ public class MSSQLTableHandler extends GenericTableHandler {
                 obj.put("_id", newLocalId); // Ensure the ID is saved in the object
             }
             String objString = mapper.writeValueAsString(obj);
-    
-            logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
+
+            logger.trace("Populating prepared statement {} for {} {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId, existingRev});
             updateStatement.setString(1, newLocalId);
             updateStatement.setString(2, newRev);
             updateStatement.setString(3, objString);
@@ -118,11 +115,11 @@ public class MSSQLTableHandler extends GenericTableHandler {
             int updateCount = updateStatement.executeUpdate();
             logger.trace("Updated rows: {} for {}", updateCount, fullId);
             if (updateCount == 0) {
-                throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + ", has changed since retrieval.");
+                throw new org.forgerock.json.resource.PreconditionFailedException("Update rejected as current Object revision " + existingRev + ", has changed since retrieval.");
             } else if (updateCount > 1) {
-                throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
+                throw new org.forgerock.json.resource.InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
             }
-    
+
             JsonValue jv = new JsonValue(obj);
             // TODO: only update what changed?
             logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
