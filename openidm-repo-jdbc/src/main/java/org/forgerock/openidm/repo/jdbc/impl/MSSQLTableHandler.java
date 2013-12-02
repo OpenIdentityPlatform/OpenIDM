@@ -108,7 +108,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
             }
             String objString = mapper.writeValueAsString(obj);
     
-            logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
+            logger.trace("Populating prepared statement {} for {} {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId, existingRev});
             updateStatement.setString(1, newLocalId);
             updateStatement.setString(2, newRev);
             updateStatement.setString(3, objString);
