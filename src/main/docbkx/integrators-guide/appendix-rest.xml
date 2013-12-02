@@ -39,8 +39,13 @@
    <primary>REST API</primary>
   </indexterm>
 
- <para>OpenIDM provides a RESTful API for accessing managed objects.</para>
- 
+    <para>Representational State Transfer (REST) is a software architecture style
+        for exposing resources, using the technologies and protocols of the World
+        Wide Web. REST describes how distributed data objects, or resources, can be
+        defined and addressed. OpenIDM provides a RESTful API for accessing managed
+        objects, system objects, workflows, and some elements of the system
+        configuration.</para>
+
  <section xml:id="rest-uri-scheme">
   <title>URI Scheme</title>
 
@@ -50,6 +55,13 @@
 
   <literallayout class="monospaced">/openidm/managed/<replaceable
   >type</replaceable>/<replaceable>id</replaceable></literallayout>
+
+     <para>The URI scheme for accessing a system object follows this
+         convention:</para>
+
+  <literallayout class="monospaced">/openidm/system/<replaceable
+  >resource-name</replaceable>/<replaceable>id</replaceable></literallayout>
+
  </section>
 
  <section xml:id="rest-object-identifier">
@@ -61,12 +73,20 @@
   </indexterm>
 
   <para>Each managed object has an identifier (expressed as
-  <replaceable>id</replaceable> in the URI scheme) which is used to
+  <replaceable>id</replaceable> in the URI scheme) that is used to
   address the object through the REST API. The REST API allows for the
   client-generated and server-generated identifiers, through PUT and POST
-  methods. The default server-generated identifier type is a UUID. Object
-  identifiers that begin with underscore ( <literal>_</literal> ) are reserved
-  for future use.</para>
+  methods. The default server-generated identifier type is a UUID. If you
+  create an object by using <literal>POST</literal>, a server-assigned ID is
+  generated in the form of a UUID. If you create an object by using PUT, the
+  client assigns the ID in whatever format you specify.</para>
+
+  <para>In general, UUIDs are better in that they can be generated easily in
+  clustered environments. However, you might have specific reasons that dictate
+  a different scheme for generating IDs.</para>
+
+  <para>Object identifiers that begin with underscore ( <literal>_</literal> )
+  are reserved for future use.</para>
  </section>
 
  <section xml:id="rest-content-negotiation">
@@ -174,9 +194,9 @@ ETag: "0"
 ....</programlisting>
      <para>This return code may change in a future release.</para>
      <para>Example Response: Updating an existing object when no version is
-     supplied (version conflict)</para>
+     supplied</para>
      <programlisting language="http">
-HTTP/1.1 409 Conflict
+HTTP/1.1 412 Precondition Required
 Content-Type: application/json
 Content-Length: 89
 ...
@@ -185,7 +205,7 @@ Content-Length: 89
       <para>Example Response: Updating an existing object when an invalid
       version is supplied (version conflict)</para>
       <programlisting language="http">
-HTTP/1.1 412 Precondition Required
+HTTP/1.1 409 Conflict
 Content-Type: application/json
 Content-Length: 89
 ...
@@ -330,4 +350,821 @@ Content-Length: 89
    </varlistentry>
   </variablelist>
  </section>
+    <!--TODO Check and update for CREST-->
+    <!--
+    <section xml:id="sample-rest-commands">
+        <title>REST Endpoints and Sample Commands</title>
+        <para>This section describes the OpenIDM REST endpoints and provides
+        a number of sample commands that show the interaction with the REST
+        interface.</para>
+
+        <section xml:id="rest-server-config">
+        <title>Managing the Server Configuration Over REST</title>
+        <para>OpenIDM stores configuration objects in the repository, and exposes
+        them under the context <literal>/openidm/config</literal>. Single instance
+        configuration objects are exposed under
+        <literal>/openidm/config/<replaceable>object-name</replaceable></literal>.
+        Multiple instance configuration objects are exposed under
+        <literal>/openidm/config/<replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.
+        The following table outlines these configuration objects and how they can
+        be accessed through the REST interface.</para>
+
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/config</entry>
+                            <entry>GET</entry>
+                            <entry>Returns a list of configuration objects</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/config/audit</entry>
+                            <entry>GET</entry>
+                            <entry>Returns the current logging configuration</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/config/provisioner.openicf/<replaceable>provisioner-name</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Returns the configuration of the specified connector</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/config/router</entry>
+                            <entry>PUT</entry>
+                            <entry>Changes the router configuration. Modifications
+                            are provided with the <literal>-data</literal> option,
+                            in JSON format.</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/config/<replaceable>object</replaceable></entry>
+                            <entry>PATCH</entry>
+                            <entry>Updates the specified configuration object.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>OpenIDM supports REST mappings for create, read, update, and
+            delete of configuration objects. Currently OpenIDM does not support
+            patch and custom query operations for configuration objects.</para>
+
+            <para>The following example displays the current configuration.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request GET
+ "http://localhost:8080/openidm/config"</screen>
+
+            <para>The result returned depends on the configuration. The
+            following sample output shows an extract of the configuration for
+            an unmodified OpenIDM instance, started with the configuration of
+            Sample 1.</para>
+
+            <programlisting language="javascript">{
+    "configurations": [
+        {
+            "factoryPid": "ui",
+            "pid": "ui.df1603b0-fb58-4112-88b8-8ccd5aa91ff4",
+            "_id": "ui/configuration"
+        },
+        {
+            "factoryPid": null,
+            "pid": "cluster",
+            "_id": "cluster"
+        },
+        {
+            "factoryPid": "endpoint",
+            "pid": "endpoint.71b79c7f-1041-4eab-b5a1-8f173fffacbc",
+            "_id": "endpoint/gettasksview"
+        },
+        {
+            "factoryPid": null,
+            "pid": "managed",
+            "_id": "managed"
+        },
+        {
+            "factoryPid": "org.apache.felix.fileinstall",
+            "pid": "org.apache.felix.fileinstall.b73f3c21-d1e7-4248-a343-2b9b1bd830ac",
+            "_id": "org.apache.felix.fileinstall/openidm"
+        },
+        {
+            "factoryPid": "process",
+            "pid": "process.e7c9b964-c902-49d2-8448-e382e8932c85",
+            "_id": "process/access"
+        },
+        {
+            "factoryPid": null,
+            "pid": "sync",
+            "_id": "sync"
+        },
+        {
+            "factoryPid": null,
+            "pid": "router",
+            "_id": "router"
+        },
+        ...
+    ]
+}</programlisting>
+
+            <para>One entry is returned for each configuration object. To obtain
+            additional information on the configuration object, include its
+            <literal>pid</literal> or <literal>_id</literal> in the URL. The
+            following example displays configuration information on the
+            <literal>sync</literal> object.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request GET
+ "http://localhost:8080/openidm/config/sync"
+
+{
+  "mappings": [
+    {
+      "policies": [
+        {
+          "action": "UPDATE",
+          "situation": "CONFIRMED"
+        },
+        {
+          "action": "IGNORE",
+          "situation": "FOUND"
+        },
+        {
+          "action": "CREATE",
+          "situation": "ABSENT"
+        },
+...
+            </screen>
+
+            <para>The following example displays the current logging configuration.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request GET
+ "http://localhost:8080/openidm/config/audit"
+            </screen>
+
+            <para>The following example shows the configuration of the XML connector.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request GET
+ "http://localhost:8080/openidm/config/provisioner.openicf/xml"</screen>
+
+            <para>To add a configuration object, send a PUT request to the
+            <literal>openidm/config</literal> URL. The following example
+            adds a custom mapping named <literal>myMapping</literal>.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request PUT
+ -data '{
+                            "properties" : [
+
+ {
+   "source" : "AccountName",
+   "target" : "userName"
+ },
+ {
+    "source" : "surname",
+    "target" : "lastname"
+ },
+ {
+    "source" : "givenName",
+    "target" : "firstname"
+ }
+                ]
+ }'
+ "http://localhost:8080/openidm/config/myMapping"</screen>
+
+            <para>To modify the configuration over REST, send a PUT or POST
+            request, with the required data, to the configuration object. The
+            following example uses PUT to modify the router configuration to
+            remove all filters, effectively bypassing any policy validation.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request PUT
+ -data '{
+     "filters" : [
+         {
+             "onRequest" : {
+             "type" : "text/javascript",
+             "file" : "bin/defaults/script/router-authz.js"
+             }
+         }
+     ]
+ }'
+ "http://localhost:8080/openidm/config/router"</screen>
+
+            <para>To delete a configuration object, send a DELETE request to
+            the object to be deleted. The following example deletes the custom
+            mapping added previously.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request DELETE
+ "http://localhost:8080/openidm/config/myMapping"</screen>
+
+        </section>
+
+        <section>
+            <title>Managing Users Over REST</title>
+            <para>User objects are stored in the repository and are exposed under the
+                context <literal>/managed/user</literal>.</para>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/managed/user/?_query-id=query-all-ids</entry>
+                            <entry>GET</entry>
+                            <entry>List all the managed users in the repository</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/managed/user/<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Retrieve the JSON representation of a specific user</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/managed/user/<replaceable>userName</replaceable></entry>
+                            <entry>PUT</entry>
+                            <entry>Create a new user</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/managed/user/?_action=create</entry>
+                            <entry>POST</entry>
+                            <entry>Create a new user</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/managed/user/<replaceable>userName</replaceable></entry>
+                            <entry>PUT</entry>
+                            <entry>Update a user entry (replaces the entire entry)</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/managed/user/?_action=patch&amp;_query-id=for-userName&amp;uid=
+                                <replaceable>userName</replaceable></entry>
+                            <entry>POST</entry>
+                            <entry>Update a user (can be used to replace the value of one or more
+                                existing attributes)</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>The following example retrieves the JSON representation of all users
+                stored in the internal repository.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request GET
+                "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+            </screen>
+
+            <para>The following example retrieves the JSON representation of a specified
+                user.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request GET
+                "http://localhost:8080/openidm/managed/user/<replaceable>user_id</replaceable>"
+            </screen>
+
+            <para>The following example adds a user with a specified ID.</para>
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request PUT
+                -data '{
+                "userName":"james",
+                "familyName":"Berg",
+                "givenName":"James",
+                "email": ["james@example.com"],
+                "userPassword":"password"
+                }'
+                "http://localhost:8080/openidm/managed/user/james"
+            </screen>
+
+            <para>The following example adds a user without specifying a user ID.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -header "Content-Type: application/json"
+                -request POST
+                -data '{
+                "userName":"pete",
+                "familyName":"Smith",
+                "givenName":"Pete",
+                "email": ["pete@example.com"],
+                "userPassword":"password"
+                }'
+                "http://localhost:8080/openidm/managed/user?_action=create"
+            </screen>
+
+            <para>The following example checks whether a user exists, then updates the
+                user entry. The command replaces the entire user entry with the new data
+                provided in the request body.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -header "Content-Type: application/json"
+                -header "If-Match: *"
+                -request PUT
+                -data '{
+                "userName":"james",
+                "familyName":"Berg",
+                "givenName":"James",
+                "email": ["james@example.com"],
+                "userPassword":"newpassword"
+                }'
+                "http://localhost:8080/openidm/managed/user/<replaceable>id</replaceable>"
+            </screen>
+
+            <para>The following command replaces the value of an existing attribute in
+                the user entry described in the previous example. You cannot use this action
+                to create a new attribute in the user entry.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -header "Content-Type: application/json"
+                -request POST
+                -data '{
+                "replace":"userPassword","value": "newer-password"
+                }'
+                "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=james"
+            </screen>
+
+        </section>
+
+        <section>
+            <title>Managing System Objects Over Rest</title>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/system</entry>
+                            <entry>GET</entry>
+                            <entry>Lists the external resources</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/system/<replaceable>system-object</replaceable>?_action=liveSync"</entry>
+                            <entry>POST</entry>
+                            <entry>Triggers a liveSync operation on the specified system object</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>The following example returns a list of the available connector
+            configurations.</para>
+
+            <screen>$ curl
+ -header "X-OpenIDM-Username: openidm-admin"
+ -header "X-OpenIDM-Password: openidm-admin"
+ -request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+        </section>
+
+        <section>
+            <title>Managing Workflows Over Rest</title>
+
+            <para>Workflow objects are exposed under the <literal>/openidm/workflow</literal>
+                context. OpenIDM provides access to the workflow module over REST, as listed
+                in the following table.</para>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/workflow/processdefinition</entry>
+                            <entry>GET</entry>
+                            <entry>Lists the defined workflow definitions</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processdefinition?_query-id=<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Performs a filtered search for a process definition</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processdefinition/<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Returns detailed information about the specified process definition</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processinstance?_query-id=query-all-ids</entry>
+                            <entry>GET</entry>
+                            <entry>Lists the running workflow process instances</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processinstance/<replaceable>id</replaceable>
+                            </entry>
+                            <entry>GET</entry>
+                            <entry>Provides detailed information of a running process instance</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/taskdefinition</entry>
+                            <entry>GET</entry>
+                            <entry>Returns detailed information about the task definition</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/taskinstance</entry>
+                            <entry>GET</entry>
+                            <entry>Returns detailed information about the task instance</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/task?_query-id=query-all-ids</entry>
+                            <entry>GET</entry>
+                            <entry>Lists all active tasks</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/task?_query-id=filteredQuery&amp;<replaceable>filter
+                            </replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Lists the tasks according to the specified filter</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/task?_query-id=user-task-summary&amp;id=<replaceable>id
+                            </replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Lists the summary of tasks assigned to the specified user</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processinstance_action=create</entry>
+                            <entry>POST</entry>
+                            <entry>Start a new workflow. Parameters are included in the request body.
+                            </entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/task/<replaceable>id</replaceable></entry>
+                            <entry>PUT</entry>
+                            <entry>Update task data</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/processinstance/<replaceable>id</replaceable></entry>
+                            <entry>DELETE</entry>
+                            <entry>Delete a process instance</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/workflow/task/<replaceable>id</replaceable>?_action=claim</entry>
+                            <entry>POST</entry>
+                            <entry>Claim or complete a task. Parameters are included in the request body.
+                                Specifically for user tasks, a user can <emphasis>claim</emphasis> a specific
+                                task, which will then be assigned to that user.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>The following examples list the defined workflows. For a workflow to
+                appear in this list, the corresponding workflow definition must be in the
+                <literal>openidm/workflow</literal> directory.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request GET
+                "http://localhost:8080/openidm/workflow
+            </screen>
+
+            <para>Depending on the defined workflows, the output will be something like
+                the following:</para>
+
+            <screen width="91"><?dbfo pgwide="1"?>{"result":[
+                {"name":"Osgi process","processDefinitionId":"osgiProcess:1:5","key":"osgiProcess"},
+                {"name":"UserApplicationAcceptance","processDefinitionId":"UserApplicationAcceptance:1:7",
+                "key":"UserApplicationAcceptance"},
+                {"name":"process1","processDefinitionId":"process1:1:206","key":"process1"},
+                {"name":"process2","processDefinitionId":"process2:1:207","key":"process2"}]}</screen>
+
+            <para>The following example invokes a workflow named "myWorkflow". The
+                <literal>foo</literal> parameter is given the value <literal>bar</literal>
+                in the workflow invokation.</para>
+
+            <screen width="91"><?dbfo pgwide="1"?>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request POST
+                "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+                -data '{"key":"myWorkflow", "foo":"bar"}'
+            </screen>
+
+        </section>
+
+        <section>
+            <title>Managing Scanned Tasks Over REST</title>
+            <para>OpenIDM provides a task scanning mechanism that enables you
+            to perform a batch scan for a specified date in OpenIDM data, on a
+            scheduled interval, and then to execute a task when this date is
+            reached. For more information about scanned tasks, see <link
+            xlink:href="integrators-guide#task-scanner"
+            xlink:role="http://docbook.org/xlink/role/olink">
+            <citetitle>Scanning Data to Trigger Tasks</citetitle></link>.</para>
+            <para>OpenIDM provides REST access to the task scanner, as listed
+            in the following table.</para>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/taskscanner</entry>
+                            <entry>GET</entry>
+                            <entry>Lists the current scanning tasks</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/taskscanner?_action=execute&amp;name=<replaceable>name</replaceable></entry>
+                            <entry>POST</entry>
+                            <entry>Triggers the specified task scan run.</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/taskscanner/<replaceable>id</replaceable>?_action=cancel</entry>
+                            <entry>POST</entry>
+                            <entry>Cancels the specified task scan run.</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+        </section>
+
+        <section>
+            <title>Accessing Log Entries Over REST</title>
+            <para>You can interact with the audit and activity logs over REST, as
+            shown in the following table.</para>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/audit</entry>
+                            <entry>GET</entry>
+                            <entry>Displays the audit log</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/recon</entry>
+                            <entry>GET</entry>
+                            <entry>Displays the reconciliation audit log</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/recon/<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Reads a specific reconciliation audit log entry</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/recon/?_queryId=audit-by-recon-id&amp;reconId=<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Queries the audit log for a particular reconciliation operation</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=
+ <replaceable>situation</replaceable>&amp;reconId=<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Queries the reconciliation audit log for a specific reconciliation situation</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/activity</entry>
+                            <entry>GET</entry>
+                            <entry>Displays the activity log</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/activity/<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Returns activity information for a specific action</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=<replaceable>id</replaceable></entry>
+                            <entry>GET</entry>
+                            <entry>Queries the activity log for the details of an action</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+        </section>
+
+        <section>
+            <title>Managing Reconciliation Operations Over REST</title>
+
+            <para>You can interact with the reconciliation engine over REST,
+            as shown in the following table.</para>
+
+            <informaltable pgwide="1">
+                <tgroup cols="3">
+                    <colspec colname='c1' colwidth="50*"/>
+                    <colspec colname='c2' colwidth="10*"/>
+                    <colspec colname='c3' colwidth="40*"/>
+                    <thead>
+                        <row>
+                            <entry>URI</entry>
+                            <entry>HTTP Operation</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>/openidm/recon</entry>
+                            <entry>GET</entry>
+                            <entry>Lists all completed reconciliation runs</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/recon?_action=recon&amp;mapping=<replaceable>mapping-name
+                            </replaceable></entry>
+                            <entry>POST</entry>
+                            <entry>Launches a reconciliation run with the specified mapping</entry>
+                        </row>
+                        <row>
+                            <entry>/openidm/recon/<replaceable>id</replaceable>?_action=cancel</entry>
+                            <entry>POST</entry>
+                            <entry>Cancels the specified reconciliation run</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </informaltable>
+
+            <para>The following example runs a reconciliation action, with the mapping
+                <literal>systemHrdb_managedUser</literal>, defined in the <filename>sync.json
+                </filename> file.</para>
+
+            <screen>$ curl
+                -header "X-OpenIDM-Username: openidm-admin"
+                -header "X-OpenIDM-Password: openidm-admin"
+                -request POST
+                "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemHrdb_managedUser"
+            </screen>
+        </section>
+
+    </section>
+    -->
+    <section xml:id="http-status-codes">
+        <title>HTTP Status Codes</title>
+
+        <para>The OpenIDM REST API returns the standard HTTP response codes, as
+            described in the following table.</para>
+
+        <informaltable>
+            <tgroup cols="2">
+                <colspec colname='c1' colwidth="40*"/>
+                <colspec colname='c2' colwidth="60*"/>
+                <thead>
+                    <row>
+                        <entry>HTTP Status</entry>
+                        <entry>Description</entry>
+                    </row>
+                </thead>
+                <tbody>
+                    <row>
+                        <entry>200 OK</entry>
+                        <entry>The request was successfully completed. If this request created a
+                            new resource that is addressable with a URI, and a response body is
+                            returned containing a representation of the new resource, a 200 status
+                            will be returned with a Location header containing the canonical URI for
+                            the newly created resource.</entry>
+                    </row>
+                    <row>
+                        <entry>201 Created</entry>
+                        <entry>A request that created a new resource was completed, and no response
+                            body containing a representation of the new resource is being returned. A
+                            Location header containing the canonical URI for the newly created resource
+                            should also be returned.
+                        </entry>
+                    </row>
+                    <row>
+                        <entry>202 Accepted</entry>
+                        <entry>The request has been accepted for processing, but the processing
+                            has not been completed.</entry>
+                    </row>
+                    <row>
+                        <entry>204 No Content</entry>
+                        <entry>The server fulfilled the request, but does not need to return a
+                            response message body.</entry>
+                    </row>
+                    <row>
+                        <entry>400 Bad Request</entry>
+                        <entry>The request could not be processed because it contains missing or
+                            invalid information.</entry>
+                    </row>
+                    <row>
+                        <entry>401 Unauthorized</entry>
+                        <entry>The authentication credentials included with this request are
+                            missing or invalid.</entry>
+                    </row>
+                    <row>
+                        <entry>403 Forbidden</entry>
+                        <entry>The server recognized your credentials, but you do not possess
+                            authorization to perform this request.</entry>
+                    </row>
+                    <row>
+                        <entry>404 Not Found</entry>
+                        <entry>The request specified a URI of a resource that does not exist.</entry>
+                    </row>
+                    <row>
+                        <entry>405 Method Not Allowed</entry>
+                        <entry>The HTTP verb specified in the request (DELETE, GET, HEAD, POST, PUT)
+                            is not supported for this request URI.</entry>
+                    </row>
+                    <row>
+                        <entry>406 Not Acceptable</entry>
+                        <entry>The resource identified by this request is not capable of generating
+                            a representation corresponding to one of the media types in the Accept
+                            header of the request.</entry>
+                    </row>
+                    <row>
+                        <entry>409 Conflict</entry>
+                        <entry>A creation or update request could not be completed, because it would
+                            cause a conflict in the current state of the resources supported by the
+                            server (for example, an attempt to create a new resource with a unique
+                            identifier already assigned to some existing resource).</entry>
+                    </row>
+                    <row>
+                        <entry>500 Internal Server Error</entry>
+                        <entry>The server encountered an unexpected condition which prevented it
+                            from fulfilling the request.</entry>
+                    </row>
+                    <row>
+                        <entry>501 Not Implemented</entry>
+                        <entry>The server does not (currently) support the functionality required
+                            to fulfill the request.</entry>
+                    </row>
+                    <row>
+                        <entry>503 Service Unavailable</entry>
+                        <entry>The server is currently unable to handle the request due to
+                            temporary overloading or maintenance of the server.</entry>
+                    </row>
+                </tbody>
+            </tgroup>
+        </informaltable>
+
+    </section>
+
 </appendix>
