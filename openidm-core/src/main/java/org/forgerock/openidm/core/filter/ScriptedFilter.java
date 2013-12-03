@@ -132,7 +132,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             }
         } catch (ResourceException e) {
-            logger.error("Failed the execute the onRequest script", e);
+            logger.debug("Failed the execute the onRequest script", e);
             handler.handleError(e);
         }
     }
@@ -155,7 +155,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 evaluateOnFailure(context, state, error, handler);
             } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
+                logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
                 handler.handleError(error);
             }
@@ -186,7 +186,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             }
         } catch (ResourceException e) {
-            logger.error("Failed the execute the onRequest script", e);
+            logger.debug("Failed the execute the onRequest script", e);
             handler.handleError(e);
         }
     }
@@ -199,7 +199,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 evaluateOnResponse(context, state, result);
             } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
+                logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
                 // Todo What to do here?
                 // handler.handleError(e);
@@ -219,7 +219,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 evaluateOnFailure(context, state, error, handler);
             } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
+                logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
                 handler.handleError(error);
             }
@@ -249,7 +249,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             }
             }
         } catch (ResourceException e) {
-            logger.error("Failed the execute the onRequest script", e);
+            logger.debug("Failed the execute the onRequest script", e);
             handler.handleError(e);
         }
 
@@ -263,7 +263,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 evaluateOnResponse(context, state, resource);
             } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
+                logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
                 // Todo What to do here?
                 // handler.handleError(e);
@@ -294,7 +294,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             try {
                 evaluateOnFailure(context, state, error, handler);
             } catch (ResourceException e) {
-                logger.error("Failed the execute the onFailure script", e);
+                logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
                 handler.handleError(error);
             }
