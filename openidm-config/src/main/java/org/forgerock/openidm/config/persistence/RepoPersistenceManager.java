@@ -361,7 +361,9 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 } else {
                     logger.trace("Creating: {} {} ", id, obj);
                     // This may create a new (empty) configuration, which felix marks with _felix___cm__newConfiguration=true
-                    CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(obj));
+                    String newResourceId = id.substring(CONFIG_CONTEXT_PREFIX.length());
+                    CreateRequest createRequest = Requests.newCreateRequest(CONFIG_CONTEXT_PREFIX, new JsonValue(obj));
+                    createRequest.setNewResourceId(newResourceId);
                     obj = repo.create(createRequest).getContent().asMap();
                     logger.debug("Stored new config in repository {} {}", pid, obj);
                 }
