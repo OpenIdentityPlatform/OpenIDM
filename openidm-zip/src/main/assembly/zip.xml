@@ -620,9 +620,9 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/admin</outputDirectory>
+            <outputDirectory>/openidm/ui/default/enduser</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui</include>
+                <include>org.forgerock.openidm:openidm-ui-enduser</include>
             </includes>
         </dependencySet>
         <dependencySet>
