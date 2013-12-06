@@ -69,6 +69,8 @@ public class EndpointsService extends AbstractScriptedService {
      */
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
 
+    public static final String CONFIG_RESOURCE_CONTEXT = "context";
+    
     /** PersistenceConfig service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private PersistenceConfig persistenceConfig;
@@ -87,7 +89,7 @@ public class EndpointsService extends AbstractScriptedService {
     protected void activate(ComponentContext context) {
         this.context = context;
 
-        Dictionary properties = context.getProperties();
+        Dictionary<String, Object> properties = context.getProperties();
         setProperties(properties);
         EnhancedConfig config = JSONEnhancedConfig.newInstance();
 
@@ -113,7 +115,16 @@ public class EndpointsService extends AbstractScriptedService {
     }
 
     protected String[] getRouterPrefixes(String factoryPid, JsonValue configuration) {
-        return new String[] { "/endpoint/" + String.valueOf(factoryPid) + "*" };
+        JsonValue resourceContext = configuration.get(CONFIG_RESOURCE_CONTEXT);
+        String routerPrefix = null;
+        if (!resourceContext.isNull() && resourceContext.isString()) {
+            // use the resource context as the router prefix
+            routerPrefix = resourceContext.asString();
+        } else {
+            // build the router prefix from the factory PID
+            routerPrefix = "endpoint/" + String.valueOf(factoryPid) + "*";
+        }
+        return new String[] { routerPrefix };
     }
 
     protected JsonValue serialiseServerContext(ServerContext context) throws ResourceException {
