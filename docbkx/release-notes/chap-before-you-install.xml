@@ -49,6 +49,9 @@
         <listitem>
             <para>Microsoft SQL Server 2008 Express</para>
         </listitem>
+        <listitem>
+            <para>Oracle Database 11g Enterprise Edition</para>
+        </listitem>
     </itemizedlist>
     <para>OrientDB is provided for evaluation only.</para>
    </listitem>
@@ -58,7 +61,7 @@
    <listitem>
     <para>You must install OpenIDM as a stand-alone service, using Apache Felix
     and Jetty as provided. Alternate containers are not supported.</para>
-    <para>This nightly build of OpenIDM bundles Jetty version 8.1.4.v20120524.</para>
+    <para>This OpenIDM release bundles Jetty version 7.6.2.v20120308.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -71,6 +74,7 @@
      <listitem><para>LDAP</para></listitem>
      <listitem><para>Scripted SQL</para></listitem>
      <listitem><para>XML File</para></listitem>
+     <listitem><para>Database Table</para></listitem>
     </itemizedlist>
    <para>ForgeRock provides additional connectors, as listed on the <link
    xlink:href="http://openicf.forgerock.org/connectors/" xlink:show="new"
@@ -93,7 +97,7 @@
  advantage of a recent JVM fix relating to non-blocking sockets with the 
  default Jetty configuration.</para>
 
- <para>You need 130 MB disk space and 256 MB memory for a minimal evaluation
+ <para>You need 150 MB disk space and 1 GB memory for an evaluation
  installation. For a production installation, disk space and memory 
  requirements will depend on the size of the repository, and on size of the 
  audit and service log files that OpenIDM writes.</para>

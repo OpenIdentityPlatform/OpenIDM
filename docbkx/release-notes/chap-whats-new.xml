@@ -31,133 +31,78 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
  
-  <important>
-    <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
-    main development branch of the product. This release contains selected key
-    features and all current fixed issues. The release has undergone important
-    functional testing but not the complete testing cycle that is done for a
-    full enterprise release. Many of the interfaces provided in this release
-    are still evolving and are not guaranteed to be supported in the enterprise
-    release.</para>
-
-    <para>This release is supported through a ForgeRock subscription. Its goal
-    is to enable you to start build phases earlier, with the most recent features,
-    instead of having to wait for the full release date. Fixes to issues that are
-    discovered in this release will be delivered as patches to ForgeRock customers,
-    and are guaranteed to be delivered in the full release that follows. This
-    release will be supported for a grace period after the full version has
-    been released.</para>
+    <para>OpenIDM <?eval ${docTargetVersion}?> is a maintenance release that
+    resolves a number of issues, including security issues in OpenIDM. It is
+    strongly recommended that you update to this release to make your
+    deployment more secure, and to take advantage of important functional
+    fixes. ForgeRock customers can contact support for help and further
+    information.</para>
     
-    <para>With the exception of these Release Notes, the official 
-    documentation for this release is still in progress, and is accessible at 
-    <link xlink:href="http://openidm.forgerock.org/docs.html" />.
-    The complete, validated documentation set will be available with the 
-    full release.</para>
-  </important> 
+    <para>Before you install OpenIDM or update your existing OpenIDM
+    installation, read these release notes. Then update or install
+    OpenIDM.</para>
 
- <itemizedlist>
-  <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
-  including the following:</para>
-  <listitem>
-    <para>Browser-based user interface</para>
-    <para>Includes self service capabilities, a generic platform to expose and 
-    invoke workflows, and a notification service for tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-ui"
-    xlink:role="http://docbook.org/xlink/role/olink">
-    <citetitle>OpenIDM User Interface</citetitle></link> in the
-    <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-  <listitem>
-    <para>BPMN 2.0 workflow engine, embedded as an OSGi bundle and accessible 
-    over REST.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-workflow"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Integrating Business Processes and Workflows</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-  <listitem>
-    <para>Configurable task scheduling service, including support for 
-    clustered schedules and scanning tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-scheduler-conf"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Scheduling Tasks and Events</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Configurable policy service.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-policies"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Using Policies to Validate Data</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Ability to perform batch scans to execute tasks</para>
-    <para>For more information, see <link xlink:href="integrators-guide#task-scanner"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Scanning Data to Trigger Tasks</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Ability to create custom RESTful endpoints.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#adding-custom-endpoints"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Adding Custom Endpoints</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Support for MS SQL JDBC as an internal repository.</para>
-    <para>For more information, see
-    <link xlink:href="http://openidm.forgerock.org/doc/install-guide#repository-mssql">
-    <citetitle>To Set Up OpenIDM With MS SQL</citetitle></link>
-    in the <citetitle>Installation Guide</citetitle>.</para>
-  </listitem>  
-  <listitem>
-    <para>Enhanced, multi-threaded reconciliation service, accessible over REST.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#chap-synchronization"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Configuring Synchronization</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Support for Powershell scripts on the Active Directory connector.
-    </para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#ad-powershell"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Using PowerShell Scripts With the Active Directory Connector</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>     
-  </listitem>
-  <listitem>
-    <para>Reusable server configuration and property value substitution in the 
-    configuration.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#using-property-substitution"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Using Property Value Substitution in the Configuration</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-      <para>Support for calling LiveSync operations over REST, or using the
-      resource API.</para>
-      <para>For more information, see
-          <link xlink:href="integrators-guide#livesync-over-rest"
-                xlink:role="http://docbook.org/xlink/role/olink">
-              <citetitle>Triggering LiveSync Over REST</citetitle></link>
-      in the <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-      
- </itemizedlist>
+    <para>For installation instructions and several samples to familiarize you
+    with the features, see the <link xlink:href="install-guide#chap-install"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+    Guide</citetitle></link>.</para>
 
- <para>For installation instructions and several samples to familiarize you 
- with the features, see the <link xlink:href="install-guide#chap-install"
-                                  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
-         Guide</citetitle></link>.</para>
+    <para>For an architectural overview and high-level presentation of OpenIDM,
+    see the <link xlink:href="integrators-guide#chap-overview"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
+    Overview</citetitle></link> chapter in the <citetitle>Integrator's Guide</citetitle>.</para>
 
- <para>For an architectural overview and high-level presentation of OpenIDM,
- see the <link xlink:href="integrators-guide#chap-overview"
-               xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
-         Overview</citetitle></link> chapter in the <citetitle>Integrator's
- Guide</citetitle>.</para>
+    <section xml:id="product-enhancements">
+        <title>New Features</title>
+        <para>Compared to the OpenIDM 2.1.0 release, OpenIDM 2.1.1 fixes a
+        number of issues. OpenIDM 2.1.1 also provides the following new features.</para>
+        <itemizedlist>
+            <listitem>
+                <para>The maximum number of retries can now be specified for a
+                liveSync operation, and a dead letter queue can be configured
+                for failed liveSync records.
+                (<link xlink:show="new"
+                 xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1326">OPENIDM-1326</link>)</para>
+            </listitem>
+            <listitem>
+                <para>The audit service REST API has been extended to support
+                read and query operations on audit log entries.
+                (<link xlink:show="new"
+                 xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1282">OPENIDM-1282</link>)</para>
+            </listitem>
+            <listitem>
+                <para>OpenIDM now supports resource renaming.
+                (<link xlink:show="new"
+                xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1200">OPENIDM-1200</link>)</para>
+            </listitem>
+            <listitem>
+                <para>Support for Oracle DB as an internal repository.</para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
+    <section xml:id="openidm-docs">
+        <title>OpenIDM Documentation</title>
+        <para>You can read the following additional
+        <link xlink:show="new" xlink:href="http://docs.forgerock.org/en/openid/2.1.0/">product documentation</link>.
+        for OpenIDM 2.1.0 online at <link xlink:show="new" xlink:href="http://docs.forgerock.org" />.</para>
+        <itemizedlist>
+            <listitem>
+                <para><link xlink:show="new"
+                xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/release-notes/index/index.html"
+                >OpenIDM 2.1.0 Release Notes</link></para>
+            </listitem>
+            <listitem>
+                <para><link
+                xlink:show="new" xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/install-guide/index/index.html"
+                >OpenIDM 2.1.0 Installation Guide</link></para>
+            </listitem>
+            <listitem>
+                <para><link
+                xlink:show="new" xlink:href="http://docs.forgerock.org/en/openidm/2.1.0/integrators-guide/index/index.html"
+                >OpenIDM 2.1.0 Integrator's Guide</link></para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
 </chapter>
