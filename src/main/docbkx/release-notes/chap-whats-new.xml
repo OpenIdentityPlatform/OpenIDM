@@ -31,30 +31,6 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
  
-  <important>
-    <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
-    main development branch of the product. This release contains selected key
-    features and all current fixed issues. The release has undergone important
-    functional testing but not the complete testing cycle that is done for a
-    full enterprise release. Many of the interfaces provided in this release
-    are still evolving and are not guaranteed to be supported in the enterprise
-    release.</para>
-
-    <para>This release is supported through a ForgeRock subscription. Its goal
-    is to enable you to start build phases earlier, with the most recent features,
-    instead of having to wait for the full release date. Fixes to issues that are
-    discovered in this release will be delivered as patches to ForgeRock customers,
-    and are guaranteed to be delivered in the full release that follows. This
-    release will be supported for a grace period after the full version has
-    been released.</para>
-    
-    <para>With the exception of these Release Notes, the official 
-    documentation for this release is still in progress, and is accessible at 
-    <link xlink:href="http://openidm.forgerock.org/docs.html">http://openidm.forgerock.org/docs.html</link>. 
-    The complete, validated documentation set will be available with the 
-    full release.</para>
-  </important> 
-
  <itemizedlist>
   <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
   including the following:</para>
