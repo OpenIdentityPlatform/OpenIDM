@@ -501,6 +501,24 @@
        <listitem>
         <para>string, optional</para>
         <para>The native OpenICF object type.</para>
+        <para>The following native types are supported:</para>
+           <screen>JAVA_TYPE_BIGDECIMAL
+JAVA_TYPE_BIGINTEGER
+JAVA_TYPE_PRIMITIVE_BOOLEAN
+JAVA_TYPE_BYTE_ARRAY
+JAVA_TYPE_CHAR
+JAVA_TYPE_CHARACTER
+JAVA_TYPE_DATE
+JAVA_TYPE_PRIMITIVE_DOUBLE
+JAVA_TYPE_DOUBLE
+JAVA_TYPE_FILE
+JAVA_TYPE_PRIMITIVE_FLOAT
+JAVA_TYPE_FLOAT
+JAVA_TYPE_GUARDEDBYTEARRAY
+JAVA_TYPE_GUARDEDSTRING
+JAVA_TYPE_INT
+JAVA_TYPE_PRIMITIVE_LONG
+JAVA_TYPE_LONG</screen>
        </listitem>
       </varlistentry>
      </variablelist>
