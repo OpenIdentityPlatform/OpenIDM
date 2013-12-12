@@ -604,7 +604,7 @@ Content-Length: 89
                     </thead>
                     <tbody>
                         <row>
-                            <entry>/openidm/managed/user/?_query-id=query-all-ids</entry>
+                            <entry>/openidm/managed/user/?_queryId=query-all-ids</entry>
                             <entry>GET</entry>
                             <entry>List all the managed users in the repository</entry>
                         </row>
@@ -629,7 +629,7 @@ Content-Length: 89
                             <entry>Update a user entry (replaces the entire entry)</entry>
                         </row>
                         <row>
-                            <entry>/openidm/managed/user/?_action=patch&amp;_query-id=for-userName&amp;uid=
+                            <entry>/openidm/managed/user/?_action=patch&amp;_queryId=for-userName&amp;uid=
                                 <replaceable>userName</replaceable></entry>
                             <entry>POST</entry>
                             <entry>Update a user (can be used to replace the value of one or more
@@ -646,7 +646,7 @@ Content-Length: 89
                 -header "X-OpenIDM-Username: openidm-admin"
                 -header "X-OpenIDM-Password: openidm-admin"
                 -request GET
-                "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+                "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
             </screen>
 
             <para>The following example retrieves the JSON representation of a specified
@@ -668,7 +668,8 @@ Content-Length: 89
                 "userName":"james",
                 "familyName":"Berg",
                 "givenName":"James",
-                "email": ["james@example.com"],
+                "email": "james@example.com",
+                "phoneNumber": "082082082",
                 "userPassword":"password"
                 }'
                 "http://localhost:8080/openidm/managed/user/james"
@@ -723,7 +724,7 @@ Content-Length: 89
                 -data '{
                 "replace":"userPassword","value": "newer-password"
                 }'
-                "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=james"
+                "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=james"
             </screen>
 
         </section>
@@ -794,7 +795,7 @@ Content-Length: 89
                             <entry>Lists the defined workflow definitions</entry>
                         </row>
                         <row>
-                            <entry>/openidm/workflow/processdefinition?_query-id=<replaceable>id</replaceable></entry>
+                            <entry>/openidm/workflow/processdefinition?_queryId=<replaceable>id</replaceable></entry>
                             <entry>GET</entry>
                             <entry>Performs a filtered search for a process definition</entry>
                         </row>
@@ -804,7 +805,7 @@ Content-Length: 89
                             <entry>Returns detailed information about the specified process definition</entry>
                         </row>
                         <row>
-                            <entry>/openidm/workflow/processinstance?_query-id=query-all-ids</entry>
+                            <entry>/openidm/workflow/processinstance?_queryId=query-all-ids</entry>
                             <entry>GET</entry>
                             <entry>Lists the running workflow process instances</entry>
                         </row>
@@ -825,18 +826,18 @@ Content-Length: 89
                             <entry>Returns detailed information about the task instance</entry>
                         </row>
                         <row>
-                            <entry>/openidm/workflow/task?_query-id=query-all-ids</entry>
+                            <entry>/openidm/workflow/task?_queryId=query-all-ids</entry>
                             <entry>GET</entry>
                             <entry>Lists all active tasks</entry>
                         </row>
                         <row>
-                            <entry>/openidm/workflow/task?_query-id=filteredQuery&amp;<replaceable>filter
+                            <entry>/openidm/workflow/task?_queryId=filteredQuery&amp;<replaceable>filter
                             </replaceable></entry>
                             <entry>GET</entry>
                             <entry>Lists the tasks according to the specified filter</entry>
                         </row>
                         <row>
-                            <entry>/openidm/workflow/task?_query-id=user-task-summary&amp;id=<replaceable>id
+                            <entry>/openidm/workflow/task?_queryId=user-task-summary&amp;id=<replaceable>id
                             </replaceable></entry>
                             <entry>GET</entry>
                             <entry>Lists the summary of tasks assigned to the specified user</entry>
