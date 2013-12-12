@@ -28,7 +28,7 @@
  * @author yaromin
  */
 define("UserDelegate", [
-	"org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
@@ -62,43 +62,23 @@ define("UserDelegate", [
         headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
         headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
-        obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/info/login",
-            url: "",
-            headers: headers,
-            success: function (data) {
-                if(!data.username) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                    successCallback(data);
-                }
-            },
-            error: errorCallback,
-            errorsHandlers: errorsHandlers
-        });
+
+        obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
+
         delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
     };
     
-    obj.getUserById = function(id, component, successCallback, errorCallback) {
-        if(component === "managed/user") {
-            obj.readEntity(id, function(user) {
-                successCallback(user);
-            }, function() {
-                errorCallback();
-            });
-        } else if(component === "internal/user") {
-            obj.readInternalEntity(id, function(user) {
-                if(!user.userName) {
-                    user.userName = user._id;
-                }
-                
-                successCallback(user);
-            }, function() {
-                errorCallback();
-            });
+    obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
+    
+        if (component === "internal/user") {
+            component = "repo/internal/user"; 
         }
+
+        this.serviceCall({
+            serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
+            success: successCallback, 
+            error: errorCallback,
+            errorsHandlers: errorsHandlers});
     };
 
        
@@ -122,26 +102,41 @@ define("UserDelegate", [
     /**
      * Checks if logged in and returns users id
      */
-    obj.getProfile = function(successCallback, errorCallback, errorsHandlers) {
+    obj.getProfile = function(successCallback, errorCallback, errorsHandlers, headers) {
+        var uiRoles = {
+            "openidm-authorized": "ui-user",
+            "openidm-admin": "ui-admin"
+        };
+
         obj.serviceCall({
             serviceUrl: constants.host + "/openidm/info/login",
             url: "",
+            headers: headers,
             success: function (data) {
+                var i;
                 if(!data.username) {
                     if(errorCallback) {
                         errorCallback();
                     }
                 } else if(successCallback) {
+
+                    // previously roles were sometimes stored as a CSV - convert those into a proper array
+                    if (typeof data.roles === "string") {
+                        data.roles = data.roles.split(",");
+                    }
+
+                    for (i=(data.roles.length-1);i>=0;i--) {
+                        if (_.has(uiRoles,data.roles[i])) {
+                            data.roles.push(uiRoles[data.roles[i]]);
+                        }
+                    }
+
                     successCallback(data);
                 }
             },
             error: errorCallback,
             errorsHandlers: errorsHandlers
         });
-    };
-    
-    obj.readInternalEntity = function(id, successCallback, errorCallback) {
-        this.serviceCall({serviceUrl: constants.host + "/openidm/repo/internal/user", url: "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
     obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
@@ -220,22 +215,6 @@ define("UserDelegate", [
             success: successCallback,
             error: errorCallback
         });
-    };
-
-    obj.logout = function() {
-        var callParams = {
-                url: "/",
-                headers: {  },
-                success: function () {
-                    console.debug("Successfully logged out");
-                },
-                error: function () {
-                    console.debug("Error during logging out");
-                }
-        };
-        callParams.headers[constants.OPENIDM_HEADER_PARAM_LOGOUT] = true;
-
-        obj.serviceCall(callParams);
     };
 
     /**

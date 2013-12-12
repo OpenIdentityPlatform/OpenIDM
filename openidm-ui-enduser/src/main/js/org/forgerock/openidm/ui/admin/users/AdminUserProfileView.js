@@ -60,7 +60,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 oldUserName = data.oldUserName;
                 delete data.oldUserName;                
                 
-                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
+                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
@@ -73,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                     userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        router.routeTo("adminUserProfile", {args: [data.userName], trigger : true});
+                        router.routeTo(router.configuration.routes.adminUserProfile, {args: [data.userName], trigger : true});
                         self.reloadData();
                     });
                 });
@@ -146,7 +146,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
             
-            _.each(this.editedUser.roles.split(","), _.bind(function(v) {
+            _.each(this.editedUser.roles, _.bind(function(v) {
                 this.$el.find("input[name=roles][value="+v+"]").attr('checked', true);
             }, this));
             
@@ -174,7 +174,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         },
         
         back: function() {
-            router.routeTo("adminUsers", {trigger: true});
+            router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
         }
     }); 
     

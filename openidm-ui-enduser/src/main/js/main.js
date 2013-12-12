@@ -31,7 +31,7 @@
 
 require.config({
     paths: {
-        mustache: "libs/mustache-0.7.0",
+        less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.5.8-min",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",
@@ -48,9 +48,6 @@ require.config({
     },
 
     shim: {
-        mustache: {
-            exports: "Mustache"
-        },
         underscore: {
             exports: "_"
         },
@@ -100,7 +97,7 @@ require.config({
  * required synchronously
  */
 require([
-    "mustache",
+    "less",
     "underscore",
     "backbone",
     "form2js",

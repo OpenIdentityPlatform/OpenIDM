@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, Backbone */
+/*global define, $, Backbone, _ */
 
 /**
  * @author mbilski
@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/Dashboard", [
             if (conf.loggedUser) {
                 var roles = conf.loggedUser.roles, data = {};
                 
-                if(roles.indexOf('openidm-admin') !== -1) {
+                if(_.indexOf(roles, 'openidm-admin') !== -1) {
                     data.mode = "openidm-admin";
                     tasksDashboard.render(data, args);
                 } else {
