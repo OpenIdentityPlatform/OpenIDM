@@ -130,8 +130,10 @@ $</screen>
     </step>
     <step performance="optional">
      <para>By default, OpenIDM listens for HTTP connections on port 8080. To
-     change the default port, edit
-     <filename>openidm/conf/jetty.xml</filename>.</para>
+     change the default port, edit the <filename>/path/to/openidm/conf/boot/boot.properties</filename>
+     file. For more information, see <link xlink:href="integrators-guide#appendix-ports-used"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Ports Used</citetitle></link>
+     in the <citetitle>Integrator's Guide</citetitle>.</para>
     </step>
     <step performance="optional">
      <indexterm>
@@ -237,6 +239,9 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      are included in the configuration. As you work through the sample 
      configurations described later in this guide, you will notice that these 
      services are active.</para>
+     <para>Startup errors and messages are logged to the console by default.
+     You can also view these messages in the log files at
+     <filename>/path/to/openidm/logs</filename>.</para>
     </step>
     <step>
      <para>Alternatively, you can manage the container and services from the
