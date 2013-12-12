@@ -428,4 +428,226 @@ mysql&gt; show tables;
         [   9] [active       ] org.forgerock.openidm.authentication
         [  11] [active       ] org.forgerock.openidm.provisioner</screen>
 
+ <procedure xml:id="repository-oracledb">
+  <title>To Set Up OpenIDM With Oracle Database</title>
+
+  <para>This procedure assumes that Oracle Database has been installed and
+  configured on the local host.</para>
+
+  <para>OpenIDM listens on port 8080 by default. To avoid a port conflict,
+  make sure that Oracle Database is configured to use a different port, or
+  edit the <filename>/path/to/openidm/conf/boot/boot.properties</filename>
+  file to change the port on which OpenIDM listens.</para>
+
+  <step>
+      <para>Connect to the Oracle Database with any database connection utility.
+      For more information, see <link xlink:show="new"
+      xlink:href="http://docs.oracle.com/cd/B25329_01/doc/admin.102/b25107/connecting.htm"
+      >Connecting to the Database</link>.</para>
+      <para>This example uses SQL Command Line (SQL*Plus) to connect as the
+      <literal>SYSTEM</literal> user.</para>
+      <screen>$ sqlplus /nolog
+SQL&gt; connect SYSTEM/password
+Connected.
+      </screen>
+  </step>
+  <step>
+      <para>Create a user that will have permission to connect to the
+      OpenIDM database tables.</para>
+      <para>The following example creates a user <literal>openidm</literal>
+      with password <literal>password</literal>.</para>
+      <screen>SQL&gt; CREATE USER openidm IDENTIFIED BY password;
+User created.</screen>
+  </step>
+  <step>
+      <para>Grant the new user at least the <literal>CREATE SESSION</literal>
+      and <literal>RESOURCE</literal> privileges, to allow that user to connect
+      to the database and create the required tables.</para>
+      <screen>SQL&gt; GRANT CREATE SESSION TO openidm;
+Grant succeeded.
+SQL&gt; GRANT RESOURCE TO openidm;
+Grant succeeded.</screen>
+  </step>
+  <step>
+      <para>Connect to the database as the <literal>openidm</literal> user.</para>
+      <screen>SQL&gt; connect openidm/password;
+Connected.
+      </screen>
+  </step>
+  <step>
+      <para>Import the OpenIDM data definition language script for OpenIDM
+      into Oracle Database.</para>
+      <screen>SQL&gt; @/root/openidm/db/scripts/oracle/openidm.sql
+Creating Sequence genericobjects_id_SEQ ...
+
+Sequence created.
+...</screen>
+      <para>This step creates all of the required database tables for use as
+      the internal repository.</para>
+  </step>
+  <step>
+      <para>Check that the tables have been created correctly by querying the
+      <literal>internaluser</literal> table. The query should return two
+      records (<literal>openidm-admin</literal> and <literal>anonymous</literal>).
+      The output here has been formatted for legibility.</para>
+      <screen>SQL&gt; select * from internaluser;
+
+OBJECTID     openidm-admin
+-----------------------------------------------------------------------------
+REV          0
+-----------------------------------------------------------------------------
+PWD          openidm-admin
+-----------------------------------------------------------------------------
+ROLES        openidm-admin,openidm-authorized
+-----------------------------------------------------------------------------
+
+OBJECTID     anonymous
+-----------------------------------------------------------------------------
+REV          0
+-----------------------------------------------------------------------------
+PWD          anonymous
+-----------------------------------------------------------------------------
+ROLES        openidm-reg
+-----------------------------------------------------------------------------</screen>
+  </step>
+  <step>
+      <para>Make sure that OpenIDM is stopped.</para>
+      <screen>$ cd /path/to/openidm/
+$ ./shutdown.sh
+OpenIDM is not running, not stopping.</screen>
+  </step>
+  <step>
+    <para>OpenIDM requires an Oracle DB driver that must be created from two
+    separate jar files. Create the driver as follows.</para>
+    <substeps>
+       <step>
+           <para>Download the Oracle JDBC driver for your Oracle DB version
+           from <link
+           xlink:show="new" xlink:href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"
+           >Oracle Technetwork</link> and place it in the <filename>openidm/db/scripts/oracle</filename>
+           directory.</para>
+           <screen>$ ls /path/to/openidm/db/scripts/oracle
+ojdbc6_g.jar
+</screen>
+       </step>
+       <step>
+           <para>Create a bind file and edit it to match the version information
+           for your JDBC driver.</para>
+           <para>You can use the sample bind file located in
+           <filename>openidm/db/scripts/mssql/</filename>. Copy the bind file
+           to the same location as the JDBC driver.</para>
+           <screen>$ cd /path/to/openidm/db/scripts
+$ cp mssql/sqljdbc4.bnd oracle/
+$ ls oracle/
+ojdbc6_g.jar  sqljdbc4.bnd</screen>
+           <para>The JDBC driver version information for your driver is located
+           in the <literal>Specification-Version</literal> property in the
+           MANIFEST file of the driver.</para>
+           <screen>$ cd /path/to/openidm/db/scripts/oracle
+$ unzip -q -c ojdbc6_g.jar META-INF/MANIFEST.MF
+...
+Specification-Vendor: Sun Microsystems Inc.
+Specification-Title: JDBC
+Specification-Version: 4.0
+...</screen>
+           <para>Edit the bind file to match the JDBC driver version.</para>
+           <screen>$ more sqljdbc4.bnd
+...
+version=4.0
+Export-Package: *;version=${version}
+Bundle-Name: Oracle JDBC Driver 4.0 for SQL Server
+Bundle-SymbolicName: Oracle JDBC Driver 4.0 for SQL Server
+Bundle-Version: ${version}</screen>
+       </step>
+       <step>
+           <para>Download the <literal>bnd</literal> Java archive file
+           (<filename>biz.aQute.bnd.jar</filename>) that enables you to create
+           OSGi bundles. The file can be downloaded from
+           <link xlink:show="new" xlink:href="http://dl.dropbox.com/u/2590603/bnd/biz.aQute.bnd.jar" />.
+           For more information about <literal>bnd</literal>, see
+           <link xlink:show="new" xlink:href="http://www.aqute.biz/Bnd/Bnd" />.</para>
+           <para>Place the <literal>bnd</literal> Java archive file in the same
+           directory as the JDBC driver, and the bind file.</para>
+           <screen>$ ls /path/to/openidm/db/scripts/oracle/
+biz.aQute.bnd.jar  ojdbc6_g.jar  sqljdbc4.bnd</screen>
+       </step>
+       <step>
+           <para>Change to the directory in which the three files are located and
+           run the following command to create the OSGi bundle.</para>
+           <screen>$ cd /path/to/openidm/db/scripts/oracle/
+$ java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd ojdbc6_g.jar
+Dec 10, 2013 9:53:28 AM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+ojdbc6_g 984 0</screen>
+           <para>A new <literal>.bar</literal> file has now been created.</para>
+           <screen>$ ls
+biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  sqljdbc4.bnd</screen>
+       </step>
+       <step>
+           <para>Move the <literal>.bar</literal> file to the
+           <literal>openidm/bundle</literal> directory and rename it with a
+           <literal>.jar</literal> extension. The actual name of the file is
+           unimportant.</para>
+           <screen>$ mv ojdbc6_g.bar /path/to/openidm/bundle/ojdbc6_g-osgi.jar</screen>
+       </step>
+   </substeps>
+  </step>
+  <step>
+   <para>Remove the default OrientDB configuration file
+   (<filename>openidm/conf/repo.orientdb.json</filename>) from the
+   configuration directory.</para>
+   <screen>$ rm /path/to/openidm/conf/repo.orientdb.json</screen>
+  </step>
+  <step>
+   <para>Copy the OracleDB configuration file
+   (<filename>openidm/samples/misc/repo.jdbc-oracle.json</filename>) to the
+   configuration directory and rename the file <filename>repo.jdbc.json</filename>.</para>
+   <screen>$ cd /path/to/openidm/conf
+$ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
+  </step>
+  <step>
+   <para>Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary,
+   to reflect your OracleDB deployment. Specifically, edit the <literal>jdbcUrl</literal>,
+   <literal>username</literal>, and <literal>password</literal> properties. For
+   example:</para>
+   <programlisting language="javascript">{
+    "connection" : {
+        "dbType" : "ORACLE",
+        "jndiName" : "",
+        "driverClass" : "oracle.jdbc.OracleDriver",
+        "jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/XE",
+        "username" : "openidm",
+        "password" : "password",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "connectionTimeoutInMs" : 30000
+    },</programlisting>
+  </step>
+ </procedure>
+
+    <para>When you have set up OracleDB for use as the OpenIDM internal
+    repository, start OpenIDM to check that the setup has been successful. On
+    startup, a number of INFO messages are output, as the predefined queries
+    are processed.</para>
+    <para>After startup, you should see that <literal>repo.jdbc</literal> is
+    <literal>active</literal>, whereas <literal>repo.orientdb</literal> is
+    <literal>unsatisfied</literal>.
+    </para>
+
+    <screen>$ cd /path/to/openidm
+$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+-Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+....
+-&gt; scr list
+   Id   State          Name
+...
+[   2] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+...
+[   3] [active       ] org.forgerock.openidm.repo.jdbc
+...</screen>
+
 </chapter>
