@@ -23,7 +23,6 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,13 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
-import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.metadata.security.ORole;
+import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
 
@@ -285,13 +286,15 @@ public class DBHelper {
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
-                // Check if structure changed
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 populateSample(db, completeConfig);
             } else { 
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 logger.info("DB does not exist, creating {}", dbURL);
-                db.create(); 	       
+                db.create();
+                // Delete default admin user
+                OSecurity security = db.getMetadata().getSecurity();
+                security.dropUser(OUser.ADMIN);
+                // Create new admin user with new username and password
+                security.createUser(user, password, security.getRole(ORole.ADMIN));
                 populateSample(db, completeConfig);
             } 
         } else {
