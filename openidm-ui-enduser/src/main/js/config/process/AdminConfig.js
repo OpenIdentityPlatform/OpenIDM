@@ -49,10 +49,10 @@ define("config/process/AdminConfig", [
                 
                 userDelegate.deleteEntity(event.userId, function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleted");                    
-                    router.routeTo("adminUsers", {trigger: true});
+                    router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
                 }, function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
-                    router.routeTo("adminUsers", {trigger: true});
+                    router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
                 });
             }
         },

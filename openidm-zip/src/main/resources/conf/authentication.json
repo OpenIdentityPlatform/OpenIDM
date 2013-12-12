@@ -6,6 +6,7 @@
         "userCredential" : "password",
         "userRoles" : "roles"
     },
+    "adminGroups": [ ],
     "defaultUserRoles" : [ ],
     "serverAuthConfig" : {
         "authnPopulateContextScript": "&{launcher.install.location}/bin/defaults/script/auth/authnPopulateContext.js",
@@ -26,10 +27,10 @@
                     "name" : "PASSTHROUGH",
                     "passThroughAuth" : "system/AD/account",
                     "propertyMapping" : {
-                        "userRoles" : "roles"
-                    },
-                    "defaultUserRoles" : [
-                    ],
+                        "userId" : "sAMAccountName",
+                        "groupMembership" : "memberOf"
+                    },                   
+                    "defaultUserRoles" : [ "openidm-authorized" ],
                     "enabled" : false
                 },
                 {

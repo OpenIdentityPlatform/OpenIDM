@@ -46,7 +46,7 @@ public class PassthroughAuthenticator {
     final static Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
 
     private final String passThroughAuth;
-    private final String userRolesProperty;
+    private final JsonValue propertyMapping;
     private final List<String> defaultRoles;
 
     /**
@@ -56,14 +56,14 @@ public class PassthroughAuthenticator {
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public PassthroughAuthenticator(String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
+    public PassthroughAuthenticator(String passThroughAuth, JsonValue propertyMapping, List<String> defaultRoles) {
         this.passThroughAuth = passThroughAuth;
-        this.userRolesProperty = userRolesProperty;
+        this.propertyMapping = propertyMapping;
         this.defaultRoles = defaultRoles;
     }
 
     /**
-     * Performs the AD Passthrough authentication.
+     * Performs the ICF Passthrough authentication.
      *
      * @param authData The AuthData object.
      * @param password The user's password.
@@ -72,6 +72,8 @@ public class PassthroughAuthenticator {
      * @throws AuthException If pass-through authentication fails.
      */
     public boolean authenticate(AuthData authData, String password) throws AuthException {
+
+        String userRolesProperty = propertyMapping.get("userRoles").asString();
 
         if (!StringUtils.isEmpty(passThroughAuth) && !"anonymous".equals(authData.getUsername())) {
             JsonResource router = getJsonResource();
@@ -87,19 +89,15 @@ public class PassthroughAuthenticator {
                     JsonValue result  = accessor.action(passThroughAuth, params, null);
                     boolean authenticated = result.isDefined(ServerConstants.OBJECT_PROPERTY_ID);
                     if (authenticated) {
-                        //This is what I was talking about. We don't have a way to populate this. Use script to overcome
-                        //it authData.roles = Arrays.asList(new String[]{"openidm-admin", "openidm-authorized"});
                         authData.setResource(passThroughAuth);
                         authData.setUserId(result.get(ServerConstants.OBJECT_PROPERTY_ID).required().asString());
 
                         result  = accessor.read(passThroughAuth + "/" + authData.getUserId());
 
                         if (userRolesProperty != null && result.isDefined(userRolesProperty)) {
-
                             authData.setRoles((List) result.get(userRolesProperty).getObject());
-                            if (authData.getRoles().size() == 0) {
-                                authData.getRoles().addAll(defaultRoles);
-                            }
+                        } else if (authData.getRoles().size() == 0) {
+                            authData.getRoles().addAll(defaultRoles);
                         }
 
                         return true;

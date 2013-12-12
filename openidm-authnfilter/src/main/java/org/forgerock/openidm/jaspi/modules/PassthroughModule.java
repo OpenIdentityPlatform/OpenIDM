@@ -43,6 +43,7 @@ public class PassthroughModule extends IDMServerAuthModule {
     private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
 
     private static String passThroughAuth;
+    private static JsonValue propertyMapping;
 
     private PassthroughAuthenticator passthroughAuthenticator;
 
@@ -80,10 +81,9 @@ public class PassthroughModule extends IDMServerAuthModule {
         passThroughAuth = config.get("passThroughAuth").asString();
 
         // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        String userRolesProperty = properties.get("userRoles").asString();
+        propertyMapping = config.get("propertyMapping");
 
-        passthroughAuthenticator = new PassthroughAuthenticator(passThroughAuth, userRolesProperty, defaultRoles);
+        passthroughAuthenticator = new PassthroughAuthenticator(passThroughAuth, propertyMapping, defaultRoles);
     }
 
     /**
@@ -96,6 +96,9 @@ public class PassthroughModule extends IDMServerAuthModule {
         Map<String, Object> contextMap = (Map<String, Object>) messageInfo.getMap()
                 .get(IDMServerAuthModule.CONTEXT_REQUEST_KEY);
         contextMap.put("passThroughAuth", passThroughAuth);
+        if (propertyMapping != null) {
+            contextMap.put("propertyMapping", propertyMapping.getObject());
+        }
     }
 
     /**

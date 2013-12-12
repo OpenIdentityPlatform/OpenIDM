@@ -28,6 +28,7 @@
     if (request.method === "read") {
         if (secCtx && secCtx.userid) {
             val = {"username" : secCtx.username, 
+                   "roles" : secCtx["openidm-roles"],
                    "userid" : {
                         "component" : secCtx.userid.component, 
                         "id" : secCtx.userid.id

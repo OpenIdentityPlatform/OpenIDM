@@ -38,7 +38,7 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
     commonConstants.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
     commonConstants.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
     
-    commonConstants.LESS_VERSION = 'libs/less-1.3.3-min.js';
+    commonConstants.LESS_VERSION = 'libs/less-1.5.1-min.js';
 
     
     return commonConstants;

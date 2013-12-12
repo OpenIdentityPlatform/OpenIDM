@@ -50,12 +50,12 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
+                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
                 delete data.terms;
                 delete data.passwordConfirm;
                 
-                this.delegate.createEntity(data, function(user) {
-                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: false });
+                this.delegate.createEntity(null, data, function(user) {
+                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: false });
                 }, function() {
                     _this.unlock();
                 });
