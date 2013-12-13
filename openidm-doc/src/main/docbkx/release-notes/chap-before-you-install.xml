@@ -27,8 +27,7 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Before You Install OpenIDM Software</title>
 
  <para>This chapter covers prerequisites for installing and running OpenIDM
@@ -48,6 +47,9 @@
         </listitem>
         <listitem>
             <para>Microsoft SQL Server 2008 Express</para>
+        </listitem>
+        <listitem>
+            <para>Oracle Database 11g </para>
         </listitem>
     </itemizedlist>
     <para>OrientDB is provided for evaluation only.</para>
@@ -77,6 +79,27 @@
    >OpenICF project connectors site</link>.</para>
    </listitem>
   </varlistentry>
+     <varlistentry>
+         <term>Browsers</term>
+         <listitem>
+             <para>ForgeRock has tested many browsers with the OpenIDM UI,
+             including the following browsers.</para>
+             <itemizedlist>
+                 <listitem>
+                     <para>Chrome and Chromium 16 and later</para>
+                 </listitem>
+                 <listitem>
+                     <para>Firefox 3.6 and later</para>
+                 </listitem>
+                 <listitem>
+                     <para>Internet Explorer 8 and later</para>
+                 </listitem>
+                 <listitem>
+                     <para>Safari 5 and later</para>
+                 </listitem>
+             </itemizedlist>
+         </listitem>
+     </varlistentry>
  </variablelist>
 
  <para>If you have a special request to support a component or combination not
