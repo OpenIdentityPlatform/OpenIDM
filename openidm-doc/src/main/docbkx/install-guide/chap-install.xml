@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Installing OpenIDM Services</title>
 
  <para>This chapter covers the tasks required to install and start
@@ -365,7 +364,9 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 {
   "stateProvince": "",
   "userName": "joe",
-  "roles": "openidm-authorized",
+  "roles": [
+    "openidm-authorized"
+  ],
   "givenName": "joe",
   "address2": "",
   "lastPasswordAttempt": "Wed Nov 28 2012 22:19:35 GMT+0200 (SAST)",
