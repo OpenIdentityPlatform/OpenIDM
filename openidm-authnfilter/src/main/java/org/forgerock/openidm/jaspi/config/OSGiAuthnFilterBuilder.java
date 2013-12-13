@@ -33,7 +33,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.forgerock.jaspi.container.config.AuthContextConfiguration;
 import org.forgerock.jaspi.container.config.Configuration;
 import org.forgerock.jaspi.container.config.ConfigurationManager;
@@ -41,9 +40,8 @@ import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
@@ -295,17 +293,17 @@ public class OSGiAuthnFilterBuilder {
 
     @Reference(
             name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletFilterRegistration.class,
+            referenceInterface = ServletRegistration.class,
             policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindServletFilterRegistration",
             unbind = "unbindServletFilterRegistration"
     )
-    private ServletFilterRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private ServletRegistration servletFilterRegistration;
+    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = servletFilterRegistration;
     }
-    private void unbindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = null;
     }
 

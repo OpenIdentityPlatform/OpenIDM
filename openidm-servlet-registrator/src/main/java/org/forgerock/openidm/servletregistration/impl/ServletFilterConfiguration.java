@@ -11,10 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012-2013 ForgeRock AS. All rights reserved.
+ * Copyright ï¿½ 2012-2013 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.servletregistration.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +28,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,32 +42,32 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 @Component(
-    name = "org.forgerock.openidm.servletfilter", 
-    immediate = true,
-    policy = ConfigurationPolicy.REQUIRE,
-    configurationFactory=true
+        name = "org.forgerock.openidm.servletfilter",
+        immediate = true,
+        policy = ConfigurationPolicy.REQUIRE,
+        configurationFactory=true
 )
 public class ServletFilterConfiguration {
     private final static Logger logger = LoggerFactory.getLogger(ServletFilterConfiguration.class);
-    
+
     private RegisteredFilter registeredFilter;
-    
+
     // Original setting of system properties
     Map<String, String> origSystemProperties = new HashMap<String, String>();
-    
+
     @Reference(
             name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletFilterRegistration.class,
+            referenceInterface = ServletRegistration.class,
             policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindServletFilterRegistration",
             unbind = "unbindServletFilterRegistration"
     )
-    private ServletFilterRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private ServletRegistration servletFilterRegistration;
+    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = servletFilterRegistration;
     }
-    private void unbindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = null;
     }
 
@@ -108,7 +108,7 @@ public class ServletFilterConfiguration {
                 servletFilterRegistration.unregisterFilter(registeredFilter);
                 logger.info("Unregistered servlet filter {}.", context.getProperties());
             } catch (Exception ex) {
-                logger.warn("Failure reported during unregistering of servlet filter {}: {}", 
+                logger.warn("Failure reported during unregistering of servlet filter {}: {}",
                         new Object[]{context.getProperties(), ex.getMessage(), ex});
             }
         }

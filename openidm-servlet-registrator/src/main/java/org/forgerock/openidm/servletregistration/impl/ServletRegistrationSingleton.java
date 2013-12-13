@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.servletregistration.impl;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -41,17 +43,18 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
+import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Singleton service for registering servlet filters in OSGi.
+ * Singleton service for registering servlet filters and servlets in OSGi.
  *
  * @author Phill Cunnington
  * @author ckienle
@@ -62,17 +65,17 @@ import org.slf4j.LoggerFactory;
         immediate = true
 )
 @Service
-public class ServletFilterRegistrationSingleton implements ServletFilterRegistration {
+public class ServletRegistrationSingleton implements ServletRegistration {
 
-    private final static Logger logger = LoggerFactory.getLogger(ServletFilterRegistrationSingleton.class);
+    private final static Logger logger = LoggerFactory.getLogger(ServletRegistrationSingleton.class);
 
     private BundleContext bundleContext;
-    
+
     @Reference
     private WebContainer webContainer;
-    
+
     private List<RegisteredFilterImpl> filters = new ArrayList<RegisteredFilterImpl>();
-    
+
     private final static Object registrationLock = new Object();
 
     /**
@@ -93,6 +96,20 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
     @Deactivate
     public void deactivate(ComponentContext context) {
         bundleContext = null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
+        webContainer.registerServlet(alias, servlet, initparams, webContainer.getDefaultSharedHttpContext());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void unregisterServlet(Servlet servlet) {
+        webContainer.unregisterServlet(servlet);
     }
 
     /**
@@ -133,7 +150,7 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
             return newFilter;
         }
     }
-    
+
     /**
      * Registers a servlet filter configuration
      * @param config the filter configuration
@@ -215,7 +232,7 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
 
         // Create filter
         Filter proxiedFilter = (Filter)Proxy.newProxyInstance(filter.getClass().getClassLoader(), new Class[]{Filter.class},
-                        new FilterProxy(filter, filterCL, preInvokeReqAttributes));
+                new FilterProxy(filter, filterCL, preInvokeReqAttributes));
 
         // Register filter
         Dictionary<String, Object> props = new Hashtable<String, Object>();
@@ -227,7 +244,7 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
         webContainer.registerFilter(proxiedFilter, urlPatternsArray, servletNamesArray, props, webContainer.getDefaultSharedHttpContext());
         return proxiedFilter;
     }
-    
+
     private void registerFilterService(JsonValue config) {
         // Register ServletFilterRegistrator service
         ServletFilterRegistrator servletFilterRegistrator = new ServletFilterRegistratorSvc(config);
@@ -242,7 +259,7 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
             logger.info("Successfully unregistered servlet filter {}", filter);
         }
     }
-    
+
     public void unregisterFilterWithWebContainer(Filter filter) {
         webContainer.unregisterFilter(filter);
     }
@@ -262,7 +279,7 @@ public class ServletFilterRegistrationSingleton implements ServletFilterRegistra
          * @param preInvokeReqAttributes request attributes to set before the filter doFilter is invoked
          */
         public FilterProxy(Filter filter, ClassLoader threadCtxClassloader,
-                Map<String, Object> preInvokeReqAttributes) {
+                           Map<String, Object> preInvokeReqAttributes) {
             this.filter = filter;
             this.threadCtxClassloader = threadCtxClassloader;
             this.preInvokeReqAttributes = preInvokeReqAttributes;

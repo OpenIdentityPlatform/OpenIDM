@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2013 ForgeRock AS. All rights reserved.
  */
 
 /**
- * OpenIDM servlet filter registration handling.
+ * OpenIDM servlet filter registration handling implementation.
  * <p>
- * This package defines the related classes necessary for adding custom servlet filters into OpenIDM
+ * This package defines the related classes necessary to implement adding custom servlet filters and servlets into OpenIDM
  */
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.servletregistration.impl;

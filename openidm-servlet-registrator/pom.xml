@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -29,8 +29,8 @@
         <artifactId>openidm-project</artifactId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-servletfilter-registrator</artifactId>
-    <name>OpenIDM servlet filter registration handler</name>
+    <artifactId>openidm-servlet-registrator</artifactId>
+    <name>OpenIDM servlet/filter registration handler</name>
     <packaging>bundle</packaging>
 
     <dependencies>
@@ -116,10 +116,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!-- allow for dynamic discovery of bundles --> 
+                        <!-- allow for dynamic discovery of bundles -->
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version}</Export-Package>
-                        <Private-Package>org.forgerock.openidm.filterregistration.impl</Private-Package>
+                        <Export-Package>org.forgerock.openidm.servletregistration;version=${openidm.version}</Export-Package>
+                        <Private-Package>org.forgerock.openidm.servletregistration.impl</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

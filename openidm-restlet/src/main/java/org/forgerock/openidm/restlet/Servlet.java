@@ -46,7 +46,8 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.restlet.JsonResourceRestlet;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
+import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
@@ -54,10 +55,7 @@ import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.restlet.RestletRouterServlet;
-import org.ops4j.pax.web.service.WebContainer;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.restlet.Request;
 import org.restlet.Restlet;
@@ -74,9 +72,9 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 @Component(
-    name = "org.forgerock.openidm.restlet",
-    immediate = true,
-    policy = ConfigurationPolicy.IGNORE
+        name = "org.forgerock.openidm.restlet",
+        immediate = true,
+        policy = ConfigurationPolicy.IGNORE
 )
 @Reference(
         name = "reference_Servlet_Restlet",
@@ -90,16 +88,16 @@ import org.slf4j.LoggerFactory;
 public class Servlet extends RestletRouterServlet {
 
     private static final long serialVersionUID = 1L;
-    
+
     /** TODO: Description. */
     final static Logger logger = LoggerFactory.getLogger(Servlet.class);
-    
+
     /** TODO: Description. */
     private static final String PATH_PROPERTY = "openidm.restlet.path";
-    
+
     @Reference
-    private WebContainer webContainer;
-    
+    private ServletRegistration servletRegistration;
+
     // Optional scripts to augment/populate the security context
     List<Script> augmentSecurityContext = new CopyOnWriteArrayList<Script>();
 
@@ -125,13 +123,13 @@ public class Servlet extends RestletRouterServlet {
      * {@code openidm.restlet.path} property.
      */
     @Reference(
-        name = "reference_Servlet_JsonResource",
-        referenceInterface = JsonResource.class,
-        bind = "bindJsonResource",
-        unbind = "unbindJsonResource",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC,
-        strategy = ReferenceStrategy.EVENT
+            name = "reference_Servlet_JsonResource",
+            referenceInterface = JsonResource.class,
+            bind = "bindJsonResource",
+            unbind = "unbindJsonResource",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT
     )
     protected HashMap<JsonResource, Restlet> restlets = new HashMap<JsonResource, Restlet>();
     protected synchronized void bindJsonResource(JsonResource resource, Map<String, Object> properties) {
@@ -149,18 +147,18 @@ public class Servlet extends RestletRouterServlet {
 
     // Register script extensions configured
     @Reference(
-        name = "reference_Servlet_ServletFilterRegistrator",
-        referenceInterface = ServletFilterRegistrator.class,
-        bind = "bindRegistrator",
-        unbind = "unbindRegistrator",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC,
-        strategy = ReferenceStrategy.EVENT
+            name = "reference_Servlet_ServletFilterRegistrator",
+            referenceInterface = ServletFilterRegistrator.class,
+            bind = "bindRegistrator",
+            unbind = "unbindRegistrator",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT
     )
-    protected Map<ServletFilterRegistrator, Script> filterRegistratorMap = 
+    protected Map<ServletFilterRegistrator, Script> filterRegistratorMap =
             new HashMap<ServletFilterRegistrator, Script>();
-    protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, 
-            Map<String, Object> properties) {
+    protected synchronized void bindRegistrator(ServletFilterRegistrator registrator,
+                                                Map<String, Object> properties) {
         JsonValue regConfig = registrator.getConfiguration();
         JsonValue scriptCfg = regConfig.get("scriptExtensions").get("augmentSecurityContext");
         if (!scriptCfg.isNull()) {
@@ -170,9 +168,9 @@ public class Servlet extends RestletRouterServlet {
             logger.debug("Registered script {}", augmentScript);
         }
     }
-    
-    protected synchronized void unbindRegistrator(ServletFilterRegistrator registrator, 
-            Map<String, Object> properties) {
+
+    protected synchronized void unbindRegistrator(ServletFilterRegistrator registrator,
+                                                  Map<String, Object> properties) {
         Script augmentScript = filterRegistratorMap.remove(registrator);
         if (augmentScript != null) {
             augmentSecurityContext.remove(augmentScript);
@@ -190,18 +188,18 @@ public class Servlet extends RestletRouterServlet {
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         String alias = "/openidm";
-        webContainer.registerServlet(alias, this, new Hashtable(), webContainer.getDefaultSharedHttpContext());
+        servletRegistration.registerServlet(alias, this, new Hashtable());
         logger.debug("Registered servlet at {}", alias);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        webContainer.unregisterServlet(this);
+        servletRegistration.unregisterServlet(this);
     }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
+            throws ServletException, IOException {
         ObjectSetContext.clear(); // start with a fresh slate
         try {
             super.service(request, response);
@@ -285,12 +283,12 @@ public class Servlet extends RestletRouterServlet {
             logger.debug("New populated context: {}", result);
             return result;
         }
-        
+
         private void augmentContext(Script augmentScript, Request request, JsonValue securityContext) throws JsonResourceException {
             // Pass request and current security context to augmeet
             Map<String, Object> scope = newScope();
 
-            try {            
+            try {
                 scope.put("request", request);
                 scope.put("security", securityContext.getObject());
                 Object ret = augmentScript.exec(scope);
@@ -299,7 +297,7 @@ public class Servlet extends RestletRouterServlet {
             } catch (ScriptException se) {
                 throw se.toJsonResourceException("Failure in executing security context augment script: "
                         + se.getMessage());
-            } 
+            }
         }
 
         /**
