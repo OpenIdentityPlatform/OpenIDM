@@ -1,4 +1,4 @@
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.servletregistration;
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -17,11 +17,11 @@ public class EmptyFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
-        
+                         FilterChain chain) throws IOException, ServletException {
+
         // Test sets a hard coded user
         request.setAttribute("openidm.username", "openidm-admin");
-        
+
         System.out.println("Filter invoked");
         // Proceed with the chain
         chain.doFilter(request, response);

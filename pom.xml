@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -42,16 +42,16 @@
             <name>CDDL-1.0</name>
             <url>http://www.opensource.org/licenses/cddl1.php</url>
             <comments>Common Development and Distribution License (CDDL) 1.0.
-            This license applies to OpenIDM source code as indicated in the
-            source code.</comments>
+                This license applies to OpenIDM source code as indicated in the
+                source code.</comments>
             <distribution>repo</distribution>
         </license>
         <license>
             <name>CC BY-NC-ND 3.0</name>
             <url>http://creativecommons.org/licenses/by-nc-nd/3.0/</url>
             <comments>Creative Commons Attribution-NonCommercial-NoDerivs 3.0
-            Unported. This license applies to the site content, and to the
-            documentation as indicated in the documentation source code.</comments>
+                Unported. This license applies to the site content, and to the
+                documentation as indicated in the documentation source code.</comments>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -114,7 +114,7 @@
                 <enabled>true</enabled>
             </releases>
             <snapshots>
-               <enabled>true</enabled>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
         <repository>
@@ -250,7 +250,7 @@
         <restlet.version>2.0.15</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <authnfilter.commons.version>1.0.6-SNAPSHOT</authnfilter.commons.version>
-        
+
         <!-- Commons JSON versions -->
         <commons.util.version>1.1.0</commons.util.version>
         <commons.json-fluent.version>1.2.0</commons.json-fluent.version>
@@ -323,7 +323,7 @@
         <module>openidm-restlet</module>
         <module>openidm-authnfilter</module>
         <module>openidm-filter</module>
-        <module>openidm-servletfilter-registrator</module>
+        <module>openidm-servlet-registrator</module>
         <module>openidm-quartz-fragment</module>
         <module>openidm-scheduler</module>
         <module>openidm-security-jetty</module>
@@ -364,10 +364,10 @@
 
     <dependencyManagement>
         <dependencies>
-        <!--    mvn versions:display-plugin-updates
-                mvn versions:display-dependency-updates
-                mvn versions:use-latest-versions
-        -->
+            <!--    mvn versions:display-plugin-updates
+                    mvn versions:display-dependency-updates
+                    mvn versions:use-latest-versions
+            -->
 
             <!-- ForgeRock Commons -->
             <dependency>
@@ -647,7 +647,7 @@
                 <artifactId>pax-web-jetty-bundle</artifactId>
                 <version>3.0.0</version>
             </dependency>
-        
+
             <!-- H2 Database -->
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -742,7 +742,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <!--This plugin's configuration is used to store Eclipse m2e settings 
                     only. It has no influence on the Maven build itself. -->
                 <plugin>
@@ -846,17 +846,17 @@
                 <version>${frDocPluginVersion}</version>
                 <inherited>false</inherited>
                 <configuration>
-                 <projectName>OpenIDM</projectName>
-                 <googleAnalyticsId>${gaId}</googleAnalyticsId>
+                    <projectName>OpenIDM</projectName>
+                    <googleAnalyticsId>${gaId}</googleAnalyticsId>
                 </configuration>
                 <executions>
                     <execution>
                         <id>copy-common</id>
- 	 	 	            <phase>pre-site</phase>
- 	 	 	            <goals>
- 	 	 	                <goal>boilerplate</goal>
- 	 	 	            </goals>
- 	 	 	        </execution>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>boilerplate</goal>
+                        </goals>
+                    </execution>
                     <execution>
                         <id>build-doc</id>
                         <phase>pre-site</phase>
@@ -890,7 +890,7 @@
                     </execution>
                 </executions>
             </plugin>
-			
+
         </plugins>
     </build>
     <reporting>
@@ -947,7 +947,7 @@
                 </reportSets>
             </plugin>
 
-			
+
         </plugins>
     </reporting>
 </project>

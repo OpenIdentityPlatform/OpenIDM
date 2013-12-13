@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -122,9 +122,9 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-servletfilter-registrator</artifactId>
+            <artifactId>openidm-servlet-registrator</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
@@ -175,11 +175,11 @@
                  this embedded jar is included as a dependency for maven
                  purposes, but explicitly excluded for the OSGi packaging -->
             <exclusions>
-                <exclusion>  
+                <exclusion>
                     <groupId>com.googlecode.disruptor</groupId>
                     <artifactId>disruptor</artifactId>
                 </exclusion>
-            </exclusions> 
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -267,7 +267,7 @@
             <artifactId>ops4j-base-lang</artifactId>
             <version>1.4.0</version>
         </dependency>
-        
+
         <!--
                 <dependency>
                     <groupId>org.apache.felix</groupId>
@@ -460,7 +460,28 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin> 
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jslint-maven-plugin</artifactId>
+                <configuration>
+                    <assumeRhino>true</assumeRhino>
+                    <predefinedVars>request,openidm,identityServer,java,logger</predefinedVars>
+                    <sourceJsFolder>src/main/resources</sourceJsFolder>
+                    <tolerateEval>true</tolerateEval>
+                    <excludes>
+                        <exclude>**/libs/*.js</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>jslint</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
