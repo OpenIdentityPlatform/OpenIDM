@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Managing Authentication, Authorization and RBAC</title>
  <indexterm>
   <primary>Authentication</primary>
@@ -204,7 +203,7 @@
     "propertyMapping" : {
         "userId" : "_id",
         "userCredential" : "password",
-        "userRoles" : "roles"
+        "userRoles" : ["roles"]
     },
  ... 
  </programlisting>
@@ -340,7 +339,7 @@ return isProcessOnUsersList(processDefinitionId);
     <programlisting language="javascript">
         {  
             "pattern"   : "*",
-            "roles"     : "openidm-admin",
+            "roles"     : ["openidm-admin"],
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowQueryExpression()",
@@ -359,8 +358,8 @@ return isProcessOnUsersList(processDefinitionId);
           to all managed user objects.</para>
         </listitem>
         <listitem>
-          <para><literal>"roles"</literal> - a comma-separated list of the roles 
-          to which this access configuration applies.</para>
+          <para><literal>"roles"</literal> - an array of the roles to which
+          this access configuration applies.</para>
         </listitem>
         <listitem>
           <para><literal>"methods"</literal> - a comma separated list of the 
