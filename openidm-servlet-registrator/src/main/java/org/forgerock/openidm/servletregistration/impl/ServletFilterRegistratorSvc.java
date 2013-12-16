@@ -14,10 +14,10 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.servletregistration.impl;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 
 /**
  * Holds the configuration used to register a servlet filter.

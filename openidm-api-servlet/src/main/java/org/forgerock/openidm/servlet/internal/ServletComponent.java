@@ -41,6 +41,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.servlet.HttpServlet;
 import org.forgerock.json.resource.servlet.HttpServletContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -79,7 +80,7 @@ public class ServletComponent implements EventHandler {
     protected HttpServletContextFactory servletContextFactory;
 
     @Reference
-    private WebContainer webContainer;
+    private ServletRegistration servletRegistration;
     
     private HttpServlet servlet;
 
@@ -89,13 +90,13 @@ public class ServletComponent implements EventHandler {
         servlet = new HttpServlet(connectionFactory, servletContextFactory);
 
         String alias = "/openidm";
-        webContainer.registerServlet(alias, servlet, new Hashtable(), webContainer.getDefaultSharedHttpContext());
+        servletRegistration.registerServlet(alias, servlet, new Hashtable());
         logger.info("Registered servlet at {}", "/openidm");
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        webContainer.unregisterServlet(servlet);
+        servletRegistration.unregisterServlet(servlet);
     }
 
     @Override

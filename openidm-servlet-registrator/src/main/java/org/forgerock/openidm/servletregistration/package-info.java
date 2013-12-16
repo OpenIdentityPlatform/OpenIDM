@@ -19,4 +19,4 @@
  * <p>
  * This package defines the related classes necessary for adding custom servlet filters into OpenIDM
  */
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.servletregistration;

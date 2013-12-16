@@ -129,7 +129,7 @@
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-servletfilter-registrator</artifactId>
+            <artifactId>openidm-servlet-registrator</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
