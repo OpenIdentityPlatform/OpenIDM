@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.servletregistration.impl;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -49,12 +51,13 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
+import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,9 +76,9 @@ import org.slf4j.LoggerFactory;
     configurationFactory=true
 )
 @Service
-public class ServletFilterRegistratorSingleton implements ServletFilterRegistration {
+public class ServletRegistrationSingleton implements ServletRegistration {
 
-    private final static Logger logger = LoggerFactory.getLogger(ServletFilterRegistratorSingleton.class);
+    private final static Logger logger = LoggerFactory.getLogger(ServletRegistrationSingleton.class);
 
     // Context of this scr component 
     private BundleContext bundleContext;
@@ -107,6 +110,19 @@ public class ServletFilterRegistratorSingleton implements ServletFilterRegistrat
         bundleContext = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
+        webContainer.registerServlet(alias, servlet, initparams, webContainer.getDefaultSharedHttpContext());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void unregisterServlet(Servlet servlet) {
+        webContainer.unregisterServlet(servlet);
+    }
     /**
      * {@inheritDoc}
      */

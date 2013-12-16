@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.servletregistration;
 
 import org.forgerock.json.fluent.JsonValue;
 

@@ -40,8 +40,8 @@ import org.forgerock.jaspi.filter.AuthNFilter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.router.RouteService;
@@ -109,7 +109,7 @@ public class OSGiAuthnFilterBuilder {
     private static final String CONFIG_AUDIT_LOGGER = "auditLogger";
     private static final String CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT = "authnPopulateContextScript";
     private static final String CONFIG_ADDITIONAL_URL_PATTERNS = "additionalUrlPatterns";
-    
+
     private static final int DEFAULT_FILTER_ORDER = 100;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -283,17 +283,17 @@ public class OSGiAuthnFilterBuilder {
 
     @Reference(
             name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletFilterRegistration.class,
+            referenceInterface = ServletRegistration.class,
             policy = ReferencePolicy.STATIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindServletFilterRegistration",
             unbind = "unbindServletFilterRegistration"
     )
-    private ServletFilterRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private ServletRegistration servletFilterRegistration;
+    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = servletFilterRegistration;
     }
-    private void unbindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = null;
     }
 

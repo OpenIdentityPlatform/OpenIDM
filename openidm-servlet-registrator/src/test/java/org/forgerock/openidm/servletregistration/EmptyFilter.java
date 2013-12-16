@@ -1,4 +1,4 @@
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.servletregistration;
 import java.io.IOException;
 
 import javax.servlet.Filter;

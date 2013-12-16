@@ -14,7 +14,7 @@
  * Copyright 2013 ForgeRock Inc.
  */
 
-package org.forgerock.openidm.filterregistration.impl;
+package org.forgerock.openidm.servletregistration.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +28,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.filterregistration.RegisteredFilter;
-import org.forgerock.openidm.filterregistration.ServletFilterRegistration;
+import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,17 +58,17 @@ public class ServletFilterConfiguration {
 
     @Reference(
             name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletFilterRegistration.class,
+            referenceInterface = ServletRegistration.class,
             policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             bind = "bindServletFilterRegistration",
             unbind = "unbindServletFilterRegistration"
     )
-    private ServletFilterRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private ServletRegistration servletFilterRegistration;
+    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = servletFilterRegistration;
     }
-    private void unbindServletFilterRegistration(ServletFilterRegistration servletFilterRegistration) {
+    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
         this.servletFilterRegistration = null;
     }
 
