@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -36,7 +36,17 @@ define("config/AppConfiguration", [
                {
                    moduleClass: "org/forgerock/commons/ui/common/main/SessionManager",
                    configuration: {
-                       loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper"
+                       loginHelperClass: "org/forgerock/openidm/ui/user/login/InternalLoginHelper"
+                   } 
+               },
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
+                   configuration: {
+                       LoginView : "org/forgerock/openidm/ui/user/LoginView",
+                       UserProfileView : "org/forgerock/openidm/ui/user/profile/UserProfileView",
+                       LoginDialog : "org/forgerock/openidm/ui/user/LoginDialog",
+                       RegisterView : "org/forgerock/openidm/ui/user/UserRegistrationView",
+                       ChangeSecurityDataDialog : "org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog"
                    } 
                },
                {
@@ -63,6 +73,7 @@ define("config/AppConfiguration", [
                        loader: [
                            {"routes":"config/routes/CommonRoutesConfig"}, 
                            {"routes":"config/routes/AdminRoutesConfig"},
+                           {"routes":"config/routes/IDMRoutesConfig"},
                            {"routes":"config/routes/UserRoutesConfig"}
                        ]
                    } 
@@ -88,8 +99,8 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                    configuration: {
                        links: {
-                           "openidm-admin" : {
-                               "role": "openidm-admin",
+                           "admin" : {
+                               "role": "ui-admin",
                                "urls": {
                                    "dashboard": {
                                        "url": "#/",

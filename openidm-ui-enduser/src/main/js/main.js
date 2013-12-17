@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -120,6 +120,7 @@ require([
     "org/forgerock/openidm/ui/common/util/Constants", 
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",
+    "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/common/util/ThemeManager"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);

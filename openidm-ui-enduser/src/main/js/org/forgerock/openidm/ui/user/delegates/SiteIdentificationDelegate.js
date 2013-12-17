@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -22,21 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global $, define, _ */
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/AdminRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/IDMRoutesConfig",
-    "./messages/AdminMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./validators/UserValidators",
-    "./validators/AdminValidators",
-    "./AppConfiguration",
-    "./process/AdminConfig",
-    "./process/CommonConfig",
-    "./process/UserConfig",
-    "./errorhandlers/CommonErrorHandlers"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function(constants, AbstractDelegate, configuration, eventManager) {
+
+    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/siteIdentification");
+
+    obj.getSiteIdentificationForLogin = function(login, successCallback, errorCallback) {            
+        obj.serviceCall({url: "?login=" + login, success: function(data) {
+            if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback});
+    };
+    
+    return obj;
+});
+
+
+

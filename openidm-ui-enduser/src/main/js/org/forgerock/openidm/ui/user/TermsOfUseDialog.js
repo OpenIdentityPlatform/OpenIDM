@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -22,21 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, _*/
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/AdminRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/IDMRoutesConfig",
-    "./messages/AdminMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./validators/UserValidators",
-    "./validators/AdminValidators",
-    "./AppConfiguration",
-    "./process/AdminConfig",
-    "./process/CommonConfig",
-    "./process/UserConfig",
-    "./errorhandlers/CommonErrorHandlers"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/user/TermsOfUseDialog", [
+    "org/forgerock/commons/ui/common/components/Dialog"
+], function(Dialog) {
+    var TermsOfUseDialog = Dialog.extend({    
+        contentTemplate: "templates/user/TermsOfUseTemplate.html",
+        baseTemplate: "templates/user/LoginBaseTemplate.html",
+        
+        data: {         
+            width: 920,
+            height: 550
+        }
+    }); 
+    
+    return new TermsOfUseDialog();
+});
