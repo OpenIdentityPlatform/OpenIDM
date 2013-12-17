@@ -54,7 +54,8 @@ switch ( objectClass ) {
             attributes.get("email").get(0),
             attributes.get("organization").get(0)
         ]);
-    sql.commit();
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
     case "__GROUP__":
@@ -64,7 +65,8 @@ switch ( objectClass ) {
             id,
             attributes.get("description").get(0)
         ]);
-    sql.commit();
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
     case "organization":
@@ -73,7 +75,8 @@ switch ( objectClass ) {
             id,
             attributes.get("description").get(0)
         ]);
-    sql.commit();
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
     default:
