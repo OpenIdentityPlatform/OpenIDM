@@ -64,18 +64,21 @@ switch ( action ) {
         sql.executeUpdate("UPDATE Users set lastname = ? where uid = ?", [attributes.get("lastname").get(0), uid]);
         sql.executeUpdate("UPDATE Users set email = ? where uid = ?", [attributes.get("email").get(0), uid]);
         sql.executeUpdate("UPDATE Users set organization = ? where uid = ?", [attributes.get("organization").get(0), uid]);
-        sql.commit();
+        // not needed if autocommit=true (default)
+        // sql.commit();
         break
 
         case "__GROUP__":
         sql.executeUpdate("UPDATE Groups set description = ? where name = ?", [attributes.get("description").get(0), uid]);
         sql.executeUpdate("UPDATE Groups set gid = ? where name = ?", [attributes.get("gid").get(0), uid]);
-        sql.commit();
+        // not needed if autocommit=true (default)
+        // sql.commit();
         break
 
         case "organization":
         sql.executeUpdate("UPDATE Organizations set description = ? where name = ?", [attributes.get("description").get(0), uid]);
-        sql.commit();
+        // not needed if autocommit=true (default)
+        // sql.commit();
         break
 
         default:

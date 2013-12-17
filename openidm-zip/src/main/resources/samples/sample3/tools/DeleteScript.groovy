@@ -41,18 +41,24 @@ def sql = new Sql(connection);
 assert uid != null
 
 switch ( objectClass ) {
-    case "__ACCOUNT__":
+case "__ACCOUNT__":
     sql.execute("DELETE FROM Users where uid= ?",[uid])
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
-    case "__GROUP__":
+case "__GROUP__":
     sql.execute("DELETE FROM Groups where name= ?",[uid])
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
-    case "organization":
+case "organization":
     sql.execute("DELETE FROM Organizations where name= ?",[uid])
+    // not needed if autocommit=true (default)
+    // sql.commit();
     break
 
-    default:
+default:
     uid;
 }
