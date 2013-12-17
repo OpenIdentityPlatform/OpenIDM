@@ -1,0 +1,126 @@
+<div class="content-bg">
+
+    <h3>{{t "common.user.userProfile"}}</h3>
+
+    <form class="form two-columns">
+        <input type="hidden" name="_id">
+        <div class="column-layout">
+            <div class="column2">
+                <div class="field">
+                    <label class="light">{{t "common.user.username"}}</label>
+                    <input type="text" name="userName" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                {{#equals userComponent "managed/user" }}
+                <div class="field">
+                    <label class="light">{{t "common.user.givenName"}}</label>
+                    <input type="text" name="givenName" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.emailAddress"}}</label> 
+                    <input type="text" name="email" /> 
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+            
+                <div class="field">
+                    <label class="light">{{t "common.user.address1"}}</label>
+                    <input type="text" name="address1" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.country"}}</label>
+                    <select name="country"></select>
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.stateProvince"}}</label>
+                    <select name="stateProvince"></select>
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                {{/equals}}               
+
+            </div>
+            <div class="column2">
+                {{#equals userComponent "internal/user"}}
+                <div class="field">
+                    <label class="light"></label> 
+                    <a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">
+                        {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
+                    </a>
+                </div>
+                {{/equals}}
+                
+                {{#equals userComponent "managed/user"}}
+                <div class="field">
+                    <label class="light"></label> 
+                    <a href="{{url 'changeSecurityData'}}" id="securityDialogLink" class="ice hrefInput">
+                        {{t "templates.user.UserProfileTemplate.changeSecurityData"}}
+                    </a>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.familyName"}}</label>
+                    <input type="text" name="familyName" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.phoneNumber"}}</label>
+                    <input type="text" name="phoneNumber" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.address2"}}</label>
+                    <input type="text" name="address2" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.city"}}</label>
+                    <input type="text" name="city" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+                
+                <div class="field">
+                    <label class="light">{{t "common.user.postalCode"}}</label>
+                    <input type="text" name="postalCode" />
+                    <span></span>
+                    <div class="validation-message"></div>
+                </div>
+
+                {{#siteIdentification}}
+                <div class="field">
+                    <label class="light"></label> 
+                    <a href="{{url 'siteIdentification'}}" id="passPhraseLink" class="ice hrefInput">
+                        {{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}
+                    </a>
+                </div>
+                {{/siteIdentification}}
+                 
+                <div class="field" style="margin-left: 340px; margin-top: 30px; height: auto">
+                    <input type="submit" name="saveButton" value="Update" class="button" />
+                </div>
+                
+                {{/equals}}
+            </div>
+        </div>
+    </form>
+
+</div>

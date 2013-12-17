@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -24,19 +24,17 @@
 
 /*global define*/
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/AdminRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/IDMRoutesConfig",
-    "./messages/AdminMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./validators/UserValidators",
-    "./validators/AdminValidators",
-    "./AppConfiguration",
-    "./process/AdminConfig",
-    "./process/CommonConfig",
-    "./process/UserConfig",
-    "./errorhandlers/CommonErrorHandlers"
+define("org/forgerock/openidm/ui/user/main", [
+    "./delegates/InternalUserDelegate",
+    "./login/InternalLoginHelper",  
+    "./UserRegistrationView",
+    "./profile/UserProfileView",
+    "./TermsOfUseDialog",
+    "./profile/EnterOldPasswordDialog",
+    "./ForgottenPasswordDialog",
+    "./profile/ChangeSecurityDataDialog",
+    "./profile/ChangeSiteIdentificationDialog",
+    "./LoginView",
+    "./LoginDialog",
+    "./delegates/SiteIdentificationDelegate"
 ]);
