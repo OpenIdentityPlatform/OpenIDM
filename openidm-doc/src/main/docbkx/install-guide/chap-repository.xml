@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Installing a Repository For Production</title>
   <indexterm>
    <primary>Repository database</primary>
@@ -42,15 +41,18 @@
  repository.</para>
  
  <para>OpenIDM <?eval ${docTargetVersion}?> supports the use of <link 
- xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new">MySQL</link> 
- and MS SQL as an internal repository. For details of the supported versions, 
- see <link xlink:href="release-notes#chap-before-you-install" 
+ xlink:href="http://dev.mysql.com/downloads/mysql/"
+ xlink:show="new">MySQL</link>, MS SQL, and Oracle Database as an internal
+ repository. For details of the supported versions, see <link
+ xlink:href="release-notes#chap-before-you-install"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install 
  OpenIDM Software</citetitle></link> in the <citetitle>Release Notes</citetitle>. 
  </para>
 
- <procedure xml:id="repository-mysql">
-  <title>To Set Up OpenIDM With MySQL</title>
+ <section xml:id="repository-mysql">
+   <title>To Set Up OpenIDM With MySQL</title>
+
+ <procedure>
 
   <para>After you have installed MySQL on the local host and <emphasis>before
       starting OpenIDM for the first time</emphasis>, set up OpenIDM to use the
@@ -187,9 +189,12 @@ mysql&gt; show tables;
         [   4] [active       ] org.forgerock.openidm.managed
         [   9] [active       ] org.forgerock.openidm.authentication
         [  11] [active       ] org.forgerock.openidm.provisioner</screen>
- 
- <procedure xml:id="repository-mssql">
-  <title>To Set Up OpenIDM With MS SQL</title>
+ </section>
+
+ <section xml:id="repository-mssql">
+ <title>To Set Up OpenIDM With MS SQL</title>
+
+ <procedure>
      <para>These instructions are specific to MS SQL Server 2008 R2 Express
      running on a local Windows XP system. Adapt the instructions for your
      environment.</para>
@@ -372,7 +377,8 @@ mysql&gt; show tables;
         "dbType" : "SQLSERVER",
         "jndiName" : "",
         "driverClass" : "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-        "jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;databaseName=openidm;applicationName=OpenIDM",
+        "jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;
+                     databaseName=openidm;applicationName=OpenIDM",
         "username" : "openidm",
         "password" : "Passw0rd",
         "defaultCatalog" : "openidm",
@@ -388,48 +394,53 @@ mysql&gt; show tables;
      </step>
  </procedure>
 
-    <para>When you have completed the preceding steps, start OpenIDM to check that
-        the setup has been successful. After startup, you should see that
-        <literal>repo.jdbc</literal> is <literal>active</literal>,
-        whereas <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.
+    <para>
+     When you have completed the preceding steps, start OpenIDM to check that
+     the setup has been successful. After startup, you should see that
+     <literal>repo.jdbc</literal> is <literal>active</literal>, whereas
+     <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.
     </para>
 
     <screen>C:> cd \path\to\openidm
-        ./> startup.bat
-        "Using OPENIDM_HOME:   \path\to\openidm"
-        "Using OPENIDM_OPTS:   -Xmx1024m"
-        "Using LOGGING_CONFIG:
-        -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
-        Using boot properties at \path\to\openidm\conf\boot\boot.properties
-        -&gt; scr list
-        Id   State          Name
-        [  19] [active       ] org.forgerock.openidm.config.starter
-        [  23] [active       ] org.forgerock.openidm.taskscanner
-        [   8] [active       ] org.forgerock.openidm.external.rest
-        [  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-        [  15] [active       ] org.forgerock.openidm.ui.simple
-        [   1] [active       ] org.forgerock.openidm.router
-        [  22] [active       ] org.forgerock.openidm.scheduler
-        [  14] [active       ] org.forgerock.openidm.restlet
-        [   7] [unsatisfied  ] org.forgerock.openidm.external.email
-        [  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
-        [   6] [active       ] org.forgerock.openidm.sync
-        [   3] [active       ] org.forgerock.openidm.script
-        [   5] [active       ] org.forgerock.openidm.recon
-        [   2] [active       ] org.forgerock.openidm.scope
-        [  10] [active       ] org.forgerock.openidm.http.contextregistrator
-        [  20] [active       ] org.forgerock.openidm.config
-        [   0] [active       ] org.forgerock.openidm.audit
-        [  21] [active       ] org.forgerock.openidm.schedule
-        [  17] [active       ] org.forgerock.openidm.repo.jdbc
-        [  16] [active       ] org.forgerock.openidm.workflow
-        [  13] [active       ] org.forgerock.openidm.provisioner.openicf
-        [   4] [active       ] org.forgerock.openidm.managed
-        [   9] [active       ] org.forgerock.openidm.authentication
-        [  11] [active       ] org.forgerock.openidm.provisioner</screen>
+./> startup.bat
+"Using OPENIDM_HOME:   \path\to\openidm"
+"Using OPENIDM_OPTS:   -Xmx1024m"
+"Using LOGGING_CONFIG:
+-Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
+Using boot properties at \path\to\openidm\conf\boot\boot.properties
+-&gt; scr list
+Id   State          Name
+[ 19] [active      ] org.forgerock.openidm.config.starter
+[ 23] [active      ] org.forgerock.openidm.taskscanner
+[  8] [active      ] org.forgerock.openidm.external.rest
+[ 12] [active      ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[ 15] [active      ] org.forgerock.openidm.ui.simple
+[  1] [active      ] org.forgerock.openidm.router
+[ 22] [active      ] org.forgerock.openidm.scheduler
+[ 14] [active      ] org.forgerock.openidm.restlet
+[  7] [unsatisfied ] org.forgerock.openidm.external.email
+[ 18] [unsatisfied ] org.forgerock.openidm.repo.orientdb
+[  6] [active      ] org.forgerock.openidm.sync
+[  3] [active      ] org.forgerock.openidm.script
+[  5] [active      ] org.forgerock.openidm.recon
+[  2] [active      ] org.forgerock.openidm.scope
+[ 10] [active      ] org.forgerock.openidm.http.contextregistrator
+[ 20] [active      ] org.forgerock.openidm.config
+[  0] [active      ] org.forgerock.openidm.audit
+[ 21] [active      ] org.forgerock.openidm.schedule
+[ 17] [active      ] org.forgerock.openidm.repo.jdbc
+[ 16] [active      ] org.forgerock.openidm.workflow
+[ 13] [active      ] org.forgerock.openidm.provisioner.openicf
+[  4] [active      ] org.forgerock.openidm.managed
+[  9] [active      ] org.forgerock.openidm.authentication
+[ 11] [active      ] org.forgerock.openidm.provisioner</screen>
+ </section>
 
- <procedure xml:id="repository-oracledb">
-  <title>To Set Up OpenIDM With Oracle Database</title>
+
+ <section xml:id="repository-oracledb">
+ <title>To Set Up OpenIDM With Oracle Database</title>
+
+ <procedure>
 
   <para>This procedure assumes that Oracle Database has been installed and
   configured on the local host.</para>
@@ -649,5 +660,6 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 ...
 [   3] [active       ] org.forgerock.openidm.repo.jdbc
 ...</screen>
+  </section>
 
 </chapter>
