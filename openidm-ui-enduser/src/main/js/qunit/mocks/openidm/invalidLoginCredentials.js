@@ -60,7 +60,7 @@ define(function () {
                     "Transfer-Encoding": "chunked",
                     "Content-Type": "application/json; charset=UTF-8"
                 },
-                "{\"configuration\":{\"selfRegistration\":false,\"securityQuestions\":false,\"siteIdentification\":false,\"language\":\"en-US\",\"passwordResetLink\":\"\",\"roles\":{\"openidm-admin\":\"Administrator\",\"openidm-authorized\":\"User\",\"tasks-manager\":\"Tasks Manager\"},\"siteImages\":[\"images/passphrase/mail.png\",\"images/passphrase/user.png\",\"images/passphrase/report.png\",\"images/passphrase/twitter.png\"],\"notificationTypes\":{\"info\":{\"name\":\"common.notification.types.info\",\"iconPath\":\"images/notifications/info.png\"},\"warning\":{\"name\":\"common.notification.types.warning\",\"iconPath\":\"images/notifications/warning.png\"},\"error\":{\"name\":\"common.notification.types.error\",\"iconPath\":\"images/notifications/error.png\"}},\"defaultNotificationType\":\"info\"}}"
+                "{\"configuration\":{\"selfRegistration\":false,\"securityQuestions\":false,\"siteIdentification\":false,\"language\":\"en-US\",\"passwordResetLink\":\"\",\"roles\":{\"admin\":\"Administrator\",\"user\":\"User\",\"tasks-manager\":\"Tasks Manager\"},\"siteImages\":[\"images/passphrase/mail.png\",\"images/passphrase/user.png\",\"images/passphrase/report.png\",\"images/passphrase/twitter.png\"],\"notificationTypes\":{\"info\":{\"name\":\"common.notification.types.info\",\"iconPath\":\"images/notifications/info.png\"},\"warning\":{\"name\":\"common.notification.types.warning\",\"iconPath\":\"images/notifications/warning.png\"},\"error\":{\"name\":\"common.notification.types.error\",\"iconPath\":\"images/notifications/error.png\"}},\"defaultNotificationType\":\"info\"}}"
             ]
         );
     
@@ -172,7 +172,7 @@ define(function () {
     
         server.respondWith(
             "GET",   
-            "templates/user/LoginBaseTemplate.html",
+            "templates/common/LoginBaseTemplate.html",
             [
                 200, 
                 { 

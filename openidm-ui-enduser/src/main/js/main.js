@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,8 +31,8 @@
 
 require.config({
     paths: {
-        mustache: "libs/mustache-0.7.0",
-        i18next: "libs/i18next-1.5.8-min",
+        less: "libs/less-1.5.1-min",
+        i18next: "libs/i18next-1.7.1-min",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",
         js2form: "libs/js2form-1.0",
@@ -48,9 +48,6 @@ require.config({
     },
 
     shim: {
-        mustache: {
-            exports: "Mustache"
-        },
         underscore: {
             exports: "_"
         },
@@ -100,7 +97,7 @@ require.config({
  * required synchronously
  */
 require([
-    "mustache",
+    "less",
     "underscore",
     "backbone",
     "form2js",
@@ -117,12 +114,13 @@ require([
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
     "config/main",
     "org/forgerock/openidm/ui/common/util/Constants", 
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",
-    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/common/util/ThemeManager"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
