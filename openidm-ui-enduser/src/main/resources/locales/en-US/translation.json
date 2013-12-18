@@ -8,7 +8,7 @@
         },
         "messages" : {
             "UserMessages" : {
-                "invalidCredentials" : "Login/password combination is invalid.",
+                "authenticationFailed" : "Login/password combination is invalid.",
                 "serviceUnavailable" : "Service unavailable",
                 "changedPassword" : "Password has been changed",
                 "unknown" : "Unknown error. Please contact with administrator",

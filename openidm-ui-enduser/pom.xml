@@ -36,7 +36,7 @@
   <packaging>bundle</packaging>
 
   <properties>
-    <forgerock-ui.version>1.0.1-SNAPSHOT</forgerock-ui.version>
+    <forgerock-ui.version>1.0.2-SNAPSHOT</forgerock-ui.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 

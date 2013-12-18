@@ -24,19 +24,22 @@
 
 (function () {
     // Get the current session's user information
-    if (request instanceof org.forgerock.json.resource.ReadRequest) {
-        var securityCClass = Packages.org.forgerock.json.resource.SecurityContext;
-        if (context.containsContext(securityCClass)) {
-            var secCtx = context.asContext(securityCClass)
-            return  {
-                "authenticationId": secCtx.authenticationId,
-                "authorizationId": secCtx.authorizationId
-            };
+    var val,secCtx = request.security;
+    if (request.method === "read") {
+        if (secCtx && secCtx.username) {
+            val = {"authenticationId" : secCtx.username, 
+                   "authorizationId": {
+                        "roles" : secCtx["roles"],
+                        "component" : secCtx.component
+                   }
+            }; 
+        } else if (secCtx) {
+            val = {"username" : secCtx.user};
         } else {
             throw "Invalid security context, can not retrieve user information associated with the session.";
         }
     } else {
-        throw "Unsupported operation on info login service: " + request.class;
+        throw "Unsupported operation on info login service: " + request.method;
     }
     return val;
 }());
