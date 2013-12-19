@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Connecting to External Resources</title>
  <indexterm>
   <primary>Connectors</primary>
@@ -41,11 +40,13 @@
   <primary>OpenICF</primary>
  </indexterm>
 
- <para>This chapter describes how to connect to external resources such
- as LDAP, Active Directory, flat files, and others. Configurations shown
- here are simplified to show essential aspects. Not all resources support
- all OpenIDM operations, however the resources shown here support
- most of the CRUD operations, and also reconciliation and LiveSync.</para>
+ <para>
+  This chapter describes how to connect to external resources such as LDAP,
+  Active Directory, flat files, and others. Configurations shown here are
+  simplified to show essential aspects. Not all resources support all OpenIDM
+  operations, however the resources shown here support most of the CRUD
+  operations, and also reconciliation and LiveSync.
+ </para>
 
  <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
  databases, directory servers, and other sources of identity data to be managed
@@ -1614,59 +1615,64 @@ _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
 
    <section xml:id="install-standalone-connector">
     <title>Installing a Standalone Java Connector Server</title>
-    <para>It may be necessary to set up a remote Java Connector Server (JSC). This
-    section provides directions for setting up the standalone connecter on
-    Unix/Linux and Windows.
+    <para>
+     In certain situations, it might be necessary to set up a remote Java
+     Connector Server (JCS). This section provides directions for setting up the
+     standalone connector on Unix/Linux and Windows.
     </para>
 
    <procedure>
     <title>Installing a Standalone Connector Server for Unix/Linux</title>
       <step>
-       <para>Download the OPENICF JAVA Connector Server from the OpenIDM
-       download page under the ForgeRock <link
-       xlink:href="http://forgerock.com/download-stack/"
-       xlink:show="new">Open Stack download page</link>.
+       <para>
+        Download the OPENICF JAVA Connector Server from the OpenIDM download
+        page under the ForgeRock <link
+        xlink:href="http://forgerock.com/download-stack/"
+        xlink:show="new">Open Stack download page</link>.
        </para>
       </step>
       <step>
-       <para>Run the terminal and unpack it. The following command will unzip the file
-       in the current folder, so make sure to move to the appropriate location prior to
-       running the command.
+       <para>Change to the appropriate location and unpack the zip file. The
+        following command unzips the file in the current folder.
        </para>
-       <screen>unzip openicf-<?eval ${openicfBundleVersion}?>-java.zip</screen>
+       <screen>$ unzip openicf-<?eval ${openicfBundleVersion}?>-java.zip</screen>
       </step>
       <step>
-       <para>Change the directory to OpenICF using the following command:
+       <para>Change to the <literal>openicf</literal> directory:
        </para>
        <screen>$ cd path/to/openicf</screen>
       </step>
-      <step>
-       <para>If needed, secure the communication between OpenIDM and JCS. The JCS 
-       uses a property called <literal>secret key</literal> to authenticate the connection. 
-       The default secret key value is <literal>changeit</literal>. To change the value 
-       of the secret key enter the following, replacing <literal>newkey</literal>
-       with the your own string value:
-       <screen>java - cp "./lib/framework/*" org.identityconnectors.framework.server.Main 
-       -setKey -key &lt;newkey&gt; -properties ./conf/ConnectorServer.properties</screen>
+      <step performance="optional">
+       <para>
+        If required, secure the communication between OpenIDM and the JCS. The
+        JCS uses the <literal>secret key</literal> property to authenticate the
+        connection. The default secret key value is <literal>changeit</literal>.
+        To change the value of the secret key enter the following, replacing
+        <literal>newkey</literal> with the your own string value:
+       <screen>$ java - cp "./lib/framework/*"
+ org.identityconnectors.framework.server.Main
+ -setKey
+ -key &lt;newkey&gt;
+ -properties ./conf/ConnectorServer.properties</screen>
        </para>
       </step>
       <step>
-       <para>Review the <filename>ConnectorServer.properties</filename> in the 
-       <literal>/conf</literal> directory, and make changes as necessary. The file 
-       contains setting information, including things like ports, the allowance of 
-       one/all IP addresses, and SSL. The file provides the required information to 
-       update these settings.
+       <para>
+        Review the <filename>conf/ConnectorServer.properties</filename> file and
+        make any required changes. This properties file contains information
+        such as port numbers, restricted addresses, and the SSL configuration.
+        The file includes the required information to update these settings.
        </para>
       </step>
       <step>
        <para>Run the JCS.
        </para>
-       <screen>java -cp "./lib/framework/*"
+       <screen>$ java -cp "./lib/framework/*"
 org.identityconnectors.framework.server.Main -run -properties 
 ./conf/ConnectorServer.properties</screen>
       </step>
       <step>
-       <para>If necessary, you can stop the JCS by pressing <literal>^C</literal>.
+       <para>If required, you can stop the JCS by pressing Control+c.
        </para>
       </step>
      </procedure>
@@ -1686,15 +1692,11 @@ org.identityconnectors.framework.server.Main -run -properties
        </para>
       </step>
       <step>
-       <para>Run the command line (<literal>Start</literal>, type <literal>cmd</literal>,
-       and <literal>cmd</literal>) and change the working directory to 
-       <literal>openicf\bin cd c:\openicf\bin</literal>
+       <para>
+        In a Command Prompt window, change the working directory to
+        <literal>openicf\bin</literal>:
        </para>
-      </step>
-      <step>
-       <para>Change the directory to OpenICF using the following command:
-       </para>
-       <screen>$ cd path/to/openicf</screen>
+       <screen>C:\>cd C:\openicf\bin</screen>
       </step>
       <step>
        <para>If needed, secure the communication between OpenIDM and JCS. The JCS 
@@ -3062,22 +3064,23 @@ return id;
   resource before you run the final command.</para>
  </section>
 
-    <section xml:id="systems-over-rest">
-        <title>Checking the Status of External Systems Over REST</title>
+ <section xml:id="systems-over-rest">
+  <title>Checking the Status of External Systems Over REST</title>
+  <para>
+   After a connection has been configured, external systems are accessible over
+   the REST interface at the URL
+   <literal>http://localhost:8080/openidm/system/<replaceable>connector-name</replaceable></literal>.
+   Aside from accessing the data objects within the external systems, you can
+   test the availability of the systems themselves.
+  </para>
+  <para>
+   To list the external systems that are connected to an OpenIDM instance, use
+   the <literal>test</literal> action on the URL
+   <literal>http://localhost:8080/openidm/system/</literal>. The following
+   example shows two external LDAP servers connected to OpenIDM:
+  </para>
 
-        <para>After a connection has been configured, external systems are
-        accessible over the REST interface at the URL
-        <literal>http://localhost:8080/openidm/system/<replaceable>connector-name</replaceable></literal>.
-        Aside from accessing the data objects within the external systems, you
-        can test the availability of the systems themselves.</para>
-
-        <para>To list the external systems that are connected to an OpenIDM
-        instance, use the <literal>test</literal> action on the URL
-        <literal>http://localhost:8080/openidm/system/</literal>. The following
-        example shows two external LDAP servers connected to OpenIDM:
-        </para>
-
-        <screen>$ curl
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -3092,15 +3095,16 @@ return id;
     "name": "ldap2"
   }
 ]</screen>
-
-        <para>The status of the system is provided by the <literal>ok</literal>
-        parameter. If the connection is available, the value of this parameter
-        is <literal>true</literal>.</para>
-
-        <para>To obtain the status for a single system, include the name of
-        the connector in the URL, for example:</para>
-
-        <screen>$ curl
+  <para>
+   The status of the system is provided by the <literal>ok</literal> parameter.
+   If the connection is available, the value of this parameter is
+   <literal>true</literal>.
+  </para>
+  <para>
+   To obtain the status for a single system, include the name of the connector
+   in the URL, for example:
+  </para>
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -3109,12 +3113,12 @@ return id;
   "ok": true,
   "name": "ldap1"
 }</screen>
-
-        <para>If there is a problem with the connection, the request returns
-        an error message. In the following example, the LDAP server named
-        <literal>ldap1</literal> is down.</para>
-
-        <screen>$ curl
+  <para>
+   If there is a problem with the connection, the request returns an error
+   message. In the following example, the LDAP server named
+   <literal>ldap1</literal> is down.
+  </para>
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -3124,12 +3128,12 @@ return id;
             [Root exception is java.net.ConnectException: Connection refused]",
   "name": "ldap"
 }</screen>
-
-        <para>To test the validity of a connector configuration, use the
-        <literal>testConfig</literal> action and include the configuration
-        in the command. For example:</para>
-
-        <screen>$ curl
+  <para>
+   To test the validity of a connector configuration, use the
+   <literal>testConfig</literal> action and include the configuration in the
+   command. For example:
+  </para>
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --data '{
@@ -3244,15 +3248,15 @@ return id;
     "operationOptions" : { }
 }'
  --request POST
- "http://localhost:8080/openidm/system?_action=testConfig"</screen>
-
-        <para>If the configuration is valid, the command returns
-        <literal>"ok": true</literal>, for example:</para>
-
-        <screen>{
-    "name": "xmlfile",
-    "ok": true
+ "http://localhost:8080/openidm/system?_action=testConfig"
+  </screen>
+  <para>
+   If the configuration is valid, the command returns
+   <literal>"ok": true</literal>, for example:
+  </para>
+  <screen>{
+  "name": "xmlfile",
+  "ok": true
 }</screen>
-
-    </section>
+ </section>
 </chapter>
