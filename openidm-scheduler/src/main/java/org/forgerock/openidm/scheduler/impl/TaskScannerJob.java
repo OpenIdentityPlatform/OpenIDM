@@ -92,8 +92,17 @@ public class TaskScannerJob {
      * @throws ExecutionException
      */
     public String startTask() throws ExecutionException {
+        int numberOfThreads = context.getNumberOfThreads();
+        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        
         if (context.getWaitForCompletion()) {
-            performTask();
+            try {
+                performTask(executor);
+            } catch (ExecutionException ex) {
+                throw ex;
+            } finally {
+                executor.shutdown();
+            }
         } else {
             // Launch a new thread for the whole taskscan process
             final ServerContext threadContext = ObjectSetContext.get();
@@ -102,9 +111,11 @@ public class TaskScannerJob {
                 public void run() {
                     try {
                         ObjectSetContext.push(threadContext);
-                        performTask();
+                        performTask(executor);
                     } catch (Exception ex) {
                         logger.warn("Taskscanner failed with unexpected exception", ex);
+                    } finally {
+                        executor.shutdown();
                     }
                 }
             };
@@ -123,13 +134,11 @@ public class TaskScannerJob {
      * @param params parameters necessary for the execution of the script
      * @throws ExecutionException
      */
-    private void performTask()
+    private void performTask(ExecutorService executor)
             throws ExecutionException {
         context.startJob();
         logger.info("Task {} started from {} with script {}",
                 new Object[] { context.getTaskScanID(), context.getInvokerName(), context.getScriptName() });
-
-        int numberOfThreads = context.getNumberOfThreads();
 
         JsonValue results;
         context.startQuery();
@@ -149,11 +158,10 @@ public class TaskScannerJob {
         // TODO jump out early if it's empty?
 
         // Split and prune the result set according to our max and if we're synchronous or not
-        List<JsonValue> resultSets = splitResultsOverThreads(results, numberOfThreads, maxRecords);
+        List<JsonValue> resultSets = splitResultsOverThreads(results, context.getNumberOfThreads(), maxRecords);
         logger.debug("Split result set into {} units", resultSets.size());
 
         final ServerContext threadContext = ObjectSetContext.get();
-        ExecutorService fullTaskScanExecutor = Executors.newFixedThreadPool(numberOfThreads);
         List<Callable<Object>> todo = new ArrayList<Callable<Object>>();
         for (final JsonValue result : resultSets) {
             Runnable command = new Runnable() {
@@ -171,7 +179,7 @@ public class TaskScannerJob {
         }
 
         try {
-            fullTaskScanExecutor.invokeAll(todo);
+            executor.invokeAll(todo);
         } catch (InterruptedException e) {
             // Mark it interrupted
             context.interrupted();
