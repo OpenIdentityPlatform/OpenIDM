@@ -56,7 +56,7 @@ if (request.method !== "query") {
        ],
        res, ret, code;
           
-    ret = openidm.query("/managed/user", params);
+    ret = openidm.query("managed/user", params);
     
     if(ret && ret.result && ret.result[0] && ret.result[0].passPhrase && ret.result[0].siteImage) {
         res = {

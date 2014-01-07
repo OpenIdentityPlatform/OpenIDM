@@ -44,7 +44,10 @@ require.config({
         xdate: "libs/xdate-0.7-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.0.rc.1",
-        moment: "libs/moment-1.7.2-min"
+        moment: "libs/moment-1.7.2-min",
+        UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
+        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
+        SiteIdentificationDelegate: "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate"
     },
 
     shim: {
@@ -114,14 +117,12 @@ require([
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "config/main",
-    "org/forgerock/openidm/ui/common/util/Constants", 
+    "org/forgerock/openidm/ui/common/util/main", 
+    "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",
-    "org/forgerock/openidm/ui/user/main",
-    "org/forgerock/openidm/ui/common/util/ThemeManager"
+    "org/forgerock/commons/ui/common/main",
+    "config/main"
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });

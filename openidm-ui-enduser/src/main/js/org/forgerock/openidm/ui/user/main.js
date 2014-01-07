@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,21 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-(function () {
-    // Get the current session's user information
-    var val,secCtx = request.security;
-    if (request.method === "read") {
-        if (secCtx && secCtx.username) {
-            val = {"authenticationId" : secCtx.username, 
-                   "authorizationId": request.security
-            }; 
-        } else if (secCtx) {
-            val = {"username" : secCtx.user};
-        } else {
-            throw "Invalid security context, can not retrieve user information associated with the session.";
-        }
-    } else {
-        throw "Unsupported operation on info login service: " + request.method;
-    }
-    return val;
-}());
+/*global define*/
+
+define("org/forgerock/openidm/ui/user/main", [
+    "./delegates/InternalUserDelegate",
+    "./delegates/UserDelegate",
+    "./login/InternalLoginHelper",  
+    "./UserRegistrationView",
+    "./profile/UserProfileView",
+    "./TermsOfUseDialog",
+    "./profile/EnterOldPasswordDialog",
+    "./ForgottenPasswordDialog",
+    "./profile/ChangeSecurityDataDialog",
+    "./profile/ChangeSiteIdentificationDialog",
+    "./delegates/SiteIdentificationDelegate",
+    "./LoginView"
+]);

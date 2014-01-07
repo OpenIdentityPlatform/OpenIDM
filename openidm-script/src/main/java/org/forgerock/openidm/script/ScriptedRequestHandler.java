@@ -292,12 +292,12 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                         return null;
                     }
                 };
-                QueryResult queryResult = new QueryResult();
                 script.putSafe("callback", queryCallback);
                 Object result = script.eval();
-                if (null != queryResult) {
-                    handler.handleResult(queryResult);
+                if (null != result) {
+                    handler.handleResource(new Resource(null, null, new JsonValue(result)));
                 }
+                handler.handleResult(new QueryResult());
             } else {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
@@ -375,8 +375,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(
                     (result))));
         } else {
-            JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
-            resource.put("result", result);
+            JsonValue resource = new JsonValue(result);
             handler.handleResult(new Resource(request.getResourceName(), null, resource));
         }
     }
