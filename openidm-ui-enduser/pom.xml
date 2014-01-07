@@ -36,7 +36,7 @@
   <packaging>bundle</packaging>
 
   <properties>
-    <forgerock-ui.version>1.0.2-SNAPSHOT</forgerock-ui.version>
+    <forgerock-ui.version>1.0.2</forgerock-ui.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -63,29 +63,11 @@
       <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
     </dependency>
     <dependency>
-      <artifactId>forgerock-ui-functional-tests</artifactId>
-      <groupId>org.forgerock.commons.ui</groupId>
-      <version>${forgerock-ui.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
   <profiles>
     <profile>
@@ -106,15 +88,6 @@
             <directory>${basedir}/src/main/resources</directory>
           </resource>
         </resources>
-
-        <testResources>
-          <testResource>
-            <directory>${basedir}/src/test/js</directory>
-          </testResource>
-          <testResource>
-            <directory>${basedir}/src/test/resources</directory>
-          </testResource>
-        </testResources>
 
         <plugins>
           <plugin>
