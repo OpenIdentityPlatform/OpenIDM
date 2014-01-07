@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,9 +25,9 @@
 /*global define*/
 
 /**
- * @author yaromin
+ * @author huck.elliott
  */
-define("config/process/AdminConfig", [
+define("config/process/IDMConfig", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
@@ -77,6 +77,22 @@ define("config/process/AdminConfig", [
                     if(event.errorCallback) { event.errorCallback(); }
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userDeleteError");
                 });
+            }
+        },
+        {
+            startEvent: constants.EVENT_NOTIFICATION_DELETE_FAILED,
+            description: "Error in deleting notification",
+            dependencies: [ ],
+            processDescription: function(event) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorDeletingNotification");
+            }
+        },
+        {
+            startEvent: constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR,
+            description: "Error in getting notifications",
+            dependencies: [ ],
+            processDescription: function(event) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
             }
         }];
     

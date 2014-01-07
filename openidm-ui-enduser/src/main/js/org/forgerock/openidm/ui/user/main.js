@@ -26,6 +26,7 @@
 
 define("org/forgerock/openidm/ui/user/main", [
     "./delegates/InternalUserDelegate",
+    "./delegates/UserDelegate",
     "./login/InternalLoginHelper",  
     "./UserRegistrationView",
     "./profile/UserProfileView",
@@ -34,7 +35,6 @@ define("org/forgerock/openidm/ui/user/main", [
     "./ForgottenPasswordDialog",
     "./profile/ChangeSecurityDataDialog",
     "./profile/ChangeSiteIdentificationDialog",
-    "./LoginView",
-    "./LoginDialog",
-    "./delegates/SiteIdentificationDelegate"
+    "./delegates/SiteIdentificationDelegate",
+    "./LoginView"
 ]);

@@ -59,13 +59,13 @@ define("UserDelegate", [
      */
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
-        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
-        headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
+        headers[constants.HEADER_PARAM_USERNAME] = uid;
+        headers[constants.HEADER_PARAM_PASSWORD] = password;
+        headers[constants.HEADER_PARAM_NO_SESION] = false;
 
         obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
 
-        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+        delete headers[constants.HEADER_PARAM_PASSWORD];
     };
     
     obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
@@ -88,7 +88,7 @@ define("UserDelegate", [
     obj.checkCredentials = function(password, successCallback, errorCallback) {
 
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_REAUTH] = password;
+        headers[constants.HEADER_PARAM_REAUTH] = password;
         obj.serviceCall({
             serviceUrl: constants.host + "/openidm/authentication?_action=reauthenticate",
             url: "",
