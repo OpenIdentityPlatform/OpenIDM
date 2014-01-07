@@ -35,7 +35,6 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl, processDefinitionsEndpointUrl;
     
     taskManagementUrl       =   "/openidm/workflow/taskinstance";
-//    taskDefinitionUrl = "/openidm/workflow/taskdefinition";
     processManagementUrl    =   "/openidm/workflow/processinstance";
     processDefinitionUrl = "/openidm/workflow/processdefinition";
     endpointUrl = "/openidm/endpoint/gettasksview";
@@ -53,36 +52,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         params._processDefinitionId = processDefinitionId;
         this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
-/*
-    obj.deleteProcess = function(id, successCallback, errorCallback) {
-        console.debug("delete process");
-        this.serviceCall({url: processManagementUrl + "/" + id, type: "DELETE", success: successCallback, error: errorCallback});
-    };
 
-    obj.getTask = function(id, successCallback, errorCallback) {
-        console.debug("get task");
-        this.serviceCall({url: taskManagementUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
-    };
-
-    obj.getProcess = function(id, successCallback, errorCallback) {
-        console.debug("get process instance");
-        this.serviceCall({url: processManagementUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
-    };
-    
-    obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
-        console.debug("get task definition");
-        this.serviceCall({url: taskDefinitionUrl + "?_queryId=query-taskdefinition&" 
-            + $.param({processDefinitionId: processDefinitionId, taskDefinitionKey: taskDefinitionKey}), success: successCallback, error: errorCallback} );
-    };
-    
-    obj.updateTask = function(id, params, successCallback, errorCallback) {
-        console.debug("update task");
-        var callParams =  {url: taskManagementUrl + "/" + id, type: "PUT", success: successCallback, error: errorCallback, data: JSON.stringify(params)};
-        callParams.headers = [];
-        callParams.headers["If-Match"] = '"*"';
-        this.serviceCall(callParams);
-    };
-*/    
     obj.completeTask = function(id, params, successCallback, errorCallback) {
         console.debug("complete task");
         this.serviceCall({url: taskManagementUrl + "/" + id + "?_action=complete", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
@@ -91,35 +61,20 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getProcessDefinition = function(id, successCallback, errorCallback) {
         this.serviceCall({url: processDefinitionUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
-/*    
-    obj.getAllTasks = function(successCallback, errorCallback) {
-        console.info("getting all tasks");
-
-        obj.serviceCall({url: taskManagementUrl + "?_queryId=query-all-ids", success: function(data) {
-            if(successCallback) {
-                successCallback(data.result);
-            }
-        }, error: errorCallback} );
-    };
-    
-    obj.getAllProcessInstances = function(successCallback, errorCallback) {
-        console.info("getting all process instances");
-
-        obj.serviceCall({url: processManagementUrl + "?_queryId=query-all-ids", success: function(data) {
-            if(successCallback) {
-                successCallback(data.result);
-            }
-        }, error: errorCallback} );
-    };
-*/    
+ 
     obj.getAllProcessDefinitions = function(userId, successCallback, errorCallback) {
         console.info("getting all process definitions");
         
-        obj.serviceCall({url: processDefinitionsEndpointUrl + "?userId=" + userId, success: function(data) {
-            if(successCallback) {
-                successCallback(data);
-            }
-        }, error: errorCallback} );
+        obj.serviceCall({
+            url: processDefinitionsEndpointUrl + "?_queryId=getprocessesforuser&userId=" + userId,  
+            type: "GET",
+            success: function(data) {
+                if(successCallback) {
+                    successCallback(data.result[0]);
+                }
+            }, 
+            error: errorCallback
+        });
     };
         
     obj.getAllUniqueProcessDefinitions = function(userId, successCallback, errorCallback) {
@@ -146,26 +101,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             successCallback(ret);
         }, errorCallback);
     };
-/*    
-    obj.getAllTasksForProccess = function(proccessNameKey, successCallback, errorCallback) {
-        console.info("getting all unassigned tasks");
-        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
-            if(successCallback) {
-                successCallback(data.result);
-            }
-        }, error: errorCallback} );
-    };
-    
-    obj.getTasksAssignedToUser = function(userName, successCallback, errorCallback) {
-        console.info("getting all tasks assigned to user " + userName);
-    
-        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({assignee: userName}), success: function(data) {
-            if(successCallback) {
-                successCallback(data.result);
-            }
-        }, error: errorCallback} );
-    };
-*/    
+   
     obj.serviceCall = function(callParams) {
         serviceInvoker.restCall(callParams);
     };
@@ -179,104 +115,35 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         callParams.headers["If-Match"] = '"*"';
         this.serviceCall(callParams);
     };
-/*    
-    obj.getTasksAvailableToUser = function(userName, successCallback, errorCallback) {
-        obj.getAllTasks(successCallback, errorCallback);
-    };
-    
-    obj.getAllTasksViewForUser = function(userName, successCallback, errorCallback) {
-        obj.getTasksAssignedToUser(userName, function(AvailableTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(AvailableTasks, userName, successCallback, errorCallback);
-        }, errorCallback);
-    };
-    
-    obj.getAllAvailableTasksViewForUser = function(userName, successCallback, errorCallback) {
-        obj.getTasksAvailableToUser(userName, function(AvailableTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(AvailableTasks, null, successCallback, errorCallback);
-        }, errorCallback);
-    };
-    
-    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, assignee, successCallback, errorCallback) {
-        var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
-        
-        getTasksSuccessCallback = function(taskData) {
-            if(taskData.assignee === assignee) {
-                myTasks[taskData._id] = taskData;
-            }
-            
-            if(assignee === null) {//} && taskData.assignee === "") {
-                myTasks[taskData._id] = taskData;
-            }
-            
-            finished++;
-            if(finished === taskInstanceBasicInfoMap.length) {
-                if(_.isEmpty(myTasks)) {
-                    errorCallback();
-                } else {
-                    successCallback(obj.buildStandardViewFromTaskMap(myTasks));
-                }
-            }
-        };
-        
-        for (pointer in taskInstanceBasicInfoMap) {
-            taskBasicData = taskInstanceBasicInfoMap[pointer];
-            obj.getTask(taskBasicData._id, getTasksSuccessCallback);
-        }
 
-        if(_.isEmpty(taskInstanceBasicInfoMap)) {
-            errorCallback();
-        }
-    };
-    
-    obj.buildStandardViewFromTaskMap = function(taskInstanceMap) {
-        var result = {}, pointer, taskInstance, taskInstanceProcessName, taskInstanceTaskName, taskView;
-        for (pointer in taskInstanceMap) {
-            taskInstance = taskInstanceMap[pointer];
-            taskInstanceProcessName = taskInstance.processDefinitionId.split(':')[0];
-            taskInstanceTaskName = taskInstance.name;
-            
-            taskView = {};
-            taskView._id = taskInstance._id;
-            taskView.assignee = taskInstance.assignee;
-            taskView.variables = taskInstance.variables;
-            taskView.createTime = taskInstance.createTime;
-            taskView.processInstanceId = taskInstance.processInstanceId;
-            
-            if (!result[taskInstanceProcessName]) {
-                result[taskInstanceProcessName] = {};
-            }
-            
-            if (!result[taskInstanceProcessName][taskInstanceTaskName]) {
-                result[taskInstanceProcessName][taskInstanceTaskName] = {};
-            }
-            
-            if (!result[taskInstanceProcessName][taskInstanceTaskName].tasks) {
-                result[taskInstanceProcessName][taskInstanceTaskName].tasks = [];
-            }
-            result[taskInstanceProcessName][taskInstanceTaskName].tasks.push(taskView);
-        }
-        
-        return result;
-    };
-*/    
     obj.getAllTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
-        obj.serviceCall({url: endpointUrl + "?userId=" + userId, success: function(data) {
-            if(_.isEmpty(data)) {
-                errorCallback();
-            } else if(successCallback) {
-                successCallback(data);
-            }
-        }, error: errorCallback} );
+        obj.serviceCall({
+            url: endpointUrl + "?_queryId=gettasksview&userId=" + userId, 
+            type: "GET",
+            success: function(data) {
+                if(_.isEmpty(data.result) || _.isEmpty(data.result[0])) {
+                    errorCallback();
+                } else if(successCallback) {
+                    successCallback(data.result[0]);
+                }
+            }, 
+            error: errorCallback
+        });
     };
     
     obj.getMyTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
-        obj.serviceCall({url: endpointUrl + "?userId=" + userId + "&viewType=assignee", success: function(data) {
-            if(_.isEmpty(data)) {
-                errorCallback();
-            } else if(successCallback) {
-                successCallback(data);
-            }
-        }, error: errorCallback} );
+        obj.serviceCall({
+            url: endpointUrl + "?_queryId=gettasksview&userId=" + userId + "&viewType=assignee",  
+            type: "GET",
+            success: function(data) {
+                if(_.isEmpty(data.result) || _.isEmpty(data.result[0])) {
+                    errorCallback();
+                } else if(successCallback) {
+                    successCallback(data.result[0]);
+                }
+            }, 
+            error: errorCallback
+        });
     };
     
     return obj;

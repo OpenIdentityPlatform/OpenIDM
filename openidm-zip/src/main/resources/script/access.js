@@ -76,7 +76,7 @@ var httpAccessConfig =
            "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
         },
         {  
-           "pattern"    : "managed/user/*",
+           "pattern"    : "managed/user",
            "roles"      : "openidm-reg",
            "methods"    : "create",
            "actions"    : "*",
@@ -154,9 +154,9 @@ var httpAccessConfig =
             "actions"   : "reauthenticate"
         },
         {   
-            "pattern"   : "*",
+            "pattern"   : "managed/user/*",
             "roles"     : "openidm-authorized",
-            "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
+            "methods"   : "read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete themselves
             "actions"   : "*",
             "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()",
             "excludePatterns": "system/*"
@@ -171,13 +171,21 @@ var httpAccessConfig =
         },
         
         // Workflow-related endpoints for authorized users
+
         {
-            "pattern"   : "workflow/taskinstance/*",
+            "pattern"   : "endpoint/getprocessesforuser",
             "roles"     : "openidm-authorized",
-            "methods"   : "action",
-            "actions"   : "complete",
-            "customAuthz" : "isMyTask()"
-        },
+            "methods"   : "query",
+            "actions"   : "*",
+            "customAuthz" : "request.params.userId[0] === request.security.id"
+        },        
+        {
+            "pattern"   : "endpoint/gettasksview",
+            "roles"     : "openidm-authorized",
+            "methods"   : "query",
+            "actions"   : "*",
+            "customAuthz" : "request.params.userId[0] === request.security.id"
+        },        
         {
             "pattern"   : "workflow/taskinstance/*",
             "roles"     : "openidm-authorized",

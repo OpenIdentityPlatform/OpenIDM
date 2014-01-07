@@ -231,33 +231,11 @@ function checkIfUIIsEnabled(param) {
 }
 
 function ownDataOnly() {
-    var userId = "";
-    
-    userId = request.id.match(/managed\/user\/(.*)/i);
-    if (userId && userId.length === 2)
-    {
-        userId = userId[1];
-    }
-    
-    if (request.params && request.params.userId)
-    {   
-        // something funny going on if we have two different values for userId
-        if (userId !== null && userId.length && userId !== request.params.userId) {
-            return false;
-        } 
-        userId = request.params.userId;
-    }
-    
-    if (request.value && request.value.userId)
-    {
-        // something funny going on if we have two different values for userId
-        if (userId !== null  && userId.length && userId !== request.params.userId) {
-            return false;
-        } 
-        userId = request.value.userId;
-    }
-    
-    return userId === request.security.id;
+    var userId = request.security.id,
+        component = request.security.component;
+
+    // in the case of a literal read on themselves
+    return (request.id === component + "/" + userId);
 
 }
 
@@ -284,7 +262,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         allowedPropertiesList = allowedPropertiesList.split(',');
     }
     
-    if (request.method === "patch" || (request.method === "action" && request.params._action === "patch")) {
+    if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
         // check each of the fields they are attempting to patch and make sure they are approved
         for (i in params) {
             if ((params[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].field)))) {

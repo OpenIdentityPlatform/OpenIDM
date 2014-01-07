@@ -32,7 +32,7 @@
     var userId, res, ret, params, notification;
 
     if (request.method === "read") {
-        userId = request.parent.security.userid.id; 
+        userId = request.security.username; 
         res = {};
         params = {
             "_queryId": "get-notifications-for-user",
@@ -46,11 +46,11 @@
         
         return res;
         
-    } else if (request.method === "delete"){
+    } else if (request.method === "delete") {
         
         notification = openidm.read("repo/ui/notification/"+request.parent.query.notificationId);
         
-        if(notification.receiverId === request.parent.security.userid.id) {
+        if(notification.receiverId === userId) {
             openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
         } else {
             throw { 

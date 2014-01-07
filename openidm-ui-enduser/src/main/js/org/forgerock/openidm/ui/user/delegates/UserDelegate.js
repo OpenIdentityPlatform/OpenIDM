@@ -59,13 +59,13 @@ define("UserDelegate", [
      */
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid;
-        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
-        headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
+        headers[constants.HEADER_PARAM_USERNAME] = uid;
+        headers[constants.HEADER_PARAM_PASSWORD] = password;
+        headers[constants.HEADER_PARAM_NO_SESION] = false;
 
         obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
 
-        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+        delete headers[constants.HEADER_PARAM_PASSWORD];
     };
     
     obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
@@ -88,14 +88,20 @@ define("UserDelegate", [
     obj.checkCredentials = function(password, successCallback, errorCallback) {
 
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_REAUTH] = password;
+        headers[constants.HEADER_PARAM_REAUTH] = password;
         obj.serviceCall({
             serviceUrl: constants.host + "/openidm/authentication?_action=reauthenticate",
             url: "",
             type: "POST",
             headers: headers,
             success: successCallback,
-            error: errorCallback
+            error: errorCallback,
+            errorsHandlers: {
+                "forbidden": { 
+                    status: "403"
+                }
+            }
+
         });
     };
     
@@ -122,7 +128,7 @@ define("UserDelegate", [
                 } else if(successCallback) {
                 
                     data = {
-                        id : rawData.authenticationId,
+                        id : rawData.authorizationId.id,
                         username : rawData.authenticationId,
                         roles: rawData.authorizationId.roles,
                         component: rawData.authorizationId.component
@@ -139,7 +145,12 @@ define("UserDelegate", [
                         }
                     }
 
-                    successCallback(data);
+                    obj.getUserById(data.id, data.component, function (userData) {
+                        userData.roles = data.roles;
+                        userData.component = data.component;
+
+                        successCallback(userData);
+                    }, errorCallback, errorsHandlers);
                 }
             },
             error: errorCallback,
@@ -149,7 +160,8 @@ define("UserDelegate", [
 
     obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}),
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}), 
+            type: "POST",
             url: "",
             success: function (data) {
                 if(data.hasOwnProperty('securityQuestion')) {
@@ -166,7 +178,8 @@ define("UserDelegate", [
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}),
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
+            type: "POST",
             url: "",
             success: function (data) {
                 if(data.result === "correct" && successCallback) {
@@ -187,7 +200,8 @@ define("UserDelegate", [
     obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
         console.info("setting new password for user and security question");
         obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}),
+            serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}), 
+            type: "POST",
             url: "",
             success: function (data) {
                 if(data.result === "correct" && successCallback) {

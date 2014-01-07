@@ -69,13 +69,13 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                     }, this);
                 
                 if(this.$el.find("input[name=password]").val() !== "") {
-                    patchDefinitionObject.push({replace: "password", value: this.$el.find("input[name=password]").val()});
+                    patchDefinitionObject.push({operation: "replace", field :"password", value: this.$el.find("input[name=password]").val()});
                 }
                 
                 this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
                     this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, successfulPatch, _.bind(function () {
                         // if replacing the password failed, try again with add instead
-                        patchDefinitionObject = [{ add: "password", value:  this.$el.find("input[name=password]").val()}];
+                        patchDefinitionObject = [{ operation: "add", field: "password", value:  this.$el.find("input[name=password]").val()}];
                         this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, successfulPatch);
                         }, this));
                 }, this));

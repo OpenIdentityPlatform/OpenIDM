@@ -35,7 +35,7 @@ define("config/main", [
     "./validators/UserValidators",
     "./validators/AdminValidators",
     "./AppConfiguration",
-    "./process/AdminConfig",
+    "./process/IDMConfig",
     "./process/CommonConfig",
     "./process/UserConfig",
     "./errorhandlers/CommonErrorHandlers"

@@ -32,7 +32,7 @@
  * 
  * This endpoint expects these parameters:
  * 
- *  _action: one of (securityQuestionForUserName|checkSecurityAnswerForUserName|setNewPasswordForUserName)
+ *  action: one of (securityQuestionForUserName|checkSecurityAnswerForUserName|setNewPasswordForUserName)
  *  uid: userName of the managed/user record
  *  securityAnswer : answer to security question; used by actions checkSecurityAnswerForUserName and setNewPasswordForUserName
  *  newPassword: new password to assign to user; used by action setNewPasswordForUserName
@@ -40,7 +40,7 @@
  */
 
 
-if (request.method !== "query") {
+if (request.method !== "action") {
     throw { 
         "code" : 403,
         "message" : "Access denied"
@@ -54,9 +54,9 @@ if (request.method !== "query") {
         patch       = [];
     
     if (
-            request.params._action === "securityQuestionForUserName" ||
-            request.params._action === "checkSecurityAnswerForUserName" ||
-            request.params._action === "setNewPasswordForUserName" ) {
+            request.action === "securityQuestionForUserName" ||
+            request.action === "checkSecurityAnswerForUserName" ||
+            request.action === "setNewPasswordForUserName" ) {
         
         if (request.params.uid) {
             userQuery = openidm.query("managed/user", {"_queryId": "for-userName", "uid": request.params.uid } );
@@ -65,12 +65,12 @@ if (request.method !== "query") {
                 
                 user = userQuery.result[0];
                 
-                if (request.params._action === "securityQuestionForUserName") {
+                if (request.action === "securityQuestionForUserName") {
                     response.securityQuestion = user.securityQuestion;
                 }
                 else if ( 
-                            request.params._action === "checkSecurityAnswerForUserName" ||
-                            request.params._action === "setNewPasswordForUserName") {
+                            request.action === "checkSecurityAnswerForUserName" ||
+                            request.action === "setNewPasswordForUserName") {
                     try {
                         user.securityAnswerAttempts = (typeof (user.securityAnswerAttempts) === "number") ? user.securityAnswerAttempts+1 : 1;
                         
@@ -84,7 +84,7 @@ if (request.method !== "query") {
                             user = openidm.read("managed/user/" + userQuery.result[0]._id);
                             patch.push({"operation" : "replace", "field" : "securityAnswerAttempts", "value" : 0});
                             
-                            if (request.params._action === "setNewPasswordForUserName") {
+                            if (request.action === "setNewPasswordForUserName") {
                                 logger.info("Setting new password for {}", request.params.username);
                                 patch.push({"operation" : "replace", "field" : "password", "value" : request.params.newPassword});
                             } else {

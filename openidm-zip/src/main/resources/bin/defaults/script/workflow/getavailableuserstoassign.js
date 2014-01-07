@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-if (request.method !== "query") {
+if (request.method !== "action") {
     throw { 
         "code" : 403,
         "message" : "Access denied"

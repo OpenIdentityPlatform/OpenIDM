@@ -29,14 +29,10 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
 ], function (commonConstants) {
     commonConstants.context = "openidm";
 
-    commonConstants.OPENIDM_HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
-    commonConstants.OPENIDM_HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
-    commonConstants.OPENIDM_HEADER_PARAM_LOGOUT = "X-OpenIDM-Logout";
-    commonConstants.OPENIDM_HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
-    commonConstants.OPENIDM_HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
-
-    commonConstants.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
-    commonConstants.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
+    commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
+    commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
+    commonConstants.HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
+    commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
     
     commonConstants.LESS_VERSION = 'libs/less-1.5.1-min.js';
 
