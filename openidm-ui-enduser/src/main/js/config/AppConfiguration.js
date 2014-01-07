@@ -44,13 +44,13 @@ define("config/AppConfiguration", [
                    configuration: {
                        LoginView : "org/forgerock/openidm/ui/user/LoginView",
                        UserProfileView : "org/forgerock/openidm/ui/user/profile/UserProfileView",
-                       LoginDialog : "org/forgerock/openidm/ui/user/LoginDialog",
+                       LoginDialog : "org/forgerock/commons/ui/common/LoginDialog",
                        RegisterView : "org/forgerock/openidm/ui/user/UserRegistrationView",
                        ChangeSecurityDataDialog : "org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog"
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/SiteConfigurator",
+                   moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                    configuration: {
                        remoteConfig: true
                    } 
@@ -59,7 +59,7 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                    configuration: {
                        processConfigurationFiles: [
-                           "config/process/AdminConfig",
+                           "config/process/IDMConfig",
                            "config/process/UserConfig",
                            "config/process/CommonConfig"
                        ]
