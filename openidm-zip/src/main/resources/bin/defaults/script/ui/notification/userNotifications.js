@@ -32,7 +32,7 @@
     var userId, res, ret, params, notification;
 
     if (request.method === "read") {
-        userId = request.security.username; 
+        userId = request.security.id; 
         res = {};
         params = {
             "_queryId": "get-notifications-for-user",
