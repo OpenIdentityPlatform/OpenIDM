@@ -40,21 +40,38 @@ import static org.fest.assertions.MapAssert.entry;
 
 public class DBHelperTest {
 
+    private String dbURL = "local:./target/testdb";
+    private String user = "admin";
+    private String password = "admin";
+    private int minSize = 5;
+    private int maxSize = 20;
+
     @Test
     public void initPoolTest() throws Exception {
-        String dbURL = "local:./target/testdb";
-        String user = "admin";
-        String password = "admin";
-        Map map = new HashMap();
-        JsonValue completeConfig = new JsonValue(map);
-        int minSize = 5;
-        int maxSize = 20;
-        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, completeConfig, true);
+        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, new JsonValue(new HashMap()), true);
         assertNotNull(pool);
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         assertNotNull(db);
         db.close();
         DBHelper.closePools();
     }
-
+    
+    @Test
+    public void updateDbCredentialsTest() throws Exception {
+        String newUser = "user1";
+        String newPassword = "pass1";
+        Map map = new HashMap();
+        JsonValue completeConfig = new JsonValue(map);
+        int minSize = 5;
+        int maxSize = 20;
+        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, completeConfig, true);
+        assertNotNull(pool);
+        DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
+        pool = DBHelper.getPool(dbURL, newUser, newPassword, minSize, maxSize, completeConfig, true);
+        assertNotNull(pool);
+        ODatabaseDocumentTx db = pool.acquire(dbURL, newUser, newPassword);
+        assertNotNull(db);
+        db.close();
+        DBHelper.closePools();
+    }
 }

@@ -31,16 +31,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.ComponentContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.EnhancedConfig;
@@ -67,6 +72,7 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -106,9 +112,16 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
     
+    public static final String ACTION_UPDATE_CREDENTIALS = "updateDbCredentials";
+    
     // Default settings for pool size min and max
     public static final int DEFAULT_POOL_MIN_SIZE = 5;
     public static final int DEFAULT_POOL_MAX_SIZE = 20;
+    
+    // Used to synchronize 
+    private static Object dbLock = new Object();
+    
+    private static OrientDBRepoService bootRepo = null;
     
     ODatabaseDocumentPool pool;
 
@@ -127,6 +140,23 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     EmbeddedOServerService embeddedServer;
+    
+    @Reference(
+            name = "ref_OrientDBRepoService_ConfigObjectService",
+            referenceInterface = JsonResource.class,
+            bind = "bindConfigService",
+            unbind = "unbindConfigService",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.DYNAMIC,
+            target = "(service.pid=org.forgerock.openidm.config)"
+        )
+        protected ObjectSet configService;
+        protected void bindConfigService(JsonResource configService) {
+            this.configService = new JsonResourceObjectSet(configService);
+        }
+        protected void unbindConfigService(JsonResource configService) {
+            this.configService = null;
+        }
     
     /**
      * Gets an object from the repository by identifier. The returned object is not validated 
@@ -152,15 +182,15 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
         }
         
-        Map<String, Object> result = null;
         ODatabaseDocumentTx db = getConnection();
+        Map<String, Object> result = null;
         try {
             ODocument doc = predefinedQueries.getByID(localId, type, db);
             if (doc == null) {
-                throw new NotFoundException("Object " + fullId + " not found in " + type);
+                throw new NotFoundException("Object " + localId + " not found in " + type);
             }
             result = DocumentUtil.toMap(doc);
-            logger.trace("Completed get for id: {} result: {}", fullId, result);        
+            logger.trace("Completed get for id: {}, type: {}, result: {}", localId, type, result);        
         } finally {
             if (db != null) {
                 db.close();
@@ -432,7 +462,33 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new UnsupportedOperationException();
+        if (params.get("_action") == null) {
+            throw new BadRequestException("Expecting _action parameter");
+        }
+
+        String action = (String)params.get("_action");
+        try {
+            if (ACTION_UPDATE_CREDENTIALS.equals(action)) {
+                String newUser = (String)params.get("user");
+                String newPassword = (String)params.get("password");
+                if (newUser == null || newPassword == null) {
+                    throw new BadRequestException("Expecting 'user' and 'password' parameters");
+                }
+                synchronized (dbLock) {
+                    DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
+                    JsonValue config = new JsonValue(configService.read(PID));
+                    config.put("user", newUser);
+                    config.put("password", newPassword);
+                    configService.update(PID, null, config.asMap());
+                    return params;
+                }
+            } else {
+                throw new BadRequestException("Unknown action: " + action);
+            }
+        } catch (JsonException e) {
+            throw new BadRequestException("Error updating DB credentials", e);
+        }
+        
     }
     
     /**
@@ -444,28 +500,29 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         int maxRetry = 100; // give it up to approx 10 seconds to recover
         int retryCount = 0;
         
-        while (db == null && retryCount < maxRetry) {
-            retryCount++;
-            try {
-                db = pool.acquire(dbURL, user, password);
-                if (retryCount > 1) {
-                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
-                }
-                retryCount = maxRetry;
-            } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
-                // TODO: remove work-around once OrientDB resolves this condition
-                if (retryCount == maxRetry) {
-                    logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
-                    throw new InternalServerErrorException(
-                            "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
-                            + ex.getMessage(), ex);
-                } else {
-                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
-                    logger.trace("Pool acquire failure detail ", ex);
-                    try {
-                        Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
-                    } catch (InterruptedException iex) {
-                        // ignore that sleep was interrupted
+        synchronized (dbLock) {
+            while (db == null && retryCount < maxRetry) {
+                retryCount++;
+                try {
+                    db = pool.acquire(dbURL, user, password);
+                    if (retryCount > 1) {
+                        logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
+                    }
+                    retryCount = maxRetry;
+                } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
+                    // TODO: remove work-around once OrientDB resolves this condition
+                    if (retryCount == maxRetry) {
+                        logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
+                        throw new InternalServerErrorException("Failure reported acquiring connection from pool, retried " + retryCount
+                                        + " times before giving up: " + ex.getMessage(), ex);
+                    } else {
+                        logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
+                        logger.trace("Pool acquire failure detail ", ex);
+                        try {
+                            Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
+                        } catch (InterruptedException iex) {
+                            // ignore that sleep was interrupted
+                        }
                     }
                 }
             }
@@ -562,14 +619,16 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
     static OrientDBRepoService getRepoBootService(Map repoConfig) {
-        OrientDBRepoService bootRepo = new OrientDBRepoService();
+        if (bootRepo == null) {
+            bootRepo = new OrientDBRepoService();
+        }
         JsonValue cfg = new JsonValue(repoConfig);
         bootRepo.init(cfg);
         return bootRepo;
     }
     
     @Activate
-    void activate(ComponentContext compContext) throws Exception { 
+    void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         
         try {
@@ -581,7 +640,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         }
         embeddedServer = new EmbeddedOServerService();
         embeddedServer.activate(existingConfig);
-        
         init(existingConfig);
         
         logger.info("Repository started.");
@@ -596,28 +654,30 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
      * @param config the configuration
      */
     void init (JsonValue config) {
-        try {
-            dbURL = getDBUrl(config);
-            logger.info("Use DB at dbURL: {}", dbURL);
-            user = getUser(config);
-            password = getPassword(config);
-            poolMinSize = getPoolMinSize(config);
-            poolMaxSize = getPoolMaxSize(config);
+        synchronized (dbLock) {
+            try {
+                dbURL = getDBUrl(config);
+                logger.info("Use DB at dbURL: {}", dbURL);
+                user = getUser(config);
+                password = getPassword(config);
+                poolMinSize = getPoolMinSize(config);
+                poolMaxSize = getPoolMaxSize(config);
 
-            Map map = config.get(CONFIG_QUERIES).asMap();
-            Map<String, String> queryMap = (Map<String, String>) map;
-            queries.setConfiguredQueries(queryMap);
-        } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid, can not start OrientDB repository", ex);
-            throw ex;
-        }
+                Map map = config.get(CONFIG_QUERIES).asMap();
+                Map<String, String> queryMap = (Map<String, String>) map;
+                queries.setConfiguredQueries(queryMap);
+            } catch (RuntimeException ex) {
+                logger.warn("Configuration invalid, can not start OrientDB repository", ex);
+                throw ex;
+            }
 
-        try {
-            pool = DBHelper.getPool(dbURL, user, password, poolMinSize, poolMaxSize, config, true);
-            logger.debug("Obtained pool {}", pool);
-        } catch (RuntimeException ex) {
-            logger.warn("Initializing database pool failed", ex);
-            throw ex;
+            try {
+                pool = DBHelper.getPool(dbURL, user, password, poolMinSize, poolMaxSize, config, true);
+                logger.debug("Obtained pool {}", pool);
+            } catch (RuntimeException ex) {
+                logger.warn("Initializing database pool failed", ex);
+                throw ex;
+            }
         }
     }
     
@@ -663,8 +723,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         }
         if (existingConfig != null 
                 && dbURL.equals(getDBUrl(newConfig))
-                && user.equals(getUser(newConfig))
-                && password.equals(getPassword(newConfig))
                 && poolMinSize == getPoolMinSize(newConfig)
                 && poolMaxSize == getPoolMaxSize(newConfig)) {
             // If the DB pool settings don't change keep the existing pool
@@ -675,6 +733,10 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             DBHelper.closePool(dbURL, pool);
         }
         init(newConfig);
+        
+        if (bootRepo != null) {
+            bootRepo.init(newConfig);
+        }
         
         existingConfig = newConfig;
         logger.debug("Repository service modified");

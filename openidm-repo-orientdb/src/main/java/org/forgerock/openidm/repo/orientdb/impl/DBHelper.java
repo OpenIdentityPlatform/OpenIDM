@@ -106,6 +106,37 @@ public class DBHelper {
     }
     
     /**
+     * Updates the username and password for the default admin user
+     * 
+     * @param dbURL the orientdb URL
+     * @param oldUser the old orientdb user to update
+     * @param oldPassword the old orientdb password to update
+     * @param oldUser the new orientdb user
+     * @param oldPassword the new orientdb password
+     * @throws org.forgerock.openidm.config.InvalidException
+     */
+    public synchronized static void updateDbCredentials(String dbURL, String oldUser, String oldPassword, 
+            String newUser, String newPassword) throws InvalidException {
+
+        ODatabaseDocumentTx db = null;
+        try {
+            db = new ODatabaseDocumentTx(dbURL);
+            db.open(oldUser, oldPassword);
+            OSecurity security = db.getMetadata().getSecurity();
+            // Delete the old admin user
+            security.dropUser(oldUser);
+            // Create new admin user with new username and password
+            security.createUser(newUser, newPassword, security.getRole(ORole.ADMIN));
+        } catch (Exception e) {
+            logger.error("Error updating DB credentials", e);
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+    
+    /**
      * Closes all pools managed by this helper
      * Call at application shut-down to cleanly shut down the pools.
      */
@@ -285,6 +316,9 @@ public class DBHelper {
         if (isLocalDB(dbURL)) {
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
+                // Make sure the db is closed
+                db.close();
+                // open the db
                 db.open(user, password); 
                 populateSample(db, completeConfig);
             } else { 
