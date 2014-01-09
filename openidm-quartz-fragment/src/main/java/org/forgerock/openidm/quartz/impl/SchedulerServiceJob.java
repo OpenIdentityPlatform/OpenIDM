@@ -135,6 +135,7 @@ public class SchedulerServiceJob implements Job {
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
             }
         }
+        scheduledServiceTracker.close();
     }
 
     ServiceTracker getServiceTracker(String servicePID) throws InvalidException {
