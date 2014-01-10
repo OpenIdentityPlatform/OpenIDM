@@ -83,16 +83,16 @@ if (!object.givenName) {
     object.givenName = "";
 }
 
-if (!object.familyName) {
-    object.familyName = "";
+if (!object.sn) {
+    object.sn = "";
 }
 
-if (!object.phoneNumber) {
-    object.phoneNumber = "";
+if (!object.telephoneNumber) {
+    object.telephoneNumber = "";
 }
 
-if (!object.email) {
-    object.email = "";
+if (!object.mail) {
+    object.mail = "";
 }
 
 if (uiConfig.configuration.siteIdentification) {

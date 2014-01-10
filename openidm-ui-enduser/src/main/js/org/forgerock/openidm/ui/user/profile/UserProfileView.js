@@ -56,7 +56,7 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
                 var data = form2js(this.$el.attr("id"), '.', false), self = this;
                 
                 if(data.phoneNumber) {
-                    data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
+                    data.telephoneNumber = data.telephoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 }
                 
                 this.delegate.patchUserDifferences(conf.loggedUser, data, _.bind(function() {
