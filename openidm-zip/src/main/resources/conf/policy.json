@@ -75,7 +75,8 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
-                                    "openidm-reg"
+                                    "openidm-reg",
+                                    "openidm-cert"
                                 ]
                             }
                         }
