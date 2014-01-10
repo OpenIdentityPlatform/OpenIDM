@@ -42,7 +42,7 @@
 
 /*jslint vars:true*/ 
 
-var allowedPropertiesForManagedUser =   "userName,password,email,givenName,familyName,phoneNumber," + 
+var allowedPropertiesForManagedUser =   "userName,password,mail,givenName,sn,telephoneNumber," + 
                                         "address1,address2,city,stateProvince,postalCode,country,siteImage," + 
                                         "passPhrase,securityAnswer,securityQuestion";
 var httpAccessConfig = 

@@ -61,7 +61,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 delete data.oldUserName;                
                 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
-                data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
+                data.telephoneNumber = data.telephoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
                     if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
@@ -89,7 +89,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 this.editedUser = user;
                 this.data.user = user;
                 this.data.roles = conf.globalData.userRoles;
-                this.data.profileName = user.givenName + ' ' + user.familyName;
+                this.data.profileName = user.givenName + ' ' + user.sn;
                 
                 this.parentRender(_.bind(function() {
                     this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
