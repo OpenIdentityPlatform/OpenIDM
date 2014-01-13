@@ -941,7 +941,7 @@
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  "http://localhost:8080/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;
-           parentActionId=90ce7473-98c7-4747-bfbb-32bfa3ce5d92"</screen>
+   parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</screen>
 
        <para>The following sample output shows the result of a query that requests
        details of the password change for bjensen.</para>
