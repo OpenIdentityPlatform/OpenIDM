@@ -37,6 +37,8 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -56,6 +58,7 @@ import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
@@ -70,6 +73,7 @@ import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
 import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
+import org.forgerock.openidm.router.RouteService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +112,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
     
+    public static final String ACTION_UPDATE_CREDENTIALS = "updateDbCredentials";
+    
     ODatabaseDocumentPool pool;
 
     String dbURL; 
@@ -115,9 +121,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     String password;
     int poolMinSize = 5; 
     int poolMaxSize = 20;
+    
+    // Used to synchronize operations on the DB that require user/password credentials
+    private static Object dbLock = new Object();
+
+    private static OrientDBRepoService bootRepo = null;
 
     // Current configuration
     JsonValue existingConfig;
+
+    @Reference(
+            policy = ReferencePolicy.DYNAMIC,
+            target = "("+ServerConstants.ROUTER_PREFIX + "=/config*)"
+            )
+    protected RouteService configService;
+    protected ServerContext configServiceContext = null;
+    private void bindConfigService(final RouteService service) throws ResourceException {
+        configService = service;
+        configServiceContext = service.createServerContext();
+    }
+
+    private void unbindConfigService(final RouteService service) {
+        configService = null;
+        configServiceContext = null;
+    }
     
     // TODO: evaluate use of Guice instead
     PredefinedQueries predefinedQueries = new PredefinedQueries();
@@ -459,7 +486,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(new NotSupportedException("Action not supported"));
+        String action = request.getAction();
+        Map<String, String> params = request.getAdditionalActionParameters();
+        try {
+            if (ACTION_UPDATE_CREDENTIALS.equals(action)) {
+                String newUser = params.get("user");
+                String newPassword = params.get("password");
+                if (newUser == null || newPassword == null) {
+                    throw new BadRequestException("Expecting 'user' and 'password' parameters");
+                }
+                synchronized (dbLock) {
+                    DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
+                    JsonValue config = configServiceContext.getConnection().read(context, Requests.newReadRequest("config", PID)).getContent();
+                    config.put("user", newUser);
+                    config.put("password", newPassword);
+                    UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
+                    configServiceContext.getConnection().update(context, updateRequest);
+                    handler.handleResult(new JsonValue(params));
+                }
+            } else {
+                handler.handleError(new BadRequestException("Unknown action: " + action));
+            }
+        } catch (ResourceException e) {
+            handler.handleError(new BadRequestException("Error updating DB credentials: " + e.getMessage(), e));
+        }
     }
 
     /**
@@ -550,28 +600,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         int maxRetry = 100; // give it up to approx 10 seconds to recover
         int retryCount = 0;
         
-        while (db == null && retryCount < maxRetry) {
-            retryCount++;
-            try {
-                db = pool.acquire(dbURL, user, password);
-                if (retryCount > 1) {
-                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
-                }
-                retryCount = maxRetry;
-            } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
-                // TODO: remove work-around once OrientDB resolves this condition
-                if (retryCount == maxRetry) {
-                    logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
-                    throw new InternalServerErrorException(
-                            "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
-                            + ex.getMessage(), ex);
-                } else {
-                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
-                    logger.trace("Pool acquire failure detail ", ex);
-                    try {
-                        Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
-                    } catch (InterruptedException iex) {
-                        // ignore that sleep was interrupted
+        synchronized (dbLock) {
+            while (db == null && retryCount < maxRetry) {
+                retryCount++;
+                try {
+                    db = pool.acquire(dbURL, user, password);
+                    if (retryCount > 1) {
+                        logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
+                    }
+                    retryCount = maxRetry;
+                } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
+                    // TODO: remove work-around once OrientDB resolves this condition
+                    if (retryCount == maxRetry) {
+                        logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
+                        throw new InternalServerErrorException(
+                                "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
+                                        + ex.getMessage(), ex);
+                    } else {
+                        logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
+                        logger.trace("Pool acquire failure detail ", ex);
+                        try {
+                            Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
+                        } catch (InterruptedException iex) {
+                            // ignore that sleep was interrupted
+                        }
                     }
                 }
             }
@@ -641,7 +693,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
     static OrientDBRepoService getRepoBootService(Map repoConfig) {
-        OrientDBRepoService bootRepo = new OrientDBRepoService();
+        if (bootRepo == null) {
+            bootRepo = new OrientDBRepoService();
+        }
         JsonValue cfg = new JsonValue(repoConfig);
         bootRepo.init(cfg);
         return bootRepo;
@@ -675,6 +729,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @param config the configuration
      */
     void init (JsonValue config) {
+        synchronized (dbLock) {
         try {
             dbURL = getDBUrl(config);
             logger.info("Use DB at dbURL: {}", dbURL);
@@ -695,6 +750,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         } catch (RuntimeException ex) {
             logger.warn("Initializing database pool failed", ex);
             throw ex;
+        }
         }
     }
     
@@ -757,12 +813,13 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             throw ex;
         }
         if (existingConfig != null 
-                && dbURL.equals(getDBUrl(newConfig))
-                && user.equals(getUser(newConfig))
-                && password.equals(getPassword(newConfig))) {
+                && dbURL.equals(getDBUrl(newConfig))) {
             // If the DB pool settings don't change keep the existing pool
             logger.info("(Re-)initialize repository with latest configuration.");
             init(newConfig);
+            if (bootRepo != null) {
+                bootRepo.init(newConfig);
+            }
         } else {
             // If the DB pool settings changed do a more complete re-initialization
             logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");

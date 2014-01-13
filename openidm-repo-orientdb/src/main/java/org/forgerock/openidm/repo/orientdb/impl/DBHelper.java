@@ -23,26 +23,27 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.orientechnologies.common.exception.OException;
-import com.orientechnologies.orient.client.remote.OServerAdmin;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.metadata.security.ORole;
+import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
 
@@ -98,6 +99,37 @@ public class DBHelper {
         }
         
         return pool;
+    }
+    
+    /**
+     * Updates the username and password for the default admin user
+     * 
+     * @param dbURL the orientdb URL
+     * @param oldUser the old orientdb user to update
+     * @param oldPassword the old orientdb password to update
+     * @param oldUser the new orientdb user
+     * @param oldPassword the new orientdb password
+     * @throws org.forgerock.openidm.config.InvalidException
+     */
+    public synchronized static void updateDbCredentials(String dbURL, String oldUser, String oldPassword, 
+            String newUser, String newPassword) throws InvalidException {
+
+        ODatabaseDocumentTx db = null;
+        try {
+            db = new ODatabaseDocumentTx(dbURL);
+            db.open(oldUser, oldPassword);
+            OSecurity security = db.getMetadata().getSecurity();
+            // Delete the old admin user
+            security.dropUser(oldUser);
+            // Create new admin user with new username and password
+            security.createUser(newUser, newPassword, security.getRole(ORole.ADMIN));
+        } catch (Exception e) {
+            logger.error("Error updating DB credentials", e);
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
     }
     
     /**
@@ -254,13 +286,15 @@ public class DBHelper {
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
-                // Check if structure changed
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 populateSample(db, completeConfig);
             } else { 
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 logger.info("DB does not exist, creating {}", dbURL);
-                db.create(); 	       
+                db.create();
+                // Delete default admin user
+                OSecurity security = db.getMetadata().getSecurity();
+                security.dropUser(OUser.ADMIN);
+                // Create new admin user with new username and password
+                security.createUser(user, password, security.getRole(ORole.ADMIN));
                 populateSample(db, completeConfig);
             } 
         } else {
