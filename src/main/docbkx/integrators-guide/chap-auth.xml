@@ -225,28 +225,44 @@
    <varlistentry>
     <term>openidm-reg</term>
     <listitem>
-     <para>Role for users accessing OpenIDM with the default anonymous
-     account</para>
+     <para>
+      Role for users accessing OpenIDM with the default anonymous account.
+     </para>
+     <para>
+      The <literal>openidm-reg</literal> role is excluded from the
+      reauthorization required policy definition by default.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>openidm-admin</term>
     <listitem>
-     <para>OpenIDM administrator role</para>
+     <para>
+      OpenIDM administrator role, excluded from the reauthorization required
+      policy definition by default.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>openidm-authorized</term>
     <listitem>
-     <para>Default role for any user authenticated with a user name and
-     password</para>
+     <para>
+      Default role for any user authenticated with a user name and password.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>openidm-cert</term>
     <listitem>
-     <para>Default role for any user authenticated with mutual SSL
-     authentication</para>
+     <para>
+      Default role for any user authenticated with mutual SSL authentication.
+     </para>
+     <para>
+      Note that this role must be assigned for mutual authentication only, and
+      the shared secret (certificate) must be adequately protected. The
+      <literal>openidm-cert</literal> role is excluded from the reauthorization
+      required policy definition by default.
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
