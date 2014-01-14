@@ -1667,10 +1667,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         if (null != connectorInfo) {
             ConnectorFacade facade = null;
             try {
+                OperationHelperBuilder ohb = new OperationHelperBuilder(testIdentifier.getName(), config,
+                        connectorInfo.createDefaultAPIConfiguration());
                 ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
-                facade = connectorFacadeFactory.newInstance(connectorInfo.createDefaultAPIConfiguration());
+                facade = connectorFacadeFactory.newInstance(ohb.getRuntimeAPIConfiguration());
             } catch (Exception e) {
-                e.printStackTrace();
                 jv.add("error", "OpenICF connector jsonConfiguration has errors: " +  e.getMessage());
                 return result;
             }
