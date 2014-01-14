@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -42,7 +42,7 @@
     <licenses>
         <license>
             <name>CDDL-1.0</name>
-            <url>http://www.opensource.org/licenses/cddl1.php</url>
+            <url>http://opensource.org/licenses/CDDL-1.0</url>
             <comments>Common Development and Distribution License (CDDL) 1.0.
                 This license applies to OpenIDM source code as indicated in the
                 source code.
@@ -160,4 +160,48 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.4</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>license</report>
+                            <report>scm</report>
+                            <report>cim</report>
+                            <report>distribution-management</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <plugin>
+                <groupId>org.forgerock.maven.plugins</groupId>
+                <artifactId>javadoc-updater-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <directory>${project.reporting.outputDirectory}</directory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
 </project>
