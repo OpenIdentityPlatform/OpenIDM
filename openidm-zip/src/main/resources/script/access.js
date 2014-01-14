@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -43,7 +43,7 @@
 /*jslint vars:true*/ 
 
 var allowedPropertiesForManagedUser =   "userName,password,mail,givenName,sn,telephoneNumber," + 
-                                        "address1,address2,city,stateProvince,postalCode,country,siteImage," + 
+                                        "postalAddress,address2,city,stateProvince,postalCode,country,siteImage," + 
                                         "passPhrase,securityAnswer,securityQuestion";
 var httpAccessConfig = 
 { 

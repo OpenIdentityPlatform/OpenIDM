@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,127 +28,97 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "UserDelegate",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/user/profile/UserProfileView",
+    "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate) {
-    var UserProfileView = AbstractView.extend({
-        template: "templates/user/UserProfileTemplate.html",
-        baseTemplate: "templates/common/DefaultBaseTemplate.html",
-        delegate: userDelegate,
-        events: {
-            "click input[type=submit]": "formSubmit",
-            "onValidate": "onValidate",
-            "change select[name='country']": "loadStates",
-            "change select[name='stateProvince']": "selectState"
-        },
-        
-        formSubmit: function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            if(validatorsManager.formValidated(this.$el)) {
-                var data = form2js(this.$el.attr("id"), '.', false), self = this;
-                
-                if(data.phoneNumber) {
-                    data.telephoneNumber = data.telephoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
-                }
-                
-                this.delegate.patchUserDifferences(conf.loggedUser, data, _.bind(function() {
-                    if(conf.loggedUser.userName !== data.userName) {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        eventManager.sendEvent(constants.EVENT_LOGOUT);
-                        return;
-                    }
-
-                    this.delegate.getProfile(function(user) {
-                        conf.loggedUser = user;
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        self.reloadData();
-                    });
-
-                }, this));
-            } else {
-                console.log('dupa');
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function(commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager) {
+    
+    var obj = Object.getPrototypeOf(commonProfileView);
+    
+    obj.data.hasAddressDetails = true;
+    
+    obj.render = function(args, callback) {
+        if(conf.globalData.userComponent && conf.globalData.userComponent === "internal/user"){
+            obj.data.adminUser = true;
+        }
+        this.parentRender(function() {
+            var self = this,
+                baseEntity = this.delegate.baseEntity + "/" + conf.loggedUser._id;
+            if (conf.globalData.userComponent === "internal/user") {
+                baseEntity = "repo/internal/user/" + conf.loggedUser._id;
             }
-        },
-        
-        render: function(args, callback) {
-            this.parentRender(function() {
-                var self = this,
-                    baseEntity = this.delegate.baseEntity + "/" + conf.loggedUser._id;
-                if (conf.globalData.userComponent === "internal/user") {
-                    baseEntity = "repo/internal/user/" + conf.loggedUser._id;
-                }
-                validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
-                    
-                    countryStateDelegate.getAllCountries( function(countries) {
-                        uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
-                            if(conf.loggedUser.country) {
-                                this.$el.find("select[name='country'] > option:first").text("");
-                                this.$el.find("select[name='country']").val(conf.loggedUser.country);
-                                
-                                this.loadStates();
-                            }
-                        }, self));
-                    });
-
-                    this.reloadData();
-
-                    if(callback) {
-                        callback();
-                    }
-                    
-                }, this));
+            validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
                 
-                
-            });            
-        },
-        
-        loadStates: function() {
-            var country = this.$el.find('select[name="country"]').val(), self = this;            
-              
-            if(country) {
-                this.$el.find("select[name='country'] > option:first").text("");
-                
-                countryStateDelegate.getAllStatesForCountry(country, function(states) {
-                    uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
-                        if(conf.loggedUser.stateProvince) {
-                            this.$el.find("select[name='stateProvince'] > option:first").text("");
-                            this.$el.find("select[name='stateProvince']").val(conf.loggedUser.stateProvince);
+                countryStateDelegate.getAllCountries( function(countries) {
+                    uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
+                        if(conf.loggedUser.country) {
+                            this.$el.find("select[name='country'] > option:first").text("");
+                            this.$el.find("select[name='country']").val(conf.loggedUser.country);
+                            
+                            this.changeCountry();
+                            this.loadStates();
                         }
                     }, self));
                 });
-            } else {
-                this.$el.find("select[name='stateProvince']").emptySelect();
-                this.$el.find("select[name='country'] > option:first").text($.t("common.form.pleaseSelect"));
-                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
-            }
-        },
-        
-        selectState: function() {
-            var state = $('#profile select[name="stateProvince"]').val();
+                
+                _.each(conf.loggedUser, function(val,key){
+                    this.$el.find('[name=' + key.toLowerCase() + ']').prop("name",key);
+                },this);
+                
+                this.reloadData();
+
+                if(callback) {
+                    callback();
+                }
+                
+            }, this));
             
-            if(state) {
-                this.$el.find("select[name='stateProvince'] > option:first").text("");
-            } else {
-                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
-            }
-        },
-        
-        reloadData: function() {
-            js2form(document.getElementById(this.$el.attr("id")), conf.loggedUser);
-            this.$el.find("input[type=submit]").val($.t("common.form.update"));
-            validatorsManager.validateAllFields(this.$el);
-        }
-    }); 
+            
+        });            
+    };
     
-    return new UserProfileView();
+    obj.events["change select[name='country']"] = function() {
+        obj.changeCountry();
+    };
+    
+    obj.changeCountry = function() {
+        var country = this.$el.find('select[name="country"]').val(), self = this;            
+        
+        if(country) {
+            this.$el.find("select[name='country'] > option:first").text("");
+            
+            countryStateDelegate.getAllStatesForCountry(country, function(states) {
+                uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
+                    if(conf.loggedUser.stateProvince) {
+                        this.$el.find("select[name='stateProvince'] > option:first").text("");
+                        this.$el.find("select[name='stateProvince']").val(conf.loggedUser.stateProvince);
+                    }
+                }, self));
+            });
+        } else {
+            this.$el.find("select[name='stateProvince']").emptySelect();
+            this.$el.find("select[name='country'] > option:first").text($.t("common.form.pleaseSelect"));
+            this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
+        }
+    };
+    
+    obj.events["change select[name='stateProvince']"] = function() {
+        obj.loadStates();
+    };
+    
+    obj.loadStates = function() {
+        var state = $('#profile select[name="stateProvince"]').val();
+        
+        if(state) {
+            this.$el.find("select[name='stateProvince'] > option:first").text("");
+        } else {
+            this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
+        }
+    };
+    
+    return obj;
 });
 
 

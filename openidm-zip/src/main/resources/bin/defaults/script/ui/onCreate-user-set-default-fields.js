@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -64,8 +64,8 @@ if (!object.lastPasswordAttempt) {
     object.lastPasswordAttempt = (new Date()).toString();
 }
 
-if (!object.address1) {
-    object.address1 = "";
+if (!object.postalAddress) {
+    object.postalAddress = "";
 }
 
 if (!object.address2) {

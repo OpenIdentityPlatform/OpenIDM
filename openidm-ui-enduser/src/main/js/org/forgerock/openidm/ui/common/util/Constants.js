@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,7 +31,7 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
 
     commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
-    commonConstants.HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
+    commonConstants.HEADER_PARAM_NO_SESSION = "X-OpenIDM-NoSession";
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
     
     commonConstants.LESS_VERSION = 'libs/less-1.5.1-min.js';
