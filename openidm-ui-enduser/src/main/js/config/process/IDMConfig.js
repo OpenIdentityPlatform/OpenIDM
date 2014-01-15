@@ -94,6 +94,17 @@ define("config/process/IDMConfig", [
             processDescription: function(event) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
             }
+        },
+        {
+            startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
+            description: "",
+            override: true,
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/Router"
+            ],
+            processDescription: function(event, router) {
+                router.routeTo(router.configuration.routes.dashboard, {trigger: true});
+            }
         }];
     
     return obj;
