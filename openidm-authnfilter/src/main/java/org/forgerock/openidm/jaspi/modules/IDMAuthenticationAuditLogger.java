@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.container.AuditLogger;
-import org.forgerock.jaspi.filter.AuthNFilter;
+import org.forgerock.auth.common.AuditRecord;
+import org.forgerock.auth.common.AuthResult;
+import org.forgerock.jaspi.logging.JaspiAuditLogger;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
@@ -43,7 +45,7 @@ import java.util.Map;
  *
  * @author Phill Cunnington
  */
-public class IDMAuthenticationAuditLogger implements AuditLogger {
+public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuthenticationAuditLogger.class);
 
@@ -54,15 +56,19 @@ public class IDMAuthenticationAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public void audit(MessageInfo messageInfo) {
+    public void audit(AuditRecord<MessageInfo> auditRecord) {
+
+        MessageInfo messageInfo = auditRecord.getAuditObject();
+
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         Map<String, Object> messageInfoParams = messageInfo.getMap();
-        Map<String, Object> map = (Map<String, Object>) messageInfoParams.get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+        Map<String, Object> map = (Map<String, Object>) messageInfoParams.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
 
         String username = (String) messageInfoParams.get(SecurityContextFactory.ATTRIBUTE_AUTHCID);
         String userId = (String) map.get(SecurityContext.AUTHZID_ID);
         List<String> roles = (List<String>) map.get(SecurityContext.AUTHZID_ROLES);
-        boolean status = (Boolean) messageInfoParams.get(IDMServerAuthModule.OPENIDM_AUTH_STATUS);
+
+        boolean status = AuthResult.SUCCESS.equals(auditRecord.getAuthResult());
         String logClientIPHeader = (String) messageInfoParams.get(LOG_CLIENT_IP_HEADER_KEY);
         logAuthRequest(request, username, userId, roles, status, logClientIPHeader);
     }

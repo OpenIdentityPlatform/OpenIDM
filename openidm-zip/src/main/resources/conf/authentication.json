@@ -7,11 +7,11 @@
         "userRoles" : "roles"
     },
     "defaultUserRoles" : [ ],
-    "serverAuthConfig" : {
+    "serverAuthContext" : {
         "authnPopulateContextScript": "&{launcher.install.location}/bin/defaults/script/auth/authnPopulateContext.js",
-        "idmAuth" : {
-            "sessionModule" : {
-                "name" : "JWT_SESSION",
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
                 "keyAlias" : "openidm-localhost",
                 "privateKeyPassword" : "&{openidm.keystore.password}",
                 "keystoreType" : "&{openidm.keystore.type}",
@@ -19,29 +19,24 @@
                 "keystorePassword" : "&{openidm.keystore.password}",
                 "maxTokenLifeMinutes" : "120",
                 "tokenIdleTimeMinutes" : "30"
-            },
-            "authModules" : [
-                {
-                    "name" : "PASSTHROUGH",
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "PASSTHROUGH",
+                "properties" : {
                     "passThroughAuth" : "system/AD/account",
                     "propertyMapping" : {
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [
-                    ],
-                    "enabled" : false
+                    ]
                 },
-                {
-                    "name" : "MANAGED_USER",
-                    "propertyMapping" : {
-                        "userId" : "_id",
-                        "userCredential" : "password",
-                        "userRoles" : "roles"
-                    },
-                    "defaultUserRoles" : [ ]
-                },
-                {
-                    "name" : "INTERNAL_USER",
+                "enabled" : false
+            },
+            {
+                "name" : "MANAGED_USER",
+                "properties" : {
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
@@ -49,7 +44,18 @@
                     },
                     "defaultUserRoles" : [ ]
                 }
-            ]
-        }
+            },
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "propertyMapping" : {
+                        "userId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                }
+            }
+        ]
     }
 }

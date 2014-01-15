@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.filter.AuthNFilter;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
@@ -107,7 +107,7 @@ public class IDMServerAuthModuleTest {
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
-        given(messageInfoMap.get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT)).willReturn(contextMap);
+        given(messageInfoMap.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT)).willReturn(contextMap);
 
         //When
         AuthStatus authStatus = idmServerAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -116,7 +116,6 @@ public class IDMServerAuthModuleTest {
         verify(contextMap).put(SecurityContext.AUTHZID_ID, "USER_ID");
         verify(contextMap).put(SecurityContext.AUTHZID_ROLES, roles);
         verify(contextMap).put(SecurityContext.AUTHZID_COMPONENT, "RESOURCE");
-        verify(messageInfoMap).put("openidm.auth.status", false);
         verify(messageInfoMap).put(SecurityContextFactory.ATTRIBUTE_AUTHCID, "USERNAME");
 
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);

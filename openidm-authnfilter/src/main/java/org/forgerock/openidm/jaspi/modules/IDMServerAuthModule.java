@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.filter.AuthNFilter;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 
@@ -29,7 +29,6 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.security.Principal;
 import java.util.Map;
 
@@ -53,8 +52,6 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     /** Attribute in session containing authenticated username. */
     public static final String USERNAME_ATTRIBUTE = "openidm.username";
-
-    static final String OPENIDM_AUTH_STATUS = "openidm.auth.status";
 
     private String logClientIPHeader = null;
 
@@ -116,7 +113,8 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             throws AuthException {
 
         Map<String, Object> messageInfoParams = messageInfo.getMap();
-        Map<String, Object> contextMap = (Map<String, Object>) messageInfoParams.get(AuthNFilter.ATTRIBUTE_AUTH_CONTEXT);
+        Map<String, Object> contextMap =
+                (Map<String, Object>) messageInfoParams.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
 
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
         messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
@@ -130,8 +128,6 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
         });
 
         contextMap.putAll(securityContextMapper.getAuthzid());
-        boolean authSuccess = AuthStatus.SUCCESS.equals(authStatus) || AuthStatus.SEND_SUCCESS.equals(authStatus);
-        messageInfoParams.put(OPENIDM_AUTH_STATUS, authSuccess);
         messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthcid());
 
         return authStatus;
