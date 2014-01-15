@@ -54,7 +54,12 @@ public class ScriptUtil {
             }
             value = opsValue;
         } else if (request instanceof QueryRequest) {
-            requestMap.put("params", ((QueryRequest)request).getAdditionalQueryParameters());
+            final QueryRequest queryRequest = (QueryRequest) request;
+            final Map<String, String> params = queryRequest.getAdditionalQueryParameters();
+            params.put("_queryId", queryRequest.getQueryId());
+            params.put("_queryExpression", queryRequest.getQueryExpression());
+            params.put("_queryFilter", queryRequest.getQueryFilter().toString());
+            requestMap.put("params", params);
             requestMap.put("method", "query");
         } else {
             requestMap.put("method", null);
