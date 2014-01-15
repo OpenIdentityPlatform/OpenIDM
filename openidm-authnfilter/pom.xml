@@ -92,7 +92,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-jaspi-container</artifactId>
+            <artifactId>forgerock-jaspi-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
