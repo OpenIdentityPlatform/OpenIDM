@@ -103,7 +103,7 @@ define("config/AppConfiguration", [
                                "role": "ui-admin",
                                "urls": {
                                    "dashboard": {
-                                       "url": "#/",
+                                       "url": "#dashboard/",
                                        "name": "config.AppConfiguration.Navigation.links.dashboard"
                                    },
                                    "users": {
@@ -115,7 +115,7 @@ define("config/AppConfiguration", [
                            "user" : {
                                "urls": {
                                    "dashboard": {
-                                       "url": "#/",
+                                       "url": "#dashboard/",
                                        "name": "config.AppConfiguration.Navigation.links.dashboard"
                                    }
                                }    

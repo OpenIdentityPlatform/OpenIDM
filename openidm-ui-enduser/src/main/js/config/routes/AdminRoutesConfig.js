@@ -31,10 +31,10 @@ define("config/routes/AdminRoutesConfig", [
 ], function() {
     
     var obj = {
-        "": {
+        "dashboard": {
             view: "org/forgerock/openidm/ui/admin/Dashboard",
             role: "ui-user,ui-admin",
-            url: "",
+            url: "dashboard/",
             forceUpdate: true
         },     
         
