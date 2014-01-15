@@ -58,7 +58,7 @@ public class ScriptUtil {
             final Map<String, String> params = queryRequest.getAdditionalQueryParameters();
             params.put("_queryId", queryRequest.getQueryId());
             params.put("_queryExpression", queryRequest.getQueryExpression());
-            params.put("_queryFilter", queryRequest.getQueryFilter().toString());
+            params.put("_queryFilter", queryRequest.getQueryFilter() != null ? queryRequest.getQueryFilter().toString() : null);
             requestMap.put("params", params);
             requestMap.put("method", "query");
         } else {
