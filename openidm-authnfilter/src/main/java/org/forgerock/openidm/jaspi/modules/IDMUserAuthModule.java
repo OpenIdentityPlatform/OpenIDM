@@ -20,6 +20,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
     protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             JsonValue options) {
 
-        String clientAuthOnlyStr = System.getProperty("openidm.auth.clientauthonlyports");
+        String clientAuthOnlyStr = IdentityServer.getInstance().getProperty("openidm.auth.clientauthonlyports");
         if (clientAuthOnlyStr != null) {
             String[] split = clientAuthOnlyStr.split(",");
             for (String entry : split) {
