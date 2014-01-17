@@ -12,10 +12,7 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
 
     <Call name="addConnector">
         <Arg>
-            <!-- Use this connector for many frequently idle connections
-                 and for threadless continuations.
-            -->
-            <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+            <New class="org.eclipse.jetty.server.nio.BlockingChannelConnector">
                 <Set name="host"><Property name="jetty.host" /></Set>
                 <Set name="port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Set>
                 <Set name="maxIdleTime">300000</Set>
@@ -26,8 +23,6 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
                         <Arg>openidm.port.https</Arg>
                     </Call>
                 </Set>
-                <Set name="lowResourcesConnections">20000</Set>
-                <Set name="lowResourcesMaxIdleTime">5000</Set>
             </New>
         </Arg>
     </Call>
