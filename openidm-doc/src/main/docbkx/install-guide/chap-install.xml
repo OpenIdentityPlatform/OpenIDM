@@ -20,14 +20,15 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-install'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Installing OpenIDM Services</title>
 
@@ -194,7 +195,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      <command>ps</command> to view the bundles installed. To see a list of all
      the OpenIDM core services and their states, enter the following
      command.</para>
-     <screen>-&gt; scr list
+     <screen width="87">-&gt; scr list
    Id   State          Name
 [  12] [active       ] org.forgerock.openidm.endpoint
 [  13] [active       ] org.forgerock.openidm.endpoint
