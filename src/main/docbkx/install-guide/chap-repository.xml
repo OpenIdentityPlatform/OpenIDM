@@ -20,14 +20,15 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012-2013 ForgeRock AS
+  !      Copyright 2012-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-repository'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Installing a Repository For Production</title>
   <indexterm>
@@ -54,9 +55,16 @@
 
  <procedure>
 
-  <para>After you have installed MySQL on the local host and <emphasis>before
-      starting OpenIDM for the first time</emphasis>, set up OpenIDM to use the
-      new repository, as described in the following sections.</para>
+  <para>
+   After you have installed MySQL on the local host and <emphasis>before
+   starting OpenIDM for the first time</emphasis>, set up OpenIDM to use the new
+   repository, as described in the following sections.
+  </para>
+  <para>
+   This procedure assumes that a password has already been set for the MySQL
+   root user.
+  </para>
+
   <step>
    <para>Download MySQL Connector/J, version 5.1 or later from the MySQL website.
    Unpack the delivery, and copy the .jar into the
