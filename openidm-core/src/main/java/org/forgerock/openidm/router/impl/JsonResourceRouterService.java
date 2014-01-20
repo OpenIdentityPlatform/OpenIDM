@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,16 +24,6 @@
 
 package org.forgerock.openidm.router.impl;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.script.ScriptException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -42,29 +32,32 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.AbstractAsynchronousConnection;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Filter;
-import org.forgerock.json.resource.FilterChain;
-import org.forgerock.json.resource.FilterCondition;
-import org.forgerock.json.resource.Filters;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ContextName;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.FutureResult;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.RequestType;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.core.filter.ScriptedFilter;
-import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
+import static org.forgerock.openidm.util.ContextUtil.INTERNAL_PROTOCOL;
+
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -75,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Paul C. Bryan
  * @author aegloff
+ * @author brmiller
  */
 @Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.OPTIONAL,
         metatype = true, configurationFactory = false, immediate = true)
@@ -83,100 +77,26 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM internal JSON resource router"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/") })
-// @References({
-// @Reference(referenceInterface = Filter.class,
-// cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy =
-// ReferencePolicy.DYNAMIC,
-// target = "(org.forgerock.openidm.router=*)") })
-public class JsonResourceRouterService implements ConnectionFactory
-/* ,ConnectionProvider */{
+public class JsonResourceRouterService implements ConnectionFactory {
 
     // Public Constants
-    public static final String PID = "org.forgerock.openidm.router";
+    public static final String PID = "org.forgerock.openidm.internal";
 
-    /**
-     * Setup logging for the {@link JsonResourceRouterService}.
-     */
+    /** Setup logging for the {@link JsonResourceRouterService}. */
     private final static Logger logger = LoggerFactory.getLogger(JsonResourceRouterService.class);
 
-    /**
-     * Event name prefix for monitoring the router
-     */
+    /** Event name prefix for monitoring the router */
     public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
 
+    @Reference(target = "(service.pid=org.forgerock.openidm.router)")
     private ConnectionFactory connectionFactory = null;
 
-    @Reference(target = "(org.forgerock.openidm.router=*)")
-    protected RequestHandler requestHandler = null;
-
-    void bindRequestHandler(final RequestHandler service) {
-        requestHandler = service;
-    }
-
-    void unbindRequestHandler(final RequestHandler service) {
-        requestHandler = null;
-    }
-
-    /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scriptRegistry;
-
-    void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-    }
-
-    void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-    }
-
-    /**
-     * Initialize the router with configuration. Supports modifying router
-     * configuration.
-     */
-    RequestHandler init(JsonValue configuration, final RequestHandler handler)
-            throws ScriptException {
-
-        List<Filter> filters = null;
-
-        // Chain chain = new Chain(router);
-        for (JsonValue jv : configuration.get("filters").expect(List.class)) {
-            // optional
-            Filter filter = newFilter(jv);
-            if (null != filter && null == filters) {
-                filters = new ArrayList<Filter>(configuration.get("filters").size());
-            }
-            if (null != filter) {
-                filters.add(filter);
-            }
-        }
-
-        if (null != filters) {
-            return new FilterChain(handler, filters);
-        } else {
-            return handler;
-        }
-    }
-
+    /** internal connection factory for internal routing */
     private ConnectionFactory internal = null;
 
     @Activate
     void activate(ComponentContext context) {
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
-
-        String factoryPid = config.getConfigurationFactoryPid(context);
-        if (StringUtils.isNotBlank(factoryPid)) {
-            throw new IllegalArgumentException(
-                    "Factory configuration not allowed, must not have property: "
-                            + ServerConstants.CONFIG_FACTORY_PID);
-        }
-
-        try {
-            connectionFactory =
-                    Resources.newInternalConnectionFactory(init(config
-                            .getConfigurationAsJson(context), requestHandler));
-        } catch (Throwable t) {
-            logger.error("Failed to configure the Filtered Router service", t);
-        }
+        internal = newInternalConnectionFactory(connectionFactory);
         logger.info("Reconciliation service activated.");
     }
 
@@ -195,82 +115,122 @@ public class JsonResourceRouterService implements ConnectionFactory
 
     @Override
     public Connection getConnection() throws ResourceException {
-        return connectionFactory.getConnection();
+        return internal.getConnection();
     }
 
     @Override
     public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
-        return connectionFactory.getConnectionAsync(handler);
+        return internal.getConnectionAsync(handler);
     }
     @Override
     public void close() {
-        connectionFactory.close();
+        internal.close();
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @param config
-     *            TODO.
-     * @throws JsonValueException
-     *             TODO.
-     */
-    public Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
 
-        FilterCondition filterCondition = null;
-        Pattern pattern = config.get("pattern").asPattern();
-        if (null != pattern) {
-            filterCondition = Filters.matchResourceName(pattern);
-        }
-
-        EnumSet<RequestType> requestTypes = null;
-        for (JsonValue method : config.get("methods").expect(List.class)) {
-            if (null == requestTypes) {
-                requestTypes = EnumSet.of(method.asEnum(RequestType.class));
-            } else {
-                requestTypes.add(method.asEnum(RequestType.class));
+    private ConnectionFactory newInternalConnectionFactory(final ConnectionFactory connectionFactory) {
+        return new ConnectionFactory() {
+            @Override
+            public void close() {
+                connectionFactory.close();
             }
-        }
 
-        if (null != requestTypes) {
-            if (null == filterCondition) {
-                filterCondition = Filters.matchRequestType(requestTypes);
-            } else {
-                filterCondition =
-                        Filters.and(filterCondition, Filters.matchRequestType(requestTypes));
+            @Override
+            public Connection getConnection() throws ResourceException {
+                final Connection connection = connectionFactory.getConnection();
+                return new AbstractAsynchronousConnection() {
+                    private Context getContext(Context context) {
+                        return new InternalServerContext(context);
+                    }
+
+                    @Override
+                    public FutureResult<JsonValue> actionAsync(Context context, ActionRequest request, ResultHandler<? super JsonValue> handler) {
+                        return connection.actionAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public void close() {
+                        connection.close();
+                    }
+
+                    @Override
+                    public FutureResult<Resource> createAsync(Context context, CreateRequest request, ResultHandler<? super Resource> handler) {
+                        return connection.createAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public FutureResult<Resource> deleteAsync(Context context, DeleteRequest request, ResultHandler<? super Resource> handler) {
+                        return connection.deleteAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public boolean isClosed() {
+                        return connection.isClosed();
+                    }
+
+                    @Override
+                    public boolean isValid() {
+                        return connection.isValid();
+                    }
+
+                    @Override
+                    public FutureResult<Resource> patchAsync(Context context, PatchRequest request, ResultHandler<? super Resource> handler) {
+                        return connection.patchAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public FutureResult<QueryResult> queryAsync(Context context, QueryRequest request, QueryResultHandler handler) {
+                        return connection.queryAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public FutureResult<Resource> readAsync(Context context, ReadRequest request, ResultHandler<? super Resource> handler) {
+                        return connection.readAsync(getContext(context), request, handler);
+                    }
+
+                    @Override
+                    public FutureResult<Resource> updateAsync(Context context, UpdateRequest request, ResultHandler<? super Resource> handler) {
+                        return connection.updateAsync(getContext(context), request, handler);
+                    }
+                };
             }
-        }
 
-        // TODO add condition to filter condition
-        Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));
-
-        Pair<JsonPointer, ScriptEntry> onRequest = getScript(config.get("onRequest"));
-        Pair<JsonPointer, ScriptEntry> onResponse = getScript(config.get("onResponse"));
-        Pair<JsonPointer, ScriptEntry> onFailure = getScript(config.get("onFailure"));
-
-        if (null == onRequest && null == onResponse && null == onFailure) {
-            return null;
-        }
-
-        if (null == filterCondition) {
-            return Filters.asFilter(new ScriptedFilter(onRequest, onResponse, onFailure));
-        } else {
-            return Filters.conditionalFilter(filterCondition, Filters.asFilter(new ScriptedFilter(
-                    onRequest, onResponse, onFailure)));
-        }
+            @Override
+            public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
+                return connectionFactory.getConnectionAsync(handler);
+            }
+        };
     }
 
-    private Pair<JsonPointer, ScriptEntry> getScript(JsonValue scriptJson) throws ScriptException {
-        if (!scriptJson.expect(Map.class).isNull()) {
+    static class InternalServerContext extends ServerContext implements ClientContext {
+        /** the client-friendly name of this context */
+        private static final ContextName CONTEXT_NAME = ContextName.valueOf("internal-server");
 
-            ScriptEntry entry = scriptRegistry.takeScript(scriptJson);
-            return Pair.of(scriptJson.getPointer(), entry);
-            // TODO throw better exception
-            // throw new JsonValueException(scriptJson,
-            // "Failed to find script");
-
+        /**
+         * {@inheritDoc}
+         */
+        protected InternalServerContext(Context parent) {
+            super(CONTEXT_NAME, parent);
         }
-        return null;
+
+        /**
+         * {@inheritDoc}
+         */
+        protected InternalServerContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
+            super(savedContext, config);
+        }
+
+        /**
+         * Return whether this Context has the given {@link Protocol}.  The only
+         * Protocol this class has is the internal protocol.
+         *
+         * @param protocol the Protocol to test
+         * @returns true if the protocol is "internal"
+         */
+        @Override
+        public boolean hasProtocol(Protocol protocol) {
+            return INTERNAL_PROTOCOL.equals(protocol);
+        }
     }
 
 }

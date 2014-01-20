@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,6 +38,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
@@ -118,6 +119,14 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     private void unbindRouteService(final RouteService service) {
         routeService = null;
         routerContext = null;
+    }
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
@@ -226,7 +235,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
         request.setAdditionalActionParameter("id", id);
         request.setContent(value);
-        context.getConnection().action(context, request);
+        connectionFactory.getConnection().action(context, request);
     }
 
     /**
@@ -243,7 +252,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
         request.setAdditionalActionParameter("id", id);
         request.setContent(newValue);
-        context.getConnection().action(context, request);
+        connectionFactory.getConnection().action(context, request);
     }
 
     /**
@@ -258,7 +267,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
         request.setAdditionalActionParameter("id", id);
         request.setContent(oldValue);
-        context.getConnection().action(context, request);
+        connectionFactory.getConnection().action(context, request);
     }
 
     /**
@@ -316,7 +325,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             previousStage = router.handle(readRequest);
             */
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
-            previousStage = routerContext.getConnection().read(routerContext, readRequest);
+            previousStage = connectionFactory.getConnection().read(routerContext, readRequest);
 
             /*
             JsonValue updateRequest = new JsonValue(new HashMap());
@@ -332,7 +341,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
             updateRequest.setRevision(previousStage.getRevision());
-            routerContext.getConnection().update(routerContext, updateRequest);
+            connectionFactory.getConnection().update(routerContext, updateRequest);
         } catch (ResourceException e) { // NotFoundException?
             if (null == previousStage) {
 //                logger.info("PooledSyncStage object {} is not found. First execution.", previousStageId);
@@ -347,7 +356,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 */
 				response = locateService(id).liveSynchronize(id.getObjectType(), null);
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
-                routerContext.getConnection().create(routerContext, createRequest);
+                connectionFactory.getConnection().create(routerContext, createRequest);
             }
             else {
                 throw e;

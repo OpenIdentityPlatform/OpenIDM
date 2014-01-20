@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2014 :orgeRock Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -149,6 +149,9 @@ public class ActivitiServiceImpl implements RequestHandler {
             bind = "bindCryptoService", unbind = "unbindCryptoService"
     )
     CryptoService cryptoService;
+
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    ConnectionFactory connectionFactory;
 
     private final OpenIDMExpressionManager expressionManager = new OpenIDMExpressionManager();
     private final SharedIdentityService identityService = new SharedIdentityService();
@@ -487,4 +490,15 @@ public class ActivitiServiceImpl implements RequestHandler {
         cryptoService = null;
         identityService.setCryptoService(null);
     }
+
+    protected void bindConnectionFactory(ConnectionFactory factory) {
+        connectionFactory = factory;
+        this.identityService.setConnectionFactory(factory);
+    }
+
+    protected void unbindConnectionFactory(ConnectionFactory factory) {
+        connectionFactory = null;
+        this.identityService.setConnectionFactory(null);
+    }
+
 }

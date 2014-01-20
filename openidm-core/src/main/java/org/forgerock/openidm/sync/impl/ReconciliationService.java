@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -48,6 +48,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -109,6 +110,16 @@ public class ReconciliationService
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
+    /**
+     * The Connection Factory
+     */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+
     @Reference(
             cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.DYNAMIC
@@ -162,7 +173,7 @@ public class ReconciliationService
 
                     ServerContext routerContext = context.asContext(RouterContext.class);
                     Collection<Resource> queryResult = new ArrayList<Resource>();
-                    routerContext.getConnection().query(routerContext, auditQuery, queryResult);
+                    getConnectionFactory().getConnection().query(routerContext, auditQuery, queryResult);
 
                     for (Resource resource : queryResult) {
                         handler.handleResult(new Resource(

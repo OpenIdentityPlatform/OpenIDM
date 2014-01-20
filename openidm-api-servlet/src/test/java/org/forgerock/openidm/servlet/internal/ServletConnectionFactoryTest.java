@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.router.impl;
+package org.forgerock.openidm.servlet.internal;
 
 import java.io.File;
 import java.net.URL;
@@ -44,7 +44,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Router;
-import org.forgerock.openidm.router.impl.JsonResourceRouterService;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.FunctionFactory;
@@ -56,18 +55,18 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * A NAME does ...
+ * A test of the ServletConnectionFactory and underlying request handler.
  * 
  * @author Laszlo Hordos
  */
-public class JsonResourceRouterServiceTest {
+public class ServletConnectionFactoryTest {
 
     private Connection testable = null;
 
     @BeforeClass
     public void BeforeClass() throws Exception {
 
-        URL config = JsonResourceRouterServiceTest.class.getResource("/conf/router.json");
+        URL config = ServletConnectionFactoryTest.class.getResource("/conf/router.json");
         Assert.assertNotNull(config, "router configuration is not found");
 
         JsonValue configuration =
@@ -98,23 +97,22 @@ public class JsonResourceRouterServiceTest {
                     }
                 }).build());
 
-        URL script = JsonResourceRouterServiceTest.class.getResource("/script/");
+        URL script = ServletConnectionFactoryTest.class.getResource("/script/");
         Assert.assertNotNull(script, "Failed to find /recon/script folder in test");
         sr.addSourceUnit(new DirectoryContainer("script", script));
 
-        JsonResourceRouterService filterService = new JsonResourceRouterService();
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
         filterService.bindRequestHandler(requestHandler);
         filterService.bindScriptRegistry(sr);
 
-        testable =
-                Resources.newInternalConnection(filterService.init(configuration, requestHandler));
+        testable = Resources.newInternalConnection(filterService.init(configuration, requestHandler));
     }
 
     @Test
     public void testActivate() throws Exception {
         JsonValue content = new JsonValue(new HashMap<String, Object>());
-        Resource user1 =
-                testable.create(new RootContext(), Requests.newCreateRequest("/managed/user",
-                        content));
+        Resource user1 = testable.create(
+                new RootContext(),
+                Requests.newCreateRequest("/managed/user", content));
     }
 }

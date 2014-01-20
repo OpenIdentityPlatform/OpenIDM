@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,16 +24,12 @@
 
 package org.forgerock.openidm.core.filter;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CrossCutFilter;
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
-import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -48,8 +44,6 @@ import org.forgerock.openidm.util.ScriptUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.engine.Utils;
-import org.forgerock.util.Factory;
-import org.forgerock.util.LazyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * A NAME does ...
  *
  * @author Laszlo Hordos
+ * @author brmiller
  */
 public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState> {
 
@@ -102,10 +97,11 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     private final Pair<JsonPointer, ScriptEntry> onRequest;
     private final Pair<JsonPointer, ScriptEntry> onResponse;
     private final Pair<JsonPointer, ScriptEntry> onFailure;
-    private PersistenceConfig persistenceConfig = null;
 
-    public ScriptedFilter(Pair<JsonPointer, ScriptEntry> onRequest,
-            Pair<JsonPointer, ScriptEntry> onResponse, Pair<JsonPointer, ScriptEntry> onFailure) {
+    public ScriptedFilter(
+            Pair<JsonPointer, ScriptEntry> onRequest,
+            Pair<JsonPointer, ScriptEntry> onResponse,
+            Pair<JsonPointer, ScriptEntry> onFailure) {
         this.onRequest = onRequest;
         this.onResponse = onResponse;
         this.onFailure = onFailure;
@@ -313,11 +309,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
                         + onRequest.getRight().getName());
             }
-            Script script = scriptEntry.getScript(context);
-
-            script.put("request", ScriptUtil.getRequestMap(state.request, context));
-            script.put("context", context);
-            script.put("_context", getLazyContext(context));
+            Script script = populateScript(scriptEntry, context, state.request);
             try {
                 //TODO Add function to support SKIP/STOP/CONTINUE
                 state.state = script.eval();
@@ -340,13 +332,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
                         + onResponse.getRight().getName());
             }
-            Script script = scriptEntry.getScript(context);
-
-            script.put("request", ScriptUtil.getRequestMap(state.request, context));
-            script.put("context", context);
+            Script script = populateScript(scriptEntry, context, state.request);
             script.put("response", resource);
-
-            script.put("_context", getLazyContext(context));
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
@@ -366,13 +353,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                 throw new ServiceUnavailableException("Failed to execute inactive script: "
                         + onFailure.getRight().getName());
             }
-            Script script = scriptEntry.getScript(context);
-
-            script.put("request", ScriptUtil.getRequestMap(state.request, context));
-            script.put("context", context);
+            Script script = populateScript(scriptEntry, context, state.request);
             script.put("exception", error.toJsonValue().asMap());
-
-            script.put("_context", getLazyContext(context));
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
@@ -383,30 +365,19 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
         }
     }
 
-    private LazyMap<String, Object> getLazyContext(final ServerContext context) {
-        return new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> newInstance() {
-                final JsonValue serverContext;
-                try {
-                    serverContext = serialiseServerContext(context);
-                    if (null != serverContext) {
-                        return serverContext.required().asMap();
-                    }
-                } catch (ResourceException e) {
-                    logger.error("Failed to serialise the ServerContext", e);
-                    /* ignore */
-                }
-                return Collections.emptyMap();
-            }
-        });
-    }
+    private Script populateScript(final ScriptEntry scriptEntry, final ServerContext context, final Request request) {
+        final Script script = scriptEntry.getScript(context);
 
-    protected JsonValue serialiseServerContext(final ServerContext context)
-            throws ResourceException {
-        if (null != context && null != persistenceConfig) {
-            return ServerContext.saveToJson(context, persistenceConfig);
+        if (scriptEntry.getName().isOpenIDM21RequestBinding()) {
+            // old, 2.1.x, deprecated script object bindings
+            script.put("request", ScriptUtil.getRequestMap(request, context));
+            script.put("_context", ScriptUtil.getLazyContext(context));
+            script.put("context", ScriptUtil.getContextMap(context));
+        } else {
+            script.put("request", request);
+            script.put("context", ScriptUtil.getContextMap(context));
         }
-        return null;
+
+        return script;
     }
 }

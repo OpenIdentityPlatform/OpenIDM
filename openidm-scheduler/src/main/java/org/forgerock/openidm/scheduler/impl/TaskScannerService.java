@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -37,13 +37,13 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonProcessingException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -56,9 +56,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
@@ -96,6 +94,10 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      */
     Map<String, TaskScannerContext> taskScanRuns =
             Collections.synchronizedMap(new LinkedHashMap<String, TaskScannerContext>());
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scopeFactory;
@@ -231,7 +233,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         String name = params.get("name");
         JsonValue config;
         try {
-            config = accessor().getConnection().read(accessor(), Requests.newReadRequest("config/" + name)).getContent();
+            config = connectionFactory.getConnection().read(accessor(), Requests.newReadRequest("config/" + name)).getContent();
         } catch (ResourceException e) {
             throw new ExecutionException("Error obtaining named config: '" + name + "'", e);
         }
@@ -245,7 +247,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         addTaskScanRun(context);
         TaskScannerJob taskScanJob = null;
         try {
-            taskScanJob = new TaskScannerJob(context, routeService, scopeFactory);
+            taskScanJob = new TaskScannerJob(connectionFactory, context, routeService, scopeFactory);
         } catch (ScriptException e) {
             throw new ExecutionException(e);
         }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2014 ForgeRock Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -67,7 +67,7 @@ public class OpenIDMResolverFactory implements ResolverFactory {
             Field languageField = cls.getDeclaredField("language");
             languageField.setAccessible(true);
             language = (String) languageField.get(behaviour);
-            ServerContext context = ServerContext.loadFromJson(openidmContext, persistenceConfig);
+            ServerContext context = new ServerContext(openidmContext, persistenceConfig);
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", language));
             if (script == null) {
                 scriptJson.put("source", "");

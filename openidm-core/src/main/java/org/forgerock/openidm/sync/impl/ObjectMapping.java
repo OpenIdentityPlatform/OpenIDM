@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -392,7 +392,7 @@ class ObjectMapping  {
             for (Map.Entry<String, Object> e: query.entrySet()) {
                 r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
             }
-            service.getRouter().getConnection().query(service.getRouter(), r, new QueryResultHandler() {
+            service.getConnectionFactory().getConnection().query(service.getRouter(), r, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore
@@ -428,7 +428,7 @@ class ObjectMapping  {
         LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
             CreateRequest cr = Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            Resource r =  service.getRouter().getConnection().create(service.getRouter(), cr);
+            Resource r =  service.getConnectionFactory().getConnection().create(service.getRouter(), cr);
             targetObject = new LazyObjectAccessor(service, targetObjectSet, r.getId(), target);
             measure.setResult(target);
         } catch (JsonValueException jve) {
@@ -457,7 +457,7 @@ class ObjectMapping  {
             LOGGER.trace("Update target object {}", id);
             UpdateRequest ur = Requests.newUpdateRequest(id, target);
             ur.setRevision(target.get("_rev").asString());
-            service.getRouter().getConnection().update(service.getRouter(), ur);
+            service.getConnectionFactory().getConnection().update(service.getRouter(), ur);
             measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
@@ -485,7 +485,7 @@ class ObjectMapping  {
                 LOGGER.trace("Delete target object {}", id);
                 DeleteRequest ur = Requests.newDeleteRequest(id);
                 ur.setRevision(target.get("_rev").asString());
-                service.getRouter().getConnection().delete(service.getRouter(), ur);
+                service.getConnectionFactory().getConnection().delete(service.getRouter(), ur);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
             } catch (NotFoundException nfe) {
@@ -536,7 +536,7 @@ class ObjectMapping  {
     public void onCreate(String id, JsonValue value) throws SynchronizationException {
         if (isSourceObject(id)) {
             if (value == null || value.getObject() == null) { // notification without the actual value
-                value = LazyObjectAccessor.rawReadObject(service.getRouter(), id);
+                value = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), id);
             }
             doSourceSync(id, value); // synchronous for now
         }
@@ -545,7 +545,7 @@ class ObjectMapping  {
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         if (isSourceObject(id)) {
             if (newValue == null || newValue.getObject() == null) { // notification without the actual value
-                newValue = LazyObjectAccessor.rawReadObject(service.getRouter(), id);
+                newValue = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), id);
             }
             // TODO: use old value to project incremental diff without fetch of source
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
@@ -931,7 +931,7 @@ class ObjectMapping  {
 
         public Void call() throws SynchronizationException {
             //TODO I miss the Request Context
-            ObjectSetContext.push(new ServerContext(parentContext, parentContext.getConnection()));
+            ObjectSetContext.push(new ServerContext(parentContext));
             try {
                 reconSourceById(sourceId, reconContext, rootContext, allLinks, remainingTargetIds);
             } finally {
@@ -984,7 +984,7 @@ class ObjectMapping  {
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
             CreateRequest cr = Requests.newCreateRequest("audit/recon",entry.toJsonValue());
-            service.getRouter().getConnection().create(service.getRouter(), cr);
+            service.getConnectionFactory().getConnection().create(service.getRouter(), cr);
         } catch (ResourceException ose) {
             throw new SynchronizationException(ose);
         }

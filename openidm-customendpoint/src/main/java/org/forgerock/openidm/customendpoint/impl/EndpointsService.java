@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -128,8 +128,8 @@ public class EndpointsService extends AbstractScriptedService {
     }
 
     protected JsonValue serialiseServerContext(ServerContext context) throws ResourceException {
-        if (null != context && null != persistenceConfig) {
-            return ServerContext.saveToJson(context, persistenceConfig);
+        if (null != context) {
+            return context.toJsonValue();
         }
         return null;
     }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,11 +39,10 @@ import org.forgerock.json.resource.PersistenceConfig;
  */
 public class TriggerContext extends ServerContext {
 
+    private static final String CONTEXT_NAME = "trigger";
+
     // persisted attribute name
     private static final String ATTR_TRIGGER_SOURCE = "trigger-source";
-
-    /** the trigger source */
-    private String trigger;
 
     /**
      * Create a new trigger context from an existing (parent) context and the source of the trigger.
@@ -52,8 +51,8 @@ public class TriggerContext extends ServerContext {
      * @param trigger the trigger source
      */
     public TriggerContext(final Context parent, final String trigger) {
-        super(checkNotNull(parent, "Cannot instantiate TriggerContext with null parent Context"));
-        this.trigger = trigger;
+        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate TriggerContext with null parent Context"));
+        data.put(ATTR_TRIGGER_SOURCE, trigger);
     }
 
     /**
@@ -70,7 +69,6 @@ public class TriggerContext extends ServerContext {
     public TriggerContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
-        this.trigger = savedContext.get(ATTR_TRIGGER_SOURCE).asString();
     }
 
     /**
@@ -78,16 +76,7 @@ public class TriggerContext extends ServerContext {
      * @return the trigger
      */
     public String getTrigger() {
-        return trigger;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected void saveToJson(final JsonValue savedContext, final PersistenceConfig config)
-            throws ResourceException {
-        super.saveToJson(savedContext, config);
-        savedContext.put(ATTR_TRIGGER_SOURCE, trigger);
+        return data.get(ATTR_TRIGGER_SOURCE).asString();
     }
 
 }

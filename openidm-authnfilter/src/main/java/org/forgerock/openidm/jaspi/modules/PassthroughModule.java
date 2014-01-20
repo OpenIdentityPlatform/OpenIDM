@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -88,7 +88,10 @@ public class PassthroughModule extends IDMServerAuthModule {
 
         try {
             passthroughAuthenticator = new PassthroughAuthenticator(
-                    OSGiAuthnFilterBuilder.getRouter().createServerContext(), passThroughAuth, userRolesProperty,
+                    OSGiAuthnFilterBuilder.getConnectionFactory(),
+                    OSGiAuthnFilterBuilder.getRouter().createServerContext(),
+                    passThroughAuth,
+                    userRolesProperty,
                     defaultRoles);
         } catch (ResourceException e) {
             //TODO
