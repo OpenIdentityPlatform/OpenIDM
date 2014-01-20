@@ -297,7 +297,7 @@
         -->
         <releaseDate />
         <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
-        <frDocPluginVersion>1.2.0</frDocPluginVersion>
+        <frDocPluginVersion>2.0.0</frDocPluginVersion>
     </properties>
 
     <modules>
@@ -848,30 +848,45 @@
                 <configuration>
                     <projectName>OpenIDM</projectName>
                     <googleAnalyticsId>${gaId}</googleAnalyticsId>
+                    <docbkxSourceDirectory>${basedir}/src/main/docbkx</docbkxSourceDirectory>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>copy-common</id>
-                        <phase>pre-site</phase>
-                        <goals>
-                            <goal>boilerplate</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>build-doc</id>
-                        <phase>pre-site</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>layout-doc</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>layout</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                    <id>copy-common</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                        <goal>boilerplate</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>filter-sources</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                        <goal>filter</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>prepare-sources</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                        <goal>prepare</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>build-doc</id>
+                    <phase>pre-site</phase>
+                    <goals>
+                        <goal>build</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>layout-doc</id>
+                    <phase>site</phase>
+                    <goals>
+                        <goal>layout</goal>
+                    </goals>
+                </execution>
+               </executions>
             </plugin>
 
             <plugin>
