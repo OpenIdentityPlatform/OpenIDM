@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -41,7 +41,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.openidm.util.ContextUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -413,15 +413,14 @@ class RouteServiceImpl implements RouteService {
 
     @Override
     public ServerContext createServerContext() throws ResourceException {
-        return createServerContext(ResourceUtil.createInternalSecurityContext(bundle
-                .getBundleContext()));
+        return createServerContext(ContextUtil.createInternalSecurityContext(bundle.getBundleContext()));
     }
 
     @Override
     public ServerContext createServerContext(Context parentContext) throws ResourceException {
         final Router r = internalRouter.get();
         if (null != r) {
-            return new ServerContext(parentContext, Resources.newInternalConnection(r));
+            return new ServerContext(parentContext);
         } else {
             throw new ServiceUnavailableException();
         }

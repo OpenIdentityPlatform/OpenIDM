@@ -21,6 +21,7 @@ import org.forgerock.auth.common.AuthResult;
 import org.forgerock.jaspi.logging.JaspiAuditLogger;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -83,6 +84,15 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
     }
 
     /**
+     * Gets the internal connection facotry for internal routing.
+     *
+     * @return the intstance of the ConnectionFactory
+     */
+    private ConnectionFactory getConnectionFactory() {
+        return OSGiAuthnFilterBuilder.getConnectionFactory();
+    }
+
+    /**
      * Logs the authentication request.
      *
      * @param request The HttpServletRequest that made the authentication request.
@@ -117,7 +127,7 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
                 // TODO We need Context!!!
                 CreateRequest createRequest = Requests.newCreateRequest("/audit/access", entry);
                 ServerContext ctx = getRouter().createServerContext();
-                ctx.getConnection().create(ctx, createRequest);
+                getConnectionFactory().getConnection().create(ctx, createRequest);
             } else {
                 // Filter should have rejected request if router is not available
                 LOGGER.warn("Failed to log entry for {} as router is null.", username);

@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -39,17 +39,17 @@
 
     <dependencies>
 
-        <!--dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
-        </dependency> -->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource-servlet</artifactId>
         </dependency>
@@ -62,17 +62,11 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>org.cometd.java</groupId>
-            <artifactId>cometd-java-server</artifactId>
-            <version>2.5.1</version>
-        </dependency>
+        </dependency> -->
         <dependency>
-            <groupId>org.cometd.java</groupId>
-            <artifactId>cometd-java-oort</artifactId>
-            <version>2.5.1</version>
-        </dependency>-->
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-api</artifactId>
@@ -123,6 +117,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-groovy</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

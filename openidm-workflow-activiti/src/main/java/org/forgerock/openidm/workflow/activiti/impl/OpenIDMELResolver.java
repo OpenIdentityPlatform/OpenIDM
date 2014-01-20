@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -74,7 +74,7 @@ public class OpenIDMELResolver extends ELResolver {
         String key = (String) property;
         try {
             JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, base, ActivitiConstants.OPENIDM_CONTEXT);
-            ServerContext serverContext = ServerContext.loadFromJson(openidmContext, persistenceConfig);
+            ServerContext serverContext = new ServerContext(openidmContext, persistenceConfig);
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {
                 scriptJson.put("source", "");

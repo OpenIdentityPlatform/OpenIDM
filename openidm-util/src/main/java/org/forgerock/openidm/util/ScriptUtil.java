@@ -1,6 +1,22 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions Copyrighted [year] [name of copyright owner]".
+ *
+ * Copyright © 2013-2014 ForgeRock AS. All rights reserved.
+ */
 package org.forgerock.openidm.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +35,8 @@ import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.servlet.HttpContext;
+import org.forgerock.util.Factory;
+import org.forgerock.util.LazyMap;
 
 public class ScriptUtil {
 
@@ -80,18 +98,48 @@ public class ScriptUtil {
         } else {
             requestMap.put("fromHttp", "false");
         }
-        requestMap.put("type", request.getRequestType());
+        requestMap.put("external", String.valueOf(ContextUtil.isExternal(context)));
+        requestMap.put("type", request.getRequestType().toString());
         requestMap.put("value", value.getObject());
         requestMap.put("id", id);
         
         return requestMap;
     }
-    
+
     private static boolean isFromHttp(ServerContext context) {
         Context c = context.getParent();
         if (c != null && c.getParent() != null && HttpContext.class.isAssignableFrom(c.getParent().getClass())) {
             return true;
         }
         return false;
+    }
+
+    public static  LazyMap<String, Object> getLazyContext(final ServerContext context) {
+        return new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> newInstance() {
+                if (null != context) {
+                    return context.toJsonValue().required().asMap();
+                }
+                else {
+                    return Collections.emptyMap();
+                }
+            }
+        });
+    }
+
+    public static Map<String, Object> getContextMap(final ServerContext context) {
+        final Map<String,Object> contextMap = new HashMap<String, Object>();
+        contextMap.put("current", context);
+        if (context.containsContext(HttpContext.class)) {
+            contextMap.put("http", context.asContext(HttpContext.class));
+        }
+        if (context.containsContext(SecurityContext.class)) {
+            contextMap.put("security", context.asContext(SecurityContext.class));
+        }
+        if (context.getParent() != null) {
+            contextMap.put("parent", context.getParent());
+        }
+        return contextMap;
     }
 }

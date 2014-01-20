@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  */
 
 // TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 // SLF4J
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -114,7 +115,7 @@ class Link {
      * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {
-        JsonValue results = linkQuery(mapping.getService().getRouter(), query);
+        JsonValue results = linkQuery(mapping.getService().getRouter(), mapping.getService().getConnectionFactory(), query);
         if (results.size() == 1) {
             fromJsonValue(results.get(0));
         } else if (results.size() > 1) { // shouldn't happen if index is unique
@@ -129,7 +130,7 @@ class Link {
      * @return The query results
      * @throws SynchronizationException if getting and initializing the link details fail
      */
-    private static JsonValue linkQuery(ServerContext router, JsonValue query) throws SynchronizationException {
+    private static JsonValue linkQuery(ServerContext router, ConnectionFactory connectionFactory, JsonValue query) throws SynchronizationException {
         JsonValue results = null;
         try {
             QueryRequest r = Requests.newQueryRequest(linkId(null));
@@ -141,7 +142,7 @@ class Link {
 
             final Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
-            router.getConnection().query(router, r, new QueryResultHandler() {
+            connectionFactory.getConnection().query(router, r, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore
@@ -307,7 +308,7 @@ class Link {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryRequest.FIELD_QUERY_ID, "links-for-linkType");
             query.put("linkType", mapping.getLinkType().getName());
-            JsonValue queryResults = linkQuery(mapping.getService().getRouter(), query);
+            JsonValue queryResults = linkQuery(mapping.getService().getRouter(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {
                 Link link = new Link(mapping);
                 link.fromJsonValue(entry);
@@ -342,7 +343,7 @@ class Link {
         JsonValue jv = toJsonValue();
         try {
             CreateRequest r = Requests.newCreateRequest(linkId(null), _id, jv);
-            Resource resource = mapping.getService().getRouter().getConnection().create(mapping.getService().getRouter(), r);
+            Resource resource = mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getRouter(), r);
             this._id = resource.getId();
             this._rev = resource.getRevision();
             this.initialized = true;
@@ -362,7 +363,7 @@ class Link {
             try {
                 DeleteRequest r = Requests.newDeleteRequest(linkId(_id));
                 r.setRevision(_rev);
-                mapping.getService().getRouter().getConnection().delete(mapping.getService().getRouter(),r);
+                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getRouter(),r);
             } catch (ResourceException ose) {
                 LOGGER.warn("Failed to delete link", ose);
                 throw new SynchronizationException(ose);
@@ -384,7 +385,7 @@ class Link {
         try {
             UpdateRequest r = Requests.newUpdateRequest(linkId(_id), jv);
             r.setRevision(_rev);
-            mapping.getService().getRouter().getConnection().update(mapping.getService().getRouter(),r);
+            mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getRouter(),r);
         } catch (ResourceException ose) {
             LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);

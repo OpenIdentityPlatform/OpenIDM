@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -57,6 +57,7 @@ import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.Requests;
@@ -106,10 +107,22 @@ public class SecurityResourceProvider {
 	protected ServerContext accessor = null;
 
     /**
+     * The Connection Factory
+     */
+    protected ConnectionFactory connectionFactory;
+
+    /**
      * The resource name, "truststore" or "keystore".
      */
 	protected String resourceName = null;
 
+    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+        this.store = store;
+        this.resourceName = resourceName;
+        this.manager = manager;
+        this.accessor = accessor;
+        this.connectionFactory = connectionFactory;
+    }
     /**
      * Returns a PEM String representation of a object.
      * 
@@ -432,7 +445,7 @@ public class SecurityResourceProvider {
         if (accessor == null) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
         }
-        JsonValue keyMap = new JsonValue(accessor.getConnection().read(accessor, Requests.newReadRequest(id)).getContent());
+        JsonValue keyMap = new JsonValue(connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id)).getContent());
         return keyMap;
     }
     
@@ -448,15 +461,15 @@ public class SecurityResourceProvider {
         }
         Resource oldResource;
         try {
-            oldResource = accessor.getConnection().read(accessor, Requests.newReadRequest(id));
+            oldResource = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id));
         } catch (NotFoundException e) {
             logger.debug("creating object " + id);
-            accessor.getConnection().create(accessor, Requests.newCreateRequest(container, id, value));
+            connectionFactory.getConnection().create(accessor, Requests.newCreateRequest(container, id, value));
             return;
         }
         UpdateRequest updateRequest = Requests.newUpdateRequest(container, id, value);
         updateRequest.setRevision(oldResource.getRevision());
-        accessor.getConnection().update(accessor, updateRequest);
+        connectionFactory.getConnection().update(accessor, updateRequest);
     }
     
     /**
@@ -472,7 +485,7 @@ public class SecurityResourceProvider {
         }
         String container = "/repo/security/keys";
         String id = container + "/" + alias;
-        Resource keyResource = accessor.getConnection().read(accessor, Requests.newReadRequest(id));
+        Resource keyResource = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id));
         if (keyResource.getContent().isNull()) {
             throw ResourceException.getException(ResourceException.NOT_FOUND, 
             		"Cannot find stored key for alias " + alias);

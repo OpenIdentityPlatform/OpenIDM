@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -64,6 +65,18 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      */
     public static final Name EVENT_AUDIT_CREATE = Name.get("openidm/internal/audit/repo/create");
 
+    /** provides a reference to the router for real-time query handling */
+    private ConnectionFactory connectionFactory;
+
+    /**
+     * Constructor.
+     *
+     * @param connectionFactory
+     */
+    public RepoAuditLogger(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         super.setConfig(config, ctx);
     }
@@ -87,7 +100,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             request.setQueryId("query-all");
             request.getAdditionalQueryParameters().putAll(params);
             Set<Resource> r = new HashSet<Resource>();
-            context.getConnection().query(context, request, r);
+            connectionFactory.getConnection().query(context, request, r);
             for (Resource entry : r) {
                 entries.add(AuditServiceImpl.formatLogEntry(entry.getContent().asMap(), type));
             }
@@ -95,7 +108,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             result.put("entries", entries);
         } else {
             ReadRequest request = Requests.newReadRequest(getRepoTarget(type), id);
-            Map<String, Object> entry = context.getConnection().read(context, request).getContent().asMap();
+            Map<String, Object> entry = connectionFactory.getConnection().read(context, request).getContent().asMap();
             formatActivityEntry(entry);
             result = AuditServiceImpl.formatLogEntry(entry, type);
         }
@@ -118,7 +131,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             request.setQueryId(queryId);
             request.getAdditionalQueryParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
-            context.getConnection().query(context, request, new QueryResultHandler() {
+            connectionFactory.getConnection().query(context, request, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // Continue
@@ -184,7 +197,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
     private void createImpl(ServerContext context, String type, Map<String, Object> obj) throws ResourceException {
         CreateRequest request = Requests.newCreateRequest(
                 getRepoTarget(type), (String) obj.get(Resource.FIELD_CONTENT_ID), new JsonValue(obj));
-        context.getConnection().create(context, request);
+        connectionFactory.getConnection().create(context, request);
     }
 
     private String getRepoTarget(String type) {

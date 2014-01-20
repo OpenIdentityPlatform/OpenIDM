@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 20132-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -44,9 +44,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -109,6 +111,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * The Repository Service Accessor
      */
     private static ServerContext accessor;
+
+    /**
+     * The Connection Factory
+     */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     /**
      * A list of listeners to notify when an instance failes
@@ -235,7 +243,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     r.setAdditionalQueryParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
-                    accessor.getConnection().query(accessor, r, new QueryResultHandler() {
+                    connectionFactory.getConnection().query(accessor, r, new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {
                             // ignore
@@ -257,7 +265,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 	String id = request.getResourceName();
                     logger.debug("Attempting to read instance {} from the database", id);
                     ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
-                    Resource instanceValue = accessor.getConnection().read(accessor, readRequest);
+                    Resource instanceValue = connectionFactory.getConnection().read(accessor, readRequest);
                     if (!instanceValue.getContent().isNull()) {
                         resultMap.put("results", getInstanceMap(instanceValue.getContent()));
                     } else {
@@ -386,7 +394,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             String repoId = getInstanceStateRepoId(instanceId);
             UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(instanceState.toMap()));
             r.setRevision(instanceState.getRevision());
-            accessor.getConnection().update(accessor, r);
+            connectionFactory.getConnection().update(accessor, r);
         }
     }
 
@@ -413,7 +421,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 container = repoId.substring(0, repoId.lastIndexOf("/"));
                 id = repoId.substring(repoId.lastIndexOf("/") + 1);
 	            CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
-                map = accessor.getConnection().create(accessor, createRequest).getContent().asMap();
+                map = connectionFactory.getConnection().create(accessor, createRequest).getContent().asMap();
             }
             return map;
         }
@@ -425,7 +433,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 throw new InternalServerErrorException("Repo router is null");
             }
             logger.debug("Reading from repo {}", repoId);
-            Resource res = accessor.getConnection().read(accessor, Requests.newReadRequest(repoId));
+            Resource res = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(repoId));
             res.getContent().put("_id", res.getId());
             res.getContent().put("_rev", res.getRevision());
             return res.getContent();
@@ -537,7 +545,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             JsonValue jv = new JsonValue(new HashMap<String, Object>());
             final Collection<Map<String, Object>> list = new HashSet<Map<String, Object>>();
             jv.put("result", list);
-            accessor.getConnection().query(accessor, r, new QueryResultHandler() {
+            connectionFactory.getConnection().query(accessor, r, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore

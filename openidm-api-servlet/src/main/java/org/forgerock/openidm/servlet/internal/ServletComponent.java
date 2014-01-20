@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,7 +27,9 @@ package org.forgerock.openidm.servlet.internal;
 import java.util.Hashtable;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -38,8 +40,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.HttpServlet;
 import org.forgerock.json.resource.servlet.HttpServletContextFactory;
+import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
@@ -57,27 +63,26 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Laszlo Hordos
  * @author ckienle
+ * @author brmiller
  */
-@Component(name = "org.forgerock.openidm.api-servlet", immediate = true,
+@Component(name = "org.forgerock.openidm.api-servlet",
+        immediate = true,
         policy = ConfigurationPolicy.IGNORE)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST HttpServlet"),
-    @Property(name = EventConstants.EVENT_TOPIC, value = { "org/forgerock/openidm/servlet/*" }) })
+    @Property(name = EventConstants.EVENT_TOPIC, value = { "org/forgerock/openidm/servlet/*" })
+})
 public class ServletComponent implements EventHandler {
 
-    /**
-     * Setup logging for the {@link ServletComponent}.
-     */
+    public static final String PID = "org.forgerock.openidm.router";
+
+    /** Setup logging for the {@link ServletComponent}. */
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
 
-    @Reference(policy = ReferencePolicy.DYNAMIC,
-            target = "(service.pid=org.forgerock.openidm.router)")
+    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.router)")
     protected ConnectionFactory connectionFactory;
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected HttpServletContextFactory servletContextFactory;
 
     @Reference
     private ServletRegistration servletRegistration;
@@ -87,7 +92,23 @@ public class ServletComponent implements EventHandler {
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.debug("Try registering servlet at {}", "/openidm");
-        servlet = new HttpServlet(connectionFactory, servletContextFactory);
+        servlet = new HttpServlet(connectionFactory,
+                new HttpServletContextFactory() {
+                    @Override
+                    public Context createContext(HttpServletRequest request) throws ResourceException {
+
+                        SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
+                        SecurityContext securityContext = securityContextFactory.createContext(request);
+                        String authcid = securityContext.getAuthenticationId();
+
+                        if (StringUtils.isEmpty(authcid)) {
+                            logger.warn("Rejecting invocation as required context to allow invocation not populated");
+                            throw ResourceException.getException(ResourceException.UNAVAILABLE,
+                                    "Rejecting invocation as required context to allow invocation not populated");
+                        }
+                        return securityContext;
+                    }
+                });
 
         String alias = "/openidm";
         servletRegistration.registerServlet(alias, servlet, new Hashtable());
@@ -98,6 +119,8 @@ public class ServletComponent implements EventHandler {
     protected synchronized void deactivate(ComponentContext context) {
         servletRegistration.unregisterServlet(servlet);
     }
+
+    // ----- Implementation of EventHandler
 
     @Override
     public void handleEvent(Event event) {

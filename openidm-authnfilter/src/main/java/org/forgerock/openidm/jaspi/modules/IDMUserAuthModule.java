@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -105,9 +105,11 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
 
         try {
-            authHelper = new AuthHelper(OSGiAuthnFilterBuilder.getCryptoService(),
-                    OSGiAuthnFilterBuilder.getRouter().createServerContext(), userIdProperty, userCredentialProperty,
-                    userRolesProperty, defaultRoles);
+            authHelper = new AuthHelper(
+                    OSGiAuthnFilterBuilder.getCryptoService(),
+                    OSGiAuthnFilterBuilder.getConnectionFactory(),
+                    OSGiAuthnFilterBuilder.getRouter().createServerContext(),
+                    userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
         } catch (ResourceException e) {
             logger.debug(e.getMessage(), e);
         }

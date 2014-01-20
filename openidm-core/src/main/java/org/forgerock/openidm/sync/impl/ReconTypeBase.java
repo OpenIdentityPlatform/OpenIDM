@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -169,7 +169,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
                 r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
             }
-            reconContext.getService().getRouter().getConnection().query(reconContext.getService().getRouter(), r, 
+            reconContext.getService().getConnectionFactory().getConnection().query(reconContext.getService().getRouter(), r,
                     new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {

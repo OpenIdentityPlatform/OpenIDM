@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -167,6 +167,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final Logger logger = LoggerFactory.getLogger(ScriptRegistryService.class);
     private static final String PROP_IDENTITY_SERVER = "identityServer";
     private static final String PROP_OPENIDM = "openidm";
+    private static final String PROP_CONSOLE = "console";
     
     private static final String SOURCE_DIRECTORY = "directory";
     private static final String SOURCE_SUBDIRECTORIES = "subdirectories";
@@ -175,8 +176,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
-    private static final ConcurrentMap<String, Object> propertiesCache =
-            new ConcurrentHashMap<String, Object>();
+    private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<String, Object>();
 
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
@@ -190,19 +190,33 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         for (IdentityServerFunctions f : IdentityServerFunctions.values()) {
             identityServer.put(f.name(), f);
         }
+        Map<String, Object> console = new HashMap<String, Object>();
+        console.put("log", new Function<Void>() {
+            @Override
+            public Void call(Parameter scope, Function<?> callback, Object... arguments) throws ResourceException, NoSuchMethodException {
+                if (arguments.length > 0) {
+                    if (arguments[0] instanceof String) {
+                        System.out.println((String) arguments[0]);
+                    }
+                }
+                return null;
+            }
+        });
         put(PROP_IDENTITY_SERVER, identityServer);
+        put(PROP_CONSOLE, console);
         put(PROP_OPENIDM, openidm);
         JsonValue properties = configuration.get("properties");
         if (properties.isMap()) {
             for (Map.Entry<String, Object> entry : properties.asMap().entrySet()) {
                 if (PROP_IDENTITY_SERVER.equals(entry.getKey())
-                        || PROP_OPENIDM.equals(entry.getKey())) {
+                        || PROP_OPENIDM.equals(entry.getKey())
+                        || PROP_CONSOLE.equals(entry.getKey())) {
                     continue;
                 }
                 put(entry.getKey(), entry.getValue());
             }
         }
-        
+
         try {
         	JsonValue sources = configuration.get("sources");
             if (!sources.isNull()) {
@@ -248,11 +262,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                         .<String> emptySet();
         keys.remove(PROP_OPENIDM);
         keys.remove(PROP_IDENTITY_SERVER);
+        keys.remove(PROP_CONSOLE);
         JsonValue properties = configuration.get("properties");
         if (properties.isMap()) {
             for (Map.Entry<String, Object> entry : properties.asMap().entrySet()) {
                 if (PROP_IDENTITY_SERVER.equals(entry.getKey())
-                        || PROP_OPENIDM.equals(entry.getKey())) {
+                        || PROP_OPENIDM.equals(entry.getKey())
+                        || PROP_CONSOLE.equals(entry.getKey())) {
                     continue;
                 }
                 put(entry.getKey(), entry.getValue());
@@ -507,8 +523,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     ScriptEntry entry = takeScript(name);
                     if (entry.isActive()) {
                         Script script = entry.getScript(context);
-                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(request
-                                .getContent().asMap()))));
+                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(request.getContent().asMap()))));
                     } else {
                         throw new ServiceUnavailableException();
                     }

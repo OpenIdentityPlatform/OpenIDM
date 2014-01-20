@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -42,10 +42,10 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -117,6 +117,10 @@ public class ManagedObjectService implements RequestHandler {
         syncRoute.set(null);
     }
 
+    /* The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
     private final ConcurrentMap<String, Route> managedRoutes = new ConcurrentHashMap<String, Route>();
 
     private final Router managedRouter = new Router();
@@ -132,7 +136,7 @@ public class ManagedObjectService implements RequestHandler {
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, value);
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
             if (managedRoutes.containsKey(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
@@ -146,7 +150,7 @@ public class ManagedObjectService implements RequestHandler {
 
         Set<String> tempRoutes = new HashSet<String>();
         for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, value);
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
             if (tempRoutes.contains(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }

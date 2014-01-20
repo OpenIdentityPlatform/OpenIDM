@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -52,6 +52,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -183,6 +184,9 @@ public class AuditServiceImpl implements AuditService {
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
     }
+
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     /** Although we may not need the router here,
          https://issues.apache.org/jira/browse/FELIX-3790
@@ -764,9 +768,9 @@ public class AuditServiceImpl implements AuditService {
                 if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
                     auditLogger = new CSVAuditLogger();
                 } else if (CONFIG_LOG_TYPE_REPO.equalsIgnoreCase(logType)) {
-                    auditLogger = new RepoAuditLogger();
+                    auditLogger = new RepoAuditLogger(connectionFactory);
                 } else if (CONFIG_LOG_TYPE_ROUTER.equalsIgnoreCase(logType)) {
-                    auditLogger = new RouterAuditLogger(routerContext);
+                    auditLogger = new RouterAuditLogger(connectionFactory);
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }

@@ -155,14 +155,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         this.properties = properties;
     }
 
-    protected JsonValue serialiseServerContext(final ServerContext context)
-            throws ResourceException {
-        if (null != context && null != persistenceConfig) {
-            return ServerContext.saveToJson(context, persistenceConfig);
-        }
-        return null;
-    }
-
     protected Scope activate(final BundleContext context, final String factoryPid,
             final JsonValue configuration) {
 
@@ -332,25 +324,15 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void handleRequest(final ServerContext context, final Request request,
             final Bindings bindings) {
-    	SecurityContext securityContext = context.asContext(SecurityContext.class);
-    	bindings.put("security", securityContext.getAuthorizationId());
-    	bindings.put("request", ScriptUtil.getRequestMap(request, context));
-    	bindings.put("context", context);
-
-    	bindings.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> newInstance() {
-                final JsonValue serverContext;
-                try {
-                    serverContext = serialiseServerContext(context);
-                    if (null != serverContext) {
-                        return serverContext.required().asMap();
-                    }
-                } catch (ResourceException e) {
-                    logger.error("Failed to serialise the ServerContext", e);
-                }
-                return Collections.emptyMap();
-            }
-        }));
+        if (scriptName.isOpenIDM21RequestBinding()) {
+            SecurityContext securityContext = context.asContext(SecurityContext.class);
+            bindings.put("security", securityContext.getAuthorizationId());
+            bindings.put("request", ScriptUtil.getRequestMap(request, context));
+            bindings.put("_context", ScriptUtil.getLazyContext(context));
+            bindings.put("context", ScriptUtil.getContextMap(context));
+        } else {
+            bindings.put("request", request);
+            bindings.put("context", ScriptUtil.getContextMap(context));
+        }
     }
 }
