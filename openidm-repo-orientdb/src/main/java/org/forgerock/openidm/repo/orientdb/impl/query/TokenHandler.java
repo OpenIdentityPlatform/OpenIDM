@@ -74,9 +74,6 @@ public class TokenHandler {
                 // fail with an exception if token not found
                 throw new BadRequestException("Missing entry in params passed to query for token " + tokenKey);
             } else {
-            	// CREST 2.x only supports String value in params
-            	String replacement = params.get(tokenKey);
-/*
                 Object replacement = params.get(tokenKey);
 
                 if (PREFIX_LIST.equals(tokenPrefix)) {
@@ -97,7 +94,7 @@ public class TokenHandler {
                     }
                     replacement = commaSeparated.toString();
                 }
-*/
+
                 if (replacement == null) {
                     replacement = "";
                 }
