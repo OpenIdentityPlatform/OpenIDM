@@ -293,11 +293,44 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                     }
                 };
                 script.putSafe("callback", queryCallback);
-                Object result = script.eval();
-                if (null != result) {
-                    handler.handleResource(new Resource(null, null, new JsonValue(result)));
+                Object rawResult = script.eval();
+                JsonValue result = null;
+                if (rawResult instanceof JsonValue) {
+                    result = (JsonValue) rawResult;
+                } else {
+                    result = new JsonValue(rawResult);
                 }
-                handler.handleResult(new QueryResult());
+                QueryResult queryResult = new QueryResult();
+                // Script can either
+                // - return null and instead use callback hook to call 
+                //   handleResource, handleResult, handleError
+                //   careful! script MUST call handleResult or handleError itself
+                // or
+                // - return a result list of resources 
+                // or 
+                // - return a full query result structure
+                if (!result.isNull()) {
+                    if (result.isList()) {
+                        // Script may return just the result elements as a list
+                        handleQueryResultList(result, handler);
+                    } else {
+                        // Or script may return a full query response structure, 
+                        // with meta-data and results field
+                        if (result.isDefined(QueryResult.FIELD_RESULT)) {
+                            handleQueryResultList(result.get(QueryResult.FIELD_RESULT), handler);
+                            queryResult = new QueryResult(
+                                    result.get(QueryResult.FIELD_PAGED_RESULTS_COOKIE).asString(), 
+                                    result.get(QueryResult.FIELD_REMAINING_PAGED_RESULTS).asInteger());
+                        } else {
+                            logger.debug("Script returned unexpected query result structure: ", 
+                                     result.getObject());
+                            handler.handleError(new InternalServerErrorException(
+                                    "Script returned unexpected query result structure of type " 
+                                    + result.getObject().getClass()));
+                        }
+                    }
+                    handler.handleResult(queryResult);
+                }
             } else {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
@@ -310,6 +343,26 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
+    
+    /**
+     * Takes a list of results (in json value wrapped form) and
+     * calls the handleResource for each on the handler. 
+     * @param resultList the list of results, possibly with id and rev entries
+     * @param handler the handle to set the results on
+     */
+    private void handleQueryResultList(JsonValue resultList, QueryResultHandler handler) {
+        for (JsonValue entry : resultList) {
+            // These can end up null
+            String id = null;
+            String rev = null;
+            if (entry.isMap()) {
+                id = entry.get(Resource.FIELD_ID).asString();
+                rev = entry.get(Resource.FIELD_REVISION).asString();
+            }
+            handler.handleResource(new Resource(id, rev, entry));
+        }
+    }
+    
 
     public void handleRead(ServerContext context, ReadRequest request,
             ResultHandler<Resource> handler) {
