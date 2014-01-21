@@ -41,7 +41,7 @@ if (!object.accountStatus) {
 }
 
 if(!object.roles) {
-    object.roles = 'openidm-authorized';    
+    object.roles = ['openidm-authorized'];    
 }
 
 if (!object.lastPasswordSet) {
