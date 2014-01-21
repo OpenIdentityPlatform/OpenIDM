@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
@@ -173,6 +174,8 @@ class ObjectMapping  {
 
     /** TODO: Description. */
     private Script resultScript;
+    
+    private JsonValue sourceCondition;
 
     /**
      * Whether existing links should be fetched in one go along with the source and target id lists.
@@ -223,6 +226,7 @@ class ObjectMapping  {
         targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
         validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
         validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
+        sourceCondition = config.get("sourceCondition").expect(Map.class);
         correlationQuery = Scripts.newInstance("ObjectMapping", config.get("correlationQuery"));
         for (JsonValue jv : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(service, jv));
@@ -356,7 +360,7 @@ class ObjectMapping  {
     private void doSourceSync(String id, JsonValue value, boolean sourceDeleted, JsonValue oldValue) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
 
-        String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
+        String localId = id.substring(sourceObjectSet.length() + 2); // skip the slashes
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
         op.oldValue = oldValue;
@@ -530,7 +534,7 @@ class ObjectMapping  {
      * object set.
      */
     private boolean isSourceObject(String id) {
-        return (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1);
+        return (id.startsWith("/" + sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 2);
     }
 
     public void onCreate(String id, JsonValue value) throws SynchronizationException {
@@ -1404,6 +1408,34 @@ class ObjectMapping  {
             initializeLink(linkObject);
             LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
         }
+        
+        /**
+         * Checks any declared source conditions on the source object
+         * 
+         * @return true if the conditions pass, false otherwise
+         * @throws SynchronizationException
+         */
+        protected boolean checkSourceConditions() throws SynchronizationException {
+            if (!sourceCondition.isNull()) {
+                for (String key : sourceCondition.keys()) {
+                    JsonPointer pointer = new JsonPointer(key);
+                    JsonValue source = sourceObjectAccessor.getObject();
+                    if (!source.isNull() && source.get(pointer) != null) {
+                        JsonValue value = source.get(pointer);
+                        if (value.isList()) {
+                            if (!value.asList().contains(sourceCondition.get(key).getObject())) {
+                                return false;
+                            }
+                        } else if (!value.getObject().equals(sourceCondition.get(key).getObject())) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         /**
          * Evaluated source valid on source object
@@ -1732,7 +1764,7 @@ class ObjectMapping  {
                         }
                     }
                 }
-            } else if (isSourceValid()) { // source is valid for mapping
+            } else if (isSourceValid() && checkSourceConditions()) { // source is valid for mapping
                 if (linkObject._id != null) { // source object linked to target
                     if (hasTargetObject()) {
                         situation = Situation.CONFIRMED;
