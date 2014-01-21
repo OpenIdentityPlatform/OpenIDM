@@ -29,6 +29,9 @@
         },
         {
             "name" : "group"
+        },
+        {
+            "name" : "role"
         }
     ]
 }
