@@ -18,7 +18,8 @@
                 "keystoreFile" : "&{openidm.keystore.location}",
                 "keystorePassword" : "&{openidm.keystore.password}",
                 "maxTokenLifeMinutes" : "120",
-                "tokenIdleTimeMinutes" : "30"
+                "tokenIdleTimeMinutes" : "30",
+                "sessionOnly" : true
             }
         },
         "authModules" : [
