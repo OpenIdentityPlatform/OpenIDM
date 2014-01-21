@@ -6,6 +6,7 @@
 
 package org.forgerock.openidm.salesforce.internal.data;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,9 +55,16 @@ public class SalesforceRequestHandlerTest {
 
     }
 
-    @Test
-    public void testReadInstance() throws Exception {
-
+    @Test(groups = { "timeout" })
+    public void testTimeout() throws Exception {
+        ReadRequest readRequest = Requests.newReadRequest("/system/test/sobjects/User/describe");
+        int i = 0;
+        do {
+            Resource r = routerRegistry.getConnection("test").read(new RootContext(), readRequest);
+            Assert.assertNotNull(r.getContent().getObject());
+            Thread.sleep(16 * 60 * 1000);
+            Toolkit.getDefaultToolkit().beep();
+        } while (i++ < 5);
     }
 
     @Test

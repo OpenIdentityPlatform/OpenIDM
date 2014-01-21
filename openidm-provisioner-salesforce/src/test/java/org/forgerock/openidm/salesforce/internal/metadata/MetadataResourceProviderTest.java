@@ -6,6 +6,7 @@
 
 package org.forgerock.openidm.salesforce.internal.metadata;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -95,6 +96,20 @@ public class MetadataResourceProviderTest {
 
         Assert.assertFalse(results.isEmpty());
 
+    }
+
+    @Test(groups = { "timeout" })
+    public void testTimeout() throws Exception {
+        QueryRequest queryRequest = Requests.newQueryRequest("/system/test/metadata/samlssoconfig");
+        queryRequest.setQueryId(ServerConstants.QUERY_ALL_IDS);
+        int i = 0;
+        do {
+            Set<Resource> results = new HashSet<Resource>();
+            routerRegistry.getConnection("test").query(new RootContext(), queryRequest, results);
+            // Assert.assertFalse(results.isEmpty());
+            Thread.sleep(16 * 60 * 1000);
+            Toolkit.getDefaultToolkit().beep();
+        } while (i++ < 5);
     }
 
     /* @formatter:off */
