@@ -40,7 +40,6 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -60,16 +59,15 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptContext;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
@@ -606,8 +604,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             ActivityLog.log(connectionFactory, context, request.getRequestType(), "read", managedId(resource.getId()),
                     null, resource.getContent(), Status.SUCCESS);
 
-            handler.handleResult(isPublicContext(context) ? cullPrivateProperties(resource)
-                    : resource);
+            handler.handleResult(ContextUtil.isExternal(context) ? cullPrivateProperties(resource) : resource);
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
@@ -731,7 +728,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     ActionRequest policyAction = Requests.newActionRequest(
                             "/policy" + managedId(resourceName), "validateObject");
                     policyAction.setContent(newValue);
-                    if (isPublicContext(context)) {
+                    if (ContextUtil.isExternal(context)) {
                         // ObjectSetContext.get().add("_isDirectHttp", true);
                         // ??  or does PolicyService already do this?
                         policyAction.setAdditionalActionParameter("_isDirectHttp", "true");
@@ -784,7 +781,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 @Override
                 public boolean handleResource(Resource resource) {
                     results.add(resource.getContent().asMap());
-                    if (isPublicContext(context)) {
+                    if (ContextUtil.isExternal(context)) {
                         // If it came over a public interface we have to cull
                         // each resulting object
                         return handler.handleResource(cullPrivateProperties(resource));
@@ -899,19 +896,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             }
         }
         return jv;
-    }
-
-    /**
-     * Checks to see if the current request's context came from a public
-     * interface (i.e. http)
-     *
-     * @return true if it came over http, false otherwise
-     */
-    private boolean isPublicContext(Context context) {
-        if (context.containsContext(ScriptContext.class)) {
-            return false;
-        }
-        return context.containsContext(HttpContext.class);
     }
 
     /**
