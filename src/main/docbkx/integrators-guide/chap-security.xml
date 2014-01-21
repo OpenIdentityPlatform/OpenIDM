@@ -28,8 +28,7 @@
          version='5.0' xml:lang='en'
          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
          xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
-         xmlns:xlink='http://www.w3.org/1999/xlink'
-         xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Securing &amp; Hardening OpenIDM</title>
  <indexterm>
   <primary>Best practices</primary>
@@ -800,6 +799,54 @@ $ cli.sh encrypt newpwd
   <para>In particular, prevent other users from reading files in at least the
   <filename>openidm/conf/boot/</filename> and
   <filename>openidm/security/</filename> directories.</para>
+
+  <para>
+   The objective is to limit access to the user that is running the service.
+   Depending on the operating system and configuration, that user might be
+   <filename>root</filename>, <filename>Administrator</filename>,
+   <filename>openidm</filename>, or something similar.
+  </para>
+
+  <procedure xml:id="security-files-unix">
+   <title>Protecting key files in Unix</title>
+
+    <step>
+     <para>
+      For the target directory, and the files therein, make sure user and
+      group ownership is limited to the user that is running the OpenIDM
+      service.
+     </para>
+    </step>
+
+    <step>
+     <para>
+      Disable access of any sort for <literal>other</literal>
+      users. One simple command for that purpose, from the
+      <filename>/path/to/openidm</filename> directory, is:
+     </para>
+     <screen># chmod -R o-rwx .</screen>
+    </step>
+
+  </procedure>
+
+  <procedure xml:id="security-files-windows">
+   <title>Protecting key files in Winodws</title>
+
+   <step>
+    <para>
+     The OpenIDM process in Windows is normally run by the
+     <literal>Administrator</literal> user.
+    </para>
+   </step>
+   <step>
+    <para>
+     If you are concerned about the security of the administrative account,
+     you can <literal>Deny</literal> permissions on the noted directories to
+     existing users, or alternatively the <literal>Users</literal> group.
+    </para>
+   </step>
+
+  </procedure>
  </section>
 
  <section xml:id="security-bootstrap">
