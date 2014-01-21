@@ -67,8 +67,6 @@ public class Config {
                     configuration.update();
                 }
             }  
-        } else {
-            System.out.println("context is null");
         }
     }
 }
