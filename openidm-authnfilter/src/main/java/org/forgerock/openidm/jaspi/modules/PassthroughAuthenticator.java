@@ -83,6 +83,9 @@ public class PassthroughAuthenticator {
                     // populate this. Use script to overcome it
                     securityContextMapper.setRoles(Arrays.asList("openidm-admin", "openidm-authorized"));
                     securityContextMapper.setResource(passThroughAuth);
+                    securityContextMapper.setUserId(result.get(Resource.FIELD_CONTENT_ID).asString());
+                    securityContextMapper.setUsername(username);
+                    return true;
                 }
             } catch (ResourceException e) {
                 if (logger.isDebugEnabled()) {
