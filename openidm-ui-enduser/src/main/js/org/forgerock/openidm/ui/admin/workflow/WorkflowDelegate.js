@@ -121,10 +121,10 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             url: endpointUrl + "?_queryId=gettasksview&userId=" + userId, 
             type: "GET",
             success: function(data) {
-                if(_.isEmpty(data.result)) {
+                if(_.isEmpty(data.result[0])) {
                     errorCallback();
                 } else if(successCallback) {
-                    successCallback(data.result);
+                    successCallback(data.result[0]);
                 }
             }, 
             error: errorCallback
@@ -136,10 +136,10 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             url: endpointUrl + "?_queryId=gettasksview&userId=" + userId + "&viewType=assignee",  
             type: "GET",
             success: function(data) {
-                if(_.isEmpty(data.result)) {
+                if(_.isEmpty(data.result[0])) {
                     errorCallback();
                 } else if(successCallback) {
-                    successCallback(data.result);
+                    successCallback(data.result[0]);
                 }
             }, 
             error: errorCallback

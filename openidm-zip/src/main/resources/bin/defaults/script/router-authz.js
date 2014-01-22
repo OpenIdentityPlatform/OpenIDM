@@ -136,6 +136,13 @@ function isMyTask() {
     
     return taskInstance.assignee === request.security.username;
 }
+function join (arr, delim) {
+    var returnStr = "",i=0;
+    for (i=0; i<arr.length; i++) {
+        returnStr = returnStr + arr[i] + delim;
+    }
+    return returnStr.replace(new RegExp(delim + "$"), '');
+}
 
 function isUserCandidateForTask(taskInstanceId) {
     
@@ -166,7 +173,7 @@ function isUserCandidateForTask(taskInstanceId) {
     
     userGroupCandidateTasksQueryParams = {
         "_queryId": "filtered-query",
-        "taskCandidateGroup": roles
+        "taskCandidateGroup": ((typeof roles === "string") ? roles : join(roles, ","))
     };    
     userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
     for (i = 0; i < userGroupCandidateTasks.length; i++) {
@@ -193,12 +200,13 @@ function isProcessOnUsersList(processDefinitionId) {
         processForUser,
         i;
     
-    for (i = 0; i < processesForUser.length; i++) {
-        processForUser = processesForUser[i];
+    for (i = 0; i < processesForUser.result.length; i++) {
+        processForUser = processesForUser.result[i];
         if (processDefinitionId === processForUser._id) {
             isProcessOneOfUserProcesses = true;
         }
     }
+
     return isProcessOneOfUserProcesses;
 }
 

@@ -64,8 +64,12 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
         return users[userId];
     },
     
-    contains = function(object, comaseparatedList) {
-        var items = comaseparatedList.split(','),i;
+    contains = function(object, items) {
+        var i;
+        if (typeof items === "string") {
+            items = items.split(',');
+        }
+        
         for (i = 0; i < items.length; i++) {
             if (items[i] === object) {
                 return true;

@@ -5,7 +5,7 @@
     "poolMaxSize" : 20,
     "queries" : {
         "get-by-field-value" : "select * FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value}",
-        "get-users-of-role" : "select userName FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$'",
+        "get-users-of-role" : "select userName FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$' OR ${role} IN roles",
         "query-all-ids" : "select _openidm_id from ${unquoted:_resource}",
         "query-all" : "select ${unquoted:fields} from ${unquoted:_resource}",
         "links-for-firstId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId}",
