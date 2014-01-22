@@ -140,11 +140,6 @@ public class PassthroughModule extends IDMServerAuthModule {
                 return AuthStatus.SEND_FAILURE;
             }
 
-            clientSubject.getPrincipals().add(new Principal() {
-                public String getName() {
-                    return username;
-                }
-            });
             boolean authenticated = passthroughAuthenticator.authenticate(username, password, securityContextMapper);
 
             if (authenticated) {
