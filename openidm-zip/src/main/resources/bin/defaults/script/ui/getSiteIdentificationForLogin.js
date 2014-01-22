@@ -75,6 +75,6 @@ if (request.method !== "query") {
         };
     }
     
-    return res;
+    return [res];
 
 }());

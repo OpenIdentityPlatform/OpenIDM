@@ -8,7 +8,7 @@
         "roles" : {
             "openidm-admin" : "Administrator",
             "openidm-authorized" : "User",
-            "tasks-manager" : "Tasks Manager"
+            "openidm-tasks-manager" : "Tasks Manager"
         },
         "siteImages" : [
             "images/passphrase/mail.png",

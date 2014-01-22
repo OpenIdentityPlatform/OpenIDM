@@ -115,6 +115,13 @@ if (request.method !== "query") {
                 return user.userName ? user.userName : user._id;
             }
         },
+        join = function (arr, delim) {
+            var returnStr = "",i=0;
+            for (i=0; i<arr.length; i++) {
+                returnStr = returnStr + arr[i] + delim;
+            }
+            return returnStr.replace(new RegExp(delim + "$"), '');
+        },        
         userId, 
         roles, 
         userName,
@@ -172,7 +179,7 @@ if (request.method !== "query") {
         
         userGroupCandidateTasksQueryParams = {
           "_queryId": "filtered-query",
-          "taskCandidateGroup": roles
+          "taskCandidateGroup": ((typeof roles === "string") ? roles : join(roles,","))
         };
         userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
         for (i = 0; i < userGroupCandidateTasks.length; i++) {
@@ -217,6 +224,6 @@ if (request.method !== "query") {
     }
     
     //return value
-    return view;
+    return [view];
 
 }());
