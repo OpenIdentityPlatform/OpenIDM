@@ -210,7 +210,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
          * {@inheritDoc}
          */
         protected InternalServerContext(Context parent) {
-            super(CONTEXT_NAME, parent);
+            super(parent);
         }
 
         /**
@@ -218,6 +218,15 @@ public class JsonResourceRouterService implements ConnectionFactory {
          */
         protected InternalServerContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
             super(savedContext, config);
+        }
+
+        /**
+         * Get this Context's {@link ContextName}.
+         *
+         * @return this object's ContextName
+         */
+        public ContextName getContextName() {
+            return CONTEXT_NAME;
         }
 
         /**
