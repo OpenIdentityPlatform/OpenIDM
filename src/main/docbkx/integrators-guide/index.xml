@@ -20,24 +20,24 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <book xml:id='integrators-guide'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM <?eval ${docTargetVersion}?> Integrator's Guide</title>
+  <title>OpenIDM ${docTargetVersion} Integrator's Guide</title>
   <abstract>
-   <para>Guide to configurating and integrating OpenIDM into identity
+   <para>Guide to configuring and integrating OpenIDM into identity
    management solutions. The OpenIDM project offers flexible, open source
    services for automating management of the identity life cycle.</para>
   </abstract>
   <copyright>
-   <year>2011-2013</year>
+   <year>2011-2014</year>
    <holder>ForgeRock AS</holder>
   </copyright>
   <authorgroup>
@@ -75,7 +75,17 @@
     <personname>
      <firstname>Lana</firstname><surname>Frost</surname>
     </personname>
-   </author>   
+   </author>
+   <author>
+    <personname>
+     <firstname>Michael</firstname><surname>Jang</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Daly</firstname><surname>Chikhaoui</surname>
+    </personname>
+   </author>
   </authorgroup>
   <xinclude:include href="../legal.xml" />
   <date><?dbtimestamp format="B d, Y"?></date>
