@@ -27,6 +27,7 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.PersistenceConfig;
@@ -39,7 +40,7 @@ import org.forgerock.json.resource.PersistenceConfig;
  */
 public class TriggerContext extends ServerContext {
 
-    private static final String CONTEXT_NAME = "trigger";
+    private static final ContextName CONTEXT_NAME = ContextName.valueOf("trigger");
 
     // persisted attribute name
     private static final String ATTR_TRIGGER_SOURCE = "trigger-source";
@@ -51,7 +52,7 @@ public class TriggerContext extends ServerContext {
      * @param trigger the trigger source
      */
     public TriggerContext(final Context parent, final String trigger) {
-        super(CONTEXT_NAME, checkNotNull(parent, "Cannot instantiate TriggerContext with null parent Context"));
+        super(checkNotNull(parent, "Cannot instantiate TriggerContext with null parent Context"));
         data.put(ATTR_TRIGGER_SOURCE, trigger);
     }
 
@@ -69,6 +70,15 @@ public class TriggerContext extends ServerContext {
     public TriggerContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
+    }
+
+    /**
+     * Get this Context's {@link ContextName}.
+     *
+     * @return this object's ContextName
+     */
+    public ContextName getContextName() {
+        return CONTEXT_NAME;
     }
 
     /**
