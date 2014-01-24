@@ -1,0 +1,50 @@
+{
+    "mappings" : [
+        {
+            "name" : "testMapping",
+            "source" : "managed/user",
+            "sourceCondition" : {
+                "equalsKey" : "foo",
+                "includesKey" : "1",
+                "json/pointer/key" : "foo"
+            },
+            "target" : "system/ldap/account",
+            
+            "properties" : [],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}
