@@ -372,10 +372,10 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             // old, 2.1.x, deprecated script object bindings
             script.put("request", ScriptUtil.getRequestMap(request, context));
             script.put("_context", ScriptUtil.getLazyContext(context));
-            script.put("context", ScriptUtil.getContextMap(context));
+            script.put("context", context);
         } else {
             script.put("request", request);
-            script.put("context", ScriptUtil.getContextMap(context));
+            script.put("context", context);
         }
 
         return script;
