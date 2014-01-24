@@ -128,18 +128,4 @@ public class ScriptUtil {
         });
     }
 
-    public static Map<String, Object> getContextMap(final ServerContext context) {
-        final Map<String,Object> contextMap = new HashMap<String, Object>();
-        contextMap.put("current", context);
-        if (context.containsContext(HttpContext.class)) {
-            contextMap.put("http", context.asContext(HttpContext.class));
-        }
-        if (context.containsContext(SecurityContext.class)) {
-            contextMap.put("security", context.asContext(SecurityContext.class));
-        }
-        if (context.getParent() != null) {
-            contextMap.put("parent", context.getParent());
-        }
-        return contextMap;
-    }
 }
