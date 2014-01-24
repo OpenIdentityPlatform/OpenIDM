@@ -55,7 +55,6 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        //a = new AnonymousClass(context);
         routerRegistry = new RouterRegistryImpl(context);
         Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
         properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
@@ -75,7 +74,6 @@ public class Activator implements BundleActivator {
 
         final Connection connection = Resources.newInternalConnection(routerRegistry.getInternalRouter());
 
-        // TODO move this to core when it's cleaned
         persistenceConfigRegistration =
                 context.registerService(PersistenceConfig.class, PersistenceConfig.builder()
                         .connectionProvider(new ConnectionProvider() {
@@ -91,7 +89,6 @@ public class Activator implements BundleActivator {
                                 return "DEFAULT";
                             }
                         }).classLoader(this.getClass().getClassLoader()).build(), properties);
-        // TODO Use BundleDelegatingClassLoader or WireAdmin from OSGi 4.3
     }
 
     @Override
