@@ -536,36 +536,24 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     @Override
     public void createInstance(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
-        // public void create(String id, Map<String, Object> object) throws
-        // ResourceException {
-        logger.debug("Create name={} id={}", name, request.getNewResourceId());
+        String id = request.getNewResourceId();
+        JsonValue content = request.getContent();
+        
+        // Check if the new id is specified in content, and use it if it is
+        if (!content.get(Resource.FIELD_CONTENT_ID).isNull()) {
+            id = content.get(Resource.FIELD_CONTENT_ID).asString();
+        }
+        logger.debug("Create name={} id={}", name, id);
 
         try {
-
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(request.getContent());
             execScript(context, "onCreate", onCreate, value);
             // includes per-property encryption
             onStore(context, value);
 
-            // Map<String, String> uriTemplateVariables =
-            // ContextUtil.getUriTemplateVariables(context);
-
-            // String id1 = null != uriTemplateVariables ?
-            // uriTemplateVariables.get("id") : null;
-            // String id2 = request.getNewResourceId();
-            // String id3 = request.getResourceName();
-
-            // if (_id.isString()) {
-            // id = _id.asString(); // override requested ID with one specified
-            // in object
-            // }
-            // if (id == null) { // default is to assign a UUID identifier
-            // id = UUID.randomUUID().toString();
-            // jv.put("_id", id);
-            // }
-
             CreateRequest createRequest = Requests.copyOfCreateRequest(request);
+            createRequest.setNewResourceId(id);
             createRequest.setContent(value);
             createRequest.setResourceName(repoId(null));
 
