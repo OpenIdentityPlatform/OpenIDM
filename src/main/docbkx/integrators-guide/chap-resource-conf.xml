@@ -1721,7 +1721,7 @@ org.identityconnectors.framework.server.Main -run -properties
        <para>If you would like the JCS to run as a Windows service, enter the following
        command.
        </para>
-       <screen>./ConnecorServer.bat /install (for uninstalling use /uninstall )</screen>
+       <screen>./ConnectorServer.bat /install (for uninstalling use /uninstall )</screen>
        <note>
         <para>If you install JCS as a Windows service you can start/stop it by 
         Microsoft's Service Console (<literal>Start</literal>, type <literal>Service</literal>,
