@@ -40,7 +40,6 @@ import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ContextName;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.FutureResult;
@@ -204,7 +203,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
 
     static class InternalServerContext extends ServerContext implements ClientContext {
         /** the client-friendly name of this context */
-        private static final ContextName CONTEXT_NAME = ContextName.valueOf("internal-server");
+        private static final String CONTEXT_NAME = "internal-server";
 
         /**
          * {@inheritDoc}
@@ -221,11 +220,11 @@ public class JsonResourceRouterService implements ConnectionFactory {
         }
 
         /**
-         * Get this Context's {@link ContextName}.
+         * Get this Context's name
          *
-         * @return this object's ContextName
+         * @return this object's name
          */
-        public ContextName getContextName() {
+        public String getContextName() {
             return CONTEXT_NAME;
         }
 
@@ -240,6 +239,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
         public boolean hasProtocol(Protocol protocol) {
             return INTERNAL_PROTOCOL.equals(protocol);
         }
+
     }
 
 }
