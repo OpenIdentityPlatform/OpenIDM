@@ -240,6 +240,13 @@ public class JsonResourceRouterService implements ConnectionFactory {
             return INTERNAL_PROTOCOL.equals(protocol);
         }
 
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Protocol getProtocol() {
+            return INTERNAL_PROTOCOL;
+        }
     }
 
 }
