@@ -413,22 +413,22 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-common</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-groovy</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-javascript</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-slf4j</artifactId>
-                <version>1.4.1-SNAPSHOT</version>
+                <version>1.4.1</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
