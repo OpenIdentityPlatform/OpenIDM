@@ -386,7 +386,7 @@ class ObjectMapping  {
             throws SynchronizationException {
         try {
             Map<String, Object> result = new HashMap<String, Object>(1);
-            final Collection<Object> list = new HashSet<Object>();
+            final Collection<Object> list = new ArrayList<Object>();
             result.put(QueryResult.FIELD_RESULT, list);
 
             QueryRequest r = Requests.newQueryRequest(targetObjectSet);
