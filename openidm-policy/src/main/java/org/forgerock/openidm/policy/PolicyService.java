@@ -46,7 +46,6 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -167,35 +166,16 @@ public class PolicyService extends AbstractScriptedService {
 			}
         }
 
-        try {
-        	JsonValue req = getRequestMap(request.getResourceName(), "action");
-        	req.add("_isDirectHttp", context.containsContext(org.forgerock.json.resource.servlet.HttpContext.class));
-        	req.add("value", request.getContent().getObject());
-        	req.add("action", request.getAction());
-        	handler.put("request", req.getObject());
-        	handler.put("resources", configuration.get("resources").getObject());
-        } catch (Throwable e) {
-            throw new InternalErrorException("Error setting request parameters", e);
-        }
+        handler.put("request", request);
+        handler.put("resources", configuration.get("resources").getObject());
     }
     
     @Override
     public void handleRead(final ServerContext context, final ReadRequest request,
             final Bindings handler) throws ResourceException {
     	super.handleRead(context, request, handler);
-    	try {
-    		JsonValue req = getRequestMap(request.getResourceName(), "read");
-        	handler.put("request", req.getObject());
-        	handler.put("resources", configuration.get("resources").getObject());
-        } catch (Throwable e) {
-            throw new InternalErrorException("Error setting request parameters", e);
-        }
-    }
-    
-    private JsonValue getRequestMap(String resourceName, String method) {
-    	JsonValue req = new JsonValue(new HashMap<String, Object>());
-    	req.add("id", resourceName);
-    	req.add("method", method);
-    	return req;
+
+        handler.put("request", request);
+        handler.put("resources", configuration.get("resources").getObject());
     }
 }

@@ -25,14 +25,14 @@
 var params =  {},
     result,
     enforce;
-params._actionId = "validateObject";
+//params._actionId = "validateObject";
 params._caller = "filterEnforcer";
 
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
-if (request.id.indexOf("policy/") !== 0 && enforce !== "false") {
-	
-	result = openidm.action("policy/" + request.id, params, request.value);
+if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
+    var content = (request.type === 'UPDATE') ? request.newContent : request.content;
+    result = openidm.action("policy/" + request.resourceName, "validateObject", params, content);
 
 	if (!result.result) {
 		throw {

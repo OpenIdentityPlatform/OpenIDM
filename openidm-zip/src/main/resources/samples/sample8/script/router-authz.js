@@ -25,10 +25,10 @@ function contains(a, o) {
 function allow() {
     var roles;
     
-    if (typeof(request.parent) === 'undefined' || request.parent.type !== 'http') {
+    if (context.caller !== 'http') {
         return true;
     }
-    roles = request.parent.security['openidm-roles'];
+    roles = context.security.roles;
     if (contains(roles, 'openidm-admin')) {
         return true;
     } else if (allowCert && contains(roles, 'openidm-cert')) {
