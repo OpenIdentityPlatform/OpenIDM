@@ -31,8 +31,7 @@ params._caller = "filterEnforcer";
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
 if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
-    var content = (request.type === 'UPDATE') ? request.newContent : request.content;
-    result = openidm.action("policy/" + request.resourceName, "validateObject", params, content);
+    result = openidm.action("policy/" + request.resourceName, "validateObject", params, request.content);
 
 	if (!result.result) {
 		throw {

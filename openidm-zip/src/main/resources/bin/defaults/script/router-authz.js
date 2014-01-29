@@ -266,17 +266,17 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
             }
         }
     } else if (request.type === "UPDATE") {
-        if (!request.newContent) {
+        if (!request.content) {
             return true;
         }
         currentUser = openidm.read(request.resourceName);
         if (!currentUser) { // this would be odd, but just in case
             return false;
         }
-        for (i in request.newContent) {
+        for (i in request.content) {
             // if the new value does not match the current value, then they must be updating it
             // if the field they are attempting to update isn't allowed for them, then reject request.
-            if (!deepCompare(currentUser[i], request.newContent[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
+            if (!deepCompare(currentUser[i], request.content[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
             }
         }
