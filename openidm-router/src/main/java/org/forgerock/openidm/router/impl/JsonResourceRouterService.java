@@ -34,27 +34,17 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.AbstractAsynchronousConnection;
-import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.FutureResult;
-import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PersistenceConfig;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import static org.forgerock.openidm.util.ContextUtil.INTERNAL_PROTOCOL;
 
@@ -111,7 +101,8 @@ public class JsonResourceRouterService implements ConnectionFactory {
         logger.info("Reconciliation service deactivated.");
     }
 
-    // ----- Implementation of ConnectionFactory
+    // ----- Implementation of ConnectionFactory - delegate to this object's internal ConnectionFactory
+    // which decorates the router ConnectionFactory
 
     @Override
     public Connection getConnection() throws ResourceException {
@@ -127,7 +118,6 @@ public class JsonResourceRouterService implements ConnectionFactory {
         internal.close();
     }
 
-
     private ConnectionFactory newInternalConnectionFactory(final ConnectionFactory connectionFactory) {
         return new ConnectionFactory() {
             @Override
@@ -137,67 +127,26 @@ public class JsonResourceRouterService implements ConnectionFactory {
 
             @Override
             public Connection getConnection() throws ResourceException {
-                final Connection connection = connectionFactory.getConnection();
-                return new AbstractAsynchronousConnection() {
-                    private Context getContext(Context context) {
+                return new AbstractConnectionWrapper<Connection>(connectionFactory.getConnection()) {
+                    @Override
+                    protected Context transform(Context context) {
                         return new InternalServerContext(context);
-                    }
-
-                    @Override
-                    public FutureResult<JsonValue> actionAsync(Context context, ActionRequest request, ResultHandler<? super JsonValue> handler) {
-                        return connection.actionAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public void close() {
-                        connection.close();
-                    }
-
-                    @Override
-                    public FutureResult<Resource> createAsync(Context context, CreateRequest request, ResultHandler<? super Resource> handler) {
-                        return connection.createAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public FutureResult<Resource> deleteAsync(Context context, DeleteRequest request, ResultHandler<? super Resource> handler) {
-                        return connection.deleteAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public boolean isClosed() {
-                        return connection.isClosed();
-                    }
-
-                    @Override
-                    public boolean isValid() {
-                        return connection.isValid();
-                    }
-
-                    @Override
-                    public FutureResult<Resource> patchAsync(Context context, PatchRequest request, ResultHandler<? super Resource> handler) {
-                        return connection.patchAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public FutureResult<QueryResult> queryAsync(Context context, QueryRequest request, QueryResultHandler handler) {
-                        return connection.queryAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public FutureResult<Resource> readAsync(Context context, ReadRequest request, ResultHandler<? super Resource> handler) {
-                        return connection.readAsync(getContext(context), request, handler);
-                    }
-
-                    @Override
-                    public FutureResult<Resource> updateAsync(Context context, UpdateRequest request, ResultHandler<? super Resource> handler) {
-                        return connection.updateAsync(getContext(context), request, handler);
                     }
                 };
             }
 
             @Override
-            public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
-                return connectionFactory.getConnectionAsync(handler);
+            public FutureResult<Connection> getConnectionAsync(final ResultHandler<? super Connection> handler) {
+                try {
+                    final Connection connection = getConnection();
+                    final FutureResult<Connection> future = Resources.newCompletedFutureResult(connection);
+                    if (handler != null) {
+                        handler.handleResult(connection);
+                    }
+                    return future;
+                } catch (ResourceException e) {
+                    throw new RuntimeException("Can't obtain connection", e);
+                }
             }
         };
     }
