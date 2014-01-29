@@ -728,11 +728,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     ActionRequest policyAction = Requests.newActionRequest(
                             "/policy" + managedId(resourceName), "validateObject");
                     policyAction.setContent(newValue);
-                    if (ContextUtil.isExternal(context)) {
-                        // ObjectSetContext.get().add("_isDirectHttp", true);
-                        // ??  or does PolicyService already do this?
-                        policyAction.setAdditionalActionParameter("_isDirectHttp", "true");
-                    }
 
                     // JsonValue result = new JsonValue(cryptoService.getRouter().action("policy/"+ managedId(id), params.asMap()));
                     JsonValue result = connectionFactory.getConnection().action(context, policyAction);
