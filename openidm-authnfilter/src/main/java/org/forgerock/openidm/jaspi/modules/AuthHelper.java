@@ -100,7 +100,9 @@ public class AuthHelper {
         try {
             UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper);
             if (userInfo != null && userInfo.checkCredential(password)) {
-                securityContextMapper.setRoles(Collections.unmodifiableList(userInfo.getRoleNames()));
+                if (securityContextMapper != null) {
+                    securityContextMapper.setRoles(Collections.unmodifiableList(userInfo.getRoleNames()));
+                }
                 return true;
             } else {
                 logger.debug("Authentication failed for {} due to invalid credentials", username);
@@ -182,7 +184,10 @@ public class AuthHelper {
                 }
             }
 
-            securityContextMapper.setUserId(retrId);  // The internal user id can be different than the login user name
+            if (securityContextMapper != null) {
+                // The internal user id can be different than the login user name
+                securityContextMapper.setUserId(retrId);
+            }
             if (retrId == null) {
                 logger.warn("Query for credentials did not contain expected result property defining the user id");
             } else if (retrCred == null && retrCredPropName == null) {

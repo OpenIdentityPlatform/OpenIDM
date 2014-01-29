@@ -190,6 +190,7 @@ public class AuthFilter implements HttpServletContextFactory, SingletonResourceP
                         //TODO Handle message
                         handler.handleError(new ForbiddenException("Reauthentication failed", new AuthException(authcid)));
                     }
+                    handler.handleResult(new JsonValue(null));
                 }
             } else {
                 handler.handleError(new BadRequestException("Action " + request.getAction()
