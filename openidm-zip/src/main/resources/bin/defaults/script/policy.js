@@ -124,11 +124,10 @@ var policyConfig = {
 policyImpl = (function (){
 
     // internal-use utility function
-    var getSecurityContext,
-        checkExceptRoles = function (exceptRoles) {
+    var checkExceptRoles = function (exceptRoles) {
             var i, j, roles, role;
-            if (security !== null) {
-                roles = security["roles"];
+            if (context.security.authorizationId !== null) {
+                roles = context.security.authorizationId.roles;
                 if (exceptRoles) {
                     for (i = 0; i < exceptRoles.length; i++) {
                         role = exceptRoles[i];
@@ -145,16 +144,6 @@ policyImpl = (function (){
             return false;
         },
         policyFunctions = {};
-
-    getSecurityContext = function(ctxt) {
-        if (typeof(ctxt) === 'undefined' || ctxt === null) {
-            return null;
-        } else if (typeof(ctxt.security) !== 'undefined') {
-            return ctxt.security;
-        } else {
-            return getSecurityContext(ctxt.parent);
-        }
-    };
 
     policyFunctions.required = function(fullObject, value, params, propName) {
         if (value === undefined) {
@@ -191,7 +180,7 @@ policyImpl = (function (){
                 },
             existing,requestId,requestBaseArray;
     
-            requestBaseArray = request.id.split("/");
+            requestBaseArray = request.resourceName.split("/");
             if (requestBaseArray.length === 3) {
                 requestId = requestBaseArray.pop();
             }
@@ -214,7 +203,7 @@ policyImpl = (function (){
         
         if (value && value.length)
         {
-            requestBaseArray = request.id.split("/");
+            requestBaseArray = request.resourceName.split("/");
             if (requestBaseArray.length === 3) {
                 requestId = requestBaseArray.pop();
             }
@@ -318,8 +307,8 @@ policyImpl = (function (){
             fullObject_server = {},
             i;
         
-        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && !request.id.match('/$')) {
-            fullObject_server = openidm.read(request.id);
+        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.resourceName && !request.resourceName.match('/$')) {
+            fullObject_server = openidm.read(request.resourceName);
         }
         
         if (value && typeof(value) === "string" && value.length) {
@@ -362,14 +351,14 @@ policyImpl = (function (){
             return [];
         }
         
-        var isHttp = request._isDirectHttp,
+        var isHttp = (context.caller === 'http'),
             actionParams,response,currentObject;
         
         if (isHttp === "true" || isHttp === true) {
             
-            if (request.id && !request.id.match('/$')) { 
+            if (request.resourceName && !request.resourceName.match('/$')) { 
                 // only do a read if there is no id specified, in the case of new records 
-                currentObject = openidm.read(request.id);
+                currentObject = openidm.read(request.resourceName);
                 if (openidm.isEncrypted(currentObject[propName])) {
                     currentObject[propName] = openidm.decrypt(currentObject[propName]);
                 }
@@ -662,7 +651,7 @@ policyProcessor = (function (policyConfig,policyImpl){
     processRequest =  function() {
         var returnObject = {},
             resource,
-            method = request.method,
+            method = request.type,
             compArray,
             rsrc,
             i,
@@ -675,19 +664,19 @@ policyProcessor = (function (policyConfig,policyImpl){
             props,
             prop;
         
-        if (request.id !== null && request.id !== undefined) {
+        if (request.resourceName !== null && request.resourceName !== undefined) {
             // Get the policy configuration for the specified resource
-            resource = getResource(resources, request.id);
+            resource = getResource(resources, request.resourceName);
             if (resource === null ) {
                 resource = {};
-                resource.resource = request.id;
+                resource.resource = request.resourceName;
                 resource.properties = [];
             }
             // Update the policy configuration with any resource specific
-            updateResourceConfig(resource, request.id);
+            updateResourceConfig(resource, request.resourceName);
         }
-        if (method === "read") {
-            if (request.id === null || request.id === "") {
+        if (method === "READ") {
+            if (request.resourceName === null || request.resourceName === "") {
                 compArray = [];
                 for (i = 0; i < resources.length; i++) {
                     rsrc = resources[i];
@@ -698,11 +687,11 @@ policyProcessor = (function (policyConfig,policyImpl){
             } else {
                 returnObject = getResourceWithPolicyRequirements(resource);
             }
-        } else if (method === "action") {
+        } else if (method === "ACTION") {
             action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};
-            if (request.id === null) {
+            if (request.resourceName === null) {
                 throw "No resource specified";
             }
             if (resource === null) {
@@ -710,10 +699,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                 returnObject.result = true;
                 returnObject.failedPolicyRequirements = failedPolicyRequirements;
             } else {
-                fullObject = request.value;
-                if (fullObject === undefined) {
-                    fullObject = request.params.value;
-                }
+                fullObject = request.content;
                 // Perform the validation
                 if (action === "validateObject") {
                     for (i = 0; i < resource.properties.length; i++) {
@@ -724,7 +710,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                                 getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
-                    props = request.value;
+                    props = request.content;
                     for (propName in props) {
                         prop = getPropertyConfig(resource, propName);
                         if (prop !== null) {
