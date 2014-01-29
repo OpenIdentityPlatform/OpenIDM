@@ -368,7 +368,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     private Script populateScript(final ScriptEntry scriptEntry, final ServerContext context, final Request request) {
         final Script script = scriptEntry.getScript(context);
 
-        if (scriptEntry.getName().isOpenIDM21RequestBinding()) {
+        if (ScriptUtil.REQUEST_BINDING_2_1.equals(scriptEntry.getName().getRequestBinding())) {
             // old, 2.1.x, deprecated script object bindings
             script.put("request", ScriptUtil.getRequestMap(request, context));
             script.put("_context", ScriptUtil.getLazyContext(context));

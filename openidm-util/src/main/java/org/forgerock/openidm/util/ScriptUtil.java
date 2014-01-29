@@ -39,6 +39,8 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
 public class ScriptUtil {
+    // a ScriptName will have this request-binding if it wishes OpenIDM 2.1.x request bindings
+    public static final String REQUEST_BINDING_2_1 = "OEPNIDM-2.1";
 
     public static Map<String, Object> getRequestMap(Request request, ServerContext context) {
         Map<String, Object> requestMap = new HashMap<String, Object>();

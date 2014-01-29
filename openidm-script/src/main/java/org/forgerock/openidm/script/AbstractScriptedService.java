@@ -324,7 +324,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void handleRequest(final ServerContext context, final Request request,
             final Bindings bindings) {
-        if (scriptName.isOpenIDM21RequestBinding()) {
+        if (ScriptUtil.REQUEST_BINDING_2_1.equals(scriptName.getRequestBinding())) {
             SecurityContext securityContext = context.asContext(SecurityContext.class);
             bindings.put("security", securityContext.getAuthorizationId());
             bindings.put("request", ScriptUtil.getRequestMap(request, context));
