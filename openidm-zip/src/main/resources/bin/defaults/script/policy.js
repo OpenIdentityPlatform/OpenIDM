@@ -382,7 +382,7 @@ policyImpl = (function (){
                 actionParams = {
                     "_action": "reauthenticate"
                 };
-                response = openidm.action("authentication",  actionParams);
+                response = openidm.action("authentication", "reauthenticate", actionParams);
             } catch (error) {
                 return [ { "policyRequirement" : "REAUTH_REQUIRED" } ];
             }
