@@ -39,19 +39,15 @@ public class ActivitiResource implements RequestHandler {
     private Router subResources = new Router();
 
     public ActivitiResource(ProcessEngine engine, PersistenceConfig config) {
-        subResources.addRoute("/", new ProcessDefinitionResource(engine));
-        subResources.addRoute("/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
-        
-        resources.addRoute(RoutingMode.STARTS_WITH, "/processdefinition", subResources);
+        resources.addRoute("/processdefinition", new ProcessDefinitionResource(engine));
+        resources.addRoute("/processdefinition/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
         resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
         resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
     }
 
     public void setProcessEngine(ProcessEngine engine, PersistenceConfig config) {
-        subResources.addRoute("/", new ProcessDefinitionResource(engine));
-        subResources.addRoute("/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
-        
-        resources.addRoute(RoutingMode.STARTS_WITH, "/processdefinition", subResources);
+        resources.addRoute("/processdefinition", new ProcessDefinitionResource(engine));
+        resources.addRoute("/processdefinition/{procdefid}/taskdefinition", new TaskDefinitionResource(engine));
         resources.addRoute("/processinstance", new ProcessInstanceResource(engine, config));
         resources.addRoute("/taskinstance", new TaskInstanceResource(engine));
     }
