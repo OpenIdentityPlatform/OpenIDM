@@ -45,6 +45,7 @@ import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.serialization.compression.impl.ONothingCompression;
 import com.orientechnologies.orient.core.storage.OStorage;
 
 /**
@@ -82,6 +83,10 @@ public class DBHelper {
         ODatabaseDocumentTx setupDbConn = null;
         ODatabaseDocumentPool pool = null;
         try {
+            // Disable Snappy compression as it does not currently work inside
+            // OSGi containers. Need to do this here before the DB is created.
+            OGlobalConfiguration.STORAGE_COMPRESSION_METHOD.setValue(ONothingCompression.NAME);
+       
             if (setupDB) {
                 logger.debug("Check DB exists in expected state for pool {}", dbURL);
                 setupDbConn = checkDB(dbURL, user, password, completeConfig);
@@ -313,7 +318,7 @@ public class DBHelper {
         if (dbURL == null) {
             throw new InvalidException("dbURL is not set");
         }
-        return dbURL.startsWith("local:");
+        return dbURL.startsWith("local:") || dbURL.startsWith("plocal");
     }
 
     // TODO: Review the initialization mechanism
@@ -385,12 +390,12 @@ public class DBHelper {
             }
 
             // Determine a unique name to use for the index
-            // Naming pattern used is <class>|property1[|propertyN]*|Idx
+            // Naming pattern used is <class>!property1[!propertyN]*!Idx
             StringBuilder sb = new StringBuilder(orientClassName);
-            sb.append("|"); // Not using dot as is reserved for (simple index) naming convention
+            sb.append("!");
             for (String entry : propertyNames) {
                 sb.append(entry);
-                sb.append("|");
+                sb.append("!");
             }
             sb.append("Idx");
             indexName = sb.toString();

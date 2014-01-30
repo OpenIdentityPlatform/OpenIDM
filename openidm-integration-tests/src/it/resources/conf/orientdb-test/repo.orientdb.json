@@ -1,5 +1,5 @@
 {
-    "dbUrl" : "local:./target/testdb/openidm",
+    "dbUrl" : "plocal:./target/testdb/openidm",
     "user" : "admin",
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
