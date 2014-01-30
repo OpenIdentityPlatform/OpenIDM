@@ -216,7 +216,7 @@ public class DocumentUtil  {
         ODocument result = null;
         if (objModel != null) {
             if (docToPopulate == null) {
-                result = new ODocument(db, orientDocClass); 
+                result = db.newInstance(orientDocClass);
             } else {
                 result = docToPopulate;
                 if (!patch) {
