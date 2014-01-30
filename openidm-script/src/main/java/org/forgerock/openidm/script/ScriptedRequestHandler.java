@@ -52,6 +52,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.Scope;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.scope.Function;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
@@ -162,6 +163,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -184,6 +187,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -206,6 +211,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -228,6 +235,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -335,6 +344,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -377,6 +388,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -399,6 +412,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + _scriptEntry.getName()));
             }
+        } catch (ScriptThrownException e) {
+            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
