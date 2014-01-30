@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,15 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.router.impl;
-
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.script.ScriptException;
+package org.forgerock.openidm.servlet.internal;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,7 +30,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -67,78 +58,87 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.script.ScriptException;
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
 /**
- * Provides internal routing for a top-level object set.
+ * The ConnectionFactory responsible for providing Connections to routing requests initiated
+ * from an external request on the api servlet.
  *
- * @author Paul C. Bryan
- * @author aegloff
+ * @author brmiller
  */
-@Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.OPTIONAL,
-        metatype = true, configurationFactory = false, immediate = true)
+@Component(name = ServletConnectionFactory.PID, policy = ConfigurationPolicy.OPTIONAL,
+        configurationFactory = false, immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM internal JSON resource router"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/") })
-// @References({
-// @Reference(referenceInterface = Filter.class,
-// cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy =
-// ReferencePolicy.DYNAMIC,
-// target = "(org.forgerock.openidm.router=*)") })
-public class JsonResourceRouterService implements ConnectionFactory
-/* ,ConnectionProvider */{
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST Servlet Connection Factory"),
+})
+public class ServletConnectionFactory implements ConnectionFactory {
 
-    // Public Constants
     public static final String PID = "org.forgerock.openidm.router";
 
     /**
-     * Setup logging for the {@link JsonResourceRouterService}.
+     * Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}.
      */
-    private final static Logger logger = LoggerFactory.getLogger(JsonResourceRouterService.class);
+    private final static Logger logger = LoggerFactory.getLogger(ServletConnectionFactory.class);
 
-    /**
-     * Event name prefix for monitoring the router
-     */
-    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
+    // the created connection factory
+    protected ConnectionFactory connectionFactory;
 
-    private ConnectionFactory connectionFactory = null;
-
+    /** the Request Handler (Router) */
     @Reference(target = "(org.forgerock.openidm.router=*)")
     protected RequestHandler requestHandler = null;
 
-    void bindRequestHandler(final RequestHandler service) {
-        requestHandler = service;
-    }
-
-    void unbindRequestHandler(final RequestHandler service) {
-        requestHandler = null;
-    }
-
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scriptRegistry;
+    private ScriptRegistry scriptRegistry = null;
 
-    void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
+    @Activate
+    protected void activate(ComponentContext context) throws ServletException, NamespaceException {
+        logger.debug("Creating servlet router/connection factory");
+        EnhancedConfig config = JSONEnhancedConfig.newInstance();
+        String factoryPid = config.getConfigurationFactoryPid(context);
+        if (StringUtils.isNotBlank(factoryPid)) {
+            throw new IllegalArgumentException(
+                    "Factory configuration not allowed, must not have property: "
+                            + ServerConstants.CONFIG_FACTORY_PID);
+        }
+        try {
+            connectionFactory = Resources.newInternalConnectionFactory(
+                    init(config.getConfigurationAsJson(context), requestHandler));
+        } catch (Throwable t) {
+            logger.error("Failed to configure the Filtered Router service", t);
+        }
+
+        logger.info("Servlet ConnectionFactory created.");
     }
 
-    void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
+    @Deactivate
+    protected synchronized void deactivate(ComponentContext context) {
     }
 
     /**
-     * Initialize the router with configuration. Supports modifying router
-     * configuration.
+     * Initialize the router with configuration. Supports modifying router configuration.
+     *
+     * @param configuration the router configuration listing filters that are installed
+     * @param handler the request handler (router)
+     * @return the RequestHandler decorated with a FilterChain consisting of any filters that are configured
      */
     RequestHandler init(JsonValue configuration, final RequestHandler handler)
             throws ScriptException {
 
         List<Filter> filters = null;
 
-        // Chain chain = new Chain(router);
         for (JsonValue jv : configuration.get("filters").expect(List.class)) {
             // optional
             Filter filter = newFilter(jv);
@@ -157,62 +157,13 @@ public class JsonResourceRouterService implements ConnectionFactory
         }
     }
 
-    private ConnectionFactory internal = null;
-
-    @Activate
-    void activate(ComponentContext context) {
-        EnhancedConfig config = JSONEnhancedConfig.newInstance();
-
-        String factoryPid = config.getConfigurationFactoryPid(context);
-        if (StringUtils.isNotBlank(factoryPid)) {
-            throw new IllegalArgumentException(
-                    "Factory configuration not allowed, must not have property: "
-                            + ServerConstants.CONFIG_FACTORY_PID);
-        }
-
-        try {
-            connectionFactory =
-                    Resources.newInternalConnectionFactory(init(config
-                            .getConfigurationAsJson(context), requestHandler));
-        } catch (Throwable t) {
-            logger.error("Failed to configure the Filtered Router service", t);
-        }
-        logger.info("Reconciliation service activated.");
-    }
-
-    @Modified
-    void modified(ComponentContext context) {
-        activate(context);
-        logger.info("Reconciliation service modified.");
-    }
-
-    @Deactivate
-    void deactivate(ComponentContext context) {
-        logger.info("Reconciliation service deactivated.");
-    }
-
-    // ----- Implementation of ConnectionFactory
-
-    @Override
-    public Connection getConnection() throws ResourceException {
-        return connectionFactory.getConnection();
-    }
-
-    @Override
-    public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
-        return connectionFactory.getConnectionAsync(handler);
-    }
-    @Override
-    public void close() {
-        connectionFactory.close();
-    }
-
     /**
-     * TODO: Description.
+     * Create a Filter from the filter configuration.
      *
      * @param config
-     *            TODO.
-     * @throws JsonValueException
+     *            the configuration describing a single filter.
+     * @return a Filter
+     * @throws org.forgerock.json.fluent.JsonValueException
      *             TODO.
      */
     public Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
@@ -255,8 +206,8 @@ public class JsonResourceRouterService implements ConnectionFactory
         if (null == filterCondition) {
             return Filters.asFilter(new ScriptedFilter(onRequest, onResponse, onFailure));
         } else {
-            return Filters.conditionalFilter(filterCondition, Filters.asFilter(new ScriptedFilter(
-                    onRequest, onResponse, onFailure)));
+            return Filters.conditionalFilter(filterCondition, Filters.asFilter(
+                    new ScriptedFilter(onRequest, onResponse, onFailure)));
         }
     }
 
@@ -271,6 +222,22 @@ public class JsonResourceRouterService implements ConnectionFactory
 
         }
         return null;
+    }
+
+    // ----- Implementation of ConnectionFactory
+
+    @Override
+    public Connection getConnection() throws ResourceException {
+        return connectionFactory.getConnection();
+    }
+
+    @Override
+    public FutureResult<Connection> getConnectionAsync(ResultHandler<? super Connection> handler) {
+        return connectionFactory.getConnectionAsync(handler);
+    }
+    @Override
+    public void close() {
+        connectionFactory.close();
     }
 
 }

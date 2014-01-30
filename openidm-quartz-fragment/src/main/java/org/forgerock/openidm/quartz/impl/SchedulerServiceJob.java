@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -85,7 +85,7 @@ public class SchedulerServiceJob implements Job {
         security.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
         security.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
         security.put("invoke-log-level", ssc.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL));
-        return new ServerContext(new SecurityContext(new RootContext(), (String) ssc.get(ScheduledService.INVOKER_NAME), security), null);
+        return new ServerContext(new SecurityContext(new RootContext(), (String) ssc.get(ScheduledService.INVOKER_NAME), security));
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {

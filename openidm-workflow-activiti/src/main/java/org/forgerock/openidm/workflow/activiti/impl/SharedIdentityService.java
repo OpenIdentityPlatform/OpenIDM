@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -90,6 +90,7 @@ public class SharedIdentityService implements IdentityService {
     private RouteService repositoryRoute;
     private ServerContext serverContext;
     private CryptoService cryptoService;
+    private ConnectionFactory connectionFactory;
     
     public static final String USER_PATH = "managed/user/";
     public static final String GROUP_PATH = "managed/group/";
@@ -109,8 +110,12 @@ public class SharedIdentityService implements IdentityService {
         this.cryptoService = service;
     }
 
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
     private Connection getConnection() throws ResourceException {
-        return serverContext.getConnection();
+        return connectionFactory.getConnection();
     }
 
     public QueryResult query(QueryRequest request, QueryResultHandler handler) throws ResourceException {

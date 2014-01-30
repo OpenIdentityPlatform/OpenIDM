@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -70,6 +70,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -231,6 +232,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * </pre>
      */
     private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> systemOperations = null;
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
@@ -446,98 +451,98 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             if (exception instanceof AlreadyExistsException) {
                 logger.error("System object {} already exists", request.getResourceName(), exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ConflictException(exception));
             } else if (exception instanceof ConfigurationException) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new InternalServerErrorException(exception));
             } else if (exception instanceof ConnectionBrokenException) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ServiceUnavailableException(exception));
             } else if (exception instanceof ConnectionFailedException) {
                 logger.error("Connection failed during operation {} on system object: {}",
                         new Object[] { request.getRequestType().toString(), id}, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ServiceUnavailableException(exception));
             } else if (exception instanceof ConnectorIOException) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ServiceUnavailableException(exception));
             } else if (exception instanceof OperationTimeoutException) {
                 logger.error("Operation {} Timeout on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ServiceUnavailableException(exception));
             } else if (exception instanceof PasswordExpiredException) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ForbiddenException(exception));
             } else if (exception instanceof InvalidPasswordException) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, exception.getMessage(),
                         exception));
             } else if (exception instanceof UnknownUidException) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new NotFoundException("Not found " + request.getResourceName(),
                         exception).setDetail(new JsonValue(new HashMap<String, Object>())));
             } else if (exception instanceof InvalidCredentialException) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, exception.getMessage(),
                         exception));
             } else if (exception instanceof PermissionDeniedException) {
                 logger.error("Permission was denied on {} operation for system object: {}",
                         new Object[]{ request.getRequestType().toString(), id  }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new ForbiddenException(exception));
             } else if (exception instanceof ConnectorSecurityException) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new InternalServerErrorException(exception));
             } else if (exception instanceof ConnectorException) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new InternalServerErrorException(exception));
             } else if (exception instanceof ResourceException) {
                 // rethrow the the expected JsonResourceException
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError((ResourceException) exception);
             } else if (exception instanceof JsonValueException) {
                 logger.error("Operation {} failed with Exception on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Bad Request", null, before, after, Status.FAILURE);
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Bad Request", null, before, after, Status.FAILURE);
                 handler.handleError(new BadRequestException(exception));
             } else {
                 logger.error("Operation {} failed with Exception on system object: {}",
                         new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
+                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
                         " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
                 handler.handleError(new InternalServerErrorException(exception));
             }
@@ -1817,17 +1822,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
                                                     onUpdateRequest.setAdditionalActionParameter("id", id);
                                                     onUpdateRequest.setContent(new JsonValue(deltaObject));
-                                                    routerContext.getConnection().action(routerContext, onUpdateRequest);
+                                                    connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
-                                                    ActivityLog.log(routerContext, RequestType.ACTION, "sync-update", id, deltaObject, deltaObject, Status.SUCCESS);
+                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-update", id, deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
                                                     // previously
                                                     // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
                                                     onDeleteRequest.setAdditionalActionParameter("id", id);
-                                                    routerContext.getConnection().action(routerContext, onDeleteRequest);
-                                                    ActivityLog.log(routerContext, RequestType.ACTION, "sync-delete", id, null, null, Status.SUCCESS);
+                                                    connectionFactory.getConnection().action(routerContext, onDeleteRequest);
+                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-delete", id, null, null, Status.SUCCESS);
                                                     break;
                                             }
                                         } catch (Exception e) {

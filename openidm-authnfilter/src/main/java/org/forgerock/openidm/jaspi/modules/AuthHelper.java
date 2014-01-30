@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2013 ForgeRock Inc. All rights reserved.
+ * Copyright 2011-2014 ForgeRock Inc. All rights reserved.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -21,6 +21,7 @@ import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
@@ -47,6 +48,7 @@ public class AuthHelper {
     private static final Logger logger = LoggerFactory.getLogger(AuthHelper.class);
 
     private final CryptoService cryptoService;
+    private final ConnectionFactory connectionFactory;
     private final ServerContext context;
 
     private final String userIdProperty;
@@ -62,10 +64,11 @@ public class AuthHelper {
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public AuthHelper(CryptoService cryptoService, ServerContext context, String userIdProperty,
+    public AuthHelper(CryptoService cryptoService, ConnectionFactory connectionFactory, ServerContext context, String userIdProperty,
             String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
 
         this.cryptoService = cryptoService;
+        this.connectionFactory = connectionFactory;
         this.context = context;
 
         this.userIdProperty = userIdProperty;
@@ -126,7 +129,7 @@ public class AuthHelper {
         request.getAdditionalQueryParameters().put("username", username);
 
         Set<Resource> result = new HashSet<Resource>();
-        context.getConnection().query(context,request,result);
+        connectionFactory.getConnection().query(context,request,result);
 
         if (result.size() > 1) {
             logger.warn("Query to match user credentials found more than one matching user for {}", username);

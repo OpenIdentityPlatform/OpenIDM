@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -59,13 +59,6 @@
             <artifactId>openidm-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
--->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
@@ -106,7 +99,12 @@
             <scope>provided</scope>
         </dependency>
 -->
-        <!-- Provided OSGi Dependencies -->        <dependency>            <groupId>org.osgi</groupId>            <artifactId>org.osgi.core</artifactId>            <scope>provided</scope>        </dependency>
+        <!-- Provided OSGi Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
         <dependency>
             <groupId>org.apache.felix</groupId>

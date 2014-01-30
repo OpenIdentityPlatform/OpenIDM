@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -45,6 +45,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
@@ -99,6 +100,14 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private volatile ArrayList<ObjectMapping> mappings = null;
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
 
     @Reference
     Reconcile reconService;
@@ -251,7 +260,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      */
     @Deprecated
     private ServerContext newFauxContext(JsonValue mapping) throws ResourceException {
-        ServerContext context = new ServerContext("sync", routeService.createServerContext());
+        ServerContext context = new ServerContext(/*"sync",*/ routeService.createServerContext());
         return context;
     }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright © 2012 ForgeRock Inc. All rights reserved.
+ * Copyright © 2012-2014 ForgeRock Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -85,7 +85,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
             String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
             Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
-            variables.put(ActivitiConstants.OPENIDM_CONTEXT, ServerContext.saveToJson(context, persistenceConfig));
+            variables.put(ActivitiConstants.OPENIDM_CONTEXT, context.toJsonValue().getObject());
             ProcessInstance instance;
             if (processDefinitionId == null) {
                 instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -19,6 +19,7 @@ package org.forgerock.openidm.jaspi.modules;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -40,6 +41,7 @@ public class PassthroughAuthenticator {
 
     final static Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
 
+    private final ConnectionFactory connectionFactory;
     private final ServerContext context;
     private final String passThroughAuth;
     private final String userRolesProperty;
@@ -52,7 +54,8 @@ public class PassthroughAuthenticator {
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public PassthroughAuthenticator(ServerContext context, String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
+    public PassthroughAuthenticator(ConnectionFactory connectionFactory, ServerContext context, String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
+        this.connectionFactory = connectionFactory;
         this.context = context;
         this.passThroughAuth = passThroughAuth;
         this.userRolesProperty = userRolesProperty;
@@ -76,7 +79,7 @@ public class PassthroughAuthenticator {
             actionRequest.setAdditionalActionParameter("username", username);
             actionRequest.setAdditionalActionParameter("password", password);
             try {
-                JsonValue result = context.getConnection().action(context, actionRequest);
+                JsonValue result = connectionFactory.getConnection().action(context, actionRequest);
                 boolean authenticated = result.isDefined(Resource.FIELD_CONTENT_ID);
                 if (authenticated) {
                     // This is what I was talking about. We don't have a way to

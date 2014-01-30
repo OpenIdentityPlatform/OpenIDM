@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.JaspiRuntimeFilter;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
@@ -199,6 +200,18 @@ public class OSGiAuthnFilterBuilder {
      */
     public static CryptoService getCryptoService() {
         return instance.cryptoService;
+    }
+
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    /**
+     * Returns the ConnectionFactory instance
+     *
+     * @return The ConnectionFactory instance
+     */
+    public static ConnectionFactory getConnectionFactory() {
+        return instance.connectionFactory;
     }
 
     @Reference(

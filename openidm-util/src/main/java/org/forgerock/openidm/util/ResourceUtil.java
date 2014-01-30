@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -59,34 +59,6 @@ public class ResourceUtil {
      */
     private ResourceUtil() {
         super();
-    }
-
-    /**
-     * Create a default internal {@link SecurityContext} newBuilder used for
-     * internal trusted calls.
-     * <p/>
-     *
-     * If the request is initiated in a non-authenticated location (
-     * {@code BundleActivator}, {@code Scheduler}, {@code ConfigurationAdmin})
-     * this contest should be used. The AUTHORIZATION module grants full access
-     * to this context.
-     *
-     * @param bundleContext
-     *            the context of the OSGi Bundle.
-     * @return new {@code SecurityContext} newBuilder.
-     */
-    public static SecurityContext createInternalSecurityContext(final BundleContext bundleContext) {
-
-        // TODO Finalise the default system context
-        Map<String, Object> authzid = new HashMap<String, Object>();
-        authzid.put(SecurityContext.AUTHZID_COMPONENT, bundleContext.getBundle().getSymbolicName());
-        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
-        authzid.put(SecurityContext.AUTHZID_DN, "system");
-        authzid.put(SecurityContext.AUTHZID_REALM, "system");
-        authzid.put(SecurityContext.AUTHZID_ID, "system");
-        return new SecurityContext(new RootContext(), bundleContext
-                .getProperty(Constants.BUNDLE_SYMBOLICNAME), authzid);
-
     }
 
     /**
