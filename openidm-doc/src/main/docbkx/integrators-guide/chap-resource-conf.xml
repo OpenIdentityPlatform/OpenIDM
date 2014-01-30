@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-resource-conf'
@@ -2034,7 +2034,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
           occurred. There should be no error message when OpenIDM is restarted. To check
           run the following.
           </para>
-          <screen>src list</screen>
+          <screen>scr list</screen>
           <para>This returns a list of installed modules, including the following:
           </para>
           <screen>[  17] [active       ] org.forgerock.openidm.provisioner.openicf</screen>
@@ -2272,7 +2272,7 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
           <para>Restart OpenIDM to verify that all of the configuration changes have
           occurred. There should be no error message when OpenIDM is restarted.
           To check, run the following command:</para>
-          <screen>src list</screen>
+          <screen>scr list</screen>
           <para>This returns a list of installed modules, including the following:
           </para>
           <screen>[  17] [active       ] org.forgerock.openidm.provisioner.openicf </screen>
