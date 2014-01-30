@@ -410,7 +410,7 @@
                                 <artifactItem>
                                     <groupId>com.orientechnologies</groupId>
                                     <artifactId>orientdb</artifactId>
-                                    <version>${orientdb.version}</version>
+                                    <version>${orientdb.studio.version}</version>
                                     <type>zip</type>
                                     <classifier>distribution</classifier>
                                     <overWrite>false</overWrite>

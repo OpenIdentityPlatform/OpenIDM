@@ -337,7 +337,7 @@ public class DocumentUtilTest {
         map.put("somedate", new Date());
         
         // An existing document to get updated from the map
-        ODocument existingDoc = new ODocument(db, orientDocClass);
+        ODocument existingDoc = db.newInstance(orientDocClass);
         existingDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, "client-assigned-id");
         // firstname and lastname deliberately not in the existing doc
         existingDoc.field("fieldtoberemoved", "ABC");
