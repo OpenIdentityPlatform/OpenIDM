@@ -143,25 +143,23 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final ResultHandler<JsonValue> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleAction(context, request, script.getBindings());
-                Object result = script.eval();
-                if (null == result) {
-                    handler.handleResult(new JsonValue(null));
-                } else if (result instanceof JsonValue) {
-                    handler.handleResult((JsonValue) result);
-                } else if (result instanceof Map) {
-                    handler.handleResult(new JsonValue((result)));
-                } else {
-                    JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
-                    resource.put("result", result);
-                    handler.handleResult(resource);
-                }
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
+            }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleAction(context, request, script.getBindings());
+            Object result = script.eval();
+            if (null == result) {
+                handler.handleResult(new JsonValue(null));
+            } else if (result instanceof JsonValue) {
+                handler.handleResult((JsonValue) result);
+            } else if (result instanceof Map) {
+                handler.handleResult(new JsonValue((result)));
             } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+                JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
+                resource.put("result", result);
+                handler.handleResult(resource);
             }
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
@@ -178,15 +176,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleCreate(context, request, script.getBindings());
-                evaluate(request, handler, script);
-            } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
             }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleCreate(context, request, script.getBindings());
+            evaluate(request, handler, script);
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
@@ -202,15 +198,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleDelete(context, request, script.getBindings());
-                evaluate(request, handler, script);
-            } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
             }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleDelete(context, request, script.getBindings());
+            evaluate(request, handler, script);
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
@@ -226,15 +220,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handlePatch(context, request, script.getBindings());
-                evaluate(request, handler, script);
-            } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
             }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handlePatch(context, request, script.getBindings());
+            evaluate(request, handler, script);
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
@@ -255,94 +247,92 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             final QueryResultHandler handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleQuery(context, request, script.getBindings());
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
+            }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleQuery(context, request, script.getBindings());
 
-                final Function<Void> queryCallback = new Function<Void>() {
-                    @Override
-                    public Void call(Parameter scope, Function<?> callback, Object... arguments)
-                            throws ResourceException, NoSuchMethodException {
-                        if (arguments.length == 3 && null != arguments[2]) {
-                            if (arguments[2] instanceof Map) {
+            final Function<Void> queryCallback = new Function<Void>() {
+                                             @Override
+                                             public Void call(Parameter scope, Function<?> callback, Object... arguments)
+                                             throws ResourceException, NoSuchMethodException {
+                    if (arguments.length == 3 && null != arguments[2]) {
+                        if (arguments[2] instanceof Map) {
 
-                            }
-                            if (arguments[2] instanceof JsonValue) {
-
-                            } else {
-                                throw new NoSuchMethodException(FunctionFactory
-                                        .getNoSuchMethodMessage("callback", arguments));
-                            }
-                        } else if (arguments.length >= 2 && null != arguments[1]) {
-                            if (arguments[1] instanceof Map) {
-
-                            }
-                            if (arguments[1] instanceof JsonValue) {
-
-                            } else {
-                                throw new NoSuchMethodException(FunctionFactory
-                                        .getNoSuchMethodMessage("callback", arguments));
-                            }
-                        } else if (arguments.length >= 1 && null != arguments[0]) {
-                            if (arguments[0] instanceof Map) {
-
-                            }
-                            if (arguments[0] instanceof JsonValue) {
-
-                            } else {
-                                throw new NoSuchMethodException(FunctionFactory
-                                        .getNoSuchMethodMessage("callback", arguments));
-                            }
-                        } else {
-                            throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                                    "callback", arguments));
                         }
-                        return null;
-                    }
-                };
-                script.putSafe("callback", queryCallback);
-                Object rawResult = script.eval();
-                JsonValue result = null;
-                if (rawResult instanceof JsonValue) {
-                    result = (JsonValue) rawResult;
-                } else {
-                    result = new JsonValue(rawResult);
-                }
-                QueryResult queryResult = new QueryResult();
-                // Script can either
-                // - return null and instead use callback hook to call 
-                //   handleResource, handleResult, handleError
-                //   careful! script MUST call handleResult or handleError itself
-                // or
-                // - return a result list of resources 
-                // or 
-                // - return a full query result structure
-                if (!result.isNull()) {
-                    if (result.isList()) {
-                        // Script may return just the result elements as a list
-                        handleQueryResultList(result, handler);
+                        if (arguments[2] instanceof JsonValue) {
+
+                        } else {
+                            throw new NoSuchMethodException(FunctionFactory
+                                    .getNoSuchMethodMessage("callback", arguments));
+                        }
+                    } else if (arguments.length >= 2 && null != arguments[1]) {
+                        if (arguments[1] instanceof Map) {
+
+                        }
+                        if (arguments[1] instanceof JsonValue) {
+
+                        } else {
+                            throw new NoSuchMethodException(FunctionFactory
+                                    .getNoSuchMethodMessage("callback", arguments));
+                        }
+                    } else if (arguments.length >= 1 && null != arguments[0]) {
+                        if (arguments[0] instanceof Map) {
+
+                        }
+                        if (arguments[0] instanceof JsonValue) {
+
+                        } else {
+                            throw new NoSuchMethodException(FunctionFactory
+                                    .getNoSuchMethodMessage("callback", arguments));
+                        }
                     } else {
-                        // Or script may return a full query response structure, 
-                        // with meta-data and results field
-                        if (result.isDefined(QueryResult.FIELD_RESULT)) {
-                            handleQueryResultList(result.get(QueryResult.FIELD_RESULT), handler);
-                            queryResult = new QueryResult(
-                                    result.get(QueryResult.FIELD_PAGED_RESULTS_COOKIE).asString(), 
-                                    result.get(QueryResult.FIELD_REMAINING_PAGED_RESULTS).asInteger());
-                        } else {
-                            logger.debug("Script returned unexpected query result structure: ", 
-                                     result.getObject());
-                            handler.handleError(new InternalServerErrorException(
-                                    "Script returned unexpected query result structure of type " 
-                                    + result.getObject().getClass()));
-                        }
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
+                                "callback", arguments));
                     }
-                    handler.handleResult(queryResult);
-                }
+                    return null;
+            }
+        };
+            script.putSafe("callback", queryCallback);
+            Object rawResult = script.eval();
+            JsonValue result = null;
+            if (rawResult instanceof JsonValue) {
+                result = (JsonValue) rawResult;
             } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+                result = new JsonValue(rawResult);
+            }
+            QueryResult queryResult = new QueryResult();
+            // Script can either
+            // - return null and instead use callback hook to call
+            //   handleResource, handleResult, handleError
+            //   careful! script MUST call handleResult or handleError itself
+            // or
+            // - return a result list of resources
+            // or
+            // - return a full query result structure
+            if (!result.isNull()) {
+                if (result.isList()) {
+                    // Script may return just the result elements as a list
+                    handleQueryResultList(result, handler);
+                } else {
+                    // Or script may return a full query response structure,
+                    // with meta-data and results field
+                    if (result.isDefined(QueryResult.FIELD_RESULT)) {
+                        handleQueryResultList(result.get(QueryResult.FIELD_RESULT), handler);
+                        queryResult = new QueryResult(
+                                result.get(QueryResult.FIELD_PAGED_RESULTS_COOKIE).asString(),
+                                result.get(QueryResult.FIELD_REMAINING_PAGED_RESULTS).asInteger());
+                    } else {
+                        logger.debug("Script returned unexpected query result structure: ",
+                                 result.getObject());
+                        handler.handleError(new InternalServerErrorException(
+                                "Script returned unexpected query result structure of type "
+                                + result.getObject().getClass()));
+                    }
+                }
+                handler.handleResult(queryResult);
             }
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
@@ -379,15 +369,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleRead(context, request, script.getBindings());
-                evaluate(request, handler, script);
-            } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
             }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleRead(context, request, script.getBindings());
+            evaluate(request, handler, script);
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
@@ -403,15 +391,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
-            if (_scriptEntry.isActive()) {
-                final Script script = _scriptEntry.getScript(context);
-                script.setBindings(script.createBindings());
-                customizer.handleUpdate(context, request, script.getBindings());
-                evaluate(request, handler, script);
-            } else {
-                handler.handleError(new ServiceUnavailableException("Inactive script: "
-                        + _scriptEntry.getName()));
+            if (!_scriptEntry.isActive()) {
+                throw new ServiceUnavailableException("Inactive script: " + _scriptEntry.getName());
             }
+            final Script script = _scriptEntry.getScript(context);
+            script.setBindings(script.createBindings());
+            customizer.handleUpdate(context, request, script.getBindings());
+            evaluate(request, handler, script);
         } catch (ScriptThrownException e) {
             handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
