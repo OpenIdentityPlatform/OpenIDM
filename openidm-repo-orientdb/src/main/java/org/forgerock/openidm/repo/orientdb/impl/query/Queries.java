@@ -89,7 +89,7 @@ public class Queries {
         String queryExpression = request.getQueryExpression();
         String queryId = null;
         if (queryExpression != null) {
-            foundQueryInfo = resolveInlineQuery(type, params, database);
+            foundQueryInfo = resolveInlineQuery(type, queryExpression, database);
         } else {
             queryId = request.getQueryId();
             if (queryId == null) {
@@ -215,14 +215,13 @@ public class Queries {
      * Populate and prepare the query information with the query expression passed in the parameters
      *
      * @param type the relative/local resource name
-     * @param params the parameters with the query expression and token replacement key/values
+     * @param queryExpression the parameters with the query expression and token replacement key/values
      * @param database a handle to a OrientDB db that is available for exclusive use during the invocation of this method
      * @return the populated query info
      */
-    protected QueryInfo resolveInlineQuery(final String type, Map<String, String> params, ODatabaseDocumentTx database ) {
+    protected QueryInfo resolveInlineQuery(final String type, String queryExpression, ODatabaseDocumentTx database ) {
         // TODO: LRU cache
-        String queryString = (String) params.get(QueryConstants.QUERY_EXPRESSION);
-        return  prepareQuery(queryString);
+        return  prepareQuery(queryExpression);
     }
 
     /**
