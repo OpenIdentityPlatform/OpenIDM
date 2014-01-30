@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 ForgeRock, AS.
+ * Copyright 2013-2014 ForgeRock, AS.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -16,6 +16,7 @@
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -39,15 +40,19 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(DeadLetterQueueHandler.class);
 
+    private final ConnectionFactory connectionFactory;
+
     /** accessor to the router */
     private final Accessor<ServerContext> accessor;
 
     /**
      * Construct this live sync failure handler.
      *
+     * @param connectionFactory
      * @param accessor an accessor to the router
      */
-    public DeadLetterQueueHandler(Accessor<ServerContext> accessor) {
+    public DeadLetterQueueHandler(ConnectionFactory connectionFactory, Accessor<ServerContext> accessor) {
+        this.connectionFactory = connectionFactory;
         this.accessor = accessor;
     }
 
@@ -71,7 +76,7 @@ public class DeadLetterQueueHandler implements SyncFailureHandler {
             syncDetail.put("failureCause", failureCause.toString());
             CreateRequest request = Requests.newCreateRequest(resourceContainer, resourceId, new JsonValue(syncDetail));
             ServerContext routeContext = accessor.access();
-            routeContext.getConnection().create(routeContext, request);
+            connectionFactory.getConnection().create(routeContext, request);
             logger.info("{} saved to dead letter queue", syncFailure.get("uid"));
         } catch (ResourceException e) {
             throw new SyncHandlerException("Failed reading/writing " + resourceContainer + "/" + resourceId, e);

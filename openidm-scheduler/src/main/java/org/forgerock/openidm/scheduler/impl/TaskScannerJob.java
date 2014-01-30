@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -66,13 +67,15 @@ public class TaskScannerJob {
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerJob.class);
     private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
 
+    private ConnectionFactory connectionFactory;
     private TaskScannerContext context;
     private RouteService routeService;
     private ScriptRegistry scopeFactory;
     private ScriptEntry script;
 
-    public TaskScannerJob(TaskScannerContext context, RouteService routeService, ScriptRegistry scopeFactory)
+    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, RouteService routeService, ScriptRegistry scopeFactory)
             throws ExecutionException, ScriptException {
+        this.connectionFactory = connectionFactory;
         this.context = context;
         this.routeService = routeService;
         this.scopeFactory = scopeFactory;
@@ -285,7 +288,7 @@ public class TaskScannerJob {
         for (Map.Entry<String, Object> e: params.asMap().entrySet()){
             r.getAdditionalQueryParameters().put(e.getKey(), String.valueOf(e.getValue()));
         }
-        c.getConnection().query(c, r, new QueryResultHandler() {
+        connectionFactory.getConnection().query(c, r, new QueryResultHandler() {
             @Override
             public void handleError(ResourceException error) {
                 // Ignore
@@ -315,7 +318,7 @@ public class TaskScannerJob {
         JsonValue readResults = null;
         ServerContext c = accessor();
 
-        readResults = c.getConnection().read(c, Requests.newReadRequest(resourceID)).getContent();
+        readResults = connectionFactory.getConnection().read(c, Requests.newReadRequest(resourceID)).getContent();
         return readResults;
     }
 
@@ -349,7 +352,7 @@ public class TaskScannerJob {
         r.setRevision(rev);
         ServerContext c = accessor();
 
-        c.getConnection().update(c, r);
+        connectionFactory.getConnection().update(c, r);
         return retrieveObject(resourceID, id);
     }
 

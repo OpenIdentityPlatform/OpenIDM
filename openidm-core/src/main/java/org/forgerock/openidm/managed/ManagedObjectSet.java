@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -39,7 +39,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -59,16 +59,15 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptContext;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
@@ -98,6 +97,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /** The managed objects service that instantiated this managed object set. */
     private final CryptoService cryptoService;
+
+    private final ConnectionFactory connectionFactory;
 
     /** Name of the managed object type. */
     private final String name;
@@ -141,10 +142,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Constructs a new managed object set.
      *
+     *
+     *
      * @param scriptRegistry
      * @param cryptoService
      *            the cryptographic service
      * @param syncRoute
+     * @param connectionFactory
      * @param config
      *            configuration object to use to initialize managed object set.
      * @throws JsonValueException
@@ -154,10 +158,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *             invalid.
      */
     public ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
-                            final AtomicReference<RouteService> syncRoute, JsonValue config)
+                            final AtomicReference<RouteService> syncRoute, ConnectionFactory connectionFactory, JsonValue config)
             throws JsonValueException, ScriptException {
         this.cryptoService = cryptoService;
         this.syncRoute = syncRoute;
+        this.connectionFactory = connectionFactory;
         name = config.get("name").required().asString();
         if (name.trim().isEmpty() || name.indexOf('{') > 0 | name.indexOf('}') > 0) {
             throw new JsonValueException(config.get("name"), "Failed to validate the name");
@@ -434,7 +439,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         UpdateRequest request = Requests.newUpdateRequest(repoId(id), newValue);
         request.setRevision(rev);
-        Resource response = context.getConnection().update(context, request);
+        Resource response = connectionFactory.getConnection().update(context, request);
 
         // TODO: Fix the context
         onUpdate(context, managedId(id), oldValue, newValue);
@@ -473,7 +478,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         */
         final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
 
-        context.getConnection().query(context, queryRequest,
+        connectionFactory.getConnection().query(context, queryRequest,
                 new QueryResultHandler() {
                     @Override
                     public void handleError(final ResourceException error) {
@@ -491,7 +496,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                             JsonValuePatch.apply(newValue, operations);
 
                             Resource updated = update(context, resource.getId(), resource.getRevision(), decrypted, newValue);
-                            ActivityLog.log(context, request.getRequestType(), "Patch " + operations.toString(), managedId(resource.getId()),
+                            ActivityLog.log(connectionFactory, context, request.getRequestType(), "Patch " + operations.toString(), managedId(resource.getId()),
                                     resource.getContent(), updated.getContent(), Status.SUCCESS);
                         } catch (ResourceException e) {
                             lastError[0] = new ConflictException(e.getMessage(), e).toJsonValue();
@@ -557,9 +562,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             createRequest.setContent(value);
             createRequest.setResourceName(repoId(null));
 
-            Resource _new = context.getConnection().create(context, createRequest);
+            Resource _new = connectionFactory.getConnection().create(context, createRequest);
 
-            ActivityLog.log(context, request.getRequestType(), "create", managedId(_new.getId()),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "create", managedId(_new.getId()),
                     null, _new.getContent(), Status.SUCCESS);
 
             onCreate(context, managedId(_new.getId()), _new);
@@ -580,15 +585,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-            Resource resource = context.getConnection().read(context, readRequest);
+            Resource resource = connectionFactory.getConnection().read(context, readRequest);
 
             onRetrieve(context, resource);
             execScript(context, "onRead", onRead, resource.getContent());
-            ActivityLog.log(context, request.getRequestType(), "read", managedId(resource.getId()),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "read", managedId(resource.getId()),
                     null, resource.getContent(), Status.SUCCESS);
 
-            handler.handleResult(isPublicContext(context) ? cullPrivateProperties(resource)
-                    : resource);
+            handler.handleResult(ContextUtil.isExternal(context) ? cullPrivateProperties(resource) : resource);
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
@@ -610,12 +614,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             for (JsonPointer pointer: request.getFields()) {
                 readRequest.addField(pointer);
             }
-            Resource resource = context.getConnection().read(context, readRequest);
+            Resource resource = connectionFactory.getConnection().read(context, readRequest);
             Resource _old = decrypt(resource);
 
             handler.handleResult(update(context, resourceId, request.getRevision(), _old, _new));
 
-            ActivityLog.log(context, request.getRequestType(), "update", managedId(_old.getId()),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "update", managedId(_old.getId()),
                     _old.getContent(), _new, Status.SUCCESS);
 
         } catch (ResourceException e) {
@@ -633,7 +637,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
 
-            Resource resource = context.getConnection().read(context, readRequest);
+            Resource resource = connectionFactory.getConnection().read(context, readRequest);
             if (onDelete != null) {
                 execScript(context, "onDelete", onDelete, decrypt(resource.getContent()));
             }
@@ -642,9 +646,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             if (deleteRequest.getRevision() == null) {
                 deleteRequest.setRevision(resource.getRevision());
             }
-            Resource deletedResource = context.getConnection().delete(context, deleteRequest);
+            Resource deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
 
-            ActivityLog.log(context, request.getRequestType(), "delete", managedId(resource.getId()),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "delete", managedId(resource.getId()),
                     resource.getContent(), null, Status.SUCCESS);
 
             onDelete(context, resourceId, resource);
@@ -689,7 +693,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 // Get the oldest value for diffing in the log
                 // JsonValue oldValue = new JsonValue(cryptoService.getRouter().read(repoId(id)));
                 ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-                Resource oldValue = context.getConnection().read(context, readRequest);
+                Resource oldValue = connectionFactory.getConnection().read(context, readRequest);
 
                 JsonValue decrypted = decrypt(oldValue.getContent()); // decrypt any incoming encrypted properties
 
@@ -712,14 +716,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     ActionRequest policyAction = Requests.newActionRequest(
                             "/policy" + managedId(resourceName), "validateObject");
                     policyAction.setContent(newValue);
-                    if (isPublicContext(context)) {
-                        // ObjectSetContext.get().add("_isDirectHttp", true);
-                        // ??  or does PolicyService already do this?
-                        policyAction.setAdditionalActionParameter("_isDirectHttp", "true");
-                    }
 
                     // JsonValue result = new JsonValue(cryptoService.getRouter().action("policy/"+ managedId(id), params.asMap()));
-                    JsonValue result = context.getConnection().action(context, policyAction);
+                    JsonValue result = connectionFactory.getConnection().action(context, policyAction);
                     if (!result.isNull() && !result.get("result").asBoolean()) {
                         logger.debug("Requested patch failed policy validation: {}", result);
                         throw new ForbiddenException("Failed policy validation" + result.toString());
@@ -729,7 +728,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 Resource resource = update(context, resourceId, _rev, oldValue, newValue);
                 retry = false;
                 logger.debug("Patch successful!");
-                ActivityLog.log(context, requestType, "Patch " + patchOperations.toString(), managedId(resourceId),
+                ActivityLog.log(connectionFactory, context, requestType, "Patch " + patchOperations.toString(), managedId(resourceId),
                         oldValue.getContent(), newValue, Status.SUCCESS);
                 return resource;
             } catch (PreconditionFailedException e) {
@@ -756,7 +755,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         final List<Map<String,Object>> results = new ArrayList<Map<String,Object>>();
         try {
-            context.getConnection().query(context, repoRequest, new QueryResultHandler() {
+            connectionFactory.getConnection().query(context, repoRequest, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     handler.handleError(error);
@@ -765,7 +764,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 @Override
                 public boolean handleResource(Resource resource) {
                     results.add(resource.getContent().asMap());
-                    if (isPublicContext(context)) {
+                    if (ContextUtil.isExternal(context)) {
                         // If it came over a public interface we have to cull
                         // each resulting object
                         return handler.handleResource(cullPrivateProperties(resource));
@@ -779,7 +778,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 }
             });
 
-            ActivityLog.log(context, request.getRequestType(),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(),
                     "query: " + request.getQueryId() + ", parameters: " + request.getAdditionalQueryParameters(),
                     request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
         } catch (ResourceException e) {
@@ -795,7 +794,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             Action action = Action.valueOf(request.getAction());
-            ActivityLog.log(context, request.getRequestType(), "Action: " + request.getAction(), managedId(resourceId),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "Action: " + request.getAction(), managedId(resourceId),
                     null, null, Status.SUCCESS);
             switch (action) {
                 case patch:
@@ -830,7 +829,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             Action action = Action.valueOf(request.getAction());
-            ActivityLog.log(context, request.getRequestType(), "Action: " + request.getAction(), request.getResourceName(),
+            ActivityLog.log(connectionFactory, context, request.getRequestType(), "Action: " + request.getAction(), request.getResourceName(),
                     null, null, Status.SUCCESS);
             switch (action) {
                 case patch:
@@ -883,19 +882,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Checks to see if the current request's context came from a public
-     * interface (i.e. http)
-     *
-     * @return true if it came over http, false otherwise
-     */
-    private boolean isPublicContext(Context context) {
-        if (context.containsContext(ScriptContext.class)) {
-            return false;
-        }
-        return context.containsContext(HttpContext.class);
-    }
-
-    /**
      * Called when a source object has been created.
      *
      * @param id
@@ -912,7 +898,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             request.setAdditionalActionParameter("id", id);
             request.setContent(value.getContent());
             try {
-                context.getConnection().action(context, request);
+                connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
                 logger.error("Failed to sync onCreate {}:{}",name, id, e);
             }
@@ -942,7 +928,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // TODO Where to store the old value???
             request.setContent(newValue);
             try {
-                return context.getConnection().action(context, request);
+                return connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
                 logger.error("Failed to sync onUpdate {}:{}",name, id, e);
             }
@@ -970,7 +956,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             request.setAdditionalActionParameter("id", id);
             request.setContent(oldValue.getContent());
             try {
-                context.getConnection().action(context, request);
+                connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
                logger.error("Failed to sync onDelete {}:{}",name, id, e);
             }

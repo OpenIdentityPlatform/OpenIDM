@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -35,6 +35,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.security.KeyStoreHandler;
@@ -51,8 +52,8 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(PrivateKeyResourceProvider.class);
     
-	public PrivateKeyResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor) {
-        super(resourceName, store, manager, accessor);
+	public PrivateKeyResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+        super(resourceName, store, manager, accessor, connectionFactory);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,6 +29,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -53,11 +54,8 @@ import org.forgerock.openidm.util.ResourceUtil;
  */
 public abstract class EntryResourceProvider extends SecurityResourceProvider implements CollectionResourceProvider {
 
-    public EntryResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor) {
-        this.store = store;
-        this.resourceName = resourceName;
-        this.manager = manager;
-        this.accessor = accessor;
+    public EntryResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+        super(resourceName, store, manager, accessor, connectionFactory);
     }
 
     @Override

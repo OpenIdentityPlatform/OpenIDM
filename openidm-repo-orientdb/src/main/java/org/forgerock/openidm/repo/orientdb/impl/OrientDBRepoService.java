@@ -45,6 +45,7 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -113,7 +114,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public static final String CONFIG_INDEX_TYPE = "indexType";
     
     public static final String ACTION_UPDATE_CREDENTIALS = "updateDbCredentials";
-    
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
     ODatabaseDocumentPool pool;
 
     String dbURL; 
@@ -497,11 +502,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 }
                 synchronized (dbLock) {
                     DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
-                    JsonValue config = configServiceContext.getConnection().read(context, Requests.newReadRequest("config", PID)).getContent();
+                    JsonValue config = connectionFactory.getConnection().read(context, Requests.newReadRequest("config", PID)).getContent();
                     config.put("user", newUser);
                     config.put("password", newPassword);
                     UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
-                    configServiceContext.getConnection().update(context, updateRequest);
+                    connectionFactory.getConnection().update(context, updateRequest);
                     handler.handleResult(new JsonValue(params));
                 }
             } else {

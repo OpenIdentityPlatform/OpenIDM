@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.filter;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -37,7 +39,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -51,8 +53,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.servlet.HttpContext;
-import org.forgerock.json.resource.servlet.HttpServletContextFactory;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
@@ -63,8 +63,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * Auth Filter
@@ -72,16 +70,16 @@ import java.util.List;
  * @author Jamie Nelson
  * @author aegloff
  * @author ckienle
+ * @author brmiller
  */
-
 @Component(name = AuthFilter.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
-@Service({HttpServletContextFactory.class, SingletonResourceProvider.class})
+@Service({SingletonResourceProvider.class})
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/authentication")
 })
-public class AuthFilter implements HttpServletContextFactory, SingletonResourceProvider {
+public class AuthFilter implements SingletonResourceProvider {
 
     public static final String PID = "org.forgerock.openidm.reauthentication";
 
@@ -115,10 +113,14 @@ public class AuthFilter implements HttpServletContextFactory, SingletonResourceP
         config = null;
     }
 
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected ConnectionFactory connectionFactory;
+
     /**
      * Activates this component.
      *
-     * @param context The COmponentContext
+     * @param context The ComponentContext
      */
     @Activate
     protected synchronized void activate(ComponentContext context) throws ResourceException {
@@ -136,23 +138,8 @@ public class AuthFilter implements HttpServletContextFactory, SingletonResourceP
         String userRolesProperty = properties.get("userRoles").asString();
         List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
 
-        authHelper = new AuthHelper(cryptoService, repositoryRoute.createServerContext(), userIdProperty,
+        authHelper = new AuthHelper(cryptoService, connectionFactory, repositoryRoute.createServerContext(), userIdProperty,
                 userCredentialProperty, userRolesProperty, defaultRoles);
-    }
-
-    @Override
-    public Context createContext(HttpServletRequest request) throws ResourceException {
-
-        SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
-        SecurityContext securityContext = securityContextFactory.createContext(request);
-        String authcid = securityContext.getAuthenticationId();
-
-        if (StringUtils.isEmpty(authcid)) {
-            logger.warn("Rejecting invocation as required context to allow invocation not populated");
-            throw ResourceException.getException(ResourceException.UNAVAILABLE,
-                    "Rejecting invocation as required context to allow invocation not populated");
-        }
-        return securityContext;
     }
 
     // ----- Declarative Service Implementation
@@ -176,8 +163,7 @@ public class AuthFilter implements HttpServletContextFactory, SingletonResourceP
             if ("reauthenticate".equalsIgnoreCase(request.getAction())) {
                 if (context.containsContext(HttpContext.class)
                         && context.containsContext(SecurityContext.class)) {
-                    String authcid =
-                            context.asContext(SecurityContext.class).getAuthenticationId();
+                    String authcid = context.asContext(SecurityContext.class).getAuthenticationId();
                     HttpContext httpContext = context.asContext(HttpContext.class);
                     String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
                     if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {

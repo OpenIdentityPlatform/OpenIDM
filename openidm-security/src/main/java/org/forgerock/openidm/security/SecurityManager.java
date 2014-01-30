@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,9 +24,7 @@
 
 package org.forgerock.openidm.security;
 
-import java.security.Key;
 import java.security.Security;
-import java.security.cert.Certificate;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -41,10 +39,12 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -117,6 +117,10 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         accessor = null;
     }
 
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
     @Reference
     private CryptoUpdateService cryptoUpdateService;
 
@@ -152,17 +156,17 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         }
         
         keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
-        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor);
-        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor);
-        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor);
+        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
+        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
+        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
 
         router.addRoute("/keystore", keystoreProvider);
         router.addRoute("/keystore/cert", keystoreCertProvider);
         router.addRoute("/keystore/privatekey", privateKeyProvider);
 
         trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
-        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor);
-        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, accessor);
+        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor, connectionFactory);
+        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, accessor, connectionFactory);
 
         router.addRoute("/truststore", truststoreProvider);
         router.addRoute("/truststore/cert", truststoreCertProvider);

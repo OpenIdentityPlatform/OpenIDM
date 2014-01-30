@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,7 @@ package org.forgerock.openidm.sync.impl;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
@@ -98,7 +99,7 @@ public class LazyObjectAccessor {
         if (!loaded) {
             try {
                 // If not found, the object will be null
-                object = rawReadObject(service.getRouter(), getQualifiedId());
+                object = rawReadObject(service.getRouter(), service.getConnectionFactory(), getQualifiedId());
             } catch (SynchronizationException ex) {
                 throw ex; // being explicit that this would not be considered loaded
             }
@@ -142,14 +143,14 @@ public class LazyObjectAccessor {
      * @throws SynchronizationException if retrieving the object failed
      * @return the object value if found, null if not found
      */
-    public static JsonValue rawReadObject(ServerContext router, String id) throws SynchronizationException {
+    public static JsonValue rawReadObject(ServerContext router, ConnectionFactory connectionFactory, String id) throws SynchronizationException {
         if (id == null) {
             throw new NullPointerException("Identifier passed to readObject is null");
         }
         EventEntry measure = Publisher.start(EVENT_READ_OBJ, null, id);
         try {
             ReadRequest r = Requests.newReadRequest(id);
-            JsonValue result = router.getConnection().read(router,r).getContent();
+            JsonValue result = connectionFactory.getConnection().read(router,r).getContent();
             measure.setResult(result);
             return result;
         } catch (NotFoundException nfe) { // target not found results in null

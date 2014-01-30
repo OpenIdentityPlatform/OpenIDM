@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,6 +34,7 @@ import java.util.Set;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryRequest;
@@ -74,15 +75,15 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
 
 
     /** provides a reference to the router for real-time query handling */
-    private ServerContext routerContext;
+    private ConnectionFactory connectionFactory;
 
     /**
      * Constructor.
      *
-     * @param routeService
+     * @param connectionFactory
      */
-    public RouterAuditLogger(ServerContext routerContext) {
-        this.routerContext = routerContext;
+    public RouterAuditLogger(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
@@ -114,7 +115,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             request.setQueryId("query-all-ids");
             request.getAdditionalQueryParameters().putAll(params);
             Set<Resource> results = new HashSet<Resource>();
-            routerContext.getConnection().query(context, request, results);
+            connectionFactory.getConnection().query(context, request, results);
 
             List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
             for (Resource entry : results) {
@@ -125,7 +126,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             result.put("entries", entries);
         } else {
             ReadRequest request = Requests.newReadRequest(getRouterLocation(type), id);
-            Map<String, Object> entry = routerContext.getConnection().read(context, request).getContent().asMap();
+            Map<String, Object> entry = connectionFactory.getConnection().read(context, request).getContent().asMap();
             result = AuditServiceImpl.formatLogEntry(unflattenActivityEntry(entry), type);
         }
 
@@ -150,7 +151,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             request.setQueryId(params.get("_queryId"));
             request.getAdditionalQueryParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
-            routerContext.getConnection().query(context, request,
+            connectionFactory.getConnection().query(context, request,
                     new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {
@@ -195,7 +196,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             AuditServiceImpl.preformatLogEntry(type, object);
             Map<String, Object> sanitized = sanitizeObject(object);
             CreateRequest request = Requests.newCreateRequest(getRouterLocation(type), new JsonValue(sanitized));
-            routerContext.getConnection().create(context, request);
+            connectionFactory.getConnection().create(context, request);
         } catch (IOException e) {
             throw new InternalServerErrorException("Unable to stringify object to be logged", e);
         } finally {

@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.router.impl.JsonResourceRouterServiceTest;
 import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -47,7 +46,7 @@ public class ObjectMappingTest {
     
     @BeforeClass
     public void setUp() throws Exception {
-        URL config = JsonResourceRouterServiceTest.class.getResource("/conf/sync.json");
+        URL config = ObjectMappingTest.class.getResource("/conf/sync.json");
         Assert.assertNotNull(config, "sync configuration is not found");
         JsonValue syncConfig = new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
         JsonValue mappingConfig = syncConfig.get("mappings").get(0);

@@ -131,10 +131,10 @@ function contains(a, o) {
 }
 
 function isMyTask() {
-    var taskInstanceId = request.id.split("/")[2],
+    var taskInstanceId = request.resourceName.split("/")[2],
         taskInstance = openidm.read("workflow/taskinstance/" + taskInstanceId);
     
-    return taskInstance.assignee === request.security.username;
+    return taskInstance.assignee === context.security.authenticationId;
 }
 function join (arr, delim) {
     var returnStr = "",i=0;
@@ -148,7 +148,7 @@ function isUserCandidateForTask(taskInstanceId) {
     
     var userCandidateTasksQueryParams = {
             "_queryId": "filtered-query",
-            "taskCandidateUser": request.security.username
+            "taskCandidateUser": context.security.authenticationId
         },
         userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result,
         userGroupCandidateTasksQueryParams,
@@ -162,8 +162,8 @@ function isUserCandidateForTask(taskInstanceId) {
     }
         
     roles = "";
-    for (i = 0; i < request.security['roles'].length; i++) {
-        role = request.security['roles'][i];
+    for (i = 0; i < context.security.authorizationId.roles.length; i++) {
+        role = context.security.authorizationId.roles[i];
         if (i === 0) {
             roles = role;
         } else {
@@ -186,14 +186,14 @@ function isUserCandidateForTask(taskInstanceId) {
 }
 
 function canUpdateTask() {
-    var taskInstanceId = request.id.split("/")[2];
+    var taskInstanceId = request.resourceName.split("/")[2];
     return isMyTask() || isUserCandidateForTask(taskInstanceId);
 }
 
 function isProcessOnUsersList(processDefinitionId) {
     var processesForUserQueryParams = {
             "_queryId": "query-processes-for-user",
-            "userId": request.security.id
+            "userId": context.security.authorizationId.id
         },
         processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams),
         isProcessOneOfUserProcesses = false,
@@ -211,19 +211,19 @@ function isProcessOnUsersList(processDefinitionId) {
 }
 
 function isAllowedToStartProcess() {
-    var processDefinitionId = request.value._processDefinitionId;
+    var processDefinitionId = request.content._processDefinitionId;
     return isProcessOnUsersList(processDefinitionId);
 }
 
 function isOneOfMyWorkflows() {
-    var processDefinitionId = request.id.split("/")[2];
+    var processDefinitionId = request.resourceName.split("/")[2];
     return isProcessOnUsersList(processDefinitionId);
 }
 
 function isQueryOneOf(allowedQueries) {
     if (
-            allowedQueries[request.id] &&
-            contains(allowedQueries[request.id], request.params._queryId)
+            allowedQueries[request.resourceName] &&
+            contains(allowedQueries[request.resourceName], request.queryId)
        )
     {
         return true;
@@ -239,11 +239,11 @@ function checkIfUIIsEnabled(param) {
 }
 
 function ownDataOnly() {
-    var userId = request.security.id,
-        component = request.security.component;
+    var userId = context.security.authorizationId.id,
+        component = context.security.authorizationId.component;
 
     // in the case of a literal read on themselves
-    return (request.id === component + "/" + userId);
+    return (request.resourceName === component + "/" + userId);
 
 }
 
@@ -254,15 +254,8 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
             return prop.replace(/^\//, '').match(/^[^\/]+/)[0];
         };
     
-    if (!request.id.match(/^managed\/user/)) {
+    if (!request.resourceName.match(/^managed\/user/)) {
         return true;
-    }
-
-    if (request.value) {
-        params = request.value;
-    }
-    else { // this would be strange, but worth checking
-        return true; // true because they don't appear to be setting anything
     }
     
     // we could accept a csv list or an array of properties for the allowedPropertiesList arg.
@@ -270,27 +263,36 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         allowedPropertiesList = allowedPropertiesList.split(',');
     }
     
-    if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
+    if (request.type === "PATCH" || (request.type === "ACTION" && request.action === "patch")) {
+		if (!request.patchOperations) {
+			return true;
+		}
         // check each of the fields they are attempting to patch and make sure they are approved
-        for (i in params) {
-            if ((params[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].field)))) {
+        for (i in request.patchOperations) {
+            if ((request.patchOperations[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(request.patchOperations[i].field)))) {
                 return false;
             }
         }
-    } else if (request.method === "update") {
-        currentUser = openidm.read(request.id);
+    } else if (request.type === "UPDATE") {
+        if (!request.content) {
+            return true;
+        }
+        currentUser = openidm.read(request.resourceName);
         if (!currentUser) { // this would be odd, but just in case
             return false;
         }
-        for (i in params) {
+        for (i in request.content) {
             // if the new value does not match the current value, then they must be updating it
             // if the field they are attempting to update isn't allowed for them, then reject request.
-            if (!deepCompare(currentUser[i],params[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
+            if (!deepCompare(currentUser[i], request.content[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
             }
         }
-    } else if (request.method === "create") {
-        for (i in params) {
+    } else if (request.type === "CREATE") {
+        if (!request.content) {
+			return true;
+		}
+		for (i in request.content) {
             // they should only be providing parameters that they are allowed to define
             if (!containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
@@ -302,10 +304,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
 }
 
 function disallowQueryExpression() {
-    if (request.params && typeof request.params._queryExpression !== "undefined") {
-        return false;
-    }
-    return true;
+	return  !request.queryExpression;
 }
 
 //////// Do not alter functions below here as part of your authz configuration
@@ -355,7 +354,7 @@ function passesAccessConfig(id, roles, method, action) {
 
 
 function passesOriginVerification() {
-    var headers = request.headers,
+    var headers = context.http.headers,
         origin = headers["Origin"] || headers["origin"];
 
     if (typeof (headers["X-Requested-With"]) !== "undefined" || 
@@ -380,30 +379,24 @@ function allow() {
     var roles,
         action;
     
-    if (request.fromHttp !== 'true') {
+    if (context.caller !== 'http') {
         return true;
     }
     
-    roles = request.security['roles'];
+    roles = context.security.authorizationId.roles;
     action = "";
     if (request.action) {
         action = request.action;
     }
     
     // Check REST requests against the access configuration
-    if (request.fromHttp === 'true') {
+    if (context.caller === 'http') {
         if (!passesOriginVerification()) {
             return false;
         }
         
-        logger.debug("Access Check for HTTP request for resource id: " + request.id);
+        logger.debug("Access Check for HTTP request for resource id: " + request.resourceName);
 
-        // TODO: the removal of the leading slash to be compatible with  
-        // existing access.js is to be reviewed
-        id = request.id;
-        if (request.id.length > 1 && request.id.substring(0, 1) == '/') { 
-            id = request.id.substring(1);
-        }
         if (passesAccessConfig(id, roles, request.method, action)) {
 //        if (passesAccessConfig(request.id, roles, request.method, action)) {
 
@@ -418,7 +411,7 @@ function allow() {
 load(identityServer.getProjectLocation() + "/script/access.js");
 
 if (!allow()) {
-//    java.lang.System.out.println(request);
+//    console.log(request);
     throw { 
         "code" : 403,
         "message" : "Access denied"

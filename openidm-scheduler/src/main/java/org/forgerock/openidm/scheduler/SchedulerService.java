@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -174,12 +174,12 @@ public class SchedulerService implements RequestHandler {
 
     protected void bindRepo(final RouteService service) throws ResourceException {
         logger.debug("binding RepositoryService");
-        RepoJobStore.setAccessor(service.createServerContext());
+        RepoJobStore.setServerContext(service.createServerContext());
     }
 
     protected void unbindRepo(final RouteService service) {
         logger.debug("unbinding RepositoryService");
-        RepoJobStore.setAccessor(null);
+        RepoJobStore.setServerContext(null);
     }
     
     

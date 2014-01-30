@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
@@ -86,15 +87,15 @@ public class ActivityLog {
                 : null;
     }
 
-    public static void log(ServerContext context, RequestType requestType, String message, String objectId,
-            JsonValue before, JsonValue after, Status status) throws ResourceException {
+    public static void log(ConnectionFactory connectionFactory, ServerContext context, RequestType requestType, String message, String objectId,
+                           JsonValue before, JsonValue after, Status status) throws ResourceException {
         if (requestType == null) {
             throw new NullPointerException("Request can not be null when audit.");
         }
         // TODO: convert to flyweight?
         try {
             Map<String, Object> activity = buildLog(context, requestType, message, objectId, before, after, status);
-            context.getConnection().create(new ServerContext(context),
+            connectionFactory.getConnection().create(new ServerContext(context),
                     Requests.newCreateRequest("audit/activity", new JsonValue(activity)));
         } catch (ResourceException ex) {
             logger.warn("Failed to write activity log {}", ex);

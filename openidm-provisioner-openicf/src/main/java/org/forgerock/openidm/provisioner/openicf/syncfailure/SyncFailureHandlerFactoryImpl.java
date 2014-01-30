@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 ForgeRock, AS.
+ * Copyright 2013-2014 ForgeRock, AS.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.ServerConstants;
@@ -60,6 +61,10 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     private void unbindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = null;
     }
+
+    /** The Connection Factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     /** the router */
     @Reference(target = "("+ ServerConstants.ROUTER_PREFIX + "=/*)")
@@ -127,7 +132,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
         if (config.isString()) {
             if (CONFIG_DEAD_LETTER.equals(config.asString())) {
                 return new DeadLetterQueueHandler(
-                        new Accessor<ServerContext>() {
+                        connectionFactory, new Accessor<ServerContext>() {
                             public ServerContext access() {
                                 return routerContext;
                             }
@@ -144,7 +149,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
                         // pass internal handlers so a script can call them if desired
                         new LoggedIgnoreHandler(),
                         new DeadLetterQueueHandler(
-                                new Accessor<ServerContext>() {
+                                connectionFactory, new Accessor<ServerContext>() {
                                     public ServerContext access() {
                                         return routerContext;
                                     }
