@@ -685,7 +685,7 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
         File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
         String orientDbFolder = dbFolder.getAbsolutePath();
         orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
-        return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
+        return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("plocal:" + orientDbFolder).asString();
     }
     
     private String getUser(JsonValue config) {
