@@ -98,7 +98,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
         if (id == null) {
             QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
             request.setQueryId("query-all");
-            request.getAdditionalQueryParameters().putAll(params);
+            request.getAdditionalParameters().putAll(params);
             Set<Resource> r = new HashSet<Resource>();
             connectionFactory.getConnection().query(context, request, r);
             for (Resource entry : r) {
@@ -129,7 +129,7 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
             }
             QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
             request.setQueryId(queryId);
-            request.getAdditionalQueryParameters().putAll(params);
+            request.getAdditionalParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
             connectionFactory.getConnection().query(context, request, new QueryResultHandler() {
                 @Override

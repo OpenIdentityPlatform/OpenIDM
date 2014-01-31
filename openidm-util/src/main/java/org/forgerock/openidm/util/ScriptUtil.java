@@ -48,7 +48,7 @@ public class ScriptUtil {
         String id = request.getResourceName();
         if (request instanceof ActionRequest) {
             value = ((ActionRequest)request).getContent();
-            requestMap.put("params", ((ActionRequest)request).getAdditionalActionParameters());
+            requestMap.put("params", ((ActionRequest)request).getAdditionalParameters());
             requestMap.put("method", "action");
             requestMap.put("action", ((ActionRequest)request).getAction());
         } else if (request instanceof CreateRequest) {
@@ -61,7 +61,7 @@ public class ScriptUtil {
         } else if (request instanceof ReadRequest) {
             requestMap.put("method", "read");
         } else if (request instanceof UpdateRequest) {
-            value = ((UpdateRequest)request).getNewContent();
+            value = ((UpdateRequest)request).getContent();
             requestMap.put("method", "update");
         } else if (request instanceof DeleteRequest) {
             requestMap.put("method", "delete");
@@ -75,7 +75,7 @@ public class ScriptUtil {
             value = opsValue;
         } else if (request instanceof QueryRequest) {
             final QueryRequest queryRequest = (QueryRequest) request;
-            final Map<String, String> params = queryRequest.getAdditionalQueryParameters();
+            final Map<String, String> params = queryRequest.getAdditionalParameters();
             params.put("_queryId", queryRequest.getQueryId());
             params.put("_queryExpression", queryRequest.getQueryExpression());
             params.put("_queryFilter", queryRequest.getQueryFilter() != null ? queryRequest.getQueryFilter().toString() : null);

@@ -70,7 +70,7 @@ public class JsonUserQuery extends UserQueryImpl {
             request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
         } else {
             request.setQueryId("for-userName");
-            request.setAdditionalQueryParameter("uid", getId());
+            request.setAdditionalParameter("uid", getId());
         }
         Collection<Resource> result = new ArrayList<Resource>();
         try {
@@ -89,7 +89,7 @@ public class JsonUserQuery extends UserQueryImpl {
     User readUser(String id) {
         QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
         request.setQueryId("for-userName");
-        request.setAdditionalQueryParameter("uid", id);
+        request.setAdditionalParameter("uid", id);
         List<Resource> result = new ArrayList<Resource>();
         try {
             identityService.query(request, result);

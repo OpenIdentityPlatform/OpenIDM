@@ -76,8 +76,8 @@ public class PassthroughAuthenticator {
 
         if (!StringUtils.isEmpty(passThroughAuth) && !"anonymous".equals(username)) {
             ActionRequest actionRequest = Requests.newActionRequest(passThroughAuth, "authenticate");
-            actionRequest.setAdditionalActionParameter("username", username);
-            actionRequest.setAdditionalActionParameter("password", password);
+            actionRequest.setAdditionalParameter("username", username);
+            actionRequest.setAdditionalParameter("password", password);
             try {
                 JsonValue result = connectionFactory.getConnection().action(context, actionRequest);
                 boolean authenticated = result.isDefined(Resource.FIELD_CONTENT_ID);

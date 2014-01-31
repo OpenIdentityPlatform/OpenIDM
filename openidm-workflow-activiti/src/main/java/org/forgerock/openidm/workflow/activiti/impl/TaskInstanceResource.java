@@ -190,7 +190,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             if (task == null) {
                 handler.handleError(new NotFoundException());
             } else {
-                Map value = request.getNewContent().expect(Map.class).asMap();
+                Map value = request.getContent().expect(Map.class).asMap();
                 if (value.containsKey(ActivitiConstants.ACTIVITI_ASSIGNEE)) {
                     task.setAssignee(value.get(ActivitiConstants.ACTIVITI_ASSIGNEE) == null
                             ? null : value.get(ActivitiConstants.ACTIVITI_ASSIGNEE).toString());

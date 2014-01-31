@@ -529,7 +529,7 @@ public class SchedulerService implements RequestHandler {
             if (request.getResourceNameObject().isEmpty()) {
                 throw new BadRequestException("Empty resourceId");
             }
-            Map<String, Object> object = request.getNewContent().asMap();
+            Map<String, Object> object = request.getContent().asMap();
             object.put("_id", request.getResourceName());
 
             // Default incoming config to "persisted" if not specified
@@ -639,7 +639,7 @@ public class SchedulerService implements RequestHandler {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, final ResultHandler<JsonValue> handler) {
         try {
-            Map<String, String> params = request.getAdditionalActionParameters();
+            Map<String, String> params = request.getAdditionalParameters();
 
             if (params.get("_action") == null) {
                 throw new BadRequestException("Expecting _action parameter");

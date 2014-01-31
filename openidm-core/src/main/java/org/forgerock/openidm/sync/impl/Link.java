@@ -137,7 +137,7 @@ class Link {
             r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
             r.setQueryExpression(query.get(QueryRequest.FIELD_QUERY_EXPRESSION).asString());
             for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
-                r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
+                r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
 
             final Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>();

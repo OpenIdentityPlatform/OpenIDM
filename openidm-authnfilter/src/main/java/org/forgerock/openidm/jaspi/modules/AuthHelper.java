@@ -126,7 +126,7 @@ public class AuthHelper {
         QueryRequest request = Requests.newQueryRequest("/repo/" + repoResource);
         request.setQueryId(repoQueryId);
         //TODO NPE check
-        request.getAdditionalQueryParameters().put("username", username);
+        request.getAdditionalParameters().put("username", username);
 
         Set<Resource> result = new HashSet<Resource>();
         connectionFactory.getConnection().query(context,request,result);

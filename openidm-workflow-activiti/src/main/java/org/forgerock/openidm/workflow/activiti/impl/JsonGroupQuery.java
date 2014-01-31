@@ -68,8 +68,8 @@ public class JsonGroupQuery extends GroupQueryImpl {
             request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
         } else {
             request.setQueryId("get-by-field-value");
-            request.setAdditionalQueryParameter("value", getId());
-            request.setAdditionalQueryParameter("field", "id");
+            request.setAdditionalParameter("value", getId());
+            request.setAdditionalParameter("field", "id");
         }
         Collection<Resource> result = new ArrayList<Resource>();
         try {
@@ -88,8 +88,8 @@ public class JsonGroupQuery extends GroupQueryImpl {
     private Group readGroup(String id) {
         QueryRequest request = Requests.newQueryRequest(SharedIdentityService.GROUP_PATH);
         request.setQueryId("get-by-field-value");
-        request.setAdditionalQueryParameter("value", id);
-        request.setAdditionalQueryParameter("field", "id");
+        request.setAdditionalParameter("value", id);
+        request.setAdditionalParameter("field", "id");
         List<Resource> result = new ArrayList<Resource>();
         try {
             identityService.query(request, result);

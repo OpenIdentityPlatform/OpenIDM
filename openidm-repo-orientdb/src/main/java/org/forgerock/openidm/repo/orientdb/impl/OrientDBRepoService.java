@@ -367,7 +367,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         final String localId = request.getResourceNameObject().leaf();
 
         String orientClassName = typeToOrientClassName(type);
-        JsonValue obj = request.getNewContent();
+        JsonValue obj = request.getContent();
 
         if (request.getRevision() != null && !"".equals(request.getRevision())) {
             obj.put(DocumentUtil.TAG_REV, request.getRevision());
@@ -492,7 +492,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         String action = request.getAction();
-        Map<String, String> params = request.getAdditionalActionParameters();
+        Map<String, String> params = request.getAdditionalParameters();
         try {
             if (ACTION_UPDATE_CREDENTIALS.equals(action)) {
                 String newUser = params.get("user");

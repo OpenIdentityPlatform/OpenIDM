@@ -266,7 +266,7 @@ public class ConfigObjectService implements RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             String rev = request.getRevision();
-            JsonValue content = request.getNewContent();
+            JsonValue content = request.getContent();
             update(request.getResourceNameObject(), rev, content.asMap());
             Resource resource = new Resource(request.getResourceName(), null, content);
             handler.handleResult(resource);

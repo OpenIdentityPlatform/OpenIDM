@@ -311,7 +311,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         try {
             ObjectSetContext.push(context);
             Map<String, Object> result = null;
-            JsonValue _params = new JsonValue(request.getAdditionalActionParameters(), new JsonPointer("params"));
+            JsonValue _params = new JsonValue(request.getAdditionalParameters(), new JsonPointer("params"));
             Action action = new JsonValue(request.getAction()).asEnum(Action.class);
             try {
                 String id = null;

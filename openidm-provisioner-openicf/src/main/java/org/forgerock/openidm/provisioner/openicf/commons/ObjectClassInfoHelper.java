@@ -224,8 +224,8 @@ public class ObjectClassInfoHelper {
 
     public Set<Attribute> getUpdateAttributes(final UpdateRequest request, final Name newName,
             final CryptoService cryptoService) throws ResourceException {
-        JsonValue newContent = request.getNewContent().required().expect(Map.class);
-        Set<String> keySet = newContent.keys();
+        JsonValue content = request.getContent().required().expect(Map.class);
+        Set<String> keySet = content.keys();
 
         Map<String,Attribute> result = new HashMap<String, Attribute>(keySet.size());
         if (null != newName) {
@@ -237,7 +237,7 @@ public class ObjectClassInfoHelper {
                 continue;
             }
             if (attributeInfo.getAttributeInfo().isUpdateable()) {
-                Object v = newContent.get(attributeInfo.getName());
+                Object v = content.get(attributeInfo.getName());
                 Attribute a = attributeInfo.build(v, cryptoService);
                 if (null != a) {
                     result.put(attributeInfo.getAttributeInfo().getName(), a);

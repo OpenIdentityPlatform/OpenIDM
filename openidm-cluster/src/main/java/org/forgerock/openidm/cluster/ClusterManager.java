@@ -240,7 +240,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     // Return a list of all nodes in the cluster
                     QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
                     r.setQueryId(QUERY_INSTANCES);
-                    r.setAdditionalQueryParameter("fields", "*");
+                    r.setAdditionalParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
                     connectionFactory.getConnection().query(accessor, r, new QueryResultHandler() {
@@ -540,7 +540,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             String time =
                     InstanceState.pad(System.currentTimeMillis()
                             - clusterConfig.getInstanceTimeout());
-            r.getAdditionalQueryParameters().put(InstanceState.PROP_TIMESTAMP_LEASE, time);
+            r.getAdditionalParameters().put(InstanceState.PROP_TIMESTAMP_LEASE, time);
             logger.debug("Attempt query {} for failed instances", QUERY_FAILED_INSTANCE);
             JsonValue jv = new JsonValue(new HashMap<String, Object>());
             final Collection<Map<String, Object>> list = new HashSet<Map<String, Object>>();
