@@ -168,8 +168,8 @@ public class ReconciliationService
                     // Next, if not in memory, try and get it from audit log
                     QueryRequest auditQuery = Requests.newQueryRequest("audit/recon");
                     auditQuery.setQueryId("audit-by-recon-id-type");
-                    auditQuery.setAdditionalQueryParameter("reconId", localId);
-                    auditQuery.setAdditionalQueryParameter("entryType", "summary");
+                    auditQuery.setAdditionalParameter("reconId", localId);
+                    auditQuery.setAdditionalParameter("entryType", "summary");
 
                     ServerContext routerContext = context.asContext(RouterContext.class);
                     Collection<Resource> queryResult = new ArrayList<Resource>();
@@ -237,7 +237,7 @@ public class ReconciliationService
             }
 
             Map<String, Object> result = new LinkedHashMap<String, Object>();
-            JsonValue paramsVal = new JsonValue(request.getAdditionalActionParameters());
+            JsonValue paramsVal = new JsonValue(request.getAdditionalParameters());
 
             if (request.getResourceNameObject().isEmpty()) {
                 // operation on collection
@@ -258,7 +258,7 @@ public class ReconciliationService
                        throw new ConflictException(se);
                     }
                 } else {
-                    throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " + request.getAdditionalActionParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " + request.getAdditionalParameters());
                 }
             } else {
                 // operation on individual resource
@@ -274,7 +274,7 @@ public class ReconciliationService
                     result.put("action", request.getAction());
                     result.put("status", "SUCCESS");
                 } else {
-                    throw new BadRequestException("Action " + request.getAction() + " on recon run " + id + " not supported " + request.getAdditionalActionParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on recon run " + id + " not supported " + request.getAdditionalParameters());
                 }
             }
             handler.handleResult(new JsonValue(result));

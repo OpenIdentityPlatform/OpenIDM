@@ -317,7 +317,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         final String type = request.getResourceNameObject().parent().toString();
         final String localId = request.getResourceNameObject().leaf();
 
-        Map<String, Object> obj = request.getNewContent().asMap();
+        Map<String, Object> obj = request.getContent().asMap();
         String rev = request.getRevision() != null && !"".equals(request.getRevision())
                 ? request.getRevision()
                 : read(Requests.newReadRequest(request.getResourceName())).getRevision();
@@ -508,7 +508,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         String type = trimStartingSlash(fullId);
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
         Map<String, Object> params = new HashMap<String, Object>();
-        params.putAll(request.getAdditionalQueryParameters());
+        params.putAll(request.getAdditionalParameters());
         params.put(TableQueries.QUERY_ID, request.getQueryId());
         params.put(TableQueries.QUERY_EXPRESSION, request.getQueryExpression());
 

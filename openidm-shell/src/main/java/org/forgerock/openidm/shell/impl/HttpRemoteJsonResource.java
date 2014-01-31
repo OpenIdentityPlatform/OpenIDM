@@ -143,7 +143,7 @@ public class HttpRemoteJsonResource implements Connection {
     @Override
     public JsonValue action(org.forgerock.json.resource.Context context, ActionRequest request)
             throws org.forgerock.json.resource.ResourceException {
-        JsonValue params = new JsonValue(request.getAdditionalActionParameters());
+        JsonValue params = new JsonValue(request.getAdditionalParameters());
         JsonValue result = handle(request, request.getResourceName(), params);
         return result;
     }
@@ -394,7 +394,7 @@ public class HttpRemoteJsonResource implements Connection {
         case CREATE:
             return ((CreateRequest)request).getContent();
         case UPDATE:
-            return new JsonValue(((UpdateRequest)request).getNewContent());
+            return new JsonValue(((UpdateRequest)request).getContent());
         case PATCH:
             ObjectMapper mapper = new ObjectMapper();
             List<PatchOperation> ops = ((PatchRequest)request).getPatchOperations();

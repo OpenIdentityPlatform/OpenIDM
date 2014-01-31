@@ -394,7 +394,7 @@ class ObjectMapping  {
             r.setQueryId((String)query.get("_" + QueryRequest.FIELD_QUERY_ID));
             r.setQueryExpression((String)query.get("_" + QueryRequest.FIELD_QUERY_EXPRESSION));
             for (Map.Entry<String, Object> e: query.entrySet()) {
-                r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
+                r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
             service.getConnectionFactory().getConnection().query(service.getRouter(), r, new QueryResultHandler() {
                 @Override

@@ -165,14 +165,14 @@ public class RestService implements SingletonResourceProvider {
         try {
             logger.debug("Action invoked on {} with {}", request.getAction(), request);
 
-            if (request.getAdditionalActionParameters().isEmpty()) {
+            if (request.getAdditionalParameters().isEmpty()) {
                 handler.handleError(new BadRequestException("Invalid action call on "
                         + request.getResourceName() + "/" + request.getAction()
                         + " : missing parameters to define what to invoke."));
                 return;
             }
 
-            JsonValue params = new JsonValue(request.getAdditionalActionParameters());
+            JsonValue params = new JsonValue(request.getAdditionalParameters());
 
             String url = params.get(ARG_URL).required().asString();
             String method = params.get(ARG_METHOD).required().asString();

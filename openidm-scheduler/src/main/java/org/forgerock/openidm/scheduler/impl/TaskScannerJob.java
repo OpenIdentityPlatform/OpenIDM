@@ -286,7 +286,7 @@ public class TaskScannerJob {
         r.setQueryId(params.get("_queryId").asString());
         r.setQueryExpression(params.get("_queryExpression").asString());
         for (Map.Entry<String, Object> e: params.asMap().entrySet()){
-            r.getAdditionalQueryParameters().put(e.getKey(), String.valueOf(e.getValue()));
+            r.getAdditionalParameters().put(e.getKey(), String.valueOf(e.getValue()));
         }
         connectionFactory.getConnection().query(c, r, new QueryResultHandler() {
             @Override

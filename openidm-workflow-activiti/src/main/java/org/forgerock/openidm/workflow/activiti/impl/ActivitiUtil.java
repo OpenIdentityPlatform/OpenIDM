@@ -92,7 +92,7 @@ public class ActivitiUtil {
      * @return 
      */
     public static String getParamFromRequest(QueryRequest request, String paramName) {
-        return request.getAdditionalQueryParameters().get(paramName);
+        return request.getAdditionalParameters().get(paramName);
     }
     
     private static class DatePropertyTransformer implements JsonTransformer {
@@ -115,7 +115,7 @@ public class ActivitiUtil {
      */
     public static Map<String, String> fetchVarParams(QueryRequest request) {
         Map<String, String> wfParams = new HashMap<String, String>();
-        Iterator<Entry<String, String>> itAll = request.getAdditionalQueryParameters().entrySet().iterator();
+        Iterator<Entry<String, String>> itAll = request.getAdditionalParameters().entrySet().iterator();
         while (itAll.hasNext()) {
             Map.Entry<String, String> e = itAll.next();
             if ((e.getKey().startsWith(ActivitiConstants.VARIABLE_QUERY_PREFIX))) {

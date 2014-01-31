@@ -113,7 +113,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
 
             QueryRequest request = Requests.newQueryRequest(getRouterLocation(type));
             request.setQueryId("query-all-ids");
-            request.getAdditionalQueryParameters().putAll(params);
+            request.getAdditionalParameters().putAll(params);
             Set<Resource> results = new HashSet<Resource>();
             connectionFactory.getConnection().query(context, request, results);
 
@@ -149,7 +149,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
 
             QueryRequest request = Requests.newQueryRequest(getRouterLocation(type));
             request.setQueryId(params.get("_queryId"));
-            request.getAdditionalQueryParameters().putAll(params);
+            request.getAdditionalParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
             connectionFactory.getConnection().query(context, request,
                     new QueryResultHandler() {

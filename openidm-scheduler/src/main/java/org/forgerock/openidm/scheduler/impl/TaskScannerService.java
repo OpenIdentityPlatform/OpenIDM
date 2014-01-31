@@ -166,7 +166,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-            Map<String, String> params = request.getAdditionalActionParameters();
+            Map<String, String> params = request.getAdditionalParameters();
             Map<String, Object> result = new LinkedHashMap<String, Object>();
 
             String action = request.getAction();

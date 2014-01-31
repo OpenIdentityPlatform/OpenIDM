@@ -705,11 +705,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private void handleScriptAction(final ActionRequest request, final ResultHandler<JsonValue> handler) throws ResourceException {
 
         // TODO NPE check
-        if (StringUtils.isBlank(request.getAdditionalActionParameters().get(SystemAction.SCRIPT_ID))) {
+        if (StringUtils.isBlank(request.getAdditionalParameters().get(SystemAction.SCRIPT_ID))) {
             handler.handleError(new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID));
             return;
         }
-        SystemAction action = localSystemActionCache.get(request.getAdditionalActionParameters().get(SystemAction.SCRIPT_ID));
+        SystemAction action = localSystemActionCache.get(request.getAdditionalParameters().get(SystemAction.SCRIPT_ID));
 
         String systemType = connectorReference.getConnectorKey().getConnectorName();
         List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
@@ -721,13 +721,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             JsonValue result = new JsonValue(new HashMap<String, Object>());
 
             boolean onConnector = !"resource".equalsIgnoreCase(
-                    request.getAdditionalActionParameters().get(SystemAction.SCRIPT_EXECUTE_MODE));
+                    request.getAdditionalParameters().get(SystemAction.SCRIPT_EXECUTE_MODE));
 
             final ConnectorFacade facade = getConnectorFacade0(handler,
                     onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
 
             if (null != facade) {
-                String variablePrefix = request.getAdditionalActionParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+                String variablePrefix = request.getAdditionalParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
 
                 List<Map<String, Object>> resultList =
                         new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
@@ -735,7 +735,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
                     boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
-                    for (Map.Entry<String, String> entry : request.getAdditionalActionParameters().entrySet()) {
+                    for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
                         if (entry.getKey().startsWith("_")) {
                             continue;
                         }
@@ -1076,7 +1076,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     final ConnectorFacade facade =
                             getConnectorFacade0(handler, AuthenticationApiOp.class);
                     if (null != facade) {
-                        JsonValue params = new JsonValue(request.getAdditionalActionParameters());
+                        JsonValue params = new JsonValue(request.getAdditionalParameters());
                         String username = params.get("username").required().asString();
                         String password = params.get("password").required().asString();
 
@@ -1359,7 +1359,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, resourceId, request.getNewContent(), null, handler);
+                handleError(context, request, e, resourceId, request.getContent(), null, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1820,7 +1820,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     // previously
                                                     // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
-                                                    onUpdateRequest.setAdditionalActionParameter("id", id);
+                                                    onUpdateRequest.setAdditionalParameter("id", id);
                                                     onUpdateRequest.setContent(new JsonValue(deltaObject));
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
@@ -1830,7 +1830,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     // previously
                                                     // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
-                                                    onDeleteRequest.setAdditionalActionParameter("id", id);
+                                                    onDeleteRequest.setAdditionalParameter("id", id);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
                                                     ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-delete", id, null, null, Status.SUCCESS);
                                                     break;

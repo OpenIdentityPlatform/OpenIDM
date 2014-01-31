@@ -263,7 +263,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         allowedPropertiesList = allowedPropertiesList.split(',');
     }
     
-    if (request.type === "PATCH" || (request.type === "ACTION" && request.action === "patch")) {
+    if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
 		if (!request.patchOperations) {
 			return true;
 		}
@@ -273,7 +273,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
                 return false;
             }
         }
-    } else if (request.type === "UPDATE") {
+    } else if (request.method === "update") {
         if (!request.content) {
             return true;
         }
@@ -288,7 +288,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
                 return false;
             }
         }
-    } else if (request.type === "CREATE") {
+    } else if (request.method === "create") {
         if (!request.content) {
 			return true;
 		}

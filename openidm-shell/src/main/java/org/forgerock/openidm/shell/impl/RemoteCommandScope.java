@@ -263,8 +263,8 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
 
             // Common request attributes
             ActionRequest request = Requests.newActionRequest("system", "CREATECONFIGURATION");
-            request.setAdditionalActionParameter(ActionRequest.FIELD_ACTION, "CREATECONFIGURATION");
-            request.setAdditionalActionParameter("_action", "CREATECONFIGURATION");
+            request.setAdditionalParameter(ActionRequest.FIELD_ACTION, "CREATECONFIGURATION");
+            request.setAdditionalParameter("_action", "CREATECONFIGURATION");
 
             final Connection accessor = getRouter();
 

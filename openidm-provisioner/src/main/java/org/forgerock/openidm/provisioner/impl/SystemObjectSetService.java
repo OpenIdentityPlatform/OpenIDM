@@ -233,7 +233,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      */
     public void onCreate(ServerContext context, String id, JsonValue value) throws ResourceException {
         ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
-        request.setAdditionalActionParameter("id", id);
+        request.setAdditionalParameter("id", id);
         request.setContent(value);
         connectionFactory.getConnection().action(context, request);
     }
@@ -250,7 +250,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     public void onUpdate(ServerContext context, String id, JsonValue oldValue, JsonValue newValue)
             throws ResourceException {
         ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
-        request.setAdditionalActionParameter("id", id);
+        request.setAdditionalParameter("id", id);
         request.setContent(newValue);
         connectionFactory.getConnection().action(context, request);
     }
@@ -265,7 +265,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      */
     public void onDelete(ServerContext context, String id, JsonValue oldValue) throws ResourceException {
         ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
-        request.setAdditionalActionParameter("id", id);
+        request.setAdditionalParameter("id", id);
         request.setContent(oldValue);
         connectionFactory.getConnection().action(context, request);
     }

@@ -651,7 +651,7 @@ policyProcessor = (function (policyConfig,policyImpl){
     processRequest =  function() {
         var returnObject = {},
             resource,
-            method = request.type,
+            method = request.method,
             compArray,
             rsrc,
             i,
@@ -675,7 +675,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             // Update the policy configuration with any resource specific
             updateResourceConfig(resource, request.resourceName);
         }
-        if (method === "READ") {
+        if (method === "read") {
             if (request.resourceName === null || request.resourceName === "") {
                 compArray = [];
                 for (i = 0; i < resources.length; i++) {
@@ -687,7 +687,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             } else {
                 returnObject = getResourceWithPolicyRequirements(resource);
             }
-        } else if (method === "ACTION") {
+        } else if (method === "action") {
             action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};

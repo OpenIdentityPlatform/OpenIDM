@@ -494,9 +494,9 @@ public class AuditServiceImpl implements AuditService {
         try {
             final String type = request.getResourceNameObject().head(1).toString();
             Map<String,String> params = new HashMap<String,String>();
-            params.putAll(request.getAdditionalQueryParameters());
+            params.putAll(request.getAdditionalParameters());
             params.put("_queryId", request.getQueryId());
-            logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalQueryParameters());
+            logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalParameters());
             AuditLogger auditLogger = getQueryAuditLogger(type);
             Map<String, Object> result = auditLogger.query(context, type, params);
 

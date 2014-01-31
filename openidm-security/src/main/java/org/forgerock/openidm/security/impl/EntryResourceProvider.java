@@ -101,9 +101,9 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
     public void updateInstance(final ServerContext context, final String resourceId,
             final UpdateRequest request, final ResultHandler<Resource> handler) {
         try {
-        	storeEntry(request.getNewContent(), resourceId);
+        	storeEntry(request.getContent(), resourceId);
         	manager.reload();
-        	handler.handleResult(new Resource(resourceId, null, request.getNewContent()));
+        	handler.handleResult(new Resource(resourceId, null, request.getContent()));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }

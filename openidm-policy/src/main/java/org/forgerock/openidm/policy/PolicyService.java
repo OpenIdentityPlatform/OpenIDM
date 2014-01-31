@@ -157,7 +157,7 @@ public class PolicyService extends AbstractScriptedService {
     public void handleAction(final ServerContext context, final ActionRequest request,
             final Bindings handler) throws ResourceException {
         super.handleAction(context, request, handler);
-        for (Map.Entry<String, String> entry : request.getAdditionalActionParameters().entrySet()) {
+        for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
             if (handler.containsKey(entry.getKey())) {
                 continue;
             }

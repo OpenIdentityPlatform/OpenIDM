@@ -167,7 +167,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
             r.setQueryExpression(query.get(QueryRequest.FIELD_QUERY_EXPRESSION).asString());
             for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
-                r.setAdditionalQueryParameter(e.getKey(), String.valueOf(e.getValue()));
+                r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
             reconContext.getService().getConnectionFactory().getConnection().query(reconContext.getService().getRouter(), r,
                     new QueryResultHandler() {

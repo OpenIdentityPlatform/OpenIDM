@@ -466,9 +466,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
 
         QueryRequest queryRequest = Requests.newQueryRequest(repoId(null));
-        queryRequest.setQueryId(request.getAdditionalActionParameters().get("_queryId"));
-        for (Map.Entry<String,String> entry : request.getAdditionalActionParameters().entrySet()) {
-            queryRequest.setAdditionalQueryParameter(entry.getKey(), entry.getValue());
+        queryRequest.setQueryId(request.getAdditionalParameters().get("_queryId"));
+        for (Map.Entry<String,String> entry : request.getAdditionalParameters().entrySet()) {
+            queryRequest.setAdditionalParameter(entry.getKey(), entry.getValue());
         }
 
         final JsonValue[] lastError = new JsonValue[1];
@@ -608,7 +608,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             // decrypt any incoming encrypted properties
-            JsonValue _new = decrypt(request.getNewContent());
+            JsonValue _new = decrypt(request.getContent());
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             for (JsonPointer pointer: request.getFields()) {
@@ -779,7 +779,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             });
 
             ActivityLog.log(connectionFactory, context, request.getRequestType(),
-                    "query: " + request.getQueryId() + ", parameters: " + request.getAdditionalQueryParameters(),
+                    "query: " + request.getQueryId() + ", parameters: " + request.getAdditionalParameters(),
                     request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -895,7 +895,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
             ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
-            request.setAdditionalActionParameter("id", id);
+            request.setAdditionalParameter("id", id);
             request.setContent(value.getContent());
             try {
                 connectionFactory.getConnection().action(context, request);
@@ -924,7 +924,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
             ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
-            request.setAdditionalActionParameter("id", id);
+            request.setAdditionalParameter("id", id);
             // TODO Where to store the old value???
             request.setContent(newValue);
             try {
@@ -953,7 +953,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
             ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
-            request.setAdditionalActionParameter("id", id);
+            request.setAdditionalParameter("id", id);
             request.setContent(oldValue.getContent());
             try {
                 connectionFactory.getConnection().action(context, request);
