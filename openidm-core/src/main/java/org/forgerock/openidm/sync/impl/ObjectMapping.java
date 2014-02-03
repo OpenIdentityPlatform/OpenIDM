@@ -42,6 +42,7 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -393,6 +394,7 @@ class ObjectMapping  {
             // FIXME Decide what to do wrt query constants and leading underscores
             r.setQueryId((String)query.get("_" + QueryRequest.FIELD_QUERY_ID));
             r.setQueryExpression((String)query.get("_" + QueryRequest.FIELD_QUERY_EXPRESSION));
+            r.setQueryFilter(QueryFilter.valueOf((String)query.get("_" + QueryRequest.FIELD_QUERY_FILTER)));
             for (Map.Entry<String, Object> e: query.entrySet()) {
                 r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
