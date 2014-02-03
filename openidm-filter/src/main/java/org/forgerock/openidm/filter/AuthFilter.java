@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.filter;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -176,7 +177,9 @@ public class AuthFilter implements SingletonResourceProvider {
                         //TODO Handle message
                         handler.handleError(new ForbiddenException("Reauthentication failed", new AuthException(authcid)));
                     }
-                    handler.handleResult(new JsonValue(null));
+                    JsonValue result = new JsonValue(new HashMap<String, Object>());
+                    result.put("reauthenticated", true);
+                    handler.handleResult(result);
                 }
             } else {
                 handler.handleError(new BadRequestException("Action " + request.getAction()
