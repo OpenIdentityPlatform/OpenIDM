@@ -46,12 +46,7 @@ if (request.method !== "query") {
         getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
             var taskDefinitionQueryParams,taskDefinition;
             if (!taskDefinitions[processDefinitionId+"|"+taskDefinitionKey]) {
-                taskDefinitionQueryParams = {
-                    "_queryId": "query-taskdefinition",
-                    "processDefinitionId": processDefinitionId,
-                    "taskDefinitionKey": taskDefinitionKey
-                };
-                taskDefinition = openidm.query("workflow/taskdefinition", taskDefinitionQueryParams);
+                taskDefinition = openidm.read("workflow/processdefinition/" + processDefinitionId + "/taskdefinition/" + taskDefinitionKey)
                 taskDefinitions[processDefinitionId+"|"+taskDefinitionKey] = taskDefinition;
             }
             return taskDefinitions[processDefinitionId+"|"+taskDefinitionKey];
@@ -67,8 +62,8 @@ if (request.method !== "query") {
             
             if (!usersWhoCanBeAssignedToTask[taskId]) {
                 
-                for(i = 0; i < request.parent.security['openidm-roles'].length; i++) {
-                    if(request.parent.security['openidm-roles'][i] === 'openidm-tasks-manager') {
+                for(i = 0; i < context.security.authorizationId.roles.length; i++) {
+                    if(context.security.authorizationId.roles[i] === 'openidm-tasks-manager') {
                         isTaskManager = true;
                         break;
                     }
@@ -143,23 +138,23 @@ if (request.method !== "query") {
     
     //code:
     
-    if (!request.params || (!request.params.userId && !request.params.userName)) {
+    if (!request.additionalParameters || (!request.additionalParameters.userId && !request.additionalParameters.userName)) {
         throw "Required params: userId or userName";
     } else {
-        if (request.params.userId) {
-            user = getUser(request.params.userId);
+        if (request.additionalParameters.userId) {
+            user = getUser(request.additionalParameters.userId);
             userId = user._id; 
             roles = user.roles;
             userName = user.userName ? user.userName : user._id;
         } else {
-            user = getUser(request.params.userName);
+            user = getUser(request.additionalParameters.userName);
             userId = user._id; 
             roles = user.roles;
             userName = user.userName ? user.userName : user._id;
         }
     }
     
-    if (request.params.viewType === 'assignee') {
+    if (request.additionalParameters.viewType === 'assignee') {
         userAssignedTasksQueryParams = {
             "_queryId": "filtered-query",
             "assignee": userName

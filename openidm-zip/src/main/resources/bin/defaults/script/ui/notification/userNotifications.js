@@ -29,10 +29,9 @@
  * 
  */
 (function () {
-    var userId, res, ret, params, notification;
+    var userId = context.security.authorizationId.id, res, ret, params, notification;
 
     if (request.method === "read") {
-        userId = request.security.id; 
         res = {};
         params = {
             "_queryId": "get-notifications-for-user",
@@ -47,8 +46,7 @@
         return res;
         
     } else if (request.method === "delete") {
-        
-        notification = openidm.read("repo/ui/notification/"+request.parent.query.notificationId);
+        notification = openidm.read("repo/ui/notification/"+request.resourceName);
         
         if(notification.receiverId === userId) {
             openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);

@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
     
     obj.deleteEntity = function(id, successCallback, errorCallback) {
         console.debug("delete entity");
-        var callParams = {url: "?notificationId=" + id, type: "DELETE", success: successCallback, error: errorCallback };
+        var callParams = {url: "/" + id, type: "DELETE", success: successCallback, error: errorCallback };
         this.serviceCall(callParams);
     };
 

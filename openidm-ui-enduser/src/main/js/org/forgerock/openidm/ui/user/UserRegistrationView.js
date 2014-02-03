@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/user/UserRegistrationView", [
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, countryStateDelegate, securityQuestionDelegate) {
     var UserRegistrationView = AbstractView.extend({
         template: "templates/user/UserRegistrationTemplate.html",
-        baseTemplate: "templates/user/LoginBaseTemplate.html",
+        baseTemplate: "templates/common/MediumBaseTemplate.html",
         delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",

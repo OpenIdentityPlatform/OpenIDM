@@ -28,7 +28,7 @@ if (request.method !== "query") {
         "message" : "Access denied"
     };
 }
-if (!request.params || (!request.params.userId && !request.params.userName)) {
+if (!request.additionalParameters || (!request.additionalParameters.userId && !request.additionalParameters.userName)) {
     throw "Required params: userId or userName";
 }
 
@@ -125,11 +125,11 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
     
     //code:
     
-    if (request.params.userId) {
-        user = getUser(request.params.userId);
+    if (request.additionalParameters.userId) {
+        user = getUser(request.additionalParameters.userId);
         roles = user.roles;
     } else {
-        user = getUser(request.params.userName);
+        user = getUser(request.additionalParameters.userName);
         roles = user.roles;
     }
     

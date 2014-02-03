@@ -25,7 +25,7 @@
 /*global healthinfo */
 
 (function () {
-    if (!request instanceof org.forgerock.json.resource.ReadRequest) {
+    if (request.method !== "read") {
          throw "Unsupported operation on ping info service: " + request.method;
     }
     
