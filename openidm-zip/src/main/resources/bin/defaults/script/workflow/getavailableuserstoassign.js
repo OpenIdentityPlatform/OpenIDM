@@ -29,7 +29,7 @@ if (request.method !== "action") {
     };
 }
 
-if (!request.params || !request.params.taskId) {
+if (!request.additionalParameters || !request.additionalParameters.taskId) {
     throw "Required param: taskId";
 }
 
@@ -82,7 +82,7 @@ if (!request.params || !request.params.taskId) {
     user,
     username,
     assigneeUserName,
-    task = openidm.read("workflow/taskinstance/" + request.params.taskId);
+    task = openidm.read("workflow/taskinstance/" + request.additionalParameters.taskId);
     
     if (!task) {
         throw "Task Not Found";

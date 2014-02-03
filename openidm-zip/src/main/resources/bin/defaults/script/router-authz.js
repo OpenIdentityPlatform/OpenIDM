@@ -264,9 +264,9 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     }
     
     if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
-		if (!request.patchOperations) {
-			return true;
-		}
+        if (!request.patchOperations) {
+            return true;
+        }
         // check each of the fields they are attempting to patch and make sure they are approved
         for (i in request.patchOperations) {
             if ((request.patchOperations[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(request.patchOperations[i].field)))) {
@@ -290,9 +290,9 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         }
     } else if (request.method === "create") {
         if (!request.content) {
-			return true;
-		}
-		for (i in request.content) {
+            return true;
+        }
+        for (i in request.content) {
             // they should only be providing parameters that they are allowed to define
             if (!containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
@@ -304,7 +304,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
 }
 
 function disallowQueryExpression() {
-	return  !request.queryExpression;
+    return  !request.queryExpression;
 }
 
 //////// Do not alter functions below here as part of your authz configuration
@@ -333,7 +333,7 @@ function passesAccessConfig(id, roles, method, action) {
                 // Check roles
                 if (containsItems(roles, config.roles.split(','))) {
                     // Check method
-                    if (method === 'undefined' || containsItem(method, config.methods)) {
+                    if (typeof method === 'undefined' || containsItem(method, config.methods)) {
                         // Check action
                         if (action === 'undefined' || action === "" || containsItem(action, config.actions)) {
                             if (typeof(config.customAuthz) !== 'undefined' && config.customAuthz !== null) {
@@ -397,7 +397,7 @@ function allow() {
         
         logger.debug("Access Check for HTTP request for resource id: " + request.resourceName);
 
-        if (passesAccessConfig(id, roles, request.method, action)) {
+        if (passesAccessConfig(request.resourceName, roles, request.method, action)) {
 //        if (passesAccessConfig(request.id, roles, request.method, action)) {
 
 

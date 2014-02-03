@@ -48,6 +48,7 @@ if (request.method !== "action") {
 }
 
 (function () {
+    
     var response    = {},
         userQuery   = {},
         user        = {},
@@ -57,10 +58,10 @@ if (request.method !== "action") {
             request.action === "securityQuestionForUserName" ||
             request.action === "checkSecurityAnswerForUserName" ||
             request.action === "setNewPasswordForUserName" ) {
-        
-        if (request.params.uid) {
-            userQuery = openidm.query("managed/user", {"_queryId": "for-userName", "uid": request.params.uid } );
-            
+
+        if (request.additionalParameters.uid) {
+            userQuery = openidm.query("managed/user", {"_queryId": "for-userName", "uid": request.additionalParameters.uid } );
+
             if (userQuery.result.length) {
                 
                 user = userQuery.result[0];
@@ -76,8 +77,8 @@ if (request.method !== "action") {
                         
                         // This could throw a policy violation if there is one in place enforcing a maximum number of attempts 
                         openidm.patch("managed/user/" + user._id, null, [{"operation" : "replace", "field" : "securityAnswerAttempts", "value": user.securityAnswerAttempts}]); 
-    
-                        if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params.securityAnswer) {
+                        
+                        if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.additionalParameters.securityAnswer) {
                             throw "Incorrect Answer";
                         } else {
     
@@ -85,8 +86,8 @@ if (request.method !== "action") {
                             patch.push({"operation" : "replace", "field" : "securityAnswerAttempts", "value" : 0});
                             
                             if (request.action === "setNewPasswordForUserName") {
-                                logger.info("Setting new password for {}", request.params.username);
-                                patch.push({"operation" : "replace", "field" : "password", "value" : request.params.newPassword});
+                                logger.info("Setting new password for {}", request.additionalParameters.username);
+                                patch.push({"operation" : "replace", "field" : "password", "value" : request.additionalParameters.newPassword});
                             } else {
                                 // used by the UI to validate passwords before actually submitting them to be changed
                                 response._id = user._id;

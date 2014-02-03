@@ -166,10 +166,16 @@ var httpAccessConfig =
         {
             "pattern"   : "endpoint/usernotifications",
             "roles"     : "openidm-authorized",
-            "methods"   : "read,delete",
+            "methods"   : "read",
             "actions"   : "*"
         },
-        
+        {
+            "pattern"   : "endpoint/usernotifications/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "delete",
+            "actions"   : "*"
+        },
+
         // Workflow-related endpoints for authorized users
 
         {
@@ -177,14 +183,14 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "request.params.userId[0] === request.security.id"
+            "customAuthz" : "request.additionalParameters.userId === context.security.authorizationId.id"
         },        
         {
             "pattern"   : "endpoint/gettasksview",
             "roles"     : "openidm-authorized",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "request.params.userId[0] === request.security.id"
+            "customAuthz" : "request.additionalParameters.userId === context.security.authorizationId.id"
         },        
         {
             "pattern"   : "workflow/taskinstance/*",
@@ -194,7 +200,7 @@ var httpAccessConfig =
             "customAuthz" : "canUpdateTask()"
         },
         {
-            "pattern"   : "workflow/processinstance/",
+            "pattern"   : "workflow/processinstance",
             "roles"     : "openidm-authorized",
             "methods"   : "create",
             "actions"   : "*",

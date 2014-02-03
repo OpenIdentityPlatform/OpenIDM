@@ -47,7 +47,7 @@ if (request.method !== "query") {
     
     var params = {
             "_queryId": "for-userName",
-            "uid": request.params.login
+            "uid": request.additionalParameters.login
         }, 
         passPhrases = [
            "human",
@@ -64,7 +64,7 @@ if (request.method !== "query") {
             "siteImage": ret.result[0].siteImage
         };
     } else {
-        code = new java.lang.String(request.params.login).hashCode();
+        code = new java.lang.String(request.additionalParameters.login).hashCode();
         code = java.lang.Math.abs(code);        
     
         ret = openidm.read("/config/ui/configuration");

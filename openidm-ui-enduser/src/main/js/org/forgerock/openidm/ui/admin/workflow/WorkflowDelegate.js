@@ -44,13 +44,13 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
         console.debug("start proccess");
         params._key = proccessNameKey;
-        this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
+        this.serviceCall({url: processManagementUrl + "/?_action=create", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
     
     obj.startProcessById = function(processDefinitionId, params, successCallback, errorCallback) {
         console.debug("start proccess");
         params._processDefinitionId = processDefinitionId;
-        this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
+        this.serviceCall({url: processManagementUrl + "/?_action=create", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
 
     obj.completeTask = function(id, params, successCallback, errorCallback) {

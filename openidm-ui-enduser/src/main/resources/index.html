@@ -4,32 +4,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 <title>OpenIDM</title>
-<script type="text/javascript">
-(function () {
-    var fakeConsole = {
-            log : function() {
-            },
-            info : function() {
-            },
-            debug : function() {
-            }
-    };
-
-    if (typeof console == "undefined") {
-        window.console = fakeConsole;
-    }
-    else
-    {
-        if (window.console.log) fakeConsole.log = window.console.log;
-        for (var key in fakeConsole)
-        {
-            if (!window.console[key]) window.console[key] = fakeConsole.log;    
-        }
-    }
-
-})();
-</script>
-
 
 <script src="libs/jquery-1.8.1-min.js"></script>
 <script src="libs/underscore-1.4.4-min.js"></script>
@@ -42,7 +16,6 @@
 <link href="css/admin/demo_table.css" rel="stylesheet" type="text/css" />
 
 
-
 <!--[if IE]>
     <link rel="stylesheet" href="css/style-ie.css" />
 <![endif]-->
@@ -51,14 +24,15 @@
 <body>
 
     <div id="messages"></div>
-    <div id="dialogs"></div>
+
     <div id="wrapper">Loading...</div>
     <div id="popup">
         <div id="popup-content" class="radious"></div>
     </div>
-    <div class="dialog-background"></div>
-
     <div id="footer"></div>
+
+    <div class="dialog-background"></div>
+    <div id="dialogs"></div>
 
 </body>
 </html>

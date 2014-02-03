@@ -24,17 +24,8 @@
 
 (function () {
     // Get the current session's user information
-    var val,secCtx = request.security;
     if (request.method === "read") {
-        if (secCtx && secCtx.username) {
-            val = {"authenticationId" : secCtx.username, 
-                   "authorizationId": request.security
-            }; 
-        } else if (secCtx) {
-            val = {"username" : secCtx.user};
-        } else {
-            throw "Invalid security context, can not retrieve user information associated with the session.";
-        }
+        return context.security;
     } else {
         throw "Unsupported operation on info login service: " + request.method;
     }
