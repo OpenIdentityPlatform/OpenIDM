@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id="chap-configuration"
@@ -28,8 +28,7 @@
  version="5.0" xml:lang="en"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Configuring OpenIDM</title>
 
  <para>OpenIDM configuration is split between <filename>.properties</filename> and container
@@ -296,7 +295,7 @@
   </indexterm>
 
   <para>OpenIDM exposes configuration objects under the
-  <literal>/openidm/config</literal> context.</para>
+  <literal>/openidm/config</literal> context path.</para>
 
   <indexterm>
   <primary>REST API</primary>
@@ -935,15 +934,18 @@ tables).</para></listitem>
   "file" : "script/echo.js" 
 }    
     </programlisting>
+
+   <!-- May want to open a bug to change context to context past in the
+   endpoint-echo.json file. -->
         
     <variablelist>
       <varlistentry>
         <term><literal>"context"</literal></term>
         <listitem>
-          <para>The URL context under which the endpoint is registered. 
+          <para>The URL context path under which the endpoint is registered.
           Currently this <emphasis>must</emphasis> be under 
           <literal>endpoint/</literal>. An endpoint registered under the 
-          context <literal>endpoint/echo</literal> is addressable over REST at 
+          context path <literal>endpoint/echo</literal> is addressable over REST at
           <literal>http://localhost:8080/openidm/endpoint/echo</literal> and 
           with the internal resource API, for example 
           <literal>openidm.read("endpoint/echo")</literal>.</para>

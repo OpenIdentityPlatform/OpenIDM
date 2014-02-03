@@ -450,7 +450,7 @@
        that are not required for the specific entry type are stripped away from
        the response. For example, a <literal>summary</literal> entry would not
        need to include a null <literal>targetObjectId</literal> field, as this
-       field would not make sense in the context of a summary. You can specify
+       would not add information to a summary. You can specify
        that this auto-formatting be disabled and return the full entry for all
        entry types. To disable entry formatting, include
        <literal>formatted=false</literal> as a query parameter in the request.</para>

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-ui'
@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM User Interface</title>
 
  <para>OpenIDM provides a customizable, browser-based user interface. The 
@@ -603,12 +602,12 @@ $ ./startup.sh</screen>
         <title>Changing the UI Path</title>
 
         <para>By default, the UI is registered at a specific URL
-        (<literal><replaceable>base-context</replaceable>/openidmui</literal>).
+        (<literal><replaceable>context-root</replaceable>/openidmui</literal>).
         To override the default URL and specify your own path, edit the
         <filename>openidm/conf/ui.context-enduser.json</filename>
         file, setting the <literal>urlContextRoot</literal> property to the
         new URL. For example, to change the path to
-        <literal><replaceable>base-context</replaceable>/exampleui</literal>,
+        <literal><replaceable>context-root</replaceable>/exampleui</literal>,
         edit the file as follows:</para>
 
         <screen>"urlContextRoot" : "/exampleui",</screen>
