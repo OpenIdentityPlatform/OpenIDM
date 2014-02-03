@@ -24,15 +24,14 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.form.DateFormType;
 import org.activiti.engine.impl.form.DefaultTaskFormHandler;
 import org.activiti.engine.impl.form.EnumFormType;
+import org.activiti.engine.impl.form.FormPropertyHandler;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
@@ -43,6 +42,7 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.DateFormTypeMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.EnumFormTypeMixIn;
+import org.forgerock.openidm.workflow.activiti.impl.mixin.FormPropertyHandlerMixIn;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskDefinitionMixIn;
 
 /**
@@ -60,6 +60,7 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
         mapper.getSerializationConfig().addMixInAnnotations(TaskDefinition.class, TaskDefinitionMixIn.class);
         mapper.getSerializationConfig().addMixInAnnotations(EnumFormType.class, EnumFormTypeMixIn.class);
         mapper.getSerializationConfig().addMixInAnnotations(DateFormType.class, DateFormTypeMixIn.class);
+        mapper.getSerializationConfig().addMixInAnnotations(FormPropertyHandler.class, FormPropertyHandlerMixIn.class);
         mapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
@@ -110,15 +111,13 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                     Map value = mapper.convertValue(taskDefinition, HashMap.class);
                     Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
                     r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
-                    List<Map> propertyList = new ArrayList<Map>();
-                    r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
                     handler.handleResource(r);
                 }
                 handler.handleResult(new QueryResult());
             } else {
                 handler.handleError(new BadRequestException("Unknown query-id"));
             }
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
     }
@@ -134,10 +133,8 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             Map value = mapper.convertValue(taskDefinition, HashMap.class);
             Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
             r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
-            List<Map> propertyList = new ArrayList<Map>();
-            r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
             handler.handleResult(r);
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
     }

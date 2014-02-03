@@ -21,12 +21,11 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.workflow.activiti.impl.mixin;
 
-import java.util.Set;
 import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.impl.form.TaskFormHandler;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.activiti.engine.form.AbstractFormType;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 
@@ -34,23 +33,17 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
  *
  * @author orsolyamebold
  */
-@JsonIgnoreProperties({"persistentState"})
-public class TaskDefinitionMixIn {
-
-    @JsonProperty(ActivitiConstants.ID)
-    protected String key;
-    @JsonProperty(ActivitiConstants.ACTIVITI_NAME)
-    protected Expression nameExpression;
-    @JsonProperty(ActivitiConstants.ACTIVITI_ASSIGNEE)
-    protected Expression assigneeExpression;
-    @JsonProperty(ActivitiConstants.ACTIVITI_CANDIDATEUSER)
-    protected Set<Expression> candidateUserIdExpressions;
-    @JsonProperty(ActivitiConstants.ACTIVITI_CANDIDATEGROUP)
-    protected Set<Expression> candidateGroupIdExpressions;
-    @JsonProperty(ActivitiConstants.ACTIVITI_DUEDATE)
-    protected Expression dueDateExpression;
-    @JsonProperty(ActivitiConstants.ACTIVITI_PRIORITY)
-    protected Expression priorityExpression;
-    @JsonProperty(ActivitiConstants.FORMPROPERTIES)
-    protected TaskFormHandler taskFormHandler;
+public class FormPropertyHandlerMixIn {
+    
+  @JsonProperty(ActivitiConstants.ID)  
+  protected String id;
+  protected String name;
+  protected AbstractFormType type;
+  protected boolean isReadable;
+  protected boolean isWritable;
+  protected boolean isRequired;
+  protected String variableName;
+  protected Expression variableExpression;
+  protected Expression defaultExpression;
+  
 }

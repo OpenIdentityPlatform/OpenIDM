@@ -85,7 +85,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
             String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
             Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
-            variables.put(ActivitiConstants.OPENIDM_CONTEXT, context.toJsonValue().getObject());
+            variables.put(ActivitiConstants.OPENIDM_CONTEXT, context.toJsonValue());
             ProcessInstance instance;
             if (processDefinitionId == null) {
                 instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);
