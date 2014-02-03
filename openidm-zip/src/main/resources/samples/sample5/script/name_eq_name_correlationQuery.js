@@ -2,8 +2,7 @@
 /*global source */
 
 (function () {
-    var myArray = [ source.userName ],
-        map = {"query": { "Equals": {"field" : "name","values" : myArray}}};
+	var map = {"_queryFilter": 'name eq "' + source.userName + '"'};
     
     return map;
 }());
