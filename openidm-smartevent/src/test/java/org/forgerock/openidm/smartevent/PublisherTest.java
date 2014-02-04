@@ -54,7 +54,7 @@ public class PublisherTest {
         return new ObjectName(StatisticsHandler.MBEAN_NAME);
     }
     
-    @Test
+    @Test(enabled = false)
     public void validateStartEndStatistics() throws Exception {
         Object dummyPayload = new JsonValue("{'test': 'some value'}");
         Object dummyContext1 = "Some context value";
