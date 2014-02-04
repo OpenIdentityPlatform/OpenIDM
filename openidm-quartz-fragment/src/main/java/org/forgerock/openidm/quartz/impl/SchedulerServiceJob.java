@@ -122,11 +122,11 @@ public class SchedulerServiceJob implements Job {
                 LogUtil.logAtLevel(logger, logLevel,
                         "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
                 // TODO: Migrate calls to router; pass context in request.
-                //ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
+                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
                 try {
                     scheduledService.execute(scheduledServiceContext);
                 } finally {
-                    //ObjectSetContext.pop();
+                    ObjectSetContext.pop();
                 }
                 LogUtil.logAtLevel(logger, logLevel,
                         "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
