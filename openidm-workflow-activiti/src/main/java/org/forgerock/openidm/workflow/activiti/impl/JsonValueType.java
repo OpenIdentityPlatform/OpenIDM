@@ -47,7 +47,7 @@ public class JsonValueType implements VariableType {
     }
 
     public boolean isCachable() {
-        return true;
+        return false;
     }
 
     public Object getValue(ValueFields valueFields) {
