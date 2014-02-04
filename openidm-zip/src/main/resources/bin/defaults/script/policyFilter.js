@@ -23,6 +23,7 @@
  */
 
 var params =  {},
+    fullResourcePath,
     result,
     enforce;
 //params._actionId = "validateObject";
@@ -31,15 +32,21 @@ params._caller = "filterEnforcer";
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
 if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
-    result = openidm.action("policy/" + request.resourceName, "validateObject", params, request.content);
+    if (request.method === "create") {
+        fullResourcePath = request.resourceName + "/" + (request.newResourceId !== null ? request.newResourceId : "*")
+    } else {
+        fullResourcePath = request.resourceName;
+    }
 
-	if (!result.result) {
-		throw {
-			"code" : 403,
-			"message" : "Policy validation failed",
-			"detail" : result
-		};
-	}
+    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content);
+
+    if (!result.result) {
+        throw {
+            "code" : 403,
+            "message" : "Policy validation failed",
+            "detail" : result
+        };
+    }
 }
 
 
