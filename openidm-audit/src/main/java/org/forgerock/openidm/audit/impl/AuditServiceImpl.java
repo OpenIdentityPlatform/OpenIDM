@@ -259,9 +259,11 @@ public class AuditServiceImpl implements AuditService {
                 throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
             }
 
+            /*
             if (request.getNewResourceId() != null) {
                 logger.warn("Audit create called with new resource id " + request.getNewResourceId() +" is disallowed");
             }
+            */
 
             Map<String, Object> obj = request.getContent().asMap();
 
@@ -302,9 +304,10 @@ public class AuditServiceImpl implements AuditService {
             }
 
             // Generate an ID for the object
-            String localId = UUID.randomUUID().toString();
+            String localId = null == request.getNewResourceId()
+                    ? UUID.randomUUID().toString()
+                    : request.getNewResourceId();
             obj.put(Resource.FIELD_CONTENT_ID, localId);
-            logger.debug("Assigned id {}", localId);
 
             // Generate unified timestamp
             if (null == obj.get("timestamp")) {
