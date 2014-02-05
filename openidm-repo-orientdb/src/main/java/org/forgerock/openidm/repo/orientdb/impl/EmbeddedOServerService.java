@@ -120,6 +120,34 @@ public class EmbeddedOServerService {
             logger.info("OrientDB clustering enabled on {}:{} with cluster name {}", new Object[] {multicastAddress, multicastPort, clusterName});
         }
 
+        JsonValue automaticBackup  = config.get("embeddedServer").get("automaticBackup");
+        Boolean backupEnabled = automaticBackup.get("enabled").defaultTo(Boolean.FALSE).asBoolean();
+        
+        if (backupEnabled) {
+            configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
+            OServerHandlerConfiguration handler = new OServerHandlerConfiguration();
+            handler.clazz = "com.orientechnologies.orient.server.handler.OAutomaticBackup";
+            configuration.handlers.add(handler);
+            
+            String targetDirectory = automaticBackup.get("targetDirectory").defaultTo("db/backup").asString();
+            String targetFileName = automaticBackup.get("targetFile").defaultTo("${DBNAME}-${DATE:yyyyMMddHHmmss}.zip").asString();
+            String firstTime = automaticBackup.get("firsttime").defaultTo("23:59:00").asString();
+            String delay = automaticBackup.get("delay").defaultTo("1d").asString();
+            String dbExclude = automaticBackup.get("dbExclude").defaultTo("temp").asString();
+            String dbInclude = automaticBackup.get("dbInclude").defaultTo("openidm").asString();
+            
+            handler.parameters = new OServerParameterConfiguration[]{
+                    new OServerParameterConfiguration("enabled", Boolean.toString(backupEnabled)),
+                    new OServerParameterConfiguration("target.directory", targetDirectory),
+                    new OServerParameterConfiguration("target.fileName", targetFileName),
+                    new OServerParameterConfiguration("firsttime", firstTime),
+                    new OServerParameterConfiguration("delay", delay),
+                    new OServerParameterConfiguration("db.exclude", dbExclude),
+                    new OServerParameterConfiguration("db.include", dbInclude)
+            };
+            logger.info("OrientDB automatic backups enabled every {} starting today at {}", new Object[] {delay, firstTime});
+        }
+
         configuration.network = new OServerNetworkConfiguration();
         configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>();
         OServerNetworkProtocolConfiguration protocol1 = new OServerNetworkProtocolConfiguration();
