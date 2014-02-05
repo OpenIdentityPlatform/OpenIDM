@@ -166,7 +166,6 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
     public void filterGenericRequest(final ServerContext context, final Request request,
             final RequestHandler next,
             final CrossCutFilterResultHandler<ScriptState, Resource> handler) {
-        logger.info("Request");
         final ScriptState state = new ScriptState(request);
         try {
             switch (evaluateOnRequest(context, state)) {

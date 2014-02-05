@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.script;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -161,8 +163,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 resource.put("result", result);
                 handler.handleResult(resource);
             }
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -183,8 +183,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             script.setBindings(script.createBindings());
             customizer.handleCreate(context, request, script.getBindings());
             evaluate(request, handler, script);
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -205,8 +203,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             script.setBindings(script.createBindings());
             customizer.handleDelete(context, request, script.getBindings());
             evaluate(request, handler, script);
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -227,8 +223,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             script.setBindings(script.createBindings());
             customizer.handlePatch(context, request, script.getBindings());
             evaluate(request, handler, script);
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -334,8 +328,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                 }
                 handler.handleResult(queryResult);
             }
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -376,8 +368,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             script.setBindings(script.createBindings());
             customizer.handleRead(context, request, script.getBindings());
             evaluate(request, handler, script);
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -398,8 +388,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             script.setBindings(script.createBindings());
             customizer.handleUpdate(context, request, script.getBindings());
             evaluate(request, handler, script);
-        } catch (ScriptThrownException e) {
-            handler.handleError(e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()));
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
@@ -409,13 +397,33 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
     }
 
-    // TODO: Investigate the ScriptThrownException
-    protected void handleScriptException(final ResultHandler<?> handler, final ScriptException e) {
-        JsonValue details = new JsonValue(new HashMap<String, Object>());
-        details.put("fileName", e.getFileName());
-        details.put("lineNumber", e.getLineNumber());
-        details.put("columnNumber", e.getColumnNumber());
-        handler.handleError(new InternalServerErrorException(e.getMessage(), e).setDetail(details));
+    protected void handleScriptException(final ResultHandler<?> handler, final ScriptException scriptException) {
+        final JsonValue detail = new JsonValue(new HashMap<String, Object>());
+        detail.put("fileName", scriptException.getFileName());
+        detail.put("lineNumber", scriptException.getLineNumber());
+        detail.put("columnNumber", scriptException.getColumnNumber());
+
+        ResourceException convertedError;
+        try {
+            throw scriptException;
+        } catch (ScriptThrownException e) {
+            convertedError = e.toResourceException(ResourceException.INTERNAL_ERROR, scriptException.getMessage());
+        } catch (ScriptException e) {
+            convertedError = new InternalServerErrorException(scriptException.getMessage(), scriptException);
+        }
+        convertedError.setDetail(detail);
+
+        /* logger.warn(scriptException.getLocalizedMessage(), convertedError) does not
+         * properly display the stacktrace when output to the console.  Build a stacktrace
+         * string manually instead.
+         */
+        StringWriter sw = new StringWriter();
+        sw.append(scriptException.getLocalizedMessage());
+        sw.append("\n");
+        convertedError.printStackTrace(new PrintWriter(sw));
+        logger.warn(sw.toString());
+
+        handler.handleError(convertedError);
     }
 
     private void evaluate(final Request request, final ResultHandler<Resource> handler,
