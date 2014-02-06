@@ -73,12 +73,12 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             var patchDefinitionObject = [], element;
             
             if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {            
-                patchDefinitionObject.push({replace: "password", value: this.$el.find("input[name=password]").val()});
+                patchDefinitionObject.push({operation: "replace", field: "password", value: this.$el.find("input[name=password]").val()});
             }
     
             if(validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {            
-                patchDefinitionObject.push({replace: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
-                patchDefinitionObject.push({replace: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val()});
+                patchDefinitionObject.push({operation: "replace", field: "securityQuestion", value: this.$el.find("select[name=securityQuestion]").val()});
+                patchDefinitionObject.push({operation: "replace", field: "securityAnswer", value: this.$el.find("input[name=securityAnswer]").val()});
             }
             
             this.delegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev, patchDefinitionObject, _.bind(function(r) {
@@ -101,10 +101,10 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
         customValidate: function () {
 
             if(validatorsManager.formValidated(this.$el.find("#passwordChange")) || validatorsManager.formValidated(this.$el.find("#securityDataChange"))) {
-                this.$el.find("input[type=submit]").removeClass('inactive').addClass('active');
+                this.$el.find("input[type=submit]").prop('disabled', false);
             }
             else {
-                this.$el.find("input[type=submit]").addClass('inactive').removeClass('active');
+                this.$el.find("input[type=submit]").prop('disabled', true);
             }
                 
             
@@ -131,6 +131,8 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                 }, this));
                 
             }, this));
+            
+            this.$el.find("input[type=submit]").prop('disabled', true);
         },
         
         reloadData: function() {
