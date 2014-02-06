@@ -40,7 +40,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class DBHelperTest {
 
-    private String dbURL = "local:./target/testdb";
+    private String dbURL = "plocal:./target/testdb";
     private String user = "admin";
     private String password = "admin";
     private int minSize = 5;
