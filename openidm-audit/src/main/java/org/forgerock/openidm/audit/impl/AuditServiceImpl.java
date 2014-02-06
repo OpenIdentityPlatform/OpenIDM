@@ -259,12 +259,6 @@ public class AuditServiceImpl implements AuditService {
                 throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
             }
 
-            /*
-            if (request.getNewResourceId() != null) {
-                logger.warn("Audit create called with new resource id " + request.getNewResourceId() +" is disallowed");
-            }
-            */
-
             Map<String, Object> obj = request.getContent().asMap();
 
             // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin, ip=127.0.0.1}  
@@ -304,7 +298,7 @@ public class AuditServiceImpl implements AuditService {
             }
 
             // Generate an ID for the object
-            String localId = null == request.getNewResourceId()
+            final String localId = (request.getNewResourceId() == null)
                     ? UUID.randomUUID().toString()
                     : request.getNewResourceId();
             obj.put(Resource.FIELD_CONTENT_ID, localId);
