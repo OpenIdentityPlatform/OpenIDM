@@ -394,7 +394,10 @@ class ObjectMapping  {
             // FIXME Decide what to do wrt query constants and leading underscores
             r.setQueryId((String)query.get("_" + QueryRequest.FIELD_QUERY_ID));
             r.setQueryExpression((String)query.get("_" + QueryRequest.FIELD_QUERY_EXPRESSION));
-            r.setQueryFilter(QueryFilter.valueOf((String)query.get("_" + QueryRequest.FIELD_QUERY_FILTER)));
+            Object queryFilter = query.get("_" + QueryRequest.FIELD_QUERY_FILTER);
+            if (queryFilter != null) {
+                r.setQueryFilter(QueryFilter.valueOf((String)queryFilter));
+            }
             for (Map.Entry<String, Object> e: query.entrySet()) {
                 r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
