@@ -136,25 +136,19 @@ public class ServletConnectionFactory implements ConnectionFactory {
      */
     RequestHandler init(JsonValue configuration, final RequestHandler handler)
             throws ScriptException {
+        final JsonValue filterConfig = configuration.get("filters").expect(List.class);
+        final List<Filter> filters = new ArrayList<Filter>(filterConfig.size());
 
-        List<Filter> filters = null;
-
-        for (JsonValue jv : configuration.get("filters").expect(List.class)) {
-            // optional
+        for (JsonValue jv : filterConfig) {
             Filter filter = newFilter(jv);
-            if (null != filter && null == filters) {
-                filters = new ArrayList<Filter>(configuration.get("filters").size());
-            }
             if (null != filter) {
                 filters.add(filter);
             }
         }
 
-        if (null != filters) {
-            return new FilterChain(handler, filters);
-        } else {
-            return handler;
-        }
+        return filters.isEmpty()
+                ? handler
+                : new FilterChain(handler, filters);
     }
 
     /**
@@ -174,16 +168,12 @@ public class ServletConnectionFactory implements ConnectionFactory {
             filterCondition = Filters.matchResourceName(pattern);
         }
 
-        EnumSet<RequestType> requestTypes = null;
+        final EnumSet<RequestType> requestTypes = EnumSet.noneOf(RequestType.class);
         for (JsonValue method : config.get("methods").expect(List.class)) {
-            if (null == requestTypes) {
-                requestTypes = EnumSet.of(method.asEnum(RequestType.class));
-            } else {
-                requestTypes.add(method.asEnum(RequestType.class));
-            }
+            requestTypes.add(method.asEnum(RequestType.class));
         }
 
-        if (null != requestTypes) {
+        if (!requestTypes.isEmpty()) {
             if (null == filterCondition) {
                 filterCondition = Filters.matchRequestType(requestTypes);
             } else {
@@ -212,16 +202,12 @@ public class ServletConnectionFactory implements ConnectionFactory {
     }
 
     private Pair<JsonPointer, ScriptEntry> getScript(JsonValue scriptJson) throws ScriptException {
-        if (!scriptJson.expect(Map.class).isNull()) {
-
-            ScriptEntry entry = scriptRegistry.takeScript(scriptJson);
-            return Pair.of(scriptJson.getPointer(), entry);
-            // TODO throw better exception
-            // throw new JsonValueException(scriptJson,
-            // "Failed to find script");
-
+        if (scriptJson.expect(Map.class).isNull()) {
+            return null;
         }
-        return null;
+
+        ScriptEntry entry = scriptRegistry.takeScript(scriptJson);
+        return Pair.of(scriptJson.getPointer(), entry);
     }
 
     // ----- Implementation of ConnectionFactory
