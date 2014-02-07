@@ -40,7 +40,7 @@ public class EmbeddedOServerServiceTest {
                 + "\"embeddedServer\" : {"
                 + "    \"automaticBackup\" : {"
                 + "        \"enabled\" : true,"
-                + "        \"targetDirectory\" : \"/backups/openidm\","
+                + "        \"targetDirectory\" : \"./target/backups\","
                 + "        \"targetFile\" : \"${DBNAME}-${DATE:yyyyMMddHHmmss}.zip\","
                 + "        \"firsttime\" : \"23:59:00\","
                 + "        \"delay\" : \"1d\""
