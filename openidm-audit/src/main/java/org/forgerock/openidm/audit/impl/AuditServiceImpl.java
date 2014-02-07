@@ -298,7 +298,7 @@ public class AuditServiceImpl implements AuditService {
             }
 
             // Generate an ID for the object
-            final String localId = (request.getNewResourceId() == null || "".equals(request.getNewResourceId()))
+            final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
                     ? UUID.randomUUID().toString()
                     : request.getNewResourceId();
             obj.put(Resource.FIELD_CONTENT_ID, localId);
