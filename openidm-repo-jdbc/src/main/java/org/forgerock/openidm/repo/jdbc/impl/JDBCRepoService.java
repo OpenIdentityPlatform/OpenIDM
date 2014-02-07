@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -204,7 +205,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         try {
             handler.handleResult(create(request));
         } catch (final ResourceException e) {
-        	e.printStackTrace();
             handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
@@ -213,17 +213,15 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public Resource create(CreateRequest request) throws ResourceException {
-        if (request.getNewResourceId() == null) {
-            throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to create.");
-        }
         if (request.getResourceNameObject().isEmpty()) {
             throw new BadRequestException(
                     "The respository requires clients to supply a type for the object to create.");
         }
         // Parse the remaining resourceName
         final String type = request.getResourceName();
-        final String localId = request.getNewResourceId();
+        final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
+                ? UUID.randomUUID().toString() // Generate ID server side.
+                : request.getNewResourceId();
         final String fullId = type + "/" + localId;
 
     	Map<String, Object> obj = request.getContent().asMap();
