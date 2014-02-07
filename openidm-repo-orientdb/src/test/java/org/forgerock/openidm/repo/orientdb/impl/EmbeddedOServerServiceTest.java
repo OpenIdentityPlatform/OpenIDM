@@ -25,10 +25,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 
 import com.orientechnologies.orient.server.plugin.OServerPlugin;
-import com.orientechnologies.orient.server.plugin.OServerPluginInfo;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
@@ -36,7 +33,7 @@ import static org.testng.Assert.*;
 
 public class EmbeddedOServerServiceTest {
     
-    @Test
+    @AfterTest
     public void automaticBackupHandlerConfigTest() throws Exception {
         Map automaticBackupMap = new HashMap();
         automaticBackupMap.put("enabled", true);
@@ -50,6 +47,7 @@ public class EmbeddedOServerServiceTest {
         embeddedServerMap.put("automaticBackup", automaticBackupMap);
         
         Map map = new HashMap();
+        map.put("dbUrl", "plocal:./target/backuptestdb");
         map.put("embeddedServer", embeddedServerMap);
         
         JsonValue config = new JsonValue(map);

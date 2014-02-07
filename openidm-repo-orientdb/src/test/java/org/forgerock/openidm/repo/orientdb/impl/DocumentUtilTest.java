@@ -48,7 +48,7 @@ import static org.fest.assertions.api.Assertions.entry;
 
 public class DocumentUtilTest {
 
-    String dbURL = "local:target/docutiltestdb";
+    String dbURL = "plocal:./target/docutiltestdb";
     ODatabaseDocumentTx db = null; 
     String orientDocClass = "Sample";
     OServer server;
