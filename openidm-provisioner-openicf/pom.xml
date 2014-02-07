@@ -36,6 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
+        <openicf.framework.version>1.1.2.0</openicf.framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -64,7 +65,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.2.0</version>
+            <version>${openicf.framework.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.forgerock.openicf.framework</groupId>
@@ -117,7 +118,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>1.1.2.0</version>
+            <version>${openicf.framework.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -208,12 +209,12 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework</artifactId>
-                                    <version>1.1.2.0</version>
+                                    <version>${openicf.framework.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
-                                    <version>1.1.2.0</version>
+                                    <version>${openicf.framework.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
