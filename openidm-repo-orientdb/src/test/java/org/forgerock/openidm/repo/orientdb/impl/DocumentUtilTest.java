@@ -46,7 +46,7 @@ import static org.fest.assertions.MapAssert.entry;
 
 public class DocumentUtilTest {
 
-    String dbURL = "local:target/docutiltestdb";
+    String dbURL = "plocal:./target/docutiltestdb";
     ODatabaseDocumentTx db = null; 
     String orientDocClass = "Sample";
 
