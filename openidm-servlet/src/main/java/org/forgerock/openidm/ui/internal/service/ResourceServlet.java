@@ -139,6 +139,10 @@ public final class ResourceServlet
         // instance is activated
         bundleListener = new BundleListener() {
             public void bundleChanged(BundleEvent event) {
+                if (event == null) {
+                    logger.debug("BundleEvent is null for bundle {}", bundleName);
+                    return;
+                }
                 Bundle eventBundle = event.getBundle();
                 if (eventBundle != null && eventBundle.getSymbolicName() != null && 
                         eventBundle.getSymbolicName().equals(bundleName)) {
