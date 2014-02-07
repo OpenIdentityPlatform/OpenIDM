@@ -24,8 +24,8 @@
 package org.forgerock.openidm.repo.orientdb.impl;
 
 
+import org.codehaus.jackson.map.ObjectMapper;
 import com.orientechnologies.orient.server.plugin.OServerPlugin;
-import java.util.HashMap;
 import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
@@ -35,22 +35,35 @@ public class EmbeddedOServerServiceTest {
     
     @AfterTest
     public void automaticBackupHandlerConfigTest() throws Exception {
-        Map automaticBackupMap = new HashMap();
-        automaticBackupMap.put("enabled", true);
-        automaticBackupMap.put("targetDirectory", "./target/backups");
-        automaticBackupMap.put("targetFile", "${DBNAME}-${DATE:yyyyMMddHHmmss}.zip");
-        automaticBackupMap.put("firsttime", "23:59:00");
-        automaticBackupMap.put("delay", "1d");
+        String automaticBackupConfig = "{"
+                + "\"dbUrl\" : \"plocal:./target/backuptestdb\","
+                + "\"embeddedServer\" : {"
+                + "    \"automaticBackup\" : {"
+                + "        \"enabled\" : true,"
+                + "        \"targetDirectory\" : \"./target/backups\","
+                + "        \"targetFile\" : \"${DBNAME}-${DATE:yyyyMMddHHmmss}.zip\","
+                + "        \"firsttime\" : \"23:59:00\","
+                + "        \"delay\" : \"1d\""
+                + "    },"
+                + "    \"enabled\" : true,"
+                + "    \"overrideConfig\" : {"
+                + "        \"network\" : {"
+                + "            \"listeners\" : {"
+                + "                \"binary\" : {"
+                + "                    \"ipAddress\" : \"0.0.0.0\","
+                + "                    \"portRange\" : \"2424-3434\""
+                + "                },"
+                + "                \"http\" : {"
+                + "                    \"ipAddress\" : \"127.0.0.1\","
+                + "                    \"portRange\" : \"2480-3480\""
+                + "                }"
+                + "            }"
+                + "        }"
+                + "    }"
+                + "}}";
 
-        Map embeddedServerMap = new HashMap();
-        embeddedServerMap.put("enabled", true);
-        embeddedServerMap.put("automaticBackup", automaticBackupMap);
-        
-        Map map = new HashMap();
-        map.put("dbUrl", "plocal:./target/backuptestdb");
-        map.put("embeddedServer", embeddedServerMap);
-        
-        JsonValue config = new JsonValue(map);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonValue config = new JsonValue((Map)mapper.readValue(automaticBackupConfig, Map.class));
         EmbeddedOServerService embeddedOServerService = new EmbeddedOServerService();
         embeddedOServerService.activate(config);
         assertNotNull(embeddedOServerService.orientDBServer);
