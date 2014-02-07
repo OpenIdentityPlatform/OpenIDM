@@ -112,12 +112,12 @@ public final class TestUtil {
 
             @Override
             public ServerContext createServerContext() throws ResourceException {
-                return new ServerContext(new RootContext(), connection);
+                return new ServerContext(new RootContext());
             }
 
             @Override
             public ServerContext createServerContext(Context context) throws ResourceException {
-                return new ServerContext(context, connection);
+                return new ServerContext(context);
             }
         }
     }

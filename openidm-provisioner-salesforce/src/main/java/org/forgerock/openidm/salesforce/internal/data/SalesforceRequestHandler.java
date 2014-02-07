@@ -26,6 +26,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -97,6 +98,12 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
      */
     @Reference(policy = ReferencePolicy.STATIC)
     protected RouterRegistry routerRegistryService;
+
+    /**
+     * The Connection Factory
+     */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     private SalesforceConnection connection = null;
 
@@ -795,7 +802,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                         ReadRequest readRequest =
                                 Requests.newReadRequest("/system/" + organizationName
                                         + "/connect/organization");
-                        serverContext.getConnection().read(serverContext, readRequest);
+                        connectionFactory.getConnection().read(serverContext, readRequest);
                         result.put("ok", true);
                     } catch (Throwable e) {
                         result.put("error", e.getMessage());
