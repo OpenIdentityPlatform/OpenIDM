@@ -23,6 +23,11 @@
     </formats>
     <fileSets>
         <fileSet>
+            <directory>${basedir}/src/main/resources/security</directory>
+            <outputDirectory>/openidm/security</outputDirectory>
+            <fileMode>0600</fileMode>
+        </fileSet>        
+        <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
             <excludes>
