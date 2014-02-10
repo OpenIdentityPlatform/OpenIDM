@@ -76,7 +76,6 @@ public class EmailServiceImpl implements SingletonResourceProvider {
         logger.debug("External Email service action called for {} with {}", request
                 .getResourceName(), request.getAdditionalParameters());
         try {
-            // TODO Fix the params and handle
             emailClient.send(request.getAdditionalParameters());
         } catch (ResourceException e) {
            handler.handleError(e);
