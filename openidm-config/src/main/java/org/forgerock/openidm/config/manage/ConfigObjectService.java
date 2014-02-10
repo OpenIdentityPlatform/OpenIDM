@@ -177,7 +177,7 @@ public class ConfigObjectService implements RequestHandler {
                 }
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-                JsonValue value = enhancedConfig.getConfiguration(props, context.getBundleContext(), resourceName.toString());
+                JsonValue value = enhancedConfig.getConfiguration(props, resourceName.toString(), false);
                 result = value.asMap();
                 logger.debug("Read configuration for service {}", resourceName);
             }
