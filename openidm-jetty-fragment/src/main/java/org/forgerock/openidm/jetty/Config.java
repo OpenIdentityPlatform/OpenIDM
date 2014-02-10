@@ -63,7 +63,6 @@ public class Config {
                     }
                     configuration.update(props);
                 } else {
-                    System.out.println("Updating configuration");
                     configuration.update();
                 }
             }  
