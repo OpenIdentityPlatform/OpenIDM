@@ -415,6 +415,7 @@ public class TaskScannerJob {
             try {
                 retryClaimTask = false;
                 _input = updateValueWithObject(resourceID, _input, startField, DATE_UTIL.now());
+                _input = updateValueWithObject(resourceID, _input, completedField, null);
                 logger.debug("Claimed task and updated StartField: {}", _input);
                 claimedTask = true;
             } catch (PreconditionFailedException ex) {
@@ -422,7 +423,7 @@ public class TaskScannerJob {
                     // and check if it's still in a state we want to process the task.
                     _input = retrieveObject(resourceID, id);
                     String currentStartDateStr = _input.get(startField).asString();
-                    String currentCompletedDateStr = _input.get(completedField).asString();
+                    String currentCompletedDateStr = (_input.get(completedField) == null)  ? null : _input.get(completedField).asString();
                     if (currentCompletedDateStr == null && (currentStartDateStr == null || currentStartDateStr.equals(expectedStartDateStr))) {
                         retryClaimTask = true;
                     } else {
