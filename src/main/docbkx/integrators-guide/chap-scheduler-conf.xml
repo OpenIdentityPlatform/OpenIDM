@@ -680,7 +680,10 @@
         <member><literal>"started"</literal> specifies the field that stores 
         the timestamp for when the task begins.</member>
         <member><literal>"completed”</literal> specifies the field that stores 
-        the timestamp for when the task completes its operation.</member>
+        the timestamp for when the task completes its operation. The
+        <literal>"completed"</literal> field is present as soon as the task has
+        started, but its value is <literal>null</literal> until the task has
+        completed.</member>
        </simplelist>
        </listitem>
       </varlistentry>
