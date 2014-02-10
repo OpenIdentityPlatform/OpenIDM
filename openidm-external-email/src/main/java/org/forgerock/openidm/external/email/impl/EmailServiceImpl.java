@@ -77,11 +77,12 @@ public class EmailServiceImpl implements SingletonResourceProvider {
                 .getResourceName(), request.getAdditionalParameters());
         try {
             // TODO Fix the params and handle
-            emailClient.send(request.getContent().asMap());
+            emailClient.send(request.getAdditionalParameters());
         } catch (ResourceException e) {
            handler.handleError(e);
         }
         result.put("status", "OK");
+        handler.handleResult(new JsonValue(result));
     }
 
     @Override

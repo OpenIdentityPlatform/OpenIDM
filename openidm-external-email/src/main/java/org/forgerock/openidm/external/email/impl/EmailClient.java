@@ -96,7 +96,7 @@ public class EmailClient {
         session = Session.getInstance(props);
     }
 
-    public void send(Map<String, Object> params) throws BadRequestException {
+    public void send(Map<String, String> params) throws BadRequestException {
         // _from : the From: address
         // _to : The To: recipients - a comma separated email address strings 
         // _cc: The Cc: recipients - a comma separated email address strings 
