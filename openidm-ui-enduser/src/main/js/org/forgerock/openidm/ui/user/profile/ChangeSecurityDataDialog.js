@@ -40,12 +40,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
 ], function(Dialog, validatorsManager, conf, userDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
-        
-        data: {         
-            width: 800,
-            height: 400
-        },
-        
+
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
@@ -114,13 +109,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             this.addAction($.t("common.form.update"), "submit");
             
             this.delegate = conf.globalData.userComponent === "internal/user" ? internalUserDelegate : userDelegate;
-            
-            if(conf.globalData.userComponent === "internal/user") {
-                this.data.height = 260;
-            } else if(conf.globalData.securityQuestions === true) {
-                this.data.height = 475;
-            }
-            
+                        
             $("#dialogs").hide();
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {

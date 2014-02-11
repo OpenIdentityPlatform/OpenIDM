@@ -70,14 +70,14 @@ var httpAccessConfig =
         // These options should only be available anonymously if securityQA is enabled
         {  
            "pattern"    : "config/ui/secquestions",
-           "roles"      : "openidm-reg",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
         },
         {  
            "pattern"    : "managed/user",
-           "roles"      : "openidm-reg",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "create",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')"
@@ -86,7 +86,7 @@ var httpAccessConfig =
         // Anonymous user can call the siteIdentification endpoint if it is enabled:
         {  
            "pattern"    : "endpoint/siteIdentification",
-           "roles"      : "openidm-reg",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('siteIdentification')"
@@ -95,7 +95,7 @@ var httpAccessConfig =
         // Anonymous user can call the securityQA endpoint if it enabled:
         {  
            "pattern"    : "endpoint/securityQA",
-           "roles"      : "openidm-reg",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
@@ -103,7 +103,7 @@ var httpAccessConfig =
         // This is needed by both self reg and security questions
         {  
            "pattern"    : "policy/managed/user/*",
-           "roles"      : "openidm-reg",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read,action",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"

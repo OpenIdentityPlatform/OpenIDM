@@ -398,8 +398,6 @@ function allow() {
         logger.debug("Access Check for HTTP request for resource id: " + request.resourceName);
 
         if (passesAccessConfig(request.resourceName, roles, request.method, action)) {
-//        if (passesAccessConfig(request.id, roles, request.method, action)) {
-
 
             logger.debug("Request allowed");
             return true;

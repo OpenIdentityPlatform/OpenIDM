@@ -33,9 +33,21 @@ define("org/forgerock/openidm/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(commonLoginView, siteIdentificationDelegate, conf) {
     
-    var LoginView = Object.getPrototypeOf(commonLoginView);
+    var LoginView = function () {},
+        obj;
+
+    LoginView.prototype = commonLoginView;
     
-    LoginView.events["change input[name=login]"] = function() {
+    obj = new LoginView();
+
+    obj.render = function (args) {
+        if (conf.globalData.securityQuestions || conf.globalData.selfRegistration || conf.globalData.siteIdentification) {
+            obj.baseTemplate = "templates/common/MediumBaseTemplate.html";
+        }
+        commonLoginView.render.call(this, args);
+    };
+
+    obj.events["change input[name=login]"] = function() {
         var login = this.$el.find("input[name=login]").val();
         
         if(conf.globalData.siteIdentification) {
@@ -55,7 +67,7 @@ define("org/forgerock/openidm/ui/user/LoginView", [
         }
     };
     
-    return LoginView;
+    return obj;
 });
 
 
