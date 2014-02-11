@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
 ], function(Dialog, validatorsManager, userDelegate, eventManager, constants, conf, securityQuestionDelegate) {
     var ForgottenPasswordDialog = Dialog.extend({    
         contentTemplate: "templates/user/ForgottenPasswordTemplate.html",
-        baseTemplate: "templates/common/LoginBaseTemplate.html",
+        baseTemplate: "templates/common/MediumBaseTemplate.html",
         
         events: {
             "click .dialogActions input[type=submit]": "formSubmit",
@@ -47,17 +47,6 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
             "customValidate": "customValidate",
             "userNameFound": "userNameFound",
             "userNameNotFound": "userNameNotFound"
-        },
-        
-        data: {         
-            width: 800,
-            height: 400
-        },
-        
-        heights : {
-            "userName": 210,
-            "securityAnswer": 300,
-            "password": 400
         },
         
         securityQuestions: {},
@@ -75,8 +64,6 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
                     this.$el.find("input[name=resetUsername]").trigger("change");
                     delete conf.forgottenPasswordUserName;
                 }
-                this.data.height = this.heights.userName;
-                this.resize();
             }, this));
             
             securityQuestionRef = this.securityQuestions;
@@ -100,24 +87,18 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
                     this.$el.find("input[name=fgtnSecurityAnswer]").val("");
                     this.$el.find("input[name=password]").val("");
                     this.$el.find("input[name=passwordConfirm]").val("");
-                    this.data.height = this.heights.userName;
-                    this.resize();
                 }
             }
         },
         userNameFound: function (event, securityQuestion) {
             console.log(this.securityQuestions[securityQuestion]);
             $("#fgtnSecurityQuestion").text(this.securityQuestions[securityQuestion]);
-            this.data.height = this.heights.securityAnswer;
-            this.resize();
             this.$el.find("#fgtnAnswerDiv").show();
             this.$el.find("input[name=fgtnSecurityAnswer]").focus();
         },
         userNameNotFound: function () {
             $("#fgtnAnswerDiv, #fgtnPasswordDiv").hide();
             this.$el.find(".dialogActions input[type=submit]").hide();
-            this.data.height = this.heights.userName;
-            this.resize();
             this.$el.find("input[name=resetUsername]").focus();
         },
         changePassword: function() {
@@ -146,14 +127,10 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
                         this.$el.trigger("onValidate");
                         this.$el.find("#fgtnPasswordDiv").show();
                         this.$el.find(".dialogActions input[type=submit]").show();
-                        this.data.height = this.heights.password;
-                        this.resize();
                     }, this)); 
                 }
                 else {
                     this.$el.find("#fgtnPasswordDiv").hide();
-                    this.data.height = this.heights.securityAnswer;
-                    this.resize();
                     this.$el.find("input[name=_id]").val("");
                 }
                 
