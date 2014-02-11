@@ -184,7 +184,13 @@ script task using expression resolver: [
  
  <section xml:id="setting-up-remote-integration">
   <title>Setting Up Remote Integration</title>
-  <para>You can set up integration with a remote Activiti engine, as described 
+
+  <para>
+   Note that Activiti Remote Integration is currently
+   not supported in production environments.
+  </para>
+
+  <para>You can set up integration with a remote Activiti engine, as described
   in the following steps.</para>
   <procedure>
    <step>

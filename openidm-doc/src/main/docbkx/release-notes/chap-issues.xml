@@ -27,8 +27,7 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Fixes, Limitations, &amp; Known Issues</title>
 
  <!-- TODO: Update for the release. -->
@@ -120,6 +119,13 @@
 
   <para>A conditional GET request, with the <literal>If-None-Match</literal> 
   request header, is not currently supported.</para>
+
+  <para>
+   OpenIDM provides an embedded workflow and business process engine based
+   on Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+   As an embedded system, local integration is supported. Remote integration
+   is not supported.
+  </para>
 
  </section>
 
