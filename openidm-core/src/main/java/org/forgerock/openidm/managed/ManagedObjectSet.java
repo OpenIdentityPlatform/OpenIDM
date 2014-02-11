@@ -709,14 +709,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 }
 
                 if (enforcePolicies) {
-                    // Validate policies on the patched object
-                    // JsonValue params = new JsonValue(new HashMap<String, Object>());
-                    // params.add("_action", "validateObject");
-                    // params.add("value", newValue);
                     ActionRequest policyAction = Requests.newActionRequest(
-                            "/policy" + managedId(resourceName), "validateObject");
+                            "policy" + managedId(resourceName + resourceId), "validateObject");
                     policyAction.setContent(newValue);
-
+                    if (ContextUtil.isExternal(context)) {
+                        policyAction.setAdditionalParameter("external", "true");
+                    }
                     // JsonValue result = new JsonValue(cryptoService.getRouter().action("policy/"+ managedId(id), params.asMap()));
                     JsonValue result = connectionFactory.getConnection().action(context, policyAction);
                     if (!result.isNull() && !result.get("result").asBoolean()) {

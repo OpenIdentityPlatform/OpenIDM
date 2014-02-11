@@ -352,10 +352,10 @@ policyImpl = (function (){
         }
         
         var isHttp = (context.caller === 'http'),
+            params = request.additionalParameters,
             actionParams,response,currentObject;
         
-        if (isHttp === "true" || isHttp === true) {
-            
+        if (isHttp === "true" || isHttp === true || (params !== null && params.external)) {
             if (request.resourceName && !request.resourceName.match('/$')) { 
                 // only do a read if there is no id specified, in the case of new records 
                 currentObject = openidm.read(request.resourceName);
@@ -745,7 +745,7 @@ additionalPolicyLoader = (function (config,impl) {
         config.policies.push(policy);
     };
     
-    obj.load = function (additionPolicies) {
+    obj.load = function (additionalPolicies) {
         var i,j;
         //Load additional policy scripts if configured
         for (i = 0; i < additionalPolicies.length; i++) {
