@@ -56,6 +56,10 @@ class ManagedObjectProperty {
     private static enum Scope {
         PUBLIC, PRIVATE
     }
+    
+    private static enum PropertyType {
+        VIRTUAL, MEMBER
+    }
 
     /**
      * Setup logging for the {@link ManagedObjectProperty}.
@@ -82,6 +86,9 @@ class ManagedObjectProperty {
 
     /** String that indicates the privacy level of the property. */
     private final Scope scope;
+    
+    /** String that indicates the property type, such as a virtual property. */
+    private final PropertyType type;
     
     /** The CryptoService implementation */
     private CryptoService cryptoService;
@@ -129,6 +136,8 @@ class ManagedObjectProperty {
         }
 
         scope = config.get("scope").defaultTo(Scope.PUBLIC.name()).asEnum(Scope.class);
+        
+        type = config.get("type").defaultTo(PropertyType.MEMBER.name()).asEnum(PropertyType.class);
     }
 
     /**
@@ -164,25 +173,28 @@ class ManagedObjectProperty {
      */
     private void execScript(ServerContext context, String type, ScriptEntry script,
             JsonValue managedObject) throws InternalServerErrorException {
-        if (script != null) {
-            Script scope = script.getScript(context);
-            scope.put("property", managedObject.get(name).getObject());
-            try {
-                scope.eval();
-            } catch (ScriptException se) {
-                String msg = name + " " + type + " script encountered exception";
-                logger.debug(msg, se);
-                throw new InternalServerErrorException(msg, se);
+        try {
+            if (script != null) {
+                Object result = null;
+                Script scope = script.getScript(context);
+                scope.put("property", managedObject.get(name).getObject());
+                scope.put("propertyName", name);
+                scope.put("object", managedObject.getObject());
+                try {
+                    result = scope.eval();
+                } catch (ScriptException se) {
+                    String msg = name + " " + type + " script encountered exception";
+                    logger.debug(msg, se);
+                    throw new InternalServerErrorException(msg, se);
+                }
+
+                logger.debug("Script {} result: {}", context, result);
+                managedObject.put(name, result);
             }
-            // property (still) defined in scope
-            if (scope.getBindings().containsKey("property")) {
-                // propagate it back to managed object
-                managedObject.put(name, scope.get("property"));
-                // not in scope but was in managed object
-            } else if (managedObject.isDefined(name)) {
-                // remove it from managed object
-                managedObject.remove(name);
-            }
+        } catch (InternalServerErrorException ex ) {
+            // This logging can be removed once there is a product wide logging of internal failures
+            logger.warn("Failure in invoking script " + type + " on " + name + ": " 
+                    + ex.getMessage(), ex);
         }
     }
 
@@ -239,6 +251,10 @@ class ManagedObjectProperty {
      */
     void onStore(ServerContext context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
+        // Virtual properties do not get stored with the DB
+        if (type.equals(PropertyType.VIRTUAL)) {
+            value.remove(name);
+        }
         setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
             if (!cryptoService.isEncrypted(value)) {
@@ -269,5 +285,9 @@ class ManagedObjectProperty {
 
     boolean isPrivate() {
         return Scope.PRIVATE.equals(scope);
+    }
+    
+    boolean isVirtual() {
+        return PropertyType.VIRTUAL.equals(type);
     }
 }
