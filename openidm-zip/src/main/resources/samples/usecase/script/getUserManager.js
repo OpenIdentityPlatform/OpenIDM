@@ -46,25 +46,25 @@ function processDelegates(delegate, candidates) {
     now = new Date();
     
     if (startDate < now && now < endDate ) {
-        pushIfNotContains(candidates.managers, delegate.to);
+        pushIfNotContains(candidates, delegate.to);
     }
 }
 
 (function () {
     if (request.method === "query") {
-        if (!request.params.userId) {
+        if (!request.additionalParameters.userId) {
         throw "Parameter userId is required";   
         }
-        var userId = request.params.userId,
+        var userId = request.additionalParameters.userId,
         user = openidm.read("managed/user/"+userId), i,
-        managerCandidates = { managers : ["superadmin"] }, manager;
+        managerCandidates = ["superadmin"], manager;
 
         if (!user) {
             throw "User not found: " + userId;
         }
 
         if (user.manager && user.manager.managerId) {
-            pushIfNotContains(managerCandidates.managers, user.manager.managerId);
+            pushIfNotContains(managerCandidates, user.manager.managerId);
             manager = openidm.read("managed/user/"+user.manager.managerId);
             if (manager.delegates !== undefined) {
                 for (i = 0; i < manager.delegates.length; i++) {

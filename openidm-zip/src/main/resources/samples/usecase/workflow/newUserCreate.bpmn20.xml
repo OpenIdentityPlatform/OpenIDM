@@ -113,13 +113,20 @@
                         &lt;option value=&quot;contractor&quot;&gt;Contractor&lt;/option&gt;
                 &lt;/select&gt;
             &lt;/div&gt;
+            &lt;div class=&quot;field&quot;&gt;
+                    &lt;label&gt;Send Email Notification&lt;/label&gt; 
+                    &lt;select name=&quot;emailEnabled&quot;&gt;
+                         &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
+                         &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+
         &lt;/div&gt;
     &lt;/fieldset&gt;
 
 &lt;script&gt;
-require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], function (v) { 
-   v.bindValidators($(&apos;#processDetails form&apos;), &quot;managed/user/&quot;);
-});
+require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
+  .bindValidators($(&apos;#processDetails form&apos; ), &quot;managed/user/*&quot; );
 &lt;/script&gt;
 "/>
                 <activiti:formProperty id="userName"
@@ -181,24 +188,22 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                     <activiti:value id="employee" name="Employee"/>
                     <activiti:value id="contractor" name="Contractor"/>
                 </activiti:formProperty>
+                <activiti:formProperty id="emailEnabled"
+                           name="Send Email Notification"
+                           type="boolean" />
             </extensionElements>
         </startEvent>
         <sequenceFlow sourceRef="start" targetRef="decisionPrep"/>
 
-        <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy">
+        <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[ 
                 params = [_queryExpression:"select * from managed_user where title='manager' and department='"+department+"'"];
                 manager = openidm.query("managed/user", params)
-                
-                StringBuilder builder = new StringBuilder();
-                for (String string : manager.result._id) {
-                    if (builder.length() > 0) {
-                        builder.append(",");
-                    }
-                    builder.append(string);
-                }
 
-                candidateUsers = builder.toString();
+                candidateUsers = []
+                for ( m in manager.result._id ) {
+                    candidateUsers.add(m)
+                }
           ]]>
             </script>
         </scriptTask>
@@ -343,11 +348,12 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
 $(&apos;#taskDetails form select[name=department]&apos;).val(&quot;{{{variables.department}}}&quot;);
 $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.userType}}&quot;);
 {{#if assignee}}
-require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], function (v) { 
-   v.bindValidators($(&apos;#taskDetails form&apos;), &quot;managed/user/&quot;, function () {
-       v.validateAllFields($(&apos;#taskDetails form&apos;));
-   });
-});
+(function () {
+  var v = require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; );
+  v.bindValidators($(&apos;#taskDetails form&apos; ), &quot;managed/user/*&quot;, function () {
+      v.validateAllFields($(&apos;#taskDetails form&apos;));
+  });
+}());
 {{/if}}
 &lt;/script&gt;
 "/>
@@ -480,14 +486,26 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                     user.put("sunset", sunsetMap)
                 }
                 
-                assignedManager = manager.result[0]
+                if (candidateUsers.size > 1) {
+                    candidateUsers.find { 
+                        if (it != 'superadmin')  { 
+                            assignedManager = openidm.read('managed/user/' + it);
+                            return true // break
+                        }
+                        return false // keep looping
+                    }
+
+                } else {
+                    assignedManager = openidm.read('managed/user/' + candidateUsers.get(0))
+                }
                 managerMap = [displayName:assignedManager.displayName, managerId:assignedManager._id]
                 managerMap.put('$ref', "managed/user/"+assignedManager._id)
                 user.put("manager", managerMap)
 
-                openidm.create('managed/user', user)
+                openidm.create('managed/user', null, user)
                 
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
+                execution.setVariable('readNewUserFromRepoParams', readNewUserFromRepoParams)
                 ]]>
             </script>
         </scriptTask>
@@ -521,8 +539,16 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                 "notificationSubtype" : "",
                 "message" : "Welcome! Your work days are from " + startDate + " to " + endDate
                 ];
-                openidm.create("repo/ui/notification/", newRequesterNotification)
-                openidm.create("repo/ui/notification/", newContractorNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newContractorNotification)
+                
+                if (emailEnabled) {
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The requested user ' + userName + ' was successfully created']
+                    openidm.action("external/email", 'sendEmail',  emailParams);
+                    emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
+                    openidm.action("external/email", 'sendEmail', emailParams);
+                }
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -547,7 +573,13 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                 "notificationSubtype" : "",
                 "message" : "Your request to create user " + userName + " was denied."
                 ];
-                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
+                
+                if (emailEnabled) {
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your request to create user ' + userName + ' was denied.']
+                    openidm.action("external/email", 'sendEmail', emailParams);
+                }
                 
             </script>
         </scriptTask>

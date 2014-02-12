@@ -18,9 +18,11 @@
                 familyName = user.familyName
                 email = user.email 
                 department = user.department
-                candidateManagers = openidm.query('endpoint/getusermanager', [userId:startUserId]).managers
+                params = [ _queryId: 'getManager', userId: startUserId];
+                candidateManagers = openidm.query('endpoint/getusermanager', params).result
                 hasBusiness = (user.accounts != null && user.accounts.contains("Business"))
                 hasProject = (user.accounts != null && user.accounts.contains("Project"))
+                execution.setVariable('candidateManagers', candidateManagers)
                 ]]>
             </script>
         </scriptTask>
@@ -174,11 +176,9 @@
                 if (project) {
                     newAccounts.push("Project")
                 }
-                params = new java.util.HashMap()
-                params.put('_action', 'patch')
-                list = [[replace:'accounts',value:newAccounts]]
-                params.put('_entity', list)
-                openidm.action('managed/user/'+userName, params)
+                
+                params = [[operation:'replace', field: 'accounts', value : newAccounts]]
+                openidm.patch('managed/user/'+userName, null, params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
@@ -199,7 +199,7 @@
                 "message" : "The access request was accepted"
                 ];
                 
-                openidm.create("repo/ui/notification/", requesterNotification)
+                openidm.create("repo/ui/notification/", null, requesterNotification)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -233,7 +233,7 @@
                 "notificationSubtype" : "",
                 "message" : "Your access request was denied by " + rejecter
                 ];
-                openidm.create("repo/ui/notification/", requesterNotification)
+                openidm.create("repo/ui/notification/", null, requesterNotification)
                 
             </script>
         </scriptTask>

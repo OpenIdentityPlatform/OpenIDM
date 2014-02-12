@@ -191,7 +191,14 @@ var httpAccessConfig =
             "methods"   : "query",
             "actions"   : "*",
             "customAuthz" : "request.additionalParameters.userId === context.security.authorizationId.id"
-        },        
+        },
+        {
+            "pattern"   : "workflow/taskinstance/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "action",
+            "actions"   : "complete",
+            "customAuthz" : "isMyTask()"
+        },
         {
             "pattern"   : "workflow/taskinstance/*",
             "roles"     : "openidm-authorized",
