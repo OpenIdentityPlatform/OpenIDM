@@ -438,10 +438,12 @@
                 <include>conf/schedule-taskscan_sun*.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
+                <include>conf/external.email.json</include>
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
                 <include>script/sun*.js</include>
                 <include>workflow/newUserCreate.bpmn20.xml</include>
+                <include>workflow/sunrise.bpmn20.xml</include>
                 <include>workflow/sunset.bpmn20.xml</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>

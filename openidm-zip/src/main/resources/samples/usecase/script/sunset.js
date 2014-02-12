@@ -6,7 +6,7 @@
  "_key": "sunset"
 };
  
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, params);
+openidm.create('workflow/processinstance', null, params);
     
     return true; // return true to indicate successful completion
 }());

@@ -11,7 +11,7 @@
             
         <sequenceFlow sourceRef="start" targetRef="fetchData"/>
 
-        <scriptTask id="fetchData" name="Prepare Task" scriptFormat="groovy">
+        <scriptTask id="fetchData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[ 
                 user = openidm.read(userId)
                 userName = user.userName
@@ -73,11 +73,8 @@
         
         <scriptTask id="deactivateManagedUser" scriptFormat="groovy">
             <script>
-                params = new java.util.HashMap()
-                params.put('_action', 'patch')
-                list = [[replace:'accountStatus',value:'inactive']]
-                params.put('_entity', list)
-                openidm.action('managed/user/'+userName, params)
+                params = [[operation: 'replace', field:'accountStatus',value:'inactive']]
+                openidm.patch(userId, null, params)
                 
             </script>
         </scriptTask>
@@ -99,7 +96,7 @@
                 "message" : "The requested user " + userName + " was successfully inactivated"
                 ];
                 
-                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -120,11 +117,8 @@
                 if (endDate != "") {
                     endDateISO = formatUTC.format(formatUTCDate.parse(endDate))
                     sunsetMap = [date:endDateISO.toString()]
-                    params = new java.util.HashMap()
-                    params.put('_action', 'patch')
-                    list = [[replace:'sunset',value:sunsetMap]]
-                    params.put('_entity', list)
-                    openidm.action('managed/user/'+userName, params)
+                    params = [[operation: 'replace', field:'sunset',value:sunsetMap]]
+                    openidm.patch(userId, null, params)
                 }
                 
                 requestDate = formatUTC.format(new Date());
@@ -136,9 +130,9 @@
                 "createDate" : requestDate,
                 "notificationType" : "warning",
                 "notificationSubtype" : "",
-                "message" : "Contract of " + userName + " was extended"
+                "message" : "Contract of " + user.userName + " was extended"
                 ];
-                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 
             </script>
         </scriptTask>
