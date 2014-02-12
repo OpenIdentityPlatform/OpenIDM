@@ -325,6 +325,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             property.onRetrieve(context, value.getContent());
         }
     }
+    
+    private void populateVirtualProperties(ServerContext context, JsonValue content) throws ForbiddenException,
+            InternalServerErrorException {
+        for (ManagedObjectProperty property : properties) {
+            if (property.isVirtual()) {
+                property.onRetrieve(context, content);
+            }
+        }
+    }
 
     /**
      * Executes all of the necessary trigger scripts when an object is to be
@@ -441,6 +450,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         request.setRevision(rev);
         Resource response = connectionFactory.getConnection().update(context, request);
 
+        populateVirtualProperties(context, newValue);
+        
         // TODO: Fix the context
         onUpdate(context, managedId(id), oldValue, newValue);
 
@@ -567,6 +578,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             ActivityLog.log(connectionFactory, context, request.getRequestType(), "create", managedId(_new.getId()),
                     null, _new.getContent(), Status.SUCCESS);
 
+            populateVirtualProperties(context, _new.getContent());
+            
             onCreate(context, managedId(_new.getId()), _new);
 
             // TODO Check the relative id
