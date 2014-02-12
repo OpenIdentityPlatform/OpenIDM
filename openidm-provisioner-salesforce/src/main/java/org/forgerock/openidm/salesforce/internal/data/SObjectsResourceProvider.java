@@ -1,11 +1,12 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  */
 
 package org.forgerock.openidm.salesforce.internal.data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
@@ -22,6 +24,7 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.salesforce.internal.SalesforceConnection;
 import org.forgerock.openidm.salesforce.internal.ServerContext;
 import org.restlet.Response;
+import org.restlet.data.Parameter;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.EmptyRepresentation;
@@ -43,6 +46,8 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
      * .
      */
     final static Logger logger = LoggerFactory.getLogger(SObjectsResourceProvider.class);
+
+    public static final String NEXT_RECORDS_URL = "nextRecordsUrl";
 
     private final SalesforceConnection connection;
 
@@ -127,33 +132,81 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
         }
     }
 
+    private JsonValue sendClientRequest(org.restlet.data.Method method, String id,
+            Parameter... parameters) throws JsonResourceException, IOException {
+
+        final ClientResource cr = getClientResource(id);
+        try {
+            cr.setMethod(method);
+            for (Parameter p : parameters) {
+                cr.getReference().addQueryParameter(p.getName(), p.getValue());
+            }
+            logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr.getReference()
+                    .getQuery());
+            handleRequest(cr, true);
+            Representation body = cr.getResponse().getEntity();
+            if (null != body && body instanceof EmptyRepresentation == false) {
+                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
+                return new JsonValue(rep.getObject());
+            }
+            return null;
+        } finally {
+            if (null != cr) {
+                cr.release();
+            }
+        }
+    }
+
+    private ClientResource getClientResource(String id) {
+        return connection.getChild(id == null ? "services/data/" + connection.getVersion()
+                : "services/data/" + connection.getVersion() + "/" + id);
+    }
+
     @Override
     protected JsonValue query(JsonValue request) throws JsonResourceException {
-        JsonValue params = request.get("params");
-        StringBuilder sb =
-                new StringBuilder("services/data/").append(connection.getVersion())
-                        .append("/query");
+        JsonValue params = request.get("params").required();
+
+        String queryExpression = null;
         if (params.isDefined(QueryConstants.QUERY_EXPRESSION)) {
+            queryExpression = params.get(QueryConstants.QUERY_EXPRESSION).asString();
+            if (StringUtils.isBlank(queryExpression)) {
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                        "Invalid 'null' param value: " + QueryConstants.QUERY_EXPRESSION);
+            }
+        } else if (params.isDefined(QueryConstants.QUERY_ID)) {
+            String queryId = params.get(QueryConstants.QUERY_ID).asString();
+            queryExpression = connection.getQueryExpression(queryId);
+            if (QueryConstants.QUERY_ALL_IDS.equals(queryId)) {
+                Matcher matcher = ServerContext.get().getMatcher();
+                queryExpression = "SELECT id FROM " + matcher.group(1);
+            } else if (StringUtils.isBlank(queryExpression)) {
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                        "Unsupported queryId " + queryId);
+            }
+        } else {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                    "Invalid request missing parameter [" + QueryConstants.QUERY_EXPRESSION + ", "
+                            + QueryConstants.QUERY_ID + "]");
+        }
 
-            final ClientResource cr = connection.getChild(sb.toString());
+        List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
+        Integer totalSize = null;
+        JsonValue result = null;
+        do {
             try {
-                cr.getReference().addQueryParameter(
-                        "q",
-                        request.get("params").get(QueryConstants.QUERY_EXPRESSION).required()
-                                .asString());
-                cr.setMethod(org.restlet.data.Method.GET);
-                logger.trace("Attempt to execute query: {}?{}", cr.getReference(), cr
-                        .getReference().getQuery());
-                handleRequest(cr, true);
-                Representation body = cr.getResponse().getEntity();
-                List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
-                JsonValue searchResult = new JsonValue(new HashMap<String, Object>(1));
-                searchResult.put(QueryConstants.QUERY_RESULT, queryResult);
+                if (null == result) {
+                    result =
+                            sendClientRequest(org.restlet.data.Method.GET, "query", new Parameter(
+                                    "q", queryExpression));
+                } else if (!result.get(NEXT_RECORDS_URL).isNull()) {
+                    String url = result.get(NEXT_RECORDS_URL).asString();
+                    String queryValue = url.substring(url.indexOf("query/"), url.length());
 
-                if (null != body && body instanceof EmptyRepresentation == false) {
-                    JacksonRepresentation<Map> rep =
-                            new JacksonRepresentation<Map>(body, Map.class);
-                    JsonValue result = new JsonValue(rep.getObject());
+                    result = sendClientRequest(org.restlet.data.Method.GET, queryValue);
+                } else {
+                    break;
+                }
+                if (result != null) {
                     for (JsonValue record : result.get("records")) {
                         if (record.isDefined("Id")) {
                             record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id")
@@ -161,58 +214,26 @@ public class SObjectsResourceProvider extends SimpleJsonResource {
                         }
                         queryResult.add(record.asMap());
                     }
-                }
-                return searchResult;
-            } finally {
-                if (null != cr) {
-                    cr.release();
-                }
-            }
-        } else {
-            String queryId = params.get(QueryConstants.QUERY_ID).required().asString();
-            String queryExpression = connection.getQueryExpression(queryId);
-            if (QueryConstants.QUERY_ALL_IDS.equals(queryId) || null != queryExpression) {
-                if (null == queryExpression) {
-                    Matcher matcher = ServerContext.get().getMatcher();
-                    queryExpression = "SELECT id FROM " + matcher.group(1);
-                }
-                ClientResource rc = connection.getChild(sb.toString());
-
-                rc.getReference().addQueryParameter("q", queryExpression);
-
-                rc.setMethod(org.restlet.data.Method.GET);
-                handleRequest(rc, true);
-                Representation body = rc.getResponse().getEntity();
-
-                List<Map<String, Object>> queryResult = new ArrayList<Map<String, Object>>();
-                JsonValue searchResult = new JsonValue(new HashMap<String, Object>(1));
-                searchResult.put(QueryConstants.QUERY_RESULT, queryResult);
-
-                if (null != body && body instanceof EmptyRepresentation == false) {
-                    JacksonRepresentation<Map> rep =
-                            new JacksonRepresentation<Map>(body, Map.class);
-                    JsonValue result = new JsonValue(rep.getObject());
-                    for (JsonValue record : result.get("records")) {
-                        if (QueryConstants.QUERY_ALL_IDS.equals(queryId)) {
-                            Map<String, Object> r = new HashMap<String, Object>(1);
-                            r.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id").asString());
-                            queryResult.add(r);
-                        } else {
-                            if (record.isDefined("Id")) {
-                                record.put(ServerConstants.OBJECT_PROPERTY_ID, record.get("Id")
-                                        .asString());
-                            }
-                            queryResult.add(record.asMap());
-
-                        }
+                    if (totalSize == null) {
+                        totalSize = result.get("totalSize").asInteger();
                     }
+                    if (result.get("done").asBoolean()) {
+                        break;
+                    }
+                } else {
+                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
+                            "Unexpected Salesforce service response: 'null'");
                 }
-                return searchResult;
-
+            } catch (final IOException e) {
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, e);
             }
-            throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
-                    "Unsupported queryId");
+        } while (true);
+        JsonValue searchResult = new JsonValue(new HashMap<String, Object>(2));
+        if (totalSize != null) {
+            searchResult.put("_resultCount", totalSize);
         }
+        searchResult.put(QueryConstants.QUERY_RESULT, queryResult);
+        return searchResult;
     }
 
     @Override
