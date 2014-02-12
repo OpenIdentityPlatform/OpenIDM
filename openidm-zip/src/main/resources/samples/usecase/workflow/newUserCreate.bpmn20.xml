@@ -543,7 +543,7 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                 openidm.create("repo/ui/notification/", null, newContractorNotification)
                 
                 if (emailEnabled) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The requested user ' + userName + ' was successfully created']
                     openidm.action("external/email", 'sendEmail',  emailParams);
                     emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
@@ -576,7 +576,7 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 
                 if (emailEnabled) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your request to create user ' + userName + ' was denied.']
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
