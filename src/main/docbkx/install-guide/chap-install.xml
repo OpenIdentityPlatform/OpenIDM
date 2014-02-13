@@ -169,7 +169,7 @@ $</screen>
        <para>Start OpenIDM (UNIX).</para>
        <screen>$ ./startup.sh
 Using OPENIDM_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -181,7 +181,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
        <screen>&lt; cd \path\to\openidm
 &lt; startup.bat
 "Using OPENIDM_HOME:   \path\to\openidm"
-"Using OPENIDM_OPTS:   -Xmx1024m -Dfile.encoding=UTF-8"
+"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
 "Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
