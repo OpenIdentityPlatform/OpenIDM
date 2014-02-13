@@ -153,6 +153,9 @@ class ObjectMapping  {
     private Script correlationQuery;
 
     /** TODO: Description. */
+    private Script defaultMapping;
+
+    /** TODO: Description. */
     private ArrayList<PropertyMapping> properties = new ArrayList<PropertyMapping>();
 
     /** TODO: Description. */
@@ -234,6 +237,10 @@ class ObjectMapping  {
         }
         for (JsonValue jv : config.get("policies").expect(List.class)) {
             policies.add(new Policy(service, jv));
+        }
+        JsonValue defaultMappingConfig = config.get("defaultMapping");
+        if (!defaultMappingConfig.isNull()) {
+            defaultMapping = Scripts.newInstance("ObjectMapping", defaultMappingConfig);
         }
         onCreateScript = Scripts.newInstance("ObjectMapping", config.get("onCreate"));
         onUpdateScript = Scripts.newInstance("ObjectMapping", config.get("onUpdate"));
@@ -525,6 +532,25 @@ class ObjectMapping  {
         } finally {
             measure.end();
         }
+        // Apply default mapping, if configured
+        applyDefaultMappings(source, target);
+    }
+
+    private JsonValue applyDefaultMappings(JsonValue source, JsonValue target) throws SynchronizationException {
+        JsonValue result = null;
+        if (defaultMapping != null) {
+            Map<String, Object> queryScope = service.newScope();
+            queryScope.put("source", source.asMap());
+            queryScope.put("target", target.asMap());
+            queryScope.put("config", config.asMap());
+            try {
+                result = new JsonValue(defaultMapping.exec(queryScope));
+            } catch (ScriptException se) {
+                LOGGER.debug("{} defaultMapping script encountered exception", name, se);
+                throw new SynchronizationException(se);
+            }
+        }
+        return result;
     }
 
     /**
