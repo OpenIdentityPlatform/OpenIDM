@@ -34,7 +34,7 @@
 
 /*global object */
 
-var uiConfig =  openidm.read("/config/ui/configuration");
+var uiConfig =  openidm.read("config/ui/configuration");
 
 if (!object.accountStatus) {
     object.accountStatus = 'active';
