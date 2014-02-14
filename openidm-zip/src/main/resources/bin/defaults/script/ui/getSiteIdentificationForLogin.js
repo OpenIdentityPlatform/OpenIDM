@@ -67,7 +67,7 @@ if (request.method !== "query") {
         code = new java.lang.String(request.additionalParameters.login).hashCode();
         code = java.lang.Math.abs(code);        
     
-        ret = openidm.read("/config/ui/configuration");
+        ret = openidm.read("config/ui/configuration");
     
         res = {
             "siteImage": ret.configuration.siteImages[code % ret.configuration.siteImages.length],
