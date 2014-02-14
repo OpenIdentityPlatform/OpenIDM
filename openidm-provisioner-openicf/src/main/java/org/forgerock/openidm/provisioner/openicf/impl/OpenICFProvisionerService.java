@@ -391,12 +391,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
                     ConnectorUtil.getOperationOptionConfiguration(configuration);
 
-            for (Map.Entry<String, ObjectClassInfoHelper> entry : ConnectorUtil.getObjectTypes(
-                    configuration).entrySet()) {
+            for (Map.Entry<String, ObjectClassInfoHelper> entry :
+                    ConnectorUtil.getObjectTypes(configuration).entrySet()) {
 
-                objectClassHandlers.put(entry.getKey(), Resources
-                        .newCollection(new ObjectClassResourceProvider(entry.getValue(),
-                                objectOperations.get(entry.getKey()), allowModification)));
+                objectClassHandlers.put(entry.getKey(),
+                        Resources.newCollection(
+                                new ObjectClassResourceProvider(
+                                        entry.getValue(),
+                                        objectOperations.get(entry.getKey()),
+                                        allowModification)));
             }
 
             // TODO Fix this Map
