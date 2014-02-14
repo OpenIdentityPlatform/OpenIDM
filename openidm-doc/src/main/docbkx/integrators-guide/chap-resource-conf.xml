@@ -862,7 +862,8 @@ JAVA_TYPE_LONG</screen>
     "blockSize": 100,
     "uidAttribute": "entryUUID",
     "maintainLdapGroupMembership": false,
-    "respectResourcePasswordPolicyChangeAfterReset": false
+    "respectResourcePasswordPolicyChangeAfterReset": false,
+    "useTimestampsForSync": false
 }</programlisting>
 
    <variablelist>
@@ -1109,6 +1110,22 @@ JAVA_TYPE_LONG</screen>
      <listitem>
       <para>If <literal>true</literal>, use simple paged results rather than
       virtual list view when both are available.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>useTimestampsForSync</term>
+     <listitem>
+      <para>
+       If <literal>true</literal>, use timestamps for LiveSync operations,
+       instead of the change log.
+      </para>
+      <para>
+       By default, the LDAP connector has a change log strategy for LDAP servers
+       that support a change log (such as OpenDJ and Oracle Directory Server
+       Enterprise Edition). If the LDAP server does not support a change log,
+       or if the change log is disabled, LiveSync for create and modify
+       operations can still occur, based on the timestamps of modifications.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>

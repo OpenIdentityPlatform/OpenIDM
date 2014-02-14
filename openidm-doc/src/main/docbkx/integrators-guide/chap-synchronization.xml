@@ -20,24 +20,27 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-synchronization'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Configuring Synchronization</title>
  <indexterm>
   <primary>Synchronization</primary>
  </indexterm>
 
- <para>One of the core services of OpenIDM is synchronizing identity data from
- different resources. This chapter explains what you must know to get started
- configuring OpenIDM's flexible synchronization mechanism, and illustrates the
- concepts with examples.</para>
+ <para>
+  One of the core services of OpenIDM is synchronizing identity data from
+  different resources. This chapter explains what you must know to get started
+  configuring OpenIDM's flexible synchronization mechanism, and illustrates the
+  concepts with examples.
+ </para>
 
  <section xml:id="sync-types">
   <title>Types of Synchronization</title>
@@ -46,17 +49,22 @@
    <secondary>Direct (push)</secondary>
   </indexterm>
 
-  <para>Synchronization happens either when OpenIDM receives a change directly,
-  or when OpenIDM discovers a change on an external resource.</para>
-
-  <para>For direct changes to OpenIDM, OpenIDM immediately pushes updates to
-  all external resources configured to receive the updates. A direct change
-  can originate not only as a write request through the REST interface, but
-  also as an update resulting from reconciliation with another resource.</para>
+  <para>
+   Synchronization happens either when OpenIDM receives a change directly, or
+   when OpenIDM discovers a change on an external resource.
+  </para>
+  <para>
+   For direct changes to OpenIDM, OpenIDM immediately pushes updates to all
+   external resources configured to receive the updates. A direct change can
+   originate not only as a write request through the REST interface, but also as
+   an update resulting from reconciliation with another resource.
+  </para>
 
   <variablelist>
-   <para>OpenIDM discovers changes on external resources through reconciliation
-   and through LiveSync.</para>
+   <para>
+    OpenIDM discovers changes on external resources through reconciliation and
+    through LiveSync.
+   </para>
 
    <varlistentry>
     <term>Reconciliation</term>
@@ -65,20 +73,26 @@
       <primary>Reconciliation</primary>
      </indexterm>
 
-     <para>In identity management, <firstterm>reconciliation</firstterm> is the
-     process of bidirectional synchronization of objects between different data
-     stores. Reconciliation applies mainly to user objects, although OpenIDM
-     can reconcile any objects, including groups and roles.</para>
+     <para>
+      In identity management, <firstterm>reconciliation</firstterm> is the
+      process of bidirectional synchronization of objects between different data
+      stores. Reconciliation applies mainly to user objects, although OpenIDM
+      can reconcile any objects, including groups and roles.
+     </para>
 
-     <para>To perform reconciliation, OpenIDM analyzes both source and target
-     systems to uncover the differences that it must reconcile. Reconciliation
-     can therefore be a heavyweight process. When working with large data sets,
-     finding all changes can be more work than processing the changes.</para>
+     <para>
+      To perform reconciliation, OpenIDM analyzes both source and target systems
+      to uncover the differences that it must reconcile. Reconciliation can
+      therefore be a heavyweight process. When working with large data sets,
+      finding all changes can be more work than processing the changes.
+     </para>
 
-     <para>Reconciliation is, however, thorough. It recognizes system error
-     conditions and catches changes that might be missed by the more
-     lightweight LiveSync mechanism. Reconciliation therefore serves as the
-     basis for compliance and reporting functionality.</para>
+     <para>
+      Reconciliation is, however, thorough. It recognizes system error
+      conditions and catches changes that might be missed by the more
+      lightweight LiveSync mechanism. Reconciliation therefore serves as the
+      basis for compliance and reporting functionality.
+     </para>
     </listitem>
    </varlistentry>
 
@@ -89,35 +103,46 @@
       <primary>LiveSync</primary>
      </indexterm>
 
-     <para><firstterm>LiveSync</firstterm> performs the same job as
-     reconciliation. LiveSync relies on a change log on the external resource
-     to determine which objects have changed.</para>
+     <para>
+      <firstterm>LiveSync</firstterm> captures the changes that occur on a
+      remote system, then pushes those changes to OpenIDM. OpenIDM uses the
+      defined mappings to replay the changes where they are required - either in
+      the OpenIDM repository, or on another remote system, or both. Unlike
+      reconciliation, LiveSync uses a polling system, and is intended to react
+      quickly to changes as they happen.
+     </para>
+     <para>
+      To perform this polling, LiveSync relies on a change detection mechanism
+      on the external resource to determine which objects have changed. The
+      change detection mechanism is specific to the external resource, and can
+      be a time stamp, a sequence number, a change vector or other any method of
+      recording changes that have occurred on the system. For example, OpenDJ
+      implements a change log that provides OpenIDM with a list of objects that
+      have changed since the last request. Active Directory implements a change
+      sequence number, and certain databases might have a
+      <literal>lastChange</literal> attribute.
+     </para>
 
-     <para>LiveSync is intended to react quickly to changes as they happen.
-     LiveSync is however a best effort mechanism that, in some cases, can miss
-     changes.</para>
-
-     <para>Furthermore, not all resources provide the change log mechanism
-     that LiveSync requires. The change log provides OpenIDM with a list of
-     objects that have changed since the last request, so that OpenIDM does not
-     need to scan all objects for changes. OpenDJ and Active Directory both
-     provide the change log required for LiveSync.</para>
     </listitem>
    </varlistentry>
   </variablelist>
 
-  <para>To determine what to synchronize, and how to carry out synchronization,
-  OpenIDM relies on mappings that you configure. LiveSync relies on the set of
-  mappings that you configure once per OpenIDM server. Reconciliation allows
-  you to configure specific mappings for a particular reconciliation job.</para>
+  <para>
+   To determine what to synchronize, and how to carry out synchronization,
+   OpenIDM relies on mappings that you configure. LiveSync relies on the set of
+   mappings that you configure once per OpenIDM server. Reconciliation allows
+   you to configure specific mappings for a particular reconciliation job.
+  </para>
 
-  <para>You must trigger OpenIDM to poll for changes on external resources,
-  usually by scheduling reconciliation or LiveSync, as described in
-  <link xlink:href="integrators-guide#chap-scheduler-conf"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
-  Tasks and Events</citetitle></link>. Alternatively, you can manage
-  reconciliation and LiveSync over the REST interface, as described in the
-  following sections.</para>
+  <para>
+   You must trigger OpenIDM to poll for changes on external resources, usually
+   by scheduling reconciliation or LiveSync, as described in
+   <link xlink:href="integrators-guide#chap-scheduler-conf"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
+   Tasks and Events</citetitle></link>. Alternatively, you can manage
+   reconciliation and LiveSync over the REST interface, as described in the
+   following sections.
+  </para>
 
   </section>
 
@@ -3160,17 +3185,20 @@ externalAccount = openidm.read("system/ldap/account/uid=ddoe,ou=People,dc=exampl
   and Events</citetitle></link>.</para>
 
   <section xml:id="configuring-sync-schedule">
-    <title>Configuring Scheduled Synchronization</title>
-  <para>Each scheduled reconciliation and LiveSync task requires a schedule
-  configuration file in <filename>opendidm/conf</filename>. By convention,
-  files are named <filename>openidm/conf/schedule-<replaceable>schedule-name
-  </replaceable>.json</filename>, where <replaceable>schedule-name</replaceable>
-  is a logical name for the scheduled synchronization operation, such as
-  <literal>reconcile_systemXmlAccounts_managedUser</literal>.</para>
-
-  <para>Schedule configuration files have the following format:</para>
-
-  <programlisting language="javascript">
+   <title>Configuring Scheduled Synchronization</title>
+   <para>
+    Each scheduled reconciliation and LiveSync task requires a schedule
+    configuration file in <filename>openidm/conf</filename>. By convention,
+    files are named
+    <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>
+    .json</filename>, where <replaceable>schedule-name</replaceable> is a
+    logical name for the scheduled synchronization operation, such as
+    <literal>reconcile_systemXmlAccounts_managedUser</literal>.
+   </para>
+   <para>
+    Schedule configuration files have the following format:
+   </para>
+   <programlisting language="javascript">
 {
  "enabled"       : true,
  "persisted"     : false,
@@ -3182,12 +3210,14 @@ externalAccount = openidm.read("system/ldap/account/uid=ddoe,ou=People,dc=exampl
  "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
  "invokeService" : "<replaceable>service identifier</replaceable>",
  "invokeContext" : "<replaceable>service specific context info</replaceable>"
-}</programlisting>
-
-  <para>For an explanation of each of these properties, see
-  <link xlink:href="integrators-guide#chap-scheduler-conf"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling Tasks
-  and Events</citetitle></link>.</para>
+}
+   </programlisting>
+   <para>
+    For an explanation of each of these properties, see
+    <link xlink:href="integrators-guide#chap-scheduler-conf"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling Tasks
+    and Events</citetitle></link>.
+   </para>
 
   <para>To schedule a reconciliation or LiveSync task, set the
   <literal>invokeService</literal> property to either <literal>"sync"</literal>
@@ -3222,12 +3252,11 @@ externalAccount = openidm.read("system/ldap/account/uid=ddoe,ou=People,dc=exampl
     }
 }</programlisting>
 
-  <para>The <literal>"source"</literal> property follows OpenIDM's convention
-  for a pointer to an external resource object and takes the form
-  <literal>system/<replaceable>resource-name</replaceable>/<replaceable>
-  object-type</replaceable></literal>.
-    </para>
-
+  <para>
+   The <literal>"source"</literal> property follows OpenIDM's convention for a
+   pointer to an external resource object and takes the form
+   <literal>system/<replaceable>resource-name/object-type</replaceable></literal>.
+  </para>
   </section>
 
   <section xml:id="alternative-mapping">
