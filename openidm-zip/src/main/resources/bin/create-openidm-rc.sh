@@ -46,6 +46,7 @@ START_CMD="nohup \$JAVA_BIN \$LOGGING_CONFIG \$JAVA_OPTS \$OPENIDM_OPTS \\
 		-Djava.endorsed.dirs=\$JAVA_ENDORSED_DIRS \\
 		-classpath \\"\$CLASSPATH\\" \\
 		-Djava.awt.headless=true \\
+                -Dopenidm.system.server.root=\$OPENIDM_HOME \\
 		org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&1 &"
 
 case "\${1}" in
