@@ -20,212 +20,255 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-data'
-         xmlns='http://docbook.org/ns/docbook'
-         version='5.0' xml:lang='en'
-         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
-         xmlns:xlink='http://www.w3.org/1999/xlink'
-         xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-    <title>Accessing Data Objects</title>
-    <indexterm>
-        <primary>Data</primary>
-        <secondary>accessing</secondary>
-    </indexterm>
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Accessing Data Objects</title>
+ <indexterm>
+  <primary>Data</primary>
+  <secondary>accessing</secondary>
+ </indexterm>
 
-    <para>OpenIDM supports a variety of objects that can be addressed via
-        a URL or URI. You can access data objects by using scripts (through the
-        Resource API) or by using direct HTTP calls (through the REST API).</para>
+ <para>
+  OpenIDM supports a variety of objects that can be addressed via a URL or URI.
+  You can access data objects by using scripts (through the Resource API) or by
+  using direct HTTP calls (through the REST API).
+ </para>
+ <para>
+  The following sections describe these two methods of accessing data objects,
+  and provide information on constructing and calling data queries.
+ </para>
 
-    <para>The following sections describe these two methods of accessing data
-        objects, and provide information on constructing and calling data queries.
-    </para>
+ <section xml:id="data-scripts">
+  <title>Accessing Data Objects by Using Scripts</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Script access</secondary>
+  </indexterm>
 
-    <section xml:id="data-scripts">
-        <title>Accessing Data Objects by Using Scripts</title>
-        <indexterm>
-            <primary>Objects</primary>
-            <secondary>Script access</secondary>
-        </indexterm>
+  <para>
+   OpenIDM's uniform programming model means that all objects are queried and
+   manipulated in the same way, using the Resource API. The URL or URI that is
+   used to identify the target object for an operation depends on the object
+   type. For an explanation of object types, see the
+   <link xlink:href="integrators-guide#appendix-obects"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
+   Objects Reference</citetitle></link>. For more information about scripts and
+   the objects available to scripts, see the
+   <link xlink:href="integrators-guide#appendix-scripting"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
+   Reference</citetitle></link>.
+  </para>
 
-        <para>OpenIDM's uniform programming model means that all objects
-            are queried and manipulated in the same way, using the Resource API.
-            The URL or URI that is used to identify the target object for an
-            operation depends on the object type. For an explanation of object
-            types, see the <link xlink:href="integrators-guide#appendix-obects"
-                                 xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Data Models and Objects Reference</citetitle></link>.
-            For more information about scripts and the objects available to
-            scripts, see the <link xlink:href="integrators-guide#appendix-scripting"
-                                   xlink:role="http://docbook.org/xlink/role/olink">
-                <citetitle>Scripting Reference</citetitle></link>.</para>
-
-        <para>You can use the Resource API to obtain managed objects,
-            configuration objects, and repository objects, as follows:</para>
-
-        <programlisting language="javascript">
+  <para>
+   You can use the Resource API to obtain managed objects, configuration
+   objects, and repository objects, as follows:
+  </para>
+  <programlisting language="javascript">
 val = openidm.read("managed/organization/mysampleorg")
 val = openidm.read("config/custom/mylookuptable")
-val = openidm.read("repo/custom/mylookuptable")</programlisting>
+val = openidm.read("repo/custom/mylookuptable")
+  </programlisting>
 
-        <para>For information about constructing an object ID, see <link
-                xlink:href="integrators-guide#rest-uri-scheme"
-                xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>URI Scheme</citetitle></link> in the
-            <citetitle>REST API Reference</citetitle>.</para>
+  <para>For information about constructing an object ID, see <link
+   xlink:href="integrators-guide#rest-uri-scheme"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>URI
+   Scheme</citetitle></link> in the <citetitle>REST API Reference</citetitle>.
+  </para>
 
-        <para>You can update entire objects with the <literal>update()</literal>
-            function, as follows.</para>
+  <para>
+   You can update entire objects with the <literal>update()</literal> function,
+   as follows.
+  </para>
 
-        <programlisting language="javascript">
+  <programlisting language="javascript">
 openidm.update("managed/organization/mysampleorg", mymap)
 openidm.update("config/custom/mylookuptable", mymap)
-openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
+openidm.update("repo/custom/mylookuptable", mymap)
+  </programlisting>
 
-        <para>For managed objects, you can partially update an object with the
-            <literal>patch()</literal> function.</para>
+  <para>
+   For managed objects, you can partially update an object with the
+   <literal>patch()</literal> function.
+  </para>
 
-        <programlisting language="javascript">
+  <programlisting language="javascript">
 openidm.patch("managed/organization/mysampleorg", rev, value)
-        </programlisting>
+  </programlisting>
 
-        <para>The <literal>create()</literal>, <literal>delete()</literal>, and
-            <literal>query()</literal> functions work the same way.</para>
+  <para>
+   The <literal>create()</literal>, <literal>delete()</literal>, and
+   <literal>query()</literal> functions work the same way.
+  </para>
+ </section>
 
-    </section>
+ <section xml:id="data-rest">
+  <title>Accessing Data Objects by Using the REST API</title>
 
-    <section xml:id="data-rest">
-        <title>Accessing Data Objects by Using the REST API</title>
+  <para>
+   OpenIDM provides RESTful access to data objects via a REST API. To access
+   objects over REST, you can use a browser-based REST client, such as the
+   <link xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
+   Simple REST Client</link> for Chrome, or <link
+   xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
+   RESTClient</link> for Firefox. Alternatively you can use the <link
+   xlink:show="new" xlink:href="http://curl.haxx.se/"><command>curl</command>
+   </link> command-line utility.
+  </para>
 
-        <para>OpenIDM provides RESTful access to data objects via a REST API.
-            To access objects over REST, you can use a browser-based REST client,
-            such as the <link
-            xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
-            Simple REST Client</link> for Chrome, or <link
-            xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
-            RESTClient</link> for Firefox. Alternatively you can use the
-            <link xlink:show="new" xlink:href="http://curl.haxx.se/"
-            ><command>curl</command></link> command-line utility.
-        </para>
+  <para>
+   For a comprehensive overview of the REST API, see the <link
+   xlink:href="integrators-guide#appendix-rest"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
+   Reference</citetitle></link> appendix.
+  </para>
 
-        <para>For a comprehensive overview of the REST API, see the
-        <link xlink:href="integrators-guide#appendix-rest"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>REST API Reference</citetitle></link> appendix.</para>
+  <para>
+   To obtain a managed object through the REST API, depending on your security
+   settings and authentication configuration, perform an HTTP GET on the
+   corresponding URL, for example
+   <literal>https://localhost:8443/openidm/managed/organization/mysampleorg</literal>.
+  </para>
 
-        <para>To obtain a managed object through the REST API, depending on your
-            security settings and authentication configuration, perform an HTTP GET
-            on the corresponding URL, for example
-            <literal>https://localhost:8443/openidm/managed/organization/mysampleorg</literal>.</para>
+  <para>
+   By default, the HTTP GET returns a JSON representation of the object.
+  </para>
+ </section>
 
-        <para>By default, the HTTP GET returns a JSON representation of the object.</para>
-    </section>
+ <section xml:id="queries">
+  <title>Defining and Calling Queries</title>
+  <para>
+   OpenIDM supports an advanced query model that enables you to define queries,
+   and to call them over the REST or Resource API.
+  </para>
 
-    <section xml:id="queries">
-        <title>Defining and Calling Queries</title>
-        <para>OpenIDM supports an advanced query model that enables you to
-            define queries, and to call them over the REST or Resource API.</para>
+  <section xml:id="parameterized-queries">
+   <title>Parameterized Queries</title>
 
-        <section xml:id="parameterized-queries">
-            <title>Parameterized Queries</title>
+   <para>
+    Managed objects in the supported OpenIDM repositories can be accessed using
+    a parameterized query mechanism. Parameterized queries on repositories are
+    defined in the repository configuration (<filename>repo.*.json</filename>)
+    and are called by their <literal>_queryId</literal>.
+   </para>
 
-            <para>Managed objects in the supported OpenIDM repositories can be
-                accessed using a parameterized query mechanism. Parameterized
-                queries on repositories are defined in the repository
-                configuration (<filename>repo.*.json</filename>) and are called
-                by their <literal>_queryId</literal>.</para>
+   <para>
+    Parameterized queries provide security and portability for the query call
+    signature, regardless of the back-end implementation. Queries that are
+    exposed over the REST interface <emphasis>must</emphasis> be parameterized
+    queries to guard against injection attacks and other misuse. Queries on the
+    officially supported repositories have been reviewed and hardened against
+    injection attacks.
+   </para>
 
-            <para>Parameterized queries provide security and portability for
-            the query call signature, regardless of the back-end implementation.
-            Queries that are exposed over the REST interface <emphasis>must</emphasis>
-            be parameterized queries to guard against injection attacks and other
-            misuse. Queries on the officially supported repositories have been
-            reviewed and hardened against injection attacks.</para>
+   <para>
+    For system objects, support for parameterized queries is restricted to
+    <literal>_queryId=query-all-ids</literal>. There is currently no support for
+    user-defined parameterized queries on system objects. Typically,
+    parameterized queries on system objects are not called directly over the
+    REST interface, but are issued from internal calls, such as correlation
+    queries.
+   </para>
 
-            <para>For system objects, support for parameterized queries is
-            restricted to <literal>_queryId=query-all-ids</literal>. There is
-            currently no support for user-defined parameterized queries on
-            system objects. Typically, parameterized queries on system objects
-            are not called directly over the REST interface, but are issued
-            from internal calls, such as correlation queries.</para>
+   <para>
+    A typical query definition is as follows:
+   </para>
 
-            <para> A typical query definition is as follows:</para>
+   <screen>
+"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"
+   </screen>
 
-            <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"</screen>
+   <para>
+    To call this query, you would reference its ID, as follows:
+   </para>
 
-            <para>To call this query, you would reference its ID, as follows:</para>
+   <screen>
+?_queryId=query-all-ids
+   </screen>
 
-            <screen>?_queryId=query-all-ids</screen>
+   <para>
+    The following example calls <literal>query-all-ids</literal> over the REST
+    interface:
+   </para>
 
-            <para>The following example calls <literal>query-all-ids</literal> over
-                the REST interface:</para>
-
-            <screen>$ curl
+   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-            </screen>
+   </screen>
+  </section>
 
-        </section>
+  <section xml:id="native-queries">
+   <title>Native Query Expressions</title>
 
-        <section xml:id="native-queries">
-            <title>Native Query Expressions</title>
+   <para>
+    Native query expressions are supported for all managed objects and system
+    objects, and can be called directly over the REST interface, rather than
+    being defined in the repository configuration.
+   </para>
 
-            <para>Native query expressions are supported for all managed
-            objects and system objects, and can be called directly over
-            the REST interface, rather than being defined in the
-            repository configuration.</para>
+   <para>
+    Native queries are intended specifically for internal callers, such as
+    custom scripts, in situations where the parameterized query facility is
+    insufficient. For example, native queries are useful if the query needs to
+    be generated dynamically.
+   </para>
 
-            <para>Native queries are intended specifically for internal
-            callers, such as custom scripts, in situations where the
-            parameterized query facility is insufficient. For example,
-            native queries are useful if the query needs to be generated
-            dynamically.</para>
+   <para>
+    The query expression is specific to the target resource. For repositories,
+    queries use the native language of the underlying data store. For system
+    objects that are backed by OpenICF connectors, queries use the applicable
+    query language of the system resource.
+   </para>
 
-            <para>The query expression is specific to the target resource.
-            For repositories, queries use the native language of the underlying
-            data store. For system objects that are backed by OpenICF connectors,
-            queries use the applicable query language of the system resource.</para>
+   <para>
+    Native queries on the repository are made using the
+    <literal>_queryExpression</literal> keyword. For example:
+   </para>
 
-            <para>Native queries on the repository are made using the
-                <literal>_queryExpression</literal> keyword. For example:</para>
-
-            <screen width="92">$ curl
+   <screen width="92">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
-            </screen>
+   </screen>
 
-            <para>Unlike parameterized queries, native queries are not portable
-            and do not guard against injection attacks. Such query expressions
-            should therefore not be used or made accessible over the REST interface
-            or over HTTP, other than for development, and should be used only via
-            the internal Resource API. For more information, see the section on
-                <link xlink:href="integrators-guide#security-urls"
-                      xlink:role="http://docbook.org/xlink/role/olink">
-                    <citetitle>Protecting Sensitive REST Interface URLs</citetitle></link>.
-            </para>
+   <para>
+    Unlike parameterized queries, native queries are not portable and do not
+    guard against injection attacks. Such query expressions should therefore not
+    be used or made accessible over the REST interface or over HTTP, other than
+    for development, and should be used only via the internal Resource API. For
+    more information, see the section on
+    <link xlink:href="integrators-guide#security-urls"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Protecting
+    Sensitive REST Interface URLs</citetitle></link>.
+   </para>
 
-            <para>If you really need to expose native queries over HTTP, in a
-                selective manner, you can design a custom endpoint to wrap
-                such access.</para>
+   <para>
+    If you really need to expose native queries over HTTP, in a selective
+    manner, you can design a custom endpoint to wrap such access.
+   </para>
+  </section>
 
-        </section>
+  <section xml:id="constructing-queries">
+   <title>Constructing Queries</title>
 
-        <section xml:id="constructing-queries">
-            <title>Constructing Queries</title>
+   <para>
+    The <literal>openidm.query</literal> function enables you to query OpenIDM
+    resource objects for reconciliation processes and workflows. The query
+    syntax is <literal>openidm.query(id, params)</literal>, where
+    <literal>id</literal> specifies the object on which the query should be
+    performed and <literal>params</literal> provides the parameters that are
+    passed to the query. For example:
+   </para>
 
-            <para>The <literal>openidm.query</literal> function enables you
-            to query OpenIDM resource objects for reconciliation processes
-            and workflows. Query syntax is
-            <literal>openidm.query(id, params)</literal>, where
-            <literal>id</literal> specifies the object on which the query should
-            be performed and <literal>params</literal> provides the parameters
-            that are passed to the query. For example:</para>
-            <programlisting language="javascript">
+   <programlisting language="javascript">
 var params = {
     'query' : {
         'Equals': {
@@ -237,25 +280,31 @@ var params = {
     }
 };
 var results = openidm.query("system/ScriptedSQL/account", params)
-            </programlisting>
+   </programlisting>
 
-            <para>OpenIDM supports nine query filters and a range of keywords
-            that can be applied to these filters. Each filter takes a field
-            and a list as value. The following filters are supported:</para>
+   <para>
+    OpenIDM supports nine query filters and a range of keywords that can be
+    applied to these filters. Each filter takes a field and a list as a value.
+    The following filters are supported:
+   </para>
 
-            <bridgehead>Attribute Operations</bridgehead>
-            <variablelist>
-                <varlistentry>
-                    <term><literal>Equals</literal> Filter</term>
-                    <listitem>
-                        <para>Determines whether the resource contains an
-                        attribute that matches a specific attribute value.
-                        </para>
-                        <para>Returns <literal>true</literal> if the object
-                        satisfies all selection criteria of the filter, otherwise
-                        returns <literal>false</literal>.</para>
-                        <para>For example:</para>
-                        <programlisting language="javascript">
+   <bridgehead>Attribute Operations</bridgehead>
+    <variablelist>
+     <varlistentry>
+      <term><literal>Equals</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the resource contains an attribute that matches a
+        specific attribute value.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the object satisfies all selection
+        criteria of the filter, otherwise returns <literal>false</literal>.
+       </para>
+       <para>
+        For example:
+       </para>
+       <programlisting language="javascript">
 {
     "Equals":{
         "field":"<replaceable>lastname</replaceable>",
@@ -264,113 +313,136 @@ var results = openidm.query("system/ScriptedSQL/account", params)
             ]
     }
 }
-                        </programlisting>
-                    </listitem>
-                </varlistentry>
-                    <varlistentry>
-                        <term><literal>ContainsAllValues</literal> Filter</term>
-                        <listitem>
-                            <para>Determines whether the external resource
-                            contains an attribute that has the same name as,
-                            and contains all of the values of, the attribute
-                            placed into the filter.
-                            </para>
-                            <para>Returns <literal>true</literal> if the object
-                            satisfies all the selection criteria of the filter,
-                            otherwise returns <literal>false</literal>.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            <bridgehead>Comparable Attribute Operations</bridgehead>
-            <para>Compares single-value attributes to a given filter.</para>
-            <variablelist>
-                <varlistentry>
-                    <term><literal>GreaterThan</literal> Filter</term>
-                    <listitem>
-                        <para>Determines whether the attribute value of the
-                         resource object is greater than the one provided in
-                         the filter.
-                        </para>
-                        <para>Returns <literal>true</literal> if the object
-                        value is greater, otherwise returns <literal>false</literal>.</para>
-                    </listitem>
-                </varlistentry>
-                    <varlistentry>
-                        <term><literal>GreaterThanOrEqual</literal> Filter</term>
-                        <listitem>
-                            <para>Determines whether the attribute value of the
-                                resource object is greater than or equal to the
-                                one provided in the filter.</para>
-                            <para>Returns <literal>true</literal> if the object
-                                value is greater than or equal, otherwise
-                                returns <literal>false</literal>.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><literal>LessThan</literal> Filter</term>
-                        <listitem>
-                            <para>Determines whether the attribute value of the
-                                resource object is less than the one provided in
-                                the filter.
-                            </para>
-                            <para>Returns <literal>true</literal> if the object
-                                value is less, otherwise returns
-                                <literal>false</literal>.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><literal>LessThanOrEqual</literal> Filter</term>
-                        <listitem>
-                            <para>Determines whether the attribute value of the
-                                resource object is less than or equal to the one
-                                provided in the filter.
-                            </para>
-                            <para>Returns <literal>true</literal> if the object
-                                value is less than or equal, otherwise returns
-                                <literal>false</literal>.</para>
-                        </listitem>
-                    </varlistentry>
-            </variablelist>
-            <bridgehead>String Attribute Operations</bridgehead>
-            <para>Compares string values to a given filter.</para>
-            <variablelist>
-                <varlistentry>
-                    <term><literal>StartsWith</literal> Filter</term>
-                    <listitem>
-                        <para>Returns attributes whose value starts with the
-                        string specified in the filter.
-                        </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><literal>Contains</literal> Filter</term>
-                    <listitem>
-                        <para>Returns attributes whose value contains the
-                        string specified in the filter.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term><literal>EndsWith</literal> Filter</term>
-                    <listitem>
-                        <para>Returns attributes whose value ends with the
-                        string specified in the filter.
-                        </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
+       </programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>ContainsAllValues</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the external resource contains an attribute that has
+        the same name as, and contains all of the values of, the attribute
+        placed into the filter.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the object satisfies all the
+        selection criteria of the filter, otherwise returns
+        <literal>false</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
 
-                <bridgehead>Filter Operations</bridgehead>
-                <para>Filter operations are used to construct more complex
-                filters by comparing two filters from the preceding section
-                or negating filters defined in the previous section.</para>
-                <variablelist>
-                    <varlistentry>
-                        <term><literal>AND Filter</literal></term>
-                        <listitem>
-                            <para>A filter that matches entries using the AND
-                            boolean operator on two filters.</para>
-                            <para>Example:</para>
-                            <programlisting language="javascript">{
+   <bridgehead>Comparable Attribute Operations</bridgehead>
+    <para>
+     Compares single-value attributes to a given filter.
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><literal>GreaterThan</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the attribute value of the resource object is greater
+        than the one provided in the filter.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the attribute value is greater,
+        otherwise returns <literal>false</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>GreaterThanOrEqual</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the attribute value of the resource object is greater
+        than or equal to the one provided in the filter.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the attribute value is greater than
+        or equal, otherwise returns <literal>false</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>LessThan</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the attribute value of the resource object is less
+        than the one provided in the filter.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the attribute value is less,
+        otherwise returns <literal>false</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>LessThanOrEqual</literal> Filter</term>
+      <listitem>
+       <para>
+        Determines whether the attribute value of the resource object is less
+        than or equal to the one provided in the filter.
+       </para>
+       <para>
+        Returns <literal>true</literal> if the attribute value is less than or
+        equal, otherwise returns <literal>false</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+
+   <bridgehead>String Attribute Operations</bridgehead>
+    <para>
+     Compares string values to a given filter.
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><literal>StartsWith</literal> Filter</term>
+      <listitem>
+       <para>Returns attributes whose value starts with the string specified in
+        the filter.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>Contains</literal> Filter</term>
+      <listitem>
+       <para>
+        Returns attributes whose value contains the string specified in the
+        filter.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>EndsWith</literal> Filter</term>
+      <listitem>
+       <para>
+        Returns attributes whose value ends with the string specified in the
+        filter.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+
+   <bridgehead>Filter Operations</bridgehead>
+    <para>
+     Filter operations are used to construct more complex filters by comparing
+     two filters from the preceding section or negating filters defined in the
+     previous section.
+    </para>
+    <variablelist>
+     <varlistentry>
+      <term><literal>AND Filter</literal></term>
+      <listitem>
+       <para>
+        A filter that matches entries using the AND boolean operator on two
+        filters.
+       </para>
+       <para>
+        Example:
+       </para>
+       <programlisting language="javascript">{
  "query":{
    "AND":[
      {
@@ -391,24 +463,30 @@ var results = openidm.query("system/ScriptedSQL/account", params)
      }
    ]
  }
-}</programlisting>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><literal>NAND Filter</literal></term>
-                        <listitem>
-                            <para>A filter that filters out matched entries
-                            by negating the AND boolean operator on two
-                            filters.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><literal>OR Filter</literal></term>
-                        <listitem>
-                            <para>A filter that matches entries using the OR
-                            boolean operator on two filters.</para>
-                            <para>Example:</para>
-                            <programlisting language="javascript">{
+}
+       </programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>NAND Filter</literal></term>
+      <listitem>
+       <para>
+        A filter that filters out matched entries by negating the AND boolean
+        operator on two filters.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>OR Filter</literal></term>
+      <listitem>
+       <para>
+        A filter that matches entries using the OR boolean operator on two
+        filters.
+       </para>
+       <para>
+        Example:
+       </para>
+       <programlisting language="javascript">{
   "query":{
     "OR":[
       {
@@ -430,21 +508,20 @@ var results = openidm.query("system/ScriptedSQL/account", params)
     ]
   }
 }
-</programlisting>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term><literal>NOR Filter</literal></term>
-                        <listitem>
-                            <para>A filter that filters out matched entries
-                            by negating the OR boolean operator on two
-                            filters.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-
-    </section>
-
+       </programlisting>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>NOR Filter</literal></term>
+      <listitem>
+       <para>
+        A filter that filters out matched entries by negating the OR boolean
+        operator on two filters.
+       </para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
   </section>
 
 </chapter>
