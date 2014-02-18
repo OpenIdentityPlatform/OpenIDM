@@ -32,7 +32,7 @@
  */
 
 /*jslint regexp:false sub:true */
-/*global httpAccessConfig, allowedOrigins */
+/*global httpAccessConfig */
 
 
 //reinventing the wheel a bit, here; eventually move to underscore's isEqual method
@@ -352,25 +352,26 @@ function passesAccessConfig(id, roles, method, action) {
     return false;
 }
 
+function isAJAXRequest() {
+    var headers = context.http.headers;
 
-function passesOriginVerification() {
-    var headers = context.http.headers,
-        origin = headers["Origin"] || headers["origin"];
+    // one of these custom headers must be present for all HTTP-based requests, to prevent CSRF attacks
 
+    // X-Requested-With is common from AJAX libraries such as jQuery
     if (typeof (headers["X-Requested-With"]) !== "undefined" || 
         typeof (headers["x-requested-with"]) !== "undefined" || 
+
+        // Basic auth headers are acceptible for convenience from cURL commands; 
+        // We don't return the request header to prompt the browser to provide basic auth headers, 
+        // so it will only be present if someone explicitly provides them, as in a cURL request.
         typeof (headers["Authorization"]) !== "undefined" || 
         typeof (headers["authorization"]) !== "undefined" || 
+
+        // The custom authn headers for OpenIDM
         typeof (headers["X-OpenIDM-Username"]) !== "undefined" || 
         typeof (headers["x-openidm-username"]) !== "undefined") {
-        
-        // CORS requests will have the Origin header included; verify that the origin given is allowed.
-        if (typeof (origin) !== "undefined" && typeof allowedOrigins !== "undefined" &&
-                !contains(allowedOrigins, origin) ) {
-            return false;
-        } else {
-            return true;
-        }
+
+        return true;
     }
     return false;
 }
@@ -391,7 +392,7 @@ function allow() {
     
     // Check REST requests against the access configuration
     if (context.caller === 'http') {
-        if (!passesOriginVerification()) {
+        if (!isAJAXRequest()) {
             return false;
         }
         

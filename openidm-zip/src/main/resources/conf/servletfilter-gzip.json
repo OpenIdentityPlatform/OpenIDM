@@ -1,0 +1,13 @@
+{
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "initParams" : {
+        "mimeTypes" : "application/json,text/html,text/plain,text/xml,application/xhtml+xml,text/css,application/javascript,application/x-javascript,image/svg+xml"
+    },
+    "scriptExtensions" : { },
+    "urlPatterns" : [
+        "/*"
+    ],
+    "filterClass" : "org.eclipse.jetty.servlets.GzipFilter"
+}
