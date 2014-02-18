@@ -351,10 +351,9 @@ policyImpl = (function (){
             return [];
         }
         
-        var isExternal = context.caller.external,
-            actionParams,response,currentObject;
+        var actionParams,response,currentObject;
         
-        if (isExternal === "true" || isExternal === true) {
+        if (context.caller.external) {
             
             if (request.resourceName && !request.resourceName.match('/$')) { 
                 // only do a read if there is no id specified, in the case of new records 
