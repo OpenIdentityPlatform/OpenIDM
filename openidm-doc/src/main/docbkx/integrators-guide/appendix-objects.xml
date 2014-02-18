@@ -754,40 +754,9 @@
             "name": "foobar"
         }
     ]
-}</programlisting>
+}
+    </programlisting>
 
-       <para>If you are using OrientDB as a repository, you must make the
-       corresponding addition to the <filename>conf/repo.orientdb.json</filename>
-       file. The following example adds the <literal>foobar</literal> object
-       after the <literal>managed_user</literal> object to the database
-       structure.</para>
-
-       <programlisting language="javascript">
-"dbStructure" : {
-    ...
-    "managed_user" : {
-        "index" : [
-            {
-                "propertyName" : "_openidm_id",
-                "propertyType" : "string",
-                "indexType" : "unique"
-            }
-        ]
-    },
-    "managed_foobar" : {
-        "index" : [
-            {
-                "propertyName" : "_openidm_id",
-                "propertyType" : "string",
-                "indexType" : "unique"
-            }
-        ]
-    },
-    ...</programlisting>
-
-       <para>If you are using one of the supported SQL databases as a
-       repository, there is no need to update the repository configuration
-       file.</para>
   </section>
 
    <section xml:id="managed-objects-declarative">
