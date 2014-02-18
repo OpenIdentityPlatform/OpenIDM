@@ -33,20 +33,16 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
-import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.FutureResult;
-import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.InternalServerContext;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.ServerConstants;
-import static org.forgerock.openidm.util.ContextUtil.INTERNAL_PROTOCOL;
 
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -151,52 +147,5 @@ public class JsonResourceRouterService implements ConnectionFactory {
         };
     }
 
-    static class InternalServerContext extends ServerContext implements ClientContext {
-        /** the client-friendly name of this context */
-        private static final String CONTEXT_NAME = "internal-server";
-
-        /**
-         * {@inheritDoc}
-         */
-        protected InternalServerContext(Context parent) {
-            super(parent);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        protected InternalServerContext(JsonValue savedContext, PersistenceConfig config) throws ResourceException {
-            super(savedContext, config);
-        }
-
-        /**
-         * Get this Context's name
-         *
-         * @return this object's name
-         */
-        public String getContextName() {
-            return CONTEXT_NAME;
-        }
-
-        /**
-         * Return whether this Context has the given {@link Protocol}.  The only
-         * Protocol this class has is the internal protocol.
-         *
-         * @param protocol the Protocol to test
-         * @returns true if the protocol is "internal"
-         */
-        @Override
-        public boolean hasProtocol(Protocol protocol) {
-            return INTERNAL_PROTOCOL.equals(protocol);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Protocol getProtocol() {
-            return INTERNAL_PROTOCOL;
-        }
-    }
 
 }

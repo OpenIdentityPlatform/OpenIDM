@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,7 +38,7 @@ if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
         fullResourcePath = request.resourceName;
     }
 
-    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content);
+    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content, [], context.current);
 
     if (!result.result) {
         throw {

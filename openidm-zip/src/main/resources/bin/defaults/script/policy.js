@@ -351,11 +351,11 @@ policyImpl = (function (){
             return [];
         }
         
-        var isHttp = (context.caller === 'http'),
-            params = request.additionalParameters,
+        var isExternal = context.caller.external,
             actionParams,response,currentObject;
         
-        if (isHttp === "true" || isHttp === true || (params !== null && params.external)) {
+        if (isExternal === "true" || isExternal === true) {
+            
             if (request.resourceName && !request.resourceName.match('/$')) { 
                 // only do a read if there is no id specified, in the case of new records 
                 currentObject = openidm.read(request.resourceName);
