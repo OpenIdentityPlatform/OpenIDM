@@ -51,6 +51,12 @@ var policyConfig = {
             "policyRequirements" : ["UNIQUE"]
         },
         {
+            "policyId" : "regexpMatches",
+            "policyExec" : "regexpMatches",
+            "clientValidation": true,
+            "policyRequirements" : ["MATCH_REGEXP"]
+        },       
+        {
             "policyId" : "valid-date",
             "policyExec" : "validDate",
             "clientValidation": true,
@@ -144,6 +150,19 @@ policyImpl = (function (){
             return false;
         },
         policyFunctions = {};
+
+
+    policyFunctions.regexpMatches = function(fullObject, value, params, property) {
+        params.flags = params.flags || "";
+        if (typeof(value) === "number") {
+            value = value + ""; // cast to string;
+        }
+        if (typeof(value) !== "string" || !(new RegExp(params.regexp, params.flags)).test(value)) {
+            return [ {"policyRequirement": "MATCH_REGEXP", "regexp": params.regexp, params: params, "flags": params.flags}];
+        } else {
+            return [];
+        }
+    };
 
     policyFunctions.required = function(fullObject, value, params, propName) {
         if (value === undefined) {
@@ -355,10 +374,11 @@ policyImpl = (function (){
         
         if (context.caller.external) {
             
-            if (request.resourceName && !request.resourceName.match('/$')) { 
-                // only do a read if there is no id specified, in the case of new records 
+
+            // don't do a read if the resource ends with "/*", which indicates that this is a new record
+            if (request.resourceName && !request.resourceName.match('/\\*$')) { 
                 currentObject = openidm.read(request.resourceName);
-                if (openidm.isEncrypted(currentObject[propName])) {
+                if (currentObject[propName] !== null && currentObject[propName] !== undefined && openidm.isEncrypted(currentObject[propName])) {
                     currentObject[propName] = openidm.decrypt(currentObject[propName]);
                 }
                 if (currentObject[propName] === fullObject[propName]) {
@@ -401,6 +421,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             i;
         
         for (i = 0; i < propAddress.length; i++) {
+            propAddress[i] = propAddress[i].replace(/\[\*\]$/, ''); // replace a trailing array indicator, if found
             tmpObject = tmpObject[propAddress[i]];
             if (tmpObject === undefined || tmpObject === null) {
                 return tmpObject;
@@ -497,7 +518,9 @@ policyProcessor = (function (policyConfig,policyImpl){
         var retObj = {},
             policyRequirements = [],
             allPolicyRequirements = getAllPolicyRequirements(policies),
-            i,params,policy,validationFunc,failed,y;
+            propValueContainer = [],
+            i,j,params,policy,validationFunc,failed,y;
+        
         for (i = 0; i < policies.length; i++) {
             params = policies[i].params;
             policy = getPolicy(policies[i].policyId);
@@ -508,23 +531,32 @@ policyProcessor = (function (policyConfig,policyImpl){
             if (!(typeof(policy.validateOnlyIfPresent) !== 'undefined' && policy.validateOnlyIfPresent && typeof(propValue) === 'undefined')) {
                 validationFunc = policyImpl[policy.policyExec]; 
                 
-                if (propValue && openidm.isEncrypted(propValue)) {
-                    propValue = openidm.decrypt(propValue);
+                if (propName.match(/\[\*\]$/)) { // if we are dealing with a property that is an array element
+                    propValueContainer = propValue; // then use the propValue provided for the array
+                } else { // if we are dealing with a regular property
+                    propValueContainer = [propValue]; // then it's a single value array
                 }
+                
+                for (j=0;j<propValueContainer.length;j++) {
                     
-                failed = validationFunc.call({ "failedPolicyRequirements": policyRequirements, "allPolicyRequirements": allPolicyRequirements }, fullObject, propValue, params, propName);
-                if (failed.length > 0) {
-                    for ( y = 0; y < failed.length; y++) {
-                        policyRequirements.push(failed[y]);
+                    retObj = {};
+                    retObj.policyRequirements = [];
+                    
+                    if (propValueContainer[j] && openidm.isEncrypted(propValueContainer[j])) {
+                        propValueContainer[j] = openidm.decrypt(propValueContainer[j]);
+                    }
+                        
+                    failed = validationFunc.call({ "failedPolicyRequirements": policyRequirements, "allPolicyRequirements": allPolicyRequirements }, fullObject, propValueContainer[j], params, propName);
+                    if (failed.length > 0) {
+                        retObj.property = propName.replace(/\[\*\]$/, "["+j+"]");
+                        for ( y = 0; y < failed.length; y++) {
+                            retObj.policyRequirements.push(failed[y]);
+                        }
+                        retArray.push(retObj);
                     }
                 }
             }
             
-        }
-        if (policyRequirements.length > 0) {
-            retObj.property = propName;
-            retObj.policyRequirements = policyRequirements;
-            retArray.push(retObj);
         }
     },
     
