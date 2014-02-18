@@ -46,15 +46,6 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>
-<!--
-        <dependency>
--->
-            <!-- required to check isPublicContext ) -->
-<!--
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-servlet</artifactId>
-        </dependency>
--->
 
         <!-- Provided OSGi Dependencies -->
         <dependency>

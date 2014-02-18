@@ -380,7 +380,7 @@ function allow() {
     var roles,
         action;
     
-    if (context.caller !== 'http') {
+    if (context.caller.external === false) {
         return true;
     }
     
@@ -391,7 +391,7 @@ function allow() {
     }
     
     // Check REST requests against the access configuration
-    if (context.caller === 'http') {
+    if (context.caller.external === true) {
         if (!isAJAXRequest()) {
             return false;
         }

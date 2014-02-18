@@ -66,11 +66,9 @@ public class ContextUtil {
 
     }
 
-    private static ClientContext.Protocol HTTP_PROTOCOL = ClientContext.Protocol.valueOf("http");
-
     /**
      * Tests whether the context represents an external routed request, by checking if the client context
-     * is present and has the "http" {@link ClientContext.Protocol}.
+     * is present and that it is external
      *
      * @param context the context to inspect
      * @return true if the context represents an external request;
@@ -78,22 +76,6 @@ public class ContextUtil {
      */
     public static boolean isExternal(Context context) {
         return context.containsContext(ClientContext.class)
-                && context.asContext(ClientContext.class).hasProtocol(HTTP_PROTOCOL);
-    }
-
-    /** the {@link ClientContext.Protocol} for internally-routed requests */
-    public static ClientContext.Protocol INTERNAL_PROTOCOL = ClientContext.Protocol.valueOf("internal-server");
-
-    /**
-     * Tests whether the context represents an internal routed request, by checking if the client context
-     * is present and has the {@link ClientContext.Protocol} matching our internal routing context protocol.
-     *
-     * @param context the context to inspect
-     * @return true if the context represents an internal request;
-     *      false otherwise, or if the {@link ClientContext} could not be found
-     */
-    public static boolean isInternal(Context context) {
-        return context.containsContext(ClientContext.class)
-                && context.asContext(ClientContext.class).hasProtocol(INTERNAL_PROTOCOL);
+                && context.asContext(ClientContext.class).isExternal();
     }
 }
