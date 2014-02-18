@@ -23,11 +23,11 @@
                 },
                 {
                     "source" : "email",
-                    "target" : "email"
+                    "target" : "mail"
                 },
                 {
                     "source" : "lastname",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "name",
@@ -39,7 +39,7 @@
                 },
                 {
                     "source" : "mobileTelephoneNumber",
-                    "target" : "phoneNumber"
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "securityQuestion",
