@@ -85,6 +85,8 @@ import com.orientechnologies.orient.core.exception.OConcurrentModificationExcept
 import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
+
 /**
  * Repository service implementation using OrientDB
  * @author aegloff
@@ -312,13 +314,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
             return new Resource(obj.get(DocumentUtil.TAG_ID).asString(), obj.get(DocumentUtil.TAG_REV).asString(),  obj);
+        } catch (ORecordDuplicatedException ex) {
+            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
+            throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
-        } catch (com.orientechnologies.orient.core.exception.ODatabaseException ex) {
+        } catch (ODatabaseException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
             // OrientDB may wrap the IndexException root cause.
-            if (isCauseIndexException(ex, 10)) {
+            if (isCauseIndexException(ex, 10) || isCauseRecordDuplicatedException(ex, 10)) {
                 throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
                         + ex.getMessage(), ex);
             } else {
@@ -644,6 +649,19 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //    String type = getObjectType(id);
     //    return typeToOrientClassName(type);
     //}
+
+    /**
+     * Detect if the root cause of the exception is a duplicate record.
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return
+     */
+    private boolean isCauseRecordDuplicatedException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, ORecordDuplicatedException.class, maxLevels);
+    }
     
     /**
      * Detect if the root cause of the exception is an index constraint violation
