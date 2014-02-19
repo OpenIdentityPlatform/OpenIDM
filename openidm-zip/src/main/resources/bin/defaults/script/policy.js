@@ -378,7 +378,7 @@ policyImpl = (function (){
             // don't do a read if the resource ends with "/*", which indicates that this is a new record
             if (request.resourceName && !request.resourceName.match('/\\*$')) { 
                 currentObject = openidm.read(request.resourceName);
-                if (currentObject[propName] !== null && currentObject[propName] !== undefined && openidm.isEncrypted(currentObject[propName])) {
+                if (openidm.isEncrypted(currentObject[propName])) {
                     currentObject[propName] = openidm.decrypt(currentObject[propName]);
                 }
                 if (currentObject[propName] === fullObject[propName]) {
@@ -542,7 +542,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                     retObj = {};
                     retObj.policyRequirements = [];
                     
-                    if (propValueContainer[j] && openidm.isEncrypted(propValueContainer[j])) {
+                    if (openidm.isEncrypted(propValueContainer[j])) {
                         propValueContainer[j] = openidm.decrypt(propValueContainer[j]);
                     }
                         

@@ -390,7 +390,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
-                if (arguments.length == 1) {
+                if (arguments == null || arguments.length == 0) {
+                    return false;
+                } else if (arguments.length == 1) {
                     return JsonCrypto.isJsonCrypto(arguments[0] instanceof JsonValue
                         ? (JsonValue) arguments[0] 
                         : new JsonValue(arguments[0]));
