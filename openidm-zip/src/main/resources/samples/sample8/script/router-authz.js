@@ -25,7 +25,7 @@ function contains(a, o) {
 function allow() {
     var roles;
     
-    if (context.caller.external === false) {
+    if (!context.caller.external) {
         return true;
     }
     roles = context.security.roles;
