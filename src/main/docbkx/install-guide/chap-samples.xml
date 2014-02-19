@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
 <title>More OpenIDM Samples</title>
 
  <para>The current distribution of OpenIDM comes with a variety of samples
@@ -971,8 +970,8 @@ $ ./startup.sh -p samples/sample5</screen>
   for example.</para>
 
   <para>Sample 6 picks up new and changed users from the LDAP suffix,
-  <literal>ou=people,dc=example,dc=com</literal>, and sends updates to the
-  "Active Directory" suffix <literal>ou=people,o=ad</literal>. To keep the
+  <literal>dc=example,dc=com</literal>, and sends updates to the
+  "Active Directory" suffix <literal>o=ad</literal>. To keep the
   example relatively simple, no configuration is provided for the flow from
   AD to LDAP.</para>
 
