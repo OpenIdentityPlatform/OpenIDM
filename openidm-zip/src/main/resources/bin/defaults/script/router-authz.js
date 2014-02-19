@@ -248,7 +248,7 @@ function ownDataOnly() {
 }
 
 function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
-    var i = 0,requestedRoles = [],params = {},currentUser = {},
+    var i = 0,requestedRoles = [],params = {},currentUser = {}, operations,
         getTopLevelProp = function (prop) {
             // removes a leading slash and only returns the first part of a string before a possible subsequent slash
             return prop.replace(/^\//, '').match(/^[^\/]+/)[0];
@@ -264,12 +264,16 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     }
     
     if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
-        if (!request.patchOperations) {
+    	if (request.method === "action") {
+    		operations = request.content;
+    	} else if (!request.patchOperations) {
             return true;
+        } else {
+        	operations = request.patchOperations
         }
         // check each of the fields they are attempting to patch and make sure they are approved
-        for (i in request.patchOperations) {
-            if ((request.patchOperations[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(request.patchOperations[i].field)))) {
+        for (i in operations) {
+            if ((operations[i].field && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(operations[i].field)))) {
                 return false;
             }
         }
