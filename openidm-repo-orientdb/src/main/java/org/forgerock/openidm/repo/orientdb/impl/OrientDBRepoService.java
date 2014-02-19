@@ -25,13 +25,11 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.ComponentContext;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
@@ -47,7 +45,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
@@ -63,6 +60,7 @@ import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
 
 // JSON Resource
 import org.forgerock.json.resource.JsonResource;
@@ -236,13 +234,16 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
+        } catch (ORecordDuplicatedException ex) {
+            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
+            throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
         } catch (ODatabaseException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
             // OrientDB may wrap the IndexException root cause.
-            if (isCauseIndexException(ex, 10)) {
+            if (isCauseIndexException(ex, 10) || isCauseRecordDuplicatedException(ex, 10)) {
                 throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
                         + ex.getMessage(), ex);
             } else {
@@ -565,6 +566,19 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     //    String type = getObjectType(id);
     //    return typeToOrientClassName(type);
     //}
+
+    /**
+     * Detect if the root cause of the exception is a duplicate record.
+     * This is necessary as the database may wrap this root cause in further exceptions,
+     * masking the underlying cause
+     * @param ex The throwable to check
+     * @param maxLevels the maximum level of causes to check, avoiding the cost
+     * of checking recursiveness
+     * @return
+     */
+    private boolean isCauseRecordDuplicatedException(Throwable ex, int maxLevels) {
+    	return isCauseException (ex, ORecordDuplicatedException.class, maxLevels);
+    }
     
     /**
      * Detect if the root cause of the exception is an index constraint violation
