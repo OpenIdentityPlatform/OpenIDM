@@ -95,7 +95,7 @@ if (request.method !== "query") {
                     }
                     
                     if(!user) {
-                        throw "Bad userId"; 
+                        return userId; 
                     }
                 }
                 users[userId] = user;
@@ -104,12 +104,17 @@ if (request.method !== "query") {
         },
         
         getDisplayableOf = function(user) {
-            if (user.givenName || user.familyName) {
-                return user.givenName + " " + user.familyName;
+            if (typeof user === "object") {
+                if (user.givenName || user.familyName) {
+                    return user.givenName + " " + user.familyName;
+                } else {
+                    return user.userName ? user.userName : user._id;
+                }
             } else {
-                return user.userName ? user.userName : user._id;
+                return user;
             }
         },
+        
         join = function (arr, delim) {
             var returnStr = "",i=0;
             for (i=0; i<arr.length; i++) {
