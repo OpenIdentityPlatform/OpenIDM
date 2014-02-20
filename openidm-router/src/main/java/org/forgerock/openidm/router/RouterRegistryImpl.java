@@ -417,7 +417,7 @@ class RouteServiceImpl implements RouteService {
 
     @Override
     public ServerContext createServerContext() throws ResourceException {
-        return createServerContext(createInternalSecurityContext(bundle.getBundleContext()));
+        return createServerContext(createInternalSecurityContext());
     }
 
     @Override
@@ -439,22 +439,17 @@ class RouteServiceImpl implements RouteService {
      * this context should be used. The AUTHORIZATION module grants full access
      * to this context.
      *
-     * @param bundleContext
-     *            the context of the OSGi Bundle.
      * @return a new {@code SecurityContext}
      */
-    private SecurityContext createInternalSecurityContext(final BundleContext bundleContext) {
-
+    private SecurityContext createInternalSecurityContext() {
         // TODO Finalise the default system context
-        Map<String, Object> authzid = new HashMap<String, Object>();
-        authzid.put(SecurityContext.AUTHZID_COMPONENT, bundleContext.getBundle().getSymbolicName());
-        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
-        authzid.put(SecurityContext.AUTHZID_DN, "system");
-        authzid.put(SecurityContext.AUTHZID_REALM, "system");
+        // Ideally, we would have an internal system user that we could point to;
+        // point to it now and build it later
+        final Map<String, Object> authzid = new HashMap<String, Object>();
         authzid.put(SecurityContext.AUTHZID_ID, "system");
-        return new SecurityContext(new RootContext(),
-                bundleContext.getProperty(Constants.BUNDLE_SYMBOLICNAME), authzid);
-
+        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
+        authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
+        return new SecurityContext(new RootContext(), "system", authzid);
     }
 }
 
