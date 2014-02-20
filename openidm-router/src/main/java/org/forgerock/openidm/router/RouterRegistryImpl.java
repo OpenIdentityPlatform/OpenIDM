@@ -25,6 +25,8 @@
 package org.forgerock.openidm.router;
 
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,8 +37,10 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -413,7 +417,7 @@ class RouteServiceImpl implements RouteService {
 
     @Override
     public ServerContext createServerContext() throws ResourceException {
-        return createServerContext(ContextUtil.createInternalSecurityContext(bundle.getBundleContext()));
+        return createServerContext(createInternalSecurityContext(bundle.getBundleContext()));
     }
 
     @Override
@@ -424,6 +428,33 @@ class RouteServiceImpl implements RouteService {
         } else {
             throw new ServiceUnavailableException();
         }
+    }
+
+    /**
+     * Create a default internal {@link org.forgerock.json.resource.SecurityContext} used for
+     * internal trusted calls.
+     * <p>
+     * If the request is initiated in a non-authenticated location (
+     * {@code BundleActivator}, {@code Scheduler}, {@code ConfigurationAdmin})
+     * this context should be used. The AUTHORIZATION module grants full access
+     * to this context.
+     *
+     * @param bundleContext
+     *            the context of the OSGi Bundle.
+     * @return a new {@code SecurityContext}
+     */
+    private SecurityContext createInternalSecurityContext(final BundleContext bundleContext) {
+
+        // TODO Finalise the default system context
+        Map<String, Object> authzid = new HashMap<String, Object>();
+        authzid.put(SecurityContext.AUTHZID_COMPONENT, bundleContext.getBundle().getSymbolicName());
+        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
+        authzid.put(SecurityContext.AUTHZID_DN, "system");
+        authzid.put(SecurityContext.AUTHZID_REALM, "system");
+        authzid.put(SecurityContext.AUTHZID_ID, "system");
+        return new SecurityContext(new RootContext(),
+                bundleContext.getProperty(Constants.BUNDLE_SYMBOLICNAME), authzid);
+
     }
 }
 
