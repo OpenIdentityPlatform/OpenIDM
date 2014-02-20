@@ -38,7 +38,7 @@ if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
         fullResourcePath = request.resourceName;
     }
 
-    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content, [], context.current);
+    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content);
 
     if (!result.result) {
         throw {

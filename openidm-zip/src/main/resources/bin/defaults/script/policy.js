@@ -372,8 +372,12 @@ policyImpl = (function (){
         
         var actionParams,response,currentObject;
         
-        if (context.caller.external) {
-            
+        // Perform reauth if the context indicates that the caller is external
+        // or if we have set a parameter to force reauth when handing a patch operation.
+        // Important: Interpret any value of additionalParameters.external as `true`
+        // so that an external caller cannot abuse this facility by passing in 'false'.
+        if (context.caller.external
+                || (request.additionalParameters !== null && request.additionalParameters.external)) {
 
             // don't do a read if the resource ends with "/*", which indicates that this is a new record
             if (request.resourceName && !request.resourceName.match('/\\*$')) { 
