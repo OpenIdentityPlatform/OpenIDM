@@ -137,22 +137,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     // Current configuration
     JsonValue existingConfig;
 
-    @Reference(
-            policy = ReferencePolicy.DYNAMIC,
-            target = "("+ServerConstants.ROUTER_PREFIX + "=/config*)"
-            )
-    protected RouteService configService;
-    protected ServerContext configServiceContext = null;
-    private void bindConfigService(final RouteService service) throws ResourceException {
-        configService = service;
-        configServiceContext = service.createServerContext();
-    }
-
-    private void unbindConfigService(final RouteService service) {
-        configService = null;
-        configServiceContext = null;
-    }
-    
     // TODO: evaluate use of Guice instead
     PredefinedQueries predefinedQueries = new PredefinedQueries();
     Queries queries = new Queries();

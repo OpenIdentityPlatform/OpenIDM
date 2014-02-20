@@ -196,19 +196,16 @@ public class AuditServiceImpl implements AuditService {
         Ensure we do not get bound on router whilst it is activating
     */
     // ----- Declarative Service Implementation
-    ServerContext routerContext = null;
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
 
     private void bindRouteService(final RouteService service) throws ResourceException {
         routeService = service;
-        routerContext = service.createServerContext();
     }
 
     private void unbindRouteService(final RouteService service) {
         routeService = null;
-        routerContext = null;
     }
 
 
