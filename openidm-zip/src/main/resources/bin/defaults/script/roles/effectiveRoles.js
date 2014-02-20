@@ -29,7 +29,11 @@
 /*global object */
 
 logger.debug("Invoked effectiveRoles script on {} value: ", propertyName, object);
-var rolesPropName = "roles";
+// Allow for configuration in virtual attribute config, but default
+if (rolesPropName === undefined) {
+    var rolesPropName = "roles";
+}
+logger.trace("Configured rolesPropName: {}", rolesPropName);
 
 var effectiveRoles = [];
 var directRoles = object[rolesPropName];
