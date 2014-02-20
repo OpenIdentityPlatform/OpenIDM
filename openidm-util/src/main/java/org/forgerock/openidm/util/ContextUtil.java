@@ -17,13 +17,6 @@ package org.forgerock.openidm.util;
 
 import org.forgerock.json.resource.ClientContext;
 import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.SecurityContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  */
@@ -36,34 +29,6 @@ public class ContextUtil {
      */
     private ContextUtil() {
         super();
-    }
-
-    /**
-     * Create a default internal {@link org.forgerock.json.resource.SecurityContext} newBuilder used for
-     * internal trusted calls.
-     * <p/>
-     *
-     * If the request is initiated in a non-authenticated location (
-     * {@code BundleActivator}, {@code Scheduler}, {@code ConfigurationAdmin})
-     * this contest should be used. The AUTHORIZATION module grants full access
-     * to this context.
-     *
-     * @param bundleContext
-     *            the context of the OSGi Bundle.
-     * @return new {@code SecurityContext} newBuilder.
-     */
-    public static SecurityContext createInternalSecurityContext(final BundleContext bundleContext) {
-
-        // TODO Finalise the default system context
-        Map<String, Object> authzid = new HashMap<String, Object>();
-        authzid.put(SecurityContext.AUTHZID_COMPONENT, bundleContext.getBundle().getSymbolicName());
-        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
-        authzid.put(SecurityContext.AUTHZID_DN, "system");
-        authzid.put(SecurityContext.AUTHZID_REALM, "system");
-        authzid.put(SecurityContext.AUTHZID_ID, "system");
-        return new SecurityContext(new RootContext(),
-                bundleContext.getProperty(Constants.BUNDLE_SYMBOLICNAME), authzid);
-
     }
 
     /**
