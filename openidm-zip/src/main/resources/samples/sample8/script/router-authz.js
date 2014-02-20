@@ -28,7 +28,7 @@ function allow() {
     if (!context.caller.external) {
         return true;
     }
-    roles = context.security.roles;
+    roles = context.security.authorizationId.roles;
     if (contains(roles, 'openidm-admin')) {
         return true;
     } else if (allowCert && contains(roles, 'openidm-cert')) {
