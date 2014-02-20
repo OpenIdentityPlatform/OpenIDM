@@ -108,9 +108,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private String instanceId;
 
     /**
-     * The Repository Service Accessor
+     * The Repository Service ServerContext
      */
-    private static ServerContext accessor;
+    private static ServerContext routeServiceServerContext;
 
     /**
      * The Connection Factory
@@ -148,12 +148,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     protected void bindRepo(final RouteService service) throws ResourceException {
         logger.debug("binding RepositoryService");
-        this.accessor = service.createServerContext();
+        this.routeServiceServerContext = service.createServerContext();
     }
 
     protected void unbindRepo(final RouteService service) {
         logger.debug("unbinding RepositoryService");
-        this.accessor = null;
+        this.routeServiceServerContext = null;
     }
 
     @Activate
@@ -243,7 +243,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     r.setAdditionalParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
-                    connectionFactory.getConnection().query(accessor, r, new QueryResultHandler() {
+                    connectionFactory.getConnection().query(context, r, new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {
                             // ignore
@@ -265,7 +265,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 	String id = request.getResourceName();
                     logger.debug("Attempting to read instance {} from the database", id);
                     ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
-                    Resource instanceValue = connectionFactory.getConnection().read(accessor, readRequest);
+                    Resource instanceValue = connectionFactory.getConnection().read(context, readRequest);
                     if (!instanceValue.getContent().isNull()) {
                         resultMap.put("results", getInstanceMap(instanceValue.getContent()));
                     } else {
@@ -388,13 +388,13 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private void updateInstanceState(String instanceId, InstanceState instanceState)
             throws ResourceException {
         synchronized (repoLock) {
-            if (accessor == null) {
+            if (routeServiceServerContext == null) {
                 throw new InternalServerErrorException("Repo router is null");
             }
             String repoId = getInstanceStateRepoId(instanceId);
             UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(instanceState.toMap()));
             r.setRevision(instanceState.getRevision());
-            connectionFactory.getConnection().update(accessor, r);
+            connectionFactory.getConnection().update(routeServiceServerContext, r);
         }
     }
 
@@ -407,7 +407,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     private Map<String, Object> getOrCreateRepo(String repoId) throws ResourceException {
         synchronized (repoLock) {
-            if (accessor == null) {
+            if (routeServiceServerContext == null) {
                 throw new InternalServerErrorException("Repo router is null");
             }
             String container, id;
@@ -421,7 +421,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 container = repoId.substring(0, repoId.lastIndexOf("/"));
                 id = repoId.substring(repoId.lastIndexOf("/") + 1);
 	            CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
-                map = connectionFactory.getConnection().create(accessor, createRequest).getContent().asMap();
+                map = connectionFactory.getConnection().create(routeServiceServerContext, createRequest).getContent().asMap();
             }
             return map;
         }
@@ -429,11 +429,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     private JsonValue readFromRepo(String repoId) throws ResourceException {
         try {
-            if (accessor == null) {
+            if (routeServiceServerContext == null) {
                 throw new InternalServerErrorException("Repo router is null");
             }
             logger.debug("Reading from repo {}", repoId);
-            Resource res = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(repoId));
+            Resource res = connectionFactory.getConnection().read(routeServiceServerContext, Requests.newReadRequest(repoId));
             res.getContent().put("_id", res.getId());
             res.getContent().put("_rev", res.getRevision());
             return res.getContent();
@@ -532,7 +532,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private Map<String, InstanceState> findFailedInstances() {
         Map<String, InstanceState> failedInstances = new HashMap<String, InstanceState>();
         try {
-            if (accessor == null) {
+            if (routeServiceServerContext == null) {
                 throw new InternalServerErrorException("Repo router is null");
             }
             QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
@@ -545,7 +545,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             JsonValue jv = new JsonValue(new HashMap<String, Object>());
             final Collection<Map<String, Object>> list = new HashSet<Map<String, Object>>();
             jv.put("result", list);
-            connectionFactory.getConnection().query(accessor, r, new QueryResultHandler() {
+            connectionFactory.getConnection().query(routeServiceServerContext, r, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore
