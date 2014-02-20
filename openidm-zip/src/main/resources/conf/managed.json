@@ -30,7 +30,8 @@
                     "type" : "virtual",
                     "onRetrieve" : {
                         "type" : "text/javascript",
-                        "file" : "roles/effectiveRoles.js"
+                        "file" : "roles/effectiveRoles.js",
+                        "rolesPropName" : "roles"
                     }
                 },
                 {
@@ -38,7 +39,8 @@
                     "type" : "virtual",
                     "onRetrieve" : {
                         "type" : "text/javascript",
-                        "file" : "roles/effectiveAssignments.js"
+                        "file" : "roles/effectiveAssignments.js",
+                        "effectiveRolesPropName" : "effectiveRoles"
                     }
                 }
             ]

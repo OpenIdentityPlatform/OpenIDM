@@ -29,9 +29,14 @@
 /*global object */
 
 logger.debug("Invoked effectiveAssignments script on property {}: {}", propertyName, object);
-var effectiveRolesPropName = "effectiveRoles";
 
-var effectiveAssignments = new Object();
+// Allow for configuration in virtual attribute config, but default
+if (effectiveRolesPropName === undefined) {
+    var effectiveRolesPropName = "effectiveRoles";
+}
+logger.trace("Configured effectiveRolesPropName: {}", effectiveRolesPropName);
+
+var effectiveAssignments = {};
 var effectiveRoles = object[effectiveRolesPropName];
 
 if (effectiveRoles != null)  {
