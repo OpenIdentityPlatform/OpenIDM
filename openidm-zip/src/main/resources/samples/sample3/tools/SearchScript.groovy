@@ -55,50 +55,116 @@ import groovy.sql.DataSet;
 // !!!! Each Map must contain a '__UID__' and '__NAME__' attribute.
 // This is required to build a ConnectorObject.
 
+
+//Need to handle the __UID__ and __NAME__ in queries - this map has entries for each objectType, 
+//and is used to translate fields that might exist in the query object from the ICF identifier
+//back to the real property name.
+def fieldMap = [
+    "organization": [
+        "__UID__": "name",
+        "__NAME__": "name"
+    ],
+    "__ACCOUNT__": [
+        "__UID__": "uid",
+        "__NAME__": "uid"
+    ],
+    "__GROUP__": [
+        "__UID__": "name",
+        "__NAME__": "name"
+    ]
+]
+
 log.info("Entering "+action+" Script");
+
+def whereTemplates = [
+    CONTAINS:'$left ${not ? "NOT " : ""}LIKE ?',
+    ENDSWITH:'$left ${not ? "NOT " : ""}LIKE ?',
+    STARTSWITH:'$left ${not ? "NOT " : ""}LIKE ?',
+    EQUALS:'$left ${not ? "<>" : "="} ?',
+    GREATERTHAN:'$left ${not ? "<=" : ">"} ?',
+    GREATERTHANOREQUAL:'$left ${not ? "<" : ">="} ?',
+    LESSTHAN:'$left ${not ? ">=" : "<"} ?',
+    LESSTHANOREQUAL:'$left ${not ? ">" : "<="} ?'
+];
+
+def whereParams = []
+def queryParser
+
+// this closure function recurses through the (potentially complex) query object in order to build an equivalent SQL 'where' expression
+queryParser = { queryObj ->
+
+    if (queryObj.operation == "OR" || queryObj.operation == "AND") {
+        return "(" + queryParser(queryObj.right) + " " + queryObj.operation + " " + queryParser(queryObj.left) + ")";
+    } else {
+
+        if (fieldMap[objectClass] && fieldMap[objectClass][queryObj.get("left")]) {
+            queryObj.put("left",fieldMap[objectClass][queryObj.get("left")]);
+        }
+
+        def engine = new groovy.text.SimpleTemplateEngine()
+        def wt = whereTemplates.get(queryObj.get("operation"))
+        def binding = [left:queryObj.get("left"),not:queryObj.get("not")]
+        def template = engine.createTemplate(wt).make(binding)
+
+        if (queryObj.get("operation") == "CONTAINS") {
+            whereParams.push("%" + queryObj.get("right") + "%")
+        } else if (queryObj.get("operation") == "ENDSWITH") {
+            whereParams.push("%" + queryObj.get("right"))
+        } else if (queryObj.get("operation") == "STARTSWITH") {
+            whereParams.push(queryObj.get("right") + "%")
+        } else {
+            whereParams.push(queryObj.get("right"))
+        }
+        return template.toString()
+    }
+}
+
 
 def sql = new Sql(connection);
 def result = []
 def where = "";
 
 if (query != null){
-    //Need to handle the __UID__ in queries
-    if (query.get("left").equalsIgnoreCase("__UID__") && objectClass.equalsIgnoreCase("__ACCOUNT__")) query.put("left","uid");
-    if (query.get("left").equalsIgnoreCase("__UID__") && objectClass.equalsIgnoreCase("__GROUP__")) query.put("left","name");
-    if (query.get("left").equalsIgnoreCase("__UID__") && objectClass.equalsIgnoreCase("organization")) query.put("left","name")
-
     // We can use Groovy template engine to generate our custom SQL queries
-    def engine = new groovy.text.SimpleTemplateEngine();
-
-    def whereTemplates = [
-        CONTAINS:' WHERE $left ${not ? "NOT " : ""}LIKE "%$right%"',
-        ENDSWITH:' WHERE $left ${not ? "NOT " : ""}LIKE "%$right"',
-        STARTSWITH:' WHERE $left ${not ? "NOT " : ""}LIKE "$right%"',
-        EQUALS:' WHERE $left ${not ? "<>" : "="} "$right"',
-        GREATERTHAN:' WHERE $left ${not ? "<=" : ">"} "$right"',
-        GREATERTHANOREQUAL:' WHERE $left ${not ? "<" : ">="} "$right"',
-        LESSTHAN:' WHERE $left ${not ? ">=" : "<"} "$right"',
-        LESSTHANOREQUAL:' WHERE $left ${not ? ">" : "<="} "$right"'
-    ]
-
-    def wt = whereTemplates.get(query.get("operation"));
-    def binding = [left:query.get("left"),right:query.get("right"),not:query.get("not")];
-    def template = engine.createTemplate(wt).make(binding);
-    where = template.toString();
+    where = " WHERE " + queryParser(query)
     log.ok("Search WHERE clause is: "+ where)
 }
 
 switch ( objectClass ) {
     case "__ACCOUNT__":
-    sql.eachRow("SELECT * FROM Users" + where, {result.add([__UID__:it.uid, __NAME__:it.uid, uid:it.uid, fullname:it.fullname,firstname:it.firstname,lastname:it.lastname,email:it.email,organization:it.organization])} );
+    sql.eachRow("SELECT * FROM Users" + where, whereParams) {
+        result.add([
+            __UID__:it.uid, 
+            __NAME__:it.uid, 
+            uid:it.uid, 
+            fullname:it.fullname,
+            firstname:it.firstname,
+            lastname:it.lastname,
+            email:it.email,
+            organization:it.organization
+        ])
+    }
     break
 
     case "__GROUP__":
-    sql.eachRow("SELECT * FROM Groups" + where, {result.add([__UID__:it.name, __NAME__:it.name, gid:it.gid, ,description:it.description])} );
+    sql.eachRow("SELECT * FROM Groups" + where, whereParams) {
+        result.add([
+            __UID__:it.name, 
+            __NAME__:it.name, 
+            gid:it.gid,
+            description:it.description
+        ])
+    }
     break
 
     case "organization":
-    sql.eachRow("SELECT * FROM Organizations" + where, {result.add([__UID__:it.name, __NAME__:it.name, description:it.description])} );
+    sql.eachRow("SELECT * FROM Organizations" + where, whereParams) {
+        result.add([
+            __UID__:it.name, 
+            __NAME__:it.name, 
+            description:it.description
+        ])
+    }
     break
 
     default:
