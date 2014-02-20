@@ -426,7 +426,7 @@ class RouteServiceImpl implements RouteService {
         if (null != r) {
             return new ServerContext(parentContext);
         } else {
-            throw new ServiceUnavailableException();
+            throw new ServiceUnavailableException("Router unavailable!");
         }
     }
 
