@@ -26,6 +26,7 @@ package org.forgerock.openidm.audit.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -169,8 +171,8 @@ public class AuditServiceImpl implements AuditService {
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    Map<String, List<String>> actionFilters;
-    Map<String, Map<String, List<String>>> triggerFilters;
+    Map<String, Set<RequestType>> actionFilters;
+    Map<String, Map<String, Set<RequestType>>> triggerFilters;
     List<JsonPointer> watchFieldFilters;
     List<JsonPointer> passwordFieldFilters;
 
@@ -265,30 +267,42 @@ public class AuditServiceImpl implements AuditService {
             logger.debug("Audit create called for {} with {}", request.getResourceName(), obj);
 
             String type = request.getResourceNameObject().head(1).toString();
-
             String trigger = getTrigger(context);
+            JsonValue action = request.getContent().get("action");
 
             // Filter
-            List<String> actionFilter = actionFilters.get(type);
-            Map<String, List<String>> triggerFilter = triggerFilters.get(type);
+            Set<RequestType> actionFilter = actionFilters.get(type);
+            Map<String, Set<RequestType>> triggerFilter = triggerFilters.get(type);
 
             if (triggerFilter != null && trigger != null) {
-                List<String> triggerActions = triggerFilter.get(trigger);
-                if (triggerActions == null) {
-                    logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
-                } else if (!triggerActions.contains(obj.get("action"))) {
-                    logger.debug("Filtered by trigger filter");
-                    handler.handleResult(new Resource(null, null, new JsonValue(obj)));
-                    return;
+                try {
+                    Set<RequestType> triggerActions = triggerFilter.get(trigger);
+                    if (triggerActions == null) {
+                        logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
+                    } else if (!triggerActions.contains(action.asEnum(RequestType.class))) {
+                        logger.debug("Filtered by trigger filter for action {}", new Object[] { action.toString() });
+                        handler.handleResult(new Resource(null, null, new JsonValue(obj)));
+                        return;
+                    }
+                } catch (JsonValueException e) {
+                    // note this is permissive on an unknown trigger filter action; 
+                    // i.e., an action of "money" will not be filtered because it is not a valid RequestType
+                    logger.debug("Action {} is not one of supported action types, not filtering", new Object[] { action.toString(), e });
                 }
             }
 
             if (actionFilter != null) {
                 // TODO: make filters that can operate on a variety of conditions
-                if (!actionFilter.contains(obj.get("action"))) {
-                    logger.debug("Filtered by action filter");
-                    handler.handleResult(new Resource(null, null, new JsonValue(obj)));
-                    return;
+                try {
+                    if (!actionFilter.contains(action.asEnum(RequestType.class))) {
+                        logger.debug("Filtered by action filter for action {}", new Object[] { action.toString() } );
+                        handler.handleResult(new Resource(null, null, new JsonValue(obj)));
+                        return;
+                    }
+                } catch (JsonValueException e) {
+                    // note this is permissive on an unknown filter action; 
+                    // i.e., an action of "money" will not be filtered because it is not a valid RequestType
+                    logger.debug("Action {} is not one of supported action types, not filtering", new Object[] { action.toString(), e });
                 }
             }
 
@@ -645,8 +659,8 @@ public class AuditServiceImpl implements AuditService {
         logger.debug("Audit service filters enabled: {}", actionFilters);
     }
 
-    Map<String, List<String>> getActionFilters(JsonValue config) {
-        Map<String, List<String>> configFilters = new HashMap<String, List<String>>();
+    Map<String, Set<RequestType>> getActionFilters(JsonValue config) {
+        Map<String, Set<RequestType>> configFilters = new HashMap<String, Set<RequestType>>();
 
         Map<String, Object> eventTypes = config.get("eventTypes").asMap();
         if (eventTypes == null) {
@@ -658,10 +672,13 @@ public class AuditServiceImpl implements AuditService {
             JsonValue filterActions = eventTypeValue.get("filter").get("actions");
             // TODO: proper filter mechanism
             if (!filterActions.isNull()) {
-                List<String> filter = new ArrayList<String>();
+                Set<RequestType> filter = EnumSet.noneOf(RequestType.class);
                 for (JsonValue action : filterActions) {
-                    Enum actionEnum = action.asEnum(RequestType.class);
-                    filter.add(actionEnum.toString());
+                    try {
+                        filter.add(action.asEnum(RequestType.class));
+                    } catch (JsonValueException e) {
+                        logger.warn("Action value {} is not a known filter action", new Object[] { action.toString() });
+                    }
                 }
                 configFilters.put(eventTypeName, filter);
             }
@@ -669,8 +686,8 @@ public class AuditServiceImpl implements AuditService {
         return configFilters;
     }
 
-    Map<String, Map<String, List<String>>> getTriggerFilters(JsonValue config) {
-        Map<String, Map<String, List<String>>> configFilters = new HashMap<String, Map<String, List<String>>>();
+    Map<String, Map<String, Set<RequestType>>> getTriggerFilters(JsonValue config) {
+        Map<String, Map<String, Set<RequestType>>> configFilters = new HashMap<String, Map<String, Set<RequestType>>>();
 
         JsonValue eventTypes = config.get("eventTypes");
         if(!eventTypes.isNull()) {
@@ -681,18 +698,21 @@ public class AuditServiceImpl implements AuditService {
                 JsonValue filterTriggers = eventType.get("filter").get("triggers");
                 if (!filterTriggers.isNull()) {
                     // Create map of the trigger's actions
-                    Map<String, List<String>> filter = new HashMap<String, List<String>>();
+                    Map<String, Set<RequestType>> filter = new HashMap<String, Set<RequestType>>();
                     Set<String> keys = filterTriggers.keys();
                     // Loop through individual triggers (that each contain a list of actions)
                     for (String key : keys) {
                         JsonValue trigger = filterTriggers.get(key);
-                        // Create a empty list of actions for this trigger
-                        List<String> triggerActions = new ArrayList<String>();
+                        // Create a empty set of actions for this trigger
+                        Set<RequestType> triggerActions = EnumSet.noneOf(RequestType.class);
                         // Loop through the trigger's actions
                         for (JsonValue triggerAction : trigger) {
                             // Add action to list
-                            Enum actionEnum = triggerAction.asEnum(RequestType.class);
-                            triggerActions.add(actionEnum.toString());
+                            try {
+                                triggerActions.add(triggerAction.asEnum(RequestType.class));
+                            } catch (JsonValueException e) {
+                                logger.warn("Action value {} is not a known filter action", new Object[] { triggerAction.toString() });
+                            }
                         }
                         // Add list of actions to map of trigger's actions
                         filter.put(key, triggerActions);
