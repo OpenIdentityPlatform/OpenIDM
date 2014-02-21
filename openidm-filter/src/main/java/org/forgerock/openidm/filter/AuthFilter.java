@@ -58,7 +58,6 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
 import org.forgerock.openidm.jaspi.modules.AuthHelper;
-import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -139,18 +138,14 @@ public class AuthFilter implements SingletonResourceProvider {
         String userRolesProperty = properties.get("userRoles").asString();
         List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
 
-        authHelper = new AuthHelper(cryptoService, connectionFactory, repositoryRoute.createServerContext(), userIdProperty,
+        authHelper = new AuthHelper(cryptoService, connectionFactory, userIdProperty,
                 userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     // ----- Declarative Service Implementation
 
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
-    RouteService repositoryRoute;
-
     @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
-
 
     // ----- Implementation of SingletonResourceProvider interface
 
@@ -173,7 +168,7 @@ public class AuthFilter implements SingletonResourceProvider {
                                 "Failed authentication, missing or empty headers"));
                         return;
                     }
-                    if (!authHelper.authenticate(queryId, queryOnResource, authcid, password, null)) {
+                    if (!authHelper.authenticate(queryId, queryOnResource, authcid, password, null, context)) {
                         //TODO Handle message
                         handler.handleError(new ForbiddenException("Reauthentication failed", new AuthException(authcid)));
                     }

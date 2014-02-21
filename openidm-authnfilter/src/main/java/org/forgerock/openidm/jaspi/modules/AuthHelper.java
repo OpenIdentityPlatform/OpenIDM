@@ -49,7 +49,6 @@ public class AuthHelper {
 
     private final CryptoService cryptoService;
     private final ConnectionFactory connectionFactory;
-    private final ServerContext context;
 
     private final String userIdProperty;
     private final String userCredentialProperty;
@@ -64,12 +63,11 @@ public class AuthHelper {
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public AuthHelper(CryptoService cryptoService, ConnectionFactory connectionFactory, ServerContext context, String userIdProperty,
-            String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
+    public AuthHelper(CryptoService cryptoService, ConnectionFactory connectionFactory, String userIdProperty,
+                      String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
 
         this.cryptoService = cryptoService;
         this.connectionFactory = connectionFactory;
-        this.context = context;
 
         this.userIdProperty = userIdProperty;
         this.userCredentialProperty = userCredentialProperty;
@@ -95,13 +93,14 @@ public class AuthHelper {
      * @param username The username.
      * @param password The password.
      * @param securityContextMapper The SecurityContextMapper object.
+     * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
     public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
-            SecurityContextMapper securityContextMapper) {
+            SecurityContextMapper securityContextMapper, ServerContext context) {
 
         try {
-            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper);
+            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper, context);
             if (userInfo != null && userInfo.checkCredential(password)) {
                 if (securityContextMapper != null) {
                     securityContextMapper.setRoles(Collections.unmodifiableList(userInfo.getRoleNames()));
@@ -117,8 +116,9 @@ public class AuthHelper {
         return false;
     }
 
-    private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
-            SecurityContextMapper securityContextMapper) throws Exception {
+    private UserInfo getRepoUserInfo(String repoQueryId, String repoResource, String username,
+            SecurityContextMapper securityContextMapper, ServerContext context) throws Exception {
+
         UserInfo user = null;
         Credential credential = null;
         List<String> roleNames = new ArrayList<String>();
@@ -129,7 +129,7 @@ public class AuthHelper {
         request.getAdditionalParameters().put("username", username);
 
         Set<Resource> result = new HashSet<Resource>();
-        connectionFactory.getConnection().query(context,request,result);
+        connectionFactory.getConnection().query(context, request, result);
 
         if (result.size() > 1) {
             logger.warn("Query to match user credentials found more than one matching user for {}", username);
