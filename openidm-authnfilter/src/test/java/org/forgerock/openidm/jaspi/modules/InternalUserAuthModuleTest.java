@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.util.Accessor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -40,12 +43,20 @@ public class InternalUserAuthModuleTest {
 
     private AuthHelper authHelper;
 
+    private ServerContext context;
+
     @BeforeMethod
     public void setUp() {
 
+        context = mock(ServerContext.class);
         authHelper = mock(AuthHelper.class);
-
-        internalUserAuthModule = new InternalUserAuthModule(authHelper);
+        internalUserAuthModule = new InternalUserAuthModule(authHelper,
+                new Accessor<ServerContext>() {
+                    @Override
+                    public ServerContext access() {
+                        return context;
+                    }
+                });
     }
 
     @Test
@@ -163,8 +174,9 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate("credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD",
-                securityContextMapper)).willReturn(true);
+        given(authHelper.authenticate(
+                    "credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD", securityContextMapper, context))
+            .willReturn(true);
 
         //When
         AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
@@ -191,8 +203,9 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate("credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD",
-                securityContextMapper)).willReturn(false);
+        given(authHelper.authenticate(
+                    "credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD", securityContextMapper, context))
+            .willReturn(false);
 
         //When
         AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,

@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
+
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.util.Accessor;
 
 import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
@@ -44,8 +47,8 @@ public class InternalUserAuthModule extends IDMUserAuthModule {
      *
      * @param authHelper A mock of the AuthHelper.
      */
-    public InternalUserAuthModule(AuthHelper authHelper) {
-        super(authHelper, INTERNAL_USER_QUERY_ID, QUERY_ON_INTERNAL_USER_RESOURCE);
+    public InternalUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor) {
+        super(authHelper, accessor, INTERNAL_USER_QUERY_ID, QUERY_ON_INTERNAL_USER_RESOURCE);
     }
 
     /**

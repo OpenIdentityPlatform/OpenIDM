@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
+
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.util.Accessor;
 
 /**
  * Authentication Module for authenticating users against a managed users table.
@@ -39,7 +42,7 @@ public class ManagedUserAuthModule extends IDMUserAuthModule {
      *
      * @param authHelper A mock of an AuthHelper instance.
      */
-    public ManagedUserAuthModule(AuthHelper authHelper) {
-        super(authHelper, QUERY_ID, QUERY_ON_RESOURCE);
+    public ManagedUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor) {
+        super(authHelper, accessor, QUERY_ID, QUERY_ON_RESOURCE);
     }
 }

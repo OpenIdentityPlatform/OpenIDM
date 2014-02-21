@@ -20,8 +20,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.forgerock.openidm.util.Accessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +59,8 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
 
     private AuthHelper authHelper;
 
+    private Accessor<ServerContext> accessor;
+
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
@@ -64,6 +68,15 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
     public IDMUserAuthModule(String queryId, String queryOnResource) {
         this.queryId = queryId;
         this.queryOnResource = queryOnResource;
+        this.accessor = new Accessor<ServerContext>() {
+            public ServerContext access() {
+                try {
+                    return OSGiAuthnFilterBuilder.getRouter().createServerContext();
+                } catch (ResourceException e) {
+                    throw new IllegalStateException("Router context unvailable", e);
+                }
+            }
+        };
     }
 
     /**
@@ -71,10 +84,11 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      *
      * @param authHelper A mock of an AuthHelper instance.
      */
-    public IDMUserAuthModule(AuthHelper authHelper, String queryId, String queryOnResource) {
-        this.authHelper = authHelper;
+    public IDMUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor, String queryId, String queryOnResource) {
         this.queryId = queryId;
         this.queryOnResource = queryOnResource;
+        this.authHelper = authHelper;
+        this.accessor = accessor;
     }
 
     /**
@@ -104,15 +118,10 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         String userRolesProperty = properties.get("userRoles").asString();
         List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
 
-        try {
-            authHelper = new AuthHelper(
-                    OSGiAuthnFilterBuilder.getCryptoService(),
-                    OSGiAuthnFilterBuilder.getConnectionFactory(),
-                    OSGiAuthnFilterBuilder.getRouter().createServerContext(),
-                    userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
-        } catch (ResourceException e) {
-            logger.debug(e.getMessage(), e);
-        }
+        authHelper = new AuthHelper(
+                OSGiAuthnFilterBuilder.getCryptoService(),
+                OSGiAuthnFilterBuilder.getConnectionFactory(),
+                userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     /**
@@ -239,7 +248,12 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             return false;
         }
         securityContextMapper.setUsername(username);
-        return authHelper.authenticate(queryId, queryOnResource, username, password, securityContextMapper);
+        try {
+            return authHelper.authenticate(queryId, queryOnResource, username, password, securityContextMapper, accessor.access());
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
@@ -265,7 +279,12 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         }
         securityContextMapper.setUsername(t[0]);
 
-        return authHelper.authenticate(queryId, queryOnResource, t[0], t[1], securityContextMapper);
+        try {
+            return authHelper.authenticate(queryId, queryOnResource, t[0], t[1], securityContextMapper, accessor.access());
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
