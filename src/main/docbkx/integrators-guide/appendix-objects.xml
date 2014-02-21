@@ -20,16 +20,16 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-objects'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Data Models and Objects Reference</title>
 
  <para>OpenIDM allows you to customize a variety of objects that can be
@@ -612,7 +612,8 @@
   "onValidate": <replaceable>script object</replaceable>,
   "onRetrieve": <replaceable>script object</replaceable>,
   "onStore"   : <replaceable>script object</replaceable>,
-  "encryption": <replaceable>property-encryption object</replaceable>
+  "encryption": <replaceable>property-encryption object</replaceable>,
+  "scope"     : <replaceable>string</replaceable>
 }</programlisting>
 
     <varlistentry>
@@ -661,6 +662,18 @@
       <para>Specifies the configuration for encryption of the property
        in the repository. If omitted or null, the property is not
        encrypted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>scope</term>
+     <listitem>
+      <para>string, optional</para>
+      <para>Specifies whether the property should be filtered from HTTP/external
+       calls. The value can be either <literal>"public"</literal> or
+       <literal>"private"</literal>. <literal>"private"</literal> indicates that
+       the property should be filtered, <literal>"public"</literal> indicates
+       no filtering. If no value is set, the property is assumed to be public
+       and thus not filtered.</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -716,9 +729,9 @@
    example, when mapping to multiple target systems, or when decoupling the
    availability of systems&#8212;to more fully report and audit on all object
    changes during reconciliation, and to build up views that are different from
-   the original source, such transformed and combined or virtual views. Managed
-   objects can also be allowed to act as an authoritative source if no other
-   appropriate source is available.</para>
+   the original source, such as transformed and combined or virtual views.
+   Managed objects can also be allowed to act as an authoritative source if no
+   other appropriate source is available.</para>
 
    <para>Other object types exist for other settings that should be available
    to a script, such as configuration or look-up tables that do not need audit
@@ -741,7 +754,9 @@
             "name": "foobar"
         }
     ]
-}</programlisting>
+}
+    </programlisting>
+
   </section>
 
    <section xml:id="managed-objects-declarative">

@@ -279,12 +279,14 @@ function required(fullObject, value, params, propName) {
         </listitem>   
       </itemizedlist>
 
-      <para>You can specify that a particular policy does not apply to users 
-      with specific OpenIDM roles by setting the <literal>"exceptRoles"</literal> 
-      parameter of the policy ID. For example, the following extract from  
-      <filename>policy.json</filename> specifies that the reauthorization 
-      required policy definition does not apply to users with roles 
-      <literal>openidm-admin</literal>, or <literal>opendim-reg</literal>.
+      <para>
+       You can specify that a particular policy does not apply to users with
+       specific OpenIDM roles by setting the <literal>"exceptRoles"</literal>
+       parameter of the policy ID. For example, the following extract from
+       <filename>policy.json</filename> specifies that the reauthorization
+       required policy definition does not apply to users with roles
+       <literal>openidm-admin</literal>, <literal>openidm-reg</literal>, or
+       <literal>openidm-cert</literal> (reserved for mutual authentication).
       </para>      
       
       <programlisting language="javascript">
@@ -294,7 +296,8 @@ function required(fullObject, value, params, propName) {
         "params" : {
             "exceptRoles" : [
                 "openidm-admin",
-                "openidm-reg"
+                "openidm-reg",
+                "openidm-cert"
             ]
         }
     }      

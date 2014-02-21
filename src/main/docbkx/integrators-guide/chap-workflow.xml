@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-workflow'
@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Integrating Business Processes and Workflows</title>
  <indexterm>
   <primary>Workflow</primary>
@@ -49,8 +48,7 @@
  standard.</para>
  
  <para>More information about Activiti and the Activiti project can be found
- at <link xlink:href="http://www.activiti.org" xlink:show="new"
- >http://www.activiti.org</link>.</para>
+ at <link xlink:href="http://www.activiti.org" xlink:show="new" />.</para>
  
  <section xml:id="about-bmpm-2-activiti">
   <title>BPMN 2.0 and the Activiti Tools</title>
@@ -186,7 +184,13 @@ script task using expression resolver: [
  
  <section xml:id="setting-up-remote-integration">
   <title>Setting Up Remote Integration</title>
-  <para>You can set up integration with a remote Activiti engine, as described 
+
+  <para>
+   Note that Activiti Remote Integration is currently
+   not supported in production environments.
+  </para>
+
+  <para>You can set up integration with a remote Activiti engine, as described
   in the following steps.</para>
   <procedure>
    <step>
@@ -1367,7 +1371,9 @@ $ ./startup.sh -p samples/workflow</screen>
   "description": "Contract accountant",
   "provisionToXML": "1",
   "accountStatus": "active",
-  "roles": "openidm-authorized"
+  "roles": [
+         "openidm-authorized"
+  ]
 }     
      </screen>
      

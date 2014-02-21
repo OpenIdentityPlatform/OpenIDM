@@ -20,8 +20,8 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
-  !    
+  !      Copyright 2011-2013 ForgeRock AS
+  !
 -->
 <chapter xml:id='chap-whats-new'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
@@ -50,7 +50,7 @@
     
     <para>With the exception of these Release Notes, the official 
     documentation for this release is still in progress, and is accessible at 
-    <link xlink:href="http://openidm.forgerock.org/docs.html">http://openidm.forgerock.org/docs.html</link>. 
+    <link xlink:href="http://openidm.forgerock.org/docs.html" />.
     The complete, validated documentation set will be available with the 
     full release.</para>
   </important> 
