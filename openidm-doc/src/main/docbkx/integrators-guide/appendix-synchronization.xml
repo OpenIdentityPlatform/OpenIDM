@@ -556,7 +556,7 @@
     <listitem>
      <para>Example:</para>
      <programlisting language="http">
-POST /openidm/system/xml/account/jsmith?action=sync HTTP/1.1</programlisting>
+POST /openidm/system/xml/account/jsmith?_action=liveSync HTTP/1.1</programlisting>
     </listitem>
    </varlistentry>
    <varlistentry>

@@ -20,16 +20,16 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2013 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-file-layout'
  version='5.0' xml:lang='en'
  xmlns='http://docbook.org/ns/docbook'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>File Layout</title>
  <indexterm><primary>File layout</primary></indexterm>
  <indexterm>
@@ -38,18 +38,27 @@
  </indexterm>
 
  <variablelist>
-  <para>When you unpack and start OpenIDM <?eval ${docTargetVersion}?>, you
-  create the following files and directories. Note that the precise paths will 
-  depend on the install, project, and working directories that you have selected 
-  during startup. For more information, see <link 
-  xlink:href="integrators-guide#startup-configuration" 
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Specifying the OpenIDM Startup Configuration</citetitle></link>.</para>
+  <para>
+   When you unpack and start OpenIDM <?eval ${docTargetVersion}?>, you create
+   the following files and directories. Note that the precise paths will depend
+   on the install, project, and working directories that you have selected
+   during startup. For more information, see <link
+   xlink:href="integrators-guide#startup-configuration"
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Specifying the OpenIDM Startup Configuration</citetitle></link>.
+  </para>
   
   <varlistentry>
-    <term><filename>openidm/audit/</filename></term>
-  <listitem><para>OpenIDM audit log directory default location, created at run time, 
-     as configured in <filename>openidm/conf/audit.json</filename></para></listitem>     
+   <term>
+    <filename>openidm/audit/</filename>
+   </term>
+   <listitem>
+    <para>
+     OpenIDM audit log directory default location, created at run time, as
+     configured in
+     <filename>openidm/conf/audit.json</filename>
+    </para>
+   </listitem>
   </varlistentry>
   <varlistentry>
     <term><filename>openidm/audit/access.csv</filename></term>
@@ -334,7 +343,16 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/samples/customendpoint</filename></term>
+   <term><filename>openidm/samples/audit-sample/</filename></term>
+   <listitem>
+    <para>
+     Sample demonstrates configuring a MySQL database to receive the audit logs
+     for access, activity, and recon.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/customendpoint/</filename></term>
    <listitem>
     <para>Sample custom endpoint configuration. For more information, see 
     <link xlink:href="integrators-guide#adding-custom-endpoints"
@@ -343,7 +361,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/samples/infoservice</filename></term>
+   <term><filename>openidm/samples/infoservice/</filename></term>
    <listitem>
     <para>Sample that shows how to use the configurable information service. 
     For more information, see <link xlink:href="integrators-guide#info-service"
@@ -452,6 +470,14 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    <term><filename>openidm/samples/security/</filename></term>
    <listitem>
     <para>Sample key store, trust store, and certificates</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/syncfailure/</filename></term>
+   <listitem>
+    <para>
+     Sample showing the sync failure handler for liveSync
+    </para>
    </listitem>
   </varlistentry>
   <varlistentry>

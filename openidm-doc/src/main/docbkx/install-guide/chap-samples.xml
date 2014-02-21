@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
 <title>More OpenIDM Samples</title>
 
  <para>The current distribution of OpenIDM comes with a variety of samples
@@ -187,6 +186,12 @@ sn: Doe
 mail: jdoe@example.com
 description: Created for OpenIDM
 </programlisting>
+      <para>There is an additional user, <literal>bjensen</literal> in the
+      sample LDIF file. This user is essentially a "dummy" user, provided for
+      compliance with RFC 4519, which stipulates that every
+      <literal>groupOfUniqueNames</literal> object must contain at least one
+      <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+      used in this sample.</para>
   </section>
 
   <section xml:id="install-sample2">
@@ -416,12 +421,19 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
+uniqueMember: uid=bjensen,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top</programlisting>
    
-   <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
-   is also imported with the <filename>Example.ldif</filename> file.</para> 
+   <para>The users with DNs <literal>uid=jdoe,ou=People,dc=example,dc=com</literal>
+   and <literal>uid=bjensen,ou=People,dc=example,dc=com</literal> are also
+   imported with the <filename>Example.ldif</filename> file. (The user
+   <literal>bjensen</literal> is essentially a "dummy" user, provided for
+   compliance with RFC 4519, which stipulates that every
+   <literal>groupOfUniqueNames</literal> object must contain at least one
+   <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+   used in this sample.)</para>
   </section>
   
   <section xml:id="install-sample2c">
@@ -469,11 +481,15 @@ $ curl
             "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
             "_rev": "0"
         }
+        {
+            "_id": "e90640e1-e426-4a36-8282-1caf36f3324a",
+            "_rev": "0"
+        }
     ],
     "conversion-time-ms": 0
  }</programlisting>
 
-   <para>To retrieve the user, get the object by ID.</para>
+   <para>Retrieve John Doe's user object by his ID.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -481,7 +497,7 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
  
-   <para>Your user's object should contain a property like: </para>
+   <para>The user object should contain a property like: </para>
    
    <screen>"ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"]</screen>
    
@@ -512,7 +528,16 @@ $ curl
    to <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and, as a 
    result, the user will be removed from the one LDAP group and added to 
    the other LDAP group on OpenDJ.</para>
-   
+
+   <para>Retrieve John Doe's user object again and notice the changed
+   <literal>"ldapGroups"</literal> property.</para>
+
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+
    <para>By default, automatic synchronization is enabled. This means that 
    when you update a managed object, any mappings defined in the 
    <filename>sync.json</filename> file are automatically executed to update 
@@ -558,6 +583,7 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
+uniqueMember: uid=bjensen,ou=People,dc=example,dc=com
 uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
@@ -566,6 +592,13 @@ objectClass: top
    
    <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
    is also imported with the <filename>Example.ldif</filename> file.</para>
+
+   <para>There is an additional user, <literal>bjensen</literal> in the
+   sample LDIF file. This user is essentially a "dummy" user, provided for
+   compliance with RFC 4519, which stipulates that every
+   <literal>groupOfUniqueNames</literal> object must contain at least one
+   <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
+   used in this sample.</para>
   </section>  
   
   <section xml:id="install-sample2d">
@@ -697,11 +730,6 @@ $ </screen>
          MySQL Connector/J, version 5.1 or later. Unpack the delivery and
          copy the .jar into the <filename>openidm/bundle</filename> directory.</para>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
-     </listitem>
-     <listitem>
-     <para>In <filename>openidm/samples/sample3/conf/provisioner.openicf-scriptedsql.json</filename>, 
-     edit the paths to the scripts (starting with 
-     <literal>/opt/openidm/</literal>) to match your installation.</para>
      </listitem>
      <listitem>
       <para>Start OpenIDM with the configuration for sample 3.</para>
@@ -942,8 +970,8 @@ $ ./startup.sh -p samples/sample5</screen>
   for example.</para>
 
   <para>Sample 6 picks up new and changed users from the LDAP suffix,
-  <literal>ou=people,dc=example,dc=com</literal>, and sends updates to the
-  "Active Directory" suffix <literal>ou=people,o=ad</literal>. To keep the
+  <literal>dc=example,dc=com</literal>, and sends updates to the
+  "Active Directory" suffix <literal>o=ad</literal>. To keep the
   example relatively simple, no configuration is provided for the flow from
   AD to LDAP.</para>
 

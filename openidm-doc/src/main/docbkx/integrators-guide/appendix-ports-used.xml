@@ -33,9 +33,8 @@
  <title>Ports Used</title>
 
  <variablelist>
-  <para>By default the OpenIDM <?eval ${docTargetVersion}?> Jetty configuration
-  in <filename>openidm/conf/jetty.xml</filename> specifies the following
-  ports.</para>
+  <para>By default, OpenIDM <?eval ${docTargetVersion}?> listens on the following
+  ports (specified in <filename>/path/to/openidm/conf/boot/boot.properties</filename>):</para>
 
   <varlistentry>
    <term><literal>8080</literal></term>
@@ -73,4 +72,8 @@
    </listitem>
   </varlistentry>
  </variablelist>
+
+    <para>The Jetty configuration (in <filename>openidm/conf/jetty.xml</filename>)
+    references the ports that are specified in the <filename>boot.properties</filename>
+    file.</para>
 </appendix>

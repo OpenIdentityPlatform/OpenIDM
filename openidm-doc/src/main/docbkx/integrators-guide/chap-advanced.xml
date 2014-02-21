@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2013 ForgeRock AS
+  !
+-->
+<chapter xml:id='chap-advanced'
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'
+         xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+  <title>Advanced Configuration</title>
+
+  <para>OpenIDM is a highly customizable, extensible identity management system.
+  For the most part, the customization and configuration required for a "typical"
+  deployment is described earlier in this book.
+  This chapter describes advanced configuration methods that would usually not
+  be required in a deployment, but that might assist in situations that require
+  a high level of customization.</para>
+
+  <section xml:id="adv-startup-configuration">
+    <title>Advanced Startup Configuration</title>
+       <para>A customizable startup configuration file (named
+       <filename>launcher.json</filename>) enables you to specify how the OSGi
+       Framework is started.
+       You specify the startup configuration file with the <literal>-c</literal>
+       option of the <command>startup</command> command.</para>
+
+       <para>Unless you are working with a highly customized deployment, you
+       should not modify the default framework configuration.</para>
+
+       <para>If no configuration file is specified, the default configuration
+       (defined in <filename>/path/to/openidm/bin/launcher.json</filename>) is
+       used. The following command starts OpenIDM with an alternative startup
+       configuration file:</para>
+       <screen>$ ./startup.sh -c /Users/admin/openidm/bin/launcher.json</screen>
+
+       <para>You can modify the default startup configuration file to specify
+       a different startup configuration.</para>
+
+       <para>The customizable properties of the default startup configuration
+       file are as follows:</para>
+
+       <itemizedlist>
+         <listitem>
+           <para><literal>"location" : "bundle"</literal> - resolves to the
+           install location. You can also load OpenIDM from a specified zip
+           file (<literal>"location" : "openidm.zip"</literal>) or you can
+           install a single jar file
+           (<literal>"location" : "openidm-system-2.2.jar"</literal>).</para>
+         </listitem>
+         <listitem>
+           <para><literal>"includes" : "**/openidm-system-*.jar"</literal> -
+           the specified folder is scanned for jar files relating to the system
+           startup. If the value of <literal>"includes"</literal> is
+           <literal>*.jar</literal>, you must specifically exclude any jars in
+           the bundle that you do not want to install, by setting the
+           <literal>"excludes"</literal> property.</para>
+         </listitem>
+         <listitem>
+           <para><literal>"start-level" : 1</literal> - specifies a start level
+           for the jar files identified previously.</para>
+         </listitem>
+         <listitem>
+           <para><literal>"action" : "install.start"</literal> - a
+           period-separated list of actions to be taken on the jar files.
+           Values can be one or more of
+           <literal>"install.start.update.uninstall"</literal>.</para>
+         </listitem>
+         <listitem>
+           <para><literal>"config.properties"</literal> - takes either a path to
+           a configuration file (relative to the project location) or a list
+           of configuration properties and their values. The list must be in
+           the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>"string"</replaceable></literal>,
+           for example:</para>
+           <programlisting language="javascript">
+           "config.properties" :
+ 	           {
+ 	               "property" : "value"
+ 	           },
+           </programlisting>
+         </listitem>
+         <listitem>
+           <para><literal>"system.properties"</literal> - takes either a path to
+           a <filename>system.properties</filename> file (relative to the project
+           location) or a list of system properties and their values. The list
+           must be in the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>"string"</replaceable></literal>,
+           for example:</para>
+           <programlisting language="javascript">
+           "system.properties" :
+ 	           {
+ 	               "property" : "value"
+ 	           },
+           </programlisting>
+         </listitem>
+         <listitem>
+           <para><literal>"boot.properties"</literal> - takes either a path to
+           a <filename>boot.properties</filename> file (relative to the project
+           location) or a list of boot properties and their values.The list
+           must be in the format
+           <literal><replaceable>"string"</replaceable>:<replaceable>object</replaceable></literal>,
+           for example:</para>
+           <programlisting language="javascript">
+           "boot.properties" :
+ 	           {
+ 	               "property" : true
+ 	           },
+           </programlisting>
+         </listitem>
+       </itemizedlist>
+
+  </section>
+</chapter>

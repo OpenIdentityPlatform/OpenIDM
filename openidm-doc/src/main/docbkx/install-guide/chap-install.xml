@@ -20,16 +20,16 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-install'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Installing OpenIDM Services</title>
 
  <para>This chapter covers the tasks required to install and start
@@ -130,8 +130,10 @@ $</screen>
     </step>
     <step performance="optional">
      <para>By default, OpenIDM listens for HTTP connections on port 8080. To
-     change the default port, edit
-     <filename>openidm/conf/jetty.xml</filename>.</para>
+     change the default port, edit the <filename>/path/to/openidm/conf/boot/boot.properties</filename>
+     file. For more information, see <link xlink:href="integrators-guide#appendix-ports-used"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Ports Used</citetitle></link>
+     in the <citetitle>Integrator's Guide</citetitle>.</para>
     </step>
     <step performance="optional">
      <indexterm>
@@ -167,7 +169,7 @@ $</screen>
        <para>Start OpenIDM (UNIX).</para>
        <screen>$ ./startup.sh
 Using OPENIDM_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -179,7 +181,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
        <screen>&lt; cd \path\to\openidm
 &lt; startup.bat
 "Using OPENIDM_HOME:   \path\to\openidm"
-"Using OPENIDM_OPTS:   -Xmx1024m -Dfile.encoding=UTF-8"
+"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
 "Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
@@ -193,7 +195,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      <command>ps</command> to view the bundles installed. To see a list of all
      the OpenIDM core services and their states, enter the following
      command.</para>
-     <screen>-&gt; scr list
+     <screen width="87">-&gt; scr list
    Id   State          Name
 [  12] [active       ] org.forgerock.openidm.endpoint
 [  13] [active       ] org.forgerock.openidm.endpoint
@@ -237,6 +239,9 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      are included in the configuration. As you work through the sample 
      configurations described later in this guide, you will notice that these 
      services are active.</para>
+     <para>Startup errors and messages are logged to the console by default.
+     You can also view these messages in the log files at
+     <filename>/path/to/openidm/logs</filename>.</para>
     </step>
     <step>
      <para>Alternatively, you can manage the container and services from the
@@ -245,8 +250,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
       <para>Use these hints to connect to the console.</para>
       <listitem>
        <para>Default Console URL: <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console'
-       >http://localhost:8080/system/console</link></para>
+       xlink:href='http://localhost:8080/system/console' /></para>
       </listitem>
       <listitem>
        <para>Default user name: <literal>admin</literal></para>
@@ -287,10 +291,10 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
     RESTClient</link> for Firefox. Alternatively you can use the 
     <command>curl</command> command-line utility that is included with most
      operating systems. For more information on <command>curl</command>, see 
-     <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>. If 
+     <link xlink:href="http://curl.haxx.se/" />. If
      you cannot locate the <command>curl</command> command on your system, you 
      can download it from 
-     <link xlink:href="http://curl.haxx.se/download.html">http://curl.haxx.se/download.html</link>.
+     <link xlink:href="http://curl.haxx.se/download.html" />.
     </para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
@@ -361,7 +365,9 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 {
   "stateProvince": "",
   "userName": "joe",
-  "roles": "openidm-authorized",
+  "roles": [
+    "openidm-authorized"
+  ],
   "givenName": "joe",
   "address2": "",
   "lastPasswordAttempt": "Wed Nov 28 2012 22:19:35 GMT+0200 (SAST)",
@@ -413,8 +419,7 @@ $</screen>
       <step>
        <para>Or click Stop on the System Information tab of the Felix console,
        by default <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console'
-       >http://localhost:8080/system/console</link>.</para>
+       xlink:href='http://localhost:8080/system/console' />.</para>
        <para>This stops the Servlet container as well, and the console is
        no longer accessible.</para>
       </step>

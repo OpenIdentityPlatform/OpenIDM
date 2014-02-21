@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-ui'
@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM User Interface</title>
 
  <para>OpenIDM provides a customizable, browser-based user interface. The 
@@ -48,8 +47,7 @@
   and is not guaranteed to be compatible with the next OpenIDM release.</para>
 
   <para>To access the user interface, install and start OpenIDM, then point 
-  your browser to <link xlink:href="http://localhost:8080/openidmui">
-  http://localhost:8080/openidmui</link>.</para>
+  your browser to <link xlink:href="http://localhost:8080/openidmui" />.</para>
   
   <para>Log in as the default administrative user (Login: openidm-admin, 
   Password: openidm-admin) or as an existing user in the repository. The 
@@ -199,7 +197,7 @@
 ...
       </programlisting>
       <para>Note that the default image files are located in
-      <filename>ui/default/admin/public/images/passphrase</filename>.</para>
+      <filename>ui/default/enduser/public/images/passphrase</filename>.</para>
 
   </section>
   
@@ -429,7 +427,7 @@
   <section xml:id="ui-style">
       <title>Changing the Default Stylesheet</title>
       <para>The default stylesheets are located in the
-          <filename>openidm/ui/default/admin/public/css</filename> directory.
+          <filename>openidm/ui/default/enduser/public/css</filename> directory.
           To customize the stylesheets, copy them to
           <filename>openidm/ui/extension/css</filename>, and edit them according
           to your requirements.</para>
@@ -438,7 +436,7 @@
       <orderedlist>
           <listitem>
               <para>Copy the default stylesheets to <filename>openidm/ui/extension/css</filename>:</para>
-              <screen>$ cd /path/to/openidm/ui/default/admin/public/
+              <screen>$ cd /path/to/openidm/ui/default/enduser/public/
 $ cp -r css ../../../extension/</screen>
           </listitem>
           <listitem>
@@ -455,7 +453,7 @@ $ cp -r css ../../../extension/</screen>
     <section xml:id="ui-logo">
         <title>Changing the Default Logo</title>
         <para>The default logo is located in the
-            <filename>openidm/ui/default/admin/public/images</filename> directory.
+            <filename>openidm/ui/default/enduser/public/images</filename> directory.
             To customize the logo:</para>
 
         <orderedlist>
@@ -478,7 +476,7 @@ $ cp -r css ../../../extension/</screen>
         <orderedlist>
             <listitem>
                 <para>Copy the default locale to <filename>openidm/ui/extension/locales</filename>:</para>
-                <screen>$ cd /path/to/openidm/ui/default/admin/public/
+                <screen>$ cd /path/to/openidm/ui/default/enduser/public/
 $ cp -r locales ../../../extension/</screen>
                 <para>The <filename>extension/locales</filename> folder now
                 contains one locale, <literal>en-US</literal>.</para>
@@ -604,12 +602,12 @@ $ ./startup.sh</screen>
         <title>Changing the UI Path</title>
 
         <para>By default, the UI is registered at a specific URL
-        (<literal><replaceable>base-context</replaceable>/openidmui</literal>).
+        (<literal><replaceable>context-root</replaceable>/openidmui</literal>).
         To override the default URL and specify your own path, edit the
         <filename>openidm/conf/ui.context-enduser.json</filename>
         file, setting the <literal>urlContextRoot</literal> property to the
         new URL. For example, to change the path to
-        <literal><replaceable>base-context</replaceable>/exampleui</literal>,
+        <literal><replaceable>context-root</replaceable>/exampleui</literal>,
         edit the file as follows:</para>
 
         <screen>"urlContextRoot" : "/exampleui",</screen>
