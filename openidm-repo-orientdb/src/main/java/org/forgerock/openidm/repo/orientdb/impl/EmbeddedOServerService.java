@@ -246,8 +246,10 @@ public class EmbeddedOServerService {
 
         // Defaulted to the same as the regular user
         String rootPwd = config.get("embeddedServer").get("rootPwd").defaultTo(pwd).asString();
-        configuration.users = new OServerUserConfiguration[]{
-                new OServerUserConfiguration("root", rootPwd, "*")
+        configuration.users = new OServerUserConfiguration[]
+        {
+                new OServerUserConfiguration("root", rootPwd, "*"),
+                new OServerUserConfiguration("guest", null, "server.listDatabases")
         };
         configuration.properties = new OServerEntryConfiguration[]{
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
