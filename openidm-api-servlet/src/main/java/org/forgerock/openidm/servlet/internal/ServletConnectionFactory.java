@@ -40,16 +40,22 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CrossCutFilterResultHandler;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.FilterCondition;
 import org.forgerock.json.resource.Filters;
 import org.forgerock.json.resource.FutureResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UntypedCrossCutFilter;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
@@ -137,7 +143,9 @@ public class ServletConnectionFactory implements ConnectionFactory {
     RequestHandler init(JsonValue configuration, final RequestHandler handler)
             throws ScriptException {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
-        final List<Filter> filters = new ArrayList<Filter>(filterConfig.size());
+        final List<Filter> filters = new ArrayList<Filter>(filterConfig.size() + 1); // add one for the logging filter
+
+        filters.add(newLoggingFilter());
 
         for (JsonValue jv : filterConfig) {
             Filter filter = newFilter(jv);
@@ -146,9 +154,8 @@ public class ServletConnectionFactory implements ConnectionFactory {
             }
         }
 
-        return filters.isEmpty()
-                ? handler
-                : new FilterChain(handler, filters);
+        // filters will always have at least the logging filter
+        return new FilterChain(handler, filters);
     }
 
     /**
@@ -208,6 +215,40 @@ public class ServletConnectionFactory implements ConnectionFactory {
 
         ScriptEntry entry = scriptRegistry.takeScript(scriptJson);
         return Pair.of(scriptJson.getPointer(), entry);
+    }
+
+    private Filter newLoggingFilter() {
+        return Filters.asFilter(
+                new UntypedCrossCutFilter<Void>() {
+                    @Override
+                    public void filterGenericError(ServerContext context, Void state, ResourceException error, ResultHandler<Object> handler) {
+                        int code = error.getCode();
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Resource exception: {} {}: \"{}\"", new Object[] { error.getCode(), error.getReason(), error.getMessage(), error });
+                        } else if (code >= 500 && code <= 599) { // log server-side errors
+                            logger.warn("Resource exception: {} {}: \"{}\"", new Object[] { error.getCode(), error.getReason(), error.getMessage(), error });
+                        }
+                        handler.handleError(error);
+                    }
+
+                    @Override
+                    public void filterGenericRequest(ServerContext context, Request request, RequestHandler next, CrossCutFilterResultHandler<Void, Object> handler) {
+                        logger.trace("Request: {}", request);
+                        handler.handleContinue(context, null);
+                    }
+
+                    @Override
+                    public <R> void filterGenericResult(ServerContext context, Void state, R result, ResultHandler<R> handler) {
+                        logger.trace("Result: {}", result);
+                        handler.handleResult(result);
+                    }
+
+                    @Override
+                    public void filterQueryResource(ServerContext context, Void state, Resource resource, QueryResultHandler handler) {
+                        logger.trace("Response: {}", resource);
+                        handler.handleResource(resource);
+                    }
+                });
     }
 
     // ----- Implementation of ConnectionFactory

@@ -24,8 +24,6 @@
 
 package org.forgerock.openidm.script;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -412,16 +410,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             convertedError = new InternalServerErrorException(scriptException.getMessage(), scriptException);
         }
         convertedError.setDetail(detail);
-
-        /* logger.warn(scriptException.getLocalizedMessage(), convertedError) does not
-         * properly display the stacktrace when output to the console.  Build a stacktrace
-         * string manually instead.
-         */
-        StringWriter sw = new StringWriter();
-        sw.append(scriptException.getLocalizedMessage());
-        sw.append("\n");
-        convertedError.printStackTrace(new PrintWriter(sw));
-        logger.warn(sw.toString());
 
         handler.handleError(convertedError);
     }
