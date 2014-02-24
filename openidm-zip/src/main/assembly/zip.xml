@@ -58,7 +58,7 @@
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/orientstudio/orientdb-${orientdb.studio.version}/www</directory>
+            <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
         </fileSet>
         <!-- Create empty logs directory  -->
