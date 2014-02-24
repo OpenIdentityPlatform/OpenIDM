@@ -10,7 +10,7 @@
         <startEvent id="start" activiti:initiator="startUserId" />
         <sequenceFlow sourceRef="start" targetRef="readUserData"/>
 
-        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
+        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[
                 user = openidm.read("managed/user/" + startUserId)
                 userName = user.userName
@@ -38,6 +38,9 @@
                                        name="Access to Project system: "
                                        expression="#{hasProject}"
                                        type="boolean"/>
+                <activiti:formProperty id="emailEnabled"
+                           name="Send Email Notification"
+                           type="boolean" />
                 <activiti:formProperty id="request" name="Request" type="enum" required="true">
                     <activiti:value id="accept" name="Request"></activiti:value>
                     <activiti:value id="cancel" name="Cancel"></activiti:value>
@@ -177,8 +180,8 @@
                     newAccounts.push("Project")
                 }
                 
-                params = [[operation:'replace', field: 'accounts', value : newAccounts]]
-                openidm.patch('managed/user/'+userName, null, params)
+                patchParams = [[operation:'replace', field: 'accounts', value : newAccounts]]
+                openidm.patch('managed/user/'+userName, null, patchParams)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
@@ -200,6 +203,12 @@
                 ];
                 
                 openidm.create("repo/ui/notification/", null, requesterNotification)
+                
+                if (emailEnabled) {
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The access request was accepted']
+                    openidm.action("external/email", 'sendEmail', emailParams);
+                }
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -235,6 +244,11 @@
                 ];
                 openidm.create("repo/ui/notification/", null, requesterNotification)
                 
+                if (emailEnabled) {
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your access request was denied by ' + rejecter]
+                    openidm.action("external/email", 'sendEmail', emailParams);
+                }
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendDenyNotification" targetRef="end"/>
@@ -246,6 +260,6 @@
         
         <endEvent id="end"/>
 
-    </process>
+    </process> 
 
 </definitions>
