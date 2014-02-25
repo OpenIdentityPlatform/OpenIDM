@@ -355,31 +355,31 @@ public class TableQueries {
                 count++;
             }
             else {
-            	Object objValue =  params.get(tokenParts[1]);
+                Object objValue =  params.get(tokenParts[1]);
                 if (PREFIX_INT.equals(tokenParts[0])) {
                     // handle single integer value
-                	Integer int_value = null;
-                	if (objValue != null) {
-                    	int_value = Integer.parseInt(objValue.toString());
-                	}
-                	statement.setInt(count, int_value);
+                    Integer int_value = null;
+                    if (objValue != null) {
+                        int_value = Integer.parseInt(objValue.toString());
+                    }
+                    statement.setInt(count, int_value);
                     count++;
                 } else if (PREFIX_LIST.equals(tokenParts[0])) {
                     // handle list of values - presently assumes Strings, TODO support integer lists
-                	if (objValue != null) {
+                    if (objValue != null) {
                         for (String list_value : objValue.toString().split(",")) {
-                    		// if list value is surrounded by single quotes remove them
-                    		if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
-                    			list_value = list_value.substring(1, list_value.length()-1);
-                    		}
-                    		statement.setString(count, list_value);
-                    		count++;
-                    	}
-                	}
-                	else {
-                		statement.setString(count, null);
-                		count++;
-                	}
+                            // if list value is surrounded by single quotes remove them
+                            if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
+                                list_value = list_value.substring(1, list_value.length()-1);
+                            }
+                            statement.setString(count, list_value);
+                            count++;
+                        }
+                    }
+                    else {
+                        statement.setString(count, null);
+                        count++;
+                    }
                 }
             }
         }

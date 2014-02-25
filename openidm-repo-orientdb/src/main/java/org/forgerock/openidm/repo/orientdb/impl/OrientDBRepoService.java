@@ -644,7 +644,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * @return
      */
     private boolean isCauseRecordDuplicatedException(Throwable ex, int maxLevels) {
-    	return isCauseException (ex, ORecordDuplicatedException.class, maxLevels);
+        return isCauseException (ex, ORecordDuplicatedException.class, maxLevels);
     }
     
     /**

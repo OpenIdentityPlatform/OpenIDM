@@ -463,7 +463,7 @@ public class SchedulerService implements RequestHandler {
 
     @Override
     public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-    	try {
+        try {
             String id = request.getNewResourceId() == null
                     ? UUID.randomUUID().toString()
                     : trimTrailingSlash(request.getNewResourceId()); // is the trim necessary?
@@ -481,7 +481,7 @@ public class SchedulerService implements RequestHandler {
             }
 
             addSchedule(scheduleConfig, id, false);
-    		handler.handleResult(new Resource(id, null, new JsonValue(object)));
+            handler.handleResult(new Resource(id, null, new JsonValue(object)));
         } catch (ParseException e) {
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ObjectAlreadyExistsException e) {
@@ -490,9 +490,9 @@ public class SchedulerService implements RequestHandler {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         } catch (JsonException e) {
             handler.handleError(new BadRequestException("Error creating schedule", e));
-    	} catch (Throwable t) {
-    		handler.handleError(ResourceUtil.adapt(t));
-    	}
+        } catch (Throwable t) {
+            handler.handleError(ResourceUtil.adapt(t));
+        }
     }
 
     @Override

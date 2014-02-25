@@ -141,7 +141,7 @@ public final class ResourceServlet
                     logger.debug("BundleEvent is null for bundle {}", bundleName);
                     return;
                 }
-            	Bundle bundle = event.getBundle();
+                Bundle bundle = event.getBundle();
                 if (bundle != null && bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(bundleName)) {
                     if (event.getType() == BundleEvent.STARTED) {
                         ResourceServlet.this.bundle = bundle;
@@ -233,7 +233,7 @@ public final class ResourceServlet
         if (contentType != null) {
             res.setContentType(contentType);
         } else {
-        	res.setContentType(getMimeType(resName));
+            res.setContentType(getMimeType(resName));
         }
 
         long lastModified = getLastModified(url);
@@ -272,17 +272,17 @@ public final class ResourceServlet
     }
     
     private String getMimeType(String fileName) {
-    	if (fileName.endsWith(".css")) {
-    		return "text/css";
-    	} else if (fileName.endsWith(".js")) {
-    		return "application/javascript";
-    	} else if (fileName.endsWith(".png")) {
-    		return "image/png";
-    	} else if (fileName.endsWith(".html")) {
-    		return "text/html";
-    	}
-    	
-    	return null;
+        if (fileName.endsWith(".css")) {
+            return "text/css";
+        } else if (fileName.endsWith(".js")) {
+            return "application/javascript";
+        } else if (fileName.endsWith(".png")) {
+            return "image/png";
+        } else if (fileName.endsWith(".html")) {
+            return "text/html";
+        }
+        
+        return null;
     }
 
     private boolean resourceModified(long resTimestamp, long modSince) {

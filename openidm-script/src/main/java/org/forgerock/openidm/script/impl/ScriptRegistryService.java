@@ -218,26 +218,26 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
 
         try {
-        	JsonValue sources = configuration.get("sources");
+            JsonValue sources = configuration.get("sources");
             if (!sources.isNull()) {
-            	for (String key : sources.keys()) {
-            		JsonValue source = sources.get(key);
-            		String directory = source.get(SOURCE_DIRECTORY).asString();
-            		URL directoryURL = (new File(directory)).toURI().toURL();
-            		/* TODO: Support addition config properties (currently set to defaults in commons)
-            		JsonValue subDirValue = source.get(SOURCE_SUBDIRECTORIES).defaultTo("auto-true");
-            		boolean subdirectories = true;
-            		if (subDirValue.isBoolean()) {
-            			subdirectories = subDirValue.asBoolean();
-            		} else {
-            			subdirectories = Boolean.parseBoolean(subDirValue.asString());
-            		}
-            		String type = source.get(SOURCE_TYPE).defaultTo("auto-detect").asString();
-            		String visibility = source.get(SOURCE_VISIBILITY).defaultTo("public").asString();
-            		*/
-            		DirectoryContainer dc = new DirectoryContainer(key, directoryURL);
-            		addSourceUnit(dc);
-            	}
+                for (String key : sources.keys()) {
+                    JsonValue source = sources.get(key);
+                    String directory = source.get(SOURCE_DIRECTORY).asString();
+                    URL directoryURL = (new File(directory)).toURI().toURL();
+                    /* TODO: Support addition config properties (currently set to defaults in commons)
+                    JsonValue subDirValue = source.get(SOURCE_SUBDIRECTORIES).defaultTo("auto-true");
+                    boolean subdirectories = true;
+                    if (subDirValue.isBoolean()) {
+                        subdirectories = subDirValue.asBoolean();
+                    } else {
+                        subdirectories = Boolean.parseBoolean(subDirValue.asString());
+                    }
+                    String type = source.get(SOURCE_TYPE).defaultTo("auto-detect").asString();
+                    String visibility = source.get(SOURCE_VISIBILITY).defaultTo("public").asString();
+                    */
+                    DirectoryContainer dc = new DirectoryContainer(key, directoryURL);
+                    addSourceUnit(dc);
+                }
             }
         } catch (Exception e) {
             logger.error("Error loading sources", e);
@@ -435,31 +435,31 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // Check if "name" is missing and "file" is used instead
         JsonValue scriptConfig = script.clone();
         if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {
-        	JsonValue file = scriptConfig.get("file");
-        	if (!file.isNull()) {
-        		scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
-        	}
+            JsonValue file = scriptConfig.get("file");
+            if (!file.isNull()) {
+                scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
+            }
         }
         
-    	return super.takeScript(scriptConfig);
+        return super.takeScript(scriptConfig);
     }
     
     private static enum IdentityServerFunctions implements Function<Object> {
         getProperty {
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
-            	boolean useCache = false;
+                boolean useCache = false;
                 if (arguments.length < 1 || arguments.length > 3) {
                     throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
                 }
                 if (arguments.length == 3) {
-                	useCache = (Boolean) arguments[2];
+                    useCache = (Boolean) arguments[2];
                 }
                 if (arguments[0] instanceof String) {
                     String name = (String) arguments[0];
                     Object result = null;
                     if (useCache) {
-                    	result = propertiesCache.get(name);
+                        result = propertiesCache.get(name);
                     }
                     if (null == result) {
                         Object defaultValue = arguments.length == 2 ? arguments[1] : null;
@@ -536,7 +536,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
                 } else {
                     throw new NotSupportedException("Unrecognized action ID '" + request.getAction() 
-                    		+ "'. Supported action IDs: [eval, batch]");
+                            + "'. Supported action IDs: [eval, batch]");
                 }
             } else {
                 final ResourceException e = new NotSupportedException(
@@ -632,32 +632,32 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
-    	
+        
         try {
             String scriptName = (String) context.get(CONFIG_NAME);
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             JsonValue scriptValue = params.get("script").expect(Map.class).clone();
             
             if (scriptValue.get("name").isNull()) {
-            	if (!scriptValue.get("file").isNull()) {
-            		scriptValue.put("name", scriptValue.get("file").getObject());
-            	}
+                if (!scriptValue.get("file").isNull()) {
+                    scriptValue.put("name", scriptValue.get("file").getObject());
+                }
             }
             
-        	if (!scriptValue.isNull()) {
-        		ScriptEntry entry = takeScript(scriptValue);
-        		JsonValue input = params.get("input");
-        		execScript(new RootContext(), entry, input);
-        	} else {
-        		throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
+            if (!scriptValue.isNull()) {
+                ScriptEntry entry = takeScript(scriptValue);
+                JsonValue input = params.get("input");
+                execScript(new RootContext(), entry, input);
+            } else {
+                throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
         } catch (ScriptException e) {
-			throw new ExecutionException(e);
-		} catch (ResourceException e) {
-			throw new ExecutionException(e);
-		}
+            throw new ExecutionException(e);
+        } catch (ResourceException e) {
+            throw new ExecutionException(e);
+        }
     }
 
     private void execScript(Context context, ScriptEntry script, JsonValue value) throws ForbiddenException, InternalServerErrorException {

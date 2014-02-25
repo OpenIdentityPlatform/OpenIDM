@@ -74,9 +74,9 @@ public class DocumentUtil  {
         Resource result = null;
         Map<String, Object> map = toMap(doc);
         if (map != null) {
-        	String id = (String) map.get(Resource.FIELD_CONTENT_ID);
-        	String rev = (String) map.get(Resource.FIELD_CONTENT_REVISION);
-        	result = new Resource(id, rev, new JsonValue(map));
+            String id = (String) map.get(Resource.FIELD_CONTENT_ID);
+            String rev = (String) map.get(Resource.FIELD_CONTENT_REVISION);
+            result = new Resource(id, rev, new JsonValue(map));
         }
         return result;
     }
@@ -100,7 +100,7 @@ public class DocumentUtil  {
      * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
-    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {    	
+    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {        
         Map<String, Object> result = null;
         if (doc != null) {
             result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   

@@ -262,7 +262,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     });
                     resultMap.put("results", list);
                 } else {
-                	String id = request.getResourceName();
+                    String id = request.getResourceName();
                     logger.debug("Attempting to read instance {} from the database", id);
                     ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
                     Resource instanceValue = connectionFactory.getConnection().read(context, readRequest);
@@ -420,7 +420,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 logger.debug("Creating repo {}", repoId);
                 container = repoId.substring(0, repoId.lastIndexOf("/"));
                 id = repoId.substring(repoId.lastIndexOf("/") + 1);
-	            CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
+                CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
                 map = connectionFactory.getConnection().create(routeServiceServerContext, createRequest).getContent().asMap();
             }
             return map;

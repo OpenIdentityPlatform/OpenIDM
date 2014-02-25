@@ -138,7 +138,7 @@ public class PolicyService extends AbstractScriptedService {
     }
     
     private void init(JsonValue configuration) {
-    	JsonValue additionalPolicies = configuration.get("additionalFiles");
+        JsonValue additionalPolicies = configuration.get("additionalFiles");
         if (!additionalPolicies.isNull()) {
             configuration.remove("additionalFiles");
             List<String> list = new ArrayList<String>();
@@ -162,8 +162,8 @@ public class PolicyService extends AbstractScriptedService {
                 continue;
             }
             if (bindings != null) {
-				bindings.put(entry.getKey(), entry.getValue());
-			}
+                bindings.put(entry.getKey(), entry.getValue());
+            }
         }
 
         handler.put("request", request);
@@ -173,7 +173,7 @@ public class PolicyService extends AbstractScriptedService {
     @Override
     public void handleRead(final ServerContext context, final ReadRequest request,
             final Bindings handler) throws ResourceException {
-    	super.handleRead(context, request, handler);
+        super.handleRead(context, request, handler);
 
         handler.put("request", request);
         handler.put("resources", configuration.get("resources").getObject());

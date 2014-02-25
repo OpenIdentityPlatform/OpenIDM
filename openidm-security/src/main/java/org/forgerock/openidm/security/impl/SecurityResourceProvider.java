@@ -78,11 +78,11 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 public class SecurityResourceProvider {
-	
+    
     private final static Logger logger = LoggerFactory.getLogger(SecurityResourceProvider.class);
 
     public static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
-	
+    
     public static final String ACTION_GENERATE_CERT = "generateCert";
     public static final String ACTION_GENERATE_CSR = "generateCSR";
 
@@ -91,20 +91,20 @@ public class SecurityResourceProvider {
     public static final String DEFAULT_CERTIFICATE_TYPE = "X509";
     public static final int DEFAULT_KEY_SIZE = 2048;
 
-	/**
-	 * The Keystore handler which handles access to actual Keystore instance
-	 */
-	protected KeyStoreHandler store = null;
-	
-	/**
-	 * The KeyStoreManager used for reloading the stores. 
-	 */
-	protected KeyStoreManager manager = null;    
+    /**
+     * The Keystore handler which handles access to actual Keystore instance
+     */
+    protected KeyStoreHandler store = null;
+    
+    /**
+     * The KeyStoreManager used for reloading the stores. 
+     */
+    protected KeyStoreManager manager = null;    
     
     /**
      * The Repository Service Accessor
      */
-	protected ServerContext accessor = null;
+    protected ServerContext accessor = null;
 
     /**
      * The Connection Factory
@@ -114,7 +114,7 @@ public class SecurityResourceProvider {
     /**
      * The resource name, "truststore" or "keystore".
      */
-	protected String resourceName = null;
+    protected String resourceName = null;
 
     public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
         this.store = store;
@@ -130,7 +130,7 @@ public class SecurityResourceProvider {
      * @return the PEM String representation
      * @throws Exception
      */
-	protected String toPem(Object object) throws Exception {
+    protected String toPem(Object object) throws Exception {
         StringWriter sw = new StringWriter(); 
         PEMWriter pw = new PEMWriter(sw); 
         pw.writeObject(object); 
@@ -232,9 +232,9 @@ public class SecurityResourceProvider {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
         content.put(Resource.FIELD_CONTENT_ID, alias);
         if (key instanceof PrivateKey) {
-        	content.put("privateKey", getKeyMap(key));
+            content.put("privateKey", getKeyMap(key));
         } else if (key instanceof SecretKey) {
-        	content.put("secret", getKeyMap(key));
+            content.put("secret", getKeyMap(key));
         }
         return content;
     }
@@ -288,13 +288,13 @@ public class SecurityResourceProvider {
      * @throws Exception
      */
     protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
-    		String algorithm, int keySize, String signatureAlgorithm, String validFrom,
+            String algorithm, int keySize, String signatureAlgorithm, String validFrom,
             String validTo) throws Exception {
-    	return generateCertificate(commonName, "None", "None", "None", "None", "None",
-    			algorithm, keySize, signatureAlgorithm, validFrom, validTo);
+        return generateCertificate(commonName, "None", "None", "None", "None", "None",
+                algorithm, keySize, signatureAlgorithm, validFrom, validTo);
     }
 
-    	
+        
     /**
      * Generates a self signed certificate using the given properties.
      *
@@ -313,10 +313,10 @@ public class SecurityResourceProvider {
      * @throws Exception
      */
     protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
-    		String organization, String organizationUnit, String stateOrProvince, 
-    		String country, String locatity, String algorithm, int keySize, 
-    		String signatureAlgorithm, String validFrom, String validTo) throws Exception {
-    	
+            String organization, String organizationUnit, String stateOrProvince, 
+            String country, String locatity, String algorithm, int keySize, 
+            String signatureAlgorithm, String validFrom, String validTo) throws Exception {
+        
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA","BC"
         keyPairGenerator.initialize(keySize);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -359,7 +359,7 @@ public class SecurityResourceProvider {
         BigInteger serial = BigInteger.valueOf(System.currentTimeMillis());
 
         X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(builder.build(), serial, 
-        		notBefore, notAfter, builder.build(), keyPair.getPublic());
+                notBefore, notAfter, builder.build(), keyPair.getPublic());
 
         ContentSigner sigGen = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(keyPair.getPrivate());
 
@@ -426,7 +426,7 @@ public class SecurityResourceProvider {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
         }
         try {
-        	String container = "/repo/security/keys";
+            String container = "/repo/security/keys";
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
             storeInRepo(container, alias, keyMap);
         } catch (Exception e) {
@@ -488,7 +488,7 @@ public class SecurityResourceProvider {
         Resource keyResource = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id));
         if (keyResource.getContent().isNull()) {
             throw ResourceException.getException(ResourceException.NOT_FOUND, 
-            		"Cannot find stored key for alias " + alias);
+                    "Cannot find stored key for alias " + alias);
         }
         try {
             JsonValue key = keyResource.getContent().get("encoded");

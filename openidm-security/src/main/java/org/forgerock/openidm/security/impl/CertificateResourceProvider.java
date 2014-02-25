@@ -46,23 +46,23 @@ public class CertificateResourceProvider extends EntryResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(CertificateResourceProvider.class);
     
-	public CertificateResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+    public CertificateResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
         super(resourceName, store, manager, accessor, connectionFactory);
     }
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
-    	String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
-    	String certString = value.get("cert").required().asString();
-    	Certificate cert = readCertificate(certString, type);
-    	store.getStore().setCertificateEntry(alias, cert);
+        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
+        String certString = value.get("cert").required().asString();
+        Certificate cert = readCertificate(certString, type);
+        store.getStore().setCertificateEntry(alias, cert);
         store.store();
     }
 
     @Override
     protected JsonValue readEntry(String alias) throws Exception {
-    	Certificate cert = store.getStore().getCertificate(alias);
-    	return returnCertificate(alias, cert);
+        Certificate cert = store.getStore().getCertificate(alias);
+        return returnCertificate(alias, cert);
     }
 
     @Override
