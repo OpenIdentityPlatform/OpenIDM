@@ -174,14 +174,14 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 try {
                     if ("execute".equalsIgnoreCase(action)) {
                         try {
-                        	ObjectSetContext.push(context);
+                            ObjectSetContext.push(context);
                             result.put("_id", onExecute(request.getResourceName(), params));
                         } catch (JsonProcessingException e) {
                             throw new InternalServerErrorException(e);
                         } catch (IOException e) {
                             throw new InternalServerErrorException(e);
                         } finally {
-                        	ObjectSetContext.pop();
+                            ObjectSetContext.pop();
                         }
                     } else {
                         throw new BadRequestException("Unknown action: " + action);

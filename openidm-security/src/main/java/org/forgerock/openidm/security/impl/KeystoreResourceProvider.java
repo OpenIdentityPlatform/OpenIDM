@@ -81,8 +81,8 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-        	String alias = request.getContent().get("alias").asString();
-        	if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) || 
+            String alias = request.getContent().get("alias").asString();
+            if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) || 
                     ACTION_GENERATE_CSR.equalsIgnoreCase(request.getAction())) {
                 if (alias == null) {
                     throw ResourceException.getException(ResourceException.BAD_REQUEST, 
@@ -90,52 +90,52 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                 }
                 String algorithm = request.getContent().get("algorithm").defaultTo(DEFAULT_ALGORITHM).asString();
                 String signatureAlgorithm = request.getContent().get("signatureAlgorithm")
-                		.defaultTo(DEFAULT_SIGNATURE_ALGORITHM).asString();
+                        .defaultTo(DEFAULT_SIGNATURE_ALGORITHM).asString();
                 int keySize = request.getContent().get("keySize").defaultTo(DEFAULT_KEY_SIZE).asInteger();
                 JsonValue result = null;
-        		if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
-        			// Generate self-signed certificate
-        			if (store.getStore().containsAlias(alias)) {
-        				handler.handleError(new ConflictException("The resource with ID '" + alias 
-        						+ "' could not be created because there is already another resource with the same ID"));
-        			} else {
-        				String domainName = request.getContent().get("domainName").required().asString();
-        				String validFrom = request.getContent().get("validFrom").asString();
-        				String validTo = request.getContent().get("validTo").asString();
+                if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
+                    // Generate self-signed certificate
+                    if (store.getStore().containsAlias(alias)) {
+                        handler.handleError(new ConflictException("The resource with ID '" + alias 
+                                + "' could not be created because there is already another resource with the same ID"));
+                    } else {
+                        String domainName = request.getContent().get("domainName").required().asString();
+                        String validFrom = request.getContent().get("validFrom").asString();
+                        String validTo = request.getContent().get("validTo").asString();
 
-        				// Generate the cert
-        				Pair<X509Certificate, PrivateKey> pair = generateCertificate(domainName, algorithm, 
-        						keySize, signatureAlgorithm, validFrom, validTo);
-        				Certificate cert = pair.getKey();
-        				PrivateKey key = pair.getValue();
+                        // Generate the cert
+                        Pair<X509Certificate, PrivateKey> pair = generateCertificate(domainName, algorithm, 
+                                keySize, signatureAlgorithm, validFrom, validTo);
+                        Certificate cert = pair.getKey();
+                        PrivateKey key = pair.getValue();
 
-        				String password = request.getContent().get("password").defaultTo(
-        						Param.getKeystoreKeyPassword()).asString();
+                        String password = request.getContent().get("password").defaultTo(
+                                Param.getKeystoreKeyPassword()).asString();
 
-        				// Add it to the store and reload
-        				store.getStore().setCertificateEntry(alias, cert);
-        				//store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}), 
-        						//new KeyStore.PasswordProtection(password.toCharArray()));
-        				store.store();
+                        // Add it to the store and reload
+                        store.getStore().setCertificateEntry(alias, cert);
+                        //store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}), 
+                                //new KeyStore.PasswordProtection(password.toCharArray()));
+                        store.store();
 
-        				manager.reload();
+                        manager.reload();
 
-        				result = returnCertificate(alias, cert);
-        			}
-        		} else {
-        			// Generate CSR
-        			Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(alias, algorithm, 
-        					signatureAlgorithm, keySize, request.getContent());
-        			result = returnCertificateRequest(alias, csr.getKey());
-        			if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
-        				result.put("privateKey", getKeyMap(csr.getRight()));
+                        result = returnCertificate(alias, cert);
                     }
-        		}
+                } else {
+                    // Generate CSR
+                    Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(alias, algorithm, 
+                            signatureAlgorithm, keySize, request.getContent());
+                    result = returnCertificateRequest(alias, csr.getKey());
+                    if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
+                        result.put("privateKey", getKeyMap(csr.getRight()));
+                    }
+                }
                 handler.handleResult(result);
-        	} else {
-        		handler.handleError(new BadRequestException("Unsupported action " + request.getAction()));
-        	}
-        	
+            } else {
+                handler.handleError(new BadRequestException("Unsupported action " + request.getAction()));
+            }
+            
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }

@@ -224,7 +224,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
                 : request.getNewResourceId();
         final String fullId = type + "/" + localId;
 
-    	Map<String, Object> obj = request.getContent().asMap();
+        Map<String, Object> obj = request.getContent().asMap();
 
         Connection connection = null;
         boolean retry = false;
@@ -488,10 +488,10 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
-        	List<Resource> results = query(request);
-        	for (Resource result : results) {
-        		handler.handleResource(result);
-        	}
+            List<Resource> results = query(request);
+            for (Resource result : results) {
+                handler.handleResource(result);
+            }
             handler.handleResult(new QueryResult());
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -502,7 +502,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
 
     @Override
     public List<Resource> query(QueryRequest request) throws ResourceException {
-    	String fullId = request.getResourceName();
+        String fullId = request.getResourceName();
         String type = trimStartingSlash(fullId);
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
         Map<String, Object> params = new HashMap<String, Object>();
@@ -566,10 +566,10 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
     }
     
     private String trimStartingSlash(String id) {
-    	if (id.startsWith("/") && id.length() > 1) {
-    		return id.substring(1);
-    	}
-    	return id;
+        if (id.startsWith("/") && id.length() > 1) {
+            return id.substring(1);
+        }
+        return id;
     }
 
     Connection getConnection() throws SQLException {
@@ -610,9 +610,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
      *         SCR and needs to be manually registered.
      */
     static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) { 
-    	JDBCRepoService bootRepo = new JDBCRepoService(); 
-    	bootRepo.init(repoConfig, context); 
-    	return bootRepo; 
+        JDBCRepoService bootRepo = new JDBCRepoService(); 
+        bootRepo.init(repoConfig, context); 
+        return bootRepo; 
     }
 
     /**
@@ -623,16 +623,16 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
      */
     @Activate
     void activate(ComponentContext compContext) {
-    	logger.debug("Activating Service with configuration {}", compContext.getProperties());
-    	try {
-    		config = enhancedConfig.getConfigurationAsJson(compContext);
-    	} catch (RuntimeException ex) {
-    		logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
-    				+ ex.getMessage(), ex);
-    		throw ex;
-    	}
-    	init(config, compContext.getBundleContext());
-    	logger.info("Repository started.");
+        logger.debug("Activating Service with configuration {}", compContext.getProperties());
+        try {
+            config = enhancedConfig.getConfigurationAsJson(compContext);
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
+                    + ex.getMessage(), ex);
+            throw ex;
+        }
+        init(config, compContext.getBundleContext());
+        logger.info("Repository started.");
     }
 
     /**

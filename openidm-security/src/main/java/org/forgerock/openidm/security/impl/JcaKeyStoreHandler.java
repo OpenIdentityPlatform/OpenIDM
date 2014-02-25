@@ -91,10 +91,10 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
         }
     }
 
-	@Override
-	public String getPassword() {
-		return password;
-	}
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
     @Override
     public String getLocation() {

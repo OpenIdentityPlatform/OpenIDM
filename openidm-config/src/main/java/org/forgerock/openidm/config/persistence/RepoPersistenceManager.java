@@ -102,7 +102,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      */
     public void checkReady() throws BootstrapFailure {
         if (requireRepository) {
-        	ServiceTracker repoTracker = null;
+            ServiceTracker repoTracker = null;
             try {
                 if (repo == null) {
                     Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
@@ -155,7 +155,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         if (isReady(0) && requireRepository) {
             String id = pidToId(pid);
             try {
-            	ReadRequest readRequest = Requests.newReadRequest(id);
+                ReadRequest readRequest = Requests.newReadRequest(id);
                 Resource existing = repo.read(readRequest);
                 exists = (existing != null);
             } catch (NotFoundException ex) {
@@ -198,7 +198,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         try {
             if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
-            	ReadRequest readRequest = Requests.newReadRequest(id);
+                ReadRequest readRequest = Requests.newReadRequest(id);
                 Resource existing = repo.read(readRequest);
                 logger.debug("Config loaded {} {}", pid, existing);
                 result = mapToDict(existing.getContent().asMap());
@@ -344,7 +344,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                         do {
                             retry = false;
                             try {
-                            	UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(obj));
+                                UpdateRequest r = Requests.newUpdateRequest(id, new JsonValue(obj));
                                 r.setRevision(rev);
                                 repo.update(r);
                             } catch (PreconditionFailedException ex) {
@@ -430,9 +430,9 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @return the qualified objectset id
      */
     String pidToId(String pid) {
-    	if (pid.indexOf("|") > -1) {
-    		return CONFIG_CONTEXT_PREFIX + pid.substring(0, pid.indexOf("|"));
-    	}
+        if (pid.indexOf("|") > -1) {
+            return CONFIG_CONTEXT_PREFIX + pid.substring(0, pid.indexOf("|"));
+        }
         return CONFIG_CONTEXT_PREFIX + pid;
     }
     

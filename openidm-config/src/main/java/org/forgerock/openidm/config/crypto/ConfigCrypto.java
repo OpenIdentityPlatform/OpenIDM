@@ -113,8 +113,8 @@ public class ConfigCrypto {
                 // Continue to check if another meta data provider can resolve the meta data
                 lastWaitException = ex;
             } catch (NotConfiguration e) {
-				logger.error("Error getting additional properties to encrypt", e);
-			}
+                logger.error("Error getting additional properties to encrypt", e);
+            }
         }
         if (lastWaitException != null) {
             throw lastWaitException;

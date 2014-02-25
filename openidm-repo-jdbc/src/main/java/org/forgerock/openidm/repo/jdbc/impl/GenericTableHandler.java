@@ -172,7 +172,7 @@ public class GenericTableHandler implements TableHandler {
     public Resource read(String fullId, String type, String localId, Connection connection)
             throws ResourceException, SQLException, IOException {
 
-    	Resource result = null;
+        Resource result = null;
         Map<String, Object> resultMap = null;
         PreparedStatement readStatement = null;
         ResultSet rs = null;
@@ -193,7 +193,7 @@ public class GenericTableHandler implements TableHandler {
                 result = new Resource(localId, rev, new JsonValue(resultMap));
             } else {
                 throw ResourceException.getException(ResourceException.NOT_FOUND,
-                		"Object " + fullId + " not found in " + type);
+                        "Object " + fullId + " not found in " + type);
             }
         } finally {
             CleanupHelper.loggedClose(rs);

@@ -124,9 +124,9 @@ import org.slf4j.LoggerFactory;
  * @author Laszlo Hordos
  */
 @Component(name = ConnectorInfoProviderService.PID,
-		policy = ConfigurationPolicy.OPTIONAL,
-		description = "OpenICF Connector Info Service",
-		immediate = true)
+        policy = ConfigurationPolicy.OPTIONAL,
+        description = "OpenICF Connector Info Service",
+        immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),

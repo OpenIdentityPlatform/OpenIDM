@@ -52,14 +52,14 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(PrivateKeyResourceProvider.class);
     
-	public PrivateKeyResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+    public PrivateKeyResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
         super(resourceName, store, manager, accessor, connectionFactory);
     }
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
-    	String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
-    	PrivateKey privateKey = null;
+        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
+        PrivateKey privateKey = null;
         String privateKeyPem = value.get("privateKey").asString();
         if (privateKeyPem == null) {
             privateKey = getKeyPair(alias).getPrivate();
@@ -73,17 +73,17 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
         Certificate [] certChain = readCertificateChain(certStringChain, type);
         verify(privateKey, certChain[0]);
         store.getStore().setEntry(alias, new PrivateKeyEntry(privateKey, certChain), 
-        		new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
+                new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
         store.store();
     }
 
     @Override
     protected JsonValue readEntry(String alias) throws Exception {
-    	Key key = store.getStore().getKey(alias, store.getPassword().toCharArray());
+        Key key = store.getStore().getKey(alias, store.getPassword().toCharArray());
         if (key == null) {
-        	throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
+            throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
         } else {
-        	return returnKey(alias, key);
+            return returnKey(alias, key);
         }
     }
 

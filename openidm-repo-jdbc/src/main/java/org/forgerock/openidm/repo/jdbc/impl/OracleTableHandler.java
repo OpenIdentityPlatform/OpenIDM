@@ -42,13 +42,13 @@ import org.slf4j.LoggerFactory;
  * @version $Revision$ $Date$
  */
 public class OracleTableHandler extends GenericTableHandler {
-	final static Logger logger = LoggerFactory.getLogger(OracleTableHandler.class);
+    final static Logger logger = LoggerFactory.getLogger(OracleTableHandler.class);
 
     public OracleTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize, sqlExceptionHandler);
     }
 
-	@Override
+    @Override
     public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection)
             throws SQLException, IOException, InternalServerErrorException {
         connection.setAutoCommit(true);

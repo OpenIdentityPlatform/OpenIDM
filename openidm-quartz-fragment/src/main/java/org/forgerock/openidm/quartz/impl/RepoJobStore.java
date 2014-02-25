@@ -228,7 +228,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     }
 
     public static void setServerContext(ServerContext serverContext) {
-    	RepoJobStore.serverContext = serverContext;
+        RepoJobStore.serverContext = serverContext;
     }
 
     public boolean setClusterService() {
@@ -1706,7 +1706,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 tgw = new TriggerGroupWrapper(groupName);
                 // create in repo
                 JsonValue newValue = getConnectionFactory().getConnection().create(getServerContext(),
-                		getCreateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue().asMap())).getContent();
+                        getCreateRequest(getTriggerGroupsRepoId(groupName), tgw.getValue().asMap())).getContent();
                 tgw = new TriggerGroupWrapper(newValue);
                 // Add to list of group names
                 addTriggerGroupName(groupName);
@@ -1739,7 +1739,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 jgw = new JobGroupWrapper(groupName);
                 // create in repo
                 JsonValue newValue = getConnectionFactory().getConnection().create(getServerContext(),
-                		getCreateRequest(getJobGroupsRepoId(groupName), jgw.getValue().asMap())).getContent();
+                        getCreateRequest(getJobGroupsRepoId(groupName), jgw.getValue().asMap())).getContent();
                 jgw = new JobGroupWrapper(newValue);
                 // Add to list of group names
                 addJobGroupName(groupName);

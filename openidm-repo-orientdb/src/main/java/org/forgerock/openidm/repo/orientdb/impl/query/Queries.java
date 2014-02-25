@@ -78,8 +78,8 @@ public class Queries {
      */
     public List<ODocument> query(final String type, QueryRequest request, ODatabaseDocumentTx database) 
             throws BadRequestException {
-            	
-    	Map<String, String> params = request.getAdditionalParameters();
+                
+        Map<String, String> params = request.getAdditionalParameters();
         String orientClassName = OrientDBRepoService.typeToOrientClassName(type);
         
         List<ODocument> result = null;

@@ -46,8 +46,8 @@ import org.forgerock.json.resource.UpdateRequest;
  * @author ckienle
  */
 public interface RepoBootService {
-	
-	/**
+    
+    /**
      * Creates a new resource in the repository.
      *
      * @param request
@@ -56,8 +56,8 @@ public interface RepoBootService {
      * @throws ResourceException
      *             if an error was encountered during creation
      */
-	public Resource create(CreateRequest request) throws ResourceException;
-	
+    public Resource create(CreateRequest request) throws ResourceException;
+    
     /**
      * Reads a resource from the repository based on the supplied read request.
      *
@@ -67,8 +67,8 @@ public interface RepoBootService {
      * @throws ResourceException
      *             if an error was encountered during the read.
      */
-	public Resource read(ReadRequest request) throws ResourceException;
-	
+    public Resource read(ReadRequest request) throws ResourceException;
+    
     /**
      * Updates a resource in the repository
      * <p/>
@@ -85,9 +85,9 @@ public interface RepoBootService {
      * @throws ResourceException
      *             if an error was encountered while updating
      */
-	public Resource update(UpdateRequest request) throws ResourceException;
-	
-	/**
+    public Resource update(UpdateRequest request) throws ResourceException;
+    
+    /**
      * Deletes a new resource in the repository.
      *
      * @param request
@@ -96,9 +96,9 @@ public interface RepoBootService {
      * @throws ResourceException
      *             if an error was encountered during the delete
      */
-	public Resource delete(DeleteRequest request) throws ResourceException;
-	
-	/**
+    public Resource delete(DeleteRequest request) throws ResourceException;
+    
+    /**
      * Queries resources in the repository.  Must provide built in query support 
      * for queryid query-all-ids.
      *
@@ -108,6 +108,6 @@ public interface RepoBootService {
      * @throws ResourceException
      *             if an error was encountered during query
      */
-	public List<Resource> query(QueryRequest request) throws ResourceException;
-	
+    public List<Resource> query(QueryRequest request) throws ResourceException;
+    
 }

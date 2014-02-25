@@ -62,16 +62,16 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
     public void createInstance(final ServerContext context, final CreateRequest request,
             final ResultHandler<Resource> handler) {
         try {
-        	if (null != request.getNewResourceId()) {
+            if (null != request.getNewResourceId()) {
                 if (store.getStore().containsAlias(request.getNewResourceId())) {
                     handler.handleError(new ConflictException("The resource with ID '"
                             + request.getNewResourceId() + "' could not be created because "
                             + "there is already another resource with the same ID"));
                 } else {
-                	String resourceId = request.getNewResourceId();
-                	storeEntry(request.getContent(), resourceId);
-                	manager.reload();
-                	handler.handleResult(new Resource(resourceId, null, request.getContent()));
+                    String resourceId = request.getNewResourceId();
+                    storeEntry(request.getContent(), resourceId);
+                    manager.reload();
+                    handler.handleResult(new Resource(resourceId, null, request.getContent()));
                 }
             } else {
                 handler.handleError(new BadRequestException(
@@ -101,9 +101,9 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
     public void updateInstance(final ServerContext context, final String resourceId,
             final UpdateRequest request, final ResultHandler<Resource> handler) {
         try {
-        	storeEntry(request.getContent(), resourceId);
-        	manager.reload();
-        	handler.handleResult(new Resource(resourceId, null, request.getContent()));
+            storeEntry(request.getContent(), resourceId);
+            manager.reload();
+            handler.handleResult(new Resource(resourceId, null, request.getContent()));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -126,39 +126,39 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         }
     }
     
-	@Override
-	public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-		final ResourceException e = new NotSupportedException("Action operations are not supported");
+    @Override
+    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        final ResourceException e = new NotSupportedException("Action operations are not supported");
         handler.handleError(e);
-	}
+    }
 
-	@Override
-	public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
-			ResultHandler<JsonValue> handler) {
-		final ResourceException e = new NotSupportedException("Action operations are not supported");
+    @Override
+    public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
+            ResultHandler<JsonValue> handler) {
+        final ResourceException e = new NotSupportedException("Action operations are not supported");
         handler.handleError(e);
-	}
+    }
 
-	@Override
-	public void patchInstance(ServerContext context, String resourceId, PatchRequest request, 
-			ResultHandler<Resource> handler) {
-		final ResourceException e = new NotSupportedException("Patch operations are not supported");
+    @Override
+    public void patchInstance(ServerContext context, String resourceId, PatchRequest request, 
+            ResultHandler<Resource> handler) {
+        final ResourceException e = new NotSupportedException("Patch operations are not supported");
         handler.handleError(e);
-	}
+    }
 
-	@Override
-	public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-		final ResourceException e = new NotSupportedException("Query operations are not supported");
+    @Override
+    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        final ResourceException e = new NotSupportedException("Query operations are not supported");
         handler.handleError(e);
-	}
-	
-	public abstract void createDefaultEntry(String alias) throws Exception;
-	
-	public boolean hasEntry(String alias) throws Exception {
+    }
+    
+    public abstract void createDefaultEntry(String alias) throws Exception;
+    
+    public boolean hasEntry(String alias) throws Exception {
         return store.getStore().containsAlias(alias);
     }
 
-	protected abstract void storeEntry(JsonValue value, String alias) throws Exception;
-	
-	protected abstract JsonValue readEntry(String alias) throws Exception;
+    protected abstract void storeEntry(JsonValue value, String alias) throws Exception;
+    
+    protected abstract JsonValue readEntry(String alias) throws Exception;
 }

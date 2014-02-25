@@ -31,5 +31,5 @@ package org.forgerock.openidm.security;
  */
 public interface KeyStoreManager {
 
-	public void reload() throws Exception ;
+    public void reload() throws Exception ;
 }
