@@ -103,7 +103,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                             return;
                         } else {
                             this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                            templateStartProcessForm.render(definition, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                            templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
                                 

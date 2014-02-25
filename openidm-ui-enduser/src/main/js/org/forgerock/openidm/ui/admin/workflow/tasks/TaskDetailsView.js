@@ -103,8 +103,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                     }, this));
                     return;
                 } else {
-                    this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition, task.formProperties), _.bind(function() {
+                    this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties.formPropertyHandlers);
+                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties({"formProperties": definition.formProperties.formPropertyHandlers}, task.formProperties), _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
                         
