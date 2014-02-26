@@ -111,7 +111,7 @@ if (!request.additionalParameters || !request.additionalParameters.taskId) {
     for (i = 0; i < candidateGroups.length; i++) {
         candidateGroup = candidateGroups[i];
         params = {
-            "_queryId": "get-users-of-role",
+            "_queryId": "get-users-of-direct-role",
             "role": candidateGroup
         };
         result = openidm.query("managed/user", params);

@@ -6,7 +6,7 @@
     "queries" : {
         
         "get-by-field-value" : "select * FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value}",
-        "get-users-of-role" : "select userName FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$'",
+        "get-users-of-direct-role" : "select userName FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$'",
         
         "query-all-ids" : "select _openidm_id from ${unquoted:_resource}",
         "query-all" : "select ${unquoted:fields} from ${unquoted:_resource}",
