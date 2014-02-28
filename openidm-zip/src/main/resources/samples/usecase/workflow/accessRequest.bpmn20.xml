@@ -31,11 +31,11 @@
         <userTask id="userAccessRequest" name="User Access Request" activiti:assignee="${startUserId}">
             <extensionElements>
                 <activiti:formProperty id="business"
-                                       name="Access to Business system: "
+                                       name="Access to Business system "
                                        expression="#{hasBusiness}"
                                        type="boolean"/>
                 <activiti:formProperty id="project"
-                                       name="Access to Project system: "
+                                       name="Access to Project system "
                                        expression="#{hasProject}"
                                        type="boolean"/>
                 <activiti:formProperty id="emailEnabled"
@@ -205,7 +205,7 @@
                 openidm.create("repo/ui/notification/", null, requesterNotification)
                 
                 if (emailEnabled) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The access request was accepted']
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
@@ -245,7 +245,7 @@
                 openidm.create("repo/ui/notification/", null, requesterNotification)
                 
                 if (emailEnabled) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'omebold@gmail.com', 
+                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your access request was denied by ' + rejecter]
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
