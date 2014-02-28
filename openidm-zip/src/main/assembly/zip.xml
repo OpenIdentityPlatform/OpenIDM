@@ -385,6 +385,13 @@
             <outputDirectory>/openidm/samples/workflow/script</outputDirectory>
         </fileSet>
         <!-- Setup use case samples-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/usecase</directory>
+            <includes>
+                <include>README</include>
+            </includes>
+            <outputDirectory>/openidm/samples/usecase/</outputDirectory>
+        </fileSet>
         <!--Use case 1 Reconciliation-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
