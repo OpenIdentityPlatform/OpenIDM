@@ -26,6 +26,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -38,6 +40,7 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.delegate.JavaDelegate;
+import org.activiti.engine.impl.ProcessEngineImpl;
 import org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.scripting.ResolverFactory;
@@ -252,7 +255,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                             //initialise the default h2 DataSource
                             JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
                             File root = IdentityServer.getFileForWorkingPath("db/activiti/database");
-                            jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
+                            jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=1000");
                             jdbcDataSource.setUser("sa");
                             configuration.setDatabaseType("h2");
                             configuration.setDataSource(jdbcDataSource);
@@ -361,6 +364,25 @@ public class ActivitiServiceImpl implements RequestHandler {
                 logger.error("Can not delete org.apache.felix.fileinstall-activiti configuration", e);
             }
             barInstallerConfiguration = null;
+        }
+        if ("h2".equals(((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDatabaseType() )) {
+            DataSource h2DdataSource = ((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDataSource();
+            java.sql.Connection conn = null;
+            try {
+                conn = h2DdataSource.getConnection();
+                Statement stat = conn.createStatement();
+                stat.execute("SHUTDOWN");
+                stat.close();
+            } catch (SQLException ex) {
+                logger.warn("H2 database failed to stop properly", ex);
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    logger.warn("H2 database failed to stop properly", ex);
+                }
+            }
         }
         if (null != processEngineFactory) {
             try {
