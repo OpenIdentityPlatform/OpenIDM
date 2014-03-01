@@ -56,7 +56,7 @@ $ ./startup.sh -p samples/myauditsample
 
 Initiate a reconciliation operation over the REST interface, as follows:
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+$ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
 Alternatively, edit samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json
 to enable scheduled reconciliation:

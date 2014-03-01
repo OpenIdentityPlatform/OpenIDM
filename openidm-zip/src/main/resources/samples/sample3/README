@@ -54,7 +54,7 @@ To try the example, follow these steps.
 
     6. Run reconciliation:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
+    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 
