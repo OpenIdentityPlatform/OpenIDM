@@ -28,7 +28,7 @@ To try the sample, follow these steps.
 
     3. Run reconciliation.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrAccounts_managedUser"
+    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrAccounts_managedUser"
     {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
 
     4. See the users from the CSV file show up in the OpenIDM repository.
