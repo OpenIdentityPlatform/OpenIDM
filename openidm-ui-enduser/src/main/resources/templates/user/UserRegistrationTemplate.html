@@ -16,35 +16,35 @@
                     <label>{{t "common.user.username"}}</label> 
                     <input type="text" name="userName" data-validation-dependents="password"/> 
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.emailAddress"}}</label> 
                     <input type="text" name="mail" /> 
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.givenName"}}</label> 
                     <input type="text" name="givenName" data-validation-dependents="password"/> 
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.familyName"}}</label> 
                     <input type="text" name="sn" data-validation-dependents="password"/> 
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
                 
                 <div class="field">
                     <label>{{t "common.user.phoneNumber"}}</label> 
                     <input type="text" name="telephoneNumber" /> 
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
 
                 <div class="group-field">
@@ -61,8 +61,7 @@
                             <span class="error">x</span>
                         </div>
                     </div>
-                    <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
-
+                    <div class="group-field-errors validationRules float-left" data-for-validator="password passwordConfirm">
                         <div class="field-rule">
                             <span class="error">x</span> 
                             <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
@@ -72,24 +71,25 @@
 
                 <div class="clear"></div>
                 {{#securityQuestions}}
-                <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
-                </p>
+                <hr class="offset20 column1"/>
                 <div class="field">
                     <label>{{t "common.user.securityQuestion"}}</label>
                     <select name="securityQuestion"></select>
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>
                 <div class="field">
                     <label>{{t "common.user.securityAnswer"}}</label> 
                     <input type="text" name="securityAnswer" />
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>  
+                <p class="border-gray round offset20 content column2 autoMarginLeftRight">
+                    {{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
+                </p>
                 {{/securityQuestions}}
                 {{#siteIdentification}}
-                <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
-                
+                <hr class="offset20 column1"/>
                 <div class="ContentFlow" id="siteImageFlow">
                     <div class="loadIndicator"><div class="indicator"></div></div>
                     <div class="flow">
@@ -102,10 +102,11 @@
                     <label>{{t "common.user.sitePhrase"}}</label> 
                     <input type="text" name="passPhrase" />
                     <span class="error">x</span>
-                    <div class="validation-message"></div>
+                    <div class="validation-message noFloat"></div>
                 </div>   
+                <p class="border-gray round offset20 content column2 autoMarginLeftRight">{{t "templates.user.ChangeSiteIdentificationDialogTemplate.siteImageAndPhaseExplanation"}}</p>
                 {{/siteIdentification}}
-                
+                <hr class="offset20 column1"/>
                 <div class="field field-checkbox">
                     <label>
                         <input type="checkbox" name="terms" value="yes" data-validator="termsOfUse" data-validator-event="click" data-validation-status="error"/> 
@@ -116,8 +117,8 @@
                 </div>
                 
                 <div class="field field-submit">
-                    <input type="submit" name="register" class="button" value="{{t "common.form.register"}}" />
-                    <div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>
+                    <input type="submit" name="register" class="button" disabled value="{{t "common.form.register"}}" />
+                    <div class="input-validation-message noFloat">{{t "common.form.validation.formContainsErrors"}}</div>
                 </div>
                 
             </div>

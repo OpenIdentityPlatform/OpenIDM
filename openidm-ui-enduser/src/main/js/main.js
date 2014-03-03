@@ -33,14 +33,15 @@ require.config({
     paths: {
         less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.7.1-min",
+        i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",
         js2form: "libs/js2form-1.0",
         form2js: "libs/form2js-1.0",
         contentflow: "libs/contentflow",
         spin: "libs/spin-1.2.5-min",
-        dataTable: "libs/datatables-1.9.3-min",
-        jqueryui: "libs/jquery-ui-1.8.23.custom-min",
+        jqueryui: "libs/jquery-ui-1.10.4.custom-min",
+        jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         xdate: "libs/xdate-0.7-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.0.rc.1",
@@ -70,11 +71,11 @@ require.config({
         spin: {
             exports: "spin"
         },
-        dataTable: {
-            exports: "dataTable"
-        },
         jqueryui: {
             exports: "jqueryui"
+        },
+        jqgrid: {
+            deps: ["jqueryui", "i18nGrid"]
         }, 
         xdate: {
             exports: "xdate"
@@ -107,7 +108,7 @@ require([
     "js2form",
     "contentflow",
     "spin",
-    "dataTable",
+    "jqgrid",
     "jqueryui",
     "xdate",
     "moment",

@@ -148,7 +148,9 @@ define("UserDelegate", [
                     obj.getUserById(data.id, data.component, function (userData) {
                         userData.roles = data.roles;
                         userData.component = data.component;
-
+                        if(!userData.userName){
+                            userData.userName = userData._id;
+                        }
                         successCallback(userData);
                     }, errorCallback, errorsHandlers);
                 }

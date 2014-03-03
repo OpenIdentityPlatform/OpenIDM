@@ -22,8 +22,7 @@
                     </div>   
                                          
                 </div>
-
-                <div class="group-field-errors float-right validationRules" data-for-validator="password passwordConfirm">
+                <div class="group-field-errors validationRules float-right" data-for-validator="password passwordConfirm">
                     <div class="field-rule">
                         <span class="error">x</span> 
                         <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
@@ -51,13 +50,13 @@
                         <label>{{t "common.user.securityAnswer"}}</label> 
                         <input type="text" name="securityAnswer"/>
                         <span class="error">x</span>
+                        <div class="validation-message noFloat" for="securityAnswer"></div>
                     </div>
-                    <div class="validation-message" for="securityAnswer" style="width:100%; text-align:right"></div>
-                </div>
-                <div class="group-field-message">
-                    {{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
                 </div>
                 <div class="clear"></div>
+            </div>
+            <div  class="border-gray round offset20 content column2 autoMarginLeftRight">
+                {{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}
             </div>
     </fieldset>
 </form>

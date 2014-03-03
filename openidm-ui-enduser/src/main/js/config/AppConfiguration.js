@@ -104,11 +104,15 @@ define("config/AppConfiguration", [
                                "urls": {
                                    "dashboard": {
                                        "url": "#dashboard/",
-                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard",
+                                       "icon": "glyph-icon-th-list",
+                                       "inactive": false
                                    },
                                    "users": {
                                        "url": "#users/",
-                                       "name": "config.AppConfiguration.Navigation.links.users"
+                                       "name": "config.AppConfiguration.Navigation.links.users",
+                                       "icon": "glyph-icon-user",
+                                       "inactive": false
                                    }
                                }    
                            },
@@ -116,7 +120,9 @@ define("config/AppConfiguration", [
                                "urls": {
                                    "dashboard": {
                                        "url": "#dashboard/",
-                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard",
+                                       "icon": "glyph-icon-th-list",
+                                       "inactive": false
                                    }
                                }    
                            }
