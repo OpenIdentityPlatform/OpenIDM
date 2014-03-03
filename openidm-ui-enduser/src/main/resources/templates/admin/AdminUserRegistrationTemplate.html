@@ -7,27 +7,27 @@
                 <div class="field">
                     <label>{{t "common.user.username"}}</label> 
                     <input type='text' name='userName' data-validation-dependents="password" /> <span class="error">x</span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
                 <div class="field">
                     <label>{{t "common.user.emailAddress"}}</label> 
                     <input type='text' name='mail' /> 
                     <span class="error">x</span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.givenName"}}</label> 
                     <input type='text' name='givenName' data-validation-dependents="password" /> 
                     <span class="error">x</span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
 
                 <div class="field">
                     <label>{{t "common.user.familyName"}}</label> 
                     <input type='text' name='sn' 
                         data-validation-dependents="password" /> <span class="error">x</span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
 
                 <div class="field">
@@ -35,7 +35,7 @@
                     <input type="text" name="telephoneNumber" /> 
 
                     <span class="error">x</span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
                 
                 <div class="field">
@@ -43,7 +43,7 @@
                     {{checkbox roles "roles"}}
 
                     <span class="error"></span>
-                    <div class='validation-message'></div>
+                    <div class='validation-message noFloat'></div>
                 </div>
 
                 <div class="group-field">
@@ -70,7 +70,7 @@
                 </div>
                 <div class="field field-submit">
                     <input type="submit" name="createButton" class="button" value='{{t "common.form.create"}}' />
-                    <div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>    
+                    <div class="input-validation-message noFloat">{{t "common.form.validation.formContainsErrors"}}</div>    
                 </div>
             </div>
  

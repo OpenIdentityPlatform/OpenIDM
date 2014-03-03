@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,25 +32,20 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "dataTable",
-    "org/forgerock/commons/ui/common/main/i18nManager"
-], function(AbstractView, userDelegate, eventManager, constants, dataTable, i18nManager) {
+    "org/forgerock/commons/ui/common/main/i18nManager",
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(AbstractView, userDelegate, eventManager, constants, i18nManager, cookieHelper) {
     var UsersView = AbstractView.extend({
         template: "templates/admin/NewUsersTemplate.html",
         
-        events: {
-            "click tr": "showProfile",
-            "click checkbox": "select"
-        },
+        events: {},
         
         select: function(event) {
             console.log("user selected");
             event.stopPropagation();
         },
         
-        showProfile: function(event) {
-            var userName = $(event.target).closest("tr").find(".userName").text();
-            
+        showProfile: function(userName) {
             if(userName) {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});
             }
@@ -58,48 +53,146 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
         
         render: function() {
             this.parentRender(function() {
-                $('#usersTable').dataTable( {
-                    "bProcessing": true,
-                    "sAjaxSource": "",
-                    "fnServerData": function(sUrl, aoData, fnCallback, oSettings) {
-                        userDelegate.getAllUsers(function(users) {
-                            var data = {aaData: users}, i;
-                            
-                            for(i = 0; i < data.aaData.length; i++) {
-                                data.aaData[i].selector = '<input type="checkbox" />';
-                                data.aaData[i].name = $('<span class="name" />').text(users[i].givenName + ' ' + users[i].sn).wrap('<p>').parent().html();
-                                data.aaData[i].userName = $('<span class="userName" />').text(users[i].userName).wrap('<p>').parent().html();
+                var _this = this,
+                grid_id = 'usersTable',
+                pager_id = grid_id + '_pager',
+                cols = [
+                        {
+                            "name": "_id",
+                            "hidden": true
+                        },
+                        {
+                            "name": "version",
+                            "hidden": true
+                        },
+                        {
+                            "name": "userName",
+                            "label": $.t("common.user.username"),
+                            "key": true
+                        },
+                        {
+                            "name": "givenName",
+                            "label": $.t("common.user.givenName")
+                        },
+                        {
+                            "name": "sn",
+                            "label": $.t("common.user.familyName")
+                        },
+                        {
+                            "name": "mail",
+                            "label": $.t("common.user.email")
+                        },
+                        {
+                            "name": "accountStatus",
+                            "label": $.t("common.user.status"),
+                            "align": "center",
+                            "stype": "select", 
+                            "edittype": "select",
+                            "editoptions": { "value": ":All;active:Active;inactive:Inactive"},
+                            "formatter": function(val, options, row_data){
+                                var img_src = (val === 'active') ? 'images/span_ok.png' : 'images/span_error.png',
+                                    html = '<img style="padding-top:5px;cursor:pointer;" src="' + img_src + '" title="' + val + '"/>';
+                                return (val && val.length > 0) ? html : '';
                             }
-
-                            fnCallback(data);
-                        });
+                        }
+                ];
+                
+                $('#' + grid_id).jqGrid('GridUnload');
+                $('#' + pager_id).remove();
+                
+                $('#' + grid_id).after('<div id="' + pager_id + '"></div>');
+                $('#' + grid_id).jqGrid( {
+                    jsonReader : {
+                        repeatitems: false,
+                        root: function(obj){ return obj.result[0].rows; },
+                        id: "userName",
+                        page: function(obj){ return obj.result[0].page; },
+                        total: function(obj){ return obj.result[0].total; },
+                        records: function(obj){ return obj.result[0].records; }
                     },
-                    "aoColumns": [
-                        {
-                            "mData": "selector",
-                            "bSortable": false
-                        },
-                        {
-                            "mData": "userName"
-                        },
-                        { 
-                            "mData": "name" 
-                        },
-                        { 
-                            "mData": "accountStatus",
-                            "sClass": "highlight"
-                        },
-                        { 
-                            "mData": "mail" 
-                        } 
-                    ],
-                    "oLanguage": {
-                        "sUrl": "locales/" + i18nManager.locale + "/datatable_translation.json"
+                    url: '/openidm/endpoint/jqgrid?resource=managed/user&_queryId=get-managed-users&formatted=false',
+                    datatype: "json",
+                    height: 'auto',
+                    width: 920,
+                    rowNum: 10,
+                    rowList: [10,20,50],
+                    pager: pager_id,
+                    viewrecords: true,
+                    hidegrid: false,
+                    sortname: 'userName',
+                    sortorder: 'asc',
+                    colModel: cols,
+                    loadComplete: function(data){
+                        var params = cookieHelper.getCookie("userGridParams");
+                        if (data.result[0].records === 0) {
+                            $('#' + grid_id).addRowData("blankRow", {"userName":"No Data Found", "name":"", "email":"", "status":""});
+                            $('.ui-paging-info').text('');
+                       }
+                       if(params){
+                           params = JSON.parse(params);
+                           $('#gs_userName').val(params.userName);
+                           $('#gs_givenName').val(params.givenName);
+                           $('#gs_sn').val(params.sn);
+                           $('#gs_mail').val(params.mail);
+                           $('#gs_accountStatus').val(params.accountStatus);
+                           $('#' + grid_id).jqGrid("sortGrid", params.sidx, false, params.sord);
+                           cookieHelper.deleteCookie("userGridParams");
+                       }
                     },
-                    "sDom": 'l<"addButton">f<"clear">rt<"clear">ip<"clear">',
-                    "sPaginationType": "full_numbers",
-                    "fnInitComplete": function(oSettings, json) {
-                        $(".addButton").html('<a href="#users/add/" class="button active" style="margin-left: 15px; float: left;">' + $.t("common.form.addUser") + '</a>');
+                    onCellSelect: function(rowid,iCol,val,e){
+                        var status,
+                            rowdata,
+                            img_src,
+                            new_status,
+                            posted_data;
+                        if(rowid !== 'blankRow'){
+                            if(iCol === 6 && e.target.nodeName.toLowerCase() === "img"){
+                                status = $(val).attr('title');
+                                rowdata = $('#' + grid_id).getRowData(rowid);
+                                img_src = (status === 'active') ? 'images/span_error.png' : 'images/span_ok.png';
+                                new_status = (status === 'active') ? 'inactive' : 'active';
+                                
+                                userDelegate.patchUserDifferences({_id: rowdata._id, _rev: rowdata.version, accountStatus: status}, {_id: rowdata._id, _rev: rowdata.version, accountStatus: new_status}, function(d) {
+                                    $(e.target).prop('src',img_src).attr('title',new_status);
+                                    $('#' + grid_id).jqGrid('setCell', rowid, 'version', d._rev);
+                                    $(e.target).closest('tr').removeClass('ui-state-highlight');
+                                });
+                            }
+                            else{
+                                posted_data = $('#' + grid_id).jqGrid('getGridParam','postData');
+                                _this.showProfile(rowid);
+                                cookieHelper.setCookie("userGridParams", JSON.stringify(posted_data));
+                            }
+                        }
+                    },
+                    beforeRequest: function(){
+                        var params = cookieHelper.getCookie("userGridParams");
+                        if(params){
+                            $('#' + grid_id).setGridParam({ postData: JSON.parse(params) });
+                        }
+                    }
+                });
+                
+                $('#' + grid_id).jqGrid("filterToolbar", {
+                    searchOnEnter: false,
+                    beforeSearch: function() {
+                        var posted_data = $('#' + grid_id).jqGrid('getGridParam','postData');
+                        if(!posted_data.userName){
+                            _.extend(posted_data,{userName:''});
+                        }
+                        if(!posted_data.givenName){
+                            _.extend(posted_data,{givenName:''});
+                        }
+                        if(!posted_data.sn){
+                            _.extend(posted_data,{sn:''});
+                        }
+                        if(!posted_data.mail){
+                            _.extend(posted_data,{mail:''});
+                        }
+                        if(!posted_data.accountStatus){
+                            _.extend(posted_data,{accountStatus:''});
+                        }
+                        $('#' + grid_id).setGridParam({ postData: posted_data });
                     }
                 });
             });

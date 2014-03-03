@@ -1,16 +1,10 @@
 <div id="users" class="content-bg">
-    <h2>{{t "common.user.usersList"}}</h2>
+    <div class="offset20">
+        <h2 style="display:inline;">{{t "common.user.usersList"}}</h2>
+        <a href="#users/add/" class="button active" style="margin-left:30px;">{{t "common.form.addUser"}}</a>
+    </div>
         
-    <table id="usersTable" width="100%">
-        <thead>
-            <tr>
-                <th width="40"><input type="checkbox" /></th>
-                <th width="150">{{t "common.user.username"}}</th>
-                <th width="200">{{t "common.user.name"}}</th>
-                <th width="220">{{t "common.user.status"}}</th>
-                <th>{{t "common.user.email"}}</th>
-            </tr>
-        </thead>
-    </table>
+    
+    <table id="usersTable"></table>
        
 </div>
