@@ -203,7 +203,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             }
         }
         String username = certs[0].getSubjectDN().getName();
-        if (certs == null || certs.length < 1 || certs[0] != null) {
+        if (certs == null || certs.length < 1 || certs[0] == null) {
             return false;
         }
         List<String> roles = new ArrayList<String>(1);
