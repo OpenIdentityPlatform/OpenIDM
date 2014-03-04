@@ -26,6 +26,7 @@
             <directory>${basedir}/src/main/resources/security</directory>
             <outputDirectory>/openidm/security</outputDirectory>
             <fileMode>0600</fileMode>
+            <directoryMode>0700</directoryMode>
         </fileSet>        
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
