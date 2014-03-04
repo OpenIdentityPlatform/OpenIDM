@@ -287,7 +287,7 @@ public class DBHelper {
         // boolean dbExists = new OServerAdmin(dbURL).connect(user, password).existsDatabase();
 
         // Local DB we can auto populate 
-        if (isLocalDB(dbURL)) {
+        if (isLocalDB(dbURL) || isMemoryDB(dbURL)) {
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
@@ -321,6 +321,19 @@ public class DBHelper {
         return dbURL.startsWith("local:") || dbURL.startsWith("plocal");
     }
 
+    /**
+     * Whether the URL represents a memory DB
+     * @param dbURL the OrientDB db url
+     * @return true if local, false if remote
+     * @throws InvalidException if the dbURL is null or otherwise known to be invalid
+     */
+    public static boolean isMemoryDB(String dbURL) throws InvalidException {
+    	if (dbURL == null) {
+    		throw new InvalidException("dbURL is not set");
+    	}
+    	return dbURL.startsWith("memory:");
+    }
+    
     // TODO: Review the initialization mechanism
     private static void populateSample(ODatabaseDocumentTx db, JsonValue completeConfig) 
             throws InvalidException {
