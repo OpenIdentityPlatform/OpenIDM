@@ -114,7 +114,7 @@ public class AuthFilter implements SingletonResourceProvider {
     }
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC)
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
     /**
