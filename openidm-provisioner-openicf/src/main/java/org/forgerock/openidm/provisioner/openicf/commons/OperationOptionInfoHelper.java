@@ -27,6 +27,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
+import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionInfo;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 
@@ -149,7 +150,11 @@ public class OperationOptionInfoHelper {
             for (AttributeInfoHelper helper : attributes) {
                 helper.build(builder, source.get(helper.getName()));
             }
-        } else {
+        }
+        
+        // Ensure that the default attributes are set if not already explicitly
+        // specified within the options object.
+        if (!builder.getOptions().containsKey(OperationOptions.OP_ATTRIBUTES_TO_GET)) {
             builder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
         }
         return builder;
