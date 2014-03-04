@@ -52,6 +52,7 @@ public class DBHelperTest {
         assertNotNull(pool);
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         assertNotNull(db);
+        db.drop();
         db.close();
         DBHelper.closePools();
     }
@@ -71,6 +72,7 @@ public class DBHelperTest {
         assertNotNull(pool);
         ODatabaseDocumentTx db = pool.acquire(dbURL, newUser, newPassword);
         assertNotNull(db);
+        db.drop();
         db.close();
         DBHelper.closePools();
     }
