@@ -22,12 +22,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var params =  {},
-    fullResourcePath,
+var fullResourcePath,
     result,
     enforce;
-//params._actionId = "validateObject";
-params._caller = "filterEnforcer";
 
 enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
@@ -38,7 +35,7 @@ if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
         fullResourcePath = request.resourceName;
     }
 
-    result = openidm.action("policy/" + fullResourcePath, "validateObject", params, request.content);
+    result = openidm.action("policy/" + fullResourcePath, "validateObject", { "external" : "true" }, request.content);
 
     if (!result.result) {
         throw {
