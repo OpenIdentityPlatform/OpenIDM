@@ -25,11 +25,11 @@
 package org.forgerock.openidm.script.impl;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -327,11 +327,15 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
-                if (arguments.length != 3) {
+                if (arguments.length == 3) {
                     JsonValue value = null;
                     String cipher = null;
                     String alias = null;
-                    if (arguments[0] instanceof Map) {
+                    if (arguments[0] instanceof Map
+                            || arguments[0] instanceof List
+                            || arguments[0] instanceof String
+                            || arguments[0] instanceof Number
+                            || arguments[0] instanceof Boolean) {
                         value = new JsonValue(arguments[0]);
                     } else if (arguments[0] instanceof JsonValue) {
                         value = (JsonValue) arguments[0];
