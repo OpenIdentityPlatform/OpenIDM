@@ -257,7 +257,7 @@ public class GenericTableHandler implements TableHandler {
      * @throws SQLException if the insert failed
      */
     void writeValueProperties(String fullId, long dbId, String localId, JsonValue value, Connection connection) throws SQLException {
-        if (cfg.searchableDefault) {
+        if (cfg.hasPossibleSearchableProperties()) {
             Integer batchingCount = 0;
             PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
             try {
@@ -690,6 +690,15 @@ class GenericTableConfig {
             return searchableDefault;
         }
     }
+    
+    /**  
+     * @return Approximation on whether this may have searchable properties
+     * It is only an approximation as we do not have an exhaustive list of possible properties
+     * to consider against a default setting of searchable.
+     */
+    public boolean hasPossibleSearchableProperties() {
+        return ((searchableDefault) ? true : properties.explicitSearchableProperties);
+    }
 
     public static GenericTableConfig parse(JsonValue tableConfig) {
         GenericTableConfig cfg = new GenericTableConfig();
@@ -709,15 +718,23 @@ class GenericPropertiesConfig {
     public String propertiesTableName;
     public boolean searchableDefault;
     public GenericPropertiesConfig properties;
+    // Whether there are any properties explicitly set to searchable true
+    public boolean explicitSearchableProperties;
 
     public static GenericPropertiesConfig parse(JsonValue propsConfig) {
+        
         GenericPropertiesConfig cfg = new GenericPropertiesConfig();
         if (!propsConfig.isNull()) {
             for (String propName : propsConfig.keys()) {
                 JsonValue detail = propsConfig.get(propName);
-                cfg.explicitlySearchable.put(new JsonPointer(propName), detail.get("searchable").asBoolean());
+                boolean propSearchable = detail.get("searchable").asBoolean();
+                cfg.explicitlySearchable.put(new JsonPointer(propName), propSearchable);
+                if (propSearchable) {
+                    cfg.explicitSearchableProperties = true;
+                }
             }
         }
+
         return cfg;
     }
 }
