@@ -780,7 +780,12 @@ class ObjectMapping  {
             Iterator<String> sourceIdsIter = reconContext.querySourceIdsIter();
             reconContext.getStatistics().sourceQueryEnd();
             if (!sourceIdsIter.hasNext()) {
-                throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
+                String msg = "Cannot perform reconciliation with an empty source object set";
+                if (reconContext.getReconHandler().allowEmptySourceSet()) {
+                    LOGGER.warn(msg);
+                    return;
+                }
+                throw new SynchronizationException(msg);
             }
 
             // If we will handle a target phase, pre-load all relevant target identifiers

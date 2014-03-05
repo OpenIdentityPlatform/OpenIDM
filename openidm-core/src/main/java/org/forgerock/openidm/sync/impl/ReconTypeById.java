@@ -43,6 +43,9 @@ public class ReconTypeById extends ReconTypeBase {
 
     // Defaulting to NOT run target phase
     static final boolean DEFAULT_RUN_TARGET_PHASE = false;
+    
+    // Defaulting to NOT allow empty source set
+    static final boolean DEFAULT_ALLOW_EMPTY_SOURCE_SET = false;
 
     List<String> sourceIds;
 
@@ -50,7 +53,7 @@ public class ReconTypeById extends ReconTypeBase {
     JsonValue targetQuery;
 
     public ReconTypeById(ReconciliationContext reconContext) throws BadRequestException {
-        super(reconContext, DEFAULT_RUN_TARGET_PHASE);
+        super(reconContext, DEFAULT_RUN_TARGET_PHASE, DEFAULT_ALLOW_EMPTY_SOURCE_SET);
 
         targetQuery = calcEffectiveQuery("targetQuery",
                 reconContext.getObjectMapping().getTargetObjectSet());

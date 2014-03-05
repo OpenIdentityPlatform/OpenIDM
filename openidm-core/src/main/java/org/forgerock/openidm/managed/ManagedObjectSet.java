@@ -25,6 +25,7 @@
 package org.forgerock.openidm.managed;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -120,6 +121,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /** Script to execute when the deletion of an object is being requested. */
     private final ScriptEntry onDelete;
+    
+    /** Script to execute after the create of an object has completed. */
+    private final ScriptEntry postCreate;
+    
+    /** Script to execute after the update of an object has completed. */
+    private final ScriptEntry postUpdate;
+    
+    /** Script to execute after the delete of an object has completed. */
+    private final ScriptEntry postDelete;
 
     /** Script to execute when a managed object requires validation. */
     private final ScriptEntry onValidate;
@@ -193,6 +203,21 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         } else {
             onDelete = null;
         }
+        if (config.isDefined("postCreate")) {
+            postCreate = scriptRegistry.takeScript(config.get("postCreate"));
+        } else {
+            postCreate = null;
+        }
+        if (config.isDefined("postUpdate")) {
+            postUpdate = scriptRegistry.takeScript(config.get("postUpdate"));
+        } else {
+            postUpdate = null;
+        }
+        if (config.isDefined("postDelete")) {
+            postDelete = scriptRegistry.takeScript(config.get("postDelete"));
+        } else {
+            postDelete = null;
+        }
         if (config.isDefined("onValidate")) {
             onValidate = scriptRegistry.takeScript(config.get("onValidate"));
             // onValidate.addScriptListener(this);
@@ -235,6 +260,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
         if (null != onDelete) {
             onDelete.deleteScriptListener(this);
+        }
+        if (null != postCreate) {
+            postCreate.deleteScriptListener(this);
+        }
+        if (null != postUpdate) {
+            postUpdate.deleteScriptListener(this);
+        }
+        if (null != postDelete) {
+            postDelete.deleteScriptListener(this);
         }
         if (null != onValidate) {
             onValidate.deleteScriptListener(this);
@@ -284,21 +318,29 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *            the script to execute, or {@code null} to execute nothing.
      * @param value
      *            the object to be populated in the script scope.
+     * @param additionalProps
+     *            a Map of additional properties to add the the script scope
      * @throws ForbiddenException
      *             if the script throws an exception.
      * @throws InternalServerErrorException
      *             if any other exception is encountered.
      */
     private void execScript(final ServerContext context, String type, ScriptEntry script,
-            JsonValue value) throws ForbiddenException, InternalServerErrorException {
+            JsonValue value, JsonValue additionalProps) throws ResourceException {
         if (null != script && script.isActive()) {
             Script executable = script.getScript(context);
-            executable.put("object", value.getObject());
+            executable.put("object", value);
+            if (additionalProps != null && !additionalProps.isNull()) {
+                for (String key : additionalProps.keys()) {
+                    executable.put(key, additionalProps.get(key));
+                }
+            }
             try {
                 executable.eval(); // allows direct modification to the object
             } catch (ScriptThrownException ste) {
-                // script aborting the trigger
-                throw new ForbiddenException(ste.getValue().toString());
+                // Allow for scripts to set their own exception
+                throw ste.toResourceException(ResourceException.INTERNAL_ERROR, 
+                        type + " script encountered exception");
             } catch (ScriptException se) {
                 String msg = type + " script encountered exception";
                 logger.debug(msg, se);
@@ -318,9 +360,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws InternalServerErrorException
      *             if any other exception occurs.
      */
-    private void onRetrieve(ServerContext context, Resource value) throws ForbiddenException,
-            InternalServerErrorException {
-        execScript(context, "onRetrieve", onRetrieve, value.getContent());
+    private void onRetrieve(ServerContext context, Resource value) throws ResourceException {
+        execScript(context, "onRetrieve", onRetrieve, value.getContent(), null);
         for (ManagedObjectProperty property : properties) {
             property.onRetrieve(context, value.getContent());
         }
@@ -346,18 +387,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws InternalServerErrorException
      *             if any other exception occurs.
      */
-    private void onStore(ServerContext context, JsonValue value) throws ForbiddenException,
-            InternalServerErrorException {
+    private void onStore(ServerContext context, JsonValue value) throws ResourceException  {
         for (ManagedObjectProperty property : properties) {
             property.onValidate(context, value);
         }
-        execScript(context, "onValidate", onValidate, value);
+        execScript(context, "onValidate", onValidate, value, null);
         // TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
             property.onStore(context, value); // includes per-property
                                               // encryption
         }
-        execScript(context, "onStore", onStore, value);
+        execScript(context, "onStore", onStore, value, null);
     }
 
     /**
@@ -429,33 +469,51 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         if (newValue.equals(oldValue.getContent())) { // object hasn't changed
             return new Resource(id, rev, null);
         }
-        if (null != onUpdate && onUpdate.isActive()) {
-            Script executable = onUpdate.getScript(context);
-            executable.put("oldObject", oldValue.getContent().asMap());
-            executable.put("newObject", newValue.asMap());
-            try {
-                executable.eval(); // allows direct modification to the objects
-            } catch (ScriptThrownException ste) {
-                // script aborting the trigger
-                throw new ForbiddenException(ste.getValue().toString());
-            } catch (ScriptException se) {
-                String msg = "onUpdate script encountered exception";
-                logger.debug(msg, se);
-                throw new InternalServerErrorException(msg, se);
-            }
-        }
+        // Execute the onUpdate script if configured
+        JsonValue additionalProps = new JsonValue(new HashMap<String, Object>());
+        additionalProps.put("oldObject", oldValue.getContent());
+        additionalProps.put("newObject", newValue);
+        execScript(context, "onUpdate", onUpdate, newValue, additionalProps);
+        
+        // Perform pre-property encryption
         onStore(context, newValue); // performs per-property encryption
 
+        // Perform update
         UpdateRequest request = Requests.newUpdateRequest(repoId(id), newValue);
         request.setRevision(rev);
         Resource response = connectionFactory.getConnection().update(context, request);
 
+        // Populate the virtual properties
         populateVirtualProperties(context, newValue);
+
+        // Execute the postUpdate script if configured
+        executePostScript(context, "postUpdate", postUpdate, id, oldValue.getContent(), newValue);
         
+        // Perform any onUpdate synchronization
         // TODO: Fix the context
         onUpdate(context, managedId(id), oldValue, newValue);
 
         return response;
+    }
+    
+    /**
+     * Post scripts are executed after the managed object has been updated, but before any synchronization.
+     * 
+     * @param context the ServerContext of the request
+     * @param type the script type
+     * @param script the post script to execute
+     * @param id the id of the managed ob object
+     * @param oldObject the old value of the managed object (null for create requests)
+     * @param newObject the new value of the managed object (null for delete requests)
+     * @throws ResourceException
+     */
+    private void executePostScript(final ServerContext context, String type, ScriptEntry script,  String id, 
+            JsonValue oldObject, JsonValue newObject) throws ResourceException {
+        JsonValue additionalProps = new JsonValue(new HashMap<String, Object>());
+        additionalProps.put("resourceName", managedId(id));
+        additionalProps.put("oldObject", oldObject);
+        additionalProps.put("newObject", newObject);
+        execScript(context, type, script, newObject, additionalProps);
     }
 
     /**
@@ -564,7 +622,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         try {
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(request.getContent());
-            execScript(context, "onCreate", onCreate, value);
+            execScript(context, "onCreate", onCreate, value, null);
             // includes per-property encryption
             onStore(context, value);
 
@@ -579,6 +637,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     null, _new.getContent(), Status.SUCCESS);
 
             populateVirtualProperties(context, _new.getContent());
+            
+            // Execute the postCreate script if configured
+            executePostScript(context, "postCreate", postCreate, id, new JsonValue(null), _new.getContent());
             
             onCreate(context, managedId(_new.getId()), _new);
 
@@ -601,7 +662,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             Resource resource = connectionFactory.getConnection().read(context, readRequest);
 
             onRetrieve(context, resource);
-            execScript(context, "onRead", onRead, resource.getContent());
+            execScript(context, "onRead", onRead, resource.getContent(), null);
             ActivityLog.log(connectionFactory, context, request.getRequestType(), "read", managedId(resource.getId()),
                     null, resource.getContent(), Status.SUCCESS);
 
@@ -652,7 +713,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             Resource resource = connectionFactory.getConnection().read(context, readRequest);
             if (onDelete != null) {
-                execScript(context, "onDelete", onDelete, decrypt(resource.getContent()));
+                execScript(context, "onDelete", onDelete, decrypt(resource.getContent()), null);
             }
             DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
             deleteRequest.setResourceName(repoId(resourceId));
@@ -663,6 +724,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             ActivityLog.log(connectionFactory, context, request.getRequestType(), "delete", managedId(resource.getId()),
                     resource.getContent(), null, Status.SUCCESS);
+            
+            // Execute the postDelete script if configured
+            executePostScript(context, "postDelete", postDelete, resourceId, deletedResource.getContent(), null);
 
             onDelete(context, resourceId, resource);
 

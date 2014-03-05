@@ -53,9 +53,11 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
 
     ReconciliationContext reconContext;
     boolean runTargetPhase;
+    boolean allowEmptySourceSet;
 
-    public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
+    public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase, boolean allowEmptySourceSet) {
         this.reconContext = reconContext;
+        this.allowEmptySourceSet = allowEmptySourceSet;
 
         JsonValue runTargetPhaseCfg = calcEffectiveConfig("runTargetPhase");
         if (runTargetPhaseCfg.isNull()) {
@@ -68,6 +70,10 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
 
     public boolean isRunTargetPhase() {
         return runTargetPhase;
+    }
+    
+    public boolean allowEmptySourceSet() {
+        return allowEmptySourceSet;
     }
 
     /**
