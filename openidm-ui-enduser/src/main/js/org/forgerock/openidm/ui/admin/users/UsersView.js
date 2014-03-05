@@ -59,28 +59,34 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                 cols = [
                         {
                             "name": "_id",
-                            "hidden": true
+                            "hidden": true,
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "version",
-                            "hidden": true
+                            "hidden": true,
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "userName",
                             "label": $.t("common.user.username"),
-                            "key": true
+                            "key": true,
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "givenName",
-                            "label": $.t("common.user.givenName")
+                            "label": $.t("common.user.givenName"),
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "sn",
-                            "label": $.t("common.user.familyName")
+                            "label": $.t("common.user.familyName"),
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "mail",
-                            "label": $.t("common.user.email")
+                            "label": $.t("common.user.email"),
+                            "formatter": Handlebars.Utils.escapeExpression
                         },
                         {
                             "name": "accountStatus",
