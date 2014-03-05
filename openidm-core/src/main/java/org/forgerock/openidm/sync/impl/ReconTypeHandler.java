@@ -48,4 +48,9 @@ public interface ReconTypeHandler {
      * @return true if the target phase should be executed for this recon, false if not
      */
     boolean isRunTargetPhase();
+    
+    /**
+     * @return true if the the recon should allow an empty source set, false otherwise.
+     */
+    boolean allowEmptySourceSet();
 }
