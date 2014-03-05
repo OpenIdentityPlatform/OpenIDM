@@ -96,7 +96,8 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             "edittype": "select",
                             "editoptions": { "value": ":All;active:Active;inactive:Inactive"},
                             "formatter": function(val, options, row_data){
-                                var img_src = (val === 'active') ? 'images/span_ok.png' : 'images/span_error.png',
+                                var val = Handlebars.Utils.escapeExpression(val),
+                                    img_src = (val === 'active') ? 'images/span_ok.png' : 'images/span_error.png',
                                     html = '<img style="padding-top:5px;cursor:pointer;" src="' + img_src + '" title="' + val + '"/>';
                                 return (val && val.length > 0) ? html : '';
                             }
