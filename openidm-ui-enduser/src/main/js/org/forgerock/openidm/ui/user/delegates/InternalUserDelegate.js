@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/user/delegates/InternalUserDelegate", [
             for(i = 0; i < patchDefinitionObject.length; i++) {
                 v = patchDefinitionObject[i];
                 
-                user[v.replace] = v.value;
+                user[v.field] = v.value;
             }
             
             obj.updateEntity(id, user, successCallback, errorCallback);
