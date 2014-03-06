@@ -218,7 +218,7 @@ public class RestService implements SingletonResourceProvider {
                         logger.debug("Using basic authentication for {} secret supplied: {}",
                                 identifier, (secret != null));
                         ChallengeResponse challengeResponse =
-                                new ChallengeResponse(ChallengeScheme.HTTP_COOKIE, identifier,
+                                new ChallengeResponse(ChallengeScheme.HTTP_BASIC, identifier,
                                         secret);
                         cr.setChallengeResponse(challengeResponse);
                     }
