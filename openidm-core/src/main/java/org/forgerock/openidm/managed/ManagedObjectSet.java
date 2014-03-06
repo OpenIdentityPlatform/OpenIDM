@@ -799,7 +799,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     JsonValue result = connectionFactory.getConnection().action(context, policyAction);
                     if (!result.isNull() && !result.get("result").asBoolean()) {
                         logger.debug("Requested patch failed policy validation: {}", result);
-                        throw new ForbiddenException("Failed policy validation" + result.toString());
+                        throw new ForbiddenException("Failed policy validation").setDetail(result);
                     }
                 }
 
