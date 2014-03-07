@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -683,7 +683,14 @@ class GenericTableConfig {
     public GenericPropertiesConfig properties;
 
     public boolean isSearchable(JsonPointer propPointer) {
-        Boolean explicit = properties.explicitlySearchable.get(propPointer);
+
+        // More specific configuration takes precedence
+        Boolean explicit = null;
+        while (!propPointer.isEmpty() && explicit == null) {
+            explicit = properties.explicitlySearchable.get(propPointer);
+            propPointer = propPointer.parent();
+        }
+        
         if (explicit != null) {
             return explicit.booleanValue();
         } else {
