@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-sample'
@@ -234,10 +234,12 @@ orientdb&gt; </screen>
      the reconciliation run through the REST interface. The call to the REST 
      interface is an HTTP POST such as the following.</para>
      <screen width="100">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
      
     </listitem>
    </varlistentry>
@@ -277,11 +279,11 @@ orientdb&gt; </screen>
                 },
                 {
                     "source": "email",
-                    "target": "email"
+                    "target": "mail"
                 },
                 {
                     "source": "lastname",
-                    "target": "familyName"
+                    "target": "sn"
                 },
                 {
                     "source": "name",
@@ -293,7 +295,7 @@ orientdb&gt; </screen>
                 }
                 {
                     "source" : "mobileTelephoneNumber",
-                    "target" : "phoneNumber"
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "securityQuestion",
@@ -302,10 +304,6 @@ orientdb&gt; </screen>
                 {
                     "source" : "securityAnswer",
                     "target" : "securityAnswer"
-                },
-                {
-                    "source" : "passPhrase",
-                    "target" : "passPhrase"
                 },
                 {
                     "source" : "roles",
@@ -388,11 +386,13 @@ $ ./startup.sh -p samples/sample1
   <literal>"enabled" : true</literal> in the schedule configuration file 
   (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json.json</filename>) 
   and then waiting until the scheduled reconciliation happens, or by using the
-  REST interface, as follows:</para>
+  REST interface. Note how the following command uses a regular HTTP connection.
+  </para>
 
   <screen width="100"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
  "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
  
@@ -401,8 +401,14 @@ $ ./startup.sh -p samples/sample1
  
  <screen>{"_id":"2d87c817-3d00-4776-a705-7de2c65937d8"}</screen>
 
-  <para>To see what happened, look at the CSV format log file,
-  <filename>openidm/audit/recon.csv</filename>.</para>
+  <para>To see what happened, you could look at the CSV format log file,
+  <filename>openidm/audit/recon.csv</filename>. If that file seems difficult
+  to decipher, read the guidance shown in the Integrator's Guide
+  section on <link xlink:show="new"
+  xlink:href="integrators-guide#querying-recon-logs"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
+  Querying the Reconciliation Audit Log</citetitle></link>.</para>
+
  </section>
 
  <section xml:id="sample-viewing-users-logs">
@@ -410,119 +416,135 @@ $ ./startup.sh -p samples/sample1
   <para>After reconciliation runs, you can use the REST interface to display
   all users in the local repository. Use a REST client to perform an HTTP 
   GET on the following URL:
-  <literal>http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</literal> 
+  <literal>https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids</literal>
   with the headers <literal>"X-OpenIDM-Username: openidm-admin"</literal> and 
   <literal>"X-OpenIDM-Password: openidm-admin"</literal>.
   </para>
 
-  <para>OpenIDM returns a JSON file. Depending on your browser, it can display
+  <para>OpenIDM returns JSON data. Depending on your browser, it can display
   the JSON or download it as a file. Alternatively, you can use the following
   <link xlink:href="http://curl.haxx.se/"><command>curl</command></link>
-  command to get the JSON file.</para>
+  command to get the JSON response.</para>
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Conent-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
 
 {
- "query-time-ms":1,
- "result":[
-  {
-   "_id":"joe",
-   "_rev":"0"
-  },{
-   "_id":"bjensen",
-   "_rev":"0"
-  },{
-   "_id":"scarter",
-   "_rev":"0"
-  }
-  ],
- "conversion-time-ms":0
- }
+ "remainingPagedResults" -1
+ "pagedResultsCookie" null
+ "resultCount" 3
+ "result"
+
+   "_rev"  "0"
+   "_id"  "joe"
+
+   "_rev"  "0"
+   "_id"  "bjensen"
+
+   "_rev"  "0"
+   "_id"  "scarter"
+}
 </screen>
 
-  <para>If you created user <literal>joe</literal> as described previously in
-  this guide, you see IDs for three users. The second and third users,
-  <literal>bjensen</literal> and <literal>scarter</literal>, were created 
-  during the reconcililation. Now try a RESTful GET of user 
+  <para>If you created user <literal>joe</literal> as described in the procedure
+  entitled <link xlink:href="integrators-guide#first-steps-with-rest"
+  xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>To Get Started With the OpenIDM REST Interface</citetitle></link>.
+  this guide, you should see the ID for that user somewhere in this list. If
+  you did not include <literal>"_id:joe"</literal> in the command to create
+  user <literal>joe</literal>.
+  </para>
+
+  <para>Now try a RESTful GET of user
   <literal>bjensen</literal> by appending the user ID to the managed user URL 
-  (<literal>http://localhost:8080/openidm/managed/user/</literal>).</para>
+  (<literal>https://localhost:8443/openidm/managed/user/</literal>).</para>
 
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/bjensen"
+ "https://localhost:8443/openidm/managed/user/bjensen"
 
-{
-  "stateProvince": "",
-  "userName": "bjensen@example.com",
-  "roles": [
-    "openidm-authorized"
-  ],
-  "description": "Created By XML1",
-  "givenName": "Barbara",
-  "address2": "",
-  "lastPasswordAttempt": "Mon Dec 17 2012 11:56:56 GMT+0200 (SAST)",
-  "address1": "",
-  "familyName": "Jensen",
-  "passwordAttempts": "0",
-  "_rev": "0",
-  "_id": "bjensen",
-  "securityQuestion": "1",
-  "country": "",
-  "city": "",
-  "lastPasswordSet": "",
-  "postalCode": "",
-  "phoneNumber": "1234567",
-  "email": "bjensen@example.com",
-  "accountStatus": "active"
+   "effectiveAssignments": {},
+   "effectiveRoles": [
+   "openidm-authorized"
+   ],
+   "userName": "bjensen@example.com",
+   "stateProvince": "",
+   "postalAddress": "",
+   "roles": "openidm-authorized",
+   "givenName": "Barbara",
+   "address2": "",
+   "lastPasswordAttempt": "Tue Feb 25 2014 13:32:52 GMT-0800 (PST)",
+   "passwordAttempts": "0",
+   "sn": "Jensen",
+   "mail": "bjensen@example.com",
+   "_rev": "9",
+   "_id": "bjensen",
+   "securityQuestion": "1",
+   "country": "",
+   "city": "",
+   "lastPasswordSet": "",
+   "postalCode": "",
+   "description": "Created By XML1",
+   "accountStatus": "active",
+   "telephoneNumber": "1234567"
 }</screen>
 
   <para>In the OrientDB console, connect to the database, and then query the
   users and audit logs. The following shows edited excerpts from a console
-  session querying OrientDB. To make it easier to view the records, the first 
+  session querying OrientDB.</para>
+
+  <para>
+   As defined in the <filename>conf/policy.json</filename> file, the
+   <literal>sn</literal> and <literal>mail</literal> parameters correspond
+   to family name (surname) and email address, respectively.
+  </para>
+
+  <para>To make it easier to view the records, the first
   query only requests three specific fields.</para>
 
   <screen width="90">&gt; connect remote:localhost/openidm admin admin
 Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 
-&gt; select familyName,email,description from managed_user
+&gt; select sn,mail,description from managed_user
 
 ---+---------+--------------------+--------------------+--------------------
   #| RID     |familyName          |email               |description         
 ---+---------+--------------------+--------------------+--------------------
-  0|    #-2:0|smith               |[1]                 |My first user       
-  1|    #-2:1|Jensen              |bjensen@example.com |Created By XML1     
-  2|    #-2:2|Carter              |scarter@example.com |Created By XML1     
+  0|    #-2:1|smith               |[1]                 |My first user
+  1|    #-2:2|Jensen              |bjensen@example.com |Created By XML1
+  2|    #-2:3|Carter              |scarter@example.com |Created By XML1
 ---+---------+--------------------+--------------------+--------------------
 
 3 item(s) found. Query executed in 0.0040 sec(s).
 
 &gt; select * from audit_activity
 
----+---------+---------------+-------------------+-------------------------+...
-  #| RID     |rev            |status             |timestamp                |...
----+---------+---------------+-------------------+-------------------------+...
-  0|    #-2:0|0              |SUCCESS            |2012-10-26T12:05:50.923Z |...
-  1|    #-2:1|0              |SUCCESS            |2012-10-26T12:05:50.966Z |...
-  2|    #-2:2|0              |SUCCESS            |2012-10-26T12:05:51.530Z |...
-  3|    #-2:3|0              |SUCCESS            |2012-10-26T12:05:51.605Z |...
+---+---------+-------------+----------+...
+  #| RID     |rev |action  |status    |...
+---+---------+-------------+----------+...
+  0|    #-2:1|0   |CREATE  |SUCCESS   |...
+  1|    #-2:2|0   |CREATE  |SUCCESS   |...
+  2|    #-2:3|0   |CREATE  |SUCCESS   |...
+  3|    #-2:4|0   |CREATE  |SUCCESS   |...
   ...
  18 item(s) found. Query executed in 0.0090 sec(s). 
 
 &gt; select * from audit_recon
 
----+---------+--------------------+-----------+------------------------+---------...
-  #| RID     |reconId             |status     |timestamp               |message  ...      
----+---------+--------------------+-----------+------------------------+---------...
-  0|    #22:0|48650107-66ef-48f...|SUCCESS    |2012-10-26T12:05:50.701Z|Reconcili...
-  1|    #22:1|48650107-66ef-48f...|SUCCESS    |2012-10-26T12:05:52.160Z|null     ...
-  2|    #22:2|48650107-66ef-48f...|SUCCESS    |2012-10-26T12:05:52.856Z|null     ...
-  3|    #22:3|48650107-66ef-48f...|SUCCESS    |2012-10-26T12:05:52.861Z|SOURCE_IG...
----+---------+--------------------+-----------+------------------------+---------...
+----+------+------+-------+---------+---------+---------+...
+#   |@RID  |action|status |exception|entryType|situation|...
+----+------+------+-------+---------+---------+---------+...
+0   |#19:0 |null  |SUCCESS|         |start    |null     |...
+1   |#19:1 |CREATE|SUCCESS|         |         |ABSENT   |...
+2   |#19:2 |CREATE|SUCCESS|         |         |ABSENT   |...
+3   |#19:3 |IGNORE|SUCCESS|         |         |UNASSI...|...
 
 4 item(s) found. Query executed in 0.0070 sec(s).
 </screen>
@@ -561,32 +583,40 @@ access.csv activity.csv recon.csv</screen>
   linkend="sample-running-reconciliation"><citetitle>Running
   Reconciliation</citetitle></link>. After reconciliation has run, query the
   local repository to see the new user appear in the list of all users under
-  <literal>http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</literal>.</para>
+  <literal>https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids</literal>.</para>
 
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Conent-Type: application/json"
  --request GET
- http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids
- 
+ https://localhost:8443/openidm/managed/user?_queryId=query-all-ids
+
 {
- "query-time-ms":1,
- "result":[{
-    "_id":"joe",
-    "_rev":"0"
-    },{
-    "_id":"bjensen",
-    "_rev":"0"
-    },{
-    "_id":"scarter",
-    "_rev":"0"
-    },{
-    "_id":"tmorris",
-    "_rev":"0"
-    }],
- "conversion-time-ms":0
- }
- </screen>
+"remainingPagedResults": -1,
+"pagedResultsCookie": null,
+"resultCount": 4,
+"result": [
+   {
+   "_rev": "0",
+   "_id": "bjensen"
+   },
+   {
+   "_rev": "0",
+   "_id": "scarter"
+   },
+   {
+   "_rev": "0",
+   "_id": "joe"
+   },
+   {
+   "_rev": "0",
+   "_id": "tmorris"
+   }
+]
+}
+</screen>
 
   <para>Also look at the reconciliation audit log,
   <filename>openidm/audit/recon.csv</filename> to see what took place during
@@ -646,39 +676,80 @@ access.csv activity.csv recon.csv</screen>
 
   <para>Create <literal>james</literal> (UNIX).</para>
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request PUT
+ --header "Content-Type: application/json"
+ --request POST
  --data '{
   "userName":"jberg",
-  "familyName":"Berg",
+  "sn":"Berg",
   "givenName":"James",
-  "email":"jberg@example.com",
-  "phoneNumber":"5556787",
+  "mail":"jberg@example.com",
+  "telephoneNumber":"5556787",
   "description":"Created by OpenIDM REST.",
   "password":"MyPassw0rd"
  }'
- "http://localhost:8080/openidm/managed/user/jberg"
+ "https://localhost:8443/openidm/managed/user?_action=create"
 
-{"_id":"jberg","_rev":"0"}</screen>
+{
+   "stateProvince": "",
+   "userName": "jberg1",
+   "postalAddress": "",
+   "effectiveAssignments": {},
+   "roles": [
+   "openidm-authorized"
+   ],
+   "telephoneNumber": "555-123-1234",
+   "password": {
+     "$crypto": {
+       "type": "x-simple-encryption",
+       "value": {
+         "key": "openidm-sym-default",
+         "iv": "U5pC7nU/8fYg8zssId2/Ng==",
+         "cipher": "AES/CBC/PKCS5Padding",
+         "data": "kPFbn3N2BTzJn0DdDLY9wA=="
+       }
+     }
+   },
+   "effectiveRoles": [
+     "openidm-authorized"
+   ],
+   "givenName": "james",
+   "address2": "",
+   "lastPasswordAttempt": "Tue Feb 25 2014 17:37:31 GMT-0800 (PST)",
+   "passwordAttempts": "0",
+   "sn": "berg",
+   "mail": "berg@example.com",
+   "country": "",
+   "city": "",
+   "_rev": "1",
+   "lastPasswordSet": "",
+   "postalCode": "",
+   "_id": "190be001-9439-4f05-8732-db2c62ca3214",
+   "accountStatus": "active",
+   "description": "Created by OpenIDM REST</screen>
 
   <para>Create <literal>james</literal> (Windows).</para>
   <screen>C:\&gt;curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request PUT
+ --header "Content-Type: application/json"
+ --request POST
  --data "{
  \"userName\":\"jberg\",
- \"familyName\":\"Berg\",
+ \"sn\":\"Berg\",
  \"givenName\":\"James\",
  \"email\":\"jberg@example.com\",
- \"phoneNumber\":\"5556787\", 
+ \"telephoneNumber\":\"5556787\",
  \"description\":\"Created by OpenIDM REST.\",
  \"password\":\"MyPassw0rd\"
  }"
- "http://localhost:8080/openidm/managed/user/jberg"
+ "https://localhost:8443/openidm/managed/user?_action=create"
+</screen>
 
-{"_id":"jberg","_rev":"0"}</screen>
+  <para>The output is essentially identical to that for UNIX.</para>
 
   <para>OpenIDM creates the new user in the repository. If you configure a
   mapping to apply changes from the local repository to the XML file connector

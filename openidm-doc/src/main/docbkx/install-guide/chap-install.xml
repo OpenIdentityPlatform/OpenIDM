@@ -47,7 +47,8 @@
     <primary>Java</primary>
     <secondary>Requirements</secondary>
    </indexterm>
-   <para>OpenIDM requires Oracle Java SE 6 update 24 or later.</para>
+   <para>OpenIDM requires the latest secure verison of Oracle Java SE 6 or
+    later.</para>
    <para>The equivalent version of OpenJDK should work for evaluation,
    too.</para>
   </section>
@@ -129,8 +130,9 @@ $ unzip ~/Downloads/openidm-<?eval ${docTargetVersion}?>.zip
 $</screen>
     </step>
     <step performance="optional">
-     <para>By default, OpenIDM listens for HTTP connections on port 8080. To
-     change the default port, edit the <filename>/path/to/openidm/conf/boot/boot.properties</filename>
+     <para>By default, OpenIDM listens for HTTP and HTTPS connections on ports
+     8080 and 8443, respectively. To change the default port, edit the
+     <filename>/path/to/openidm/conf/boot/boot.properties</filename>
      file. For more information, see <link xlink:href="integrators-guide#appendix-ports-used"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Ports Used</citetitle></link>
      in the <citetitle>Integrator's Guide</citetitle>.</para>
@@ -250,7 +252,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
       <para>Use these hints to connect to the console.</para>
       <listitem>
        <para>Default Console URL: <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console' /></para>
+       xlink:href='https://localhost:8443/system/console' /></para>
       </listitem>
       <listitem>
        <para>Default user name: <literal>admin</literal></para>
@@ -278,7 +280,35 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
     </step>
    </procedure>
 
-   <procedure xml:id="first-steps-with-rest">
+   <procedure xml:id="stop-openidm">
+    <title>To Stop the OpenIDM Services</title>
+    <indexterm>
+     <primary>Stopping OpenIDM</primary>
+    </indexterm>
+    <step>
+     <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
+      prompt, or through the Felix console.</para>
+     <stepalternatives>
+      <step>
+       <para>Either enter the <command>shutdown</command> command at the
+        <literal>-&gt;</literal> prompt.</para>
+       <screen>-&gt; shutdown
+...
+$</screen>
+      </step>
+      <step>
+       <para>Or click Stop on the System Information tab of the Felix console,
+        by default <link xlink:show="new"
+        xlink:href='http://localhost:8080/system/console' />.</para>
+       <para>This stops the Servlet container as well, and the console is
+        no longer accessible.</para>
+      </step>
+     </stepalternatives>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="first-steps-with-rest">
     <title>To Get Started With the OpenIDM REST Interface</title>
     <indexterm>
      <primary>Getting started</primary>
@@ -296,13 +326,62 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      can download it from 
      <link xlink:href="http://curl.haxx.se/download.html" />.
     </para>
-    <step>
-     <para>Access the following URL to get a JSON file including all users in
+
+    <para>
+     OpenIDM is accessible over the regular and secure HTTP ports of the Jetty
+     Servlet container, 8080 and 8443.
+    </para>
+
+    <para>
+     If you want to run <command>curl</command>
+     over the secure port, 8443, you would either need to include the
+     <command>--insecure</command> option, or follow the instructions shown
+     in <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
+     REST Access to the HTTPS Port</citetitle></link>. You can use those
+     instructions with the self-signed certificate generated when OpenIDM
+     starts, or with a <filename>*.crt</filename> file provided by a
+     certificate authority.
+    </para>
+
+    <para>
+     In numerous cases, <command>curl</command> commands to the secure port
+     are depicted with a <literal>--cacert self-signed.crt</literal> option.
+     Instructions for creating that <filename>self-signed.crt</filename> file
+     are shown in the aforementioned section on <link xlink:show="new"
+     xlink:href="integrators-guide#rest-over-https"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
+     REST Access to the HTTPS Port</citetitle></link>.
+    </para>
+
+    <para>
+     If you would rather use <command>curl</command> to connect to the regular
+     HTTP port, omit the <literal>--cacert self-signed.crt</literal> file and
+     point to a regular Jetty HTTP URL such as
+     http://localhost:8080/openidm/...
+    </para>
+
+    <note>
+     <para>
+      All RESTful commands depicted in this document, as depicted with
+      <command>curl</command>, are
+      based on the default configuration of OpenIDM. If you change configuration
+      files in directories such as <filename>openidm/conf</filename> and
+      <filename>openidm/script</filename>, you may need to modify the RESTful
+      commands to reflect those changes.
+     </para>
+    </note>
+
+   <procedure xml:id="first-rest-steps">
+
+   <step>
+    <para>Access the following URL to get a JSON file including all users in
      the OpenIDM repository.</para>
 
      <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</screen>
 
      <para>When you first install OpenIDM with an empty repository, no users
@@ -310,84 +389,142 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 
     </step>
     <step>
-     <para>Create a user <literal>joe</literal> by sending a RESTful PUT.</para>
+     <para>Create a user <literal>joe</literal> by sending a RESTful POST.</para>
      <para>The following <command>curl</command> commands create the user
      <literal>joe</literal> in the repository.</para>
      <stepalternatives>
       <step>
        <para>Create <literal>joe</literal> (UNIX).</para>
        <screen>$ curl
+ --cacert self-signed.crt
+ --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request PUT
+ --header "Content-Type: application/json"
+ --request POST
  --data '{
  "userName":"joe",
  "givenName":"joe",
- "familyName":"smith",
- "email":"joe@example.com",
- "phoneNumber":"555-123-1234",
+ "sn":"smith",
+ "mail":"joe@example.com",
+ "telephoneNumber":"555-123-1234",
  "password":"TestPassw0rd",
- "description":"My first user"
+ "description":"My first user",
+ "_id":"joe"
  }'
- http://localhost:8080/openidm/managed/user/joe
+ https://localhost:8443/openidm/managed/user?_action=create
 
-{"_id":"joe","_rev":"0"}</screen>
+
+{
+  "userName": "joe",
+  "stateProvince": "",
+  "postalAddress": "",
+  "effectiveAssignments": {},
+  "roles": [
+    "openidm-authorized"
+  ],
+  "telephoneNumber": "555-123-1234",
+  "password": {
+    "$crypto": {
+      "value": {
+        "key": "openidm-sym-default",
+        "iv": "gTcveNaZdSHE1qeBgcmzRw==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "X9sCuuvNwSbblxdqS65qxw=="
+      },
+      "type": "x-simple-encryption",
+    }
+  },
+  "effectiveRoles": [
+    "openidm-authorized"
+  ],
+  "givenName": "joe",
+  "address2": "",
+  "lastPasswordAttempt": "Tue Feb 25 2014 18:03:40 GMT-0800 (PST)",
+  "passwordAttempts": "0",
+  "sn": "smith",
+  "mail": "joe4@example.com",
+  "country": "",
+  "city": "",
+  "_rev": "1",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "joe",
+  "accountStatus": "active",
+  "description": "My first user",
+  "_id":"joe"
+}
+</screen>
       </step>
+
       <step>
        <para>Create <literal>joe</literal> (Windows).</para>
        <screen>C:\&gt;curl
+ --cacert self-signed.crt
+ --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request PUT
+ --request POST
  --data "{
  \"userName\":\"joe\",
  \"givenName\":\"joe\",
- \"familyName\":\"smith\",
- \"email\":\"joe@example.com\",
- \"phoneNumber\":\"555-123-1234\",
+ \"sn\":\"smith\",
+ \"mail\":\"joe@example.com\",
+ \"telephoneNumber\":\"555-123-1234\",
  \"password\":\"TestPassw0rd\",
  \"description\":\"My first user\"
+ \"_id\":\"joe\"
  }"
- http://localhost:8080/openidm/managed/user/joe
-
-{"_id":"joe","_rev":"0"}</screen>
+ https://localhost:8443/openidm/managed/user?_action=create
+}</screen>
       </step>
      </stepalternatives>
     </step>
     <step>
      <para>Fetch the newly created user from the repository with a RESTful
      GET.</para>
+
      <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- http://localhost:8080/openidm/managed/user/joe
+ --header "Content-Type: application/json"
+ --request GET
+ https://localhost:8443/openidm/managed/user/joe
 
 {
-  "stateProvince": "",
-  "userName": "joe",
-  "roles": [
+  "effectiveAssignments": {},
+  "effectiveRoles": [
     "openidm-authorized"
   ],
+  "stateProvince": "",
+  "userName": "joe",
+  "postalAddress": "",
   "givenName": "joe",
   "address2": "",
-  "lastPasswordAttempt": "Wed Nov 28 2012 22:19:35 GMT+0200 (SAST)",
-  "address1": "",
-  "familyName": "smith",
+  "lastPasswordAttempt": "Tue Feb 25 2014 18:13:03 GMT-0800 (PST)",
   "passwordAttempts": "0",
-  "_rev": "0",
+  "sn": "smith",
+  "mail": "joe@example.com",
+  "_rev": "1",
   "_id": "joe",
   "country": "",
   "city": "",
   "lastPasswordSet": "",
   "postalCode": "",
-  "phoneNumber": "555-123-1234",
-  "email": "joe@example.com",
   "description": "My first user",
-  "accountStatus": "active"
+  "accountStatus": "active",
+  "telephoneNumber": "555-123-1234",
+  "roles": [
+    "openidm-authorized"
+  ]
 }</screen>
+    </step>
+    <step>
      <para>OpenIDM returns the JSON object all on one line. To format the JSON 
      for legibility, use a JSON parser, such as <link 
      xlink:href="http://stedolan.github.com/jq/">jq</link>.</para>
+
      <para>Notice that more attributes are returned for user <literal>joe</literal> 
      than the attributes you added in the previous step. The additional 
      attributes are added by a script named 
@@ -397,34 +534,16 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed Object 
      Configuration</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
      </para>
-    </step>
-   </procedure>
 
-   <procedure xml:id="stop-openidm">
-    <title>To Stop the OpenIDM Services</title>
-    <indexterm>
-     <primary>Stopping OpenIDM</primary>
-    </indexterm>
-    <step>
-    <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
-    prompt, or through the Felix console.</para>
-     <stepalternatives>
-      <step>
-       <para>Either enter the <command>shutdown</command> command at the
-       <literal>-&gt;</literal> prompt.</para>
-       <screen>-&gt; shutdown
-...
-$</screen>
-      </step>
-      <step>
-       <para>Or click Stop on the System Information tab of the Felix console,
-       by default <link xlink:show="new"
-       xlink:href='http://localhost:8080/system/console' />.</para>
-       <para>This stops the Servlet container as well, and the console is
-       no longer accessible.</para>
-      </step>
-     </stepalternatives>
+     <para>
+      When creating a user, available attributes are listed in the
+      <filename>conf/sync.json</filename> if it exists; some attributes are
+      required, as listed in the associated
+      <filename>conf/policy.json</filename> file.
+     </para>
     </step>
+
    </procedure>
- </section>
-</chapter>
+  </section>
+
+ </chapter>
