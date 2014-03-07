@@ -37,7 +37,7 @@
    life cycle.</para>
   </abstract>
   <copyright>
-   <year>2011-2013</year>
+   <year>2011-2014</year>
    <holder>ForgeRock AS</holder>
   </copyright>
   <authorgroup>
@@ -69,6 +69,11 @@
    <author>
     <personname>
      <firstname>Matthias</firstname><surname>Tristl</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Mike</firstname><surname>Jang</surname>
     </personname>
    </author>
   </authorgroup>
