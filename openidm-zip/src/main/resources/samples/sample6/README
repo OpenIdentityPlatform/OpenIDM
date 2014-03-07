@@ -1,6 +1,6 @@
 Sample 6 - LiveSync Between Two LDAP Servers
 --------------------------------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -65,9 +65,24 @@ To run the sample in OpenIDM, follow these steps.
     to set "enabled" : true. LiveSync causes synchronization to happen as you 
     make changes.
 
-    6. Using the OpenDJ Control Panel, add a new user under
+    6. Using ./ldapmodify, create a new user in
        ou=People,dc=example,dc=com, and then check the result under
        ou=people,o=ad.
+
+       An example would be to create a bdobbs.ldif file and paste the following in it.
+           dn: uid=bdobbs,ou=People,dc=example,dc=com
+           objectClass: person
+           objectClass: inetOrgPerson
+           objectClass: organizationalPerson
+           objectClass: top
+           givenName: Bob
+           description: Created to see LiveSync work
+           uid: bdobbs
+           cn: Bob Dobbs
+           sn: Dobbs
+           mail: bdobbs@example.com
+
+       Then use ./ldapmodify -p 1389 -a -D "cn=Directory Manager" -w password -f ~/path/to/bdobbs.ldif
 
     $ ./ldapsearch -p 1389 -b ou=people,o=ad "(uid=*)" cn description
     dn: uid=jdoe,ou=people,o=ad

@@ -32,8 +32,6 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.i18n.LocalizableMessageDescriptor;
-import org.forgerock.i18n.slf4j.LocalizedLogger;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -63,6 +61,8 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +88,7 @@ import java.util.Map;
 })
 public class SystemObjectSetService implements ScheduledService, SingletonResourceProvider {
 
-    private final static LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(SystemObjectSetService.class);
+    private final static Logger logger = LoggerFactory.getLogger(SystemObjectSetService.class);
 
     public static final String ROUTER_PREFIX =  "/system";
 
@@ -195,6 +195,21 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 handler.handleError(e);
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e));
+            }
+        } else if (isLiveSyncAction(request.getAction())) {
+            JsonValue params = new JsonValue(request.getAdditionalParameters());
+            try {
+                String source = params.get("source").asString();
+                if (source == null) {
+                    logger.debug("liveSync requires an explicit source parameter, source is : {}", source );
+                    throw new BadRequestException("liveSync action requires either an explicit source parameter, "
+                                + "or needs to be called on a specific provisioner URI");
+                } else {
+                    logger.debug("liveSync called with explicit source parameter {}", source);
+                }
+                handler.handleResult(liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString())));
+            } catch (ResourceException e) {
+                handler.handleError(e);
             }
         } else {
             handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
@@ -310,33 +325,15 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      * record content of where it failed should be included in the response
      */
     private JsonValue liveSync(String source, boolean detailedFailure) throws ResourceException {
-        JsonValue response = null;
+        JsonValue response;
         Id id = new Id(source);
         String previousStageResourceContainer = "repo/synchronisation/pooledSyncStage/";
         String previousStageId = id.toString().replace("/", "").toUpperCase();
-//        JsonValue previousStage = null;
         Resource previousStage = null;
         try {
-            /*
-            JsonValue readRequest = new JsonValue(new HashMap());
-            readRequest.put("type", "resource");
-            readRequest.put("method", "read");
-            readRequest.put("id", previousStageId);
-            previousStage = router.handle(readRequest);
-            */
             ReadRequest readRequest = Requests.newReadRequest(previousStageResourceContainer, previousStageId);
             previousStage = connectionFactory.getConnection().read(routerContext, readRequest);
 
-            /*
-            JsonValue updateRequest = new JsonValue(new HashMap());
-            updateRequest.put("type", "resource");
-            updateRequest.put("method", "update");
-            updateRequest.put("id", previousStageId);
-            updateRequest.put("rev", previousStage.get("_rev"));
-            response = locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this);
-            updateRequest.put("value", response.asMap());
-            router.handle(updateRequest);
-            */
             response = locateService(id).liveSynchronize(id.getObjectType(),
                     previousStage != null && previousStage.getContent() != null ? previousStage.getContent() : null);
             UpdateRequest updateRequest = Requests.newUpdateRequest(previousStageResourceContainer, previousStageId, response);
@@ -344,16 +341,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             connectionFactory.getConnection().update(routerContext, updateRequest);
         } catch (ResourceException e) { // NotFoundException?
             if (null == previousStage) {
-//                logger.info("PooledSyncStage object {} is not found. First execution.", previousStageId);
-                /*
-                JsonValue createRequest = new JsonValue(new HashMap());
-                createRequest.put("type", "resource");
-                createRequest.put("method", "create");
-                createRequest.put("id", previousStageId);
-                response = locateService(id).liveSynchronize(id.getObjectType(), null, this);
-                createRequest.put("value", response.asMap());
-                router.handle(createRequest);
-                */
 				response = locateService(id).liveSynchronize(id.getObjectType(), null);
                 CreateRequest createRequest = Requests.newCreateRequest(previousStageResourceContainer, previousStageId, response);
                 connectionFactory.getConnection().create(routerContext, createRequest);
@@ -368,12 +355,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         }
         return response;
     }
-/*
-    private ProvisionerService locateService(JsonValue request) throws ResourceException {
-        Id identifier = new Id(request.get("id").required().asString());
-        return locateService(identifier);
-    }
-*/
+
     private ProvisionerService locateService(Id identifier) throws ResourceException {
         for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
             if (entry.getKey().is(identifier)) {

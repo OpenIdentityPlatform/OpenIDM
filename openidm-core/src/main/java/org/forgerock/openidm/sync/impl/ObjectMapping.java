@@ -368,7 +368,7 @@ class ObjectMapping  {
     private void doSourceSync(String id, JsonValue value, boolean sourceDeleted, JsonValue oldValue) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
 
-        String localId = id.substring(sourceObjectSet.length() + 2); // skip the slashes
+        String localId = id.substring(sourceObjectSet.length() + 1); // skip the slashes
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
         op.oldValue = oldValue;
@@ -565,7 +565,7 @@ class ObjectMapping  {
      * object set.
      */
     private boolean isSourceObject(String id) {
-        return (id.startsWith("/" + sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 2);
+        return (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1);
     }
 
     public void onCreate(String id, JsonValue value) throws SynchronizationException {

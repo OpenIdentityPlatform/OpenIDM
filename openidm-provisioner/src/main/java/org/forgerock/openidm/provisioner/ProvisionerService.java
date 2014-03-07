@@ -67,8 +67,9 @@ public interface ProvisionerService {
      * Synchronise the changes from the end system for the given {@code objectType}.
      * <p/>
      * OpenIDM takes active role in the synchronisation process by asking the end system to get all changed object.
-     * Not all system is capable to fulfill this kind of request but if the end system is capable then the implementation
-     * send each changes to the {@link SynchronizationListener} and when it finished it return a new <b>stage</b> object.
+     * Not all systems are capable to fulfill this kind of request but if the end system is capable then the
+     * implementation sends each change to a new request on the router and when it is finished, it returns
+     * a new <b>stage</b> object.
      * <p/>
      * The {@code previousStage} object is the previously returned value of this method.
      * Unhandled exception will result not to update the stage object in repository.
@@ -77,10 +78,8 @@ public interface ProvisionerService {
      *
      * @param objectType
      * @param previousStage           The previously returned object. If null then it's the first execution.
-     * @param synchronizationListener The listener to send the changes to.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
-     * @throws JsonResourceException if a failure occurred during live sync
+     * @throws ResourceException if a failure occurred during live sync
      */
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage /*, final SynchronizationListener synchronizationListener*/)
-            throws ResourceException;
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage) throws ResourceException;
 }
