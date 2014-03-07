@@ -397,6 +397,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 objectClassHandlers.put(entry.getKey(),
                         Resources.newCollection(
                                 new ObjectClassResourceProvider(
+                                        entry.getKey(),
                                         entry.getValue(),
                                         objectOperations.get(entry.getKey()),
                                         allowModification)));
@@ -1009,7 +1010,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     private enum ObjectClassAction {
-        authenticate, resolveUsername;
+        authenticate, resolveUsername, liveSync;
     }
 
     /**
@@ -1022,13 +1023,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         private final ObjectClassInfoHelper objectClassInfoHelper;
         private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
         private final boolean allowModification;
+        private final String objectClass;
 
-        private ObjectClassResourceProvider(ObjectClassInfoHelper objectClassInfoHelper,
+        private ObjectClassResourceProvider(String objectClass, ObjectClassInfoHelper objectClassInfoHelper,
                 Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations,
                 boolean allowModification) {
             this.objectClassInfoHelper = objectClassInfoHelper;
             this.operations = operations;
             this.allowModification = allowModification;
+            this.objectClass = objectClass;
         }
 
         /**
@@ -1075,11 +1078,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         public void actionCollection(ServerContext context, ActionRequest request,
                 ResultHandler<JsonValue> handler) {
             try {
+                JsonValue params = new JsonValue(request.getAdditionalParameters());
                 if (ObjectClassAction.authenticate.name().equalsIgnoreCase(request.getAction())) {
                     final ConnectorFacade facade =
                             getConnectorFacade0(handler, AuthenticationApiOp.class);
                     if (null != facade) {
-                        JsonValue params = new JsonValue(request.getAdditionalParameters());
                         String username = params.get("username").required().asString();
                         String password = params.get("password").required().asString();
 
@@ -1101,6 +1104,23 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         }
 
                         handler.handleResult(result);
+                    }
+                } else if (ObjectClassAction.liveSync.name().equalsIgnoreCase(request.getAction())) {
+                    try {
+                        String source = "system/"
+                                + OpenICFProvisionerService.this.systemIdentifier.getName()
+                                + "/"
+                                + objectClass;
+                        ActionRequest forwardRequest = Requests.newActionRequest("system/", request.getAction());
+                        forwardRequest.setAdditionalParameter("source", source);
+
+                        // forward request to be handled in SystemObjectSetService#actionInstance
+                        handler.handleResult(connectionFactory
+                                .getConnection()
+                                .action(context, forwardRequest));
+
+                    } catch (ResourceException e) {
+                        handler.handleError(e);
                     }
                 } else {
                     handler.handleError(new BadRequestException("Unsupported action: " + request.getAction()));
@@ -1724,11 +1744,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * {@code objectType}.
      * <p/>
      * OpenIDM takes active role in the synchronization process by asking the
-     * end system to get all changed object. Not all system is capable to
+     * end system to get all changed object. Not all systems are capable to
      * fulfill this kind of request but if the end system is capable then the
-     * implementation send each changes to the
-     * {@link org.forgerock.openidm.sync.SynchronizationService} and when it
-     * finished it return a new <b>stage</b> object.
+     * implementation sends each change to a new request on the router and when
+     * it is finished, it returns a new <b>stage</b> object.
      * <p/>
      * The {@code previousStage} object is the previously returned value of this
      * method.
@@ -1809,19 +1828,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      */
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
-                                            // 'id' value was:
-                                            // helper.resolveQualifiedId(syncDelta.getUid()).toString()
                                             // Q: are we going to encode ids?
                                             final String id = helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue();
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
-                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid()); // the value was: Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
+                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid());
                                                     }
-
-                                                    // previously
-                                                    // synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
                                                     onUpdateRequest.setAdditionalParameter("id", id);
                                                     onUpdateRequest.setContent(new JsonValue(deltaObject));
@@ -1830,8 +1844,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-update", id, deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
-                                                    // previously
-                                                    // synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString() , null);
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
                                                     onDeleteRequest.setAdditionalParameter("id", id);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);

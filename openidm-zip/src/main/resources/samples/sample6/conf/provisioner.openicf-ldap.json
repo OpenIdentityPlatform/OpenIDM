@@ -116,7 +116,7 @@
                      "cn" :
                         {
                            "type" : "string",
-                           "nativeName" : "cn",
+                           "nativeName" : "__NAME__",
                            "nativeType" : "string"
                         },
                      "description" :

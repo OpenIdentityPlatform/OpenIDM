@@ -290,7 +290,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      */
     // TODO: consider moving this logic somewhere else
     private String managedId(String id) {
-        StringBuilder sb = new StringBuilder("/managed/").append(name);
+        StringBuilder sb = new StringBuilder("managed/").append(name);
         if (id != null) {
             sb.append('/').append(id);
         }
@@ -305,7 +305,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @return the fully-qualified repository object identifier.
      */
     private String repoId(String id) {
-        return "/repo" + managedId(id);
+        return "repo/" + managedId(id);
     }
 
     /**
@@ -787,7 +787,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                 if (enforcePolicies) {
                     ActionRequest policyAction = Requests.newActionRequest(
-                            "policy" + managedId(resourceName + resourceId), "validateObject");
+                            "policy/" + managedId(resourceName + resourceId), "validateObject");
                     policyAction.setContent(newValue);
                     if (ContextUtil.isExternal(context)) {
                         // this parameter is used in conjunction with the test in policy.js
