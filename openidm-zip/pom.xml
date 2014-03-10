@@ -435,6 +435,14 @@
             <artifactId>org.restlet.ext.jackson</artifactId>
             <version>2.1.2</version>
         </dependency>
+
+        <!-- jdbc drivers -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql-fr-osgi</artifactId>
+            <version>9.3-1101-jdbc41</version>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>openidm-${project.version}</finalName>
