@@ -29,6 +29,7 @@ define("config/main", [
     "./routes/AdminRoutesConfig",
     "./routes/UserRoutesConfig",
     "./routes/IDMRoutesConfig",
+    "./messages/CommonMessages",
     "./messages/AdminMessages",
     "./messages/UserMessages",
     "./validators/CommonValidators",

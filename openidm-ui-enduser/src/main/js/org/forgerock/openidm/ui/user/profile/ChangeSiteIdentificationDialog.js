@@ -58,8 +58,12 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
             event.preventDefault();
             event.stopPropagation();
             
-            if(validatorsManager.formValidated(this.$el)) {            
-                var self = this, patchDefinition = [{replace: "siteImage", value: this.$el.find("input[name='siteImage']").val()}, {replace: "passPhrase", value: this.$el.find("input[name=passPhrase]").val()}];
+            if(validatorsManager.formValidated(this.$el)) {
+                var self = this, 
+                    patchDefinition = [
+                        {"operation": "replace", "field": "siteImage", "value": this.$el.find("input[name='siteImage']").val()}, 
+                        {"operation": "replace", "field": "passPhrase", "value": this.$el.find("input[name=passPhrase]").val()}
+                    ];
                 
                 userDelegate.patchSelectedUserAttributes(conf.loggedUser._id, conf.loggedUser._rev,  patchDefinition, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "siteIdentificationChanged");
@@ -68,23 +72,17 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
                     
-                    if ($.inArray("ui-admin", conf.loggedUser.roles) === -1) {
-                        userDelegate.getForUserID(conf.loggedUser._id, function(user) {
-                            conf.loggedUser = user;
-                        });
-                    } else {
-                        userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
-                            conf.loggedUser = user;
-                        });
-                    }
+                    userDelegate.getProfile(function(user) {
+                        conf.loggedUser = user;
+                    });
                     
                     this.close();
-                }, this));                
+                }, this));
             }
         },
         
         render: function() {
-            this.actions = {};
+            this.actions = [];
             this.addAction($.t("common.form.save"), "submit");
             this.show(_.bind(function() {
                 this.siteImageCounter = 0;

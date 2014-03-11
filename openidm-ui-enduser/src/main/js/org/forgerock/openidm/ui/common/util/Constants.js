@@ -36,6 +36,7 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
     
     commonConstants.LESS_VERSION = 'libs/less-1.5.1-min.js';
 
+    commonConstants.EVENT_USER_UPDATE_POLICY_FAILURE = "EVENT_USER_UPDATE_POLICY_FAILURE";
     
     return commonConstants;
 });

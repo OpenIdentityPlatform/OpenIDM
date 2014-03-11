@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
         render: function() {
             var securityQuestionRef;
             this.securityQuestions = {};
-            this.actions = {};
+            this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el); 

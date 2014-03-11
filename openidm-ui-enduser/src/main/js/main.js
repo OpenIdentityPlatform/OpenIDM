@@ -118,7 +118,7 @@ require([
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/util/main", 
+    "org/forgerock/openidm/ui/common/main", 
     "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",

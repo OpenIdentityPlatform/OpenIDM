@@ -80,17 +80,11 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                 delete conf.passwords;
                 this.close();
-                
-                if ($.inArray("ui-admin", conf.loggedUser.roles) === -1) {
-                    userDelegate.getForUserID(conf.loggedUser._id, function(user) {
-                        conf.loggedUser = user;
-                    });
-                } else {
-                    userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
-                        conf.loggedUser = user;
-                    });
-                }
-                        
+
+                userDelegate.getProfile(function (user) {
+                    conf.loggedUser = user;
+                });
+
             }, this));
         },
         customValidate: function () {
@@ -101,11 +95,10 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             else {
                 this.$el.find("input[type=submit]").prop('disabled', true);
             }
-                
             
         },
         render: function() {
-            this.actions = {};
+            this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
             
             this.delegate = conf.globalData.userComponent === "internal/user" ? internalUserDelegate : userDelegate;

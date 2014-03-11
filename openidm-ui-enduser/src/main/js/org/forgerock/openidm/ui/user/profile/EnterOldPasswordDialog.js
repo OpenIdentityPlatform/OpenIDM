@@ -66,7 +66,7 @@ define("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog", [
         },
         
         render: function() {
-            this.actions = {};
+            this.actions = [];
             this.addAction($.t("common.form.continue"), "submit");
             
             this.show(_.bind(function() {

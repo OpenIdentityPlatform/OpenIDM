@@ -76,7 +76,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         router.routeTo(router.configuration.routes.adminUserProfile, {args: [data.userName], trigger : true});
                         self.reloadData();
                     });
-                });
+                }, null, null, { "forbidden": { status: "403", event: constants.EVENT_USER_UPDATE_POLICY_FAILURE } });
             }
         },
         

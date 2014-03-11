@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, _, $*/
 
 /**
  * @author huck.elliott
@@ -93,6 +93,41 @@ define("config/process/IDMConfig", [
             dependencies: [ ],
             processDescription: function(event) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "errorFetchingNotifications");
+            }
+        },
+        {
+            startEvent: constants.EVENT_USER_UPDATE_POLICY_FAILURE,
+            description: "Failure on update of user",
+            dependencies: [ ],
+            processDescription: function(event) {
+                var response = event.error.responseObj,
+                    failedProperties,
+                    errors = "Unknown";
+
+                if (typeof response === "object" && response !== null && 
+                    typeof response.detail === "object" && response.message === "Failed policy validation") {
+
+                    errors = _.chain(response.detail.failedPolicyRequirements)
+                                .groupBy('property')
+                                .pairs()
+                                .map(function (a) {
+                                    return a[0] + ": " + 
+                                        _.chain(a[1])
+                                            .pluck('policyRequirements')
+                                            .map(function (pr) {
+                                                return _.map(pr, function (p) {
+                                                    return $.t("common.form.validation." + p.policyRequirement, p.params); 
+                                                });
+                                            })
+                                            .value()
+                                            .join(", ");
+                                })
+                                .value()
+                                .join("; ");
+
+                }
+
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "userValidationError", validationErrors: errors});
             }
         },
         {

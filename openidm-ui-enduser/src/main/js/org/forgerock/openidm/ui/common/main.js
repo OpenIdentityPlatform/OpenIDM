@@ -24,7 +24,8 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/common/util/main", [
-    "./Constants",
-    "./ThemeManager"
+define("org/forgerock/openidm/ui/common/main", [
+    "./util/Constants",
+    "./util/ThemeManager",
+    "./delegates/SiteConfigurationDelegate"
 ]);

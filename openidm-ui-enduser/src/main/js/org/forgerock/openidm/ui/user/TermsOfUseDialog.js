@@ -32,8 +32,7 @@ define("org/forgerock/openidm/ui/user/TermsOfUseDialog", [
 ], function(Dialog) {
     var TermsOfUseDialog = Dialog.extend({    
         contentTemplate: "templates/user/TermsOfUseTemplate.html",
-        baseTemplate: "templates/common/MediumBaseTemplate.html",
-        data: {}
+        baseTemplate: "templates/common/MediumBaseTemplate.html"        
     }); 
     
     return new TermsOfUseDialog();

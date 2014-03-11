@@ -52,7 +52,8 @@ define("config/AppConfiguration", [
                {
                    moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                    configuration: {
-                       remoteConfig: true
+                       remoteConfig: true,
+                       delegate: "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
                    } 
                },
                {
@@ -154,6 +155,7 @@ define("config/AppConfiguration", [
                        messages: {
                        },
                        loader: [
+                                {"messages":"config/messages/CommonMessages"},
                                 {"messages":"config/messages/AdminMessages"},
                                 {"messages":"config/messages/UserMessages"}
                        ]

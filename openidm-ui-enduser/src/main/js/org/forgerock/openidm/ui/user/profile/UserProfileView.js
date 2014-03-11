@@ -42,6 +42,8 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
     obj.render = function(args, callback) {
         if(conf.globalData.userComponent && conf.globalData.userComponent === "internal/user"){
             obj.data.adminUser = true;
+        } else {
+            obj.data.adminUser = false;
         }
         this.parentRender(function() {
             var self = this,
