@@ -1,0 +1,109 @@
+.ContentFlow{
+    position:relative;
+    margin-top: 15px;
+    padding-bottom: 15px;
+}
+
+.ContentFlow .flow .item img.content {
+    width: 100%;
+}
+
+.ContentFlow .flow .item.active {
+    cursor: pointer;
+}
+   
+.ContentFlow .scrollbar {
+    width: 50%;
+    margin: 0px auto;
+    margin-top: 10px;
+    height: 16px;
+    background:#fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    border-top-color: #bbb;
+    border-left-color: #bbb;
+    position: relative;
+    overflow: visible;
+    margin-bottom: 15px;
+}
+
+  
+.ContentFlow .scrollbar .slider:hover,  .ContentFlow .scrollbar:hover  .slider   {
+    background: #F44;
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.ContentFlow .scrollbar .slider {
+    width: 16px;
+    height: 16px;
+    cursor: move;
+    background: #E07676;
+    border-radius: 8px;  
+}
+
+.ContentFlow .mouseoverCheckElement {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    left: 0px;
+    visibility: hidden;
+}
+
+
+.ContentFlow .flow .item {
+    position: absolute; 
+    visibility: hidden;
+    top: 0;
+    left: 0;
+}
+
+.ContentFlow .flow .item .content {
+    display: block;
+}
+.ContentFlow .flow .item div.content {
+    width: 100%;
+    height: 100%;
+}
+.ContentFlow .flow .item .label {
+    display: none;
+}
+.ContentFlow .flow .item .reflection {
+    display: block;
+}
+
+.ContentFlow .scrollbar {
+    position: relative; /* needed for z-index */
+    z-index: 1;         /* set above flow */
+    visibility: hidden;
+}
+
+.ContentFlow .scrollbar .slider {
+    position: absolute; 
+}
+* html .ContentFlow .scrollbar .slider .virtualSlider {
+    height: 100%;
+}
+.ContentFlow .scrollbar .slider .position {
+    position: absolute; 
+    text-align: center;
+}
+
+.ContentFlow .loadIndicator {
+    position: absolute; 
+    z-index: 65000;    
+}
+
+.ContentFlow .loadIndicator {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+.ContentFlow .loadIndicator .indicator {
+    background: url(../../img/loader.gif) center center no-repeat;
+    width: 100%;
+    height: 100%;
+}
+* html .ContentFlow .loadIndicator .indicator {
+    height: 100px;
+}
