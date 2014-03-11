@@ -34,14 +34,16 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/Router"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, router) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
         delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "click input[name=backButton]": "back"
         },
         
         formSubmit: function(event) {
@@ -70,7 +72,11 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                     this.unlock();
                 }, this));
             });            
-        }   
+        },
+        
+        back: function() {
+            router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
+        }    
     }); 
     
     return new AdminUserRegistrationView();

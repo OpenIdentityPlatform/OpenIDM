@@ -91,15 +91,17 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
             }
         },
         userNameFound: function (event, securityQuestion) {
-            console.log(this.securityQuestions[securityQuestion]);
             $("#fgtnSecurityQuestion").text(this.securityQuestions[securityQuestion]);
-            this.$el.find("#fgtnAnswerDiv").show();
+            this.$el.find("#fgtnAnswerDiv").slideDown();
             this.$el.find("input[name=fgtnSecurityAnswer]").focus();
+            this.$el.find("input[name=submitUsername]").fadeOut();
+            this.$el.find("#resetUsername").prop('readonly','true');
         },
         userNameNotFound: function () {
-            $("#fgtnAnswerDiv, #fgtnPasswordDiv").hide();
+            $("#fgtnAnswerDiv, #fgtnPasswordDiv").slideUp();
             this.$el.find(".dialogActions input[type=submit]").hide();
             this.$el.find("input[name=resetUsername]").focus();
+            this.$el.find("input[name=submitUsername]").fadeIn();
         },
         changePassword: function() {
             var dialog = this, userName = this.$el.find("input[name=resetUsername]").val(), securityAnswer = this.$el.find("input[name=fgtnSecurityAnswer]").val(), newPassword = this.$el.find("input[name=password]").val();
@@ -125,12 +127,16 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
                 if (typeof(msg) === "undefined") {
                     validatorsManager.bindValidators(this.$el.find('#fgtnPasswordDiv'), userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
                         this.$el.trigger("onValidate");
-                        this.$el.find("#fgtnPasswordDiv").show();
+                        this.$el.find("#fgtnPasswordDiv").slideDown();
                         this.$el.find(".dialogActions input[type=submit]").show();
+                        this.$el.find("input[name=submitAnswer]").css('visibility','hidden');
+                        this.$el.find("#fgtnSecurityAnswer").prop('readonly','true');
+                   
+                        
                     }, this)); 
                 }
                 else {
-                    this.$el.find("#fgtnPasswordDiv").hide();
+                    this.$el.find("#fgtnPasswordDiv").slideUp();
                     this.$el.find("input[name=_id]").val("");
                 }
                 

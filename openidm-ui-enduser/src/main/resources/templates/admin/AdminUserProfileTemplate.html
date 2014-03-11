@@ -1,122 +1,156 @@
 <div id="profile" class="content-bg">
 
-    <h1 id="userProfileHeadingLabel">{{t 'openidm.ui.admin.users.AdminUserProfileView.profileOwnership' profileName}}</h1>
+    <h1>{{t 'openidm.ui.admin.users.AdminUserProfileView.profileOwnership' profileName}}</h1>
     
-        <form class="form two-columns">
-            <input type="hidden" name="_id">
+    <form class="form clearfix">
 
-            <div class="column-layout">
-                <div class="column2">
-                    <div class="field">
-                        <label class="light">{{t "common.user.username"}}</label> 
-                        <input type="text" name="userName" /> 
-                        <span></span>
-                        <div class="validation-message"></div>
+        <input type="hidden" name="_id">
+
+        <div class="clearfix">
+
+            <div class="float-right col2">
+                <a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput align-label">
+                    {{t "common.user.changePassword"}}
+                </a>
+            </div>
+
+            <div class="group-field-block col2">
+                <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="text" id="userName" name="userName" required autofocus >
+                        <span class="error">x</span>
                     </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.emailAddress"}}</label> 
-                        <input type="text" name="mail" /> 
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.givenName"}}</label>
-                        <input type="text" name="givenName" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.accountStatus"}}</label> 
-                        <select name="accountStatus" >
-                            <option value="active">{{t "common.user.active"}}</option>
-                            <option value="inactive">{{t "common.user.inactive"}}</option>
-                        </select>                               
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.address1"}}</label>
-                        <input type="text" name="postalAddress" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.country"}}</label>
-                        <select name="country" ></select>
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.stateProvince"}}</label>
-                        <select name="stateProvince" ></select>
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <!-- <div class="field">
-                        <label class="light">{{t "common.user.lastPasswordSet"}}</label> 
-                        <input type="text" name="lastPasswordSet" class="read-only" disabled="disabled" value="01/10/11"/> 
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div> -->   
-                </div>
-                <div class="column2">
-                    <div class="floatRight">
-                        <div class="field">
-                            <label class="light"></label> 
-                            <a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.familyName"}}</label>
-                        <input type="text" name="sn" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-	                    <label class="light">{{t "common.user.role"}}</label> 
-	                    {{checkbox roles "roles"}}
-	
-	                    <span class="error"></span>
-	                    <div class='validation-message'></div>
-	                </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.phoneNumber"}}</label>
-                        <input type="text" name="telephoneNumber" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
-                        <label class="light">{{t "common.user.address2"}}</label>
-                        <input type="text" name="address2" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="light">{{t "common.user.city"}}</label>
-                        <input type="text" name="city" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    
-                    <div class="field">
-                        <label class="light">{{t "common.user.postalCode"}}</label>
-                        <input type="text" name="postalCode" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
+                    <div class="validation-message"></div>
                 </div>
             </div>
-            <div class="column-layout">
-                <div class="float-right" style="margin-right: 30px;">
-                    <div class="field submit-field">
-                        <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button"/>
-                        <input type="button" name="deleteButton" value="{{t "common.form.delete"}}" class="button"/>
-                        <input type="button" name="backButton" value="{{t "common.form.back"}}" class="button"/>
-                        <input type="text" name="oldUserName" style="display: none" />
+
+        </div>
+
+
+        <div class="clearfix">
+
+            <div class="group-field-block col2">
+                <label for="givenName" class="light align-right">{{t "common.user.givenName"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="text" id="givenName" name="givenName" value="" required />
+                        <span class="error">x</span>
                     </div>
+                    <div class="validation-message"></div>
                 </div>
             </div>
-			
-		</form>
+
+            <div class="group-field-block col2">
+                <label for="sn" class="light align-right">{{t "common.user.familyName"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="text" id="sn" name="sn" value="" required />
+                        <span class="error">x</span>
+                    </div>
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+   
+        </div>
+
+        <div class="clearfix">
+
+            <div class="group-field-block col2">
+                <label for="mail" class="light align-right">{{t "common.user.emailAddress"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="email" id="mail" name="mail" value=""  required />
+                        <span class="error">x</span>
+                    </div>
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+
+
+            <div class="group-field-block col2" >
+                <label class="light align-right">{{t "common.user.role"}}</label> 
+                {{checkbox roles "roles"}}
+            </div>
+
+        </div>
+
+
+        <div class="clearfix">
+
+             <div class="group-field-block col2">
+                <label for="sn" class="light align-right">{{t "common.user.accountStatus"}}</label>
+                <select name="accountStatus" >
+                    <option value="active">{{t "common.user.active"}}</option>
+                    <option value="inactive">{{t "common.user.inactive"}}</option>
+                </select>    
+                <div class="validation-message"></div>
+            </div>
+
+            <div class="group-field-block col2">
+                <label for="telephoneNumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
+                <div class="float-left separate-message">
+                    <div class="group-input-span">
+                        <input type="tel" id="telephoneNumber" name="telephoneNumber" value="" required />
+                        <span class="error">x</span>
+                    </div>
+                    <div class="validation-message"></div>
+                </div>
+            </div>
+
+        </div>  
+
+        <div class="clearfix">
+
+            <div class="group-field-block col2">
+                <label for="postalAddress" class="light align-right">{{t "common.user.address1"}}</label>
+                <input type="text" id="postalAddress" name="postalAddress" value="" />
+            </div>
+
+             <div class="group-field-block col2">
+                <label for="address2" class="light align-right">{{t "common.user.address2"}}</label>
+                <input type="text" id="address2" name="address2" value="" />
+            </div>
+
+        </div>
+
+        <div class="clearfix">
+
+            <div class="group-field-block col2">
+                <label for="city" class="light align-right">{{t "common.user.city"}}</label>
+                <input type="text" id="city" name="city" value="" />
+            </div>
+
+             <div class="group-field-block col2">
+                <label for="postalCode" class="light align-right">{{t "common.user.postalCode"}}</label>
+                <input type="text" id="postalCode" name="postalCode" value="" />
+            </div>
+
+        </div>
+
+        <div class="clearfix">
+
+            <div class="group-field-block col2">
+                <label for="country" class="light align-right">{{t "common.user.country"}}</label>
+                <select id="country" name="country"></select>  
+            </div>
+
+             <div class="group-field-block col2">
+                <label for="stateProvince" class="light align-right">{{t "common.user.stateProvince"}}</label>
+                <select id="stateProvince" name="stateProvince"></select>                   
+            </div>
+
+        </div>
+   
+
+        <div class="float-right group-actions-block"> 
+            <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button" disabled />
+            <input type="button" name="deleteButton" value="{{t "common.form.delete"}}" class="button"/>
+            <input type="button" name="backButton" value="{{t "common.form.back"}}" class="button"/>
+            <input type="text" name="oldUserName" style="display: none" />
+        </div>
+        
+    </form>
+
 </div>
 
