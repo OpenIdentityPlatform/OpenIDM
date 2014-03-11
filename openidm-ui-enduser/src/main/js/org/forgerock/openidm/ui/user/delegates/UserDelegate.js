@@ -244,13 +244,18 @@ define("UserDelegate", [
     /**
      * See AbstractDelegate.patchEntityDifferences
      */
-    obj.patchUserDifferences = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
+    obj.patchUserDifferences = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
         console.info("updating user");
-        obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
+        obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers);
     };
     
     obj.updateUser = function(oldUserData, stub, newUserData, successCallback, errorCallback, noChangesCallback) {
-        obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback);
+        obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
+                "forbidden": {
+                    status: "403",
+                    event: constants.EVENT_USER_UPDATE_POLICY_FAILURE
+                }
+            });
     };
 
     /**

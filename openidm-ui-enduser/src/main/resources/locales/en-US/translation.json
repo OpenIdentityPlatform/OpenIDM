@@ -7,30 +7,32 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
-            "UserMessages" : {
+            "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
                 "serviceUnavailable" : "Service unavailable",
-                "changedPassword" : "Password has been changed",
                 "unknown" : "Unknown error. Please contact with administrator",
-                "profileUpdateFailed" : "Problem during profile update",
-                "profileUpdateSuccessful" : "Profile has been updated",
-                "userNameUpdated" : "Username has been modified succesfully.",
-                "afterRegistration" : "User has been registered successfully",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
-                "siteIdentificationChanged" : "Site identification image has been changed",
-                "securityDataChanged" : "Security data has been changed",
                 "unauthorized" : "Unauthorized access or session timeout",
-                "userAlreadyExists" : "User already exists",
                 "internalError" : "Internal server error",
                 "forbiddenError" : "Forbidden request error.",
                 "notFoundError" : "Not found error.",
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
-                "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications.",
                 "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
+            },
+            "UserMessages" : {
+                "changedPassword" : "Password has been changed",
+                "profileUpdateFailed" : "Problem during profile update",
+                "profileUpdateSuccessful" : "Profile has been updated",
+                "userNameUpdated" : "Username has been modified succesfully.",
+                "afterRegistration" : "User has been registered successfully",
+                "siteIdentificationChanged" : "Site identification image has been changed",
+                "securityDataChanged" : "Security data has been changed",
+                "userAlreadyExists" : "User already exists",
+                "errorDeletingNotification" : "Error deleting notification.",
+                "errorFetchingNotifications" : "Error Fetching notifications."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",
@@ -40,7 +42,8 @@
                 "completedTask" : "Task has been completed.",
                 "claimedTask" : "Task has been claimed.",
                 "unclaimedTask" : "Task has been unclaimed.",
-                "startedProcess" : "Process has been started"
+                "startedProcess" : "Process has been started",
+                "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
             }
         },
         "AppConfiguration" : {
@@ -99,7 +102,7 @@
                 "enterLogin" : "Please enter your login in the field below to continue."
             },
             "TermsOfUseTemplate" : {
-                "termsOfUse" : "Terms of use",
+                "termsOfUse" : "Terms of Use",
                 "termsOfUseContent" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p>"
             },
             "UserProfileTemplate" : {
@@ -110,7 +113,7 @@
                 "registerYourAccount" : "Register your account",
                 "logIn" : "Log in",
                 "haveAccoutQuestion" : "Already have an account?",
-                "agreeToTerms" : "I agree to the %sterms of use%s"
+                "agreeToTerms" : "I agree to the "
             }
         },
         "admin" : {

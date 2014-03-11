@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
         
         render: function(params) {
             this.editedUsername = params[0];
-            this.actions = {};
+            this.actions = [];
             this.addAction("Update", "submit");
 
             this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {

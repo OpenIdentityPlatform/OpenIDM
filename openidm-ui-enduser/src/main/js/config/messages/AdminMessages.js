@@ -44,6 +44,10 @@ define("config/messages/AdminMessages", [
                 msg: "config.messages.AdminMessages.userDeleteError",
                 type: "error"
             },
+            "userValidationError": {
+                msg: "config.messages.AdminMessages.userValidationError",
+                type: "error"
+            },
 
             //applications
             "userApplicationsUpdate": {
