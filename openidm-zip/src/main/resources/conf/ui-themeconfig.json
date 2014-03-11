@@ -47,11 +47,11 @@
             "color-info": "blue",
             "color-inactive": "gray",
 
-            "input-background-color": "#fff",
-            "input-background-invalid-color": "#ffe5e9",
-            "input-border-basic": "#DBDBDB",
+            "input-background-color" : "#fff",
+            "input-background-invalid-color" : "#fff",
+            "input-border-invalid-color" : "#f8b9b3",
+            "input-border-basic" : "#DBDBDB",
             "header-border-color": "#5D5D5D",
-
 
             "footer-height": "126px"
         },
