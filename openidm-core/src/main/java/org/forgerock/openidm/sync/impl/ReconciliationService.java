@@ -252,8 +252,7 @@ public class ReconciliationService
                         } else {
                             waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                         }
-                        result.put("_id",  reconcile(ReconAction.valueOf(request.getAction()),
-                                    mapping, waitForCompletion, paramsVal));
+                        result.put("_id",  reconcile(ReconAction.valueOf(request.getAction()), mapping, waitForCompletion, paramsVal, request.getContent()));
                     } catch (SynchronizationException se) {
                        throw new ConflictException(se);
                     }
@@ -289,10 +288,10 @@ public class ReconciliationService
     /**
      * {@inheritDoc}
      */
-    public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams)
+    public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams, JsonValue config)
         throws SynchronizationException {
 
-        final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams);
+        final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams, config);
         if (Boolean.TRUE.equals(synchronous)) {
             reconcile(reconContext);
         } else {
@@ -328,7 +327,7 @@ public class ReconciliationService
      * @param reconParams
      * @return a new reconciliation context
      */
-    private ReconciliationContext newReconContext(ReconAction reconAction, JsonValue mapping, JsonValue reconParams)
+    private ReconciliationContext newReconContext(ReconAction reconAction, JsonValue mapping, JsonValue reconParams, JsonValue config)
         throws SynchronizationException {
 
         ReconciliationContext reconContext = null;
@@ -347,7 +346,7 @@ public class ReconciliationService
             throw new SynchronizationException("Unknown mapping type");
         }
         try {
-            reconContext = new ReconciliationContext(reconAction, objMapping, context, reconParams, this);
+            reconContext = new ReconciliationContext(reconAction, objMapping, context, reconParams, config, this);
         } catch (BadRequestException ex) {
             throw new SynchronizationException("Failure in initializing reconciliation: "
                     + ex.getMessage(), ex);

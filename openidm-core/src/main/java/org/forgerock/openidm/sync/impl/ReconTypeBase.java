@@ -85,13 +85,15 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * @return the effective configuration; may be null if neither an override or static configuration is provided
      */
     protected JsonValue calcEffectiveConfig(String configPropertyName) {
+        JsonValue overridingConfig = reconContext.getOverridingConfig();
         // Precedence to config supplied in the request body
-        JsonValue effectiveConfig = reconContext.getReconParams().get("_entity").get(configPropertyName);
+        JsonValue effectiveConfig = overridingConfig == null ? new JsonValue(null) : overridingConfig.get(configPropertyName);
+        
         if (effectiveConfig.isNull()) {
-            // Use regular configuration when not overriden in request body
-            JsonValue mappingCfg = reconContext.getObjectMapping().getConfig();
-            effectiveConfig = mappingCfg.get(configPropertyName);
-            logger.debug("Using settings from mapping configuration for {} : {}", configPropertyName, effectiveConfig);
+            // Use regular configuration when not overridden in request body
+            JsonValue cfg = reconContext.getObjectMapping().getConfig().get(configPropertyName);
+            logger.debug("Using settings from mapping configuration for {} : {}", configPropertyName, cfg);
+            return cfg;
         } else {
             logger.debug("Using settings supplied in call for {} : {}", configPropertyName, effectiveConfig);
         }
