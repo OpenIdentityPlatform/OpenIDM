@@ -28,21 +28,23 @@ var mappings,
     sourceQueryId,
     result, 
     params = {
-        "sourceQuery" : {
-            "_queryId": "get-users-of-direct-role",
-            "role": resourceName	
-        },
         "waitForCompletion": "true"
+    },
+    value = {
+    	"sourceQuery" : {
+            "queryId": "get-users-of-direct-role",
+            "role": resourceName	
+        }
     };
 
 // Check if default sourceQuery is overridden
 if (sourceQuery) {
-    params.sourceQuery = sourceQuery;
+	value.sourceQuery = sourceQuery;
 }
 
 // Check if the queryId is overridden
 if (sourceQueryId) {
-	params.sourceQuery._queryId = sourceQueryId;
+	value.sourceQuery.queryId = sourceQueryId;
 }
 
 // Get sync mappings
@@ -53,8 +55,10 @@ if (syncConfig && syncConfig.mappings) {
     mappings = syncConfig.mappings;
     for (i = 0; i < mappings.length; i++) {
         var mapping = mappings[i];
-        var name = mapping.name;
-        params.mapping = name;
-        openidm.action("recon", "recon", params);
+        if (mapping.source == "managed/user") {
+            var name = mapping.name;
+            params.mapping = name;
+            openidm.action("recon", "recon", params, value);
+        }
     }
 }

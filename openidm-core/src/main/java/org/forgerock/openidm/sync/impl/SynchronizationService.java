@@ -288,7 +288,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                 }
 
                 try {
-                    reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, params);
+                    reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, params, null);
                 } finally {
                     ObjectSetContext.pop();
                 }
@@ -335,7 +335,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                         result = new HashMap<String, Object>();
                         JsonValue mapping = _params.get("mapping").required();
                         logger.debug("Synchronization action=recon, mapping={}", mapping);
-                        String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params);
+                        String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params, request.getContent());
                         result.put("reconId", reconId);
                         result.put("_id", reconId);
                         result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");

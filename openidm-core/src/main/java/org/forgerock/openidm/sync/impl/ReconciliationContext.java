@@ -51,7 +51,11 @@ public class ReconciliationContext {
     ObjectMapping mapping;
     ReconciliationService service;
 
+    // The additional recon parameters
     private JsonValue reconParams;
+    
+    // The overriding configuration
+    private JsonValue overridingConfig;
 
     private ReconStage stage = ReconStage.ACTIVE_INITIALIZED;
     private String reconId;
@@ -76,12 +80,14 @@ public class ReconciliationContext {
      * @param mapping the mapping configuration
      * @param callingContext The resource call context
      * @param reconParams configuration options for the recon
+     * @param config the overriding config (if specified in the request body)
      */
     public ReconciliationContext(
             ReconciliationService.ReconAction reconAction,
             ObjectMapping mapping,
             ServerContext callingContext,
             JsonValue reconParams,
+            JsonValue overridingConfig,
             ReconciliationService service)
         throws BadRequestException {
 
@@ -89,9 +95,11 @@ public class ReconciliationContext {
         this.reconId = callingContext.getId();
         this.reconStat = new ReconciliationStatistic(this);
         this.reconParams = reconParams;
+        this.overridingConfig = overridingConfig;
         this.service = service;
+        
         reconTypeHandler = createReconTypeHandler(reconAction);
-
+        
         // Initialize the executor for this recon, or null if no executor should be used
         int noOfThreads = mapping.getTaskThreads();
         if (noOfThreads > 0) {
@@ -136,6 +144,13 @@ public class ReconciliationContext {
      */
     public JsonValue getReconParams() {
         return reconParams;
+    }
+
+    /**
+     * @return the overriding configuration
+     */
+    public JsonValue getOverridingConfig() {
+        return overridingConfig;
     }
 
     /**

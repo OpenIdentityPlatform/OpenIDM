@@ -763,7 +763,6 @@ class ObjectMapping  {
      * @throws SynchronizationException
      */
     private void doRecon(ReconciliationContext reconContext) throws SynchronizationException {
-
         reconContext.getStatistics().reconStart();
         String reconId = reconContext.getReconId();
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);

@@ -42,11 +42,13 @@ public interface Reconcile {
      *  to return immediately (FALSE) with the recon id, which can then be used for subsequent
      *  queries / actions on that reconciliation run.
      * @param reconParams all parameters passed to the recon invocation
+     * @param config the overriding config
      */
     public String reconcile(
             ReconciliationService.ReconAction reconAction,
             JsonValue mapping,
             Boolean synchronous,
-            JsonValue reconParams)
+            JsonValue reconParams,
+            JsonValue config)
         throws SynchronizationException;
 }
