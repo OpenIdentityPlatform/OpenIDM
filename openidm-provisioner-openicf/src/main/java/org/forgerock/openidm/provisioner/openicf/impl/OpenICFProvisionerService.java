@@ -58,6 +58,7 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationListener;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.event.ConnectorEvent;
 import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.common.security.GuardedString;
@@ -495,9 +496,9 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     public JsonValue create(Id id, JsonValue object, JsonValue params) throws Exception {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
-            ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, params);
-            Uid uid = getConnectorFacade().create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
+            Pair<ObjectClass, Set<Attribute>> connectorObject = helper.build(CreateApiOp.class, object);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, params);
+            Uid uid = getConnectorFacade().create(connectorObject.first, AttributeUtil.filterUid(connectorObject.second), operationOptionsBuilder.build());
             helper.resetUid(uid, object);
             return object;
         } else {
@@ -510,7 +511,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         ConnectorFacade facade = getConnectorFacade();
         if (helper.isOperationPermitted(GetApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, params);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, params);
             ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
             if (null != connectorObject) {
                 return helper.build(connectorObject);
@@ -524,27 +525,9 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     public JsonValue update(Id id, String rev, JsonValue object, JsonValue params) throws Exception {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
-            JsonValue newName = object.get(ServerConstants.OBJECT_PROPERTY_ID);
-            ConnectorObject connectorObject = null;
-            Set<Attribute> attributeSet = null;
-
-            //TODO support case sensitive and insensitive rename detection!
-            if (newName.isString() && !id.getLocalId().equals(Id.unescapeUid(newName.asString()))) {
-                //This is a rename
-                connectorObject = helper.build(UpdateApiOp.class, newName.asString(), object);
-                attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
-            } else {
-                connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
-                attributeSet = new HashSet<Attribute>();
-                for (Attribute attribute : connectorObject.getAttributes()) {
-                    if (attribute.is(Uid.NAME)) {
-                        continue;
-                    }
-                    attributeSet.add(attribute);
-                }
-            }
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, params);
-            Uid uid = getConnectorFacade().update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
+            Pair<ObjectClass, Set<Attribute>> connectorObject = helper.build(UpdateApiOp.class, object);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, params);
+            Uid uid = getConnectorFacade().update(connectorObject.first, new Uid(id.getLocalId()), connectorObject.second, operationOptionsBuilder.build());
             helper.resetUid(uid, object);
             return object;
         } else {
@@ -556,7 +539,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     public JsonValue delete(Id id, String rev, JsonValue params) throws Exception {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null, null);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null);
             getConnectorFacade().delete(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
         } else {
             logger.debug("Operation DELETE of {} is not permitted", id);
@@ -570,7 +553,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             OperationOptionsBuilder operationOptionsBuilder = helper
-                    .getOperationOptionsBuilder(SearchApiOp.class, null, null);
+                    .getOperationOptionsBuilder(SearchApiOp.class, null);
             JsonValue query = params.get("query");
             JsonValue queryId = params.get(QueryConstants.QUERY_ID);
             EventEntry measure = Publisher
@@ -759,8 +742,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
                 if (helper.isOperationPermitted(AuthenticationApiOp.class)) {
                     OperationOptionsBuilder operationOptionsBuilder = helper
-                            .getOperationOptionsBuilder(AuthenticationApiOp.class, null, null);
-
+                            .getOperationOptionsBuilder(AuthenticationApiOp.class, null);
+		    
                     String username = params.get("username").required().asString();
                     String password = params.get("password").required().asString();
 
@@ -848,7 +831,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 } else {
                     final SyncToken[] lastToken = new SyncToken[]{token};
                     final String[] failedRecord = new String[1];
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, previousStage);
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
                                 new Object[]{helper.getObjectClass().getObjectClassValue(), token});

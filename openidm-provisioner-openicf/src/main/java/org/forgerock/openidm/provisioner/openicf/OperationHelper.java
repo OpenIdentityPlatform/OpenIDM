@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner.openicf;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceException;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
@@ -36,6 +37,7 @@ import org.identityconnectors.framework.common.objects.filter.Filter;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author $author$
@@ -66,12 +68,11 @@ public interface OperationHelper {
      * Gets a new instance of {@link OperationOptionsBuilder} filled with {@link OperationOptions}.
      *
      * @param operation
-     * @param connectorObject
      * @param source
      * @return
      * @throws Exception
      */
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception;
+    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, JsonValue source) throws Exception;
 
     /**
      * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
@@ -109,9 +110,7 @@ public interface OperationHelper {
      */
     public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception;
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception;
-
-    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception;
+    public Pair<ObjectClass, Set<Attribute>> build(Class<? extends APIOperation> operation, JsonValue source) throws Exception;
 
     /**
      * Build a new Map object from the {@code source} object.
