@@ -35,6 +35,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 
 
+import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
@@ -174,6 +175,10 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             QueryRequest r = Requests.newQueryRequest(objectSet);
             r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
             r.setQueryExpression(query.get(QueryRequest.FIELD_QUERY_EXPRESSION).asString());
+            JsonValue queryFilter = query.get(QueryRequest.FIELD_QUERY_FILTER);
+            if (!queryFilter.isNull()) {
+                r.setQueryFilter(QueryFilter.valueOf(queryFilter.asString()));
+            }
             for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
                 r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
