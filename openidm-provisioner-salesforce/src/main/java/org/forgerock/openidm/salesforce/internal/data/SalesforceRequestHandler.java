@@ -6,7 +6,7 @@
 
 package org.forgerock.openidm.salesforce.internal.data;
 
-import java.util.Dictionary;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,6 +64,7 @@ import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.restlet.Response;
+import org.restlet.data.Parameter;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.EmptyRepresentation;
@@ -92,6 +93,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     final static Logger logger = LoggerFactory.getLogger(SalesforceRequestHandler.class);
 
     private static final String REVISION_FIELD = "LastModifiedDate";
+    private static final String NEXT_RECORDS_URL  = "nextRecordsUrl";
 
     /**
      * RouterRegistryService service.
@@ -349,7 +351,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     public void queryCollection(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         try {
-            if (request.getQueryId() != null) {
+            if (StringUtils.isNotBlank(request.getQueryId())) {
 
                 String queryExpression = connection.getQueryExpression(request.getQueryId());
                 if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())
@@ -358,46 +360,19 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                         String type = getPartition(context);
                         queryExpression = "SELECT id FROM " + type;
                     }
-                    final ClientResource rc = getClientResource("query");
 
-                    rc.getReference().addQueryParameter("q", queryExpression);
-
-                    rc.setMethod(org.restlet.data.Method.GET);
-                    handleRequest(rc, true);
-                    Representation body = rc.getResponse().getEntity();
-
-                    if (null != body && body instanceof EmptyRepresentation == false) {
-                        JacksonRepresentation<Map> rep =
-                                new JacksonRepresentation<Map>(body, Map.class);
-                        JsonValue result = new JsonValue(rep.getObject());
-                        for (JsonValue record : result.get("records")) {
-                            if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                                Map<String, Object> r = new HashMap<String, Object>(1);
-                                r.put(Resource.FIELD_CONTENT_ID, record.get("Id").asString());
-                                Resource resource =
-                                        new Resource(record.get("Id").asString(), record.get(
-                                                REVISION_FIELD).asString(), record);
-                                handler.handleResource(resource);
-                            } else {
-                                if (record.isDefined("Id")) {
-                                    record.put(Resource.FIELD_CONTENT_ID, record.get("Id")
-                                            .asString());
-                                }
-                                Resource resource =
-                                        new Resource(record.get("Id").asString(), record.get(
-                                                REVISION_FIELD).asString(), record);
-                                handler.handleResource(resource);
-                            }
-                        }
+                    if (executeQuery(handler, queryExpression)) {
+                        return;
                     }
-                    // TODO support paging
-                    handler.handleResult(new QueryResult());
+
                 } else {
-                    handler.handleError(new BadRequestException("Unsupported QueryID"
+                    handler.handleError(new BadRequestException("Unsupported QueryId"
                             + request.getQueryId()));
                 }
-            } else {
+            } else if (StringUtils.isNotBlank(request.getQueryExpression())) {
                 queryResource.handleQuery(context, request, handler);
+            } else {
+                handler.handleError(new NotSupportedException("queryFilter is not yet supported"));
             }
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
@@ -552,6 +527,92 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
         return describe;
     }
 
+    private boolean executeQuery(QueryResultHandler handler, String queryExpression) throws ResourceException {
+        Integer totalSize = null;
+        JsonValue result = null;
+        String pagedResultsCookie = null;
+
+        //TODO Enable it when OpenIDM Sync Engine supports the paged search
+        boolean OpenIDMisSmart = false; //QueryRequest.getPageSize <> 0
+
+        do {
+            try {
+                if (null == result) {
+                    result =
+                            sendClientRequest(org.restlet.data.Method.GET, "query",
+                                    new Parameter("q", queryExpression));
+                } else if (!result.get(NEXT_RECORDS_URL).isNull()) {
+                    String url = result.get(NEXT_RECORDS_URL).asString();
+                    String queryValue =
+                            url.substring(url.indexOf("query/"), url.length());
+                    if (OpenIDMisSmart) {
+                        // TODO Use the OpenIDM to iterate over the pages
+                        pagedResultsCookie = queryValue.substring(6);
+                        // TODO Calculate the remainingPagedResults
+                        String pos =
+                                pagedResultsCookie.substring(pagedResultsCookie.indexOf('-') + 1);
+                        handler.handleResult(new QueryResult(pagedResultsCookie, totalSize
+                                - Integer.getInteger(pos)));
+                        return true;
+                    }
+                    result = sendClientRequest(org.restlet.data.Method.GET, queryValue);
+                } else {
+                    break;
+                }
+                if (result != null) {
+                    for (JsonValue record : result.get("records")) {
+                        if (record.isDefined("Id")) {
+                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id")
+                                    .asString());
+                        }
+                        Resource resource =
+                                new Resource(record.get("Id").asString(), record.get(
+                                        REVISION_FIELD).asString(), record);
+                        handler.handleResource(resource);
+                    }
+                    if (totalSize == null) {
+                        totalSize = result.get("totalSize").asInteger();
+                    }
+                    if (result.get("done").asBoolean()) {
+                        break;
+                    }
+                } else {
+                    throw new InternalServerErrorException(
+                            "Unexpected Salesforce service response: 'null'");
+                }
+            } catch (final IOException e) {
+                throw new InternalServerErrorException(e);
+            }
+        } while (true);
+        handler.handleResult(new QueryResult());
+        return false;
+    }
+
+    private JsonValue sendClientRequest(org.restlet.data.Method method, String id,
+                                        Parameter... parameters) throws ResourceException, IOException {
+
+        final ClientResource cr = getClientResource(id);
+        try {
+            cr.setMethod(method);
+            for (Parameter p : parameters) {
+                cr.getReference().addQueryParameter(p.getName(), p.getValue());
+            }
+            logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr.getReference()
+                    .getQuery());
+            handleRequest(cr, true);
+            Representation body = cr.getResponse().getEntity();
+            if (null != body && body instanceof EmptyRepresentation == false) {
+                JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
+                return new JsonValue(rep.getObject());
+            }
+            return null;
+        } finally {
+            if (null != cr) {
+                cr.release();
+            }
+        }
+    }
+
     protected void handleRequest(final ClientResource resource, boolean tryReauth)
             throws ResourceException {
         try {
@@ -600,38 +661,12 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
         public void handleQuery(ServerContext context, QueryRequest request,
                 QueryResultHandler handler) {
             try {
-                if (null != request.getQueryExpression()) {
-                    final ClientResource cr = getClientResource("query");
-                    try {
-                        cr.getReference().addQueryParameter("q", request.getQueryExpression());
-                        cr.setMethod(org.restlet.data.Method.GET);
-                        logger.debug("Attempt to execute query: {}?{}", cr.getReference(), cr
-                                .getReference().getQuery());
-                        handleRequest(cr, true);
-                        Representation body = cr.getResponse().getEntity();
+                if (StringUtils.isNotBlank(request.getQueryExpression())) {
 
-                        if (null != body && body instanceof EmptyRepresentation == false) {
-                            JacksonRepresentation<Map> rep =
-                                    new JacksonRepresentation<Map>(body, Map.class);
-                            JsonValue result = new JsonValue(rep.getObject());
-                            for (JsonValue record : result.get("records")) {
-                                if (record.isDefined("Id")) {
-                                    record.put(Resource.FIELD_CONTENT_ID, record.get("Id")
-                                            .asString());
-                                }
-                                Resource resource =
-                                        new Resource(record.get("Id").asString(), record.get(
-                                                REVISION_FIELD).asString(), record);
-                                handler.handleResource(resource);
-                            }
-                        }
-                        // TODO support paging
-                        handler.handleResult(new QueryResult());
-                    } finally {
-                        if (null != cr) {
-                            cr.release();
-                        }
+                    if (executeQuery(handler, request.getQueryExpression())) {
+                        return;
                     }
+
                 } else {
                     handler.handleError(new NotSupportedException(
                             "queryId and queryFilter is not yet supported"));
