@@ -33,7 +33,8 @@ define("ThemeManager", [
     "org/forgerock/openidm/ui/admin/ConfigDelegate"
 ], function(constants,conf,configDelegate) {
     
-    var obj = {};
+    var obj = {},
+        themePromise;
 
     obj.loadThemeCSS = function(theme){
         $('head').find('link[href*=less]').remove();
@@ -80,34 +81,24 @@ define("ThemeManager", [
     };
     
     obj.getTheme = function(){
-        var theme = {},
-            newLessVars = {},
-            themeName, prom ;
-        
-        //find out if the theme has changed
-        if(conf.globalData.theme){
-            //no change so use the existing theme
-            prom = $.Deferred();
-            prom.resolve(conf.globalData.theme);
-            return prom;
-        }
-        else{
-            return obj.loadThemeConfig().then(function(themeConfig){
-                theme = themeConfig;
+        if (themePromise === undefined) {
+            themePromise = obj.loadThemeConfig().then(function(themeConfig){
+                var newLessVars = {};
+
+                conf.globalData.theme = themeConfig;
                 //the following line is needed to align commons code with idm
-                theme.path = "";
-                return obj.loadThemeCSS(theme).then(function(){
-                    _.each(theme.settings.lessVars, function (value, key) {
+                themeConfig.path = "";
+                return obj.loadThemeCSS(themeConfig).then(function(){
+                    _.each(themeConfig.settings.lessVars, function (value, key) {
                         newLessVars['@' + key] = value;
                     });
                     less.modifyVars(newLessVars);
                     
-                    conf.globalData.theme = theme;
-                    
-                    return theme;
+                    return themeConfig;
                 });
             });
         }
+        return themePromise;
     };
     
     
