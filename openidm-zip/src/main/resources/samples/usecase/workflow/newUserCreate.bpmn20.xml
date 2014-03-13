@@ -49,13 +49,13 @@
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;familyName&quot; data-validation-dependents=&quot;password&quot;/&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;sn&quot; data-validation-dependents=&quot;password&quot;/&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;email&quot; /&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;mail&quot; /&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
@@ -81,7 +81,7 @@
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;phoneNumber&quot; /&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; /&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
@@ -116,8 +116,8 @@
             &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;Send Email Notification&lt;/label&gt; 
                     &lt;select name=&quot;emailEnabled&quot;&gt;
-                         &lt;option value=&quot;1&quot;&gt;Yes&lt;/option&gt;
-                         &lt;option value=&quot;0&quot;&gt;No&lt;/option&gt;
+                         &lt;option value=&quot;true&quot;&gt;Yes&lt;/option&gt;
+                         &lt;option value=&quot;false&quot;&gt;No&lt;/option&gt;
                     &lt;/select&gt;
                 &lt;/div&gt;
 
@@ -137,11 +137,11 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
                                        name="First Name"
                                        required="true"
                                        type="string" />
-                <activiti:formProperty id="familyName"
+                <activiti:formProperty id="sn"
                                        name="Last Name"
                                        required="true"
                                        type="string" />
-                <activiti:formProperty id="email"
+                <activiti:formProperty id="mail"
                                        name="Email"
                                        required="true"
                                        type="string" />
@@ -160,7 +160,7 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
                 <activiti:formProperty id="address1"
                                        name="Address"
                                        type="string" />
-                <activiti:formProperty id="phoneNumber"
+                <activiti:formProperty id="telephoneNumber"
                                        name="Phone Number"
                                        required="true"
                                        type="string" />
@@ -251,13 +251,13 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;familyName&quot; value=&quot;{{variables.familyName}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;sn&quot; value=&quot;{{variables.sn}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;email&quot; value=&quot;{{variables.email}}&quot; /&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;mail&quot; value=&quot;{{variables.mail}}&quot; /&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
@@ -283,7 +283,7 @@ require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
             &lt;/div&gt;
             &lt;div class=&quot;field&quot;&gt;
                 &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                &lt;input type=&quot;text&quot; name=&quot;phoneNumber&quot; value=&quot;{{variables.phoneNumber}}&quot;/&gt; 
+                &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; value=&quot;{{variables.telephoneNumber}}&quot;/&gt; 
                 &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                 &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
             &lt;/div&gt;
@@ -365,11 +365,11 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                                        name="First Name"
                                        required="true"
                                        type="string" />
-                <activiti:formProperty id="familyName"
+                <activiti:formProperty id="sn"
                                        name="Last Name"
                                        required="true"
                                        type="string" />
-                <activiti:formProperty id="email"
+                <activiti:formProperty id="mail"
                                        name="Email"
                                        required="true"
                                        type="string" />
@@ -391,7 +391,7 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                                        name="Address"
                                        required="true"
                                        type="string" />
-                <activiti:formProperty id="phoneNumber"
+                <activiti:formProperty id="telephoneNumber"
                                        name="Phone Number"
                                        required="true"
                                        type="string" />
@@ -450,9 +450,9 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
         <scriptTask id="createManagedUser" scriptFormat="groovy">
             <script>
                 <![CDATA[
-                user = [_id:userName, userName:userName, givenName:givenName, familyName:familyName,
-                email:email, country:country, city:city, stateProvince:stateProvince,
-                postalCode:postalCode, address1:address1, phoneNumber:phoneNumber,
+                user = [_id:userName, userName:userName, givenName:givenName, sn:sn,
+                mail:mail, country:country, city:city, stateProvince:stateProvince,
+                postalCode:postalCode, address1:address1, telephoneNumber:telephoneNumber,
                 department:department, employeeNumber:employeeNumber, displayName:displayName,
                 userType:userType, password:"Passw0rd"]
                 
@@ -542,7 +542,7 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 openidm.create("repo/ui/notification/", null, newContractorNotification)
                 
-                if (emailEnabled) {
+                if (new Boolean(emailEnabled)) {
                     emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The requested user ' + userName + ' was successfully created']
                     openidm.action("external/email", 'sendEmail',  emailParams);
@@ -575,7 +575,7 @@ $(&apos;#taskDetails form select[name=userType]&apos;).val(&quot;{{variables.use
                 ];
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 
-                if (emailEnabled) {
+                if (new Boolean(emailEnabled)) {
                     emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
                     _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your request to create user ' + userName + ' was denied.']
                     openidm.action("external/email", 'sendEmail', emailParams);

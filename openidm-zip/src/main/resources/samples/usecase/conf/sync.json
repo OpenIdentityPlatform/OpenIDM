@@ -31,11 +31,11 @@
                 },
                 {
                     "source" : "mail",
-                    "target" : "email"
+                    "target" : "mail"
                 },
                 {
                     "source" : "mobile",
-                    "target" : "phoneNumber"
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "postalCode",
@@ -43,7 +43,7 @@
                 },
                 {
                     "source" : "sn",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "st",

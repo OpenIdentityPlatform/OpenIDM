@@ -71,7 +71,7 @@
                         {
                             "policyId" : "cannot-contain-others",
                             "params" : {
-                                "disallowedFields" : "userName,givenName,familyName"
+                                "disallowedFields" : "userName,givenName,sn"
                             }
                         },
                         {
@@ -86,7 +86,7 @@
                     ]
                 },
                 {
-                    "name" : "email",
+                    "name" : "mail",
                     "policies" : [
                         {
                             "policyId" : "required"
@@ -114,7 +114,7 @@
                     ]
                 },
                 {
-                    "name" : "familyName",
+                    "name" : "sn",
                     "policies" : [
                         {
                             "policyId" : "required"
@@ -128,7 +128,7 @@
                     ]
                 },
                 {
-                    "name" : "phoneNumber",
+                    "name" : "telephoneNumber",
                     "policies" : [
                         {
                             "policyId" : "required"
