@@ -28,10 +28,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -51,9 +52,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
+import org.forgerock.util.promise.Function;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -78,9 +81,13 @@ import org.slf4j.LoggerFactory;
 @Service
 public class ServletRegistrationSingleton implements ServletRegistration {
 
-    private final static Logger logger = LoggerFactory.getLogger(ServletRegistrationSingleton.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServletRegistrationSingleton.class);
 
-    // Context of this scr component 
+    private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
+
+    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/openidmui/*" };
+
+    // Context of this scr component
     private BundleContext bundleContext;
     
     @Reference
@@ -170,47 +177,28 @@ public class ServletRegistrationSingleton implements ServletRegistration {
      */
     private Filter registerFilterWithWebContainer(JsonValue config) throws Exception {
         // Get required info from config
-        String filterClass = config.get("filterClass").required().asString();
+        String filterClass = config.get(SERVLET_FILTER_CLASS).required().asString();
         logger.info("Using filter class: {}", filterClass);
-        JsonValue urlStrings = config.get("classPathURLs");
-        List<URL> urls = new ArrayList<URL>();
-        for (JsonValue urlStr : urlStrings.expect(List.class)) {
-            try {
-                URL url = new URL(urlStr.asString());
-                urls.add(url);
-                logger.info("Added URL to filter classpath: {}", url);
-            } catch (MalformedURLException ex) {
-                logger.warn("Configured classPathURL is not a valid URL: {}", urlStr, ex);
-                throw ex;
-            }
-        }
+        List<URL> urls = config.get(SERVLET_FILTER_CLASS_PATH_URLS).asList(
+                new Function<JsonValue, URL, JsonValueException>() {
+                    @Override
+                    public URL apply(JsonValue jsonValue) throws JsonValueException {
+                        return jsonValue.asURL();
+                    }
+                });
+        logger.info("Added URLs { {} })) to filter classpath", StringUtils.join(urls, ", "));
 
-        Map<String, Object> preInvokeReqAttributes = config.get("requestAttributes").asMap();
+        Map<String, Object> preInvokeReqAttributes = config.get(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES).asMap();
         
-        String httpContextId = config.get("httpContextId").defaultTo("openidm").asString();
-
         // Servlet names this filter should apply to, e.g. one could also add "OpenIDM Web"
-        List<String> servletNames = null;
-        JsonValue rawServletNames = config.get("servletNames");
-        if (rawServletNames.isNull()) {
-            // default
-            servletNames = new ArrayList<String>();
-            servletNames.add("OpenIDM REST");
-        } else {
-            servletNames = rawServletNames.asList(String.class);
-        }
+        List<String> servletNames = config.get(SERVLET_FILTER_SERVLET_NAMES)
+                .defaultTo(Arrays.asList(DEFAULT_SERVLET_NAME))
+                .asList(String.class);
 
         // URL patterns to apply the filter to, e.g. one could also add "/openidmui/*");
-        List<String> urlPatterns = null;
-        JsonValue rawUrlPatterns = config.get("urlPatterns");
-        if (rawUrlPatterns.isNull()) {
-            // default
-            urlPatterns = new ArrayList<String>();
-            urlPatterns.add("/openidm/*");
-            urlPatterns.add("/openidmui/*");
-        } else {
-            urlPatterns = rawUrlPatterns.asList(String.class);
-        }
+        List<String> urlPatterns = config.get(SERVLET_FILTER_URL_PATTERNS)
+                .defaultTo(Arrays.asList(DEFAULT_SERVLET_URL_PATTERNS))
+                .asList(String.class);
 
         // Filter init params, a string to string map
         JsonValue rawInitParams = config.get("initParams");
@@ -238,17 +226,17 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         }
 
         // Create filter
-        Filter proxiedFilter = (Filter)Proxy.newProxyInstance(filter.getClass().getClassLoader(), new Class[]{Filter.class},
-                        new FilterProxy(filter, filterCL, preInvokeReqAttributes));
+        Filter proxiedFilter = (Filter) Proxy.newProxyInstance(
+                filter.getClass().getClassLoader(),
+                new Class[] { Filter.class },
+                new FilterProxy(filter, filterCL, preInvokeReqAttributes));
 
         // Register filter
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        for (String key : initParams.keySet()) {
-            props.put(key, initParams.get(key));
-        }
-        String [] urlPatternsArray = urlPatterns.toArray(new String[urlPatterns.size()]);
-        String [] servletNamesArray = servletNames.toArray(new String[servletNames.size()]);
-        webContainer.registerFilter(proxiedFilter, urlPatternsArray, servletNamesArray, props, webContainer.getDefaultSharedHttpContext());
+        webContainer.registerFilter(proxiedFilter,
+                urlPatterns.toArray(new String[urlPatterns.size()]),
+                servletNames.toArray(new String[servletNames.size()]),
+                new Hashtable<String, Object>(initParams),
+                webContainer.getDefaultSharedHttpContext());
         return proxiedFilter;
     }
     

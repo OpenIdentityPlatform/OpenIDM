@@ -18,8 +18,19 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
+import org.forgerock.script.Script;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.exception.ScriptThrownException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.script.ScriptException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -38,8 +49,11 @@ import java.util.Map;
  * so OpenIDM can operate properly.
  *
  * @author Phill Cunnington
+ * @author brmiller
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
+
+    private final static Logger logger = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
     /** Authentication username header. */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
@@ -55,6 +69,12 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     private String logClientIPHeader = null;
 
+    /** the auth module configuration */
+    protected JsonValue properties = new JsonValue(null);
+
+    /** an security context augmentation script, if configured */
+    private ScriptEntry augmentScript = null;
+
     /**
      * Extracts the "clientIPHeader" value from the json configuration.
      *
@@ -67,11 +87,22 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     @Override
     public final void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             Map options) throws AuthException {
-        JsonValue jsonValue = new JsonValue(options);
+        properties = new JsonValue(options);
 
-        logClientIPHeader = (String) options.get("clientIPHeader");
+        logClientIPHeader = properties.get("clientIPHeader").asString();
 
-        initialize(requestPolicy, responsePolicy, handler, jsonValue);
+        initialize(requestPolicy, responsePolicy, handler, properties);
+
+        JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
+        if (!scriptConfig.isNull()) {
+            try {
+                augmentScript = OSGiAuthnFilterBuilder.getScriptRegistry().takeScript(scriptConfig);
+                logger.debug("Registered script {}", augmentScript);
+            } catch (ScriptException e) {
+                logger.error("{} when attempting to register script {}", new Object[] { e.toString(), scriptConfig, e});
+                throw new AuthException(e.toString()); // silly AuthException does not support chaining cause!!!
+            }
+        }
     }
 
     /**
@@ -127,10 +158,42 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             }
         });
 
+        if (AuthStatus.SUCCESS.equals(authStatus)) {
+            executeAugmentationScript(securityContextMapper);
+        }
+
         contextMap.putAll(securityContextMapper.getAuthzid());
         messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthcid());
 
         return authStatus;
+    }
+
+    private void executeAugmentationScript(SecurityContextMapper securityContextMapper) throws AuthException {
+        if (null != augmentScript) {
+            try {
+                if (!augmentScript.isActive()) {
+                    throw new ServiceUnavailableException("Failed to execute inactive script: " + augmentScript.getName().toString());
+                }
+
+                // Create internal ServerContext chain for script-call
+                ServerContext context = OSGiAuthnFilterBuilder.getRouter().createServerContext();
+                final Script script = augmentScript.getScript(context);
+                // Pass auth module properties and SecurityContextWrapper details to augmentation script
+                script.put("properties", properties);
+                script.put("security", securityContextMapper.asJsonValue());
+                script.eval();
+            } catch (ScriptThrownException e) {
+                final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
+                logger.error("{} when attempting to execute script {}", new Object[] { re.toString(), augmentScript.getName(), re});
+                throw new AuthException(re.getMessage()); // silly AuthException does not support chaining cause!!!
+            } catch (ScriptException e) {
+                logger.error("{} when attempting to execute script {}", new Object[] { e.toString(), augmentScript.getName(), e});
+                throw new AuthException(e.getMessage()); // silly AuthException does not support chaining cause!!!
+            } catch (ResourceException e) {
+                logger.error("{} when attempting to create server context", e.toString(), e);
+                throw new AuthException(e.getMessage()); // silly AuthException does not support chaining cause!!!
+            }
+        }
     }
 
     /**

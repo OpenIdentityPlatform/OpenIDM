@@ -37,7 +37,9 @@ import org.forgerock.json.fluent.JsonValue;
  *
  */
 public interface RegisteredFilter extends Comparable<RegisteredFilter> {
-    
+
+    public static final String FILTER_ORDER = "order";
+
     /**
      * Returns the registered filter's underlying javax.servlet.Filter object
      * 

@@ -33,6 +33,33 @@ import java.util.Dictionary;
  */
 public interface ServletRegistration {
 
+    /** The canonical class name for the Filter class. */
+    public static final String SERVLET_FILTER_CLASS = "filterClass";
+
+    /** Classpath URLs to use for the servlet filter's classloader. */
+    public static final String SERVLET_FILTER_CLASS_PATH_URLS = "classPathURLs";
+
+    /** Request attributes to set before the servlet filter's doFilter method is invoked */
+    public static final String SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES = "requestAttributes";
+
+    /** Servlet names, or aliases, to which the servlet filter applies. */
+    public static final String SERVLET_FILTER_SERVLET_NAMES = "servletNames";
+
+    /** URL patterns to which the servlet filter applies. */
+    public static final String SERVLET_FILTER_URL_PATTERNS = "urlPatterns";
+
+    /** Initialization arguments for the filter. */
+    public static final String SERVLET_FILTER_INIT_PARAMETERS = "initParams";
+
+    /** System properties required by the filter. */
+    public static final String SERVLET_FILTER_SYSTEM_PROPERTIES = "systemProperties";
+
+    /** Script extensions supported/requested by the filter */
+    public static final String SERVLET_FILTER_SCRIPT_EXTENSIONS = "scriptExtensions";
+
+    /** Script extension to augment security context */
+    public static final String SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT = "augmentSecurityContext";
+
     /**
      * Parses the given servlet filter configuration and registers a servlet filter in OSGi.
      *

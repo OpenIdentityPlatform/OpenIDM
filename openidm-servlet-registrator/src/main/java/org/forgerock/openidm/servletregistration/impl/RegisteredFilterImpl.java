@@ -35,7 +35,6 @@ import org.forgerock.openidm.servletregistration.RegisteredFilter;
  * A RegisteredFilter implementation
  * 
  * @author ckienle
- *
  */
 public class RegisteredFilterImpl implements RegisteredFilter {
  
@@ -47,14 +46,14 @@ public class RegisteredFilterImpl implements RegisteredFilter {
     protected RegisteredFilterImpl(JsonValue config) {
         this.config = config;
         id = UUID.randomUUID();
-        order = config.get("order").defaultTo(0).asInteger();
+        order = config.get(FILTER_ORDER).defaultTo(0).asInteger();
     }
 
     @Override
     public int compareTo(RegisteredFilter filter) {
         return order.compareTo(filter.getOrder());
     }
-    
+
     @Override
     public boolean equals(Object filter) {
         if (filter instanceof RegisteredFilter) {
