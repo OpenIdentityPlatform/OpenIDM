@@ -24,12 +24,15 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.script.ScriptException;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -37,18 +40,21 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.HttpServlet;
-import org.forgerock.json.resource.servlet.HttpServletContextFactory;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
-import org.ops4j.pax.web.service.WebContainer;
+
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -78,6 +84,8 @@ public class ServletComponent implements EventHandler {
 
     public static final String PID = "org.forgerock.openidm.router";
 
+    private static final String SERVLET_ALIAS = "/openidm";
+
     /** Setup logging for the {@link ServletComponent}. */
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
 
@@ -86,33 +94,61 @@ public class ServletComponent implements EventHandler {
 
     @Reference
     private ServletRegistration servletRegistration;
-    
+
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected ScriptRegistry scriptRegistry;
+
+    // Optional scripts to augment/populate the security context
+    private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<ScriptEntry>();
+
+    // Register script extensions configured
+    @Reference(
+            name = "reference_Servlet_ServletFilterRegistrator",
+            referenceInterface = ServletFilterRegistrator.class,
+            bind = "bindRegistrator",
+            unbind = "unbindRegistrator",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT
+    )
+    protected Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap =
+            new HashMap<ServletFilterRegistrator, ScriptEntry>();
+
+    protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
+        JsonValue scriptConfig = registrator.getConfiguration()
+                .get(SERVLET_FILTER_SCRIPT_EXTENSIONS)
+                .get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
+        if (!scriptConfig.isNull() && !scriptConfig.expect(Map.class).isNull()) {
+            try {
+                ScriptEntry augmentScript = scriptRegistry.takeScript(scriptConfig);
+                filterRegistratorMap.put(registrator, augmentScript);
+                augmentSecurityScripts.add(augmentScript);
+                logger.debug("Registered script {}", augmentScript);
+            } catch (ScriptException e) {
+                logger.debug("{} when attempting to registered script {}", new Object[] { e.toString(), scriptConfig, e});
+            }
+        }
+    }
+
+    protected synchronized void unbindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
+        ScriptEntry augmentScript = filterRegistratorMap.remove(registrator);
+        if (augmentScript != null) {
+            augmentSecurityScripts.remove(augmentScript);
+            logger.debug("Deregistered script {}", augmentScript);
+        }
+    }
+
     private HttpServlet servlet;
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
-        logger.debug("Try registering servlet at {}", "/openidm");
+        logger.debug("Try registering servlet at {}", SERVLET_ALIAS);
         servlet = new HttpServlet(connectionFactory,
-                new HttpServletContextFactory() {
-                    @Override
-                    public Context createContext(HttpServletRequest request) throws ResourceException {
+                new IDMSecurityContextFactory(scriptRegistry, augmentSecurityScripts));
 
-                        SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
-                        SecurityContext securityContext = securityContextFactory.createContext(request);
-                        String authcid = securityContext.getAuthenticationId();
-
-                        if (StringUtils.isEmpty(authcid)) {
-                            logger.warn("Rejecting invocation as required context to allow invocation not populated");
-                            throw ResourceException.getException(ResourceException.UNAVAILABLE,
-                                    "Rejecting invocation as required context to allow invocation not populated");
-                        }
-                        return securityContext;
-                    }
-                });
-
-        String alias = "/openidm";
-        servletRegistration.registerServlet(alias, servlet, new Hashtable());
-        logger.info("Registered servlet at {}", "/openidm");
+        servletRegistration.registerServlet(SERVLET_ALIAS, servlet, new Hashtable());
+        logger.info("Registered servlet at {}", SERVLET_ALIAS);
     }
 
     @Deactivate

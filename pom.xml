@@ -252,8 +252,8 @@
         <authnfilter.commons.version>1.3.0</authnfilter.commons.version>
 
         <!-- Commons JSON versions -->
-        <commons.forgerock-util.version>1.2.0</commons.forgerock-util.version>
-        <commons.forgerock-rest.version>2.2.2</commons.forgerock-rest.version>
+        <commons.forgerock-util.version>1.3.1</commons.forgerock-util.version>
+        <commons.forgerock-rest.version>2.2.3</commons.forgerock-rest.version>
         <commons.forgerock-script.version>1.1.3</commons.forgerock-script.version>
 
         <!-- OSGi bundles properties -->
@@ -450,7 +450,7 @@
                 <version>${authnfilter.commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.forgerock.util</groupId>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
                 <version>${commons.forgerock-util.version}</version>
             </dependency>

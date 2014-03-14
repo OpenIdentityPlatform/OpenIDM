@@ -30,6 +30,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class ServletFilterConfiguration {
         logger.info("Successfully registered servlet filter {}", context.getProperties());
 
         origSystemProperties = new HashMap<String, String>();
-        JsonValue rawSystemProperties = config.get("systemProperties");
+        JsonValue rawSystemProperties = config.get(SERVLET_FILTER_SYSTEM_PROPERTIES);
         for (String key : rawSystemProperties.keys()) {
             String prev = System.setProperty(key, rawSystemProperties.get(key).asString());
             // null value is used to keep track of properties that weren't set before

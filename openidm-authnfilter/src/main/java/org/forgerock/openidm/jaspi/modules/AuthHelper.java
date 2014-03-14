@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +102,7 @@ public class AuthHelper {
             UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper, context);
             if (userInfo != null && userInfo.checkCredential(password)) {
                 if (securityContextMapper != null) {
-                    securityContextMapper.setRoles(Collections.unmodifiableList(userInfo.getRoleNames()));
+                    securityContextMapper.setRoles(userInfo.getRoleNames());
                 }
                 return true;
             } else {

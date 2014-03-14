@@ -7,8 +7,13 @@
         "userRoles" : "roles"
     },
     "defaultUserRoles" : [ ],
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "auth/authnPopulateContext.js"
+        }
+    },
     "serverAuthContext" : {
-        "authnPopulateContextScript": "&{launcher.install.location}/bin/defaults/script/auth/authnPopulateContext.js",
         "sessionModule" : {
             "name" : "JWT_SESSION",
             "properties" : {
@@ -26,6 +31,10 @@
             {
                 "name" : "PASSTHROUGH",
                 "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" : "auth/passthroughAuthnPopulateContext.js"
+                    },
                     "passThroughAuth" : "system/AD/account",
                     "propertyMapping" : {
                         "userRoles" : "roles"
@@ -38,6 +47,10 @@
             {
                 "name" : "MANAGED_USER",
                 "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" : "auth/managedAuthnPopulateContext.js"
+                    },
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",
@@ -49,6 +62,10 @@
             {
                 "name" : "INTERNAL_USER",
                 "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" :  "auth/internalAuthnPopulateContext.js"
+                    },
                     "propertyMapping" : {
                         "userId" : "_id",
                         "userCredential" : "password",

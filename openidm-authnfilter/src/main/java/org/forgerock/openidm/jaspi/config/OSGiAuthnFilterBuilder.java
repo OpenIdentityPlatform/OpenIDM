@@ -26,13 +26,26 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.JaspiRuntimeFilter;
+import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;
+
+import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
+import static org.forgerock.openidm.servletregistration.RegisteredFilter.FILTER_ORDER;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS_PATH_URLS;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_URL_PATTERNS;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_INIT_PARAMETERS;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
+
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -52,6 +65,12 @@ import java.util.Map;
  *     <code>
  * {
  *     "serverAuthConfig" : {
+ *         "scriptExtensions" : {
+ *             "augmentSecurityContext" : {
+ *                 "type" : "text/javascript",
+ *                 "file" : "auth/authnPopulateContext.js"
+ *             }
+ *         },
  *         "sessionModule" : {
  *             "name" : "JWT_SESSION",
  *                 "properties" : {
@@ -93,8 +112,6 @@ public class OSGiAuthnFilterBuilder {
     public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
 
     // config tokens
-    private static final String CONFIG_SERVER_AUTH_CONFIG = "serverAuthConfig";
-    private static final String CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT = "authnPopulateContextScript";
     private static final String CONFIG_ADDITIONAL_URL_PATTERNS = "additionalUrlPatterns";
 
     private static final int DEFAULT_FILTER_ORDER = 100;
@@ -125,38 +142,26 @@ public class OSGiAuthnFilterBuilder {
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         instance = this;
-        String authnPopulateScriptLocation = getAuthnPopulateContextScript(config);
+        JsonValue scriptExtensions = config.get(SERVLET_FILTER_SCRIPT_EXTENSIONS);
         List<String> additionalUrlPatterns = getAdditionalUrlPatterns(config);
         configureAuthenticationFilter(config);
 
-        registerAuthnFilter(authnPopulateScriptLocation, additionalUrlPatterns);
+        registerAuthnFilter(scriptExtensions, additionalUrlPatterns);
     }
 
     /**
-     * Gets the authnPopulateContextScript value out of the authentication.json configuration.
-     * <p>
-     * If the property is not defined then the default script is used.
-     *
-     * @param config The authentication json configuration.
-     * @return The authnPopulateContextScript location.
-     */
-    private String getAuthnPopulateContextScript(final JsonValue config) {
-        String authnPopulateScriptLocation = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT)
-                .defaultTo("bin/defaults/script/auth/authnPopulateContext.js").asString();
-        config.get(CONFIG_SERVER_AUTH_CONFIG).remove(CONFIG_AUTHN_POPULATE_CONTEXT_SCRIPT);
-        return authnPopulateScriptLocation;
-    }
-
-    /**
-     * Getes the additional url parameters value out of the authentication.json configuration.
+     * Gets the additional url parameters value out of the authentication.json configuration.
      *
      * @param config The authentication json configuration.
      * @return The additional url parameters, if any.
      */
     private List<String> getAdditionalUrlPatterns(final JsonValue config) {
-        List<String> additionalUrlPatterns = config.get(CONFIG_SERVER_AUTH_CONFIG).get(CONFIG_ADDITIONAL_URL_PATTERNS)
-                .defaultTo(new ArrayList<String>(0)).asList(String.class);
-        config.get(CONFIG_SERVER_AUTH_CONFIG).remove(CONFIG_ADDITIONAL_URL_PATTERNS);
+        List<String> additionalUrlPatterns = config
+                .get(SERVER_AUTH_CONTEXT_KEY)
+                .get(CONFIG_ADDITIONAL_URL_PATTERNS)
+                .defaultTo(new ArrayList<String>(0))
+                .asList(String.class);
+        config.get(SERVER_AUTH_CONTEXT_KEY).remove(CONFIG_ADDITIONAL_URL_PATTERNS);
         return additionalUrlPatterns;
     }
 
@@ -184,6 +189,13 @@ public class OSGiAuthnFilterBuilder {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
 
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected ScriptRegistry scriptRegistry;
+
     /**
      * Returns the Router instance.
      *
@@ -202,8 +214,14 @@ public class OSGiAuthnFilterBuilder {
         return instance.cryptoService;
     }
 
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    /**
+     * Returns the ScriptRegistry instance
+     *
+     * @return the ScriptRegistry instance
+     */
+    public static ScriptRegistry getScriptRegistry() {
+        return instance.scriptRegistry;
+    }
 
     /**
      * Returns the ConnectionFactory instance
@@ -235,37 +253,33 @@ public class OSGiAuthnFilterBuilder {
     /**
      * Registers the Authentication Filter in OSGi.
      *
-     * @param authnPopulateScriptLocation The location of the authn augment context script.
+     * @param scriptExtensions A map of script extensions to register for the filter, namely,
+     *                         the location of the authn augment context script.
      * @param additionalUrlPatterns additional url patterns to which to apply the filter
      * @throws Exception If a problem occurs whilst registering the filter.
      */
-    private void registerAuthnFilter(String authnPopulateScriptLocation, List<String> additionalUrlPatterns)
+    private void registerAuthnFilter(JsonValue scriptExtensions, List<String> additionalUrlPatterns)
             throws Exception {
 
         Map<String, String> initParams = new HashMap<String, String>();
         initParams.put("module-configuration-factory-class", JaspiRuntimeConfigurationFactory.class.getName());
         initParams.put("logging-configurator-class", JaspiRuntimeConfigurationFactory.class.getName());
 
-        Map<String, String> augmentSecurityContext = new HashMap<String, String>();
-        augmentSecurityContext.put("type", "text/javascript");
-        augmentSecurityContext.put("file", authnPopulateScriptLocation);
-
-        Map<String, Object> scriptExtensions = new HashMap<String, Object>();
-        scriptExtensions.put("augmentSecurityContext", augmentSecurityContext);
-
         List<String> urlPatterns = new ArrayList<String>();
         urlPatterns.add("/openidm/*");
         urlPatterns.addAll(additionalUrlPatterns);
 
         Map<String, Object> filterConfig = new HashMap<String, Object>();
-        filterConfig.put("classPathURLs", new ArrayList<String>());
-        filterConfig.put("systemProperties", new HashMap<String, Object>());
-        filterConfig.put("requestAttributes", new HashMap<String, Object>());
-        filterConfig.put("initParams", initParams);
-        filterConfig.put("scriptExtensions", scriptExtensions);
-        filterConfig.put("urlPatterns", urlPatterns);
-        filterConfig.put("filterClass", JaspiRuntimeFilter.class.getCanonicalName());
-        filterConfig.put("order", DEFAULT_FILTER_ORDER);
+        filterConfig.put(SERVLET_FILTER_CLASS_PATH_URLS, new ArrayList<String>());
+        filterConfig.put(SERVLET_FILTER_SYSTEM_PROPERTIES, new HashMap<String, Object>());
+        filterConfig.put(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES, new HashMap<String, Object>());
+        filterConfig.put(SERVLET_FILTER_INIT_PARAMETERS, initParams);
+        filterConfig.put(SERVLET_FILTER_URL_PATTERNS, urlPatterns);
+        filterConfig.put(SERVLET_FILTER_CLASS, JaspiRuntimeFilter.class.getCanonicalName());
+        filterConfig.put(FILTER_ORDER, DEFAULT_FILTER_ORDER);
+        if (!scriptExtensions.isNull() && scriptExtensions.isMap()) {
+            filterConfig.put(SERVLET_FILTER_SCRIPT_EXTENSIONS, scriptExtensions.asMap());
+        }
 
         JsonValue filterConfigJson = new JsonValue(filterConfig);
 

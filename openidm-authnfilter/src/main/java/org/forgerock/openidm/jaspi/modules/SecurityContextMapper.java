@@ -16,49 +16,60 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.fluent.JsonValue;
+import static org.forgerock.json.resource.SecurityContext.AUTHZID_ID;
+import static org.forgerock.json.resource.SecurityContext.AUTHZID_COMPONENT;
+import static org.forgerock.json.resource.SecurityContext.AUTHZID_ROLES;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A JsonValue-wrapper to contain the security context information before the
+ * SecurityContext proper is built.
+ */
 public class SecurityContextMapper {
+    private static final String AUTHENTICATION_ID = "authenticationId";
+    private static final String AUTHORIZATION_ID = "authorizationId";
 
-    private String authcid;
-    private final Map<String, Object> authzid;
+    private final JsonValue authData;
 
     public SecurityContextMapper() {
-        authzid = new HashMap<String, Object>();
+        authData = new JsonValue(new HashMap<String, Object>());
+        authData.put(AUTHORIZATION_ID, new HashMap<String, Object>());
     }
 
     public void setUsername(String username) {
-        authcid = username;
+        authData.put(AUTHENTICATION_ID, username);
     }
 
     public void setUserId(String userId) {
-        authzid.put(SecurityContext.AUTHZID_ID, userId);
+        authData.get(AUTHORIZATION_ID).put(AUTHZID_ID, userId);
     }
 
     public void setResource(String resource) {
-        authzid.put(SecurityContext.AUTHZID_COMPONENT, resource);
+        authData.get(AUTHORIZATION_ID).put(AUTHZID_COMPONENT, resource);
     }
 
     public void setRoles(List<String> roles) {
-        authzid.put(SecurityContext.AUTHZID_ROLES, roles);
+        authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, roles);
     }
 
     public List<String> getRoles() {
-        return Collections.unmodifiableList((List<? extends String>) authzid.get(SecurityContext.AUTHZID_ROLES));
+        return Collections.unmodifiableList((List<? extends String>) authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).asList(String.class));
     }
 
     public String getAuthcid() {
-        return authcid;
+        return authData.get(AUTHENTICATION_ID).asString();
     }
 
     public Map<String, Object> getAuthzid() {
-        return Collections.unmodifiableMap(authzid);
+        return Collections.unmodifiableMap(authData.get(AUTHORIZATION_ID).asMap());
+    }
+
+    protected JsonValue asJsonValue() {
+        return authData;
     }
 }

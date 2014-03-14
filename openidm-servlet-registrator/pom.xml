@@ -46,6 +46,11 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+            <version>${commons.forgerock-util.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
