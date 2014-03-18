@@ -13,7 +13,7 @@
                     <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
                     <div class="float-left separate-message">
                         <div class="group-input-span">
-                            <input type="text" id="userName" name="userName" value="" data-validation-dependents="password" required/>
+                            <input type="text" id="userName" name="userName" value="" data-validation-dependents="password" required autofocus/>
                             <span class="error">x</span>
                         </div>
                         <div class="validation-message"></div>
@@ -99,7 +99,7 @@
 
                 <p>{{t "templates.user.ChangeSecurityDataDialogTemplate.securityQuestionAndAnserExplanation"}}</p>
               
-                <div class="group-field-block ">
+                <div class="group-field-block">
                     <label for="securityQuestion" class="light align-right">{{t "common.user.securityQuestion"}}</label>
                     <div class="group-input-span">
                         <select id="securityQuestion" name="securityQuestion"></select>  
@@ -139,7 +139,7 @@
                     <label for="passPhrase" class="light align-right">{{t "common.user.sitePhrase"}}</label>
                     <div class="float-left separate-message">
                         <div class="group-input-span">
-                            <input type="text" name="passPhrase" />
+                            <input type="text" name="passPhrase" required/>
                             <span class="error">x</span>
                         </div>
                         <div class="validation-message"></div>
