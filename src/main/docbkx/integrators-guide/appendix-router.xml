@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2014 ForgeRock AS
   !    
 -->
 <appendix xml:id="appendix-router"
@@ -28,9 +28,9 @@
  xml:lang="en"
  xmlns="http://docbook.org/ns/docbook"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ xsi:schemaLocation="http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Router Service Reference</title>
   <indexterm>
    <primary>Router service</primary>
@@ -76,7 +76,8 @@
       <para>string, optional</para>
       <para>Specifies a regular expression pattern matching the JSON pointer of
       the object to trigger scripts. If not specified, all identifiers
-      (including <literal>null</literal>) match.</para>
+      (including <literal>null</literal>) match. Pattern matching is done on the
+      resource name, rather than on individual objects.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -157,7 +158,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             }
         },
         {
-            "pattern" : "^managed/user/.*",
+            "pattern" : "^managed/user",
             "methods" : [
                 "read"
             ],
@@ -167,7 +168,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             }
         },
         {
-            "pattern" : "^managed/user/.*",
+            "pattern" : "^managed/user",
             "methods" : [
                 "read"
             ],
@@ -177,7 +178,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             }
         },
         {
-            "pattern" : "^managed/user/.*",
+            "pattern" : "^managed/user",
             "methods" : [
                 "read"
             ],
@@ -187,7 +188,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             }
         },
         {
-            "pattern" : "^managed/user/.*",
+            "pattern" : "^managed/user",
             "methods" : [
                 "read"
             ],
@@ -206,7 +207,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
 requestFilter 1
 requestFilter 2
 responseFilter 2
-responseFilter 1    
+responseFilter 1
     </screen>
     
   </section>
@@ -323,7 +324,7 @@ responseFilter 1
 {
     "filters": [
         {
-            "pattern": "^managed/user/.*",
+            "pattern": "^managed/user",
             "methods": [
                 "create",
                 "update"
