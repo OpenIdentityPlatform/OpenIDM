@@ -54,12 +54,15 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             event.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
-                var data = form2js(this.$el.attr("id"), '.', false), self = this, oldUserName;
+                var data = form2js(this.$el.attr("id"), '.', false),
+                    formData = new FormData(),
+                    self = this, 
+                    oldUserName;
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
                 oldUserName = data.oldUserName;
                 delete data.oldUserName;                
-                
+
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
                 data.telephoneNumber = data.telephoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
@@ -69,6 +72,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
+
+
                     
                     userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;

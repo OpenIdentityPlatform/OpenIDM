@@ -18,7 +18,7 @@
                 <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
                 <div class="float-left separate-message">
                     <div class="group-input-span">
-                        <input type="text" id="userName" name="userName" required autofocus >
+                        <input type="text" id="userName" name="userName" autofocus >
                         <span class="error">x</span>
                     </div>
                     <div class="validation-message"></div>
@@ -34,7 +34,7 @@
                 <label for="givenName" class="light align-right">{{t "common.user.givenName"}}</label>
                 <div class="float-left separate-message">
                     <div class="group-input-span">
-                        <input type="text" id="givenName" name="givenName" value="" required />
+                        <input type="text" id="givenName" name="givenName" value="" />
                         <span class="error">x</span>
                     </div>
                     <div class="validation-message"></div>
@@ -45,7 +45,7 @@
                 <label for="sn" class="light align-right">{{t "common.user.familyName"}}</label>
                 <div class="float-left separate-message">
                     <div class="group-input-span">
-                        <input type="text" id="sn" name="sn" value="" required />
+                        <input type="text" id="sn" name="sn" value="" />
                         <span class="error">x</span>
                     </div>
                     <div class="validation-message"></div>
@@ -60,7 +60,7 @@
                 <label for="mail" class="light align-right">{{t "common.user.emailAddress"}}</label>
                 <div class="float-left separate-message">
                     <div class="group-input-span">
-                        <input type="email" id="mail" name="mail" value=""  required />
+                        <input type="email" id="mail" name="mail" value="" />
                         <span class="error">x</span>
                     </div>
                     <div class="validation-message"></div>
@@ -91,7 +91,7 @@
                 <label for="telephoneNumber" class="light align-right">{{t "common.user.phoneNumber"}}</label>
                 <div class="float-left separate-message">
                     <div class="group-input-span">
-                        <input type="tel" id="telephoneNumber" name="telephoneNumber" value="" required />
+                        <input type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
                         <span class="error">x</span>
                     </div>
                     <div class="validation-message"></div>
@@ -141,7 +141,6 @@
             </div>
 
         </div>
-   
 
         <div class="float-right group-actions-block"> 
             <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button" disabled />
