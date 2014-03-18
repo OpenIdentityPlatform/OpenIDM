@@ -97,8 +97,7 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
     private boolean isSecurityContextPopulated(SecurityContext context) {
         return !StringUtils.isEmpty(context.getAuthenticationId())
             && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_ID).toString())
-            && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString())
-            && !((List) context.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES)).isEmpty();
+            && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString());
     }
 
     /**
