@@ -611,7 +611,7 @@ Using OPENIDM_OPTS:   -Xmx1024m -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp
 Using LOGGING_CONFIG: -Djava.util.logging.config.file=/Users/lana/openidm/conf/logging.properties
 Listening for transport dt_socket at address: 5005
 Using boot properties at /Users/lana/openidm/conf/boot/boot.properties
-OpenIDM version "2.1.0-SNAPSHOT" (revision: 2144)
+OpenIDM version "3.0.0-SNAPSHOT" (revision: 2985)
 -> OpenIDM ready</screen>
              <para>The relevant JPDA options are outlined in the startup script
              (<literal>startup.sh</literal>).</para>
