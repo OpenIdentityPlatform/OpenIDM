@@ -38,16 +38,19 @@
   <primary>Security</primary>
  </indexterm>
 
-    <para>OpenIDM provides a security management service, that manages keystore
-    and truststore files.
-    The security service is accessible over the REST interface, enabling you to
-    read and import SSL certificates, and to generate certificate signing
-    requests.
-    This chapter describes the security management service and its REST interface.</para>
-
-    <para>In addition, the chapter outlines the specific security procedures
-    that you should follow before deploying OpenIDM in a production environment.
-    </para>
+ <para>
+  OpenIDM provides a security management service, that manages keystore and
+  truststore files. The security service is accessible over the REST interface,
+  enabling you to read and import SSL certificates, and to generate certificate
+  signing requests.
+ </para>
+ <para>
+  This chapter describes the security management service and its REST interface.
+ </para>
+ <para>
+  In addition, the chapter outlines the specific security procedures that you
+  should follow before deploying OpenIDM in a production environment.
+ </para>
 
     <!--TODO Integrate post-CREST merge into trunk
     With CREST, the security service changes slightly wrt the end points and
@@ -84,101 +87,111 @@
   -->
 
  <section xml:id="security-management-service">
-     <title>Accessing the Security Management Service</title>
+  <title>Accessing the Security Management Service</title>
 
-     <para>OpenIDM stores keystore and truststore files in a folder named
-     <filename>/path/to/openidm/security</filename>. These files can be managed
-     by using the <command>keytool</command> command, or over the REST
-     interface, at the URL
-     <literal>http://localhost:8080/openidm/security</literal>. For information
-     about using the <command>keytool</command> command, see
-     <link xlink:href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html" />.
-     </para>
+  <para>
+   OpenIDM stores keystore and truststore files in a folder named
+   <filename>/path/to/openidm/security</filename>. These files can be managed by
+   using the <command>keytool</command> command, or over the REST interface, at
+   the URL <literal>http://localhost:8080/openidm/security</literal>. For
+   information about using the <command>keytool</command> command, see
+   <link xlink:href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html" />.
+  </para>
 
-     <para>The following sections describe how to manage certificates and keys over
-     REST.</para>
+  <para>
+   The following sections describe how to manage certificates and keys over REST.
+  </para>
 
-     <example xml:id="display-keystore-over-rest">
-         <title>To Display the Contents of the Keystore</title>
+  <example xml:id="display-keystore-over-rest">
+   <title>To Display the Contents of the Keystore</title>
 
-         <para>When OpenIDM is first deployed (but not yet started) there is a
-         single entry in the keystore, with the alias
-         <literal>openidm-local-openidm-forgerock-org</literal>. This is an
-         internal private key and should not be modified.
-         </para>
+   <para>
+    OpenIDM generates a symmetric key and a private key the first time the
+    server is started. After startup, you can display the contents of the
+    keystore over REST, as follows:
+   </para>
 
-         <para>OpenIDM generates a symmetric key and a private key the first
-         time the server is started. After startup, you can display the
-         contents of the keystore over REST, as follows:</para>
-
-         <screen>$ curl
+   <screen>
+    <userinput>
+$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/security/keystore
+    </userinput>
+    <computeroutput>
  {
   "aliases": [
     "openidm-sym-default",
-    "openidm-localhost",
-    "openidm-local-openidm-forgerock-org"
+    "openidm-localhost"
   ],
   "type": "JCEKS",
   "provider": {
     "KeyGenerator.Blowfish": "com.sun.crypto.provider.BlowfishKeyGenerator",
     "Alg.Alias.KeyFactory.DH": "DiffieHellman",
   ...
-  }</screen>
+  }
+    </computeroutput>
+   </screen>
 
-         <itemizedlist>
-             <para>By default, OpenIDM includes the following aliases:</para>
-             <listitem>
-                 <para><literal>openidm-sym-default</literal> - the default
-                 symmetric key that is used, for example, to encrypt the
-                 configuration.</para>
-             </listitem>
-             <listitem>
-                 <para><literal>openidm-localhost</literal> - the default
-                 alias that is used by the Jetty web server to service SSL
-                 requests. This alias references a private key and a self-signed
-                 certificate. You can use the self-signed certificate for
-                 testing purposes. When you deploy OpenIDM in a production
-                 environment, you should replace the self-signed certificate
-                 with a certificate that has been signed by a certificate
-                 authority.</para>
-             </listitem>
-             <listitem>
-                 <para><literal>openidm-local-openidm-forgerock-org</literal>
-                 - an internal private key.</para>
-             </listitem>
-         </itemizedlist>
-     </example>
+   <itemizedlist>
+    <para>
+     By default, OpenIDM includes the following aliases:
+    </para>
+    <listitem>
+     <para>
+      <literal>openidm-sym-default</literal> - the default symmetric key that is
+      used, for example, to encrypt the configuration.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>openidm-localhost</literal> - the default alias that is used by
+      the Jetty web server to service SSL requests. This alias references a
+      private key and a self-signed certificate. You can use the self-signed
+      certificate for testing purposes. When you deploy OpenIDM in a production
+      environment, you should replace the self-signed certificate with a
+      certificate that has been signed by a certificate authority.
+     </para>
+    </listitem>
+   </itemizedlist>
+  </example>
 
-     <section xml:id="csr-over-rest">
-         <title>To Generate a Certificate Signing Request Over REST</title>
+  <section xml:id="csr-over-rest">
+   <title>To Generate a Certificate Signing Request Over REST</title>
 
-         <para>To request a signed certificate, generate a certificate signing
-         request (CSR) over REST, as described in this section. The details of
-         the CSR are specified in JSON format, for example:</para>
-             <programlisting language="javascript">{
-"DN" : "www.example.com",
-"OU" : "HR",
-"L"  : "Cupertino",
-"C"  : "US",}</programlisting>
+   <para>
+    To request a signed certificate, generate a certificate signing request
+    (CSR) over REST, as described in this section. The details of the CSR are
+    specified in JSON format, for example:
+   </para>
+   <programlisting language="javascript">
+{
+    "DN" : "www.example.com",
+    "OU" : "HR",
+    "L"  : "Cupertino",
+    "C"  : "US"
+}
+   </programlisting>
 
-         <para>For information about the complete contents of a CSR, see
-         <link xlink:href="http://www.sslshopper.com/what-is-a-csr-certificate-signing-request.html" />.
-         </para>
+   <para>
+    For information about the complete contents of a CSR, see
+    <link xlink:href="http://www.sslshopper.com/what-is-a-csr-certificate-signing-request.html" />.
+   </para>
 
-         <para>To generate a CSR over the REST interface, include the private
-         key alias in the URL.
-         The following example, uses the default alias
-         (<literal>openidm-localhost</literal>).
-         If you have created your own private key for this request, specify its
-         alias instead of <literal>openidm-localhost</literal>.
-         Specify <literal> "returnPrivateKey" : true</literal> to return the
-         private key along with the request. </para>
+   <para>
+    To generate a CSR over the REST interface, include the private key alias in
+    the URL. The following example, uses the default alias
+    (<literal>openidm-localhost</literal>). If you have created your own private
+    key for this request, specify its alias instead of
+    <literal>openidm-localhost</literal>. Specify
+    <literal> "returnPrivateKey" : true</literal> to return the private key
+    along with the request.
+   </para>
 
-         <screen width="90">$ curl
+   <screen width="90">
+    <userinput>
+$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -188,7 +201,8 @@
  "C"  : "US",
  "returnPrivateKey" : true}'
  "http://localhost:8080/openidm/security/keystore/openidm-localhost?_action=generateCSR"
-
+    </userinput>
+    <computeroutput>
 {
   "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmjCCAYICAQAwVzEYMBYGA1UEAwwPd3d3LmV4YW
              1wbGUuY29tMQswCQYDVQQL\nDAJIUjENMAsGA1UECgwETm9uZTESMBAGA1UEBwwJQ3VwZXJ0aW5v
@@ -243,42 +257,47 @@
              -----\n",
     "format": "X.509"
   }
-}</screen>
+}
+    </computeroutput>
+   </screen>
 
-         <para>This sample request returns the CSR, the private key associated
-         with the request, and the public key.
-         The security management service stores the private key in the
-         repository.
-         When the signed certificate is returned by the certificate authority
-         and you import the certificate into the keystore, you do not need to
-         supply the private key.
-         The security management service locates the private key in the
-         repository, adds the certificate chain, and loads it into the
-         keystore.</para>
+   <para>
+    This sample request returns the CSR, the private key associated with the
+    request, and the public key. The security management service stores the
+    private key in the repository.
+    When the signed certificate is returned by the certificate authority and you
+    import the certificate into the keystore, you do not need to supply the
+    private key. The security management service locates the private key in the
+    repository, adds the certificate chain, and loads it into the keystore.
+   </para>
 
-         <para>If you will be importing the signed certificate into the keystore
-         of an OpenIDM instance that is not connected to the repository in which
-         this private key was stored, you must include the private key when you
-         import the signed certificate.
-         Setting <literal>"returnPrivateKey" : true</literal> in the CSR enables
-         you to maintain a copy of the private key for this purpose.</para>
+   <para>
+    If you will be importing the signed certificate into the keystore of an
+    OpenIDM instance that is not connected to the repository in which this
+    private key was stored, you must include the private key when you import the
+    signed certificate. Setting <literal>"returnPrivateKey" : true</literal> in
+    the CSR enables you to maintain a copy of the private key for this purpose.
+   </para>
 
-         <para>Send the output from
-         <literal>"csr": "-----BEGIN CERTIFICATE REQUEST----- ... -----END CERTIFICATE REQUEST-----</literal>
-         to your certificate authority for signature.</para>
+   <para>Send the output from
+    <literal>"csr": "-----BEGIN CERTIFICATE REQUEST----- ... -----END CERTIFICATE REQUEST-----</literal>
+    to your certificate authority for signature.
+   </para>
+  </section>
 
-     </section>
+  <section xml:id="import-signed-cert-over-rest">
+   <title>To Import a Signed Certificate into the Keystore</title>
+   <para>
+    When a signed certificate is returned by the certificate authority, import
+    it into the keystore by running a RESTful <literal>PUT</literal> command on
+    the keystore alias. Include the CA root certificate in the command. If you
+    are not importing the certificate into the same keystore as the one from
+    which the CSR was generated, include the private key in the PUT request.
+   </para>
 
-     <section xml:id="import-signed-cert-over-rest">
-         <title>To Import a Signed Certificate into the Keystore</title>
-         <para>When a signed certificate is returned by the certificate authority,
-         import it into the keystore by running a RESTful <literal>PUT</literal>
-         command on the keystore alias. Include the CA root certificate in the
-         command. If you are not importing the certificate into the same keystore
-         as the one from which the CSR was generated, include the private key in
-         the PUT request.</para>
-
-         <screen width="90">$ curl
+   <screen width="90">
+    <userinput>
+$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
@@ -361,25 +380,31 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
 -----END RSA PRIVATE KEY-----"
  }'
  "http://localhost:8080/openidm/security/keystore/openidm-localhost"
-
+    </userinput>
+    <computeroutput>
 {
     "_id": "openidm-localhost"
-}</screen>
+}
+    </computeroutput>
+   </screen>
 
-         <para>If the import is successful, the command returns the alias of
-         the keystore to which the signed certificate was added.</para>
-     </section>
-
+   <para>
+    If the import is successful, the command returns the alias of the keystore
+    to which the signed certificate was added.
+   </para>
+  </section>
  </section>
 
  <section xml:id="security-precautions">
-     <title>Security Precautions for a Production Environment</title>
+  <title>Security Precautions for a Production Environment</title>
 
-     <para>Out of the box, OpenIDM is set up for ease of development and
-     deployment. When you deploy OpenIDM in production, there are specific
-     precautions you should take to minimize security breaches. After following
-     the guidance in this section, make sure that you test your installation
-     to verify that it behaves as expected before putting it into production.</para>
+  <para>
+   Out of the box, OpenIDM is set up for ease of development and deployment.
+   When you deploy OpenIDM in production, there are specific precautions you
+   should take to minimize security breaches. After following the guidance in
+   this section, make sure that you test your installation to verify that it
+   behaves as expected before putting it into production.
+  </para>
 
  <section xml:id="security-ssl-https">
   <title>Use SSL and HTTPS</title>
@@ -405,35 +430,47 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
  </section>
 
  <section xml:id="rest-over-https">
-     <title>Restrict REST Access to the HTTPS Port</title>
+  <title>Restrict REST Access to the HTTPS Port</title>
 
-     <para>Use certificates to secure REST access, over HTTPS. OpenIDM generates
-     a self-signed certificate when it first starts up. You can use this
-     certificate to test secure REST access. Note that in production systems,
-     it is recommended that you replace this certificate with a certificate
-     that has been signed by a certificate authority.</para>
+  <para>
+   Use certificates to secure REST access, over HTTPS. OpenIDM generates a
+   self-signed certificate when it first starts up. You can use this certificate
+   to test secure REST access. Note that in production systems, it is
+   recommended that you replace this certificate with a certificate that has
+   been signed by a certificate authority.
+  </para>
+  <para>
+   The following procedure shows how to secure REST access using the default
+   self-signed certificate.
+  </para>
 
-     <para>The following procedure shows how to secure REST access using the
-     default self-signed certificate.</para>
-
-     <procedure>
-         <step>
-             <para>Extract the certificate that is generated when OpenIDM
-             starts up.</para>
-
-             <screen>$ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null</screen>
-
-             <para>This command outputs the entire certificate to the terminal.</para>
-         </step>
-         <step>
-             <para>Using any text editor, create a file named
-             <filename>self-signed.crt</filename>. Copy the portion of the
-             certificate from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal>
-             to <literal>­­­­­END CERTIFICATE­­­­­</literal> and paste it into the
-             <filename>self-signed.crt</filename> file. Your
-             <filename>self-signed.crt</filename> file should now contain
-             something like the following:</para>
-             <screen>$ more self-signed.crt
+  <procedure>
+   <step>
+    <para>
+     Extract the certificate that is generated when OpenIDM starts up.
+    </para>
+    <screen>
+     $ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null
+    </screen>
+    <para>
+     This command outputs the entire certificate to the terminal.
+    </para>
+   </step>
+   <step>
+    <para>
+     Using any text editor, create a file named
+     <filename>self-signed.crt</filename>. Copy the portion of the certificate
+     from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal> to
+     <literal>­­­­­END CERTIFICATE­­­­­</literal> and paste it into the
+     <filename>self-signed.crt</filename> file. Your
+     <filename>self-signed.crt</filename> file should now contain something like
+     the following:
+    </para>
+    <screen>
+     <userinput>
+      $ more self-signed.crt
+     </userinput>
+     <computeroutput>
 -----BEGIN CERTIFICATE-----
 MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
 cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
@@ -446,17 +483,25 @@ wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
 m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
 UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
 s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
------END CERTIFICATE-----</screen>
-         </step>
-         <step>
-             <para>Test REST access on the HTTPS port, referencing the
-             self-signed certificate in the command. For example:</para>
-             <screen>$ curl
+-----END CERTIFICATE-----
+     </computeroutput>
+    </screen>
+   </step>
+   <step>
+    <para>
+     Test REST access on the HTTPS port, referencing the self-signed certificate
+     in the command. For example:
+    </para>
+    <screen>
+     <userinput>
+$ curl
  --header "X-OpenIDM-Username:openidm-admin"
  --header "X-OpenIDM-Password:openidm-admin"
  --cacert self-signed.crt
  --request GET
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
+     </userinput>
+     <computeroutput>
 {
     "conversion-time-ms": 0,
     "result": [
@@ -466,16 +511,19 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
         }
     ],
     "query-time-ms": 1
-}</screen>
-             <note>
-                 <para>If you receive the response
-                 <literal>curl: (52) Empty reply from server</literal>, check
-                 that you have, in fact, used <literal>https</literal> (not
-                 <literal>http</literal>) and the secure port in the URL.</para>
-             </note>
-         </step>
-
-     </procedure>
+}
+     </computeroutput>
+    </screen>
+    <note>
+     <para>
+      If you receive the response
+      <literal>curl: (52) Empty reply from server</literal>, check that you
+      have, in fact, used <literal>https</literal> (not <literal>http</literal>)
+      and the secure port in the URL.
+     </para>
+    </note>
+   </step>
+  </procedure>
  </section>
 
  <section xml:id="security-encrypt-data">
@@ -521,11 +569,14 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
 
   <para>The following examples show successful authentications.</para>
 
-  <screen>$ curl
+  <screen>
+   <userinput>
+$ curl
  --dump-header /dev/stdout
  --user openidm-admin:openidm-admin
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+   </userinput>
+   <computeroutput>
 HTTP/1.1 200 OK
 Set-Cookie: JSESSIONID=2l0zobpuk6st1b2m7gvhg5zas;Path=/
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
@@ -536,13 +587,16 @@ Server: Restlet-Framework/2.0.9
 Transfer-Encoding: chunked
 
 {"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+   </computeroutput>
 
+   <userinput>
 $ curl
  --dump-header /dev/stdout
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+   </userinput>
+   <computeroutput>
 HTTP/1.1 200 OK
 Set-Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8;Path=/
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
@@ -553,13 +607,16 @@ Server: Restlet-Framework/2.0.9
 Transfer-Encoding: chunked
 
 {"query-time-ms":0,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+   </computeroutput>
 
+   <userinput>
 $ curl
  --dump-header /dev/stdout
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
  --header "X-Requested-With: OpenIDM Plugin"
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+   </userinput>
+   <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
 Date: Wed, 18 Jan 2012 10:37:20 GMT
@@ -567,7 +624,9 @@ Accept-Ranges: bytes
 Server: Restlet-Framework/2.0.9
 Transfer-Encoding: chunked
 
-{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}</screen>
+{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+   </computeroutput>
+  </screen>
 
   <para>Notice that the last example uses the cookie OpenIDM set in the
   response to the previous request, and includes the
@@ -579,13 +638,16 @@ Transfer-Encoding: chunked
 
   <para>You can also request one-time authentication without a session.</para>
 
-  <screen>$ curl
+  <screen>
+   <userinput>
+$ curl
  --dump-header /dev/stdout
  --header "X-OpenIDM-NoSession: true"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+   </userinput>
+   <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
 Date: Wed, 18 Jan 2012 10:52:27 GMT
@@ -593,32 +655,45 @@ Accept-Ranges: bytes
 Server: Restlet-Framework/2.0.9
 Transfer-Encoding: chunked
 
-{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}</screen>
+{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+   </computeroutput>
+  </screen>
 
   <para>To log out and destroy the session, send the specific OpenIDM
   header.</para>
 
-  <screen>$ curl
+  <screen>
+   <userinput>
+$ curl
  --dump-header /dev/stdout
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
  --header "X-Requested-With: OpenIDM Plugin"
  --header "X-OpenIDM-Logout: true"
  "http://localhost:8080/openidm/"
-
-HTTP/1.1 204 No Content</screen>
+   </userinput>
+   <computeroutput>
+HTTP/1.1 204 No Content
+   </computeroutput>
+  </screen>
 
   <para>OpenIDM creates the <literal>openidm-admin</literal> user with password
   <literal>openidm-admin</literal> by default. This internal user is stored in
   OpenIDM's repository.</para>
 
-  <screen>mysql&gt; select objectid,roles from internaluser;
+  <screen>
+   <userinput>
+mysql&gt; select objectid,roles from internaluser;
+   </userinput>
+   <computeroutput>
 +---------------+----------------------------------+
 | objectid      | roles                            |
 +---------------+----------------------------------+
 | anonymous     | openidm-reg                      |
 | openidm-admin | openidm-admin,openidm-authorized |
 +---------------+----------------------------------+
-2 rows in set (0.00 sec)</screen>
+2 rows in set (0.00 sec)
+   </computeroutput>
+  </screen>
 
   <indexterm>
    <primary>Authentication</primary>
@@ -664,7 +739,9 @@ HTTP/1.1 204 No Content</screen>
 
    <step>
     <para>Add the new key to the key store.</para>
-    <screen>$ cd /path/to/openidm/
+    <screen>
+     <userinput>
+$ cd /path/to/openidm/
 $ keytool
  -genseckey
  -alias new-sym-key
@@ -672,11 +749,14 @@ $ keytool
  -keysize 128
  -keystore security/keystore.jceks
  -storetype JCEKS
+     </userinput>
+     <computeroutput>
 Enter keystore password:
 Enter key password for &lt;new-sym-key&gt;
   (RETURN if same as keystore password):
 Re-enter new password:
-$ </screen>
+     </computeroutput>
+    </screen>
     <para>Also see
     <filename>openidm/samples/security/keystore_readme.txt</filename>.</para>
    </step>
@@ -694,8 +774,12 @@ $ </screen>
    <step>
     <para>Use the <command>encrypt</command> command to obtain the encrypted 
     version of the new password.</para>
-    <screen>$ cd /path/to/openidm/
+    <screen>
+     <userinput>
+$ cd /path/to/openidm/
 $ cli.sh encrypt newpwd
+     </userinput>
+     <computeroutput>
 ...
 -----BEGIN ENCRYPTED VALUE-----
 {
@@ -709,7 +793,9 @@ $ cli.sh encrypt newpwd
     "type" : "x-simple-encryption"
   }
 }
-------END ENCRYPTED VALUE------</screen>
+------END ENCRYPTED VALUE------
+     </computeroutput>
+    </screen>
    </step>
    <step>
     <para>Replace the user object in the
@@ -765,24 +851,43 @@ $ cli.sh encrypt newpwd
   over HTTP are <literal>/openidm/managed/</literal> and <literal>/openidm/config/</literal>.
   Other URIs are triggered indirectly, or are for internal consumption.</para>
   
-  <para>OpenIDM supports native query expressions on the JDBC repository and it 
-  is possible to enable these over HTTP, for example:</para>
+  <para>OpenIDM supports native query expressions on the repository, and it is
+   possible to enable these over HTTP, for example:</para>
   
   <screen width="91">$curl 
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"</screen>
   
-  <para>By default, direct HTTP access to native queries is disallowed, and 
-  should remain so in production systems. To enable native queries on the JDBC 
-  repository over HTTP, specifically for testing or development purposes, 
-  remove the custom authorization call from the router authorization script 
-  (<filename>openidm/script/router-authz.js</filename>).</para>
+  <para>
+   By default, direct HTTP access to native queries is disallowed, and should
+   remain so in production systems. To enable native queries on the repository
+   over HTTP, specifically for testing or development purposes, edit the access
+   control configuration file (<filename>access.js</filename>) to remove any
+   instances of <literal>"disallowQueryExpression()"</literal>. For example:
+  </para>
   
-  <screen>"customAuthz" : "disallowQueryExpression()"</screen>
-  
-  <para>Remember to remove the comma at the end of the preceding line as 
-  well.</para>
+  <programlisting language="javascript">
+{
+    "pattern"   : "*",
+    "roles"     : "openidm-admin",
+    "methods"   : "*", // default to all methods allowed
+    "actions"   : "*", // default to all actions allowed
+ // "customAuthz" : "disallowQueryExpression()",
+    "excludePatterns": "system/*"
+},
+...
+{
+    "pattern"   : "system/*",
+    "roles"     : "openidm-admin",
+    "methods"   : "create,read,update,delete,patch,query", // restrictions on 'action'
+    "actions"   : ""
+ // "customAuthz" : "disallowQueryExpression()"
+},
+...
+"customAuthz" : "ownDataOnly() &amp;&amp; managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')",
+
+  </programlisting>
 
   <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
@@ -867,12 +972,16 @@ $ cli.sh encrypt newpwd
      provided with OpenIDM:
     </para>
     <screen>
+     <userinput>
 $ java -jar /path/to/openidm/bundle/openidm-crypto-2.1.0-SNAPSHOT.jar
+     </userinput>
+     <computeroutput>
 This utility helps obfuscate passwords to prevent casual observation.
 It is not securely encrypted and needs further measures to prevent disclosure.
 Please enter the password:
 OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
 CRYPT:a8b5a01ba48a306f300b62a1541734c7
+     </computeroutput>
     </screen>
    </listitem>
    <listitem>
@@ -884,7 +993,10 @@ CRYPT:a8b5a01ba48a306f300b62a1541734c7
      contain the obfuscated password and the cryptographic key:
     </para>
     <screen>
+     <userinput>
 $ more conf/boot/boot.properties
+     </userinput>
+     <computeroutput>
 ...
 # Keystore password, adjust to match your keystore and protect this file
 # openidm.keystore.password=changeit
@@ -894,6 +1006,7 @@ openidm.truststore.password=changeit
 openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
 openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
 ...
+     </computeroutput>
     </screen>
    </listitem>
    <listitem>
