@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
     var ChangeUserPasswordDialog = Dialog.extend({    
         contentTemplate: "templates/admin/ChangeUserPasswordDialogTemplate.html",
         delegate: userDelegate,
-        data: {         
+        data: {
             width: 800,
             height: 300
         },
@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
         formSubmit: function(event) {
             event.preventDefault();
             
-            if(validatorsManager.formValidated(this.$el)) {            
+            if(validatorsManager.formValidated(this.$el)) {
                 var patchDefinitionObject = [], element,
                     successfulPatch = _.bind(function(r) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
@@ -89,6 +89,13 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
 
             this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
                 this.show(_.bind(function() {
+                    // necessary to add the details of the user to the form as hidden variables for
+                    // some types of policy validation checking (cannotContainOthers for example)
+                    var form = this.$el.find("form");
+                    _.each(user, function (value, name) {
+                        form.append($("<input>").attr("type", "hidden").attr("name", name).val(value));
+                    });
+
                     validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + user._id, _.bind(function () {
                     
                         this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
@@ -96,7 +103,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                         this.reloadData();
                     
                     }, this));
-                }, this));            
+                }, this));
             }, this));
         },
         

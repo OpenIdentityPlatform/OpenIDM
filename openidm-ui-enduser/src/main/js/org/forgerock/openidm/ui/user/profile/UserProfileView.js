@@ -51,6 +51,11 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
             if (conf.globalData.userComponent === "internal/user") {
                 baseEntity = "repo/internal/user/" + conf.loggedUser._id;
             }
+
+            _.each(conf.loggedUser, function(val,key){
+                this.$el.find('[name=' + key.toLowerCase() + ']').prop("name",key);
+            },this);
+
             validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
                 
                 countryStateDelegate.getAllCountries( function(countries) {
@@ -65,10 +70,6 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
                     }, self));
                 });
                 
-                _.each(conf.loggedUser, function(val,key){
-                    this.$el.find('[name=' + key.toLowerCase() + ']').prop("name",key);
-                },this);
-                
                 this.reloadData();
 
                 if(callback) {
@@ -78,7 +79,7 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
             }, this));
             
             
-        });            
+        });
     };
     
     obj.events["change select[name='country']"] = function() {
@@ -86,7 +87,7 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
     };
     
     obj.changeCountry = function() {
-        var country = this.$el.find('select[name="country"]').val(), self = this;            
+        var country = this.$el.find('select[name="country"]').val(), self = this;
         
         if(country) {
             this.$el.find("select[name='country'] > option:first").text("");
