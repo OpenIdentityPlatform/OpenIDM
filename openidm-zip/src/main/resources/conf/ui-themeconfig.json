@@ -19,8 +19,8 @@
             "login-container-label-align": "left",
             "highlight-color": "#eeea07",
 
-            "login-container-width": "312px",
-            "medium-container-width": "792px",
+            "login-container-width": "430px",
+            "medium-container-width": "850px",
             "site-width": "960px",
             "message-background-color": "#fff",
             "content-background": "#f9f9f9",
