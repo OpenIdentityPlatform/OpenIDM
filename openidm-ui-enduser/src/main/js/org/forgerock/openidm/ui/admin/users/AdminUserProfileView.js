@@ -55,7 +55,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             
             if(validatorsManager.formValidated(this.$el)) {
                 var data = form2js(this.$el.attr("id"), '.', false),
-                    formData = new FormData(),
                     self = this, 
                     oldUserName;
                 delete data.lastPasswordSet;
