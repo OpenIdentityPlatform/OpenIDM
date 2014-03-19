@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -43,9 +43,6 @@ public class ReconTypeById extends ReconTypeBase {
 
     // Defaulting to NOT run target phase
     static final boolean DEFAULT_RUN_TARGET_PHASE = false;
-    
-    // Defaulting to NOT allow empty source set
-    static final boolean DEFAULT_ALLOW_EMPTY_SOURCE_SET = false;
 
     List<String> sourceIds;
 
@@ -53,7 +50,7 @@ public class ReconTypeById extends ReconTypeBase {
     JsonValue targetQuery;
 
     public ReconTypeById(ReconciliationContext reconContext) throws BadRequestException {
-        super(reconContext, DEFAULT_RUN_TARGET_PHASE, DEFAULT_ALLOW_EMPTY_SOURCE_SET);
+        super(reconContext, DEFAULT_RUN_TARGET_PHASE);
 
         targetQuery = calcEffectiveQuery("targetQuery",
                 reconContext.getObjectMapping().getTargetObjectSet());
