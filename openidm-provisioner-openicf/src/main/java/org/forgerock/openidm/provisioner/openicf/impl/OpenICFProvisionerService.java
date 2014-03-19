@@ -1086,12 +1086,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         String username = params.get("username").required().asString();
                         String password = params.get("password").required().asString();
 
-                        /* FIXME remove? */
-                        OperationOptionInfoHelper helper = operations.get(AuthenticationApiOp.class);
-                        OperationOptions operationOptions = null;
-                        if (null != helper) {
-                            operationOptions = null; // helper.
-                        }
+                        OperationOptions operationOptions = operations.get(AuthenticationApiOp.class)
+                                .build(jsonConfiguration, objectClassInfoHelper)
+                                .build();
 
                         // Throw ConnectorException
                         Uid uid = facade.authenticate(objectClassInfoHelper.getObjectClass(), username,
@@ -1155,12 +1152,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             final Set<Attribute> createAttributes =
                                     objectClassInfoHelper.getCreateAttributes(request, cryptoService);
 
-                            /* FIXME - remove? */
-                            OperationOptionInfoHelper helper = operations.get(CreateApiOp.class);
-                            OperationOptions operationOptions = null;
-                            if (null != helper) {
-                                operationOptions = null; // helper.
-                            }
+                            OperationOptions operationOptions = operations.get(CreateApiOp.class)
+                                    .build(jsonConfiguration, objectClassInfoHelper)
+                                    .build();
 
                             Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
                                     AttributeUtil.filterUid(createAttributes), operationOptions);
@@ -1199,11 +1193,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 final ConnectorFacade facade = getConnectorFacade0(handler, DeleteApiOp.class);
                 if (null != facade) {
 
-                    OperationOptionInfoHelper helper = operations.get(DeleteApiOp.class);
-                    OperationOptions operationOptions = null;
-                    if (null != helper) {
-                        operationOptions = null; // helper.
-                    }
+                    OperationOptions operationOptions = operations.get(DeleteApiOp.class)
+                            .build(jsonConfiguration, objectClassInfoHelper)
+                            .build();
 
                     Uid uid =
                             null != request.getRevision() ? new Uid(resourceId, request
@@ -1246,13 +1238,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, SearchApiOp.class);
                 if (null != facade) {
-
-                    /* FIXME - remove? */
-                    OperationOptionInfoHelper helper = operations.get(SearchApiOp.class);
-                    OperationOptionsBuilder operationOptionsBuilder = null;
-                    if (null != helper) {
-                        operationOptionsBuilder = new OperationOptionsBuilder(); // helper.
-                    }
+                    OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
+                                .build(jsonConfiguration, objectClassInfoHelper);
 
                     Filter filter = null;
 
@@ -1319,19 +1306,21 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResultHandler<Resource> handler) {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, GetApiOp.class);
+                OperationOptions operationOptions;
                 if (null != facade) {
-
-                    /* FIXME - remove? */
-                    OperationOptionInfoHelper helper = operations.get(GetApiOp.class);
-                    OperationOptionsBuilder OOBuilder = new OperationOptionsBuilder();
+                    OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
                     if (null == request.getFields() || request.getFields().isEmpty()) {
-                        OOBuilder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
+                        operationOptions = operations.get(UpdateApiOp.class)
+                                .build(jsonConfiguration, objectClassInfoHelper)
+                                .build();
                     } else {
-                        objectClassInfoHelper.setAttributesToGet(OOBuilder, request.getFields());
+                        OperationOptionsBuilder builder = new OperationOptionsBuilder();
+                        objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
+                        operationOptions = builder.build();
                     }
                     Uid uid = new Uid(resourceId);
                     ConnectorObject connectorObject =
-                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid, OOBuilder.build());
+                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
                     if (null != connectorObject) {
                         handler.handleResult(objectClassInfoHelper.build(connectorObject, cryptoService));
@@ -1363,12 +1352,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             objectClassInfoHelper.getUpdateAttributes(request, newName,
                                     cryptoService);
 
-                    /* FIXME - remove? */
-                    OperationOptionInfoHelper helper = operations.get(UpdateApiOp.class);
-                    OperationOptions operationOptions = null;
-                    if (null != helper) {
-                        operationOptions = null; // helper.
-                    }
+                    OperationOptions operationOptions = operations.get(UpdateApiOp.class)
+                            .build(jsonConfiguration, objectClassInfoHelper)
+                            .build();
 
                     Uid _uid = null != request.getRevision()
                         ? new Uid(resourceId, request.getRevision())
