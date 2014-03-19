@@ -192,12 +192,12 @@ policyImpl = (function (){
     };
 
     policyFunctions.noInternalUserConflict = function(fullObject, value, params, property) {
+        var queryParams,existing,requestId,requestBaseArray;
         if (value && value.length) {
-            var queryParams = {
+            queryParams = {
                 "_queryId": "credential-internaluser-query",
                 "username": value
-                },
-            existing,requestId,requestBaseArray;
+            };
     
             requestBaseArray = request.resourceName.split("/");
             if (requestBaseArray.length === 3) {
@@ -213,15 +213,14 @@ policyImpl = (function (){
     };
 
     policyFunctions.unique = function(fullObject, value, params, property) {
-        var queryParams = {
+        var queryParams,existing,requestId,requestBaseArray;
+        if (value && value.length) {
+            queryParams = {
                 "_queryId": "get-by-field-value",
                 "field": property,
                 "value": value
-                },
-            existing,requestId,requestBaseArray;
-        
-        if (value && value.length)
-        {
+            };
+
             requestBaseArray = request.resourceName.split("/");
             if (requestBaseArray.length === 3) {
                 requestId = requestBaseArray.pop();
@@ -236,7 +235,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.validDate = function(fullObject, value, params, property) {
-        if (typeof(value) !== "string" || !value.length || isNaN(new Date(value).getTime())) {
+        if (typeof(value) === "string" && value.length && isNaN(new Date(value).getTime())) {
             return [ {"policyRequirement": "VALID_DATE"}];
         } else {
             return [];
@@ -266,7 +265,7 @@ policyImpl = (function (){
     policyFunctions.validPhoneFormat = function(fullObject, value, params, property) {
         var phonePattern = /^\+?([0-9\- \(\)])*$/;
     
-        if (typeof(value) !== "string" || !value.length || !phonePattern.test(value)) {
+        if (typeof(value) === "string" && value.length && !phonePattern.test(value)) {
             return [ {"policyRequirement": "VALID_PHONE_FORMAT"}];
         } else {
             return [];
@@ -276,7 +275,7 @@ policyImpl = (function (){
     policyFunctions.validNameFormat = function(fullObject, value, params, property) {
         var namePattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/;
     
-        if (typeof(value) !== "string" || !value.length || !namePattern.test(value)) {
+        if (typeof(value) === "string" && value.length && !namePattern.test(value)) {
             return [ {"policyRequirement": "VALID_NAME_FORMAT"}];
         } else {
             return [];
@@ -284,7 +283,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.minLength = function(fullObject, value, params, property) {
-        if (typeof(value) !== "string" || !value.length || value.length < params.minLength) {
+        if (typeof(value) === "string" && value.length && value.length < params.minLength) {
             return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":params.minLength} } ];
         } else {
             return [];
@@ -294,7 +293,7 @@ policyImpl = (function (){
     policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, property) {
         var reg = /[(A-Z)]/g;
         
-        if (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numCaps) {
+        if (typeof(value) === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numCaps)) {
             return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
         } else {
             return [];
@@ -304,7 +303,7 @@ policyImpl = (function (){
     policyFunctions.atLeastXNumbers = function(fullObject, value, params, property) {
         var reg = /\d/g;
         
-        if (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numNums) {
+        if (typeof(value) === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numNums)) {
             return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
         } else {
             return [];
@@ -314,7 +313,7 @@ policyImpl = (function (){
     policyFunctions.validEmailAddressFormat = function(fullObject, value, params, property) {
         var emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/; 
         
-        if (typeof(value) !== "string" || !value.length || !emailPattern.test(value)) {
+        if (typeof(value) === "string" && value.length && !emailPattern.test(value)) {
             return [ {"policyRequirement": "VALID_EMAIL_ADDRESS_FORMAT"}];
         } else {
             return [];
@@ -741,7 +740,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                 throw "No resource specified";
             }
             if (resource === null) {
-                // There is no configured policies for this resource (nothing to verify)
+                // There are no configured policies for this resource (nothing to verify)
                 returnObject.result = true;
                 returnObject.failedPolicyRequirements = failedPolicyRequirements;
             } else {
