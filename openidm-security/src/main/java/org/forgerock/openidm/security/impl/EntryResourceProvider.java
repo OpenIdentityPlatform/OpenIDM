@@ -119,8 +119,8 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 store.getStore().deleteEntry(resourceId);
                 store.store();
                 manager.reload();
+                handler.handleResult(new Resource(resourceId, null, new JsonValue(null)));
             }
-            handler.handleResult(new Resource(resourceId, null, new JsonValue(null)));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
