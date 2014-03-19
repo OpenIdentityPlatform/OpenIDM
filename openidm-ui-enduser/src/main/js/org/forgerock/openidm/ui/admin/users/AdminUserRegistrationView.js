@@ -69,6 +69,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/*", _.bind(function () {
+                    validatorsManager.validateAllFields(this.$el);
                     this.unlock();
                 }, this));
             });            

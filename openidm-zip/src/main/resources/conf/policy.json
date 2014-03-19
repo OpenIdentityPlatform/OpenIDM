@@ -128,12 +128,6 @@
                     "name" : "telephoneNumber",
                     "policies" : [
                         {
-                            "policyId" : "required"
-                        },
-                        {
-                            "policyId" : "not-empty"
-                        },
-                        {
                             "policyId" : "valid-phone-format"
                         }
                     ]
