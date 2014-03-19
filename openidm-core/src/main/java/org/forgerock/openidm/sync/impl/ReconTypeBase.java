@@ -53,19 +53,14 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReconTypeBase.class);
 
     ReconciliationContext reconContext;
-    boolean runTargetPhase;
-    boolean allowEmptySourceSet;
+    final boolean runTargetPhase;
+    final boolean allowEmptySourceSet;
 
-    public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase, boolean allowEmptySourceSet) {
+    public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
         this.reconContext = reconContext;
-        this.allowEmptySourceSet = allowEmptySourceSet;
-
-        JsonValue runTargetPhaseCfg = calcEffectiveConfig("runTargetPhase");
-        if (runTargetPhaseCfg.isNull()) {
-            runTargetPhase = defaultRunTargetPhase;
-        } else {
-            runTargetPhase = runTargetPhaseCfg.asBoolean().booleanValue();
-        }
+        this.allowEmptySourceSet = calcEffectiveConfig("allowEmptySourceSet").defaultTo(false).asBoolean();
+        logger.debug("allowEmptySourceSet: {}", allowEmptySourceSet);
+        this.runTargetPhase = calcEffectiveConfig("runTargetPhase").defaultTo(defaultRunTargetPhase).asBoolean();
         logger.debug("runTargetPhase: {}", runTargetPhase);
     }
 

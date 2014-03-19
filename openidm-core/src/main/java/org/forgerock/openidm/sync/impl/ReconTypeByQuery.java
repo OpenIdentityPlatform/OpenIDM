@@ -47,15 +47,12 @@ public class ReconTypeByQuery extends ReconTypeBase {
 
     // Defaulting to run target phase
     static final boolean DEFAULT_RUN_TARGET_PHASE = true;
-    
-    // Defaulting to allow empty source set
-    static final boolean DEFAULT_ALLOW_EMPTY_SOURCE_SET = true;
 
     JsonValue sourceQuery;
     JsonValue targetQuery;
 
     public ReconTypeByQuery(ReconciliationContext reconContext) {
-        super(reconContext, DEFAULT_RUN_TARGET_PHASE, DEFAULT_ALLOW_EMPTY_SOURCE_SET);
+        super(reconContext, DEFAULT_RUN_TARGET_PHASE);
 
         sourceQuery = calcEffectiveQuery("sourceQuery",
                 reconContext.getObjectMapping().getSourceObjectSet());
