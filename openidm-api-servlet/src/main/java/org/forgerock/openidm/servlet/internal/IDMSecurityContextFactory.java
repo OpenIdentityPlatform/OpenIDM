@@ -98,7 +98,7 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
         return !StringUtils.isEmpty(context.getAuthenticationId())
             && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_ID).toString())
             && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString())
-            && !((List) context.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES)).isEmpty();
+            && context.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES) != null;
     }
 
     /**
