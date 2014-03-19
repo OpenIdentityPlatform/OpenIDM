@@ -31,7 +31,26 @@
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [ ]
-                }
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "PASSTHROUGH",
+                "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "file" : "auth/passthroughAuthnPopulateContext.js"
+                    },
+                    "passThroughAuth" : "system/ldap/account",
+                    "propertyMapping" : {
+                        "userId" : "uid"
+                    },
+                    "managedUserLink" : "systemLdapAccounts_managedUser",
+                    "defaultUserRoles" : [
+                        "openidm-authorized"
+                    ]
+                },
+                "enabled" : true
             },
             {
                 "name" : "INTERNAL_USER",
@@ -42,7 +61,8 @@
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [ ]
-                }
+                },
+                "enabled" : true
             }
         ]
     }

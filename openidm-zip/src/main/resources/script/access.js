@@ -131,7 +131,7 @@ var httpAccessConfig =
             "pattern"   : "system/*",
             "roles"     : "openidm-admin",
             "methods"   : "action",
-            "actions"   : "test,testConfig,createconfiguration,liveSync"
+            "actions"   : "test,testConfig,createconfiguration,liveSync,authenticate"
         },
         
         // Additional checks for authenticated users
@@ -154,12 +154,11 @@ var httpAccessConfig =
             "actions"   : "reauthenticate"
         },
         {   
-            "pattern"   : "managed/user/*",
+            "pattern"   : "*",
             "roles"     : "openidm-authorized",
             "methods"   : "read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete themselves
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()",
-            "excludePatterns": "system/*"
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()"
         },
 
         // enforcement of which notifications you can read and delete is done within the endpoint 
