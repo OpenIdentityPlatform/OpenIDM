@@ -229,7 +229,11 @@ $ ./startup.sh -p samples/sample2</screen>
      If you want to run a <command>curl</command> command over regular HTTP,
      remove the <literal>--cacert self-signed.crt</literal> option and change
      the URL to use protocol HTTP over port 8080. For instructions on how
-     to set up a <filename>self-signed.crt</filename>
+     to set up a <filename>self-signed.crt</filename>, see the Integrator's
+     Guide section entitled <link xlink:show="new"
+                            xlink:href="integrators-guide#rest-over-https"
+                            xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Restrict REST Access to the HTTPS Port</citetitle></link>.
     </para>
    </note>
 
@@ -785,7 +789,7 @@ $ </screen>
 
    <para>Make sure MySQL is running.</para>
   </section>                                                                                                                       sp
-  
+
   <section xml:id="install-sample3">
    <title>Install the Sample</title>
 
@@ -892,9 +896,11 @@ $ curl
  --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
+
   </section>
+
  </section>
- 
+
  <section xml:id="more-sample4">
   <title>Sample 4 - CSV File</title>
   <indexterm>
