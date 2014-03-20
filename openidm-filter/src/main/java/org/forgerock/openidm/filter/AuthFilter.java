@@ -164,22 +164,24 @@ public class AuthFilter implements SingletonResourceProvider {
                     String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
                     if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
                         logger.debug("Failed authentication, missing or empty headers");
-                        handler.handleError(new ForbiddenException(
-                                "Failed authentication, missing or empty headers"));
-                        return;
+                        throw new ForbiddenException("Failed authentication, missing or empty headers");
                     }
                     if (!authHelper.authenticate(queryId, queryOnResource, authcid, password, null, context)) {
                         //TODO Handle message
-                        handler.handleError(new ForbiddenException("Reauthentication failed", new AuthException(authcid)));
+                        throw new ForbiddenException("Reauthentication failed", new AuthException(authcid));
                     }
+
                     JsonValue result = new JsonValue(new HashMap<String, Object>());
                     result.put("reauthenticated", true);
                     handler.handleResult(result);
+                } else {
+                    throw new InternalServerErrorException("Failure to reauthenticate - missing context");
                 }
             } else {
-                handler.handleError(new BadRequestException("Action " + request.getAction()
-                        + " on authentication service not supported"));
+                throw new BadRequestException("Action " + request.getAction() + " on authentication service not supported");
             }
+        } catch (ResourceException e) {
+            handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
