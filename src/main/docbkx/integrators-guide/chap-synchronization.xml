@@ -283,19 +283,20 @@
     their values, you use the synchronization mappings file.</para>
    </section>
 
-   <section xml:id="synchronization-mappings-file">
-    <title>Synchronization Mappings File</title>
+  <section xml:id="synchronization-mappings-file">
+   <title>Synchronization Mappings File</title>
 
-     <indexterm>
-      <primary>Synchronization</primary>
-      <secondary>Mappings</secondary>
-     </indexterm>
-     <indexterm>
-      <primary>Mappings</primary>
-     </indexterm>
+    <indexterm>
+     <primary>Synchronization</primary>
+     <secondary>Mappings</secondary>
+    </indexterm>
+    <indexterm>
+     <primary>Mappings</primary>
+    </indexterm>
 
-     <para>The synchronization mappings file (<filename>openidm/conf/sync.json</filename>)
-         represents the core configuration for OpenIDM synchronization.
+    <para>
+     The synchronization mappings file (<filename>openidm/conf/sync.json</filename>)
+     represents the core configuration for OpenIDM synchronization.
      </para>
 
      <para>The <filename>sync.json</filename> file describes a set of mappings.
@@ -535,7 +536,44 @@
 }
    </programlisting>
 
-   </section>
+   <para>
+    If a source resource is empty, the default behavior is for a reconciliation
+    operation to exit, without failure, and to log a warning, similar to the
+    following:
+   </para>
+   <screen>
+2014-03-20 10:41:18:918 WARN Cannot perform reconciliation with an empty source
+    object set, unless explicitly configured to allow it.
+   </screen>
+   <para>
+    The reconciliation summary is also logged in the reconciliation audit log.
+   </para>
+   <para>
+    This behavior prevents reconciliation operations from accidentally deleting
+    everything in a target resource. For example, in the event that a source
+    system is unavailable but erroneously reporting its status as "up", the
+    absence of source objects should not result in objects being removed on the
+    target resource.
+   </para>
+   <para>
+    There might be situations in which you do want reconciliations of an empty
+    source resource to proceed. In this case, you can override the default
+    behavior by setting the <literal>"allowEmptySourceSet"</literal> property to
+    <literal>true</literal> in the mapping. For example:
+   </para>
+   <programlisting>
+{
+    "mappings" : [
+        {
+        "name" : "systemXmlfileAccounts_managedUser",
+        "source" : "system/xmlfile/account",
+        "allowEmptySourceSet" : true,
+        ...
+   </programlisting>
+   <para>
+    Reconciliation of an empty source effectively wipes out the target.
+   </para>
+  </section>
 
   <section xml:id="sync-encrypted-values">
    <title>Using Encrypted Values</title>
@@ -1258,9 +1296,14 @@
 ...
   </programlisting>
   <para>
-   The format of the query can be any query type that is supported by the
-   resource, such as <literal>queryExpression</literal> or
-   <literal>queryFilter</literal>, and can include additional parameters.
+   The format of the query can be <literal>queryId</literal>,
+   <literal>queryFilter</literal>, or <literal>queryExpression</literal>, and
+   can include additional parameters. In OpenIDM ${docTargetVersion}, predefined
+   queries other than <literal>query-all-ids</literal>, and complex query
+   expressions are not supported <emphasis>on external resources</emphasis>
+   (<literal>/system</literal> endpoints). So, for external resources, the
+   format of the query must be either a <literal>queryFilter</literal> or
+   <literal>_queryId=query-all-ids</literal>.
   </para>
   <para>
    The source and target queries send the query to the resource that is defined
