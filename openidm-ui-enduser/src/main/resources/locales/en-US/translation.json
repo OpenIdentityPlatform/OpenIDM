@@ -168,6 +168,8 @@
             "reset" : "Reset",
             "copyright" : "Copyright (c) 2010-12 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
+            "reloadGrid" : "Reload Grid",
+            "clearFilters" : "Clear Filters",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",

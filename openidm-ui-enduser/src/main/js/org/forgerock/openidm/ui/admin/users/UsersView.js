@@ -35,20 +35,65 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/CookieHelper"
 ], function(AbstractView, userDelegate, eventManager, constants, i18nManager, cookieHelper) {
-    var UsersView = AbstractView.extend({
+    var hasFilters = function(){
+            var search = false;
+            $.each($('.ui-search-toolbar').find('input,select'),function(){
+                if($(this).val().length > 0){
+                    search = true;
+                }
+            });
+            return search;
+        },
+        UsersView = AbstractView.extend({
         template: "templates/admin/NewUsersTemplate.html",
         
-        events: {},
+        events: {
+            "click #reloadGridBtn": "reloadGrid",
+            "click #clearFiltersBtn": "clearFilters"
+        },
         
         select: function(event) {
             console.log("user selected");
             event.stopPropagation();
         },
         
+        reloadGrid: function(event){
+            event.preventDefault();
+            $('#usersTable').trigger('reloadGrid');
+        },
+        
         showProfile: function(userName) {
             if(userName) {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});
             }
+        },
+        
+        clearFilters: function(event){
+            var grid_id = '#usersTable',
+                post_data = $(grid_id).jqGrid('getGridParam','postData');
+            
+            event.preventDefault();
+            
+            $(grid_id).jqGrid('setGridParam',{search:false});
+
+            $.extend(post_data, { filters: "" });
+
+            _.each(post_data,function(v,k){
+                if (k === "_search"){
+                    post_data._search = false;
+                }
+                else if ($.inArray(k, ["nd", "sidx", "rows", "sord", "page", "filters"]) < 0) {
+                    try {
+                        delete post_data[k];
+                    } catch (e) { }
+
+                    $("#gs_" + $.jgrid.jqID(k), $(grid_id).get(0).grid.hDiv).val("");
+
+                }
+            });
+            
+            $(grid_id).trigger("reloadGrid", [{ page: 1}]);
+            $('#clearFiltersBtn').hide();
         },
         
         render: function() {
@@ -102,7 +147,8 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                                 return (val_escaped && val_escaped.length > 0) ? html : '';
                             }
                         }
-                ];
+                ],
+                rowNum = cookieHelper.getCookie("userGridRows");
                 
                 $('#' + grid_id).jqGrid('GridUnload');
                 $('#' + pager_id).remove();
@@ -121,7 +167,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                     datatype: "json",
                     height: 'auto',
                     width: 920,
-                    rowNum: 10,
+                    rowNum: (rowNum) ? parseInt(rowNum, 10) : 10,
                     rowList: [10,20,50],
                     pager: pager_id,
                     viewrecords: true,
@@ -144,6 +190,10 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                            $('#gs_accountStatus').val(params.accountStatus);
                            $('#' + grid_id).jqGrid("sortGrid", params.sidx, false, params.sord);
                            cookieHelper.deleteCookie("userGridParams");
+                           $('#clearFiltersBtn').show();
+                       }
+                       if(!hasFilters()){
+                           $('#clearFiltersBtn').hide();
                        }
                     },
                     onCellSelect: function(rowid,iCol,val,e){
@@ -170,6 +220,17 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                                 _this.showProfile(rowid);
                                 cookieHelper.setCookie("userGridParams", JSON.stringify(posted_data));
                             }
+                        }
+                    },
+                    onSortCol: function(){
+                        if(hasFilters()){
+                            $('#' + grid_id).setGridParam({ search: true });
+                        }
+                    },
+                    onPaging: function(btn){
+                        if(btn === "records"){
+                            var rows = $('.ui-pg-selbox').val();
+                            cookieHelper.setCookie("userGridRows", rows);
                         }
                     },
                     beforeRequest: function(){
@@ -200,6 +261,9 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             _.extend(posted_data,{accountStatus:''});
                         }
                         $('#' + grid_id).setGridParam({ postData: posted_data });
+                    },
+                    afterSearch: function(){
+                        $('#clearFiltersBtn').show();
                     }
                 });
             });
