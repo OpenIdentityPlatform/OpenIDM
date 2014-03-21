@@ -728,7 +728,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // Execute the postDelete script if configured
             executePostScript(context, "postDelete", postDelete, resourceId, deletedResource.getContent(), null);
 
-            onDelete(context, resourceId, resource);
+            onDelete(context, managedId(resourceId), resource);
 
             handler.handleResult(deletedResource);
         } catch (ResourceException e) {
