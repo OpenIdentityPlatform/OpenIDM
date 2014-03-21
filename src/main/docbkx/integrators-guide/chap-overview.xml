@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id="chap-overview"
@@ -28,9 +28,9 @@
          version="5.0"
          xml:lang="en"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude">
+         xsi:schemaLocation="http://docbook.org/ns/docbook
+         http://docbook.org/xml/5.0/xsd/docbook.xsd"
+         xmlns:xlink="http://www.w3.org/1999/xlink">
   <title>Architectural Overview</title>
   <indexterm><primary>Architecture</primary></indexterm>
 
@@ -217,6 +217,7 @@
        $ curl
          --header "X-OpenIDM-Username: openidm-admin"
          --header "X-OpenIDM-Password: openidm-admin"
+         --header "Content-Type: application/json"
          --request GET
          "http://localhost:8080/openidm/managed/..."
        </screen>
@@ -240,10 +241,12 @@
        interface with a query similar to the following:</para>
        <screen>
        $ curl
+         --cacert self-signed.crt
          --header "X-OpenIDM-Username: openidm-admin"
          --header "X-OpenIDM-Password: openidm-admin"
+         --header "Content-Type: application/json"
          --request GET
-         "http://localhost:8080/openidm/system/..."
+         "https://localhost:8443/openidm/system/..."
        </screen>
        <para>There is a default implementation for the OpenICF framework, that 
        allows any connector object to be represented as a system object.</para>
@@ -292,6 +295,48 @@
       </listitem>
      </varlistentry>
     </variablelist>
+  </section>
+
+  <section xml:id="commons-rest-commands">
+   <title>Secure Commons REST Commands</title>
+
+   <para>
+    As noted in the <link xlink:show="new"
+    xlink:href="integrators-guide#appendix-rest"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
+    Reference</citetitle>, </link> Representational State Transfer (REST) is a
+    software architecture style for exposing resources, using the technologies
+    and protocols of the World Wide Web.
+   </para>
+
+   <para>
+    REST interfaces are commonly tested with a <command>curl</command> command.
+    Many of these commands are used in this document. They work with the
+    standard ports associated with Java EE communications, 8080 and 8443.
+   </para>
+
+   <para>
+     If you want to run <command>curl</command>
+     over the secure port, 8443, you would include either the
+     <command>--insecure</command> option, or follow the instructions shown
+     in <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
+              xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
+     REST Access to the HTTPS Port</citetitle></link>. You can use those
+     instructions with the self-signed certificate generated when OpenIDM
+     starts, or with a <filename>*.crt</filename> file provided by a
+     certificate authority.
+    </para>
+
+    <para>
+     In numerous cases, <command>curl</command> commands to the secure port
+     are depicted with a <literal>--cacert self-signed.crt</literal> option.
+     Instructions for creating that <filename>self-signed.crt</filename> file
+     are shown in the aforementioned section on <link xlink:show="new"
+     xlink:href="integrators-guide#rest-over-https"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
+     REST Access to the HTTPS Port</citetitle></link>.
+    </para>
+
   </section>
 
   <section xml:id="openidm-access-layer">

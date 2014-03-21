@@ -308,131 +308,163 @@
   <screen>$ curl --request GET 
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- http://localhost:8080/openidm/config
+ --header "Content-Type: application/json"
+ --cacert self-signed.crt
+ https://localhost:8443/openidm/config
 
 {
-    "configurations": [
-        {
-            "_id": "endpoint/getprocessesforuser",
-            "pid": "endpoint.788f364e-d870-4f46-982a-793525fff6f0",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "provisioner.openicf/xml",
-            "pid": "provisioner.openicf.90b18af9-fe27-45a2-a4ae-1056c04a4d31",
-            "factoryPid": "provisioner.openicf"
-        },
-        {
-            "_id": "ui/configuration",
-            "pid": "ui.36bb2bf4-8e19-43d2-9df2-a0553ffac590",
-            "factoryPid": "ui"
-        },
-        {
-            "_id": "managed",
-            "pid": "managed",
-            "factoryPid": null
-        },
-        {
-            "_id": "sync",
-            "pid": "sync",
-            "factoryPid": null
-        },
-        {
-            "_id": "router",
-            "pid": "router",
-            "factoryPid": null
-        },
-        {
-            "_id": "process/access",
-            "pid": "process.44743c97-a01b-4562-85ad-8a2c9b89155a",
-            "factoryPid": "process"
-        },
-        {
-            "_id": "endpoint/siteIdentification",
-            "pid": "endpoint.ef05a7f3-a420-4fbb-998c-02d283cae4d1",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "endpoint/securityQA",
-            "pid": "endpoint.e2d87637-c918-4056-99a1-20f25c897066",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "scheduler",
-            "pid": "scheduler",
-            "factoryPid": null
-        },
-        {
-            "_id": "ui/countries",
-            "pid": "ui.acde0f4c-808f-45fb-9627-d7d2ca702e7c",
-            "factoryPid": "ui"
-        },
-        {
-            "_id": "org.apache.felix.fileinstall/openidm",
-            "pid": "org.apache.felix.fileinstall.2dedea63-4592-4074-a709-ffa70f1e841d",
-            "factoryPid": "org.apache.felix.fileinstall"
-        },
-        {
-            "_id": "schedule/reconcile_systemXmlAccounts_managedUser",
-            "pid": "schedule.f53b235a-862e-4e18-a3cf-10ae3cbabc1e",
-            "factoryPid": "schedule"
-        },
-        {
-            "_id": "workflow",
-            "pid": "workflow",
-            "factoryPid": null
-        },
-        {
-            "_id": "endpoint/getavailableuserstoassign",
-            "pid": "endpoint.d19da94f-bae3-4101-922c-fe47ea8616d2",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "repo.orientdb",
-            "pid": "repo.orientdb",
-            "factoryPid": null
-        },
-        {
-            "_id": "audit",
-            "pid": "audit",
-            "factoryPid": null
-        },
-        {
-            "_id": "endpoint/gettasksview",
-            "pid": "endpoint.edcc1ff8-a7ba-4c46-8258-bf5216e85192",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "ui/secquestions",
-            "pid": "ui.649e2c65-0cc7-4a0d-a6b1-95f4c5168bdc",
-            "factoryPid": "ui"
-        },
-        {
-            "_id": "org.apache.felix.fileinstall/activiti",
-            "pid": "org.apache.felix.fileinstall.a0ba2f7d-bdb9-43b5-b84e-0e8feee6be72",
-            "factoryPid": "org.apache.felix.fileinstall"
-        },
-        {
-            "_id": "policy",
-            "pid": "policy",
-            "factoryPid": null
-        },
-        {
-            "_id": "endpoint/usernotifications",
-            "pid": "endpoint.e96d5319-6260-41db-af76-bd4e692b792d",
-            "factoryPid": "endpoint"
-        },
-        {
-            "_id": "org.apache.felix.fileinstall/ui",
-            "pid": "org.apache.felix.fileinstall.89f8c6dd-f54e-46a4-bfda-1e76ac044c33",
-            "factoryPid": "org.apache.felix.fileinstall"
-        },
-        {
-            "_id": "authentication",
-            "pid": "authentication",
-            "factoryPid": null
-        }
-    ]
+   "configurations": [
+      {
+         "factoryPid": "servletfilter",
+         "pid": "servletfilter.ec099f08-bfd4-4ab4-8537-78e5b956c7cc",
+         "_id": "servletfilter/gzip"
+      },
+      {
+         "factoryPid": null,
+         "pid": "router",
+         "_id": "router"
+      },
+      {
+         "factoryPid": "servletfilter",
+         "pid": "servletfilter.1a827eb5-ef74-4976-9b4a-fc9a0cbefb78",
+         "_id": "servletfilter/cors"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.a0ec1db7-a675-48d4-8e37-2dd414874c82",
+         "_id": "endpoint/siteIdentification"
+      },
+      {
+         "factoryPid": "ui",
+         "pid": "ui.85a6c7da-a94a-41f6-8498-6efff87daa5d",
+         "_id": "ui/configuration"
+      },
+      {
+         "factoryPid": "org.apache.felix.fileinstall",
+         "pid": "org.apache.felix.fileinstall.efbc7bb0-d31f-411d-8bc0-34908618d2f9",
+         "_id": "org.apache.felix.fileinstall/activiti"
+      },
+      {
+         "factoryPid": null,
+         "pid": "authentication",
+         "_id": "authentication"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.11f44de1-e2c2-48f8-8bd3-fc1d15736c03",
+         "_id": "endpoint/getavailableuserstoassign"
+      },
+      {
+         "factoryPid": "ui",
+         "pid": "ui.2b8a70f0-8f86-47cd-9a90-d69e1702b9fa",
+         "_id": "ui/themeconfig"
+      },
+      {
+         "factoryPid": null,
+         "pid": "policy",
+         "_id": "policy"
+      },
+      {
+         "factoryPid": "ui",
+         "pid": "ui.85e78d26-2909-4bb0-aade-46e2b2aa83d3",
+         "_id": "ui/secquestions"
+      },
+      {
+         "factoryPid": null,
+         "pid": "script",
+         "_id": "script"
+      },
+      {
+         "factoryPid": null,
+         "pid": "managed",
+         "_id": "managed"
+      },
+      {
+         "factoryPid": "org.apache.felix.fileinstall",
+         "pid": "org.apache.felix.fileinstall.8681aa56-2d59-4f0d-a82b-8c12eeecf023",
+         "_id": "org.apache.felix.fileinstall/ui"
+      },
+      {
+         "factoryPid": null,
+         "pid": "audit",
+         "_id": "audit"
+      },
+      {
+         "factoryPid": null,
+         "pid": "repo.orientdb",
+         "_id": "repo.orientdb"
+      },
+      {
+         "factoryPid": null,
+         "pid": "scheduler",
+         "_id": "scheduler"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.463bd65d-987b-42ee-bf5f-077cf7ed4fdc",
+         "_id": "endpoint/usernotifications"
+      },
+      {
+         "factoryPid": "info",
+         "pid": "info.b1b6666f-aca3-4c77-8270-4695fe959036",
+         "_id": "info/login"
+      },
+      {
+         "factoryPid": "org.apache.felix.fileinstall",
+         "pid": "org.apache.felix.fileinstall.1f94019a-2206-448f-b2f6-104916b2d0da",
+         "_id": "org.apache.felix.fileinstall/openidm"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.d032df65-2cc2-4da6-bc5e-209495e43a34",
+         "_id": "endpoint/securityQA"
+      },
+      {
+         "factoryPid": "ui.context",
+         "pid": "ui.context.22dbe594-c15f-4a66-9e70-d3ad04d60cc2",
+         "_id": "ui.context/enduser"
+      },
+      {
+         "factoryPid": "info",
+         "pid": "info.869f1173-cdca-415a-a4f9-5835c5b7fefb",
+         "_id": "info/ping"
+      },
+      {
+         "factoryPid": null,
+         "pid": "cluster",
+         "_id": "cluster"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.7e9ec068-bb4a-4fa0-ae15-1706bb4a3a07",
+         "_id": "endpoint/jqgrid"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.47978983-0411-425d-8f53-4022175e146a",
+         "_id": "endpoint/gettasksview"
+      },
+      {
+         "factoryPid": "endpoint",
+         "pid": "endpoint.1e64173d-d693-4bef-8df6-bb88d7431af4",
+         "_id": "endpoint/getprocessesforuser"
+      },
+      {
+         "factoryPid": null,
+         "pid": "workflow",
+         "_id": "workflow"
+      },
+      {
+         "factoryPid": "ui",
+         "pid": "ui.b10eb4cb-83e3-4a4b-9d29-d91d90eb3053",
+         "_id": "ui/countries"
+      },
+      {
+         "factoryPid": "process",
+         "pid": "process.9863529c-60e0-42e3-b5d5-c5c704016e95",
+         "_id": "process/access"
+      }
+   ]
 }</screen>
 
   <para>Single instance configuration objects are located under
@@ -441,136 +473,178 @@
   configuration.</para>
 
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- http://localhost:8080/openidm/config/audit
+ --header "Content-Type: application/json"
+ https://localhost:8443/openidm/config/audit
 
 {
-    "eventTypes": {
-        "activity": {
-            "filter": {
-                "actions": [
-                    "create",
-                    "update",
-                    "delete",
-                    "patch",
-                    "action"
-                ]
-            }
-        },
-        "recon": {}
-    },
-    "logTo": [
-        {
-            "logType": "csv",
-            "location": "audit",
-            "recordDelimiter": ";"
-        },
-        {
-            "logType": "repository"
-        }
-    ]
+   "eventTypes": {
+     "recon": {},
+     "activity": {
+       "filter": {
+         "actions": [
+           "create",
+           "update",
+           "delete",
+           "patch",
+           "action"
+         ]
+       },
+       "passwordFields": [
+         "password"
+       ],
+       "watchedFields": []
+     }
+   },
+   "exceptionFormatter": {
+     "file": "bin/defaults/script/audit/stacktraceFormatter.js",
+     "type": "text/javascript"
+   },
+   "logTo": [
+     {
+       "recordDelimiter": ";",
+       "logType": "csv",
+       "location": "audit"
+     },
+     {
+       "useForQueries": true,
+       "logType": "repository"
+     }
+   ]
 }</screen>
 
   <para>Multiple instance configuration objects are found under
   <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable
-  >instance-name</replaceable></literal>. The following example shows the
-  configuration for the XML connector provisioner.</para>
+  >instance-name</replaceable></literal>.
+  </para>
+
+   <para>The following example shows the configuration for the XML connector
+    provisioner, based on the first IDM sample described in the
+    <link xlink:show="new" xlink:href="install-guide#chap-sample"
+          xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
+    First IDM Sample</citetitle></link> of the OpenIDM Installation Guide.</para>
 
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- http://localhost:8080/openidm/config/provisioner.openicf/xml
+ --header "Content-Type: application/json"
+ https://localhost:8443/openidm/config/provisioner.openicf/xml
 
-{
-    "name": "xmlfile",
-    "connectorRef": {
-        "bundleName":
-            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-        "bundleVersion": "<?eval ${openicfBundleVersion}?>",
-        "connectorName": "com.forgerock.openicf.xml.XMLConnector"
-    },
-    "producerBufferSize": 100,
-    "connectorPoolingSupported": true,
-    "poolConfigOption": {
-        "maxObjects": 10,
-        "maxIdle": 10,
-        "maxWait": 150000,
-        "minEvictableIdleTimeMillis": 120000,
-        "minIdle": 1
-    },
+
+  {
     "operationTimeout": {
-        "CREATE": -1,
-        "TEST": -1,
-        "AUTHENTICATE": -1,
-        "SEARCH": -1,
-        "VALIDATE": -1,
-        "GET": -1,
-        "UPDATE": -1,
-        "DELETE": -1,
-        "SCRIPT_ON_CONNECTOR": -1,
-        "SCRIPT_ON_RESOURCE": -1,
-        "SYNC": -1,
-        "SCHEMA": -1
+      "SCRIPT_ON_CONNECTOR": -1,
+      "VALIDATE": -1,
+      "SYNC": -1,
+      "DELETE": -1,
+      "TEST": -1,
+      "UPDATE": -1,
+      "CREATE": -1,
+      "AUTHENTICATE": -1,
+      "SEARCH": -1,
+      "GET": -1,
+      "SCRIPT_ON_RESOURCE": -1,
+      "SCHEMA": -1
+    },
+    "connectorRef": {
+      "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
+      "bundleVersion": "1.1.0.1",
+      "bundleName": "org.forgerock.openicf.connectors.xml-connector"
+    },
+    "connectorPoolingSupported": true,
+    "syncFailureHandler": {
+      "maxRetries": 5,
+      "postRetryAction": "logged-ignore"
     },
     "configurationProperties": {
-        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
-        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
-        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
+      "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+      "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
+      "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
     },
     "objectTypes": {
-        "account": {
-            "$schema": "http://json-schema.org/draft-03/schema",
-            "id": "__ACCOUNT__",
-            "type": "object",
-            "nativeType": "__ACCOUNT__",
-            "properties": {
-                "description": {
-                    "type": "string",
-                    "nativeName": "__DESCRIPTION__",
-                    "nativeType": "string"
-                },
-                "firstname": {
-                    "type": "string",
-                    "nativeName": "firstname",
-                    "nativeType": "string"
-                },
-                "email": {
-                    "type": "string",
-                    "nativeName": "email",
-                    "nativeType": "string"
-                },
-                "__UID__": {
-                    "type": "string",
-                    "nativeName": "__UID__"
-                },
-                "password": {
-                    "type": "string",
-                    "required": false,
-                    "nativeName": "__PASSWORD__",
-                    "nativeType": "JAVA_TYPE_GUARDEDSTRING",
-                    "flags": [
-                        "NOT_READABLE",
-                        "NOT_RETURNED_BY_DEFAULT"
-                    ]
-                },
-                "name": {
-                    "type": "string",
-                    "required": true,
-                    "nativeName": "__NAME__",
-                    "nativeType": "string"
-                },
-                "lastname": {
-                    "type": "string",
-                    "required": true,
-                    "nativeName": "lastname",
-                    "nativeType": "string"
-                }
-            }
-        }
+      "account": {
+        "nativeType": "__ACCOUNT__",
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "type": "object",
+        "properties": {
+          "securityAnswer": {
+            "nativeType": "string",
+            "nativeName": "securityAnswer",
+            "required": true,
+            "type": "string"
+          },
+          "securityQuestion": {
+            "nativeType": "string",
+            "nativeName": "securityQuestion",
+            "required": true,
+            "type": "string"
+          },
+          "password": {
+            "nativeType": "string",
+            "nativeName": "password",
+            "type": "string"
+          },
+          "mobileTelephoneNumber": {
+            "nativeType": "string",
+            "nativeName": "mobileTelephoneNumber",
+            "required": true,
+            "type": "string"
+          },
+          "_id": {
+            "nativeName": "__UID__",
+            "type": "string"
+          },
+          "email": {
+            "nativeType": "string",
+            "nativeName": "email",
+            "type": "string"
+          },
+          "description": {
+            "nativeType": "string",
+            "nativeName": "__DESCRIPTION__",
+            "type": "string"
+          },
+          "name": {
+            "nativeType": "string",
+            "nativeName": "__NAME__",
+            "required": true,
+            "type": "string"
+          },
+          "roles": {
+            "nativeType": "string",
+            "nativeName": "roles",
+            "required": false,
+            "type": "string"
+          },
+          "lastname": {
+            "nativeType": "string",
+            "nativeName": "lastname",
+            "required": true,
+            "type": "string"
+          },
+          "firstname": {
+            "nativeType": "string",
+            "nativeName": "firstname",
+            "type": "string"
+          }
+        },
+        "id": "__ACCOUNT__"
+      }
     },
-    "operationOptions": {}
-}</screen>
+    "operationOptions": {},
+    "name": "xmlfile",
+    "producerBufferSize": 100,
+    "poolConfigOption": {
+      "maxObjects": 10,
+      "minEvictableIdleTimeMillis": 120000,
+      "maxIdle": 10,
+      "minIdle": 1,
+      "maxWait": 150000
+    }
+  }</screen>
 
   <para>You can change the configuration over REST by using an HTTP PUT request 
   to modify the required configuration object. The following example modifies 
@@ -578,21 +652,34 @@
   bypassing any policy validation.</para>
   
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request PUT
  --data '{
-          "filters" : [
-             {
-                "onRequest" : {
-                   "type" : "text/javascript",
-                   "file" : "bin/defaults/script/router-authz.js"
-                }
-              }
-           ]
-           }'
- "http://localhost:8080/openidm/config/router"
-  </screen>
+   "filters" : [
+     {
+       "onRequest" : {
+         "type" : "text/javascript",
+         "file" : "bin/defaults/script/router-authz.js"
+       }
+     }
+   ]
+   }'
+ "https://localhost:8443/openidm/config/router"
+
+
+{
+  "filters": [
+    {
+      "onRequest": {
+        "file": "bin/defaults/script/router-authz.js",
+        "type": "text/javascript"
+      }
+    }
+  ]
+}</screen>
 
   <para>See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
@@ -662,14 +749,14 @@
    To use the production environment, start OpenIDM as follows:</para>
    
    <screen>
-   $ export OPENIDM_OPTS="-Xmx1024m -Denvironment=PROD"
+   $ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=PROD"
    $ ./startup.sh
    </screen>
    
    <para>To use the development environment, start OpenIDM as follows:</para>
    
    <screen>
-   $ export OPENIDM_OPTS="-Xmx1024m -Denvironment=DEV"
+   $ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=DEV"
    $ ./startup.sh
    </screen>
    
@@ -924,6 +1011,8 @@ tables).</para></listitem>
       <member><filename>script/echo.js</filename>, which is launched when the 
       endpoint is accessed.</member>      
     </simplelist>
+
+
     
     <para>The structure of an endpoint configuration file is as follows:</para>
     
@@ -935,9 +1024,6 @@ tables).</para></listitem>
 }    
     </programlisting>
 
-   <!-- May want to open a bug to change context to context past in the
-   endpoint-echo.json file. -->
-        
     <variablelist>
       <varlistentry>
         <term><literal>"context"</literal></term>
@@ -971,43 +1057,79 @@ tables).</para></listitem>
     </variablelist>
     
     <para>The endpoint script has a <literal>request</literal> variable 
-    available in its scope. The request structure carries all the information 
-    about the request, and includes the following properties:</para>
+    available in its scope.</para>
+
+    <para>
+     Depending on the request type, the associated structure may vary in
+     the following properties:</para>
     
     <variablelist>
-      <varlistentry>
-      <term><literal>id</literal></term>
+     <varlistentry>
+      <term><literal>method</literal></term>
       <listitem>
-        <para>The local ID, without the <literal>endpoint/</literal> prefix, 
-        for example, <literal>echo</literal>.</para>
+       <para>The requested operation, that is, <literal>create</literal>,
+        <literal>read</literal>, <literal>update</literal>,
+        <literal>delete</literal>, <literal>patch</literal>,
+        <literal>query</literal> or <literal>action</literal>.</para>
       </listitem>
-      </varlistentry>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>resourceName</literal></term>
+      <listitem>
+        <para>The local identifier, without the <literal>endpoint/</literal>
+        prefix, such as <literal>echo</literal>.</para>
+      </listitem>
+     </varlistentry>
+
+     <!-- Check carefully; these are best guesses. I haven't included
+     all options listed in the tested version of echo.js, but think these
+     are the more important ones. -->
+
+     <varlistentry>
+      <term><literal>newResourceID</literal></term>
+      <listitem>
+       <para>
+        An identifier associated with a new resource, associated with
+        the <literal>create</literal> method.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>revision</literal></term>
+      <listitem>
+       <para>
+        The revision level associated with the method used, relative to
+        a <literal>newResourceId</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>content</literal></term>
+      <listitem>
+       <para>
+        Content based on the latest version of the object, using
+        <literal>getObject</literal>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>context</literal></term>
+      <listitem>
+       <para>
+        A JSON object, which contains a set of members which define the context of a request
+       </para>
+      </listitem>
+     </varlistentry>
+
+     <!-- parameters may be deleted or renamed; may be related to OPENIDM-1671
       <varlistentry>
-        <term><literal>method</literal></term>
-        <listitem>
-          <para>The requested operation, that is, <literal>create</literal>, 
-          <literal>read</literal>, <literal>update</literal>, 
-          <literal>delete</literal>, <literal>patch</literal>, 
-          <literal>query</literal> or <literal>action</literal>.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal>params</literal></term>
+        <term><literal>parameters</literal></term>
         <listitem>
          <para>The parameters that are passed in. For example, for an HTTP GET 
          with <literal>?param=x</literal>, the request contains 
          <literal>"params":{"param":"x"}</literal>.</para>
         </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal>parent</literal></term>
-        <listitem>
-          <para>Provides the context for the invocation, including headers and 
-          security.</para>
-          <para>Note that the interface for this context is still evolving and 
-          may change in a future release.</para>
-        </listitem>
-      </varlistentry>
+      </varlistentry>                              -->
     </variablelist>
     
     <para>A script implementation should check and reject requests for methods 
@@ -1036,59 +1158,87 @@ x
     <para>The following example uses the sample provided in 
     <literal>openidm/samples/customendpoint</literal> and shows the complete 
     request structure, which is returned by the query.</para>
-    
+
+    <!-- May need to revise -->
+
     <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/endpoint/echo?param=x"
-{
-  "type": "resource",
-  "uuid": "21c5ddc6-a66e-464e-9fa4-9b777505799e",
-  "params": {
-    "param": "x"
-  },
-  "method": "query",
-  "parent": {
-    "path": "/openidm/endpoint/echo",
-    "headers": {
-      "Accept": "*/*",
-      "User-Agent": "curl/7.21.4 ... OpenSSL/0.9.8r zlib/1.2.5",
-      "Authorization": "Basic b3BlbmlkbS1hZG1pbjpvcGVuaWRtLWFkbWlu",
-      "Host": "localhost:8080"
-    },
-    "query": {
-      "param": "x"
-    },
-    "method": "GET",
-    "parent": {
-      "uuid": "bec97cbf-8618-42f8-a841-9f5f112538e9",
-      "parent": null,
-      "type": "root"
-    },
-    "type": "http",
-    "uuid": "7fb3e0d9-5f56-4b15-b710-28f2147cf4b4",
-    "security": {
-      "openidm-roles": [
-        "openidm-admin",
-        "openidm-authorized"
-      ],
-      "username": "openidm-admin",
-      "userid": {
-        "component": "internal/user",
-        "id": "openidm-admin"
-      }
-    }
-  },
-  "id": "echo"
-} 
-    </screen>    
+ "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids"
+
+
+ {
+   "remainingPagedResults": -1,
+   "pagedResultsCookie": null,
+   "resultCount": 1,
+   "result": [
+     {
+       "resourceName": "",
+       "queryId": "query-all-ids",
+       "parameters": null,
+       "content": null,
+       "queryExpression": null,
+       "queryFilter": null,
+       "context": null,
+       "pageSize": 0,
+       "pagedResultsOffset": 0,
+       "method": "query",
+       "pagedResultsCookie": null
+     }
+   ]
+ }</screen>
     
     <para>You must protect access to any custom endpoints by configuring the 
     appropriate authorization for those contexts. For more information, see 
     the <link xlink:href="integrators-guide#openidm-authorization" 
     xlink:role="http://docbook.org/xlink/role/olink">
     <citetitle>Authorization</citetitle></link> section.</para>
+
+  </section>
+
+  <section xml:id="config-default-directories">
+   <title>Default and Custom Configuration Directories</title>
+
+   <para>
+    You can set up custom configuration files in directories as
+    defined in the <filename>openidm/conf/script.json</filename> file.
+   </para>
+
+   <para>
+    The following portion of the <filename>script.json</filename> file
+    points to sources in installation and project directories. As implied in the
+    section on
+    <link xlink:href="integrators-guide#startup-configuration" xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Specifying the OpenIDM Startup Configuration</citetitle>
+    </link>, the <literal>launcher.project.location</literal> is the directory
+    cited if you start OpenIDM with a specific project directory.</para>
+   <para>
+    For example, if you start OpenIDM from the <filename>/path/to/openidm</filename>
+    directory with the following command:
+   </para>
+   <screen>$ ./startup..sh -p /path/to/openidm/customconfig
+   </screen>
+   <para>
+    The <literal>launcher.project.location</literal> directory would be
+    <filename>/path/to/openidm/customconfig</filename>.
+   </para>
+   <para>
+    In contrast, the <filename>script.json</filename> file also refers to a
+    <literal>launcher.install.location</literal> directory, which is
+    <filename>/path/to/openidm</filename>
+   </para>
+
+   <para>Thus, based on the way the <filename>script.json</filename> file
+    is configured for <literal>project</literal>
+    and <literal>project-script</literal>, you can add custom
+    configuration and script files to the
+    <filename>/path/to/openidm/customconfig</filename> and the
+    <filename>/path/to/openidm/customconfig/script</filename> directories.
+   </para>
 
   </section>
 

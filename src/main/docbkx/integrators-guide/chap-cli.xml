@@ -28,8 +28,7 @@
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Command-Line Interface</title>
 
  <para>OpenIDM includes a basic command-line interface that provides a number 
@@ -285,18 +284,13 @@ $ ./cli.sh encrypt [-j] <replaceable>string</replaceable>
   
   <screen width="85">
 $ ./cli.sh encrypt mypassword
-Using boot properties at /openidm/conf/boot/boot.properties
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Activating cryptography service of type: JCEKS provider:
-      location: security/keystore.jceks
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: CryptoService is initialized with 3 keys.
+Executing ./cli.sh
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
 -----BEGIN ENCRYPTED VALUE-----
 {
   "$crypto" : {
@@ -317,18 +311,13 @@ INFO: CryptoService is initialized with 3 keys.
   
   <screen width="85">
 $ ./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}
-Using boot properties at /openidm/conf/boot/boot.properties
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Activating cryptography service of type: JCEKS provider:
-      location: security/keystore.jceks
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:00:03 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: CryptoService is initialized with 3 keys.
+
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
 -----BEGIN ENCRYPTED VALUE-----
 {
   "$crypto" : {
@@ -348,25 +337,20 @@ INFO: CryptoService is initialized with 3 keys.
   this case, you need not escape the special characters.</para>
   
   <screen width="85">
-$ ./cli.sh encrypt -j 
-Using boot properties at /openidm/conf/boot/boot.properties
+$ ./cli.sh encrypt -j
+
+Using boot properties at /path/toopenidm/conf/boot/boot.properties
 Enter the Json value
 
 > Press ctrl-D to finish input
 Start data input:
 {"password":"myPassw0rd"}
 ^D
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Activating cryptography service of type: JCEKS provider:
-      location: security/keystore.jceks
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-sym-default
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-localhost
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: Available cryptography key: openidm-local-openidm-forgerock-org
-Oct 23, 2012 2:37:56 PM org.forgerock.openidm.crypto.impl.CryptoServiceImpl activate
-INFO: CryptoService is initialized with 3 keys.
+
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
 -----BEGIN ENCRYPTED VALUE-----
 {
   "$crypto" : {
@@ -450,10 +434,13 @@ AES:606d80ae316be58e94439f91ad8ce1c0
   
   <screen>
 $ ./cli.sh validate
-Using boot properties at /openidm/conf/boot/boot.properties
+
+Executing ./cli.sh
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
 ...................................................................
 [Validating] Load JSON configuration files from:
-[Validating] 	/openidm/conf
+[Validating] 	/path/to/openidm/conf
 [Validating] audit.json .................................. SUCCESS
 [Validating] authentication.json ......................... SUCCESS
 [Validating] endpoint-getavailableuserstoassign.json ..... SUCCESS
