@@ -73,6 +73,31 @@
                 "propertiesTable" : "managedobjectproperties",
                 "searchableDefault" : true
             },
+            "managed/user" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : false,
+                "properties" : {
+                    "/userName" : {
+                        "searchable" : true
+                    },
+                    "/givenName" : {
+                        "searchable" : true
+                    },
+                    "/sn" : {
+                        "searchable" : true
+                    },
+                    "/mail" : {
+                        "searchable" : true
+                    },
+                    "/accountStatus" : {
+                        "searchable" : true
+                    },
+                    "/roles" : {
+                        "searchable" : true
+                    }
+                } 
+            },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
                 "propertiesTable" : "schedulerobjectproperties",
@@ -85,37 +110,6 @@
             }
         },
         "explicitMapping" : { 
-            "managed/user": {
-                "table" : "managed_user",
-                "objectToColumn": {
-                    "_id": "objectid",
-                    "_rev" : "rev",
-                    "userName": "userName",
-                    "password": "password",
-                    "accountStatus":"accountStatus",
-                    "roles":"roles",
-                    "lastPasswordSet":"lastPasswordSet",
-                    "postalCode":"postalCode",
-                    "stateProvince":"stateProvince",
-                    "passwordAttempts":"passwordAttempts",
-                    "lastPasswordAttempt":"lastPasswordAttempt",
-                    "postalAddress":"postalAddress",
-                    "address2":"address2",
-                    "country":"country",
-                    "city":"city",
-                    "givenName":"givenName",
-                    "sn":"sn",
-                    "telephoneNumber":"telephoneNumber",
-                    "mail":"mail",
-                    "siteImage":"siteImage",
-                    "passPhrase":"passPhrase",
-                    "securityAnswer":"securityAnswer",
-                    "securityQuestion":"securityQuestion",
-                    "securityAnswerAttempts":"securityAnswerAttempts",
-                    "lastSecurityAnswerAttempt":"lastSecurityAnswerAttempt",
-                    "total":"total"
-                }
-            },
             "link" : {
                 "table" : "links",
                 "objectToColumn" : {
