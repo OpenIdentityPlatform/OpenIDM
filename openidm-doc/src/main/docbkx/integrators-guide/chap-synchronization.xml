@@ -330,11 +330,11 @@
             "target": "managed/user",
             "properties": [
                 {
-                    "target": "familyName",
+q                   "target": "sn",
                     "source": "lastName"
                 },
                 {
-                    "target": "homePhone",
+                    "target": "telephoneNumber",
                     "source": "homePhone"
                 },
                 {
@@ -592,8 +592,8 @@
            <citetitle>Managing Passwords</citetitle></link>.</para>
 
    <para>You configure encryption in the managed object configuration (in the
-   <filename>openidm/conf/managed.json</filename> file). The following
-   example shows a managed object configuration that encrypts and decrypts
+   <filename>openidm/conf/managed.json</filename> file). The following extract
+   of that file shows a managed object configuration that encrypts and decrypts
    <literal>securityAnswer</literal>, <literal>ssn</literal>, and
    <literal>password</literal> attributes using the default symmetric
    key, and additional scripts for extra passwords.</para>
@@ -603,6 +603,7 @@
     "objects": [
         {
             "name": "user",
+            ...
             "properties": [
                 {
                     "name": "securityAnswer",
@@ -623,15 +624,8 @@
                     }
                 }
             ],
-            "onStore": {
-                "type": "text/javascript",
-                "file": "script/encryptExtraPassword.js"
-            },
-            "onRetrieve": {
-                "type": "text/javascript",
-                "file": "script/decryptExtraPassword.js"
-            }
-        }
+            ...
+          }
     ]
 }</programlisting>
 
@@ -687,16 +681,17 @@
    request to update only those properties that need to be changed.
    </para>
 
-   <para>For example, to update the familyName of user joe, replace only the
-   familyName and not the entire user object, as follows:</para>
+   <para>For example, to update the <literal>givenName</literal> of user jdoe,
+    you could run the following command:</para>
 
    <screen width="100">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
- --data '[{"replace":"familyName","value": "Brown"}]'
- "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=joe"
+ --data '[{"operation":"replace","field":"givenName","value":"Jon"}]'
+ "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
    </screen>
 
    <note>
@@ -787,10 +782,12 @@
    </para>
 
    <screen width="91"><?dbfo pgwide="1"?>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
    </screen>
 
    <para>
@@ -814,10 +811,12 @@
    </para>
 
    <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/recon?_action=recon&amp;
+ "https://localhost:8443/openidm/recon?_action=recon&amp;
  mapping=systemLdapAccounts_managedUser&amp;waitForCompletion=true"
    </screen>
   </section>
@@ -833,53 +832,56 @@
     </para>
 
     <screen>$curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e
+ "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e
+
 {
-    "_id": "0890ad62-4738-4a3f-8b8e-f3c83bbf212e",
-    "mapping": "systemLdapAccounts_managedUser",
-    "state": "SUCCESS",
-    "stage": "COMPLETED_SUCCESS",
-    "stageDescription": "reconciliation completed.",
-    "progress": {
-        "source": {
-            "existing": {
-                "processed": 2,
-                "total": "2"
-            }
-        },
-        "target": {
-            "existing": {
-                "processed": 0,
-                "total": "0"
-            },
-            "created": 2
-        },
-        "links": {
-            "existing": {
-                "processed": 0,
-                "total": "0"
-            },
-            "created": 2
-        }
-    },
-    "situationSummary": {
-        "SOURCE_IGNORED": 0,
-        "MISSING": 0,
-        "FOUND": 0,
-        "AMBIGUOUS": 0,
-        "UNQUALIFIED": 0,
-        "CONFIRMED": 0,
-        "SOURCE_MISSING": 0,
-        "ABSENT": 2,
-        "TARGET_IGNORED": 0,
-        "UNASSIGNED": 0
-    },
-    "started": "2013-10-28T13:16:29.479Z",
-    "ended": "2013-10-28T13:16:29.971Z"
-}   </screen>
+  "ended": "2014-03-06T07:00:32.094Z",
+  "_id": "7a07c100-4f11-4d7e-bf8e-fa4594f99d58",
+  "mapping": "systemLdapAccounts_managedUser",
+  "state": "SUCCESS",
+  "stage": "COMPLETED_SUCCESS",
+  "stageDescription": "reconciliation completed.",
+  "progress": {
+     "links": {
+       "created": 0,
+       "existing": {
+         "total": "1",
+         "processed": 1
+       }
+     },
+     "target": {
+       "created": 0,
+       "existing": {
+         "total": "3",
+         "processed": 3
+       }
+     },
+     "source": {
+       "existing": {
+         "total": "1",
+         "processed": 1
+       }
+     }
+  },
+  "situationSummary": {
+     "UNASSIGNED": 2,
+     "TARGET_IGNORED": 0,
+     "SOURCE_IGNORED": 0,
+     "MISSING": 0,
+     "FOUND": 0,
+     "AMBIGUOUS": 0,
+     "UNQUALIFIED": 0,
+     "CONFIRMED": 1,
+     "SOURCE_MISSING": 0,
+     "ABSENT": 0
+  },
+  "started": "2014-03-06T07:00:31.907Z"
+}</screen>
    </section>
 
    <section xml:id="canceling-recons">
@@ -893,10 +895,12 @@
     </para>
 
     <screen width="91"><?dbfo pgwide="1"?>$curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
+ "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
     </screen>
 
     <para>
@@ -904,11 +908,12 @@
      following:
     </para>
 
-    <screen width="91">
-    {"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e",
+    <screen>
+{
+     "status":"SUCCESS",
      "action":"cancel",
-     "status":"SUCCESS"}
-    </screen>
+     "_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e"
+}</screen>
 
     <para>
      If you specified that the call should wait for completion before the ID is
@@ -928,10 +933,12 @@
     </para>
 
     <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/recon"
+ "https://localhost:8443/openidm/recon"
     </screen>
 
     <para>
@@ -939,37 +946,53 @@
      each reconciliation run.
     </para>
 
-    <screen width="91">{"reconciliations":[
- {"_id":"d3040cc9-ec2e-41b8-86c4-72393087a626",
- "mapping":"systemLdapAccounts_managedUser",
- "state":"SUCCESS",
- "stage":"COMPLETED_SUCCESS",
- "stageDescription":"reconciliation completed.",
- "progress":{
-   "source":{
-      "existing":{
-         "processed":1001,
-         "total":"1001"
-      }
+    <screen width="91">{
+   "reconciliations": [
+     {
+       "ended": "2014-03-06T06:14:11.845Z",
+       "_id": "4286510e-986a-4521-bfa4-8cd1e039a7f5",
+       "mapping": "systemLdapAccounts_managedUser",
+       "state": "SUCCESS",
+       "stage": "COMPLETED_SUCCESS",
+       "stageDescription": "reconciliation completed.",
+       "progress": {
+         "links": {
+           "created": 1,
+           "existing": {
+           "total": "0",
+           "processed": 0
+         }
+       },
+       "target": {
+         "created": 1,
+         "existing": {
+           "total": "2",
+           "processed": 2
+         }
+       },
+       "source": {
+         "existing": {
+           "total": "1",
+           "processed": 1
+         }
+       }
+     },
+     "situationSummary": {
+       "UNASSIGNED": 2,
+       "TARGET_IGNORED": 0,
+       "SOURCE_IGNORED": 0,
+       "MISSING": 0,
+       "FOUND": 0,
+       "AMBIGUOUS": 0,
+       "UNQUALIFIED": 0,
+       "CONFIRMED": 0,
+       "SOURCE_MISSING": 0,
+       "ABSENT": 1
+     },
+     "started": "2014-03-06T06:14:04.722Z"
    },
-   "target":{
-      "existing":{
-         "processed":1001,
-         "total":"1001"
-      },
-      "created":0
-   },
-   "links":{
-      "existing":{
-         "processed":1001,
-         "total":"1001"
-      },
-      "created":0
-   }
- },
- "started":"2012-11-18T08:48:00.031Z",
- "ended":"2012-11-18T08:48:00.160Z"},
-    </screen>
+ ]
+}</screen>
 
     <variablelist>
      <para>
@@ -1190,10 +1213,12 @@
       LiveSync operation on the user accounts in an external LDAP system.
      </para>
      <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system/ldap/account?_action=liveSync"
+ "https://localhost:8443/openidm/system/ldap/account?_action=liveSync"
      </screen>
     </listitem>
     <listitem>
@@ -1208,10 +1233,12 @@
       example.
      </para>
      <screen width="84">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system?_action=liveSync&amp;source=system/ldap/account"
+ "https://localhost:8443/openidm/system?_action=liveSync&amp;source=system/ldap/account"
      </screen>
     </listitem>
    </itemizedlist>
@@ -1220,11 +1247,11 @@
     A successful LiveSync operation returns the following response:
    </para>
    <screen>{
+    "_rev": "4",
     "_id": "SYSTEMLDAPACCOUNT",
-    "_rev": "0",
     "connectorData": {
-        "syncToken": 1,
-        "nativeType": "integer"
+        "nativeType": "integer",
+        "syncToken": 1
     }
 }
    </screen>
@@ -1239,10 +1266,12 @@
     additional information. For example:
    </para>
    <screen width="95">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system/ldap/account?_action=liveSync&amp;detailedFailure=true"
+ "https://localhost:8443/openidm/system/ldap/account?_action=liveSync&amp;detailedFailure=true"
    </screen>
 
    <note>
@@ -1331,12 +1360,13 @@
    employees, you would run the reconciliation operation as follows:
   </para>
   <screen width="93">$ curl
- --insecure
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
+ --data '{"sourceQuery": {"_queryId" : "query-all-ids"}}'
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=managedUser_systemLdapAccounts"
- -d '{"sourceQuery": {"_queryId" : "query-all-ids"}}'
   </screen>
   <para>
    By default, a reconciliation operation runs both the source and target phase,
@@ -1389,10 +1419,12 @@
     </para>
 
     <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/recon"
+ "https://localhost:8443/openidm/audit/recon"
     </screen>
 
     <para>
@@ -1522,10 +1554,12 @@
     </para>
 
     <screen width="80">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"
+ "https://localhost:8443/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"
     </screen>
 
     <para>
@@ -1534,22 +1568,22 @@
     </para>
 
     <programlisting language="javascript">{
- "messageDetail": null,
- "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
- "situation": "ABSENT",
- "actionId": "86995423-8a43-4fc7-9c3c-9e450e0234cb",
- "targetObjectId": "managed/user/scarter",
- "action": "CREATE",
- "entryType": "",
- "_id": "9f59bb8a-31c6-41af-8f27-02094391ba0c",
- "reconId": "5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f",
- "status": "SUCCESS",
- "exception": "",
+ "targetObjectId": "managed/user/5b9b75e8-2667-4040-a50d-7a644922f072",
+ "sourceObjectId": "system/ldap/account/uid=jdoe,ou=People,dc=example,dc=com",
+ "situation": "CONFIRMED",
  "reconciling": "source",
  "ambiguousTargetObjectIds": "",
- "timestamp": "2013-05-08T07:58:33.791Z",
+ "action": "UPDATE",
+ "actionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+ "exception": "",
+ "_id": "88802a56-8be9-43bf-aaf9-d861820f3e39",
+ "entryType": "",
+ "timestamp": "2014-03-06T06:59:14.637Z",
+ "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+ "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+ "status": "SUCCESS",
  "message": null,
- "sourceObjectId": "system/xmlfile/account/scarter"
+ "messageDetail": null
 }
     </programlisting>
 
@@ -1560,10 +1594,12 @@
     </para>
 
     <screen width="91">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/recon/?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"
     </screen>
 
     <para>
@@ -1572,112 +1608,132 @@
     </para>
 
     <programlisting language="javascript">{
-  "start": {
-    "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-    "messageDetail": null,
-    "message": "Reconciliation initiated by openidm-admin",
-    "timestamp": "2013-05-14T08:20:41.343Z",
-    "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-    "entryType": "start",
-    "_id": "ce58ef39-425d-4711-94b9-a9c77df23001",
-    "status": "SUCCESS",
-    "exception": "",
-    "mapping": "systemXmlfileAccounts_managedUser"
-  },
-  "result": [
-    {
-      "messageDetail": null,
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "situation": "ABSENT",
-      "actionId": "1a391fe8-201b-4f59-ad05-92ee804488a8",
-      "targetObjectId": "managed/user/scarter",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "6dc0a18a-826d-487d-a29f-5cd8d2f55465",
-      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-      "status": "SUCCESS",
-      "exception": "",
-      "reconciling": "source",
-      "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-14T08:20:41.763Z",
-      "message": null,
-      "sourceObjectId": "system/xmlfile/account/scarter"
-    },
-    {
-      "messageDetail": null,
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "situation": "ABSENT",
-      "actionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
-      "targetObjectId": "managed/user/bjensen",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "1cda457e-54e2-451b-8a40-ef93dec7e60c",
-      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-      "status": "SUCCESS",
-      "exception": "",
-      "reconciling": "source",
-      "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-14T08:20:41.760Z",
-      "message": null,
-      "sourceObjectId": "system/xmlfile/account/bjensen"
-    }
-  ],
-  "summary": {
-    "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-    "messageDetail": {
-      "ended": "2013-05-14T08:20:41.783Z",
-      "started": "2013-05-14T08:20:41.342Z",
-      "situationSummary": {
-        "SOURCE_MISSING": 0,
-        "FOUND": 0,
-        "SOURCE_IGNORED": 0,
-        "UNQUALIFIED": 0,
-        "UNASSIGNED": 0,
-        "TARGET_IGNORED": 0,
-        "CONFIRMED": 0,
-        "AMBIGUOUS": 0,
-        "ABSENT": 2,
-        "MISSING": 0
-      },
-      "progress": {
-        "links": {
-          "created": 2,
-          "existing": {
-            "total": "0",
-            "processed": 0
-          }
-        },
-        "target": {
-          "created": 2,
-          "existing": {
-            "total": "0",
-            "processed": 0
-          }
-        },
-        "source": {
-          "existing": {
-            "total": "2",
-            "processed": 2
-          }
-        }
-      },
-      "stageDescription": "reconciling target entries",
-      "stage": "ACTIVE_RECONCILING_TARGET",
-      "state": "ACTIVE",
-      "mapping": "systemXmlfileAccounts_managedUser"
-    },
-    "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
-       CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 ",
-    "timestamp": "2013-05-14T08:20:41.783Z",
-    "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-    "entryType": "summary",
-    "_id": "94c5893c-4ea8-4464-aff2-5533d6369722",
-    "status": "SUCCESS",
-    "exception": "",
-    "mapping": "systemXmlfileAccounts_managedUser"
-  }
-}
-    </programlisting>
+ "remainingPagedResults": -1,
+ "pagedResultsCookie": null,
+ "resultCount": 5,
+ "result": [
+   {
+     "mapping": "systemLdapAccounts_managedUser",
+     "exception": "",
+     "_id": "e8932aef-31ad-43e8-ab5a-c997b247ab9d",
+     "entryType": "summary",
+     "timestamp": "2014-03-06T06:59:14.691Z",
+     "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+     "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+     "status": "SUCCESS",
+     "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
+         CONFIRMED: 1 SOURCE_MISSING: 0 ABSENT: 0 TARGET_IGNORED: 0 UNASSIGNED: 2 ",
+     "messageDetail": {
+       "stage": "ACTIVE_RECONCILING_TARGET",
+       "stageDescription": "reconciling target entries",
+       "ended": "2014-03-06T06:59:14.691Z",
+       "started": "2014-03-06T06:59:14.353Z",
+       "mapping": "systemLdapAccounts_managedUser",
+       "state": "ACTIVE",
+       "situationSummary": {
+         "SOURCE_MISSING": 0,
+         "FOUND": 0,
+         "SOURCE_IGNORED": 0,
+         "UNQUALIFIED": 0,
+         "UNASSIGNED": 2,
+         "TARGET_IGNORED": 0,
+         "CONFIRMED": 1,
+         "AMBIGUOUS": 0,
+         "ABSENT": 0,
+         "MISSING": 0
+       },
+       "progress": {
+         "links": {
+           "created": 0,
+           "existing": {
+             "processed": 1,
+             "total": "1"
+           }
+         },
+       "source": {
+         "existing": {
+           "processed": 1,
+           "total": "1"
+         }
+       },
+       "target": {
+         "created": 0,
+         "existing": {
+           "processed": 3,
+           "total": "3"
+         }
+       }
+     }
+   }
+ },
+ {
+   "targetObjectId": "managed/user/e8b93d84-5295-4286-b951-cea07550a331",
+   "sourceObjectId": null,
+   "situation": "UNASSIGNED",
+   "reconciling": "target",
+   "ambiguousTargetObjectIds": null,
+   "action": "IGNORE",
+   "actionId": null,
+   "exception": "",
+   "_id": "7878e924-0aa6-46a9-8d42-716eae098121",
+   "entryType": "",
+   "timestamp": "2014-03-06T06:59:14.674Z",
+   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "status": "SUCCESS",
+   "message": null,
+   "messageDetail": null
+ },
+ {
+   "targetObjectId": "managed/user/0e4cfe5e-3d9d-4d74-acf4-596f610eda5a",
+   "sourceObjectId": null,
+   "situation": "UNASSIGNED",
+   "reconciling": "target",
+   "ambiguousTargetObjectIds": null,
+   "action": "IGNORE",
+   "actionId": null,
+   "exception": "",
+   "_id": "795d1616-9ec7-44c7-80f5-bc7c566bd2fe",
+   "entryType": "",
+   "timestamp": "2014-03-06T06:59:14.653Z",
+   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "status": "SUCCESS",
+   "message": null,
+   "messageDetail": null
+ },
+ {
+   "targetObjectId": "managed/user/5b9b75e8-2667-4040-a50d-7a644922f072",
+   "sourceObjectId": "system/ldap/account/uid=jdoe,ou=People,dc=example,dc=com",
+   "situation": "CONFIRMED",
+   "reconciling": "source",
+   "ambiguousTargetObjectIds": "",
+   "action": "UPDATE",
+   "actionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "exception": "",
+   "_id": "88802a56-8be9-43bf-aaf9-d861820f3e39",
+   "entryType": "",
+   "timestamp": "2014-03-06T06:59:14.637Z",
+   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "status": "SUCCESS",
+   "message": null,
+   "messageDetail": null
+ },
+ {
+   "mapping": "systemLdapAccounts_managedUser",
+   "exception": "",
+   "_id": "91c00e7f-1975-4f68-bfba-7740e8f05ec5",
+   "entryType": "start",
+   "timestamp": "2014-03-06T06:59:14.354Z",
+   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
+   "status": "SUCCESS",
+   "message": "Reconciliation initiated by openidm-admin",
+   "messageDetail": null
+ }
+]
+}</programlisting>
 
     <para>
      Note that the response structure of a read request on
@@ -1697,10 +1753,12 @@
     </para>
 
     <screen width="98">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT
  &amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"
     </screen>
 
@@ -1763,10 +1821,12 @@
     </para>
 
     <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/activity"
+ "https://localhost:8443/openidm/audit/activity"
     </screen>
 
     <para>
@@ -1774,40 +1834,42 @@
      which was a password change for user bjensen.
     </para>
 
-    <programlisting language="javascript">{
-  "entries": [
-    {
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "action": "create",
-      "objectId": "managed/user/bjensen",
-      "_rev": "0",
-      "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
-      "timestamp": "2013-05-14T08:20:41.712Z",
-      "message": null,
-      "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
-      "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
-      "requester": "openidm-admin",
-      "rev": "0",
-      "passwordChanged": true,
-      "status": "SUCCESS",
-      "before": null,
-      "changedFields": [
-        "/password"
-      ],
-      "after": {
-        "securityAnswer": {
-          "$crypto": {
-            "type": "x-simple-encryption",
-            "value": {
-              "key": "openidm-sym-default",
-              "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
-              "cipher": "AES/CBC/PKCS5Padding",
-              "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
-            }
-          }
-        },
-       ...
-    </programlisting>
+  <programlisting language="javascript">{
+   "entries": [
+   ...
+   },
+     "before": null,
+     "requester": "openidm-admin",
+     "parentActionId": "c2c102bc-7b32-4020-b5aa-9a7d63652cb6",
+     "_id": "bbaff1e0-923b-48f0-b053-b1614cbb3647",
+     "activityId": "c2c102bc-7b32-4020-b5aa-9a7d63652cb6",
+     "timestamp": "2014-03-13T16:20:54.811Z",
+     "action": "CREATE",
+     "message": "create",
+     "objectId": "managed/user/4f2f5eea-918a-4ef1-9244-be41dcf128a4",
+     "rev": "1",
+     "rootActionId": "c2c102bc-7b32-4020-b5aa-9a7d63652cb6"
+   },
+   {
+     "passwordChanged": true,
+     "changedFields": [
+     "/password"
+   ],
+     "status": "SUCCESS",
+     "after": {
+       "securityAnswer": {
+         "$crypto": {
+           "value": {
+             "key": "openidm-sym-default",
+             "iv": "8CvlA6rWN03MAhLSKJmbvw==",
+             "cipher": "AES/CBC/PKCS5Padding",
+             "data": "oJBTrrX+wFAygFZkLuGPrhB/jAIICcdIBuCX1eEbpS0="
+           },
+           "type": "x-simple-encryption"
+         }
+       },
+   ...
+  </programlisting>
 
     <para>
      To return activity information for a specific action, include the
@@ -1815,82 +1877,115 @@
     </para>
 
     <screen width="85">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"
+ "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"
     </screen>
 
     <para>
      Results similar to the following are returned:
     </para>
 
-    <programlisting language="javascript">{
-  "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-  "action": "create",
-  "objectId": "managed/user/bjensen",
-  "timestamp": "2013-05-14T08:20:41.712Z",
-  "message": null,
-  "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
-  "after": {
-    "securityAnswer": {
-      "$crypto": {
-        "type": "x-simple-encryption",
-        "value": {
-          "key": "openidm-sym-default",
-          "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
-          "cipher": "AES/CBC/PKCS5Padding",
-          "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
-        }
-      }
-    },
-    "stateProvince": "",
-    "userName": "bjensen@example.com",
-    "roles": [
-        "openidm-authorized"
-    ],
-    "description": "Created By XML1",
-    "accountStatus": "active",
-    "password": {
-      "$crypto": {
-        "type": "x-simple-encryption",
-        "value": {
-          "key": "openidm-sym-default",
-          "iv": "bqhRyLW1lI+KZROcpgyukg==",
-          "cipher": "AES/CBC/PKCS5Padding",
-          "data": "qO8A76GqNqftVVwOlasyPw=="
-        }
-      }
-    },
-    "securityQuestion": "1",
-    "givenName": "Barbara",
-    "address2": "",
-    "lastPasswordAttempt": "Tue May 14 2013 10:20:41 GMT+0200 (SAST)",
-    "address1": "",
-    "familyName": "Jensen",
-    "passwordAttempts": "0",
-    "country": "",
-    "city": "",
-    "_rev": "0",
-    "lastPasswordSet": "",
-    "postalCode": "",
-    "phoneNumber": "1234567",
-    "_id": "bjensen",
-    "email": "bjensen@example.com"
-  },
+  <programlisting language="javascript">{
+  "passwordChanged": true,
   "changedFields": [
     "/password"
   ],
-  "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
-  "_rev": "0",
-  "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
-  "requester": "openidm-admin",
-  "rev": "0",
-  "passwordChanged": true,
   "status": "SUCCESS",
-  "before": null
-}
-    </programlisting>
+  "after": {
+    "securityAnswer": {
+      "$crypto": {
+      "value": {
+        "key": "openidm-sym-default",
+        "iv": "HpsyTtTXc2pfNrXlYbro7Q==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "0M6O7geNjalJ7e0EGSG9B90eaeF8zJuogdL74hcAIRg="
+      },
+      "type": "x-simple-encryption"
+    }
+  },
+  "userName": "bjensen@example.com",
+  "stateProvince": "",
+  "postalAddress": "",
+  "effectiveAssignments": {},
+  "roles": "openidm-authorized",
+  "telephoneNumber": "1234567",
+  "accountStatus": "active",
+  "password": {
+    "$crypto": {
+      "value": {
+        "key": "openidm-sym-default",
+        "iv": "dkRjURz761HaObBuLl+EkA==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "9chNPUlXotHy195ERj6vlg=="
+      },
+      "type": "x-simple-encryption"
+    }
+  },
+  "effectiveRoles": [
+    "openidm-authorized"
+  ],
+  "givenName": "Barbara",
+  "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
+  "address2": "",
+  "passwordAttempts": "0",
+  "sn": "Jensen",
+  "mail": "bjensen@example.com",
+  "securityQuestion": "1",
+  "city": "",
+  "country": "",
+  "_rev": "7",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "bjensen",
+  "description": "Created By XML1"
+},
+  "before": {
+  "securityAnswer": "Some security answer",
+  "userName": "bjensen@example.com",
+  "stateProvince": "",
+  "postalAddress": "",
+  "roles": "openidm-authorized",
+  "telephoneNumber": "1234567",
+  "password": {
+    "$crypto": {
+      "value": {
+        "key": "openidm-sym-default",
+        "iv": "bqhRyLW1lI+KZROcpgyukg==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "qO8A76GqNqftVVwOlasyPw=="
+      },
+      "type": "x-simple-encryption",
+    "securityQuestion": "1",
+  "givenName": "Barbara",
+  "address2": "",
+  "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
+  "passwordAttempts": "0",
+  "sn": "Jensen",
+  "mail": "bjensen@example.com",
+  "country": "",
+  "city": "",
+  "_rev": "7",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "bjensen",
+  "description": "Created By XML1",
+  "accountStatus": "active"
+},
+"requester": "openidm-admin",
+"parentActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
+"_id": "ee88adb8-3329-4f81-a8f2-d9c8e0fbf72b",
+"activityId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
+"timestamp": "2014-03-13T16:21:27.086Z",
+"action": "UPDATE",
+"message": "update",
+"objectId": "managed/user/bjensen",
+"rev": "7",
+"rootActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5"
+}    </programlisting>
 
     <para>
      Each action in the activity log has a <literal>rootActionId</literal> and a
@@ -1906,10 +2001,12 @@
     </para>
 
     <screen width="90">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;
+ "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;
  parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"
     </screen>
 
@@ -1918,76 +2015,103 @@
      details of the password change for bjensen.
     </para>
 
-    <programlisting language="javascript">{
+  <programlisting language="javascript">{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
   "result": [
     {
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "action": "create",
-      "objectId": "managed/user/bjensen",
-      "_rev": "0",
-      "_id": "22ef6d20-bd84-4267-9db8-745825a46ad1",
-      "timestamp": "2013-05-14T08:20:41.712Z",
-      "message": null,
-      "activityId": "aa964020-b343-4d23-8e00-745ed4b79f50",
-      "parentActionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
-      "requester": "openidm-admin",
-      "rev": "0",
-      "passwordChanged": true,
-      "status": "SUCCESS",
-      "before": null,
+      "rootActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
       "changedFields": [
         "/password"
-      ],
-      "after": {
-        "securityAnswer": {
-          "$crypto": {
-            "type": "x-simple-encryption",
-            "value": {
-              "key": "openidm-sym-default",
-              "iv": "c6gZKz4sSL2YNTBwwFXIzw==",
-              "cipher": "AES/CBC/PKCS5Padding",
-              "data": "7FATEBtuLlLfMXGokfLrtJ2rXPEsE1YTIXSoGQCum4w="
-            }
-          }
-        },
-        "stateProvince": "",
+    ],
+      "action": "UPDATE",
+      "objectId": "managed/user/bjensen",
+      "before": {
+        "securityAnswer": "Some security answer",
         "userName": "bjensen@example.com",
-        "roles": [
-            "openidm-authorized"
-        ],
-        "description": "Created By XML1",
-        "accountStatus": "active",
-        "password": {
-          "$crypto": {
-            "type": "x-simple-encryption",
-            "value": {
-              "key": "openidm-sym-default",
-              "iv": "bqhRyLW1lI+KZROcpgyukg==",
-              "cipher": "AES/CBC/PKCS5Padding",
-              "data": "qO8A76GqNqftVVwOlasyPw=="
-            }
-          }
-        },
+        "stateProvince": "",
+        "postalAddress": "",
+        "roles": "openidm-authorized",
+        "telephoneNumber": "1234567",
+        "password": "CAngetin1",
         "securityQuestion": "1",
         "givenName": "Barbara",
         "address2": "",
-        "lastPasswordAttempt": "Tue May 14 2013 10:20:41 GMT+0200 (SAST)",
-        "address1": "",
-        "familyName": "Jensen",
+        "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
         "passwordAttempts": "0",
+        "sn": "Jensen",
+        "mail": "bjensen@example.com",
         "country": "",
         "city": "",
-        "_rev": "0",
+        "_rev": "7",
         "lastPasswordSet": "",
         "postalCode": "",
-        "phoneNumber": "1234567",
         "_id": "bjensen",
-        "email": "bjensen@example.com"
+        "description": "Created By XML1",
+        "accountStatus": "active"
+      },
+      "status": "SUCCESS",
+      "_rev": "1",
+      "_id": "ee88adb8-3329-4f81-a8f2-d9c8e0fbf72b",
+      "parentActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
+      "timestamp": "2014-03-13T16:21:27.086Z",
+      "message": "update",
+      "activityId": "71ddeed8-9006-4578-b869-13e15a3ce6b5",
+      "after": {
+        "securityAnswer": {
+          "$crypto": {
+            "value": {
+              "key": "openidm-sym-default",
+              "iv": "HpsyTtTXc2pfNrXlYbro7Q==",
+              "cipher": "AES/CBC/PKCS5Padding",
+              "data": "0M6O7geNjalJ7e0EGSG9B90eaeF8zJuogdL74hcAIRg="
+            },
+            "type": "x-simple-encryption"
+          }
+        },
+        "userName": "bjensen@example.com",
+        "stateProvince": "",
+        "postalAddress": "",
+        "effectiveAssignments": {},
+        "roles": "openidm-authorized",
+        "telephoneNumber": "1234567",
+        "accountStatus": "active",
+        "password": {
+          "$crypto": {
+            "value": {
+              "key": "openidm-sym-default",
+              "iv": "dkRjURz761HaObBuLl+EkA==",
+              "cipher": "AES/CBC/PKCS5Padding",
+              "data": "9chNPUlXotHy195ERj6vlg=="
+          },
+        "type": "x-simple-encryption"
       }
-    }
-  ]
-}
-    </programlisting>
+    },
+    "effectiveRoles": [
+       "openidm-authorized"
+    ],
+    "givenName": "Barbara",
+    "lastPasswordAttempt": "Thu Mar 13 2014 07:23:12 GMT-0800 (GMT-08:00)",
+    "address2": "",
+    "passwordAttempts": "0",
+    "sn": "Jensen",
+    "mail": "bjensen@example.com",
+    "securityQuestion": "1",
+    "city": "",
+    "country": "",
+    "_rev": "7",
+    "lastPasswordSet": "",
+    "postalCode": "",
+    "_id": "bjensen",
+    "description": "Created By XML1"
+  },
+  "rev": "7",
+  "requester": "openidm-admin",
+  "passwordChanged": true
+  }
+ ]
+}</programlisting>
 
     <note>
      <para>
@@ -2200,10 +2324,12 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     </para>
     <screen width="98">
     <userinput>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"
     </userinput>
     {
        "query-time-ms": 2,
@@ -2223,10 +2349,12 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     </para>
     <screen>
     <userinput>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/repo/synchronisation/deadLetterQueue/ldap/4"
+ "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap/4"
     </userinput>
 {
   "objectType": "account",

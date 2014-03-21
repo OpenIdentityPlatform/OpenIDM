@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Connecting to External Resources</title>
  <indexterm>
@@ -1555,10 +1556,12 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
          <para>The connector is now configured. To verify the configuration,
          perform a RESTful GET request on the remote system URL, for example:</para>
          <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/system/ad/account?_queryId=query-all-ids"</screen>
+ "https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids"</screen>
          <para>Such a request should return the user accounts in your Active
          Directory server.</para>
      </step>
@@ -1604,9 +1607,12 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
       <para>To test the synchronization, run a reconciliation operation by
       running the following command.
       </para>
-      <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: 
-openidm-admin" --request POST  "http://localhost:8080/openidm/recon?
-_action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
+      <screen>$ curl
+ --cacert self-signed.crt
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
+ --request POST  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
       <para>If reconciliation is successful, the command returns a reconciliation
       ID, similar to the following:
       </para>
@@ -2535,10 +2541,12 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
     following request, specifying the userName as input:</para>
     
     <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script&amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
+ "https://localhost:8443/openidm/system/ActiveDirectory/account?_action=script&amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
    </section>
   </section>
 
@@ -2809,16 +2817,18 @@ return id;
   command, as shown below for the XML connector.</para>
 
   <screen>$ curl
+ --cacert self-signed.crt
+ --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- -d '{"connectorRef":
+ --data '{"connectorRef":
  {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
  "displayName": "XML Connector",
  "bundleName": "org.forgerock.openicf.connectors.xml-connector",
  "bundleVersion": "1.1.0.1"}
  }'
  --request POST
- "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+ "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <para>The command returns a core connector configuration. The core connector
   configuration returned is not yet functional. It does not contain
@@ -2829,11 +2839,17 @@ return id;
 
   <programlisting language="javascript">
 {
-  "configurationProperties": {
-    "xsdIcfFilePath": null,
-    "xsdFilePath": null,
-    "createFileIfNotExists": false,
-    "xmlFilePath": null
+   "poolConfigOption": {
+   "minIdle": 1,
+   "minEvictableIdleTimeMillis": 120000,
+   "maxWait": 150000,
+   "maxIdle": 10,
+   "maxObjects": 10
+  },
+   "resultsHandlerConfig": {
+   "enableAttributesToGetSearchResultsHandler": true,
+   "enableFilteredResultsHandler": true,
+   "enableNormalizingResultsHandler": true
   },
   "operationTimeout": {
     "SCHEMA": -1,
@@ -2850,17 +2866,11 @@ return id;
     "GET": -1,
     "RESOLVEUSERNAME": -1
   },
-  "resultsHandlerConfig": {
-    "enableAttributesToGetSearchResultsHandler": true,
-    "enableFilteredResultsHandler": true,
-    "enableNormalizingResultsHandler": true
-  },
-  "poolConfigOption": {
-    "minIdle": 1,
-    "minEvictableIdleTimeMillis": 120000,
-    "maxWait": 150000,
-    "maxIdle": 10,
-    "maxObjects": 10
+  "configurationProperties": {
+   "xsdIcfFilePath": null,
+   "xsdFilePath": null,
+   "createFileIfNotExists": false,
+   "xmlFilePath": null
   },
   "connectorRef": {
     "bundleVersion": "1.1.0.1",
@@ -2875,10 +2885,11 @@ return id;
   core configuration as the body for the next command.</para>
   
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --data '{
-{
   "configurationProperties":
     {
       "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
@@ -2921,7 +2932,7 @@ return id;
   }
 }'
  --request POST
- "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+ "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <note>
    <para>Notice the single quotes around the argument to the
@@ -2935,143 +2946,15 @@ return id;
   resource in order to generate output. OpenIDM then iterates through schema
   objects and attributes, creating JSON representations for "objectTypes" and
   "operationOptions" for supported objects and operations.</para>
-  
-  <programlisting language="javascript">
-{
-    "connectorRef": {
-        "connectorHostRef": "#LOCAL",
-        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
-        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion": "1.1.0.1"
-    },
-    "poolConfigOption": {
-        "maxObjects": 10,
-        "maxIdle": 10,
-        "maxWait": 150000,
-        "minEvictableIdleTimeMillis": 120000,
-        "minIdle": 1
-    },
-    "resultsHandlerConfig": {
-        "enableNormalizingResultsHandler": true,
-        "enableFilteredResultsHandler": true,
-        "enableCaseInsensitiveFilter": false,
-        "enableAttributesToGetSearchResultsHandler": true
-    },
-    "operationTimeout": {
-        "CREATE": -1,
-        "UPDATE": -1,
-        "DELETE": -1,
-        "TEST": -1,
-        "SCRIPT_ON_CONNECTOR": -1,
-        "SCRIPT_ON_RESOURCE": -1,
-        "GET": -1,
-        "RESOLVEUSERNAME": -1,
-        "AUTHENTICATE": -1,
-        "SEARCH": -1,
-        "VALIDATE": -1,
-        "SYNC": -1,
-        "SCHEMA": -1
-    },
-    "configurationProperties": {
-        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml",
-        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
-        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd"
-    },
-    "objectTypes": {
-        "OrganizationUnit": {
-            "...": "..."
-        },
-        "__GROUP__": {
-            "$schema": "http://json-schema.org/draft-03/schema",
-            "id": "__GROUP__",
-            "type": "object",
-            "nativeType": "__GROUP__",
-            "properties": {
-                "__DESCRIPTION__": {
-                    "type": "string",
-                    "required": true,
-                    "nativeName": "__DESCRIPTION__",
-                    "nativeType": "string"
-                },
-                "__NAME__": {
-                    "type": "string",
-                    "required": true,
-                    "nativeName": "__NAME__",
-                    "nativeType": "string"
-                }
-            }
-        },
-        "__ACCOUNT__": {
-            "$schema": "http://json-schema.org/draft-03/schema",
-            "id": "__ACCOUNT__",
-            "type": "object",
-            "nativeType": "__ACCOUNT__",
-            "properties": {
-                "firstname": {
-                    "type": "string",
-                    "nativeName": "firstname",
-                    "nativeType": "string"
-                },
-                "__DESCRIPTION__": {
-                    "type": "string",
-                    "nativeName": "__DESCRIPTION__",
-                    "nativeType": "string"
-                },
-                "__UID__": {
-                    "type": "string",
-                    "nativeName": "__UID__",
-                    "nativeType": "string"
-                },
-                "__NAME__": {
-                    "type": "string",
-                    "required": true,
-                    "nativeName": "__NAME__",
-                    "nativeType": "string"
-                }
-            }
-        }
-    },
-    "operationOptions": {
-        "CREATE": {
-            "objectFeatures": {
-                "OrganizationUnit": {
-                    "...": "..."
-                },
-                "__GROUP__": {
-                    "...": "..."
-                },
-                "__ACCOUNT__": {
-                    "denied": false,
-                    "onDeny": "DO_NOTHING",
-                    "operationOptionInfo": {
-                        "$schema": "http://json-schema.org/draft-03/schema",
-                        "id": "FIX_ME",
-                        "type": "object",
-                        "properties": {
-                            "...": "..."
-                        }
-                    }
-                }
-            }
-        },
-        "UPDATE": {
-            "objectFeatures": {
-                "__ACCOUNT__": {
-                    "denied": false,
-                    "onDeny": "DO_NOTHING",
-                    "operationOptionInfo": {
-                        "$schema": "http://json-schema.org/draft-03/schema",
-                        "id": "FIX_ME",
-                        "type": "object",
-                        "properties": {
-                            "...": "..."
-                        }
-                    }
-                }
-            }
-        }
-    }
-}</programlisting>
+
+  <!-- Removed the previously included output (The CREST-based output is
+  about 2x the original length; 244 lines would be too much. So I just include
+  a description. -->
+
+  <para>
+   The output includes the basic <literal>--data</literal> input, along with
+   <literal>operationOptions</literal> and <literal>objectTypes</literal>.
+  </para>
 
   <para>As OpenIDM produces a full property set for all attributes and all
   object types in the schema from the external resource, the resulting
@@ -3086,22 +2969,24 @@ return id;
   <para>
    After a connection has been configured, external systems are accessible over
    the REST interface at the URL
-   <literal>http://localhost:8080/openidm/system/<replaceable>connector-name</replaceable></literal>.
+   <literal>https://localhost:8443/openidm/system/<replaceable>connector-name</replaceable></literal>.
    Aside from accessing the data objects within the external systems, you can
    test the availability of the systems themselves.
   </para>
   <para>
    To list the external systems that are connected to an OpenIDM instance, use
    the <literal>test</literal> action on the URL
-   <literal>http://localhost:8080/openidm/system/</literal>. The following
+   <literal>https://localhost:8443/openidm/system/</literal>. The following
    example shows two external LDAP servers connected to OpenIDM:
   </para>
 
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system/?_action=test"
+ "https://localhost:8443/openidm/system?_action=test"
 [
   {
     "ok": true,
@@ -3122,10 +3007,12 @@ return id;
    in the URL, for example:
   </para>
   <screen>$ curl
+ --cacert self-signed.crt
+ --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/system/ldap1/?_action=test"
+ "https://localhost:8443/openidm/system/ldap1?_action=test"
 {
   "ok": true,
   "name": "ldap1"
@@ -3136,10 +3023,12 @@ return id;
    <literal>ldap1</literal> is down.
   </para>
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/system/ldap1/?_action=test"
+ "https://localhost:8443/openidm/system/ldap1?_action=test"
 {
   "error": "javax.naming.CommunicationException: localhost:1389
             [Root exception is java.net.ConnectException: Connection refused]",
@@ -3151,8 +3040,10 @@ return id;
    command. For example:
   </para>
   <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --data '{
     "name" : "xmlfile",
     "connectorRef" : {
@@ -3272,8 +3163,8 @@ return id;
    <literal>"ok": true</literal>, for example:
   </para>
   <screen>{
-  "name": "xmlfile",
-  "ok": true
+   "ok": true,
+   "name": "xmlfile"
 }</screen>
  </section>
 </chapter>

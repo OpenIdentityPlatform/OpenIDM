@@ -20,16 +20,15 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-policies'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'>
  <title>Using Policies to Validate Data</title>
  <indexterm>
   <primary>Policies</primary>
@@ -104,17 +103,28 @@
       that the value of a property must contain a certain number of capital 
       letters.</para>
       
-      <programlisting width="72" language="javascript">
+      <programlisting width="100" language="javascript">
 ...
             {   "policyId" : "at-least-X-capitals",
+                "policyExec" : "atLeastXCapitalLetters",
                 "clientValidation": true,
-                "policyExec" : "atLeastXCapitalLetters", 
+                "validateOnlyIfPresent":true,
                 "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
             },
 ...
 
-function atLeastXCapitalLetters(fullObject, value, params, property) {
+policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, property) {
     var reg = /[(A-Z)]/g;
+
+    if (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length &lt; params
+    .nuafsdmCaps) {
+    nnn   return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
+       } else {
+       return [];
+       }
+       };
+policyFunctions.atLeastXCapitalLetters = function (fullObject, value, params, property) {
+    var reg = nnn/\d/g;
     if (typeof value !== "string" || !value.length || value.match(reg) 
         === null || value.match(reg).length &lt; params.numCaps) {
         return [ { 
@@ -144,8 +154,9 @@ function atLeastXCapitalLetters(fullObject, value, params, property) {
       
       <programlisting language="javascript">
 {   "policyId" : "minimum-length",
-    "clientValidation": true,
     "policyExec" : "propertyMinLength",
+    "clientValidation": true,
+    "validateOnlyIfPresent":true,
     "policyRequirements" : ["MIN_LENGTH"]
 }
       </programlisting>
@@ -217,6 +228,10 @@ function required(fullObject, value, params, propName) {
       following extract of the default policy configuration file shows how 
       the <literal>at-least-X-capitals</literal> policy is applied to user 
       passwords, with a default value of <literal>1</literal>.</para>
+
+     <!-- This really is "just" a selective excerpt; actual policy.json
+     files are more extensive, even just in the password area. But
+     the selectivity helps make the point of this section. -->
       
       <programlisting language="javascript">
 {
@@ -340,7 +355,8 @@ function notNull(fullObject, value, params, property) {
 } 
     </programlisting>
     
-    <para>The policy is referenced in the policy configuration file as follows:
+    <para>The <filename>mypolicy.js</filename> policy is referenced in the
+     <filename>policy.json</filename> configuration file as follows:
     </para>
     
     <programlisting language="javascript">
@@ -352,13 +368,13 @@ function notNull(fullObject, value, params, property) {
         {
 ...
     </programlisting>
-    
-    <para>You can also configure policies for managed object properties as 
-    part of the property definition in the <filename>conf/managed.json</filename> 
-    file. For example, the following extract of a managed.json file shows a 
+
+   <para>You can also configure policies for managed object properties as
+    part of the property definition in the <filename>conf/managed.json</filename>
+    file. For example, the following extract of a managed.json file shows a
     policy configuration for the <literal>password</literal> property.</para>
-    
-     <programlisting language="javascript">
+
+   <programlisting language="javascript">
 ...
 "properties" : [
     {
@@ -383,8 +399,7 @@ function notNull(fullObject, value, params, property) {
         ]
     },
 ...
-    </programlisting>   
-
+   </programlisting>
   </section>
   
   <section xml:id="disabling-policies">
@@ -415,7 +430,7 @@ function notNull(fullObject, value, params, property) {
     <title>Managing Policies Over REST</title>
     
     <para>You can manage the policy service over the REST interface, by calling 
-    the REST endpoint <literal>http://localhost:8080/openidm/policy</literal>, as 
+    the REST endpoint <literal>https://localhost:8443/openidm/policy</literal>, as
     shown in the following examples.</para>
     
     <section xml:id="listing-policies">
@@ -426,10 +441,12 @@ function notNull(fullObject, value, params, property) {
       </para>
       
       <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/policy"</screen>
+ "https://localhost:8443/openidm/policy"</screen>
       
       <para>The policy objects are returned in JSON format, with one object 
       for each defined policy ID, for example:</para>
@@ -437,76 +454,38 @@ function notNull(fullObject, value, params, property) {
 <screen width="88">{
   "resources": [
     {
-      "resource": "managed/user/*",
       "properties": [
       {
+        "name": "_id",
         "policies": [
           {
-            "policyId": "required",
-            "policyFunction": "function required(fullObject, value, params, propName) {
-              if (value === undefined) {
-              return [{"policyRequirement":"REQUIRED"}];
-                      }
-              return [];
-            }",
-            "policyRequirements": [
-              "REQUIRED"
-            ]
-          },
+            "policyFunction":
 ...</screen>
-    
+
       <para>To display the policies that apply to a specific component, include 
       the component name in the URL. For example, the following REST call 
       displays the policies that apply to managed users.
       </para>
       
       <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/policy/managed/user/*"</screen>
+ "https://localhost:8443/openidm/policy/managed/user/*"</screen>
       
-      <screen width="85">
+      <screen>
 {
-    "resource": "managed/user/*",
-    "properties": [
-        {
-            "policies": [
-                {
-                    "policyId": "required",
-                    "policyFunction": "
-                        \nfunction required(fullObject, value, params, propName) {
-                            \n    if (value === undefined) {
-                            \n        return [{\"policyRequirement\":\"REQUIRED\"}];
-                            \n    }
-                            \n    return [];
-                            \n}
-                            \n",
-                    "policyRequirements": [
-                        "REQUIRED"
-                    ]
-                },
-                {
-                    "policyId": "not-empty",
-                    "policyFunction": "
-                    \nfunction notEmpty(fullObject, value, params, property) {
-                    \n    if (typeof (value) !== \"string\" || !value.length) {
-                    \n        return [{\"policyRequirement\":\"REQUIRED\"}];
-                    \n    } else {
-                    \n        return [];
-                    \n    }
-                    \n}
-                    \n",
-                    "policyRequirements": [
-                        "REQUIRED"
-                    ]
-                },
-                {
-                    "policyId": "unique",
-                    "policyRequirements": [
-                        "UNIQUE"
-                    ]
-                },
+   "properties": [
+     {
+        "name": "_id",
+        "policies": [
+            {
+            "policyFunction": "
+               "\n  function (fullObject, value, params, property) {
+               \n    var i, join = function (arr, d) {
+
 ...
 }</screen>
     </section>
@@ -521,35 +500,61 @@ function notNull(fullObject, value, params, property) {
       acceptable in terms of the policy requirements.</para>
       
       <screen width="83">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST      
- --data '{"familyName":"Jones",
-          "givenName":"Bob",
-          "_id":"bjones",
-          "phoneNumber":"0827878921",
-          "passPhrase":null,
-          "email":"bjones@example.com",
-          "accountStatus":"active",
-          "roles":"admin",
-          "userName":"bjones@example.com",
-          "password":"123"}' 
- "http://localhost:8080/openidm/policy/managed/user/bjones?_action=validateObject"
+ --data '{"sn":"Jones",
+  "givenName":"Bob",
+  "_id":"bjones",
+  "telephoneNumber":"0827878921",
+  "passPhrase":null,
+  "mail":"bjones@example.com",
+  "accountStatus":"active",
+  "roles":"admin",
+  "userName":"bjones@example.com",
+  "password":"123"}'
+ "https://localhost:8443/openidm/policy/managed/user/bjones?_action=validateObject"
 
-{"result":false,
- "failedPolicyRequirements":[
-    {"policyRequirements":[
-         {"policyRequirement":"AT_LEAST_X_CAPITAL_LETTERS",
-             "params":{"numCaps":1}
-         },
-         {"policyRequirement":"MIN_LENGTH",
-             "params":{"minLength":8}
+
+ {
+   "failedPolicyRequirements": [
+     {
+       "property": "password",
+       "policyRequirements": [
+         {
+           "params": {
+             "numCaps": 1
+           },
+           "policyRequirement": "AT_LEAST_X_CAPITAL_LETTERS"
          }
-         ],
-      "property":"password"
-    }
-  ]
-}</screen>
+       ]
+     },
+     {
+       "property": "password",
+       "policyRequirements": [
+         {
+           "params": {
+             "minLength": 8
+           },
+           "policyRequirement": "MIN_LENGTH"
+         }
+       ]
+     },
+     {
+       "property": "passPhrase",
+       "policyRequirements": [
+         {
+           "params": {
+             "minLength": 4
+           },
+           "policyRequirement": "MIN_LENGTH"
+         }
+       ]
+     }
+   ],
+   "result": false
+ }</screen>
       
       <para>The result (<literal>false</literal>) indicates that the object 
       is not valid. The unfulfilled policy requirements are provided as part 
@@ -601,15 +606,17 @@ function notNull(fullObject, value, params, property) {
       returns a <literal>true</literal> result, for example:</para>
       
       <screen>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
  --data '{ "password" : "1NewPassword" }' 
- "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
+ "https://localhost:8443/openidm/policy/managed/user/bjensen?_action=validateProperty"
  
 {
-    "result": true,
     "failedPolicyRequirements": []
+    "result": true,
 }
       </screen>
      
