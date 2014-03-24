@@ -32,6 +32,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.script.ScriptException;
+
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -40,16 +42,12 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.quartz.impl.ObjectSetContext;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
@@ -61,14 +59,12 @@ import org.joda.time.ReadablePeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
-
 public class TaskScannerJob {
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerJob.class);
     private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
 
     private ConnectionFactory connectionFactory;
-    private TaskScannerContext context;
+    private TaskScannerContext taskScannerContext;
     private RouteService routeService;
     private ScriptRegistry scopeFactory;
     private ScriptEntry script;
@@ -76,7 +72,7 @@ public class TaskScannerJob {
     public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, RouteService routeService, ScriptRegistry scopeFactory)
             throws ExecutionException, ScriptException {
         this.connectionFactory = connectionFactory;
-        this.context = context;
+        this.taskScannerContext = context;
         this.routeService = routeService;
         this.scopeFactory = scopeFactory;
 
@@ -95,10 +91,10 @@ public class TaskScannerJob {
      * @throws ExecutionException
      */
     public String startTask() throws ExecutionException {
-        int numberOfThreads = context.getNumberOfThreads();
+        int numberOfThreads = taskScannerContext.getNumberOfThreads();
         final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         
-        if (context.getWaitForCompletion()) {
+        if (taskScannerContext.getWaitForCompletion()) {
             try {
                 performTask(executor);
             } catch (ExecutionException ex) {
@@ -108,12 +104,11 @@ public class TaskScannerJob {
             }
         } else {
             // Launch a new thread for the whole taskscan process
-            final ServerContext threadContext = ObjectSetContext.get();
+            final ServerContext context = taskScannerContext.getContext();
             Runnable command = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        ObjectSetContext.push(threadContext);
                         performTask(executor);
                     } catch (Exception ex) {
                         logger.warn("Taskscanner failed with unexpected exception", ex);
@@ -125,7 +120,7 @@ public class TaskScannerJob {
             new Thread(command).start();
             // Shouldn't need to keep ahold of this, I don't think? Can just start it and let it go
         }
-        return context.getTaskScanID();
+        return taskScannerContext.getTaskScanID();
     }
 
     /**
@@ -139,39 +134,37 @@ public class TaskScannerJob {
      */
     private void performTask(ExecutorService executor)
             throws ExecutionException {
-        context.startJob();
+        taskScannerContext.startJob();
         logger.info("Task {} started from {} with script {}",
-                new Object[] { context.getTaskScanID(), context.getInvokerName(), context.getScriptName() });
+                new Object[] { taskScannerContext.getTaskScanID(), taskScannerContext.getInvokerName(), taskScannerContext.getScriptName() });
 
         JsonValue results;
-        context.startQuery();
+        taskScannerContext.startQuery();
         try {
             results = fetchAllObjects();
         } catch (ResourceException e1) {
             throw new ExecutionException("Error during query", e1);
         }
-        context.endQuery();
-        Integer maxRecords = context.getMaxRecords();
+        taskScannerContext.endQuery();
+        Integer maxRecords = taskScannerContext.getMaxRecords();
         if (maxRecords == null) {
-            context.setNumberOfTasksToProcess(results.size());
+            taskScannerContext.setNumberOfTasksToProcess(results.size());
         } else {
-            context.setNumberOfTasksToProcess(Math.min(results.size(), maxRecords));
+            taskScannerContext.setNumberOfTasksToProcess(Math.min(results.size(), maxRecords));
         }
-        logger.debug("TaskScan {} query results: {}", context.getInvokerName(), results.size());
+        logger.debug("TaskScan {} query results: {}", taskScannerContext.getInvokerName(), results.size());
         // TODO jump out early if it's empty?
 
         // Split and prune the result set according to our max and if we're synchronous or not
-        List<JsonValue> resultSets = splitResultsOverThreads(results, context.getNumberOfThreads(), maxRecords);
+        List<JsonValue> resultSets = splitResultsOverThreads(results, taskScannerContext.getNumberOfThreads(), maxRecords);
         logger.debug("Split result set into {} units", resultSets.size());
 
-        final ServerContext threadContext = ObjectSetContext.get();
         List<Callable<Object>> todo = new ArrayList<Callable<Object>>();
         for (final JsonValue result : resultSets) {
             Runnable command = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        ObjectSetContext.push(threadContext);
                         performTaskOverSet(result);
                     } catch (Exception ex) {
                         logger.warn("Taskscanner failed with unexpected exception", ex);
@@ -185,19 +178,19 @@ public class TaskScannerJob {
             executor.invokeAll(todo);
         } catch (InterruptedException e) {
             // Mark it interrupted
-            context.interrupted();
-            logger.warn("Task scan '" + context.getTaskScanID() + "' interrupted");
+            taskScannerContext.interrupted();
+            logger.warn("Task scan '" + taskScannerContext.getTaskScanID() + "' interrupted");
         }
         // Don't mark the job as completed if its been deactivated
-        if (!context.isInactive()) {
-            context.endJob();
+        if (!taskScannerContext.isInactive()) {
+            taskScannerContext.endJob();
         }
 
         logger.info("Task '{}' completed. Total time: {}ms. Query time: {}ms. Progress: {}",
-                new Object[] { context.getTaskScanID(),
-                context.getStatistics().getJobDuration(),
-                context.getStatistics().getQueryDuration(),
-                context.getProgress()
+                new Object[] { taskScannerContext.getTaskScanID(),
+                taskScannerContext.getStatistics().getJobDuration(),
+                taskScannerContext.getStatistics().getQueryDuration(),
+                taskScannerContext.getProgress()
         });
     }
 
@@ -227,19 +220,19 @@ public class TaskScannerJob {
     private void performTaskOverSet(JsonValue results)
                     throws ExecutionException {
         for (JsonValue input : results) {
-            if (context.isCanceled()) {
-                logger.info("Task '" + context.getTaskScanID() + "' cancelled. Terminating execution.");
+            if (taskScannerContext.isCanceled()) {
+                logger.info("Task '" + taskScannerContext.getTaskScanID() + "' cancelled. Terminating execution.");
                 break; // Jump out quick since we've cancelled the job
             }
             // Check if this object has a STARTED time already
-            JsonValue startTime = input.get(context.getStartField());
+            JsonValue startTime = input.get(taskScannerContext.getStartField());
             String startTimeString = null;
             if (startTime != null && !startTime.isNull()) {
                 startTimeString = startTime.asString();
                 DateTime startedTime = DATE_UTIL.parseTimestamp(startTimeString);
 
                 // Skip if the startTime + interval has not been passed
-                ReadablePeriod period = context.getRecoveryTimeout();
+                ReadablePeriod period = taskScannerContext.getRecoveryTimeout();
                 DateTime expirationDate = startedTime.plus(period);
                 if (expirationDate.isAfterNow()) {
                     logger.debug("Object already started and has not expired. Started at: {}. Timeout: {}. Expires at: {}",
@@ -267,9 +260,9 @@ public class TaskScannerJob {
      * @throws JsonResourceException
      */
     private JsonValue fetchAllObjects() throws ResourceException {
-        JsonValue flatParams = flattenJson(context.getScanValue());
+        JsonValue flatParams = flattenJson(taskScannerContext.getScanValue());
         ConfigMacroUtil.expand(flatParams);
-        return performQuery(context.getObjectID(), flatParams);
+        return performQuery(taskScannerContext.getObjectID(), flatParams);
     }
 
     /**
@@ -281,14 +274,13 @@ public class TaskScannerJob {
      */
     private JsonValue performQuery(String resourceID, JsonValue params) throws ResourceException {
         final JsonValue queryResults = new JsonValue(new ArrayList<Map<String, Object>>());;
-        ServerContext c = accessor();
-        QueryRequest r = Requests.newQueryRequest(resourceID);
-        r.setQueryId(params.get("_queryId").asString());
-        r.setQueryExpression(params.get("_queryExpression").asString());
+        QueryRequest queryRequest = Requests.newQueryRequest(resourceID);
+        queryRequest.setQueryId(params.get("_queryId").asString());
+        queryRequest.setQueryExpression(params.get("_queryExpression").asString());
         for (Map.Entry<String, Object> e: params.asMap().entrySet()){
-            r.getAdditionalParameters().put(e.getKey(), String.valueOf(e.getValue()));
+            queryRequest.getAdditionalParameters().put(e.getKey(), String.valueOf(e.getValue()));
         }
-        connectionFactory.getConnection().query(c, r, new QueryResultHandler() {
+        connectionFactory.getConnection().query(taskScannerContext.getContext(), queryRequest, new QueryResultHandler() {
             @Override
             public void handleError(ResourceException error) {
                 // Ignore
@@ -316,9 +308,8 @@ public class TaskScannerJob {
      */
     private JsonValue performRead(String resourceID) throws ResourceException {
         JsonValue readResults = null;
-        ServerContext c = accessor();
 
-        readResults = connectionFactory.getConnection().read(c, Requests.newReadRequest(resourceID)).getContent();
+        readResults = connectionFactory.getConnection().read(taskScannerContext.getContext(), Requests.newReadRequest(resourceID)).getContent();
         return readResults;
     }
 
@@ -348,11 +339,10 @@ public class TaskScannerJob {
         String id = value.get("_id").required().asString();
         String fullID = retrieveFullID(resourceID, value);
         String rev = value.get("_rev").required().asString();
-        UpdateRequest r = Requests.newUpdateRequest(fullID, value);
-        r.setRevision(rev);
-        ServerContext c = accessor();
+        UpdateRequest updateRequest = Requests.newUpdateRequest(fullID, value);
+        updateRequest.setRevision(rev);
 
-        connectionFactory.getConnection().update(c, r);
+        connectionFactory.getConnection().update(taskScannerContext.getContext(), updateRequest);
         return retrieveObject(resourceID, id);
     }
 
@@ -406,9 +396,9 @@ public class TaskScannerJob {
         boolean claimedTask = false;
         boolean retryClaimTask = false;
 
-        JsonPointer startField = context.getStartField();
-        JsonPointer completedField = context.getCompletedField();
-        String resourceID = context.getObjectID();
+        JsonPointer startField = taskScannerContext.getStartField();
+        JsonPointer completedField = taskScannerContext.getCompletedField();
+        String resourceID = taskScannerContext.getObjectID();
 
         JsonValue _input = input;
         do {
@@ -432,7 +422,7 @@ public class TaskScannerJob {
                         logger.debug("Task for {} {} was already claimed, ignore.", resourceID, id);
                     }
             }
-        } while (retryClaimTask && !context.isCanceled());
+        } while (retryClaimTask && !taskScannerContext.isCanceled());
         if (claimedTask) {
             execScript(_input);
         }
@@ -459,10 +449,11 @@ public class TaskScannerJob {
     private void execScript(JsonValue input)
             throws ExecutionException, ResourceException {
         if (script != null) {
-            String resourceID = context.getObjectID();
+            String resourceID = taskScannerContext.getObjectID();
+            ServerContext context = taskScannerContext.getContext();
 
             try {
-                Script scope = script.getScript(accessor());
+                Script scope = script.getScript(context);
                 scope.put("input", input.getObject());
                 scope.put("objectID", retrieveFullID(resourceID, input));
 
@@ -471,17 +462,17 @@ public class TaskScannerJob {
                 logger.debug("After script execution: {}", _input);
 
                 if (returnedValue == Boolean.TRUE) {
-                   _input = updateValueWithObject(resourceID, _input, context.getCompletedField(), DATE_UTIL.now());
-                   context.getStatistics().taskSucceded();
+                   _input = updateValueWithObject(resourceID, _input, taskScannerContext.getCompletedField(), DATE_UTIL.now());
+                   taskScannerContext.getStatistics().taskSucceded();
                    logger.debug("Updated CompletedField: {}", _input);
                 } else {
-                    context.getStatistics().taskFailed();
+                    taskScannerContext.getStatistics().taskFailed();
                 }
 
             } catch (ScriptException se) {
-                context.getStatistics().taskFailed();
-                String msg = context.getScriptName() + " script invoked by " +
-                        context.getInvokerName() + " encountered exception";
+                taskScannerContext.getStatistics().taskFailed();
+                String msg = taskScannerContext.getScriptName() + " script invoked by " +
+                        taskScannerContext.getInvokerName() + " encountered exception";
                 logger.debug(msg, se);
                 throw new ExecutionException(msg, se);
             }
@@ -551,9 +542,4 @@ public class TaskScannerJob {
             refObj = refObj.get(p);
         }
     }
-
-    private ServerContext accessor() throws ResourceException {
-        return new ServerContext(routeService.createServerContext());
-    }
-
 }

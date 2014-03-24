@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -62,7 +64,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.quartz.impl.ObjectSetContext;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -71,8 +72,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
 
 @Component(name = "org.forgerock.openidm.taskscanner", policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Properties({
@@ -105,10 +104,6 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
 
-    private ServerContext accessor() throws ResourceException {
-        return new ServerContext(routeService.createServerContext());
-    }
-
     @Activate
     public void activate(ComponentContext context) {
         String maxCompletedStr =
@@ -120,12 +115,17 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      * Invoked by the Task Scanner whenever the task scanner is triggered by the scheduler
      */
     @Override
-    public void execute(Map<String, Object> context) throws ExecutionException {
-        String invokerName = (String) context.get(INVOKER_NAME);
-        String scriptName = (String) context.get(CONFIG_NAME);
-        JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
-
-        startTaskScanJob(invokerName, scriptName, params);
+    public void execute(Map<String, Object> contextMap) throws ExecutionException {
+        String invokerName = (String) contextMap.get(INVOKER_NAME);
+        String scriptName = (String) contextMap.get(CONFIG_NAME);
+        JsonValue params = new JsonValue(contextMap).get(CONFIGURED_INVOKE_CONTEXT);
+        ServerContext context;
+        try {
+            context = routeService.createServerContext();
+        } catch (ResourceException e) {
+            throw new ExecutionException(e);
+        }
+        startTaskScanJob(context, invokerName, scriptName, params);
     }
 
     @Override
@@ -174,14 +174,11 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
                 try {
                     if ("execute".equalsIgnoreCase(action)) {
                         try {
-                            ObjectSetContext.push(context);
-                            result.put("_id", onExecute(request.getResourceName(), params));
+                            result.put("_id", onExecute(context, request.getResourceName(), params));
                         } catch (JsonProcessingException e) {
                             throw new InternalServerErrorException(e);
                         } catch (IOException e) {
                             throw new InternalServerErrorException(e);
-                        } finally {
-                            ObjectSetContext.pop();
                         }
                     } else {
                         throw new BadRequestException("Unknown action: " + action);
@@ -228,26 +225,26 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      * @throws JsonProcessingException
      * @throws IOException
      */
-    private String onExecute(String id, Map<String, String> params)
+    private String onExecute(ServerContext context, String id, Map<String, String> params)
             throws ExecutionException, JsonProcessingException, IOException, ScriptException {
         String name = params.get("name");
         JsonValue config;
         try {
-            config = connectionFactory.getConnection().read(accessor(), Requests.newReadRequest("config/" + name)).getContent();
+            config = connectionFactory.getConnection().read(context, Requests.newReadRequest("config/" + name)).getContent();
         } catch (ResourceException e) {
             throw new ExecutionException("Error obtaining named config: '" + name + "'", e);
         }
         JsonValue invokeContext = config.get(INVOKE_CONTEXT);
 
-        return startTaskScanJob("REST", name, invokeContext);
+        return startTaskScanJob(context, "REST", name, invokeContext);
     }
 
-    private String startTaskScanJob(String invokerName, String scriptName, JsonValue params) throws ExecutionException {
-        TaskScannerContext context = new TaskScannerContext(invokerName, scriptName, params, ObjectSetContext.get());
-        addTaskScanRun(context);
+    private String startTaskScanJob(ServerContext context, String invokerName, String scriptName, JsonValue params) throws ExecutionException {
+        TaskScannerContext taskScannerContext = new TaskScannerContext(invokerName, scriptName, params, context);
+        addTaskScanRun(taskScannerContext);
         TaskScannerJob taskScanJob = null;
         try {
-            taskScanJob = new TaskScannerJob(connectionFactory, context, routeService, scopeFactory);
+            taskScanJob = new TaskScannerJob(connectionFactory, taskScannerContext, routeService, scopeFactory);
         } catch (ScriptException e) {
             throw new ExecutionException(e);
         }
