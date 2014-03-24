@@ -3417,7 +3417,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    </itemizedlist>
 
    <programlisting language="javascript">
-varmap={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
+var map={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
 map;</programlisting>
   </section>
  </section>
