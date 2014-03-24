@@ -339,7 +339,7 @@ CryptoService is initialized with 2 keys.
   <screen width="85">
 $ ./cli.sh encrypt -j
 
-Using boot properties at /path/toopenidm/conf/boot/boot.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
 Enter the Json value
 
 > Press ctrl-D to finish input
