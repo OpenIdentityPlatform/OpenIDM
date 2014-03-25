@@ -17,7 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
@@ -31,8 +30,7 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
-import java.security.Principal;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -40,10 +38,18 @@ import java.util.Map;
  * to a OpenICF Connector.
  *
  * @author Phill Cunnington
+ * @author brmiller
  */
 public class PassthroughModule extends IDMServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
+
+    // config properties
+    private static final String PASS_THROUGH_AUTH = "passThroughAuth";
+    private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
+    private static final String AUTHENTICATION_ID = "authenticationId";
+    private static final String GROUP_MEMBERSHIP = "groupMembership";
+    private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
 
     private static String passThroughAuth;
 
@@ -71,28 +77,25 @@ public class PassthroughModule extends IDMServerAuthModule {
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
-     * @param options {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            JsonValue options) {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
 
-        JsonValue config = new JsonValue(options);
-
-        List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        passThroughAuth = config.get("passThroughAuth").asString();
-
-        // User properties - default to NULL if not defined
-        JsonValue properties = config.get("propertyMapping");
-        String userRolesProperty = properties.get("userRoles").asString();
+        passThroughAuth = properties.get(PASS_THROUGH_AUTH).asString();
 
         try {
             passthroughAuthenticator = new PassthroughAuthenticator(
                     OSGiAuthnFilterBuilder.getConnectionFactory(),
                     OSGiAuthnFilterBuilder.getRouter().createServerContext(),
                     passThroughAuth,
-                    userRolesProperty,
-                    defaultRoles);
+                    properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString(),
+                    properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString(),
+                    properties.get(DEFAULT_USER_ROLES).defaultTo(Collections.emptyList()).asList(String.class),
+                    properties.get(GROUP_ROLE_MAPPING).defaultTo(Collections.emptyMap()).asMapOfList(String.class),
+                    properties.get(GROUP_COMPARISON_METHOD)
+                            .defaultTo(PassthroughAuthenticator.GroupComparison.equals.name())
+                            .asEnum(PassthroughAuthenticator.GroupComparison.class)
+            );
         } catch (ResourceException e) {
             //TODO
             e.printStackTrace();
@@ -106,9 +109,9 @@ public class PassthroughModule extends IDMServerAuthModule {
      */
     @SuppressWarnings("unchecked")
     void setPassThroughAuthOnRequest(MessageInfo messageInfo) {
-        Map<String, Object> contextMap = (Map<String, Object>) messageInfo.getMap()
-                .get(SecurityContextFactory.ATTRIBUTE_AUTHZID);
-        contextMap.put("passThroughAuth", passThroughAuth);
+        Map<String, Object> contextMap =
+                (Map<String, Object>) messageInfo.getMap().get(SecurityContextFactory.ATTRIBUTE_AUTHZID);
+        contextMap.put(PASS_THROUGH_AUTH, passThroughAuth);
     }
 
     /**
@@ -134,8 +137,8 @@ public class PassthroughModule extends IDMServerAuthModule {
             //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
             setPassThroughAuthOnRequest(messageInfo);
 
-            final String username = request.getHeader("X-OpenIDM-Username");
-            String password = request.getHeader("X-OpenIDM-Password");
+            final String username = request.getHeader(HEADER_USERNAME);
+            String password = request.getHeader(HEADER_PASSWORD);
 
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 LOGGER.debug("Failed authentication, missing or empty headers");

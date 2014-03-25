@@ -17,7 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.testng.annotations.BeforeClass;
@@ -58,14 +57,14 @@ public class IDMServerAuthModuleTest {
         return new IDMServerAuthModule() {
             @Override
             protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
-                    CallbackHandler handler, JsonValue options) throws AuthException {
+                                      CallbackHandler handler) throws AuthException {
             }
 
             @Override
             protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
                     SecurityContextMapper securityContextWrapper) throws AuthException {
                 securityContextWrapper.setUserId("USER_ID");
-                securityContextWrapper.setUsername("USERNAME");
+                securityContextWrapper.setAuthenticationId("USERNAME");
                 securityContextWrapper.setRoles(roles);
                 securityContextWrapper.setResource("RESOURCE");
                 return AuthStatus.SEND_CONTINUE;

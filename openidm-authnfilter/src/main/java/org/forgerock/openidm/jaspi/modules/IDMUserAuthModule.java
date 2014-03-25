@@ -46,10 +46,16 @@ import java.util.StringTokenizer;
  * Authentication Module for authenticating users against a managed users table.
  *
  * @author Phill Cunnington
+ * @author brmiller
  */
 public abstract class IDMUserAuthModule extends IDMServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(IDMUserAuthModule.class);
+
+    // property config keys
+    private static final String USER_ID = "userId";
+    private static final String USER_CREDENTIAL = "userCredential";
+    private static final String USER_ROLES = "userRoles";
 
     private final String queryId;
     private final String queryOnResource;
@@ -73,7 +79,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
                 try {
                     return OSGiAuthnFilterBuilder.getRouter().createServerContext();
                 } catch (ResourceException e) {
-                    throw new IllegalStateException("Router context unvailable", e);
+                    throw new IllegalStateException("Router context unavailable", e);
                 }
             }
         };
@@ -97,11 +103,9 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
-     * @param options {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            JsonValue options) {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
 
         String clientAuthOnlyStr = IdentityServer.getInstance().getProperty("openidm.auth.clientauthonlyports");
         if (clientAuthOnlyStr != null) {
@@ -112,11 +116,11 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         }
         logger.info("Authentication disabled on ports: {}", clientAuthOnly);
 
-        JsonValue properties = options.get("propertyMapping");
-        String userIdProperty = properties.get("userId").asString();
-        String userCredentialProperty = properties.get("userCredential").asString();
-        String userRolesProperty = properties.get("userRoles").asString();
-        List<String> defaultRoles = options.get("defaultUserRoles").asList(String.class);
+        JsonValue propertyMapping = properties.get(PROPERTY_MAPPING);
+        String userIdProperty = propertyMapping.get(USER_ID).asString();
+        String userCredentialProperty = propertyMapping.get(USER_CREDENTIAL).asString();
+        String userRolesProperty = propertyMapping.get(USER_ROLES).asString();
+        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES).asList(String.class);
 
         authHelper = new AuthHelper(
                 OSGiAuthnFilterBuilder.getCryptoService(),
@@ -159,7 +163,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         }
         securityContextMapper.setResource(queryOnResource);
         
-        final String authcid = securityContextMapper.getAuthcid();
+        final String authcid = securityContextMapper.getAuthenticationId();
         if (authenticated) {
             clientSubject.getPrincipals().add(new Principal() {
                 public String getName() {
@@ -209,7 +213,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         List<String> roles = new ArrayList<String>(1);
         roles.add("openidm-cert");
         securityContextMapper.setRoles(roles);
-        securityContextMapper.setUsername(username);
+        securityContextMapper.setAuthenticationId(username);
         securityContextMapper.setUserId(username);
         logger.debug("Authentication client certificate subject {}", username);
         return true;
@@ -247,7 +251,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             logger.debug("Failed authentication, missing or empty headers");
             return false;
         }
-        securityContextMapper.setUsername(username);
+        securityContextMapper.setAuthenticationId(username);
         try {
             return authHelper.authenticate(queryId, queryOnResource, username, password, securityContextMapper, accessor.access());
         } catch (IllegalStateException e) {
@@ -277,7 +281,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         if (t.length != 2) {
             return false;
         }
-        securityContextMapper.setUsername(t[0]);
+        securityContextMapper.setAuthenticationId(t[0]);
 
         try {
             return authHelper.authenticate(queryId, queryOnResource, t[0], t[1], securityContextMapper, accessor.access());

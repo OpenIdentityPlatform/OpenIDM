@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class IWAModule extends IDMServerAuthModule {
      * module.
      */
     public IWAModule() {
-        commonsIwaModule = new org.forgerock.jaspi.modules.iwa.IWAModule();
+        this(new org.forgerock.jaspi.modules.iwa.IWAModule());
     }
 
     /**
@@ -62,16 +61,15 @@ public class IWAModule extends IDMServerAuthModule {
     /**
      * Initialises the commons IWA authentication module.
      *
+     *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
-     * @param options {@inheritDoc}
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            JsonValue options) throws AuthException {
-        commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, options.asMap());
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) throws AuthException {
+        commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, properties.asMap());
     }
 
     /**
@@ -124,7 +122,7 @@ public class IWAModule extends IDMServerAuthModule {
                 LOGGER.error("IWAModule: Username not found by IWA");
                 throw new AuthException("Could not get username");
             }
-            securityContextMapper.setUsername(username);
+            securityContextMapper.setAuthenticationId(username);
             // Need to set as much information as possible so it can be put in both the request and JWT for IDM
             // and later use
             securityContextMapper.setResource("system/AD/account");

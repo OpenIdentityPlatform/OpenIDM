@@ -55,6 +55,10 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
+    // common config property keys
+    protected static final String DEFAULT_USER_ROLES = "defaultUserRoles";
+    protected static final String PROPERTY_MAPPING = "propertyMapping";
+
     /** Authentication username header. */
     public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
@@ -63,9 +67,6 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
     /** Authentication without a session header. */
     public static final String NO_SESSION = "X-OpenIDM-NoSession";
-
-    /** Attribute in session containing authenticated username. */
-    public static final String USERNAME_ATTRIBUTE = "openidm.username";
 
     private String logClientIPHeader = null;
 
@@ -91,7 +92,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
 
         logClientIPHeader = properties.get("clientIPHeader").asString();
 
-        initialize(requestPolicy, responsePolicy, handler, properties);
+        initialize(requestPolicy, responsePolicy, handler);
 
         JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
         if (!scriptConfig.isNull()) {
@@ -112,11 +113,10 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
      * @param requestPolicy The request policy this module must enforce, or null.
      * @param responsePolicy The response policy this module must enforce, or null.
      * @param handler CallbackHandler used to request information.
-     * @param options A JsonValue of module-specific configuration properties.
      * @throws AuthException If there is a problem initialising the Authentication module.
      */
-    protected abstract void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
-            CallbackHandler handler, JsonValue options) throws AuthException;
+    protected abstract void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler)
+            throws AuthException;
 
     /**
      * {@inheritDoc}
@@ -154,7 +154,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
         AuthStatus authStatus = validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
         clientSubject.getPrincipals().add(new Principal() {
             public String getName() {
-                return securityContextMapper.getAuthcid();
+                return securityContextMapper.getAuthenticationId();
             }
         });
 
@@ -162,8 +162,8 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
             executeAugmentationScript(securityContextMapper);
         }
 
-        contextMap.putAll(securityContextMapper.getAuthzid());
-        messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthcid());
+        contextMap.putAll(securityContextMapper.getAuthorizationId());
+        messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthenticationId());
 
         return authStatus;
     }

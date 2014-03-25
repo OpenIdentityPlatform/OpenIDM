@@ -21,6 +21,7 @@ import static org.forgerock.json.resource.SecurityContext.AUTHZID_ID;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_COMPONENT;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_ROLES;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,31 +42,46 @@ public class SecurityContextMapper {
         authData.put(AUTHORIZATION_ID, new HashMap<String, Object>());
     }
 
-    public void setUsername(String username) {
-        authData.put(AUTHENTICATION_ID, username);
+    public void setAuthenticationId(String authcId) {
+        authData.put(AUTHENTICATION_ID, authcId);
     }
 
     public void setUserId(String userId) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_ID, userId);
     }
 
+    public String getUserId() {
+        return authData.get(AUTHORIZATION_ID).get(AUTHZID_ID).asString();
+    }
+
     public void setResource(String resource) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_COMPONENT, resource);
+    }
+
+    public String getResource() {
+        return authData.get(AUTHORIZATION_ID).get(AUTHZID_COMPONENT).asString();
     }
 
     public void setRoles(List<String> roles) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, roles);
     }
 
-    public List<String> getRoles() {
-        return Collections.unmodifiableList((List<? extends String>) authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).asList(String.class));
+    public void addRole(String role) {
+        if (authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).isNull()) {
+            authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>());
+        }
+        authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).add(role);
     }
 
-    public String getAuthcid() {
+    public List<String> getRoles() {
+        return Collections.unmodifiableList(authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).asList(String.class));
+    }
+
+    public String getAuthenticationId() {
         return authData.get(AUTHENTICATION_ID).asString();
     }
 
-    public Map<String, Object> getAuthzid() {
+    public Map<String, Object> getAuthorizationId() {
         return Collections.unmodifiableMap(authData.get(AUTHORIZATION_ID).asMap());
     }
 

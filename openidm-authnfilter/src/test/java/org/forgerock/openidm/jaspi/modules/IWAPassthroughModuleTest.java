@@ -69,11 +69,11 @@ public class IWAPassthroughModuleTest {
         given(options.asMap()).willReturn(optionsMap);
 
         //When
-        iwaAdPassthroughModule.initialize(requestPolicy, responsePolicy, handler, options);
+        iwaAdPassthroughModule.initialize(requestPolicy, responsePolicy, handler, optionsMap);
 
         //Then
         verify(commonsIwaModule).initialize(requestPolicy, responsePolicy, handler, optionsMap);
-        verify(passthroughModule).initialize(requestPolicy, responsePolicy, handler, options);
+        verify(passthroughModule).initialize(requestPolicy, responsePolicy, handler);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class IWAPassthroughModuleTest {
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
-        verify(securityContextMapper).setUsername("USERNAME");
+        verify(securityContextMapper).setAuthenticationId("USERNAME");
         verify(securityContextMapper).setResource("system/AD/account");
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }

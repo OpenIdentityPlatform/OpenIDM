@@ -17,7 +17,6 @@
 package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,14 +67,12 @@ public class IWAPassthroughModule extends IWAModule {
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
-     * @param options {@inheritDoc}
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            JsonValue options) throws AuthException {
-        super.initialize(requestPolicy, responsePolicy, handler, options);
-        passthroughModule.initialize(requestPolicy, responsePolicy, handler, options);
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) throws AuthException {
+        super.initialize(requestPolicy, responsePolicy, handler);
+        passthroughModule.initialize(requestPolicy, responsePolicy, handler);
     }
 
     /**
@@ -100,11 +97,11 @@ public class IWAPassthroughModule extends IWAModule {
             SecurityContextMapper securityContextMapper) throws AuthException {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
+        // Set pass through auth resource on request so it can be accessed by an augmentation script.
         passthroughModule.setPassThroughAuthOnRequest(messageInfo);
 
-        String xOpenIDMUsername = request.getHeader("X-OpenIDM-Username");
-        String xOpenIdmPassword = request.getHeader("X-OpenIDM-Password");
+        String xOpenIDMUsername = request.getHeader(HEADER_USERNAME);
+        String xOpenIdmPassword = request.getHeader(HEADER_PASSWORD);
         if (!StringUtils.isEmpty(xOpenIDMUsername) && !StringUtils.isEmpty(xOpenIdmPassword)) {
             // skip straight to ad passthrough
             LOGGER.debug("IWAPassthroughModule: Have OpenIDM username, falling back to AD Passthrough");
