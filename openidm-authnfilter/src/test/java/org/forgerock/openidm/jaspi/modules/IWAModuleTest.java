@@ -66,7 +66,7 @@ public class IWAModuleTest {
         given(options.asMap()).willReturn(optionsMap);
 
         //When
-        iwaModule.initialize(requestPolicy, responsePolicy, handler, options);
+        iwaModule.initialize(requestPolicy, responsePolicy, handler, optionsMap);
 
         //Then
         verify(commonsIwaModule).initialize(requestPolicy, responsePolicy, handler, optionsMap);
@@ -190,7 +190,7 @@ public class IWAModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(securityContextMapper).setUsername("USERNAME");
+        verify(securityContextMapper).setAuthenticationId("USERNAME");
         verify(securityContextMapper).setResource("system/AD/account");
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
@@ -226,7 +226,7 @@ public class IWAModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(securityContextMapper, never()).setUsername(anyString());
+        verify(securityContextMapper, never()).setAuthenticationId(anyString());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 

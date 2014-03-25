@@ -16,10 +16,16 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.security.auth.message.AuthException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -27,43 +33,97 @@ import org.forgerock.json.resource.ServerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.message.AuthException;
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
  * connector.
  *
  * @author Phill Cunnington
+ * @author brmiller
  */
 public class PassthroughAuthenticator {
 
-    final static Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
+    private static final Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
+
+    /** anonymous user */
+    private static final String ANONYMOUS = "anonymous";
+
+    /**
+     * The modes of group-comparison supported to see if a user's membership in a given
+     * group matches one of the groups that have been specified to map to a particular
+     * OpenIDM role.
+     */
+    static enum GroupComparison {
+        /* case-sensitive equality */
+        equals {
+            public boolean compare(final String groupA, final String groupB) {
+                return groupA.equals(groupB);
+            }
+        },
+
+        /* case-insensitive equality */
+        caseInsensitive {
+            public boolean compare(final String groupA, final String groupB) {
+                return groupA.equalsIgnoreCase(groupB);
+            }
+        },
+
+        /* LDAP case- and whitespace-insensitive matching */
+        ldap {
+            public boolean compare(final String groupA, final String groupB) {
+                // ldap is case (and to some degree whitespace) insensitive, so we have to be too:
+                return groupA.replaceAll(LDAP_WHITESPACE, "$1").equalsIgnoreCase(groupB.replaceAll(LDAP_WHITESPACE, "$1"));
+            }
+        };
+
+        private static final String LDAP_WHITESPACE = "\\s*(^|$|,|=)\\s*";
+
+        /**
+         * Compare two groups for fuzzy equality.
+         *
+         * @param groupA a membership group
+         * @param groupB a membership group
+         * @return whether the comparison considers them the same group
+         */
+        public abstract boolean compare(final String groupA, final String groupB);
+    }
 
     private final ConnectionFactory connectionFactory;
     private final ServerContext context;
     private final String passThroughAuth;
-    private final String userRolesProperty;
+    private final String authenticationId;
+    private final String groupMembership;
     private final List<String> defaultRoles;
+    private final Map<String, List<String>> roleMapping;
+    private final GroupComparison groupComparison;
 
     /**
      * Constructs an instance of the PassthroughAuthenticator.
      *
-     * @param passThroughAuth The passThroughAuth resource.
-     * @param userRolesProperty The user roles property.
-     * @param defaultRoles The list of default roles.
+     * @param connectionFactory the ConnectionFactory for making an authenticate request on the router
+     * @param context the ServerContext to use when making requests on the router
+     * @param passThroughAuth the passThroughAuth resource
+     * @param authenticationId the object attribute that represents the authentication id
+     * @param groupMembership the object attribute representing the group membership
+     * @param defaultRoles the list of default roles
+     * @param roleMapping the mapping between OpenIDM roles and pass-through auth groups
+     * @param groupComparison the method of {@link GroupComparison} to use
      */
-    public PassthroughAuthenticator(ConnectionFactory connectionFactory, ServerContext context, String passThroughAuth, String userRolesProperty, List<String> defaultRoles) {
+    public PassthroughAuthenticator(ConnectionFactory connectionFactory, ServerContext context,
+            String passThroughAuth,  String authenticationId,  String groupMembership,
+            List<String> defaultRoles, Map<String, List<String>> roleMapping, GroupComparison groupComparison) {
         this.connectionFactory = connectionFactory;
         this.context = context;
         this.passThroughAuth = passThroughAuth;
-        this.userRolesProperty = userRolesProperty;
+        this.authenticationId = authenticationId;
+        this.groupMembership = groupMembership;
         this.defaultRoles = defaultRoles;
+        this.roleMapping = roleMapping;
+        this.groupComparison = groupComparison;
     }
 
     /**
-     * Performs the AD Passthrough authentication.
+     * Performs the pass-through authentication to an external system endpoint, such as an OpenICF provisioner at
+     * "system/AD/account".
      *
      * @param username The user's username
      * @param password The user's password.
@@ -74,37 +134,90 @@ public class PassthroughAuthenticator {
     public boolean authenticate(String username, String password, SecurityContextMapper securityContextMapper)
             throws AuthException {
 
-        if (!StringUtils.isEmpty(passThroughAuth) && !"anonymous".equals(username)) {
-            ActionRequest actionRequest = Requests.newActionRequest(passThroughAuth, "authenticate");
-            actionRequest.setAdditionalParameter("username", username);
-            actionRequest.setAdditionalParameter("password", password);
-            try {
-                JsonValue result = connectionFactory.getConnection().action(context, actionRequest);
-                boolean authenticated = result.isDefined(Resource.FIELD_CONTENT_ID);
-                if (authenticated) {
-                    // This is what I was talking about. We don't have a way to
-                    // populate this. Use script to overcome it
-                    securityContextMapper.setRoles(Arrays.asList("openidm-admin", "openidm-authorized"));
-                    securityContextMapper.setResource(passThroughAuth);
-                    securityContextMapper.setUserId(result.get(Resource.FIELD_CONTENT_ID).asString());
-                    securityContextMapper.setUsername(username);
-                    return true;
-                }
-            } catch (ResourceException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Failed pass-through authentication of {} on {}.", username, passThroughAuth, e);
-                }
-                if (e.isServerError()) { // HTTP server-side error
-                    throw new AuthException("Failed pass-through authentication of " + username + " on "
-                            + passThroughAuth + ".");
-                }
-                //authentication failed
+        if (StringUtils.isEmpty(passThroughAuth) || ANONYMOUS.equals(username)) {
+            return false;
+        }
+
+        try {
+            final JsonValue result = connectionFactory.getConnection().action(context,
+                    Requests.newActionRequest(passThroughAuth, "authenticate")
+                            .setAdditionalParameter("username", username)
+                            .setAdditionalParameter("password", password));
+
+            // pass-through authentication is successful if _id exists in result; bail here early if not the case
+            if (!result.isDefined(Resource.FIELD_CONTENT_ID)) {
                 return false;
             }
 
-            //TODO need to look at setting resource on authz and setting roles on authz, as well as what uses this to ensure security context is populated, like the old Servlet class used to do!
+            // user is authenticated; populate security context
+            securityContextMapper.setResource(passThroughAuth);
+            securityContextMapper.setUserId(result.get(Resource.FIELD_CONTENT_ID).asString());
+            securityContextMapper.setAuthenticationId(username);
+
+            // First, set roles based on default assignment if provided
+            if (!defaultRoles.isEmpty()) {
+                securityContextMapper.setRoles(defaultRoles);
+            }
+
+            // Then, apply role mapping if available:
+            // If the propertyMapping specifies a authenticationId property and the roleMapping has been provided,
+            // attempt to read the user from the pass-through source and set roles based on the roleMapping
+            if (authenticationId != null && roleMapping.size() > 0) {
+                final List<Resource> resources = new ArrayList<Resource>();
+                connectionFactory.getConnection().query(context,
+                        Requests.newQueryRequest(passThroughAuth)
+                                .setQueryFilter(QueryFilter.equalTo(authenticationId, securityContextMapper.getAuthenticationId())),
+                        resources);
+                if (resources.isEmpty()) {
+                    throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");
+                } else if (resources.size() > 1) {
+                    throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
+                }
+                final JsonValue userDetail = resources.get(0).getContent();
+
+                if (!userDetail.get(groupMembership).isNull()) {
+                    final List<String> userGroups = userDetail.get(groupMembership).asList(String.class);
+                    for (final Map.Entry<String, List<String>> entry : roleMapping.entrySet()) {
+                        final String role = entry.getKey();
+                        final List<String> groups = entry.getValue();
+                        if (isMemberOfRoleGroups(groups, userGroups)) {
+                            securityContextMapper.addRole(role);
+                        }
+                    }
+                }
+
+                // Roles are now set.
+                // Note: roles can be further augmented with a script if more complex behavior is desired
+
+                logger.debug("Used pass-through details to update context for {} with userid : {}, roles : {}",
+                        securityContextMapper.getAuthenticationId(),
+                        securityContextMapper.getUserId(),
+                        securityContextMapper.getRoles());
+            }
+            return true;
+        } catch (ResourceException e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed pass-through authentication of {} on {}.", username, passThroughAuth, e);
+            }
+            if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
+                throw new AuthException("Failed pass-through authentication of " + username + " on "
+                        + passThroughAuth + ":" + e.getMessage());
+            }
+            // authentication failed
+            return false;
         }
 
+        //TODO need to look at setting resource on authz and setting roles on authz, as well as what uses this to ensure security context is populated, like the old Servlet class used to do!
+    }
+
+    private boolean isMemberOfRoleGroups(List<String> groups, List<String> groupMembership) {
+        for (String group : groups) {
+            for (String membership : groupMembership) {
+                if (groupComparison.compare(group, membership)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 }

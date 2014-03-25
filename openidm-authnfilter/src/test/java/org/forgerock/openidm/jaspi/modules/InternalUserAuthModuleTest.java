@@ -183,7 +183,7 @@ public class InternalUserAuthModuleTest {
                 securityContextMapper);
 
         //Then
-        verify(securityContextMapper).setUsername("USERNAME");
+        verify(securityContextMapper).setAuthenticationId("USERNAME");
         verify(securityContextMapper).setResource("internal/user");
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
@@ -212,7 +212,7 @@ public class InternalUserAuthModuleTest {
                 securityContextMapper);
 
         //Then
-        verify(securityContextMapper).setUsername("USERNAME");
+        verify(securityContextMapper).setAuthenticationId("USERNAME");
         verify(securityContextMapper).setResource("internal/user");
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
