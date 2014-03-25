@@ -1325,15 +1325,44 @@ q                   "target": "sn",
 ...
   </programlisting>
   <para>
-   The format of the query can be <literal>queryId</literal>,
-   <literal>queryFilter</literal>, or <literal>queryExpression</literal>, and
-   can include additional parameters. In OpenIDM ${docTargetVersion}, predefined
-   queries other than <literal>query-all-ids</literal>, and complex query
-   expressions are not supported <emphasis>on external resources</emphasis>
-   (<literal>/system</literal> endpoints). So, for external resources, the
-   format of the query must be either a <literal>queryFilter</literal> or
-   <literal>_queryId=query-all-ids</literal>.
+   The format of the query can be any query type that is supported by the
+   resource, and can include additional parameters, if applicable. OpenIDM
+   ${docTargetVersion} supports the following query types.
   </para>
+  <itemizedlist>
+   <para>
+    For queries on managed objects:
+   </para>
+   <listitem>
+    <para>
+     <literal>_queryId</literal> for arbitrary predefined, parameterized
+     queries
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>_queryExpression</literal> for client-supplied queries, in native
+     query format
+    </para>
+   </listitem>
+  </itemizedlist>
+  <itemizedlist>
+   <para>
+    For queries on system objects:
+   </para>
+   <listitem>
+    <para>
+     <literal>_queryId=query-all-ids</literal> (the only supported predefined
+     query)
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>_queryFilter</literal> for arbitrary filters, in common filter
+     notation
+    </para>
+   </listitem>
+  </itemizedlist>
   <para>
    The source and target queries send the query to the resource that is defined
    for that source or target, by default. You can override the resource to which
