@@ -20,15 +20,15 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-compatibility'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Compatibility</title>
 
  <para>This chapter covers both major changes to existing functionality, and
@@ -43,97 +43,11 @@
   
   <variablelist>
     <varlistentry>
-      <term>Changes to the scheduler configuration</term>
+      <term>TBD</term>
       <listitem>
-        <para>The way in which scheduled tasks is configured has changed, as 
-        described in <link xlink:href="integrators-guide#chap-scheduler-conf"
-                           xlink:role="http://docbook.org/xlink/role/olink">
-                <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>
-        <para>Schedules are now defined in files named 
-        <literal>openidm/conf/schedule-*.json</literal>. If you use the 
-        previous naming convention (scheduler-*.json), the schedules will not 
-        be launched.</para>      
-      </listitem>   
-    </varlistentry>
-    <varlistentry>
-      <term>Reconciliation now on <literal>recon</literal> service</term>
-      <listitem>
-        <para>In previous releases, reconciliation was called on the 
-        <literal>sync</literal> service. This API has been deprecated and 
-        reconciliation is now called on the <literal>recon</literal> service. 
-        For example, a reconciliation operation that previously targeted the 
-        following URL:</para>
-        <screen width="91">  
-"http://localhost:8080/openidm/recon?_action=sync&amp;mapping=systemLdapAccounts_managedUser"
-        </screen>
-        <para>would now use the following URL:</para>
-        <screen width="91">  
-"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-        </screen>       
+        <para>TBD</para>
       </listitem>
     </varlistentry>
-    <varlistentry>
-      <term>Audit log changes</term>
-      <listitem>
-        <para>Timestamps now have milliseconds and are in UTC timezone.
-        </para>
-        <para>The access log now has an additional field, <literal>userid</literal>,
-        which is the OpenIDM ID for a managed or internal user who is logged in. 
-        For authentication via SSL mutual auth only, the 
-        <literal>userid</literal> is currently <literal>null</literal> because 
-        there is no direct associated user in OpenIDM.</para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>Database schema changes</term>
-      <listitem>
-        <para>The <literal>reconID</literal> column has been removed from the 
-        <literal>links</literal> table.</para>
-        <para>The size of the <literal>linkType</literal> column in the
-        <literal>links</literal> table has been reduced to 255 characters. This 
-        is because MySQL can only create unique indexes on that size for UTF-8 
-        encoding.</para>
-        <para>The <literal>links</literal> table indexes have been changed to
-        unique indexes to prevent duplication.</para>
-        <para>The <literal>auditactivity</literal> table contains two new
-        columns - <literal>changedfields</literal> and <literal>passwordchanged</literal>,
-        for additional auditing functionality.</para>
-        <para>Tables have been added for the scheduler configuration and for User
-        Interface notifications.</para>
-        <para>The <literal>openidm</literal> user is created with all the required
-        privileges to update the <literal>openidm</literal> database by default.</para>
-      </listitem>            
-    </varlistentry>
-    <varlistentry>
-      <term>Changes to token definitions in OrientDB query definitions</term>
-      <listitem>
-        <para>Existing <literal>repo.orientdb.json</literal> query definitions 
-        with tokens like <literal>${mytoken}</literal> must be reviewed and 
-        adjusted to match the new definition which aligns declarations for 
-        regular and prepared statement uses.</para>
-        <para>Existing <literal>${token}</literal> tokens are now suitable for
-        quoted strings by default. Prefixes such as <literal>unquoted:</literal> 
-        and <literal>dotnotation:</literal> allow you to use queries in contexts 
-        where the unquoted value or the JSON pointer converted to OrientDB dot 
-        notation should be inserted.</para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>New queries in <literal>repo.*.json</literal> definitions</term>
-      <listitem>
-        <para>query-by-linkType</para>
-      </listitem>
-    </varlistentry>
-    <varlistentry>
-      <term>Security context changes</term>
-      <listitem>
-        <para>The request context now includes the security context of the 
-        user that is associated with the call.</para>
-        <para>The <literal>"user"</literal> property has been renamed 
-        <literal>"username"</literal>, the name used to log in (for example, 
-        to authenticate against an access manager).</para>
-      </listitem>
-    </varlistentry>    
     
   </variablelist>
  </section> 
@@ -146,37 +60,27 @@
    
    <variablelist>
      <varlistentry>
-       <term>Connection pooling is on by default</term>
+      <term>Change to how multiple roles are specified</term>
        <listitem>
-         <para>For existing configurations, keep this setting off unless you 
-         explicitly require it to be changed.</para>
-       </listitem>
-     </varlistentry>
-     <varlistentry>
-       <term>Explicit definition of username, password, and role</term>
-       <listitem>
-         <para>The authentication configuration now explicitly defines which 
-         properties from the query represent the username, password, and role. 
-         Existing configurations rely on the logic of the query order to 
-         determine which property is which.
-         </para>
-       </listitem>
-     </varlistentry>
-     <varlistentry>
-       <term>Prefetching of links during reconciliation operations</term>
-       <listitem>
-         <para>All links are now queried at the start of a correlation and the 
-         results of that query are used.</para>
-         <para>For more information, see
-             <link xlink:href="integrators-guide#prefetching-links"
-             xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Prefetching Links</citetitle></link>
-         in the <citetitle>Integrator's Guide</citetitle>.</para>
+        <para>
+         In OpenIDM 2.1.0, multiple roles were specified as a CSV list. For
+         example:
+        </para>
+        <programlisting>
+"roles":""openidm-authorized,contractor",
+        </programlisting>
+        <para>
+         In OpenIDM ${docTargetVersion}, multiple roles are specified as an
+         array. For example:
+        </para>
+        <programlisting>
+"roles": [
+    "openidm-authorized","contractor"
+],
+        </programlisting>
        </listitem>
      </varlistentry>
    </variablelist>
-
-
-    
  </section>
  
  <section xml:id="deprecation">
@@ -186,9 +90,7 @@
     <para>The following functionality is deprecated in 
     OpenIDM <?eval ${docTargetVersion}?>.</para>
     <listitem>
-      <para>Reconciliation is no longer called on the <literal>sync</literal> 
-      service. For more information, see the list of changes to existing 
-      functionality.</para>
+      <para>TBD</para>
     </listitem>
   </itemizedlist>
   
@@ -199,7 +101,7 @@
  <section xml:id="removed-functionality">
   <title>Removed Functionality</title>
   
-  <para>No functionality has been removed in OpenIDM <?eval ${docTargetVersion}?>.</para>
+  <para>No functionality has been removed in OpenIDM ${docTargetVersion}.</para>
   
   <para>No functionality is planned to be removed at this time.</para>
  </section>
