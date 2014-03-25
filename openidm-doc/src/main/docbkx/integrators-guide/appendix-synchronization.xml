@@ -63,7 +63,8 @@
   "onCreate"        : <replaceable>script object</replaceable>,
   "onUpdate"        : <replaceable>script object</replaceable>,
   "onLink"          : <replaceable>script object</replaceable>,
-  "onUnlink"        : <replaceable>script object</replaceable>
+  "onUnlink"        : <replaceable>script object</replaceable>,
+  "result"          : <replaceable>script object</replaceable>
 }</programlisting>
 
   <variablelist xml:id="mapping-object-properties">
