@@ -1216,6 +1216,35 @@ x
      <citetitle>Specifying the OpenIDM Startup Configuration</citetitle>
     </link>, the <literal>launcher.project.location</literal> is the directory
     cited if you start OpenIDM with a specific project directory.</para>
+
+   <programlisting>...
+"sources" : {
+  "default" : {
+    "directory" : "&amp;{launcher.install.location}/bin/defaults/script",
+    "subdirectories" : "true",
+    "visibility" : "public",
+    "type" : "auto-detect"
+  },
+  "install" : {
+    "directory" : "&amp;{launcher.install.location}",
+    "subdirectories" : "true",
+    "visibility" : "public",
+    "type" : "auto-detect"
+  },
+  "project" : {
+    "directory" : "&amp;{launcher.project.location}",
+    "subdirectories" : "true",
+    "visibility" : "public",
+    "type" : "auto-detect"
+  },
+  "project-script" : {
+    "directory" : "&amp;{launcher.project.location}/script",
+    "subdirectories" : "true",
+    "visibility" : "public",
+    "type" : "auto-detect"
+  }
+...</programlisting>
+
    <para>
     For example, if you start OpenIDM from the <filename>/path/to/openidm</filename>
     directory with the following command:
