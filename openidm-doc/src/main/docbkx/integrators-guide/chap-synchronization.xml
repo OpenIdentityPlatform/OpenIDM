@@ -330,7 +330,7 @@
             "target": "managed/user",
             "properties": [
                 {
-q                   "target": "sn",
+                    "target": "sn",
                     "source": "lastName"
                 },
                 {
