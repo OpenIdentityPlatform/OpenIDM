@@ -26,7 +26,7 @@
                 "name" : "MANAGED_USER",
                 "properties" : {
                     "propertyMapping" : {
-                        "userId" : "_id",
+                        "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
@@ -37,7 +37,7 @@
                 "name" : "INTERNAL_USER",
                 "properties" : {
                     "propertyMapping" : {
-                        "userId" : "_id",
+                        "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
