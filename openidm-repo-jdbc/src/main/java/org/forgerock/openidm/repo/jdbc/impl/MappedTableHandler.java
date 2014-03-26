@@ -555,11 +555,18 @@ class Mapping {
                     }
                     if (JsonUtil.isEncrypted((String) value)) {
                         try {
-                            value =
-                                    new JsonValue((Map) mapper.readValue((String) value, Map.class));
+                            value = new JsonValue((Map) mapper.readValue((String) value, Map.class));
                         } catch (IOException e) {
-                            throw new InternalServerErrorException(
-                                    "Unable to map encrypted value for " + entry.dbColName, e);
+                            throw new InternalServerErrorException("Unable to map encrypted value for " + entry.dbColName, e);
+                        }
+                    }
+                } else if ("JSON".equals(entry.dbColType)) {
+                    value = rs.getString(entry.dbColName);
+                    if (value != null) {
+                        try {
+                            value = new JsonValue((Map) mapper.readValue(rs.getString(entry.dbColName), Map.class)).asMap();
+                        } catch (IOException e) {
+                            throw new InternalServerErrorException("Unable to map JSON value for " + entry.dbColName, e);
                         }
                     }
                 } else {
