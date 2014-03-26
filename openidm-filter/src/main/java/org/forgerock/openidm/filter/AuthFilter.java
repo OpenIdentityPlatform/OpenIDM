@@ -133,12 +133,12 @@ public class AuthFilter implements SingletonResourceProvider {
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
 
         JsonValue properties = config.get("propertyMapping");
-        String userIdProperty = properties.get("userId").asString();
+        String authenticationIdProperty = properties.get("authenticationId").asString();
         String userCredentialProperty = properties.get("userCredential").asString();
         String userRolesProperty = properties.get("userRoles").asString();
         List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
 
-        authHelper = new AuthHelper(cryptoService, connectionFactory, userIdProperty,
+        authHelper = new AuthHelper(cryptoService, connectionFactory, authenticationIdProperty,
                 userCredentialProperty, userRolesProperty, defaultRoles);
     }
 

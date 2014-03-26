@@ -49,7 +49,7 @@ public class AuthHelper {
     private final CryptoService cryptoService;
     private final ConnectionFactory connectionFactory;
 
-    private final String userIdProperty;
+    private final String authenticationIdProperty;
     private final String userCredentialProperty;
     private final String userRolesProperty;
     private final List<String> defaultRoles;
@@ -57,31 +57,31 @@ public class AuthHelper {
     /**
      * Constructs an instance of the AuthHelper.
      *
-     * @param userIdProperty The user id property.
+     * @param authenticationIdProperty The user id property.
      * @param userCredentialProperty The user credential property.
      * @param userRolesProperty The user roles property.
      * @param defaultRoles The list of default roles.
      */
-    public AuthHelper(CryptoService cryptoService, ConnectionFactory connectionFactory, String userIdProperty,
+    public AuthHelper(CryptoService cryptoService, ConnectionFactory connectionFactory, String authenticationIdProperty,
                       String userCredentialProperty, String userRolesProperty, List<String> defaultRoles) {
 
         this.cryptoService = cryptoService;
         this.connectionFactory = connectionFactory;
 
-        this.userIdProperty = userIdProperty;
+        this.authenticationIdProperty = authenticationIdProperty;
         this.userCredentialProperty = userCredentialProperty;
         this.userRolesProperty = userRolesProperty;
         this.defaultRoles = defaultRoles;
 
-        if ((userIdProperty != null && userCredentialProperty == null)
-                || (userIdProperty == null && userCredentialProperty != null)) {
+        if ((authenticationIdProperty != null && userCredentialProperty == null)
+                || (authenticationIdProperty == null && userCredentialProperty != null)) {
             logger.warn("AuthHelper config does not fully define the necessary properties."
                     + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
-                    + " Defaulting to manual role query.", userIdProperty, userCredentialProperty);
+                    + " Defaulting to manual role query.", authenticationIdProperty, userCredentialProperty);
         }
 
         logger.info("AuthHelper config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
-                userIdProperty, userCredentialProperty, userRolesProperty);
+                authenticationIdProperty, userCredentialProperty, userRolesProperty);
     }
 
     /**
@@ -145,12 +145,12 @@ public class AuthHelper {
 
             // If all of the required user parameters are defined
             // we can just fetch that info instead of iterating/requiring it in-order
-            if (userIdProperty != null && userCredentialProperty != null) {
+            if (authenticationIdProperty != null && userCredentialProperty != null) {
                 logger.debug("AuthModule using explicit role query");
-                if (Resource.FIELD_CONTENT_ID.equals(userIdProperty)){
+                if (Resource.FIELD_CONTENT_ID.equals(authenticationIdProperty)){
                     retrId = resource.getId();
                 } else {
-                    retrId = resource.getContent().get(userIdProperty).asString();
+                    retrId = resource.getContent().get(authenticationIdProperty).asString();
                 }
 
                 retrCredPropName = userCredentialProperty;

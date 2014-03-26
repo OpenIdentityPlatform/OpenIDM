@@ -47,7 +47,6 @@ public class PassthroughModule extends IDMServerAuthModule {
     // config properties
     private static final String PASS_THROUGH_AUTH = "passThroughAuth";
     private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
-    private static final String AUTHENTICATION_ID = "authenticationId";
     private static final String GROUP_MEMBERSHIP = "groupMembership";
     private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
 

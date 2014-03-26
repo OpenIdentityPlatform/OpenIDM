@@ -53,7 +53,6 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
     private final static Logger logger = LoggerFactory.getLogger(IDMUserAuthModule.class);
 
     // property config keys
-    private static final String USER_ID = "userId";
     private static final String USER_CREDENTIAL = "userCredential";
     private static final String USER_ROLES = "userRoles";
 
@@ -117,7 +116,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         logger.info("Authentication disabled on ports: {}", clientAuthOnly);
 
         JsonValue propertyMapping = properties.get(PROPERTY_MAPPING);
-        String userIdProperty = propertyMapping.get(USER_ID).asString();
+        String authenticationIdProperty = propertyMapping.get(AUTHENTICATION_ID).asString();
         String userCredentialProperty = propertyMapping.get(USER_CREDENTIAL).asString();
         String userRolesProperty = propertyMapping.get(USER_ROLES).asString();
         List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES).asList(String.class);
@@ -125,7 +124,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         authHelper = new AuthHelper(
                 OSGiAuthnFilterBuilder.getCryptoService(),
                 OSGiAuthnFilterBuilder.getConnectionFactory(),
-                userIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
+                authenticationIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
     }
 
     /**
