@@ -2652,29 +2652,36 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
     <listitem><para>Update</para></listitem>
    </itemizedlist>
 
-   <para>See the <filename>openidm/samples/sample3/tools/</filename> directory
-   for example scripts.</para>
-   <para>The scripted SQL connector runs with autocommit mode enabled by default. 
-   As soon as a statement is executed that modifies a table, the update is stored 
-   on disk and the change cannot be rolled back. This setting applies to all 
-   database actions (search, create, delete, test, synch, and update). 
-   You can disable autocommit in the connector configuration file 
-   (<literal>conf/provisioner.openicf-scriptedsql.json</literal>) by adding the 
-   <literal>autocommit</literal> property and setting it to 
-   <literal>false</literal>, for example:</para>
+   <para>
+    See the <filename>openidm/samples/sample3/tools/</filename> directory for
+    example scripts.
+   </para>
+   <para>
+    The scripted SQL connector runs with autocommit mode enabled by default. As
+    soon as a statement is executed that modifies a table, the update is stored
+    on disk and the change cannot be rolled back. This setting applies to all
+    database actions (search, create, delete, test, synch, and update). You can
+    disable autocommit in the connector configuration file
+    (<literal>conf/provisioner.openicf-scriptedsql.json</literal>) by adding the
+    <literal>autocommit</literal> property and setting it to
+    <literal>false</literal>, for example:
+   </para>
    <programlisting language="javascript">
-  "configurationProperties" : {
-        "host" : "localhost",
-        "port" : "3306",
-        ...
-        "database" : "HRDB",
-        "autoCommit" : false,
-        "reloadScriptOnExecution" : true,
-        "createScriptFileName" : "/path/to/openidm/tools/CreateScript.groovy",
+"configurationProperties" : {
+    "host" : "localhost",
+    "port" : "3306",
+    ...
+    "database" : "HRDB",
+    "autoCommit" : false,
+    "reloadScriptOnExecution" : true,
+    "createScriptFileName" : "/path/to/openidm/tools/CreateScript.groovy",
+    ...
    </programlisting>
-   <para>If you require a traditional transaction with a manual commit for 
-   a specific script, you can disable autocommit mode in the script or scripts 
-   for each action that requires a manual commit.</para>
+   <para>
+    If you require a traditional transaction with a manual commit for a specific
+    script, you can disable autocommit mode in the script or scripts for each
+    action that requires a manual commit.
+   </para>
    
    <!--TODO Test this example before committing this section
    <para>The following example edits the <literal>CreateScript.groovy</literal> 
