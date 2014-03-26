@@ -2,7 +2,7 @@
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
     "propertyMapping" : {
-        "userId" : "_id",
+        "authenticationId" : "_id",
         "userCredential" : "password",
         "userRoles" : "roles"
     },
@@ -26,7 +26,7 @@
                 "name" : "MANAGED_USER",
                 "properties" : {
                     "propertyMapping" : {
-                        "userId" : "_id",
+                        "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
@@ -43,7 +43,7 @@
                     },
                     "passThroughAuth" : "system/ldap/account",
                     "propertyMapping" : {
-                        "userId" : "uid"
+                        "authenticationId" : "uid"
                     },
                     "managedUserLink" : "systemLdapAccounts_managedUser",
                     "defaultUserRoles" : [
@@ -56,7 +56,7 @@
                 "name" : "INTERNAL_USER",
                 "properties" : {
                     "propertyMapping" : {
-                        "userId" : "_id",
+                        "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },

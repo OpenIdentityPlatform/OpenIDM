@@ -56,6 +56,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     private final static Logger logger = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
     // common config property keys
+    protected static final String AUTHENTICATION_ID = "authenticationId";
     protected static final String DEFAULT_USER_ROLES = "defaultUserRoles";
     protected static final String PROPERTY_MAPPING = "propertyMapping";
 
