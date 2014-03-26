@@ -290,11 +290,9 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                             revison = "";
                             result.put(Resource.FIELD_CONTENT_ID, result.get("id").getObject());
                         }
-                        if (result.isDefined("errors")) {
-                            if (result.get("errors").size() > 0) {
-                                handler.handleError(new InternalServerErrorException(
-                                        "Failed to create FIX ME"));
-                            }
+                        if (result.isDefined("errors") && result.get("errors").size() > 0) {
+                            handler.handleError(new InternalServerErrorException(
+                                    "Failed to create FIX ME"));
                         } else {
                             handler.handleResult(new Resource(id, revison, result));
                         }
