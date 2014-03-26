@@ -76,11 +76,11 @@ public class AuthHelper {
         if ((authenticationIdProperty != null && userCredentialProperty == null)
                 || (authenticationIdProperty == null && userCredentialProperty != null)) {
             logger.warn("AuthHelper config does not fully define the necessary properties."
-                    + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
+                    + " Both \"authenticationId\" ({}) and \"userCredential\" ({}) should be defined."
                     + " Defaulting to manual role query.", authenticationIdProperty, userCredentialProperty);
         }
 
-        logger.info("AuthHelper config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
+        logger.info("AuthHelper config explicit user properties authenticationId: {}, userCredentials: {}, userRoles: {}",
                 authenticationIdProperty, userCredentialProperty, userRolesProperty);
     }
 
