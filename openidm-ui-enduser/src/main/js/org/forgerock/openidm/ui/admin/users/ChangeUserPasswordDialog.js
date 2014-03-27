@@ -58,26 +58,21 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             event.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
-                var patchDefinitionObject = [], element,
-                    successfulPatch = _.bind(function(r) {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                        this.close();
-                        
-                        userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
-                            require("org/forgerock/openidm/ui/admin/users/AdminUserProfileView").editedUser = user;
-                        });
-                    }, this);
+                var patchDefinitionObject = [], element;
                 
                 if(this.$el.find("input[name=password]").val() !== "") {
                     patchDefinitionObject.push({operation: "replace", field :"password", value: this.$el.find("input[name=password]").val()});
                 }
                 
                 this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
-                    this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, successfulPatch, _.bind(function () {
-                        // if replacing the password failed, try again with add instead
-                        patchDefinitionObject = [{ operation: "add", field: "password", value:  this.$el.find("input[name=password]").val()}];
-                        this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, successfulPatch);
-                        }, this));
+                    this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, _.bind(function(r) {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
+                        this.close();
+                        
+                        userDelegate.getForUserName(this.editedUsername, function(user) {
+                            require("org/forgerock/openidm/ui/admin/users/AdminUserProfileView").editedUser = user;
+                        });
+                    }, this));
                 }, this));
             }
         },
