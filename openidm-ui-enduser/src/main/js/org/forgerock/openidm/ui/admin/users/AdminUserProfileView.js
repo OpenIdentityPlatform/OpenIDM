@@ -63,7 +63,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 delete data.oldUserName;                
 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
-                data.telephoneNumber = data.telephoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
                     if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
