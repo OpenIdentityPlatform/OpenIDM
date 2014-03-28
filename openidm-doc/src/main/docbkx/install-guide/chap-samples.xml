@@ -816,7 +816,7 @@ Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
+OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 bob
 rowley
 louis

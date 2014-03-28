@@ -70,7 +70,7 @@
 "roles":""openidm-authorized,contractor",
         </programlisting>
         <para>
-         In OpenIDM ${docTargetVersion}, multiple roles are specified as an
+         In OpenIDM ${serverDocTargetVersion}, multiple roles are specified as an
          array. For example:
         </para>
         <programlisting>
@@ -88,7 +88,7 @@
   
   <itemizedlist>
     <para>The following functionality is deprecated in 
-    OpenIDM <?eval ${docTargetVersion}?>.</para>
+    OpenIDM <?eval ${serverDocTargetVersion}?>.</para>
     <listitem>
       <para>TBD</para>
     </listitem>
@@ -101,7 +101,7 @@
  <section xml:id="removed-functionality">
   <title>Removed Functionality</title>
   
-  <para>No functionality has been removed in OpenIDM ${docTargetVersion}.</para>
+  <para>No functionality has been removed in OpenIDM ${serverDocTargetVersion}.</para>
   
   <para>No functionality is planned to be removed at this time.</para>
  </section>

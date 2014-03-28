@@ -20,20 +20,19 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2014 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-ports-used'
  version='5.0' xml:lang='en'
  xmlns='http://docbook.org/ns/docbook'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'>
  <title>Ports Used</title>
 
  <variablelist>
-  <para>By default, OpenIDM <?eval ${docTargetVersion}?> listens on the following
+  <para>By default, OpenIDM <?eval ${serverDocTargetVersion}?> listens on the following
   ports (specified in <filename>/path/to/openidm/conf/boot/boot.properties</filename>):</para>
 
   <varlistentry>

@@ -30,7 +30,7 @@
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM ${docTargetVersion} Integrator's Guide</title>
+  <title>OpenIDM ${serverDocTargetVersion} Integrator's Guide</title>
   <abstract>
    <para>Guide to configuring and integrating OpenIDM into identity
    management solutions. The OpenIDM project offers flexible, open source

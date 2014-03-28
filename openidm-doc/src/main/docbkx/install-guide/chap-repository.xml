@@ -41,7 +41,7 @@
  OpenIDM in production, however, you must replace OrientDB with a supported
  repository.</para>
  
- <para>OpenIDM <?eval ${docTargetVersion}?> supports the use of <link 
+ <para>OpenIDM <?eval ${serverDocTargetVersion}?> supports the use of <link
  xlink:href="http://dev.mysql.com/downloads/mysql/"
  xlink:show="new">MySQL</link>, MS SQL, and Oracle Database as an internal
  repository. For details of the supported versions, see <link

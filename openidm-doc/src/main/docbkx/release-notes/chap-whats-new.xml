@@ -20,19 +20,19 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-whats-new'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>What's New in OpenIDM <?eval ${serverDocTargetVersion}?></title>
  
   <important>
-    <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
+    <para>OpenIDM <?eval ${serverDocTargetVersion}?> is a milestone release from the
     main development branch of the product. This release contains selected key
     features and all current fixed issues. The release has undergone important
     functional testing but not the complete testing cycle that is done for a
@@ -56,7 +56,7 @@
   </important> 
 
  <itemizedlist>
-  <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
+  <para>OpenIDM <?eval ${serverDocTargetVersion}?> provides many new features,
   including the following:</para>
   <listitem>
     <para>Browser-based user interface</para>
