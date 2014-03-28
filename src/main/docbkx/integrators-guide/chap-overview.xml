@@ -160,7 +160,7 @@
       <term>Repository</term>
       <listitem>
        <para>The repository provides a common abstraction for a pluggable
-       persistence layer. OpenIDM <?eval ${docTargetVersion}?> supports use
+       persistence layer. OpenIDM <?eval ${serverDocTargetVersion}?> supports use
        of MySQL to back the repository. Yet, plugin repositories can include
        NoSQL and relational databases, LDAP, and even flat files. The
        repository API operates using a JSON-based object model with RESTful

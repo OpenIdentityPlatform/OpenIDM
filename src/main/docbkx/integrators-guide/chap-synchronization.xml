@@ -1327,7 +1327,7 @@
   <para>
    The format of the query can be any query type that is supported by the
    resource, and can include additional parameters, if applicable. OpenIDM
-   ${docTargetVersion} supports the following query types.
+   ${serverDocTargetVersion} supports the following query types.
   </para>
   <itemizedlist>
    <para>

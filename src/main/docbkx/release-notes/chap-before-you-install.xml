@@ -34,7 +34,7 @@
  software.</para>
 
  <variablelist>
-  <para>For OpenIDM <?eval ${docTargetVersion}?>, the following configurations
+  <para>For OpenIDM <?eval ${serverDocTargetVersion}?>, the following configurations
   are supported for use in production.</para>
   <varlistentry>
    <term>Repository</term>
@@ -66,7 +66,7 @@
   <varlistentry>
    <term>Connectors</term>
    <listitem>
-    <para>OpenIDM <?eval ${docTargetVersion}?> comes packaged with these
+    <para>OpenIDM <?eval ${serverDocTargetVersion}?> comes packaged with these
     OpenICF connectors:</para>
     <itemizedlist>
      <listitem><para>CSV File</para></listitem>

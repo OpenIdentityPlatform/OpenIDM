@@ -69,7 +69,7 @@
     OpenIDM services run in an OSGi container with an embedded Servlet
     container, and an embedded noSQL database. By default the OSGi container is
     Apache Felix. The default Servlet container is Jetty. For OpenIDM
-    <?eval ${docTargetVersion}?>, the only supported configuration is running
+    <?eval ${serverDocTargetVersion}?>, the only supported configuration is running
     the services in Apache Felix and Jetty.
    </para>
   </section>
@@ -143,7 +143,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
       Unpack the contents of the .zip file into the install location.
      </para>
      <screen>$ cd /path/to
-$ unzip ~/Downloads/openidm-<?eval ${docTargetVersion}?>.zip
+$ unzip ~/Downloads/openidm-<?eval ${serverDocTargetVersion}?>.zip
 ...
   inflating: openidm/connectors/scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
   inflating: openidm/bin/felix.jar   
@@ -198,7 +198,7 @@ Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
+OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 -> OpenIDM ready</screen>
       </step>
       <step>
@@ -210,7 +210,7 @@ OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
 "Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
-OpenIDM version "<?eval ${docTargetVersion}?>" (revision: XXXX)
+OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 -> OpenIDM ready
 -&gt;</screen>
       </step>

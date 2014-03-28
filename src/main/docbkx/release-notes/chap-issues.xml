@@ -33,7 +33,7 @@
  <!-- TODO: Update for the release. -->
  <note>
   <para>The current list of fixes and issues reflects OpenIDM
-  <?eval ${docTargetVersion}?> in progress as of February 15, 2013.</para>
+  <?eval ${serverDocTargetVersion}?> in progress as of February 15, 2013.</para>
  </note>
 
  <para>OpenIDM issues are tracked at <link
@@ -45,7 +45,7 @@
   <title>Fixes and Improvements</title>
 
      <itemizedlist>
-         <para>OpenIDM <?eval ${docTargetVersion}?> includes the following major
+         <para>OpenIDM <?eval ${serverDocTargetVersion}?> includes the following major
              fixes and improvements.</para>
 
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1122" xlink:show="new">OPENIDM-1122</link>: Populate the X-Requested-With header in the requests</para></listitem>
@@ -133,7 +133,7 @@
   <title>Known Issues</title>
  
   <itemizedlist>
-   <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
+   <para>OpenIDM <?eval ${serverDocTargetVersion}?> has the following known
    issues.</para>
 
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1176" xlink:show="new">OPENIDM-1176</link>: Disabled schedules via dynamic scheduler API disappear</para></listitem>
