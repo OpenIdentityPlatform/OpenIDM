@@ -153,10 +153,14 @@ var httpAccessConfig =
             "methods"   : "action",
             "actions"   : "reauthenticate"
         },
+
+        // This rule is primarily controlled by the ownDataOnly function - that will only allow 
+        // access to the endpoint from which the user orignates 
+        // (For example a managed/user with the _id of bob will only be able to access managed/user/bob)
         {   
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
-            "methods"   : "read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete themselves
+            "methods"   : "read,update,patch",
             "actions"   : "*",
             "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()"
         },
