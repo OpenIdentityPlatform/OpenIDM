@@ -24,8 +24,10 @@
 
 package org.forgerock.openidm.router;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,7 +47,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ContextUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -447,7 +448,9 @@ class RouteServiceImpl implements RouteService {
         // point to it now and build it later
         final Map<String, Object> authzid = new HashMap<String, Object>();
         authzid.put(SecurityContext.AUTHZID_ID, "system");
-        authzid.put(SecurityContext.AUTHZID_ROLES, "system");
+        List<String> roles = new ArrayList<String>();
+        roles.add("system");
+        authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
         return new SecurityContext(new RootContext(), "system", authzid);
     }
