@@ -33,8 +33,6 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
     commonConstants.HEADER_PARAM_NO_SESSION = "X-OpenIDM-NoSession";
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
-    
-    commonConstants.LESS_VERSION = 'libs/less-1.5.1-min.js';
 
     commonConstants.EVENT_USER_UPDATE_POLICY_FAILURE = "EVENT_USER_UPDATE_POLICY_FAILURE";
     
