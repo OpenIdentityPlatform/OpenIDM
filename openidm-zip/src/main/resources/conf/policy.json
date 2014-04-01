@@ -74,6 +74,7 @@
                             "policyId" : "re-auth-required",
                             "params" : {
                                 "exceptRoles" : [
+                                    "system",
                                     "openidm-admin",
                                     "openidm-reg",
                                     "openidm-cert"
@@ -141,6 +142,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.securityQuestions",
                                 "exceptRoles" : [
+                                    "system",
                                     "openidm-admin"
                                 ]
                             }
@@ -156,6 +158,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.securityQuestions",
                                 "exceptRoles" : [
+                                    "system",
                                     "openidm-admin"
                                 ]
                             }
@@ -170,6 +173,7 @@
                             "policyId" : "re-auth-required",
                             "params" : {
                                 "exceptRoles" : [
+                                    "system",
                                     "openidm-admin",
                                     "openidm-reg"
                                 ]
@@ -213,6 +217,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.siteIdentification",
                                 "exceptRoles" : [
+                                    "system",
                                     "openidm-admin"
                                 ]
                             }
