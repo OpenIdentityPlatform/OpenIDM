@@ -8,11 +8,9 @@
 
         <div class="clearfix">
 
-            <div class="float-right col2">
-                <a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput align-label">
-                    {{t "common.user.changePassword"}}
-                </a>
-            </div>
+            <ul class="float-right link-box">
+                <li><a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a></li>
+            </ul>
 
             <div class="group-field-block col2">
                 <label for="userName" class="light align-right">{{t "common.user.username"}}</label>
