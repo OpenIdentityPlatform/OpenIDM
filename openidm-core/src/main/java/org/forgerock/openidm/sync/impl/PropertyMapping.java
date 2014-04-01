@@ -154,7 +154,7 @@ class PropertyMapping {
                 result = transform.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
                 LOGGER.warn("Property mapping " + targetPointer + " transformation script encountered exception", se);
-                throw new SynchronizationException(se);
+                throw new SynchronizationException("Transformation script error :  " + se.getMessage() + " for attribute '" + targetPointer + "'");
             }
         }
         if (result == null) {
