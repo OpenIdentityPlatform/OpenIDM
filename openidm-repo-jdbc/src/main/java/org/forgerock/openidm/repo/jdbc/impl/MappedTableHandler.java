@@ -542,42 +542,43 @@ class Mapping {
     }
 
     public JsonValue mapToJsonValue(ResultSet rs, Set columnNames) throws SQLException,
-            InternalServerErrorException {
+    InternalServerErrorException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
 
         for (ColumnMapping entry : columnMappings) {
             Object value = null;
             if (columnNames.contains(entry.dbColName)) {
-                if ("STRING".equals(entry.dbColType)) {
+                if (ColumnMapping.TYPE_STRING.equals(entry.dbColType)) {
                     value = rs.getString(entry.dbColName);
                     if (cryptoServiceAccessor == null || cryptoServiceAccessor.access() == null) {
                         throw new InternalServerErrorException("CryptoService unavailable");
                     }
                     if (JsonUtil.isEncrypted((String) value)) {
-                        try {
-                            value = new JsonValue((Map) mapper.readValue((String) value, Map.class));
-                        } catch (IOException e) {
-                            throw new InternalServerErrorException("Unable to map encrypted value for " + entry.dbColName, e);
-                        }
+                        value = convertToJson(entry.dbColName, "encrypted", (String)value, Map.class).asMap();
                     }
-                } else if ("JSON".equals(entry.dbColType)) {
-                    value = rs.getString(entry.dbColName);
-                    if (value != null) {
-                        try {
-                            value = new JsonValue((Map) mapper.readValue(rs.getString(entry.dbColName), Map.class)).asMap();
-                        } catch (IOException e) {
-                            throw new InternalServerErrorException("Unable to map JSON value for " + entry.dbColName, e);
-                        }
-                    }
+                } else if (ColumnMapping.TYPE_JSON_MAP.equals(entry.dbColType)) {
+                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), Map.class).asMap();
+                } else if (ColumnMapping.TYPE_JSON_LIST.equals(entry.dbColType)) {
+                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), List.class).asList();
                 } else {
-                    // TODO: support for more complex type conversions
-                    value = rs.getObject(entry.dbColName);
+                    throw new InternalServerErrorException("Unsupported DB column type " + entry.dbColType);
                 }
                 mappedResult.put(entry.objectColPointer, value);
             }
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
         return mappedResult;
+    }
+
+    private <T> JsonValue convertToJson(String name, String nameType, String value, Class<T> valueType) throws InternalServerErrorException {
+        if (value != null) {
+            try {
+                return new JsonValue(mapper.readValue(value, valueType));
+            } catch (IOException e) {
+                throw new InternalServerErrorException("Unable to map " + nameType + " value for " + name, e);
+            }
+        }
+        return new JsonValue(null);
     }
 
     public String getRev(ResultSet rs) throws SQLException {
@@ -606,6 +607,14 @@ class Mapping {
  * Parsed Config handling
  */
 class ColumnMapping {
+    public static final String DB_COLUMN_NAME = "column";
+    public static final String DB_COLUMN_TYPE = "type";
+
+    public static final String TYPE_STRING = "STRING";
+    public static final String TYPE_JSON_MAP = "JSON_MAP";
+    public static final String TYPE_JSON_LIST = "JSON_LIST";
+   
+    
     public JsonPointer objectColPointer;
     public String objectColName; // String representation of the column
                                  // name/path
@@ -623,9 +632,12 @@ class ColumnMapping {
             }
             dbColName = dbColMappingConfig.get(0).required().asString();
             dbColType = dbColMappingConfig.get(1).required().asString();
+        } else if (dbColMappingConfig.isMap()) {
+            dbColName = dbColMappingConfig.asMap().get(DB_COLUMN_NAME).toString();
+            dbColType = dbColMappingConfig.asMap().get(DB_COLUMN_TYPE).toString();
         } else {
             dbColName = dbColMappingConfig.asString();
-            dbColType = "STRING";
+            dbColType = TYPE_STRING;
         }
     }
 
