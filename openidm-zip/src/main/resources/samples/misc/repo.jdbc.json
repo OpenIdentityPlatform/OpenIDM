@@ -183,7 +183,7 @@
                     "actionId" : "actionid",
                     "exception" : "exceptiondetail",
                     "mapping" : "mapping",
-                    "messageDetail" : "messagedetail"
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
                 }
             },
             "audit/access" : {
