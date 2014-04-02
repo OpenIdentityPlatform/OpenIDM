@@ -28,11 +28,6 @@ package org.forgerock.openidm.quartz.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.SecurityContext;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
@@ -68,25 +63,6 @@ public class SchedulerServiceJob implements Job {
         // Instances of Job must have a public no-argument constructor.
     }
 
-    /**
-     * Generates a new scheduler service context, suitable for inclusion as a parent context
-     * to a resource via the router. For now, this is simply placed on the ObjectSetContext
-     * stack prior to the call to the scheduled service, but in the future should be sent in
-     * a request context via the router. This does not create a faux request context; that is
-     * incumbent on the invoked service to establish if necessary.
-     */
-    private ServerContext newSchedulerContext(Map<String, Object> ssc) {
-        HashMap<String, Object> security = new HashMap<String, Object>();
-        security.put("username", ssc.get(ScheduledService.INVOKER_NAME));
-        security.put("security", security);
-        security.put("scheduled-time", ssc.get(ScheduledService.SCHEDULED_FIRE_TIME));
-        security.put("actual-time", ssc.get(ScheduledService.ACTUAL_FIRE_TIME));
-        security.put("next-time", ssc.get(ScheduledService.NEXT_FIRE_TIME));
-        security.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
-        security.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
-        security.put("invoke-log-level", ssc.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL));
-        return new ServerContext(new SecurityContext(new RootContext(), (String) ssc.get(ScheduledService.INVOKER_NAME), security));
-    }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
@@ -98,15 +74,13 @@ public class SchedulerServiceJob implements Job {
         Object invokeContext = data.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
         ServiceTracker scheduledServiceTracker = (ServiceTracker) getServiceTracker(invokeService);
 
-
-
         logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
                 new Object[] {invokeService, invokeContext, context});
         logger.debug("Job to invoke service with PID {} with scheduler context {}", new Object[] {invokeService, context});
 
         Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
         scheduledServiceContext.putAll(data);
-        //scheduledServiceContext.remove(SchedulerService.SERVICE_TRACKER);
+
         scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +
                 context.getJobDetail().getName() + "-" + context.getScheduledFireTime());
         scheduledServiceContext.put(ScheduledService.SCHEDULED_FIRE_TIME, context.getScheduledFireTime());
@@ -119,17 +93,9 @@ public class SchedulerServiceJob implements Job {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
             try {
-                LogUtil.logAtLevel(logger, logLevel,
-                        "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                // TODO: Migrate calls to router; pass context in request.
-                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
-                try {
-                    scheduledService.execute(scheduledServiceContext);
-                } finally {
-                    ObjectSetContext.pop();
-                }
-                LogUtil.logAtLevel(logger, logLevel,
-                        "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
+                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
+                scheduledService.execute(scheduledServiceContext);
+                LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
