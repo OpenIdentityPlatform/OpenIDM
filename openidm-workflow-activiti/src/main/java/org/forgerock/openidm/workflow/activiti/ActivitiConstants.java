@@ -96,4 +96,5 @@ public class ActivitiConstants {
     public static final String FORMPROPERTY_VARIABLEEXPRESSION = "variableExpression";
     public static final String ENUM_VALUES = "values";
     public static final String DATE_PATTERN = "datePattern";
+    public static final String ACTIVITI_FORMGENERATIONTEMPLATE = "formGenerationTemplate";
 }

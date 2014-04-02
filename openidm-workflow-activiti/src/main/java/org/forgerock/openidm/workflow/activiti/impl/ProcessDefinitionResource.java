@@ -23,11 +23,15 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
@@ -145,6 +149,15 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             StartFormData startFormData = formService.getStartFormData(def.getId());
             if (def.hasStartFormKey()) {
                 r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
+                ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(def.getDeploymentId(), startFormData.getFormKey());
+                Reader reader = new InputStreamReader(startForm);
+                try {
+                    Scanner s = new Scanner(reader).useDelimiter("\\A");
+                    String formTemplate = s.hasNext() ? s.next() : "";
+                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
+                } finally {
+                    reader.close();
+                }
             }
             DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) def.getStartFormHandler();
             List<Map> propertyList = new ArrayList<Map>();

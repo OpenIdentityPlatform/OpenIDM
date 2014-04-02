@@ -34,9 +34,10 @@ import org.activiti.engine.impl.identity.Authentication;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.activiti.engine.identity.NativeGroupQuery;
+import org.activiti.engine.identity.NativeUserQuery;
 import org.forgerock.json.resource.*;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.RouteService;
@@ -330,5 +331,15 @@ public class SharedIdentityService implements IdentityService {
      * with a user
      */
     public void deleteUserInfo(String userId, String key) {
+    }
+
+    @Override
+    public NativeUserQuery createNativeUserQuery() {
+        throw new UnsupportedOperationException("Native user query not supported.");
+    }
+
+    @Override
+    public NativeGroupQuery createNativeGroupQuery() {
+        throw new UnsupportedOperationException("Native group query not supported.");
     }
 }
