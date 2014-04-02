@@ -95,10 +95,12 @@
      <para>
       Make sure you have an appropriate version of Java installed.
      </para>
-     <screen>$ java -version
+     <screen><userinput>$ java -version</userinput>
+      <computeroutput>
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
-Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
+Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</computeroutput>
+     </screen>
      <para>
       Check the release notes for Java requirements in the chapter, <link
      xlink:href="release-notes#chap-before-you-install"
@@ -142,13 +144,15 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
      <para>
       Unpack the contents of the .zip file into the install location.
      </para>
-     <screen>$ cd /path/to
-$ unzip ~/Downloads/openidm-<?eval ${serverDocTargetVersion}?>.zip
+     <screen><userinput>$ cd /path/to
+$ unzip ~/Downloads/openidm-${serverDocTargetVersion}.zip
+      </userinput>
+      <computeroutput>
 ...
-  inflating: openidm/connectors/scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
-  inflating: openidm/bin/felix.jar   
-  inflating: openidm/bin/openidm.jar
-$</screen>
+inflating: openidm/connectors/scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
+inflating: openidm/bin/felix.jar
+inflating: openidm/bin/openidm.jar</computeroutput>
+     </screen>
     </step>
     <step performance="optional">
      <para>
@@ -192,19 +196,24 @@ $</screen>
      <stepalternatives>
       <step>
        <para>Start OpenIDM (UNIX).</para>
-       <screen>$ ./startup.sh
+       <screen><userinput>$ ./startup.sh</userinput>
+        <computeroutput>
 Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
--> OpenIDM ready</screen>
+-> OpenIDM ready
+        </computeroutput>
+       </screen>
       </step>
       <step>
        <para>Start OpenIDM (Windows).</para>
-       <screen>&lt; cd \path\to\openidm
-&lt; startup.bat
+       <screen><userinput>C:\&gt; cd \path\to\openidm
+C:\&gt; startup.bat
+        </userinput>
+        <computeroutput>
 "Using OPENIDM_HOME:   \path\to\openidm"
 "Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
 "Using LOGGING_CONFIG:
@@ -212,7 +221,9 @@ OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
 OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 -> OpenIDM ready
--&gt;</screen>
+-&gt;
+        </computeroutput>
+       </screen>
       </step>
      </stepalternatives>
      <para>At the resulting <literal>-&gt;</literal> prompt, you can enter
@@ -220,7 +231,8 @@ OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
      <command>ps</command> to view the bundles installed. To see a list of all
      the OpenIDM core services and their states, enter the following
      command.</para>
-     <screen width="87">-&gt; scr list
+     <screen width="87"><userinput>-&gt; scr list</userinput>
+      <computeroutput>
    Id   State          Name
 [  12] [active       ] org.forgerock.openidm.endpoint
 [  13] [active       ] org.forgerock.openidm.endpoint
@@ -258,7 +270,9 @@ OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
 [  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
 [  24] [active       ] org.forgerock.openidm.infoservice
 [  21] [active       ] org.forgerock.openidm.authentication
--&gt;</screen>
+-&gt;
+      </computeroutput>
+     </screen>
      <para>A default startup does not include certain configurable services, 
      which will indicate an <literal>unsatisfied</literal> state until they 
      are included in the configuration. As you work through the sample 
@@ -356,14 +370,14 @@ $</screen>
     </para>
 
     <para>
-     If you want to run <command>curl</command>
-     over the secure port, 8443, you would either need to include the
-     <command>--insecure</command> option, or follow the instructions shown
-     in <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
+     If you want to run <command>curl</command> over the secure port, 8443, you
+     must either include the <command>--insecure</command> option, or follow the
+     instructions shown in
+     <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
      REST Access to the HTTPS Port</citetitle></link>. You can use those
-     instructions with the self-signed certificate generated when OpenIDM
-     starts, or with a <filename>*.crt</filename> file provided by a
+     instructions with the self-signed certificate that is generated when
+     OpenIDM starts, or with a <filename>*.crt</filename> file provided by a
      certificate authority.
     </para>
 
@@ -381,17 +395,16 @@ $</screen>
      If you would rather use <command>curl</command> to connect to the regular
      HTTP port, omit the <literal>--cacert self-signed.crt</literal> file and
      point to a regular Jetty HTTP URL such as
-     http://localhost:8080/openidm/...
+     <literal>http://localhost:8080/openidm/...</literal>.
     </para>
 
     <note>
      <para>
-      All RESTful commands depicted in this document, as depicted with
-      <command>curl</command>, are
-      based on the default configuration of OpenIDM. If you change configuration
-      files in directories such as <filename>openidm/conf</filename> and
-      <filename>openidm/script</filename>, you may need to modify the RESTful
-      commands to reflect those changes.
+      All RESTful command line examples in this guide, as depicted with
+      <command>curl</command>, are based on the default configuration of
+      OpenIDM. If you change configuration files in directories such as
+      <filename>openidm/conf</filename> and <filename>openidm/script</filename>,
+      you might need to modify the RESTful commands to reflect those changes.
      </para>
     </note>
 
@@ -401,10 +414,10 @@ $</screen>
     <para>Access the following URL to obtain the JSON representation of all
      users in the OpenIDM repository.</para>
 
-     <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
+     <screen>$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
  http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</screen>
 
      <para>When you first install OpenIDM with an empty repository, no users
@@ -418,26 +431,24 @@ $</screen>
      <stepalternatives>
       <step>
        <para>Create <literal>joe</literal> (UNIX).</para>
-       <screen>
-       <userinput>$ curl
- --cacert self-signed.crt
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- --data '{
- "userName":"joe",
- "givenName":"joe",
- "sn":"smith",
- "mail":"joe@example.com",
- "telephoneNumber":"555-123-1234",
- "password":"TestPassw0rd",
- "description":"My first user",
- "_id":"joe"
- }'
- https://localhost:8443/openidm/managed/user?_action=create
- </userinput>
-
+       <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{ \
+ "userName":"joe", \
+ "givenName":"joe", \
+ "sn":"smith", \
+ "mail":"joe@example.com", \
+ "telephoneNumber":"555-123-1234", \
+ "password":"TestPassw0rd", \
+ "description":"My first user", \
+ "_id":"joe" \
+ }' \
+ https://localhost:8443/openidm/managed/user?_action=create</userinput>
+        <computeroutput>
 {
   "userName": "joe",
   "stateProvince": "",
@@ -476,29 +487,28 @@ $</screen>
   "accountStatus": "active",
   "description": "My first user",
   "_id":"joe"
-}
-</screen>
+}        </computeroutput>
+       </screen>
       </step>
       <step>
        <para>Create <literal>joe</literal> (Windows).</para>
-       <screen>C:\&gt;curl
- --cacert self-signed.crt
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- --data "{
- \"userName\":\"joe\",
- \"givenName\":\"joe\",
- \"sn\":\"smith\",
- \"mail\":\"joe@example.com\",
- \"telephoneNumber\":\"555-123-1234\",
- \"password\":\"TestPassw0rd\",
- \"description\":\"My first user\"
- \"_id\":\"joe\"
- }"
- https://localhost:8443/openidm/managed/user?_action=create
-}</screen>
+       <screen>C:\&gt; curl ^
+ --cacert self-signed.crt ^
+ --header "Content-Type: application/json" ^
+ --header "X-OpenIDM-Username: openidm-admin" ^
+ --header "X-OpenIDM-Password: openidm-admin" ^
+ --request POST ^
+ --data "{ ^
+ \"userName\":\"joe\", ^
+ \"givenName\":\"joe\", ^
+ \"sn\":\"smith\", ^
+ \"mail\":\"joe@example.com\", ^
+ \"telephoneNumber\":\"555-123-1234\", ^
+ \"password\":\"TestPassw0rd\", ^
+ \"description\":\"My first user\" ^
+ \"_id\":\"joe\" ^
+ }" ^
+ https://localhost:8443/openidm/managed/user?_action=create</screen>
       </step>
      </stepalternatives>
     </step>
@@ -506,15 +516,15 @@ $</screen>
      <para>Fetch the newly created user from the repository with a RESTful
      GET.</para>
 
-     <screen>
-     <userinput>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request GET \
  https://localhost:8443/openidm/managed/user/joe
      </userinput>
+     <computeroutput>
 {
   "effectiveAssignments": {},
   "effectiveRoles": [
@@ -541,7 +551,7 @@ $</screen>
   "roles": [
     "openidm-authorized"
   ]
-}</screen>
+}</computeroutput></screen>
     </step>
     <step>
      <para>
