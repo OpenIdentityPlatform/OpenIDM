@@ -82,7 +82,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                 var template = this.getGenerationTemplate(definition, task), view, passJSLint;
                 delete this.definitionFormPropertyMap;
                 
-                if(definition.formResourceKey) {
+                if(template === false && definition.formResourceKey) {
                     view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
                     if (view.render) {
                         view.render(task, category, null, callback);
@@ -120,7 +120,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
         
         getGenerationTemplate: function(definition, task) {
             var formPropertyHandlers = definition.formProperties.formPropertyHandlers, property, i;
-
+            if (typeof definition.formGenerationTemplate === "string") {
+                return definition.formGenerationTemplate;
+            }
             for(i = 0; i < formPropertyHandlers.length; i++) {
                 property = formPropertyHandlers[i];
                 if(property._id === "_formGenerationTemplate") {

@@ -1,0 +1,145 @@
+
+<style>
+#taskDetails fieldset {
+       margin-top: 0;
+}
+#taskDetails .group-field {
+       float: left !important;
+       width: 100%;
+}
+#taskDetails .field label {
+       text-align: left;
+}
+#taskDetails .field input,#taskDetails .field select {
+       clear: both;
+}
+#taskDetails .field .validation-message {
+       clear: none !important;
+       margin-left: 20px !important;
+       float: left !important;
+}
+</style>
+
+<h2 class="header">User Approval</h2>
+
+    <fieldset>
+        <div class="fields">
+            <div class="field">
+                <label>{{t "common.user.username"}}</label> 
+                <input type="text" name="userName" value="{{variables.userName}}" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.givenName"}}</label> 
+                <input type="text" name="givenName" value="{{variables.givenName}}" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.familyName"}}</label> 
+                <input type="text" name="sn" value="{{variables.sn}}" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.emailAddress"}}</label> 
+                <input type="text" name="mail" value="{{variables.mail}}" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Country</label> 
+                <input type="text" name="country" value="{{variables.country}}" /> 
+            </div>
+            <div class="field">
+                <label>City</label> 
+                <input type="text" name="city" value="{{variables.city}}"/> 
+            </div>
+            <div class="field">
+                <label>State</label> 
+                <input type="text" name="stateProvince" value="{{variables.stateProvince}}" /> 
+            </div>
+            <div class="field">
+                <label>Postal Code</label> 
+                <input type="text" name="postalCode" value="{{variables.postalCode}}"/> 
+            </div>
+            <div class="field">
+                    <label>Address</label> 
+                    <input type="text" name="address1" value="{{variables.address1}}"/> 
+            </div>
+            <div class="field">
+                <label>{{t "common.user.phoneNumber"}}</label> 
+                <input type="text" name="telephoneNumber" value="{{variables.telephoneNumber}}"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Department</label> 
+                <select name="department">
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Production Planning">Production Planning</option>
+                        <option value="Sales &amp; Distribution">Sales & Distribution</option>
+                        <option value="Treasury &amp; Payments">Treasury & Payments</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Start Date (yyyy-MM-dd)</label> 
+                <input type="text" name="startDate" /> 
+            </div>
+            <div class="field">
+                <label>End Date (yyyy-MM-dd)</label> 
+                <input type="text" name="endDate" /> 
+            </div>
+            
+            <div class="field">
+                <label>Employee Number</label> 
+                <input type="text" name="employeeNumber" value="{{variables.employeeNumber}}" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Display Name</label> 
+                <input type="text" name="displayName" value="{{{variables.displayName}}}"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>User Type</label> 
+                <select name="userType">
+                        <option value="employee">Employee</option>
+                        <option value="contractor">Contractor</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Manager</label> 
+                <select name="title">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                </select>
+            </div>
+            <div class="field">  
+                    <label class="light">{{t "common.form.decision"}}</label> 
+                    <select name="decision" " data-validator='required' " >
+                        <option value="accept">Accept</option>
+                        <option value="reject">Reject</option>
+                    </select>
+        
+                    <span class="ok" style="">✔</span>
+                    <div class="validation-message"></div> 
+                </div>
+        </div>
+    </fieldset>
+
+<script>
+$('#taskDetails form select[name=department]').val("{{{variables.department}}}");
+$('#taskDetails form select[name=userType]').val("{{variables.userType}}");
+{{#if assignee}}
+(function () {
+  var v = require("org/forgerock/commons/ui/common/main/ValidatorsManager" );
+  v.bindValidators($('#taskDetails form' ), "managed/user/*", function () {
+      v.validateAllFields($('#taskDetails form'));
+  });
+}());
+{{/if}}
+</script>

@@ -23,9 +23,14 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.form.DateFormType;
@@ -129,12 +134,26 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("procdefid");
             ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(processDefinitionId);
             TaskDefinition taskDefinition = procdef.getTaskDefinitions().get(resourceId);
-            DefaultTaskFormHandler taskFormHandler = (DefaultTaskFormHandler) taskDefinition.getTaskFormHandler();
             Map value = mapper.convertValue(taskDefinition, HashMap.class);
             Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
-            r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
+            FormService formService = processEngine.getFormService();
+            String taskFormKey = formService.getTaskFormKey(processDefinitionId, resourceId);
+            if (taskFormKey != null){
+                r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormKey);
+                ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(procdef.getDeploymentId(), taskFormKey);
+                Reader reader = new InputStreamReader(startForm);
+                try {
+                    Scanner s = new Scanner(reader).useDelimiter("\\A");
+                    String formTemplate = s.hasNext() ? s.next() : "";
+                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
+                } finally {
+                    reader.close();
+                }
+            }
             handler.handleResult(r);
         } catch (IllegalArgumentException ex) {
+            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+        } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
     }

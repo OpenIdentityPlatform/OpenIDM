@@ -450,7 +450,7 @@
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
                 <include>script/sun*.js</include>
-                <include>workflow/newUserCreate.bpmn20.xml</include>
+                <include>workflow/newUserCreate.bar</include>
                 <include>workflow/sunrise.bpmn20.xml</include>
                 <include>workflow/sunset.bpmn20.xml</include>
             </includes>

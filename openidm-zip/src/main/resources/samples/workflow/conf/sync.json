@@ -23,7 +23,7 @@
                 },
                 {
                     "source" : "lastname",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "manager",
@@ -39,11 +39,11 @@
                 },
                 {
                     "source" : "mobileTelephoneNumber",
-                    "target" : "phoneNumber"
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "email",
-                    "target" : "email"
+                    "target" : "mail"
                 },
                 {
                     "source" : "startDate",
@@ -115,20 +115,20 @@
             },
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "var map = {'query': { 'Equals': {'field' : 'name','values' : [source.userName]}}};map;"
+                "file" : "script/correlationQuery.js"
             },
             "properties" : [
                 {
-                    "target" : "name",
-                    "source" : "userName"
+                    "source" : "userName",
+                    "target" : "name"
                 },
                 {
-                    "target" : "firstname",
-                    "source" : "givenName"
+                    "source" : "givenName",
+                    "target" : "firstname"
                 },
                 {
-                    "target" : "lastname",
-                    "source" : "familyName"
+                    "source" : "sn",
+                    "target" : "lastname"
                 },
                 {
                     "source" : "manager",
@@ -147,10 +147,10 @@
                 },
                 {
                     "target" : "mobileTelephoneNumber",
-                    "source" : "phoneNumber"
+                    "source" : "telephoneNumber"
                 },
                 {
-                    "source" : "email",
+                    "source" : "mail",
                     "target" : "email"
                 },
                 {

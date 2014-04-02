@@ -17,7 +17,7 @@
                            name="First Name"
                            required="true"
                            type="string" />
-                <activiti:formProperty id="familyName"
+                <activiti:formProperty id="sn"
                            name="Last Name"
                            required="true"
                            type="string" />
@@ -27,11 +27,11 @@
                 <activiti:formProperty id="jobTitle"
                            name="Job Title"
                            type="string" />
-                <activiti:formProperty id="phoneNumber"
+                <activiti:formProperty id="telephoneNumber"
                            name="Phone Number"
                            required="true"
                            type="string" />
-                <activiti:formProperty id="email"
+                <activiti:formProperty id="mail"
                            name="Email"
                            required="true"
                            type="string" />
@@ -89,7 +89,7 @@
 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;email&quot; /&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;mail&quot; /&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
@@ -103,14 +103,14 @@
 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;familyName&quot; data-validation-dependents=&quot;password&quot;/&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;sn&quot; data-validation-dependents=&quot;password&quot;/&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
                 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;phoneNumber&quot; /&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; /&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
@@ -173,9 +173,8 @@
         &lt;/fieldset&gt;
 
 &lt;script&gt;
-require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], function (v) { 
-   v.bindValidators($(&apos;#processDetails form&apos;), &quot;managed/user/&quot;);
-});
+require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; )
+  .bindValidators($(&apos;#processDetails form&apos; ), &quot;managed/user/*&quot; );
 &lt;/script&gt;
 
                 " />
@@ -192,6 +191,8 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
             
             readStartUserFromRepoParams = [_queryId:'for-userName',uid:startUserId]
             startUserFromRepo = openidm.query('managed/user', readStartUserFromRepoParams)
+            execution.setVariable("startUserFromRepo", startUserFromRepo)
+            execution.setVariable("decisionOptions", decisionOptions)
           ]]></script>
         </scriptTask>
         <userTask id="decideApprovalTask" name="Contractor Approval" activiti:candidateGroups="manager">
@@ -235,7 +236,7 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.emailAddress&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;email&quot; value=&quot;{{variables.email}}&quot; /&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;mail&quot; value=&quot;{{variables.mail}}&quot; /&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
@@ -249,14 +250,14 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.familyName&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;familyName&quot; value=&quot;{{variables.familyName}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;sn&quot; value=&quot;{{variables.sn}}&quot; data-validation-dependents=&quot;password&quot;/&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
                 
                 &lt;div class=&quot;field&quot;&gt;
                     &lt;label&gt;{{t &quot;common.user.phoneNumber&quot;}}&lt;/label&gt; 
-                    &lt;input type=&quot;text&quot; name=&quot;phoneNumber&quot; value=&quot;{{variables.phoneNumber}}&quot; /&gt; 
+                    &lt;input type=&quot;text&quot; name=&quot;telephoneNumber&quot; value=&quot;{{variables.telephoneNumber}}&quot; /&gt; 
                     &lt;span class=&quot;error&quot;&gt;x&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
@@ -326,8 +327,8 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                     &lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
                     &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt; 
                 &lt;/div&gt;
-
-
+                
+                
             &lt;/div&gt;
             
         &lt;/fieldset&gt;
@@ -335,11 +336,12 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
 &lt;script&gt;
 $(&apos;#taskDetails form select[name=provisionToXML]&apos;).val(&quot;{{variables.provisionToXML}}&quot;);
 {{#if assignee}}
-require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], function (v) { 
-   v.bindValidators($(&apos;#taskDetails form&apos;), &quot;managed/user/&quot;, function () {
-       v.validateAllFields($(&apos;#taskDetails form&apos;));
-   });
-});
+(function () {
+  var v = require(&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot; );
+  v.bindValidators($(&apos;#taskDetails form&apos; ), &quot;managed/user/*&quot;, function () {
+      v.validateAllFields($(&apos;#taskDetails form&apos;));
+  });
+}());
 {{/if}}
 &lt;/script&gt;
     
@@ -352,14 +354,15 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
 
         <scriptTask id="createManagedUser" scriptFormat="groovy">
             <script>
-                user = [userName:userName, givenName:givenName, familyName:familyName,
-                manager:startUserId, department:department, jobTitle:jobTitle, phoneNumber:phoneNumber, 
-                email:email, startDate:startDate, endDate:endDate, password:password, description:description,
+                user = [userName:userName, givenName:givenName, sn:sn,
+                manager:startUserId, department:department, jobTitle:jobTitle, telephoneNumber:telephoneNumber, 
+                mail:mail, startDate:startDate, endDate:endDate, password:password, description:description,
                 provisionToXML:provisionToXML]
 
                 openidm.create('managed/user',null, user)
                 
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
+                execution.setVariable("readNewUserFromRepoParams", readNewUserFromRepoParams)
             </script>
         </scriptTask>
         

@@ -81,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                         this.processDefinition = definition;
                         delete this.definitionFormPropertyMap;
                         
-                        if(definition.formResourceKey) {
+                        if(template === false && definition.formResourceKey) {
                             view = require(formManager.getViewForForm(definition.formResourceKey));
                             if (view.render) {
                                 view.render(definition, {}, {}, callback);
@@ -119,6 +119,9 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
         
         getGenerationTemplate: function(definition) {
             var property, i;
+            if (typeof definition.formGenerationTemplate === "string") {
+                return definition.formGenerationTemplate;
+            }
             for(i = 0; i < definition.formProperties.length; i++) {
                 property = definition.formProperties[i];
                 if(property._id === "_formGenerationTemplate") {

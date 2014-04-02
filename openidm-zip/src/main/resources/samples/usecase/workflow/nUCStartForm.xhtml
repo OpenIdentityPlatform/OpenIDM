@@ -1,0 +1,119 @@
+
+<style>
+#processDetails fieldset {
+       margin-top: 0;
+}
+#processDetails .group-field {
+       float: left !important;
+       width: 100%;
+}
+#processDetails .field label {
+       text-align: left;
+}
+#processDetails .field input,#processDetails .field select {
+       clear: both;
+}
+#processDetails .field .validation-message {
+       clear: none !important;
+       margin-left: 20px !important;
+       float: left !important;
+}
+</style>
+
+<h2 class="header">User Details</h2>
+
+    <fieldset>
+        <div class="fields">
+            <div class="field">
+                <label>{{t "common.user.username"}}</label> 
+                <input type="text" name="userName" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.givenName"}}</label> 
+                <input type="text" name="givenName" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.familyName"}}</label> 
+                <input type="text" name="sn" data-validation-dependents="password"/> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>{{t "common.user.emailAddress"}}</label> 
+                <input type="text" name="mail" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Country</label> 
+                <input type="text" name="country" /> 
+            </div>
+            <div class="field">
+                <label>City</label> 
+                <input type="text" name="city" /> 
+            </div>
+            <div class="field">
+                <label>State</label> 
+                <input type="text" name="stateProvince" /> 
+            </div>
+            <div class="field">
+                <label>Postal Code</label> 
+                <input type="text" name="postalCode" /> 
+            </div>
+            <div class="field">
+                    <label>Address</label> 
+                    <input type="text" name="address1" /> 
+            </div>
+            <div class="field">
+                <label>{{t "common.user.phoneNumber"}}</label> 
+                <input type="text" name="telephoneNumber" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Department</label> 
+                <select name="department">
+                        <option value="Human Resources">Human Resources</option>
+                        <option value="Production Planning">Production Planning</option>
+                        <option value="Sales & Distribution">Sales & Distribution</option>
+                        <option value="Treasury & Payments">Treasury & Payments</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Employee Number</label> 
+                <input type="text" name="employeeNumber" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>Display Name</label> 
+                <input type="text" name="displayName" /> 
+                <span class="error">x</span>
+                <div class="validation-message"></div>
+            </div>
+            <div class="field">
+                <label>User Type</label> 
+                <select name="userType">
+                        <option value="employee">Employee</option>
+                        <option value="contractor">Contractor</option>
+                </select>
+            </div>
+            <div class="field">
+                    <label>Send Email Notification</label> 
+                    <select name="emailEnabled">
+                         <option value="true">Yes</option>
+                         <option value="false">No</option>
+                    </select>
+                </div>
+
+        </div>
+    </fieldset>
+
+<script>
+require("org/forgerock/commons/ui/common/main/ValidatorsManager" )
+  .bindValidators($('#processDetails form' ), "managed/user/*" );
+</script>
