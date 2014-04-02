@@ -112,10 +112,10 @@ public class IDMServerAuthModuleTest {
         AuthStatus authStatus = idmServerAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verify(contextMap).put(SecurityContext.AUTHZID_ID, "USER_ID");
-        verify(contextMap).put(SecurityContext.AUTHZID_ROLES, roles);
-        verify(contextMap).put(SecurityContext.AUTHZID_COMPONENT, "RESOURCE");
-        verify(messageInfoMap).put(SecurityContextFactory.ATTRIBUTE_AUTHCID, "USERNAME");
+        assertEquals(contextMap.get(SecurityContext.AUTHZID_ID), "USER_ID");
+        assertEquals(contextMap.get(SecurityContext.AUTHZID_ROLES), roles);
+        assertEquals(contextMap.get(SecurityContext.AUTHZID_COMPONENT), "RESOURCE");
+        assertEquals(messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID), "USERNAME");
 
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
