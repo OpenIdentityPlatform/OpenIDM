@@ -574,7 +574,7 @@ var results = openidm.query("system/ScriptedSQL/account", params)
    <title>Creating Role Definitions</title>
    <para>
     Role definitions are stored in the repository and are accessible at the
-    <literal>/openidm/managed/roles</literal> context path. Role definitions
+    <literal>/openidm/managed/role</literal> context path. Role definitions
     have a structure similar to the following:
    </para>
    <programlisting language="java">
