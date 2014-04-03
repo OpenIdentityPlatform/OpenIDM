@@ -6,136 +6,156 @@
             "target" : "managed/user",
             "properties" : [
                 {
-            "source" : "cn",
-            "target" : "displayName"
+                    "source" : "cn",
+                    "target" : "displayName"
                 },
                 {
-            "source" : "description",
-            "target" : "description"
+                    "source" : "description",
+                    "target" : "description"
                 },
                 {
-            "source" : "givenName",
-            "target" : "givenName"
+                    "source" : "givenName",
+                    "target" : "givenName"
                 },
                 {
-            "source" : "mail",
-            "target" : "email"
+                    "source" : "mail",
+                    "target" : "mail"
                 },
                 {
-            "source" : "sn",
-            "target" : "familyName"
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
                 },
                 {
-            "source" : "uid",
-            "target" : "userName"
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
                 }
             ],
             "policies" : [
                 {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
                 },
                 {
-            "situation" : "FOUND",
-            "action" : "UPDATE"
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
                 },
                 {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
                 },
                 {
-            "situation" : "AMBIGUOUS",
-            "action" : "EXCEPTION"
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
                 },
                 {
-            "situation" : "MISSING",
-            "action" : "UNLINK"
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
                 },
                 {
-            "situation" : "SOURCE_MISSING",
-            "action" : "EXCEPTION"
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "EXCEPTION"
                 },
                 {
-            "situation" : "UNQUALIFIED",
-            "action" : "IGNORE"
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
                 },
                 {
-            "situation" : "UNASSIGNED",
-            "action" : "IGNORE"
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
                 }
             ]
         },
         {
-        "name" : "managedUser_systemLdapAccounts",
-        "source" : "managed/user",
-        "target" : "system/ldap/account",
-        "links" : "systemLdapAccounts_managedUser",
-        "correlationQuery" : {
-            "type" : "text/javascript",
-            "file" : "script/ldapBackCorrelationQuery.js"
-        },
-            "properties" : [
-                {
-            "source" : "givenName",
-            "target" : "givenName"
-                },
-                {
-            "source" : "familyName",
-            "target" : "sn"
-                },
-                {
-            "source" : "displayName",
-            "target" : "cn"
-                },
-                {
-            "source" : "userName",
-            "target" : "uid"
-                },
-                {
-            "source" : "description",
-            "target" : "description"
-                },
-                {
-            "source" : "email",
-            "target" : "mail"
-                }
-            ],
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "links" : "systemLdapAccounts_managedUser",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/ldapBackCorrelationQuery.js"
+            },
             "onCreate" : {
                 "type" : "text/javascript",
                 "source" : "target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"
             },
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "cn"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source)"
+                    },
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
+                    "target" : "password"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                }
+            ],
             "policies" : [
                 {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
                 },
                 {
-            "situation" : "FOUND",
-            "action" : "LINK"
+                    "situation" : "FOUND",
+                    "action" : "LINK"
                 },
                 {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
                 },
                 {
-            "situation" : "AMBIGUOUS",
-            "action" : "IGNORE"
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
                 },
                 {
-            "situation" : "MISSING",
-            "action" : "IGNORE"
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
                 },
                 {
-            "situation" : "SOURCE_MISSING",
-            "action" : "IGNORE"
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
                 },
                 {
-            "situation" : "UNQUALIFIED",
-            "action" : "IGNORE"
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
                 },
                 {
-            "situation" : "UNASSIGNED",
-            "action" : "IGNORE"
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
                 }
             ]
         }

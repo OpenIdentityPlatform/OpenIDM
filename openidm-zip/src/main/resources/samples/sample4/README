@@ -1,20 +1,22 @@
-Sample 4 - CSV File
+Sample 4 - CSV File to XML File
 -------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-This sample demonstrates using a comma-separated value file as an external
-resource. The synchronization mapping is defined only from the CSV file to
-the OpenIDM internal repository, so changes flow only from the CSV to OpenIDM.
+This sample demonstrates using both a comma-separated value file and an XML
+file as external resources. The synchronization mapping is directly from the 
+CSV file to the XML file, without using the OpenIDM internal repository. 
+Changes flow only from the CSV to XML. Data exists in both files, and
+correlation is used to find matching records.
 
 For documentation pertaining to this example see:
 http://openidm.forgerock.org/doc/install-guide/index.html#more-sample4
 
 To try the sample, follow these steps.
 
-    1. Data for this sample is in the CSV file, samples/sample4/data/hr.csv.
+    1. CSV data for this sample is in the file samples/sample4/data/hr.csv.
 
     $ cd /path/to/openidm
     $ cat samples/sample4/data/hr.csv
@@ -22,43 +24,95 @@ To try the sample, follow these steps.
     "Darth", "DDOE", "Doe", "doe@forgerock.org", "123456", "Z29vZA=="
     "Darth", "VDART", "Vader", "vader@forgerock.org", "654321", "Z29vZA=="
 
+    XML data for this sample is in the file samples/sample4/data/xmlConnectorData.xml
+
+    $ cd /path/to/openidm
+    $ cat samples/sample4/data/xmlConnectorData.xml
+
+     <?xml version="1.0" encoding="UTF-8"?>
+     <icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                          xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+     <ri:__ACCOUNT__>
+        <icf:__UID__>1</icf:__UID__>
+        <icf:__NAME__>bjensen@example.com</icf:__NAME__>
+        <ri:password>TestPassw0rd#</ri:password>
+        <ri:firstname>Barbara</ri:firstname>
+        <ri:lastname>Jensen</ri:lastname>
+        <ri:email>bjensen@example.com</ri:email>
+        <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+        <ri:roles>openidm-authorized</ri:roles>
+        <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+     </ri:__ACCOUNT__>
+     <ri:__ACCOUNT__>
+        <icf:__UID__>3</icf:__UID__>
+        <icf:__NAME__>vader@forgerock.org</icf:__NAME__>
+        <ri:password>TestPassw0rd#</ri:password>
+        <ri:firstname>Anakin</ri:firstname>
+        <ri:lastname>Skywalker</ri:lastname>
+        <ri:email>vader@forgerock.org</ri:email>
+        <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+        <ri:roles>openidm-admin,openidm-authorized</ri:roles>
+        <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+     </ri:__ACCOUNT__>
+
+
+    Note that the last entry in that file has the same email address (vader@forgerock.org) 
+    as an entry in the CSV. This will be used by correlation to find and update the record.
+
     2. Start OpenIDM with the configuration for sample 4.
 
     $ ./startup.sh -p samples/sample4
 
     3. Run reconciliation.
 
-    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrAccounts_managedUser"
+    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=csv_xmlfile"
     {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
 
-    4. See the users from the CSV file show up in the OpenIDM repository.
+    4. See the data updated in the XML file:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-    {
-        "query-time-ms": 0,
-        "result": [
-            {
-                "_id": "1f914f71-032e-48ad-a39c-dcd972deaae4",
-                "_rev": "0"
-            },
-            {
-                "_id": "67cb30a4-0ad7-48e4-95b1-39b351ee2353",
-                "_rev": "0"
-            }
-        ],
-        "conversion-time-ms": 0
-    }
+    $ cd /path/to/openidm
+    $ cat samples/sample4/data/xmlConnectorData.xml
 
-    In your terminal the response appears all on one line.
+    <?xml version="1.0" encoding="UTF-8"?>
+    <icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                          xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+       <ri:__ACCOUNT__>
+          <icf:__UID__>3</icf:__UID__>
+          <ri:mobileTelephoneNumber>N/A</ri:mobileTelephoneNumber>
+          <ri:firstname>Darth</ri:firstname>
+          <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+          <ri:roles>openidm-admin,openidm-authorized</ri:roles>
+          <icf:__NAME__>vader@forgerock.org</icf:__NAME__>
+          <ri:email>vader@forgerock.org</ri:email>
+          <ri:password>Z29vZA==</ri:password>
+          <ri:lastname>Vader</ri:lastname>
+       </ri:__ACCOUNT__>
+       <ri:__ACCOUNT__>
+          <ri:mobileTelephoneNumber>N/A</ri:mobileTelephoneNumber>
+          <ri:firstname>Darth</ri:firstname>
+          <icf:__DESCRIPTION__/>
+          <ri:roles>openidm-authorized</ri:roles>
+          <icf:__UID__>01e85792-0515-426e-b2d6-7e0c4b354265</icf:__UID__>
+          <icf:__NAME__>doe@forgerock.org</icf:__NAME__>
+          <ri:email>doe@forgerock.org</ri:email>
+          <ri:password>Z29vZA==</ri:password>
+          <ri:lastname>Doe</ri:lastname>
+       </ri:__ACCOUNT__>
+    </icf:OpenICFContainer>
 
-    5. Retrieve an individual user using the ID value from the response.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/67cb30a4-0ad7-48e4-95b1-39b351ee2353"
-    {
-        "userName": "Vader",
-        "givenName": "Darth",
-        "employeeNumber": "654321",
-        "_id": "67cb30a4-0ad7-48e4-95b1-39b351ee2353",
-        "_rev": "0",
-        "email": "vader@forgerock.org"
-    }
+
+    Note that Vader got updated, Doe got created, and Jensen got deleted. This 
+    is all based on the policies declared in sync.json.
+
+    You can also try changing data in either the CSV or the XML and running recon 
+    again. You should see the changes you make in the CSV used as authoritative,
+    overriding any changes you make in the XML and the two remaining in sync.
+
+    These users will not be visible from the OpenIDM UI, since they are mapped 
+    directly rather than via the internal OpenIDM repository.
+

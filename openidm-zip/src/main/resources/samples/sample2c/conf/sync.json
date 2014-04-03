@@ -19,11 +19,15 @@
                 },
                 {
                     "source" : "mail",
-                    "target" : "email"
+                    "target" : "mail"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "sn",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "uid",
@@ -84,7 +88,7 @@
                     "target" : "givenName"
                 },
                 {
-                    "source" : "familyName",
+                    "source" : "sn",
                     "target" : "sn"
                 },
                 {
@@ -100,8 +104,24 @@
                     "target" : "description"
                 },
                 {
-                    "source" : "email",
+                    "source" : "mail",
                     "target" : "mail"
+                },
+                {
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source)"
+                    },
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
+                    "target" : "password"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "ldapGroups",

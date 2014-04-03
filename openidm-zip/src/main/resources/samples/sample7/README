@@ -21,12 +21,12 @@ To try the sample, follow these steps.
     2. Run reconciliation to copy the user from the XML file under data/ to
        the OpenIDM internal repository.
 
-    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
 
     3. Retrieve the user from the repository. The scripts you copied transform
        the user data to fit the SCIM-like schema.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/DDOE1"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/DDOE1"
     {
         "schemas": "['urn:scim:schemas:core:1.0']",
         "ims": [

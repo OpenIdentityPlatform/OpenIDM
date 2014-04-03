@@ -8,13 +8,13 @@ DROP TABLE IF EXISTS Organizations;
 CREATE TABLE Users(
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	uid char(32) NOT NULL,
-	password char(32),
+	password char(128),
 	firstname varchar(32) NOT NULL default '',
 	lastname varchar(32) NOT NULL default '',
 	fullname varchar(32),
 	email varchar(32),
 	organization varchar(32),
-	timestamp TIMESTAMP
+	timestamp TIMESTAMP default now()
 );
 
 CREATE TABLE Groups(
@@ -22,20 +22,24 @@ CREATE TABLE Groups(
 	gid char(32) NOT NULL,
 	name varchar(32) NOT NULL default '',
 	description varchar(32),
-	timestamp TIMESTAMP
+	timestamp TIMESTAMP default now()
 );
 
 CREATE TABLE Organizations(
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	name varchar(32) NOT NULL default '',
 	description varchar(32),
-	timestamp TIMESTAMP
+	timestamp TIMESTAMP default now()
 );
-INSERT INTO Users VALUES ("0","bob","password","Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("0","rowley","password","Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("0","louis","password","Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("0","john","password","John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("0","jdoe","password","John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
+
+INSERT INTO Users 
+( uid, password, firstname, lastname, fullname, email, organization, timestamp )
+VALUES 
+("bob",sha2("password1", 512),"Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP),
+("rowley",sha2("password2", 512),"Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP),
+("louis",sha2("password3", 512),"Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP),
+("john",sha2("password4", 512),"John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP),
+("jdoe",sha2("password5", 512),"John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
 
 INSERT INTO Groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
 INSERT INTO Groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
@@ -45,4 +49,4 @@ INSERT INTO Organizations VALUES ("0","SALES","Sales organization",CURRENT_TIMES
 INSERT INTO Organizations VALUES ("0","SUPPORT","Support organization",CURRENT_TIMESTAMP);
 INSERT INTO Organizations VALUES ("0","ENG","Engineering organization",CURRENT_TIMESTAMP);
 
-grant all on *.* to root@'%' IDENTIFIED BY 'password';
+grant all on HRDB.* to root@'%' IDENTIFIED BY 'password';

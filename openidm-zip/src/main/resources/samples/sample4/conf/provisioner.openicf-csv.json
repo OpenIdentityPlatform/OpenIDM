@@ -1,5 +1,5 @@
 {
-    "name" : "HR",
+    "name" : "csv",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
         "bundleVersion" : "1.1.0.1",

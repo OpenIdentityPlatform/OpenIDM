@@ -20,14 +20,14 @@ To try the sample, follow these steps.
 
     2. Run reconciliation.
 
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+    $ curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
     4. The reconciliation starts an approval workflow for each ABSENT user.
        These workflows (managedUserApproval) wait for approval.
 
     5. Query the started workflow task instances.
 
-    $ curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
 
         sample response:
         {"result":[
@@ -41,22 +41,22 @@ To try the sample, follow these steps.
 
     6. Approve the request.
    
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}' -H "Content-Type: application/json"
+    $ curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}' -H "Content-Type: application/json"
 
     7. Query the managed users created by the asynchronous reconciliation after 
        the approval step.
 
-    $ curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
         
         sample response:
         {"result":[{"_id":"1","_rev":"0"}],"resultCount":1,"pagedResultsCookie":null,"remainingPagedResults":-1}
 
 To test the sample you might want to copy the following into an executable text file and run it:
 
-curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 sleep 3
 echo ""
-curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
 echo ""
 echo "now run the following after replacing XX with the taskinstanceNumber (the _id property) from above!"
-echo 'curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/XX?_action=complete" -H "Content-Type: application/json" --data '\''{"requestApproved": "true"}'\'
+echo 'curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/workflow/taskinstance/XX?_action=complete" -H "Content-Type: application/json" --data '\''{"requestApproved": "true"}'\'

@@ -1,5 +1,5 @@
 
-/*global security, properties */
+/*global security, properties, openidm */
 
 
 /**
@@ -37,44 +37,32 @@ var userDetail,
     role,
     resource = properties.passThroughAuth,
     propertyMapping = properties.propertyMapping,
-    userIdProperty = propertyMapping.userId,
+    userIdPropertyName = propertyMapping.authenticationId,
     groupMembershipProperty = propertyMapping.groupMembership,
     defaultUserRoles = properties.defaultUserRoles,
     groupRoleMapping = properties.groupRoleMapping,
     managedUserId,
     managedUser;
 
-function isMemberOfRoleGroups(groupsForRole, assignedGroups) {
-    var i,j;
-
-    for (i=0;i<groupsForRole.length;i++) {
-        for (j=0;j<assignedGroups.length;j++) {
-            // ldap is case (and to some degree whitespace) insensitive, so we have to be too:
-            if (assignedGroups[j].toLowerCase().replace(/\s*(^|$|,|=)\s*/g, "$1") === groupsForRole[i].toLowerCase().replace(/\s*(^|$|,|=)\s*/g, "$1")) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-userDetail = openidm.query(resource, { '_queryFilter' : userIdProperty + ' eq "' + security.authenticationId  + '"' });
-
-if (!userDetail.result || userDetail.result.length === 0) {
-    throw {
-        "code" : 401,
-        "message" : "Access denied, no user detail could be retrieved"
-    };
-}
-
-if (userDetail.result.length > 1) {
-    throw {
-        "code" : 401,
-        "message" : "Access denied, user detail retrieved ambiguous"
-    };
-}
-
+// This is needed to switch the context of a pass-through authenticated user from their original security context
+// to a context that is based on the related managed/user account. This is helpful for UI interaction.
 if (typeof properties.managedUserLink === "string" && properties.managedUserLink.length) {
+
+    userDetail = openidm.query(resource, { '_queryFilter' : userIdPropertyName + ' eq "' + security.authenticationId  + '"' });
+
+    if (!userDetail.result || userDetail.result.length === 0) {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, no user detail could be retrieved"
+        };
+    }
+
+    if (userDetail.result.length > 1) {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, user detail retrieved ambiguous"
+        };
+    }
 
     managedUserId = openidm.query("repo/link", {
         "_queryId": "links-for-firstId",
@@ -104,34 +92,4 @@ if (typeof properties.managedUserLink === "string" && properties.managedUserLink
         "roles": managedUser.roles ? managedUser.roles : defaultUserRoles
     };
 
-} else {
-
-    // Only augment authorizationId if missing
-    if (!security.authorizationId) {
-        security.authorizationId = {};
-    }
-
-    security.authorizationId.component = resource;
-    security.authorizationId.roles = [];
-    for (i = 0; i < defaultUserRoles.length; i++) {
-        security.authorizationId.roles[i] = defaultUserRoles[i];
-    }
-
-    if (!security.authorizationId.id) {
-        security.authorizationId.id = userDetail.result[0]._id;
-    }
-
-    if (typeof userDetail.result[0][groupMembershipProperty] !== "undefined") {
-        for (role in groupRoleMapping) {
-            if (isMemberOfRoleGroups(groupRoleMapping[role], userDetail.result[0][groupMembershipProperty])) {
-                // push the current role onto roles array
-                security.authorizationId.roles.push(role);
-            }
-        }
-    }
-
-    logger.debug("Augmented context for {} with userid : {}, roles : {}", security.authenticationId, security.authorizationId.id, security.authorizationId.roles);
-
 }
-
-

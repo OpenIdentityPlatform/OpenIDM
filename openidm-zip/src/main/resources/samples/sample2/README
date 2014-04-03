@@ -1,6 +1,6 @@
 Sample 2 - One-way LDAP -> Internal Repository
 ----------------------------------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -25,11 +25,14 @@ The sample includes these configuration files.
     "principal" : "cn=Directory Manager",
     "credentials" : "password",
     "baseContextsToSynchronize" : [ "ou=People,dc=example,dc=com" ],
-    "attributesToSynchronize" : [ "uid", "sn", "cn", "givenName", "mail", "description" ],
+    "attributesToSynchronize" : [ "uid", "sn", "cn", "givenName", "mail", "description", "telephoneNumber" ],
 *   conf/scheduler-recon.json configures a scheduler you can use to run
     reconciliation periodically.
 *   conf/sync.json describes how identities in the directory server map to
     identities in the internal repository target.
+*   conf/authentication.json specifies an additional "authModule" entry for "PASSTHROUGH"
+    authentication. This is used to allow the managed/user entries created from LDAP to
+    login with the credentials which remain in LDAP.
 
 Data for this sample is stored in data/Example.ldif. After you import
 the data, ou=People,dc=example,dc=com contains a single user entry for
@@ -41,7 +44,7 @@ first sample.
 The following curl command runs reconciliation once, creating users defined
 in OpenDJ in OpenIDM's internal repository:
 
-$ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
+$ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
 
 Alternatively, edit conf/scheduler-recon.json to enable scheduled
 reconciliation:
@@ -51,4 +54,18 @@ reconciliation:
 The following curl command requests all identifiers in OpenIDM's internal
 repository. Use it to see the results after reconciliation for example.
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+$ curl -k -u "openidm-admin:openidm-admin" "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&_prettyPrint=true"
+{
+  "result" : [ {
+    "_id" : "678eb8f7-5e3f-4bef-b001-bc0f01353dae",
+    "_rev" : "0"
+  }, {
+    "_id" : "5e9534cb-c37e-48c0-9c1f-0782a7e2a9c0",
+    "_rev" : "0"
+  } ],
+  "resultCount" : 2,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+
+After you have created the managed/user entries you can use them to login to the UI at https://localhost:8443/openidmui/

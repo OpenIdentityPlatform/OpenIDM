@@ -1,6 +1,6 @@
 Sample 1 - One-Way XML -> Internal Repository
 ---------------------------------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -30,7 +30,7 @@ $ ./startup.sh -p samples/sample1
 
 Initiate a reconciliation operation over the REST interface, as follows:
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "Content-type: application/json" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+$ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
 Alternatively, edit samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json
 to enable scheduled reconciliation:
@@ -40,4 +40,55 @@ to enable scheduled reconciliation:
 The following curl command requests all identifiers in OpenIDM's internal
 repository. Use it to see the results after reconciliation for example.
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+$ curl -k -u "openidm-admin:openidm-admin" "https://localhost:8443/openidm/managed/user?_queryId=query-all&fields=*&_prettyPrint=true"
+{
+  "result" : [ {
+    "mail" : "bjensen@example.com",
+    "sn" : "Jensen",
+    "passwordAttempts" : "0",
+    "lastPasswordAttempt" : "Sun Mar 16 2014 20:54:53 GMT-0700 (PDT)",
+    "address2" : "",
+    "givenName" : "Barbara",
+    "securityQuestion" : "1",
+    "country" : "",
+    "city" : "",
+    "lastPasswordSet" : "",
+    "postalCode" : "",
+    "_id" : "bjensen",
+    "_rev" : "1",
+    "description" : "Created By XML1",
+    "accountStatus" : "active",
+    "telephoneNumber" : "1234567",
+    "roles" : "openidm-authorized",
+    "postalAddress" : "",
+    "stateProvince" : "",
+    "userName" : "bjensen@example.com"
+  }, {
+    "mail" : "scarter@example.com",
+    "sn" : "Carter",
+    "passwordAttempts" : "0",
+    "lastPasswordAttempt" : "Sun Mar 16 2014 20:54:53 GMT-0700 (PDT)",
+    "address2" : "",
+    "givenName" : "Steven",
+    "securityQuestion" : "1",
+    "country" : "",
+    "city" : "",
+    "lastPasswordSet" : "",
+    "postalCode" : "",
+    "_id" : "scarter",
+    "_rev" : "1",
+    "description" : "Created By XML1",
+    "accountStatus" : "active",
+    "telephoneNumber" : "1234567",
+    "roles" : "admin",
+    "postalAddress" : "",
+    "stateProvince" : "",
+    "userName" : "scarter@example.com"
+  } ],
+  "resultCount" : 2,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+
+
+

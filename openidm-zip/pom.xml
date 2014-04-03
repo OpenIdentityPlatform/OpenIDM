@@ -416,7 +416,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>ldap-connector</artifactId>
-            <version>1.1.1.2</version>
+            <version>1.1.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
@@ -428,7 +428,7 @@
             <artifactId>databasetable-connector</artifactId>
             <version>1.1.0.0</version>
         </dependency>
-        
+
         <!-- Restlet -->
         <dependency>
             <groupId>org.restlet.osgi</groupId>
@@ -442,6 +442,22 @@
             <artifactId>postgresql-fr-osgi</artifactId>
             <version>9.3-1101-jdbc41</version>
         </dependency>
+
+        <!-- Javascript libraries -->
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>lodash</artifactId>
+            <version>2.4.1</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>1.3.0</version>
+            <type>js</type>
+        </dependency>
+
 
     </dependencies>
     <build>
@@ -472,23 +488,6 @@
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-connectors</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors</groupId>
-                                    <artifactId>ldap-connector</artifactId>
-                                    <version>1.1.0.1</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/connectors</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

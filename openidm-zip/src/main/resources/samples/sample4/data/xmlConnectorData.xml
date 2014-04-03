@@ -4,7 +4,7 @@
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
    <ri:__ACCOUNT__>
-      <icf:__UID__>bjensen</icf:__UID__>
+      <icf:__UID__>1</icf:__UID__>
       <icf:__NAME__>bjensen@example.com</icf:__NAME__>
       <ri:password>TestPassw0rd#</ri:password>
       <ri:firstname>Barbara</ri:firstname>
@@ -15,12 +15,12 @@
       <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
    </ri:__ACCOUNT__>
    <ri:__ACCOUNT__>
-      <icf:__UID__>scarter</icf:__UID__>
-      <icf:__NAME__>scarter@example.com</icf:__NAME__>
+      <icf:__UID__>3</icf:__UID__>
+      <icf:__NAME__>vader@forgerock.org</icf:__NAME__>
       <ri:password>TestPassw0rd#</ri:password>
-      <ri:firstname>Steven</ri:firstname>
-      <ri:lastname>Carter</ri:lastname>
-      <ri:email>scarter@example.com</ri:email>
+      <ri:firstname>Anakin</ri:firstname>
+      <ri:lastname>Skywalker</ri:lastname>
+      <ri:email>vader@forgerock.org</ri:email>
       <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
       <ri:roles>openidm-admin,openidm-authorized</ri:roles>
       <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
