@@ -213,14 +213,13 @@
        example, groups or roles.</para>
        <para>You can access managed objects over the REST interface with a query 
        similar to the following:</para>
-       <screen>
-       $ curl
-         --header "X-OpenIDM-Username: openidm-admin"
-         --header "X-OpenIDM-Password: openidm-admin"
-         --header "Content-Type: application/json"
-         --request GET
-         "http://localhost:8080/openidm/managed/..."
-       </screen>
+       <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/..."</screen>
       </listitem>
      </varlistentry>
      
@@ -239,14 +238,13 @@
        <para>System objects follow the same RESTful resource-based design 
        principles as managed objects. They can be accessed over the REST 
        interface with a query similar to the following:</para>
-       <screen>
-       $ curl
-         --cacert self-signed.crt
-         --header "X-OpenIDM-Username: openidm-admin"
-         --header "X-OpenIDM-Password: openidm-admin"
-         --header "Content-Type: application/json"
-         --request GET
-         "https://localhost:8443/openidm/system/..."
+       <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request GET \
+ "https://localhost:8443/openidm/system/..."
        </screen>
        <para>There is a default implementation for the OpenICF framework, that 
        allows any connector object to be represented as a system object.</para>
@@ -280,14 +278,17 @@
         <primary>Reconciliation</primary>
        </indexterm>
 
-       <para><firstterm>Reconciliation</firstterm> provides for on-demand and
-       scheduled resource comparisons between the OpenIDM managed object
-       repository and source or target systems. Comparisons can result in
-       different actions depending on the mappings defined between the
-       systems.</para>
-       <para>Synchronization provides for creating, updating, and deleting
-       resources from a source to a target system either on demand or according
-       to a schedule.</para>
+       <para>
+        <firstterm>Reconciliation</firstterm> enables on-demand and scheduled
+        resource comparisons between the OpenIDM managed object repository and
+        source or target systems. Comparisons can result in different actions,
+        depending on the mappings defined between the systems.
+       </para>
+       <para>
+        <firstterm>Synchronization</firstterm> enables creating, updating, and
+        deleting resources from a source to a target system, either on demand or
+        according to a schedule.
+       </para>
        <para>See the <link xlink:href="integrators-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Configuring Synchronization</citetitle></link> chapter for
@@ -316,20 +317,19 @@
    </para>
 
    <para>
-     If you want to run <command>curl</command>
-     over the secure port, 8443, you would include either the
-     <command>--insecure</command> option, or follow the instructions shown
-     in <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
-              xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
-     REST Access to the HTTPS Port</citetitle></link>. You can use those
-     instructions with the self-signed certificate generated when OpenIDM
-     starts, or with a <filename>*.crt</filename> file provided by a
-     certificate authority.
-    </para>
+    To run <command>curl</command> over the secure port, 8443, you must include
+    either the <command>--insecure</command> option, or follow the instructions
+    shown in <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict
+    REST Access to the HTTPS Port</citetitle></link>. You can use those
+    instructions with the self-signed certificate generated when OpenIDM
+    starts, or with a <filename>*.crt</filename> file provided by a
+    certificate authority.
+   </para>
 
     <para>
-     In numerous cases, <command>curl</command> commands to the secure port
-     are depicted with a <literal>--cacert self-signed.crt</literal> option.
+     In many cases in this guide, <command>curl</command> commands to the secure
+     port are depicted with a <literal>--cacert self-signed.crt</literal> option.
      Instructions for creating that <filename>self-signed.crt</filename> file
      are shown in the aforementioned section on <link xlink:show="new"
      xlink:href="integrators-guide#rest-over-https"
