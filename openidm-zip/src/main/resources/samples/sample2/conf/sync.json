@@ -5,22 +5,72 @@
             "source" : "system/ldap/account",
             "target" : "managed/user",
             "properties" : [
-                { "source" : "cn", "target" : "displayName" },
-                { "source" : "description", "target" : "description" },
-                { "source" : "givenName", "target" : "givenName" },
-                { "source" : "mail", "target" : "email" },
-                { "source" : "sn", "target" : "familyName" },
-                { "source" : "uid", "target" : "userName" }
+                {
+                    "source" : "cn",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "target" : "accountStatus",
+                    "default" : "active"
+                }
             ],
             "policies" : [
-                { "situation" : "CONFIRMED", "action" : "UPDATE" },
-                { "situation" : "FOUND", "action" : "UPDATE" },
-                { "situation" : "ABSENT", "action" : "CREATE" },
-                { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
-                { "situation" : "MISSING", "action" : "UNLINK" },
-                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
-                { "situation" : "UNQUALIFIED", "action" : "DELETE" },
-                { "situation" : "UNASSIGNED", "action" : "DELETE" }
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "DELETE"
+                }
             ]
         }
     ]

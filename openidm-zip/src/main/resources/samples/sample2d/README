@@ -1,6 +1,6 @@
 Sample 2d - Synchronizing LDAP Groups
 -------------------------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -22,7 +22,7 @@ parameters:
 "principal" : "cn=Directory Manager",
 "credentials" : "password",
 
-Unlike sample2, this sample sync.json configuration contains three mappings - 
+Unlike sample2c, this sample sync.json configuration contains three mappings - 
 two for user objects and one for group objects. The number of attributes mapped 
 is limited.
 

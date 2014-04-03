@@ -42,15 +42,11 @@
                     "target" : "telephoneNumber"
                 },
                 {
-                    "source" : "securityQuestion",
-                    "target" : "securityQuestion"
-                },
-                {
-                    "source" : "securityAnswer",
-                    "target" : "securityAnswer"
-                },
-                {
                     "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
                     "target" : "roles"
                 }
             ],

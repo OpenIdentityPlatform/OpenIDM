@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2010-2014 ForgeRock Inc. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -45,16 +45,16 @@ def sql = new Sql(connection);
 
 switch ( objectClass ) {
     case "__ACCOUNT__":
-    sql.execute("INSERT INTO Users (uid, firstname,lastname,fullname,email,organization) values (?,?,?,?,?,?)",
+    sql.execute("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha2(?, 512),?,?,?,?,?)",
         [
             id,
+            attributes.get("password") != null ? attributes.get("password").get(0) : null,
             attributes.get("firstname").get(0),
             attributes.get("lastname").get(0),
             attributes.get("fullname").get(0),
             attributes.get("email").get(0),
             attributes.get("organization").get(0)
         ]);
-    sql.commit();
     break
 
     case "__GROUP__":
@@ -64,7 +64,6 @@ switch ( objectClass ) {
             id,
             attributes.get("description").get(0)
         ]);
-    sql.commit();
     break
 
     case "organization":
@@ -73,7 +72,6 @@ switch ( objectClass ) {
             id,
             attributes.get("description").get(0)
         ]);
-    sql.commit();
     break
 
     default:

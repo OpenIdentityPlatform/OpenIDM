@@ -1,6 +1,6 @@
 Sample 3 - Scripted SQL
 -----------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -28,15 +28,15 @@ To try the example, follow these steps.
     Enter password:
     mysql> use HRDB;
     mysql> select * from Users;
-    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-    | id | uid    | password | firstname | lastname | fullname      | email                     | organization | timestamp           |
-    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-    |  1 | bob    | password | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2012-02-20 12:16:44 |
-    |  2 | rowley | password | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2012-02-20 12:16:44 |
-    |  3 | louis  | password | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2012-02-20 12:16:44 |
-    |  4 | john   | password | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2012-02-20 12:16:44 |
-    |  5 | jdoe   | password | John      | Doe      | John Doe      | John.Does@example.com     | ENG          | 2012-02-20 12:16:44 |
-    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    | id | uid    | password                                                                                                                         | firstname | lastname | fullname      | email                     | organization | timestamp           |
+    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    |  1 | bob    | bc547750b92797f955b36112cc9bdd5cddf7d0862151d03a167ada8995aa24a9ad24610b36a68bc02da24141ee51670aea13ed6469099a4453f335cb239db5da | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-03-15 22:15:18 |
+    |  2 | rowley | 92a891f888e79d1c2e8b82663c0f37cc6d61466c508ec62b8132588afe354712b20bb75429aa20aa3ab7cfcc58836c734306b43efd368080a2250831bf7f363f | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-03-15 22:15:18 |
+    |  3 | louis  | 2a64d6563d9729493f91bf5b143365c0a7bec4025e1fb0ae67e307a0c3bed1c28cfb259fc6be768ab0a962b1e2c9527c5f21a1090a9b9b2d956487eb97ad4209 | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2014-03-15 22:15:18 |
+    |  4 | john   | 11961811bd4e11f23648afbd2d5c251d2784827147f1731be010adaf0ab38ae18e5567c6fd1bee50a4cd35fb544b3c594e7d677efa7ca01c2a2cb47f8fb12b17 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-03-15 22:15:18 |
+    |  5 | jdoe   | 39c6f5329e959b2af0deb0f8dacbcdf5418204f46baed50388f62b047c9223c66ff470031ecd653a49f6eff6fa876811e46f0c269390a8bf61f4f983729e1083 | John      | Doe      | John Doe      | John.Does@example.com     | ENG          | 2014-03-15 22:15:18 |
+    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
     5 rows in set (0.01 sec)
     
     mysql> quit
@@ -45,61 +45,63 @@ To try the example, follow these steps.
     5. Start OpenIDM with the configuration for sample 3.
 
     $ /path/to/openidm/startup.sh -p samples/sample3
-    ...
-    -> bob
-    rowley
-    louis
-    john
-    jdoe
 
     6. Run reconciliation:
 
-    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
+    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&_prettyPrint=true"
     {
-        "query-time-ms": 0,
-        "result": [
-            {
-                "_id": "9d1a92bf-aa88-4b48-b607-ec6d95e7b178",
-                "_rev": "0"
-            },
-            {
-                "_id": "d781ba76-33ba-4581-8cda-8ed9c6d4903d",
-                "_rev": "0"
-            },
-            {
-                "_id": "40b7ca4f-f112-4878-ae6b-6aa97503fac6",
-                "_rev": "0"
-            },
-            {
-                "_id": "3afb15e5-8713-4ba4-a464-fa9c5f952bff",
-                "_rev": "0"
-            },
-            {
-                "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
-                "_rev": "0"
-            }
-        ],
-        "conversion-time-ms": 0
+      "result" : [ {
+        "_id" : "1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d",
+        "_rev" : "0"
+      }, {
+        "_id" : "3afdc6a9-c296-44db-864c-32d3a5bdd713",
+        "_rev" : "0"
+      }, {
+        "_id" : "6e435110-3d08-48f2-b955-15308310ec32",
+        "_rev" : "0"
+      }, {
+        "_id" : "a114aa7d-6edf-4394-8ebb-197eaeb57598",
+        "_rev" : "0"
+      }, {
+        "_id" : "d32b9667-9ee4-41cc-9374-ac70e5554aeb",
+        "_rev" : "0"
+      } ],
+      "resultCount" : 5,
+      "pagedResultsCookie" : null,
+      "remainingPagedResults" : -1
     }
-
-    In your terminal the response appears all on one line.
 
     8. Retrieve an individual user, using an ID value from the previous GET:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/5474ff66-31af-4097-b1fb-a394f9a60d95"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d?_prettyPrint=true"
     {
-        "familyName": "Doe",
-        "userName": "jdoe",
-        "givenName": "John",
-        "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
-        "_rev": "0",
-        "email": [
-            "John.Does@example.com"
-        ]
+      "_id" : "1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d",
+      "_rev" : "1",
+      "mail" : "Rowley.Birkin@example.com",
+      "sn" : "Birkin",
+      "passwordAttempts" : "0",
+      "address2" : "",
+      "lastPasswordAttempt" : "Sun Mar 16 2014 12:15:59 GMT-0700 (PDT)",
+      "givenName" : "Rowley",
+      "city" : "",
+      "country" : "",
+      "lastPasswordSet" : "",
+      "postalCode" : "",
+      "accountStatus" : "active",
+      "telephoneNumber" : "",
+      "roles" : [ "openidm-authorized" ],
+      "userName" : "rowley",
+      "stateProvince" : "",
+      "postalAddress" : "",
+      "effectiveRoles" : [ "openidm-authorized" ],
+      "effectiveAssignments" : { }
     }
 
-    Again, in your terminal the response appears all on one line.
+You can login to the OpenIDM UI (https://localhost:8443/openidmui) with any of
+the users that were created. Consult the values from "sample_HR_DB.mysql" to 
+retrieve their cleartext passwords. Users can update their profile or their password;
+the changes will be synced back to LDAP.

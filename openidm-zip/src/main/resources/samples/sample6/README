@@ -42,7 +42,7 @@ To run the sample in OpenIDM, follow these steps.
 
     3. Run reconciliation.
 
-    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
+    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
     {"reconId":"d88ca423-d5f2-4eb5-a451-a229399f92af"}
 
     4. Check that the user was added under ou=people,o=ad.

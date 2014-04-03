@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock Inc. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,20 +24,29 @@
  * $Id$
  */
 import groovy.sql.Sql;
-import groovy.sql.DataSet;
+import org.identityconnectors.framework.common.exceptions.InvalidPasswordException;
 
 // Parameters:
 // The connector sends the following:
-// connection: handler to the SQL connection
-// action: a string describing the action ("TEST" here)
-// log: a handler to the Log facility
+// connection
+// configuration
+// action ("AUTHENTICATE")
+// log
+// objectClass
+// options
+// username
+// password
+
+// It is expected that an authentication failure will throw an error from the package org.identityconnectors.framework.common.exceptions
 
 log.info("Entering "+action+" Script");
 def sql = new Sql(connection);
+def authId = null;
 
-// if the database connection isn't properly established, or if the 
-// schema hasn't been populated, this query will result in an error.
-// Errors thrown here will prevent the connector from being enabled.
-sql.execute("DESC Users");
+sql.eachRow("SELECT uid FROM Users WHERE uid = ? AND password = sha2(?, 512)", [username, password]) { authId = it.uid }
 
+if (authId == null) {
+    throw new InvalidPasswordException("Authentication Failed")
+}
 
+return authId

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2010-2014 ForgeRock Inc. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -59,23 +59,63 @@ switch ( action ) {
     case "UPDATE":
     switch ( objectClass ) {
         case "__ACCOUNT__":
-        sql.executeUpdate("UPDATE Users set fullname = ? where uid = ?", [attributes.get("fullname").get(0), uid]);
-        sql.executeUpdate("UPDATE Users set firstname = ? where uid = ?", [attributes.get("firstname").get(0), uid]);
-        sql.executeUpdate("UPDATE Users set lastname = ? where uid = ?", [attributes.get("lastname").get(0), uid]);
-        sql.executeUpdate("UPDATE Users set email = ? where uid = ?", [attributes.get("email").get(0), uid]);
-        sql.executeUpdate("UPDATE Users set organization = ? where uid = ?", [attributes.get("organization").get(0), uid]);
-        sql.commit();
+        sql.executeUpdate("""
+            UPDATE 
+                Users 
+            SET 
+                fullname = ?,
+                firstname = ?,
+                lastname = ?,
+                email = ?,
+                organization = ?,
+                password = coalesce(sha2(?, 512), password)
+            WHERE 
+                uid = ?
+            """, 
+            [
+                attributes.get("fullname").get(0),
+                attributes.get("firstname").get(0),
+                attributes.get("lastname").get(0),
+                attributes.get("email").get(0),
+                attributes.get("organization").get(0),
+                attributes.get("password") != null ? attributes.get("password").get(0) : null,
+                uid
+            ]
+        );
         break
 
         case "__GROUP__":
-        sql.executeUpdate("UPDATE Groups set description = ? where name = ?", [attributes.get("description").get(0), uid]);
-        sql.executeUpdate("UPDATE Groups set gid = ? where name = ?", [attributes.get("gid").get(0), uid]);
-        sql.commit();
+        sql.executeUpdate("""
+            UPDATE 
+                Groups 
+            SET
+                description = ?,
+                gid = ?
+            WHERE 
+                name = ?
+            """, 
+            [
+                attributes.get("description").get(0), 
+                attributes.get("gid").get(0),
+                uid
+            ]
+        );
         break
 
         case "organization":
-        sql.executeUpdate("UPDATE Organizations set description = ? where name = ?", [attributes.get("description").get(0), uid]);
-        sql.commit();
+        sql.executeUpdate("""
+            UPDATE 
+                Organizations
+            SET 
+                description = ?
+            WHERE 
+                name = ?
+            """, 
+            [
+                attributes.get("description").get(0), 
+                uid
+            ]
+        );
         break
 
         default:

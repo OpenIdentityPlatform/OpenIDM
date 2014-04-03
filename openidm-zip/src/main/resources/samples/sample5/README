@@ -21,7 +21,7 @@ To try the sample, follow these steps.
     The new file is empty until you run reconciliation.
 
     2. Run reconciliation.
-    $ curl --header "Content-type: application/json" --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
+    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
     {"reconId":"b149f0e3-4bb9-4790-9266-fab2e5c80ec6"}
     
     3. Check 

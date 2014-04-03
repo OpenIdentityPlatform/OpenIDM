@@ -20,7 +20,7 @@ To try the sample, follow these steps.
 
     2. Run reconciliation.
 
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+    $ curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
     3. Observe messages from your scripts that are logged to the OpenIDM
        (Felix) console:

@@ -46,9 +46,6 @@
             ]
         },
         {
-            "name" : "group"
-        },
-        {
             "name" : "role",
             "postCreate" : {
                 "type" : "text/javascript",

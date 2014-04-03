@@ -3,7 +3,7 @@
    "connectorRef" :
       {
           "bundleName"    : "org.forgerock.openicf.connectors.ldap-connector",
-          "bundleVersion" : "1.1.1.2",
+          "bundleVersion" : "[1.1.0.1,1.1.2.0)",
           "connectorName" : "org.identityconnectors.ldap.LdapConnector"
       },
    "poolConfigOption" :
@@ -78,8 +78,7 @@
             ],
          "accountUserNameAttributes" :
             [
-               "uid",
-               "cn"
+               "uid"
             ],
          "host" : "localhost",
          "groupMemberAttribute" : "uniqueMember",

@@ -2,7 +2,7 @@
     "name" : "hrdb",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.scriptedsql-connector",
-        "bundleVersion" : "1.1.0.1",
+        "bundleVersion" : "1.1.2.0-SNAPSHOT",
         "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,
@@ -39,6 +39,7 @@
         "jdbcDriver" : "com.mysql.jdbc.Driver",
         "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/HRDB",
         "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
+        "authenticateScriptFileName" : "&{launcher.project.location}/tools/AuthenticateScript.groovy",
         "createScriptFileName" : "&{launcher.project.location}/tools/CreateScript.groovy",
         "testScriptFileName" : "&{launcher.project.location}/tools/TestScript.groovy",
         "searchScriptFileName" : "&{launcher.project.location}/tools/SearchScript.groovy",
@@ -110,18 +111,14 @@
                     "required" : true
                 },
                 "email" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string",
-                        "nativeType" : "string"
-                    },
+                    "type" : "string",
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
                 "password" : {
                     "type" : "string",
-                    "nativeName" : "__PASSWORD__",
-                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "nativeName" : "password",
+                    "nativeType" : "string",
                     "flags" : [ "NOT_READABLE", "NOT_RETURNED_BY_DEFAULT" ]
                 },
                 "uid" : {

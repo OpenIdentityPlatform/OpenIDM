@@ -2,7 +2,7 @@
     "name" : "HR",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion" : "1.1.1.2",
+        "bundleVersion" : "1.1.1.3",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
     "poolConfigOption" : {
@@ -71,8 +71,7 @@
             "inetOrgPerson"
         ],
         "accountUserNameAttributes" : [
-            "uid",
-            "cn"
+            "uid"
         ],
         "host" : "localhost",
         "groupMemberAttribute" : "uniqueMember",

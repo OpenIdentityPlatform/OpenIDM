@@ -41,11 +41,11 @@ Usecase1 - Initial reconciliation
 
     2. Run reconciliation.
 
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+    $ curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
 
     3. Query the managed users created by reconciliation
 
-    $ curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
     
     There should be 23 users created.
 
