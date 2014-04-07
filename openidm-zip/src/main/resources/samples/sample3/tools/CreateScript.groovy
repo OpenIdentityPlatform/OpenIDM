@@ -45,7 +45,7 @@ def sql = new Sql(connection);
 
 switch ( objectClass ) {
     case "__ACCOUNT__":
-    sql.execute("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha2(?, 512),?,?,?,?,?)",
+    sql.execute("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha1(?),?,?,?,?,?)",
         [
             id,
             attributes.get("password") != null ? attributes.get("password").get(0) : null,

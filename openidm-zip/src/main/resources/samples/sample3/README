@@ -28,19 +28,22 @@ To try the example, follow these steps.
     Enter password:
     mysql> use HRDB;
     mysql> select * from Users;
-    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-    | id | uid    | password                                                                                                                         | firstname | lastname | fullname      | email                     | organization | timestamp           |
-    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-    |  1 | bob    | bc547750b92797f955b36112cc9bdd5cddf7d0862151d03a167ada8995aa24a9ad24610b36a68bc02da24141ee51670aea13ed6469099a4453f335cb239db5da | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-03-15 22:15:18 |
-    |  2 | rowley | 92a891f888e79d1c2e8b82663c0f37cc6d61466c508ec62b8132588afe354712b20bb75429aa20aa3ab7cfcc58836c734306b43efd368080a2250831bf7f363f | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-03-15 22:15:18 |
-    |  3 | louis  | 2a64d6563d9729493f91bf5b143365c0a7bec4025e1fb0ae67e307a0c3bed1c28cfb259fc6be768ab0a962b1e2c9527c5f21a1090a9b9b2d956487eb97ad4209 | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2014-03-15 22:15:18 |
-    |  4 | john   | 11961811bd4e11f23648afbd2d5c251d2784827147f1731be010adaf0ab38ae18e5567c6fd1bee50a4cd35fb544b3c594e7d677efa7ca01c2a2cb47f8fb12b17 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-03-15 22:15:18 |
-    |  5 | jdoe   | 39c6f5329e959b2af0deb0f8dacbcdf5418204f46baed50388f62b047c9223c66ff470031ecd653a49f6eff6fa876811e46f0c269390a8bf61f4f983729e1083 | John      | Doe      | John Doe      | John.Does@example.com     | ENG          | 2014-03-15 22:15:18 |
-    +----+--------+----------------------------------------------------------------------------------------------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    | id | uid    | password                                 | firstname | lastname | fullname      | email                     | organization | timestamp           |
+    +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    |  1 | bob    | e38ad214943daad1d64c102faec29de4afe9da3d | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-04-04 07:03:12 |
+    |  2 | rowley | 2aa60a8ff7fcd473d321e0146afd9e26df395147 | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-04-04 07:03:12 |
+    |  3 | louis  | 1119cfd37ee247357e034a08d844eea25f6fd20f | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2014-04-04 07:03:12 |
+    |  4 | john   | a1d7584daaca4738d499ad7082886b01117275d8 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-04-04 07:03:12 |
+    |  5 | jdoe   | edba955d0ea15fdef4f61726ef97e5af507430c0 | John      | Doe      | John Doe      | John.Does@example.com     | ENG          | 2014-04-04 07:03:12 |
+    +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
     5 rows in set (0.01 sec)
     
     mysql> quit
     Bye
+
+    * Note that these passwords are hashed, and not available to be read into OpenIDM as cleartext. 
+    * sha1 is used to hash these passwords for compatiblity reasons; in production uses, more secure algorithms should be used.
 
     5. Start OpenIDM with the configuration for sample 3.
 
@@ -48,7 +51,7 @@ To try the example, follow these steps.
 
     6. Run reconciliation:
 
-    $ curl -k --header "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
+    $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 

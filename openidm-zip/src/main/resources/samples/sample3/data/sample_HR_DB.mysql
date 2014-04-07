@@ -35,11 +35,11 @@ CREATE TABLE Organizations(
 INSERT INTO Users 
 ( uid, password, firstname, lastname, fullname, email, organization, timestamp )
 VALUES 
-("bob",sha2("password1", 512),"Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP),
-("rowley",sha2("password2", 512),"Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP),
-("louis",sha2("password3", 512),"Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP),
-("john",sha2("password4", 512),"John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP),
-("jdoe",sha2("password5", 512),"John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
+("bob",sha1("password1"),"Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP),
+("rowley",sha1("password2"),"Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP),
+("louis",sha1("password3"),"Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP),
+("john",sha1("password4"),"John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP),
+("jdoe",sha1("password5"),"John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
 
 INSERT INTO Groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
 INSERT INTO Groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
