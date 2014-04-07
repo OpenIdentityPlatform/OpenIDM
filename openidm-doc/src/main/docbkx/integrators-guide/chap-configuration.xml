@@ -27,7 +27,8 @@
  xmlns="http://docbook.org/ns/docbook"
  version="5.0" xml:lang="en"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xsi:schemaLocation="http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink">
  <title>Configuring OpenIDM</title>
 
@@ -73,8 +74,16 @@
     REST access.</para>
    </listitem>
    <listitem>
+    <para>The <literal>cluster</literal> configuration defines how one
+    OpenIDM instance can be configured in a cluster.</para>
+   </listitem>
+   <listitem>
     <para>The <literal>endpoint</literal> configuration controls any custom
     REST endpoints.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>info</literal> configuration points to script files for
+    the customizable information service.</para>
    </listitem>
    <listitem>
       <para>The <literal>managed</literal> configuration defines managed
@@ -96,6 +105,10 @@
    <listitem>
     <para>The <literal>router</literal> configuration specifies filters to
     apply for specific operations.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>script</literal> configuration defines default
+    and custom configuration directories.</para>
    </listitem>
    <listitem>
     <para>The <literal>sync</literal> configuration defines the mappings that
@@ -128,6 +141,11 @@
    <listitem>
     <para>Multiple <literal>provisioner.openicf</literal> configurations
     correspond to the resources connected to OpenIDM.</para>
+   </listitem>
+   <listitem>
+    <para>Multiple <literal>servletfilter</literal> configurations can
+    be used for different servlet filters such as the Cross Origin and GZip
+    filters.</para>
    </listitem>
   </itemizedlist>
  </section>
@@ -302,16 +320,16 @@
   <secondary>Listing configuration objects</secondary>
   </indexterm>
   <para>You can list the configuration on the local host by performing a GET
-  <literal>http://localhost:8080/openidm/config</literal>. The following
-  example shows the default configuration for an OpenIDM instance started
-  with Sample 1.</para>
-  <screen>$ curl --request GET 
+  <literal>https://localhost:8443/openidm/config</literal>. The following
+  example shows excerpts of the default configuration for an OpenIDM instance
+  started with Sample 1.</para>
+  <screen>
+ $ <userinput>curl --request GET
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --cacert self-signed.crt
- https://localhost:8443/openidm/config
-
+ https://localhost:8443/openidm/config  </userinput>
+   <computeroutput>
 {
    "configurations": [
       {
@@ -324,116 +342,9 @@
          "pid": "router",
          "_id": "router"
       },
-      {
-         "factoryPid": "servletfilter",
-         "pid": "servletfilter.1a827eb5-ef74-4976-9b4a-fc9a0cbefb78",
-         "_id": "servletfilter/cors"
-      },
-      {
-         "factoryPid": "endpoint",
-         "pid": "endpoint.a0ec1db7-a675-48d4-8e37-2dd414874c82",
-         "_id": "endpoint/siteIdentification"
-      },
-      {
-         "factoryPid": "ui",
-         "pid": "ui.85a6c7da-a94a-41f6-8498-6efff87daa5d",
-         "_id": "ui/configuration"
-      },
-      {
-         "factoryPid": "org.apache.felix.fileinstall",
-         "pid": "org.apache.felix.fileinstall.efbc7bb0-d31f-411d-8bc0-34908618d2f9",
-         "_id": "org.apache.felix.fileinstall/activiti"
-      },
-      {
-         "factoryPid": null,
-         "pid": "authentication",
-         "_id": "authentication"
-      },
-      {
-         "factoryPid": "endpoint",
-         "pid": "endpoint.11f44de1-e2c2-48f8-8bd3-fc1d15736c03",
-         "_id": "endpoint/getavailableuserstoassign"
-      },
-      {
-         "factoryPid": "ui",
-         "pid": "ui.2b8a70f0-8f86-47cd-9a90-d69e1702b9fa",
-         "_id": "ui/themeconfig"
-      },
-      {
-         "factoryPid": null,
-         "pid": "policy",
-         "_id": "policy"
-      },
-      {
-         "factoryPid": "ui",
-         "pid": "ui.85e78d26-2909-4bb0-aade-46e2b2aa83d3",
-         "_id": "ui/secquestions"
-      },
-      {
-         "factoryPid": null,
-         "pid": "script",
-         "_id": "script"
-      },
-      {
-         "factoryPid": null,
-         "pid": "managed",
-         "_id": "managed"
-      },
-      {
-         "factoryPid": "org.apache.felix.fileinstall",
-         "pid": "org.apache.felix.fileinstall.8681aa56-2d59-4f0d-a82b-8c12eeecf023",
-         "_id": "org.apache.felix.fileinstall/ui"
-      },
-      {
-         "factoryPid": null,
-         "pid": "audit",
-         "_id": "audit"
-      },
-      {
-         "factoryPid": null,
-         "pid": "repo.orientdb",
-         "_id": "repo.orientdb"
-      },
-      {
-         "factoryPid": null,
-         "pid": "scheduler",
-         "_id": "scheduler"
-      },
-      {
-         "factoryPid": "endpoint",
-         "pid": "endpoint.463bd65d-987b-42ee-bf5f-077cf7ed4fdc",
-         "_id": "endpoint/usernotifications"
-      },
-      {
-         "factoryPid": "info",
-         "pid": "info.b1b6666f-aca3-4c77-8270-4695fe959036",
-         "_id": "info/login"
-      },
-      {
-         "factoryPid": "org.apache.felix.fileinstall",
-         "pid": "org.apache.felix.fileinstall.1f94019a-2206-448f-b2f6-104916b2d0da",
-         "_id": "org.apache.felix.fileinstall/openidm"
-      },
-      {
-         "factoryPid": "endpoint",
-         "pid": "endpoint.d032df65-2cc2-4da6-bc5e-209495e43a34",
-         "_id": "endpoint/securityQA"
-      },
-      {
-         "factoryPid": "ui.context",
-         "pid": "ui.context.22dbe594-c15f-4a66-9e70-d3ad04d60cc2",
-         "_id": "ui.context/enduser"
-      },
-      {
-         "factoryPid": "info",
-         "pid": "info.869f1173-cdca-415a-a4f9-5835c5b7fefb",
-         "_id": "info/ping"
-      },
-      {
-         "factoryPid": null,
-         "pid": "cluster",
-         "_id": "cluster"
-      },
+
+   ...
+
       {
          "factoryPid": "endpoint",
          "pid": "endpoint.7e9ec068-bb4a-4fa0-ae15-1706bb4a3a07",
@@ -444,16 +355,9 @@
          "pid": "endpoint.47978983-0411-425d-8f53-4022175e146a",
          "_id": "endpoint/gettasksview"
       },
-      {
-         "factoryPid": "endpoint",
-         "pid": "endpoint.1e64173d-d693-4bef-8df6-bb88d7431af4",
-         "_id": "endpoint/getprocessesforuser"
-      },
-      {
-         "factoryPid": null,
-         "pid": "workflow",
-         "_id": "workflow"
-      },
+
+   ...
+
       {
          "factoryPid": "ui",
          "pid": "ui.b10eb4cb-83e3-4a4b-9d29-d91d90eb3053",
@@ -464,7 +368,7 @@
          "pid": "process.9863529c-60e0-42e3-b5d5-c5c704016e95",
          "_id": "process/access"
       }
-   ]
+   ]    </computeroutput>
 }</screen>
 
   <para>Single instance configuration objects are located under
@@ -736,10 +640,7 @@
    
    <programlisting language="javascript">
     {
-    "dbUrl" : "local:./db/&amp;{&amp;{environment}.location}-openidm",
-    "user" : "admin",
-    "poolMinSize" : 5,
-    "poolMaxSize" : 20,
+    "dbUrl" : "plocal:./db/&amp;{&amp;{environment}.location}-openidm",
     ...
     }
    </programlisting>
@@ -1165,7 +1066,6 @@ x
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids"
 

@@ -444,7 +444,6 @@ function notNull(fullObject, value, params, property) {
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/policy"</screen>
       
@@ -471,7 +470,6 @@ function notNull(fullObject, value, params, property) {
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/policy/managed/user/*"</screen>
       

@@ -1559,7 +1559,6 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids"</screen>
          <para>Such a request should return the user accounts in your Active

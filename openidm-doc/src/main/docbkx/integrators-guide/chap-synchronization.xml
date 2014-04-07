@@ -369,7 +369,7 @@
      reflect OpenIDM attribute names. For example, the mapping has the
      attribute <literal>lastName</literal> defined in the
      <literal>MyLDAP</literal> connector configuration file mapped to
-     <literal>familyName</literal> in the OpenIDM managed user object. Notice
+     <literal>sn</literal> in the OpenIDM managed user object. Notice
      that the attribute names come from the connector configuration, rather
      than the external resource itself.</para>
 
@@ -831,14 +831,15 @@
      section:
     </para>
 
-    <screen>$curl
+    <screen>
+ $ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
  "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e
-
+     </userinput>
+     <computeroutput>
 {
   "ended": "2014-03-06T07:00:32.094Z",
   "_id": "7a07c100-4f11-4d7e-bf8e-fa4594f99d58",
@@ -880,7 +881,7 @@
      "SOURCE_MISSING": 0,
      "ABSENT": 0
   },
-  "started": "2014-03-06T07:00:31.907Z"
+  "started": "2014-03-06T07:00:31.907Z"</computeroutput>
 }</screen>
    </section>
 
