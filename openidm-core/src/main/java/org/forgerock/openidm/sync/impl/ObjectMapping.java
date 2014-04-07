@@ -352,23 +352,23 @@ class ObjectMapping  {
      * @see doSourceSync(String id, JsonValue value)
      * Convenience function with deleted defaulted to false and oldValue defaulted to null
      */
-    private void doSourceSync(String id, JsonValue value) throws SynchronizationException {
-        doSourceSync(id, value, false, null);
+    private void doSourceSync(String resourceId, JsonValue value) throws SynchronizationException {
+        doSourceSync(resourceId, value, false, null);
     }
 
     /**
      * Source synchronization
      *
-     * @param id fully-qualified source object identifier.
+     * @param resourceId object identifier.
      * @param value null to have it query the source state if applicable,
      *        or JsonValue to tell it the value of the existing source to sync
      * @param sourceDeleted Whether the source object has been deleted
      * @throws SynchronizationException if sync-ing fails.
      */
-    private void doSourceSync(String id, JsonValue value, boolean sourceDeleted, JsonValue oldValue) throws SynchronizationException {
-        LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
+    private void doSourceSync(String resourceId, JsonValue value, boolean sourceDeleted, JsonValue oldValue) throws SynchronizationException {
+        LOGGER.trace("Start source synchronization of {} {}", resourceId, (value == null ? "without a value" : "with a value"));
 
-        String localId = id.substring(sourceObjectSet.length() + 1); // skip the slashes
+        String localId = resourceId;
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
         op.oldValue = oldValue;
@@ -496,11 +496,9 @@ class ObjectMapping  {
         if (target != null && target.get("_id").isString()) { // forgiving delete
             EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
             try {
-                String id = LazyObjectAccessor.qualifiedId(targetObjectSet,
-                        target.get("_id").required().asString());
-                LOGGER.trace("Delete target object {}", id);
-                DeleteRequest ur = Requests.newDeleteRequest(id);
+                DeleteRequest ur = Requests.newDeleteRequest(targetObjectSet, target.get("_id").required().asString());
                 ur.setRevision(target.get("_rev").asString());
+                LOGGER.trace("Delete target object {}", ur.getResourceName());
                 service.getConnectionFactory().getConnection().delete(service.getRouter(), ur);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
@@ -564,36 +562,36 @@ class ObjectMapping  {
      * Returns {@code true} if the specified object identifer is in this mapping's source
      * object set.
      */
-    private boolean isSourceObject(String id) {
-        return (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1);
+    private boolean isSourceObject(String resourceContainer, String resourceId) {
+        return sourceObjectSet.equals(resourceContainer) && !resourceId.isEmpty();
     }
 
-    public void onCreate(String id, JsonValue value) throws SynchronizationException {
-        if (isSourceObject(id)) {
+    public void onCreate(String resourceContainer, String resourceId, JsonValue value) throws SynchronizationException {
+        if (isSourceObject(resourceContainer, resourceId)) {
             if (value == null || value.getObject() == null) { // notification without the actual value
-                value = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), id);
+                value = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
-            doSourceSync(id, value); // synchronous for now
+            doSourceSync(resourceId, value); // synchronous for now
         }
     }
 
-    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
-        if (isSourceObject(id)) {
+    public void onUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
+        if (isSourceObject(resourceContainer, resourceId)) {
             if (newValue == null || newValue.getObject() == null) { // notification without the actual value
-                newValue = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), id);
+                newValue = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
             // TODO: use old value to project incremental diff without fetch of source
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
-                doSourceSync(id, newValue); // synchronous for now
+                doSourceSync(resourceId, newValue); // synchronous for now
             } else {
-                LOGGER.trace("There is nothing to update on {}", id);
+                LOGGER.trace("There is nothing to update on {}", resourceContainer + "/" + resourceId);
             }
         }
     }
 
-    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
-        if (isSourceObject(id)) {
-            doSourceSync(id, null, true, oldValue); // synchronous for now
+    public void onDelete(String resourceContainer, String resourceId, JsonValue oldValue) throws SynchronizationException {
+        if (isSourceObject(resourceContainer, resourceId)) {
+            doSourceSync(resourceId, null, true, oldValue); // synchronous for now
         }
     }
 

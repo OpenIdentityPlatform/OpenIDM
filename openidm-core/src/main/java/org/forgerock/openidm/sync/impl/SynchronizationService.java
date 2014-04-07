@@ -220,11 +220,11 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      */
     // SynchronizationListener
     @Deprecated // use resource interface
-    public void onCreate(String id, JsonValue object) throws SynchronizationException {
-        PendingLink.handlePendingLinks(mappings, id, object);
+    public void onCreate(String resourceContainer, String resourceId, JsonValue object) throws SynchronizationException {
+        PendingLink.handlePendingLinks(mappings, resourceContainer, resourceId, object);
         for (ObjectMapping mapping : mappings) {
             if (mapping.isSyncEnabled()) {
-                mapping.onCreate(id, object);
+                mapping.onCreate(resourceContainer, resourceId, object);
             }
         }
     }
@@ -234,10 +234,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      */
     // SynchronizationListener
     @Deprecated // use resource interface
-    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
+    public void onUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             if (mapping.isSyncEnabled()) {
-                mapping.onUpdate(id, oldValue, newValue);
+                mapping.onUpdate(resourceContainer, resourceId, oldValue, newValue);
             }
         }
     }
@@ -247,10 +247,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      */
     // SynchronizationListener
     @Deprecated // use resource interface
-    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
+    public void onDelete(String resourceContainer, String resourceId, JsonValue oldValue) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             if (mapping.isSyncEnabled()) {
-                mapping.onDelete(id, oldValue);
+                mapping.onDelete(resourceContainer, resourceId, oldValue);
             }
         }
     }
@@ -314,22 +314,26 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             JsonValue _params = new JsonValue(request.getAdditionalParameters(), new JsonPointer("params"));
             Action action = new JsonValue(request.getAction()).asEnum(Action.class);
             try {
-                String id = null;
+                String resourceContainer;
+                String resourceId;
                 switch (action) {
                     case onCreate:
-                        id = _params.get("id").required().asString();
-                        logger.debug("Synchronization action=onCreate, id={}", id);
-                        onCreate(id, request.getContent());
+                        resourceContainer = _params.get("resourceContainer").required().asString();
+                        resourceId = _params.get("resourceId").required().asString();
+                        logger.debug("Synchronization action=onCreate, resourceContainer={},  resourceId={} ", resourceContainer, resourceId);
+                        onCreate(resourceContainer, resourceId, request.getContent());
                         break;
                     case onUpdate:
-                        id = _params.get("id").required().asString();
-                        logger.debug("Synchronization action=onUpdate, id={}", id);
-                        onUpdate(id, null, request.getContent());
+                        resourceContainer =  _params.get("resourceContainer").required().asString();
+                        resourceId = _params.get("resourceId").required().asString();
+                        logger.debug("Synchronization action=onUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
+                        onUpdate(resourceContainer, resourceId, null, request.getContent());
                         break;
                     case onDelete:
-                        id = _params.get("id").required().asString();
-                        logger.debug("Synchronization action=onDelete, id={}", id);
-                        onDelete(id, null);
+                        resourceContainer =  _params.get("resourceContainer").required().asString();
+                        resourceId = _params.get("resourceId").required().asString();
+                        logger.debug("Synchronization action=onDelete, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
+                        onDelete(resourceContainer, resourceId, null);
                         break;
                     case recon:
                         result = new HashMap<String, Object>();
