@@ -16,6 +16,7 @@
             <script>
                 params = [_queryId:'query-all-ids']
                 out:println "script task using resolver: " + openidm.query('workflow/processdefinition', params)
+                execution.setVariable('params', params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="scripttask1" targetRef="serviceTask"/>
