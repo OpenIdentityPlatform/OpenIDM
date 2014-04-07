@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -51,11 +51,12 @@ class PendingLink {
      * Detect and handle pending links if present
      *
      * @param mappings all the mappings to scan
-     * @param targetId the target identifier to link to
+     * @param resourceContainer the target identifier path
+     * @param resourceId the target identifier to link to
      * @param targetObject the full target object, useful for the onLink script
      * @throws SynchronizationException if linking failed
      */
-    public static void handlePendingLinks(ArrayList<ObjectMapping> mappings, String targetId, JsonValue targetObject) throws SynchronizationException {
+    public static void handlePendingLinks(ArrayList<ObjectMapping> mappings, String resourceContainer, String resourceId, JsonValue targetObject) throws SynchronizationException {
         // Detect if there is a pending link
         JsonValue pendingLink = null;
         JsonValue pendingLinkContext = null;
@@ -79,11 +80,11 @@ class PendingLink {
             Situation situation = Situation.valueOf(origSituation);
 
             for (ObjectMapping mapping : mappings) {
-                if (mapping.getName().equals(mappingName) && targetId.startsWith(mapping.getTargetObjectSet() + "/")) {
-                    logger.debug("Matching mapping {} found for pending link to {}", mappingName, targetId);
+                if (mapping.getName().equals(mappingName) && resourceContainer.equals(mapping.getTargetObjectSet())) {
+                    logger.debug("Matching mapping {} found for pending link to {}", mappingName, resourceContainer + "/" + resourceId);
                     mapping.explicitOp(sourceObject, targetObject, situation, Action.LINK, reconId);
                     pendingLinkContext.remove(PENDING_LINK);
-                    logger.debug("Pending link for mapping {} between {}-{} created", new Object[] {mappingName, sourceId, targetId});
+                    logger.debug("Pending link for mapping {} between {}-{} created", new Object[] {mappingName, sourceId, resourceContainer + "/" + resourceId});
                     break;
                 }
             }

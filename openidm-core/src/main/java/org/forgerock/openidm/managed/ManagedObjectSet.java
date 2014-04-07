@@ -66,6 +66,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -290,11 +291,19 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      */
     // TODO: consider moving this logic somewhere else
     private String managedId(String id) {
-        StringBuilder sb = new StringBuilder("managed/").append(name);
+        StringBuilder sb = new StringBuilder(getManagedObjectPath());
         if (id != null) {
             sb.append('/').append(id);
         }
         return sb.toString();
+    }
+
+    /**
+     * Generates the managed object path
+     * @return the managed object path
+     */
+    private String getManagedObjectPath() {
+        return new StringBuilder("managed/").append(name).toString();
     }
 
     /**
@@ -491,7 +500,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         
         // Perform any onUpdate synchronization
         // TODO: Fix the context
-        onUpdate(context, managedId(id), oldValue, newValue);
+        onUpdate(context, getManagedObjectPath(), id, oldValue, newValue);
 
         return response;
     }
@@ -641,7 +650,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // Execute the postCreate script if configured
             executePostScript(context, "postCreate", postCreate, id, new JsonValue(null), _new.getContent());
             
-            onCreate(context, managedId(_new.getId()), _new);
+            onCreate(context, getManagedObjectPath(), _new.getId(), _new);
 
             // TODO Check the relative id
             handler.handleResult(_new);
@@ -675,7 +684,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     @Override
-    public void updateInstance(final ServerContext context,final String resourceId,final  UpdateRequest request,
+    public void updateInstance(final ServerContext context, final String resourceId, final UpdateRequest request,
             final ResultHandler<Resource> handler) {
         logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
@@ -728,7 +737,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // Execute the postDelete script if configured
             executePostScript(context, "postDelete", postDelete, resourceId, deletedResource.getContent(), null);
 
-            onDelete(context, managedId(resourceId), resource);
+            onDelete(context, getManagedObjectPath(), resourceId, resource);
 
             handler.handleResult(deletedResource);
         } catch (ResourceException e) {
@@ -962,23 +971,24 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Called when a source object has been created.
      *
-     * @param id
-     *            the fully-qualified identifier of the object that was created.
+     * @param resourceContainer location where the object is located
+     * @param resourceId the object that was created.
      * @param value
      *            the value of the object that was created.
      * @throws ResourceException
      *             if an exception occurs processing the notification.
      */
-    public void onCreate(ServerContext context, String id, Resource value) throws ResourceException {
+    public void onCreate(ServerContext context, String resourceContainer, String resourceId, Resource value) throws ResourceException {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
-            request.setAdditionalParameter("id", id);
-            request.setContent(value.getContent());
+            ActionRequest request = Requests.newActionRequest("sync", "ONCREATE")
+                    .setAdditionalParameter("resourceContainer", resourceContainer)
+                    .setAdditionalParameter("resourceId", resourceId)
+                    .setContent(value.getContent());
             try {
                 connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
-                logger.error("Failed to sync onCreate {}:{}",name, id, e);
+                logger.error("Failed to sync onCreate {}:{}",name, request.getResourceName(), e);
             }
         } else {
             logger.warn("Sync service was not available.");
@@ -988,8 +998,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Called when a source object has been updated.
      *
-     * @param id
-     *            the fully-qualified identifier of the object that was updated.
+      @param resourceContainer location where the object is located
+     * @param resourceId the object that was updated.
      * @param oldValue
      *            the old value of the object prior to the update.
      * @param newValue
@@ -997,18 +1007,18 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws ResourceException
      *             if an exception occurs processing the notification.
      */
-    public JsonValue onUpdate(ServerContext context, String id, Resource oldValue,
+    public JsonValue onUpdate(ServerContext context, String resourceContainer, String resourceId, Resource oldValue,
             JsonValue newValue) throws ResourceException {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
-            request.setAdditionalParameter("id", id);
-            // TODO Where to store the old value???
-            request.setContent(newValue);
+            ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE")
+                    .setAdditionalParameter("resourceContainer", resourceContainer)
+                    .setAdditionalParameter("resourceId", resourceId)
+                    .setContent(newValue);  // TODO Where to store the old value???
             try {
                 return connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
-                logger.error("Failed to sync onUpdate {}:{}",name, id, e);
+                logger.error("Failed to sync onUpdate {}:{}",name, request.getResourceName(), e);
             }
         } else {
             logger.warn("Sync service was not available.");
@@ -1019,24 +1029,25 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     /**
      * Called when a source object has been deleted.
      *
-     * @param id
-     *            the fully-qualified identifier of the object that was deleted.
+     * @param resourceContainer location where the object is located
+     * @param resourceId the object that was deleted.
      * @param oldValue
      *            the value before the delete, or null if not supplied
      * @throws ResourceException
      *             if an exception occurs processing the notification.
      */
-    public void onDelete(ServerContext context, String id, Resource oldValue)
+    public void onDelete(ServerContext context, String resourceContainer, String resourceId, Resource oldValue)
             throws ResourceException {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
-            request.setAdditionalParameter("id", id);
-            request.setContent(oldValue.getContent());
+            ActionRequest request = Requests.newActionRequest("sync", "ONDELETE")
+                    .setAdditionalParameter("resourceContainer", resourceContainer)
+                    .setAdditionalParameter("resourceId", resourceId)
+                    .setContent(oldValue.getContent());
             try {
                 connectionFactory.getConnection().action(context, request);
             } catch (NotFoundException e) {
-               logger.error("Failed to sync onDelete {}:{}",name, id, e);
+               logger.error("Failed to sync onDelete {}:{}",name, request.getResourceName(), e);
             }
         } else {
             logger.warn("Sync service was not available.");

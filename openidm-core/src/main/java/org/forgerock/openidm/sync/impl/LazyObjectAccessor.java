@@ -99,7 +99,7 @@ public class LazyObjectAccessor {
         if (!loaded) {
             try {
                 // If not found, the object will be null
-                object = rawReadObject(service.getRouter(), service.getConnectionFactory(), getQualifiedId());
+                object = rawReadObject(service.getRouter(), service.getConnectionFactory(), componentContext, localId);
             } catch (SynchronizationException ex) {
                 throw ex; // being explicit that this would not be considered loaded
             }
@@ -138,18 +138,19 @@ public class LazyObjectAccessor {
      * Typically access to objects should be through {@code getObject()} instead,
      * which can support the lazy/cached loading.
      *
-     * @param id the qualified identifier of the object.
+     * @param resourceContainer location where the object is stored
+     * @param resourceId the object identifier
      * @throws NullPointerException if {@code targetId} is {@code null}.
      * @throws SynchronizationException if retrieving the object failed
      * @return the object value if found, null if not found
      */
-    public static JsonValue rawReadObject(ServerContext router, ConnectionFactory connectionFactory, String id) throws SynchronizationException {
-        if (id == null) {
+    public static JsonValue rawReadObject(ServerContext router, ConnectionFactory connectionFactory, String resourceContainer, String resourceId) throws SynchronizationException {
+        if (resourceId == null) {
             throw new NullPointerException("Identifier passed to readObject is null");
         }
-        EventEntry measure = Publisher.start(EVENT_READ_OBJ, null, id);
+        EventEntry measure = Publisher.start(EVENT_READ_OBJ, null, resourceId);
         try {
-            ReadRequest r = Requests.newReadRequest(id);
+            ReadRequest r = Requests.newReadRequest(resourceContainer, resourceId);
             JsonValue result = connectionFactory.getConnection().read(router,r).getContent();
             measure.setResult(result);
             return result;
@@ -161,13 +162,6 @@ public class LazyObjectAccessor {
         } finally {
             measure.end();
         }
-    }
-
-    /**
-     * @return The qualified identifier, qualified with the component context
-     */
-    public String getQualifiedId() {
-        return qualifiedId(componentContext, localId);
     }
 
     /**

@@ -1104,10 +1104,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     }
                 } else if (ObjectClassAction.liveSync.name().equalsIgnoreCase(request.getAction())) {
                     try {
-                        String source = "system/"
-                                + OpenICFProvisionerService.this.systemIdentifier.getName()
-                                + "/"
-                                + objectClass;
+                        String source = getSource(objectClass);
                         ActionRequest forwardRequest = Requests.newActionRequest("system/", request.getAction());
                         forwardRequest.setAdditionalParameter("source", source);
 
@@ -1310,13 +1307,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != facade) {
                     OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
                     if (null == request.getFields() || request.getFields().isEmpty()) {
-                        operationOptions = operations.get(UpdateApiOp.class)
+                        operationOptions = operations.get(GetApiOp.class)
                                 .build(jsonConfiguration, objectClassInfoHelper)
                                 .build();
                     } else {
-                        OperationOptionsBuilder builder = new OperationOptionsBuilder();
                         objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
-                        operationOptions = builder.build();
+                        operationOptions = operationOptionsBuilder.build();
                     }
                     Uid uid = new Uid(resourceId);
                     ConnectorObject connectorObject =
@@ -1633,6 +1629,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     /**
+     * Gets the fully qualified path name
+     * @param objectClass the object class for the intended resource
+     * @param optionalId ids to append to the fully qualified path
+     * @return
+     */
+    private String getSource(final String objectClass, final String... optionalId) {
+        final StringBuilder sb = new StringBuilder("system/");
+        sb.append(systemIdentifier.getName());
+        sb.append("/");
+        sb.append(objectClass);
+        for(String id : optionalId) {
+            sb.append("/").append(id);
+        }
+        return sb.toString();
+    }
+    /**
      * Gets a brief status report about the current status of this service instance.
      * </p/>
      * {@code {
@@ -1815,25 +1827,28 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
                                             // Q: are we going to encode ids?
-                                            final String id = helper.resolveQualifiedId(null).getPath() + syncDelta.getUid().getUidValue();
+                                            final String resourceId = syncDelta.getUid().getUidValue();
+                                            String resourceContainer = getSource(objectType);
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previous-id", syncDelta.getPreviousUid());
                                                     }
-                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE");
-                                                    onUpdateRequest.setAdditionalParameter("id", id);
-                                                    onUpdateRequest.setContent(new JsonValue(deltaObject));
+                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE")
+                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
+                                                            .setAdditionalParameter("resourceId", resourceId)
+                                                            .setContent(new JsonValue(deltaObject));
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
-                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-update", id, deltaObject, deltaObject, Status.SUCCESS);
+                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
-                                                    ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE");
-                                                    onDeleteRequest.setAdditionalParameter("id", id);
+                                                    ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE")
+                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
+                                                            .setAdditionalParameter("resourceId", resourceId);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
-                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-delete", id, null, null, Status.SUCCESS);
+                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-delete", onDeleteRequest.getResourceName(), null, null, Status.SUCCESS);
                                                     break;
                                             }
                                         } catch (Exception e) {

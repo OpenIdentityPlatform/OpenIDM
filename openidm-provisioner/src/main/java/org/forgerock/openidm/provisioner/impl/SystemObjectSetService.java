@@ -327,7 +327,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     private JsonValue liveSync(String source, boolean detailedFailure) throws ResourceException {
         JsonValue response;
         Id id = new Id(source);
-        String previousStageResourceContainer = "repo/synchronisation/pooledSyncStage/";
+        String previousStageResourceContainer = "repo/synchronisation/pooledSyncStage";
         String previousStageId = id.toString().replace("/", "").toUpperCase();
         Resource previousStage = null;
         try {
