@@ -20,16 +20,16 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-mail'
  version='5.0' xml:lang='en'
  xmlns='http://docbook.org/ns/docbook'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Sending Email</title>
  <indexterm>
   <primary>Configuration</primary>
@@ -130,6 +130,22 @@ $ cp samples/misc/external.email.json conf/</screen>
   </step>
  </procedure>
 
+ <note>
+  <para>
+   The REST call described in the section that follows may use the local
+   SMTP server. For a "quick and dirty" test, you could use the default
+   port, disable authentication, and TLS:
+  </para>
+  <programlisting>
+"host" : "localhost",
+"port" : "25,
+"username" : "xxxxxx",
+"password" : "xxxxxx",
+"mail.smtp.auth" : "false",
+"mail.smtp.starttls.enable" : "false"
+  </programlisting>
+ </note>
+
  <section xml:id="send-mail-rest">
   <title>Sending Mail Over REST</title>
   <para>Although you are more likely to send mail from a script in production,
@@ -138,14 +154,19 @@ $ cp samples/misc/external.email.json conf/</screen>
   configuration works. You pass the message parameters as POST parameters,
   URL encoding the content as necessary.</para>
 
+  <!-- I get an 400 error message, varies slightly w/ PUT v. POST. Nothing
+  shows up in the log file.  -->
+
   <para>The following example sends a test email using the REST API.</para>
-  <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/external/email?
- _from=openidm@example.com&amp;_to=admin@example.com&amp;
- _subject=Test&amp;_body=Test"</screen>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/external/email?_action=send&amp;
+_from=openidm@example.com&amp;_to=admin@example.com&amp;
+_subject=Test&amp;_body=Test"</userinput></screen>
  </section>
 
  <section xml:id="send-mail-script">

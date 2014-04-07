@@ -52,40 +52,6 @@
   should follow before deploying OpenIDM in a production environment.
  </para>
 
-    <!--TODO Integrate post-CREST merge into trunk
-    With CREST, the security service changes slightly wrt the end points and
-    resource providers that service them. CREST has the following endpoints:
-
-"openidm/security/keystore"
-"openidm/security/truststore"
-
-  These are serviced by SingletonResourceProviders where the
-  keystore/truststore themselves are the resource. These endpoints are used
-  to do reads on the keystore/truststore (as a whole), or any special actions
-  (such as "generateCert" and "generateCSR").  When forming action request for
-  this endpoint, all properties (including "alias") need to be contained in
-  the request data.
-
-  So, the alias is not provided in the URL, but in the data object, for example:
-
-  a request like this "http://localhost:8080/openidm/security/keystore/openidm-localhost?_action=generateCSR"
-
-  must be reworked as "http://localhost:8080/openidm/security/keystore/?_action=generateCSR"
-
-  '{ "alias" : "openidm-localhost", "domainName" : "www.example.com" .... }'.
-
-"openidm/security/keystore/cert"
-"openidm/security/keystore/privatekey"
-"openidm/security/truststore/cert"
-
-  These are service by CollectionResourceProviders that provide access to
-  certificates and private keys within the keystore and truststore.  All CRUD
-  requests on certs and keys will need to use these endpoints.  Also, since these
-  are collections, you need to include the alias (resource ID) in the request URL
-  (for example "openidm/security/keystore/privatekey/openidm-localhost").
-
-  -->
-
  <section xml:id="security-management-service">
   <title>Accessing the Security Management Service</title>
 
@@ -93,7 +59,7 @@
    OpenIDM stores keystore and truststore files in a folder named
    <filename>/path/to/openidm/security</filename>. These files can be managed by
    using the <command>keytool</command> command, or over the REST interface, at
-   the URL <literal>http://localhost:8080/openidm/security</literal>. For
+   the URL <literal>https://localhost:8443/openidm/security</literal>. For
    information about using the <command>keytool</command> command, see
    <link xlink:href="http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html" />.
   </para>
@@ -114,18 +80,19 @@
    <screen>
     <userinput>
 $ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- http://localhost:8080/openidm/security/keystore
+ https://localhost:8443/openidm/security/keystore
     </userinput>
     <computeroutput>
- {
+{
   "aliases": [
     "openidm-sym-default",
     "openidm-localhost"
   ],
-  "type": "JCEKS",
   "provider": {
     "KeyGenerator.Blowfish": "com.sun.crypto.provider.BlowfishKeyGenerator",
     "Alg.Alias.KeyFactory.DH": "DiffieHellman",
@@ -192,36 +159,24 @@ $ curl
    <screen width="90">
     <userinput>
 $ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
  --data '{"CN" : "www.example.com",
  "OU" : "HR",
  "L"  : "Cupertino",
  "C"  : "US",
- "returnPrivateKey" : true}'
- "http://localhost:8080/openidm/security/keystore/openidm-localhost?_action=generateCSR"
+ "returnPrivateKey" : true,
+ "alias" : "openidm-localhost"}'
+ "https://localhost:8443/openidm/security/keystore?_action=generateCSR"
     </userinput>
     <computeroutput>
 {
-  "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmjCCAYICAQAwVzEYMBYGA1UEAwwPd3d3LmV4YW
-             1wbGUuY29tMQswCQYDVQQL\nDAJIUjENMAsGA1UECgwETm9uZTESMBAGA1UEBwwJQ3VwZXJ0aW5v
-             MQswCQYDVQQG\nEwJVUzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKwC7WFOutmzW0
-             GR\nuyWdzKDlJlT/XDz9/g4UOR9FdKgfvWIxOF1LbsFBqmlJrk/pq1x8BqSwKr1JjbFc\nlyY/bC
-             YV+jwsl8zt0XSgVQvKaYTHyl6HYwQue3n9DpFozuWUQKgkcEtwV5KAn7uv\n2V0aZHHPwNUZi2XT
-             5nLipjeb0JeBN2eheGMhuzNIO0xOeHYaj7xjUvXDuK9FaJvd\n+9zA4fvEEn5iwgveEaPlVABfUO
-             p5No9D4E4vkGdIvd42ygFll+e8OkuYuwqRKbSs\nnj/YhnBZyXXUiAjx5G0Ce94LpcmWJG3AW5TV
-             MSITg2VeWydKMZ/aoGL85cSbqZXW\nLGJAaHMCAwEAATANBgkqhkiG9w0BAQ0FAAOCAQEAUaxG0x
-             NRQkZyywBkqWzSi1BA\nHbe9vNrZHj7bXk8w806kBaQoaSmEPVlS0dtsRUwiwdxxvzsVTkZYe46k
-             4NJU0nFn\nVYCDT3ij9VuNcbZcK7DC9aL71n2g4va4wQ3vq1XsY8zMu/7VEvUd97rgiQ2wTA1O\n
-             payk6Tdjw089Ea7nCjKW2FofxCjvhHaOOAS58ptV9aqRprxSaq6esk9kPWGqtpDF\nkjKHSUE1dK
-             b0Tcsh8meqAIwLE57vGkvpoZ2jLQN40IbfazhECk/inxhtnNJgPhvz\nM4l8LnPC3oirKGtSTZVW
-             hvf9faTNbVYBC3jFZz9HEh1655y/v/ekdAj/ZXP/fw==\n
-           -----END CERTIFICATE REQUEST-----\n",
-  "_id": "openidm-localhost",
   "privateKey": {
-    "algorithm": "RSA",
-    "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOUm
+     "algorithm": "RSA",
+     "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOU
              VP9cPP3+DhQ5H0V0qB+9YjE4\nXUtuwUGqaUmuT+mrXHwGpLAqvUmNsVyXJj9sJhX6PCyXzO3RdK
              BVC8pphMfKXodj\nBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpkcc/A1RmLZdPmcuKmN5vQl4E3
              Z6F4\nYyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh+8QSfmLCC94Ro+VUAF9Q6nk2j0Pg\nTi+Q
@@ -257,6 +212,23 @@ $ curl
              -----\n",
     "format": "X.509"
   }
+     },
+     "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmzCCAYMCAQAwWDEZMBcGA1UEAwwQd3d3MS5
+             leGFtcGxlLmNvbTELMAkGA1UE\nCwwCSFIxDTALBgNVBAoMBE5vbmUxEjAQBgNVBAcMCUN1cGVyd
+             GlubzELMAkGA1UE\nBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDAjCjTt1b
+             o0WKH\nP/4PR/Td3A1ElTo4/J/7o7eWflOqs8vW5d76SMcJFKOQ6FhoOcOHRNewch+a0DBK\njKF
+             aRCE1c0PuXiIlrO7wsF4dFTtTZKAhrpFdM+0hU4LeyCDxQQ5UDga3rmyVIvC8\nL1PvW+sZEcZ9r
+             T67XOV03cwUpjvG4W58FCUKd6UAI0szfIrFdvJp4q4LkkBNkk9J\nUf+MXsSVuHzZrqvqhX900Is
+             a19mXD6/P9Cql8KmwEzzbglGFf6uYAK33F71Kx409\nTeS85sjmBbyJwUVwhgQ0R35H3HC6jex4P
+             jx1rSfPmsi61JBx9kyGu6rnSv5FOQGy\nBQpgQFnJAgMBAAEwDQYJKoZIhvcNAQENBQADggEBAKc
+             yInfo2d7/12jUrOjL4Bqt\nStuQS/HkO2KAsc/zUnlpJyd3RPI7Gs1C6FxIRVCzi4Via5QzE06n2
+             F8HHkinqc6m\nBWhIcf5Omk6fSqG0aw7fqn20XWDkRm+I4vtm8P8CuWftUj5qv5kmyUtrcQ3+YPD
+             O\nL+cK4cfuCkjLQ3h4GIgBJP+gfWX8fTmCHyaHEFjLTMj1hZYEx+3f8awOVFoNmr3/\nB8LIJNH
+             UiFHO6EED7LDOwa/z32mTRET0nK5DVO60H80JSWxzdWYZQV/IzHzm8ST4\n6j6vuheBZiG5gZR2V
+             F0x5XoudQrSg7lpVslXBHNeiM85+H08RMQh8Am2bp+Xstw=\n
+     -----END CERTIFICATE REQUEST-----\n",
+     "_id": "openidm-localhost"
+     }
 }
     </computeroutput>
    </screen>
@@ -295,13 +267,19 @@ $ curl
     which the CSR was generated, include the private key in the PUT request.
    </para>
 
+   <!-- Since I don't have a CRT from a CSR, I did not check this. But
+    I did make cREST appropriate changes, e.g. application/json and
+    "alias": "openidm-localhost" -->
    <screen width="90">
     <userinput>
 $ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request PUT
  --data '{
+    "alias": "openidm-localhost",
     "fromCSR": true,
     "certs": [
         "-----BEGIN CERTIFICATE-----\n
@@ -379,7 +357,7 @@ AbP8xFXIP5JU8O4tWmlbxAbMOYfrZHabFNZx4DH1OVOJqdJIVx0KER0GSZd50D6W\n
 QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
 -----END RSA PRIVATE KEY-----"
  }'
- "http://localhost:8080/openidm/security/keystore/openidm-localhost"
+ "https://localhost:8443/openidm/security/keystore/cert"
     </userinput>
     <computeroutput>
 {
@@ -393,6 +371,67 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     to which the signed certificate was added.
    </para>
   </section>
+
+  <section xml:id="security-endpoints">
+   <title>Security Management Service Endpoints</title>
+
+    <para>
+     The OpenIDM security management service includes the following endpoints:
+     <itemizedlist>
+      <listitem>
+       <para><filename>openidm/security/keystore</filename></para>
+      </listitem>
+      <listitem>
+       <para><filename>openidm/security/truststore</filename></para>
+      </listitem>
+     </itemizedlist>
+    </para>
+
+    <para>
+     These endpoints are serviced by <literal>SingletonResourceProviders</literal>
+     where the keystore and truststore are themselves the resource.
+    </para>
+
+    <para>
+     You can use these endpoints to READ the contents on the keystore and
+     truststore.
+    </para>
+
+    <para>
+     You can also use these endpoints to perform related actions such as
+     <literal>generateCert</literal> and <literal>generateCSR</literal>.
+    </para>
+
+    <para>
+     When you set up an <literal>_action</literal> request on either endpoint,
+     you need to include all properties, including <literal>alias</literal>,
+     in the request data.
+    </para>
+
+    <para>
+     The alias is not provided in the URL; it is available in the data object.
+     For example, you might include <literal>"alias" : "openidm-localhost"</literal>
+     within a <literal>--data '{ "alias" : "openidm-localhost" }' </literal>
+     option.
+    </para>
+
+    <para>
+     The security service includes endpoints for the keystore and truststore:
+     <literal>openidm/security/keystore</literal> and
+     <literal>openidm/security/truststore</literal>. Certificates and private
+     keys are associated with <literal>openidm/security/keystore/cert</literal>,
+     <literal>openidm/security/keystore/privatekey</literal>, and
+     <literal>openidm/security/truststore/cert</literal>.
+    </para>
+
+    <para>
+     These endpoints are serviced by <literal>CollectionResourceProviders</literal>
+     that provide access to certificates and private keys within the keystore
+     and truststore.
+    </para>
+
+  </section>
+
  </section>
 
  <section xml:id="security-precautions">
@@ -503,25 +542,16 @@ $ curl
      </userinput>
      <computeroutput>
 {
-    "conversion-time-ms": 0,
-    "result": [
-        {
-            "_rev": "0",
-            "_id": "8afd44a7-13be-449e-9c47-7a310e675c00"
-        }
-    ],
-    "query-time-ms": 1
+    "remainingPagedResuts": -1,
+    "pagedResultsCooke": null,
+    "resultCount": 0,
+    "result": [],
 }
      </computeroutput>
     </screen>
-    <note>
-     <para>
-      If you receive the response
-      <literal>curl: (52) Empty reply from server</literal>, check that you
-      have, in fact, used <literal>https</literal> (not <literal>http</literal>)
-      and the secure port in the URL.
-     </para>
-    </note>
+
+    <!-- Note removed, as the ambiguous message no longer seems to be an issue -->
+
    </step>
   </procedure>
  </section>
@@ -539,7 +569,7 @@ $ curl
   <para>Beyond relying on end-to-end availability of TLS/SSL to protect
   data, OpenIDM also supports explicit encryption of data that goes on the
   wire. This can be important if the TLS/SSL termination happens prior to
-  the final end point.</para>
+  the final endpoint.</para>
 
   <para>OpenIDM also supports encryption of data stored in the repository,
   using a symmetric key. This protects against some attacks on the data
@@ -572,59 +602,62 @@ $ curl
   <screen>
    <userinput>
 $ curl
+ --cacert self-signed.crt
  --dump-header /dev/stdout
  --user openidm-admin:openidm-admin
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ --header "Content-Type: application/json"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
 HTTP/1.1 200 OK
-Set-Cookie: JSESSIONID=2l0zobpuk6st1b2m7gvhg5zas;Path=/
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Content-Type: application/json; charset=UTF-8
-Date: Wed, 18 Jan 2012 10:36:19 GMT
-Accept-Ranges: bytes
-Server: Restlet-Framework/2.0.9
-Transfer-Encoding: chunked
+Cache-Control: no-cache
+Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Vary: Accept-Encoding, User-Agent
+Content-Length: 82
+Server: Jetty(8.y.z-SNAPSHOT)
 
-{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+{"result":[],"resultCount":"0","pagedResultsCookie":null,"remainingPagedResults":-1}
    </computeroutput>
 
    <userinput>
 $ curl
  --dump-header /dev/stdout
+ --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
 HTTP/1.1 200 OK
-Set-Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8;Path=/
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Content-Type: application/json; charset=UTF-8
-Date: Wed, 18 Jan 2012 10:36:40 GMT
-Accept-Ranges: bytes
-Server: Restlet-Framework/2.0.9
-Transfer-Encoding: chunked
+Cache-Control: no-cache
+Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Vary: Accept-Encoding, User-Agent
+Content-Length: 82
+Server: Jetty(8.y.z-SNAPSHOT)
 
-{"query-time-ms":0,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+{"result":[],"resultCount":"0","pagedResultsCookie":null,"remainingPagedResults":-1}
    </computeroutput>
 
    <userinput>
 $ curl
  --dump-header /dev/stdout
+ --cacert self-signed.crt
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
  --header "X-Requested-With: OpenIDM Plugin"
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ --header "Content-Type: application/json"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
-HTTP/1.1 200 OK
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Content-Type: application/json; charset=UTF-8
-Date: Wed, 18 Jan 2012 10:37:20 GMT
-Accept-Ranges: bytes
-Server: Restlet-Framework/2.0.9
-Transfer-Encoding: chunked
-
-{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+Cache-Control: no-cache
+Vary: Accept-Encoding, User-Agent
+Content-Length: 82
+Server: Jetty(8.y.z-SNAPSHOT)
    </computeroutput>
   </screen>
 
@@ -642,24 +675,26 @@ Transfer-Encoding: chunked
    <userinput>
 $ curl
  --dump-header /dev/stdout
+ --cacert self-signed.crt
  --header "X-OpenIDM-NoSession: true"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ --header "Content-Type: application/json"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
-Date: Wed, 18 Jan 2012 10:52:27 GMT
-Accept-Ranges: bytes
-Server: Restlet-Framework/2.0.9
-Transfer-Encoding: chunked
+Cache-Control: no-cache
+Vary: Accept-Encoding, User-Agent
+Content-Length: 82
+Server: Jetty(8.y.z-SNAPSHOT)
 
-{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+{"result":[],"resultCount":"0","pagedResultsCookie":null,"remainingPagedResults":-1}
    </computeroutput>
   </screen>
 
-  <para>To log out and destroy the session, send the specific OpenIDM
+  <para>To log out and destroy the session, use the specific X-OpenIDM-Logout
   header.</para>
 
   <screen>
@@ -672,13 +707,22 @@ $ curl
  "http://localhost:8080/openidm/"
    </userinput>
    <computeroutput>
-HTTP/1.1 204 No Content
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
+Cache-Control: no-cache
+Vary: Accept-Encoding, User-Agent
+Content-Length: 82
+Server: Jetty(8.y.z-SNAPSHOT)
    </computeroutput>
   </screen>
 
   <para>OpenIDM creates the <literal>openidm-admin</literal> user with password
   <literal>openidm-admin</literal> by default. This internal user is stored in
-  OpenIDM's repository.</para>
+  OpenIDM's repository. To set up OpenIDM for MySQL, see the OpenIDM Installation
+  Guide section entitled
+  <link xlink:href="install-guide#repository-mysql" xlink:show="new"
+         xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>To Set Up OpenIDM with MySQL</citetitle></link>.</para>
 
   <screen>
    <userinput>
@@ -852,12 +896,16 @@ $ cli.sh encrypt newpwd
   Other URIs are triggered indirectly, or are for internal consumption.</para>
   
   <para>OpenIDM supports native query expressions on the repository, and it is
-   possible to enable these over HTTP, for example:</para>
+   possible to enable these over HTTP, for example, the following query should
+   identify managed users in an OrientDB repository:</para>
+ <!-- Changed call to managed_user for OrientDB (managedobjects is for MySQL) -->
   
-  <screen width="91">$curl 
+  <screen width="91">$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"</screen>
+ --header "Content-Type: application/json"
+ "https://localhost:8443/openidm/managed/user?_queryExpression=select+*+from+managed_user"</screen>
   
   <para>
    By default, direct HTTP access to native queries is disallowed, and should
@@ -885,7 +933,10 @@ $ cli.sh encrypt newpwd
  // "customAuthz" : "disallowQueryExpression()"
 },
 ...
-"customAuthz" : "ownDataOnly() &amp;&amp; managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')",
+ "customAuthz" : "ownDataOnly() &amp;&amp;
+    managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')",
+    // &amp;&amp; disallowQueryExpression()"
+
 
   </programlisting>
 
@@ -934,7 +985,7 @@ $ cli.sh encrypt newpwd
   </procedure>
 
   <procedure xml:id="security-files-windows">
-   <title>Protecting key files in Winodws</title>
+   <title>Protecting key files in Windows</title>
 
    <step>
     <para>
@@ -973,7 +1024,7 @@ $ cli.sh encrypt newpwd
     </para>
     <screen>
      <userinput>
-$ java -jar /path/to/openidm/bundle/openidm-crypto-2.1.0-SNAPSHOT.jar
+$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${openidm.version}?>.jar
      </userinput>
      <computeroutput>
 This utility helps obfuscate passwords to prevent casual observation.
