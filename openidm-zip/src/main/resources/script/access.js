@@ -160,8 +160,8 @@ var httpAccessConfig =
         {   
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
-            "methods"   : "read,update,patch",
-            "actions"   : "*",
+            "methods"   : "read,update,patch,action",
+            "actions"   : "patch",
             "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()"
         },
 
