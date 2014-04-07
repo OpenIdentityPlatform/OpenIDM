@@ -43,7 +43,7 @@ log.info("Entering "+action+" Script");
 def sql = new Sql(connection);
 def authId = null;
 
-sql.eachRow("SELECT uid FROM Users WHERE uid = ? AND password = sha2(?, 512)", [username, password]) { authId = it.uid }
+sql.eachRow("SELECT uid FROM Users WHERE uid = ? AND password = sha1(?)", [username, password]) { authId = it.uid }
 
 if (authId == null) {
     throw new InvalidPasswordException("Authentication Failed")

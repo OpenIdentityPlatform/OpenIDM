@@ -68,7 +68,7 @@ switch ( action ) {
                 lastname = ?,
                 email = ?,
                 organization = ?,
-                password = coalesce(sha2(?, 512), password)
+                password = coalesce(sha1(?), password)
             WHERE 
                 uid = ?
             """, 
