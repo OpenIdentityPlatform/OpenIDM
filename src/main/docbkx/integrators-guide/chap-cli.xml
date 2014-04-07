@@ -20,14 +20,15 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-cli'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Command-Line Interface</title>
 
@@ -40,16 +41,19 @@
  script first, and then run the utility. For example, to run the 
  <command>encrypt</command> utility on a UNIX system:</para>
  
- <screen>$ cd /path/to/openidm
-$ ./cli.sh
+ <screen>
+$ <userinput>cd /path/to/openidm </userinput>
+$ <userinput>./cli.sh </userinput>
+  <computeroutput>
 Using boot properties at /openidm/conf/boot/boot.properties
-openidm# encrypt ....
+openidm# encrypt ....</computeroutput>
  </screen>
  
 <para>or</para>
 
- <screen>$ cd /path/to/openidm
-$ ./cli.sh encrypt ...
+ <screen>
+$ <userinput>cd /path/to/openidm</userinput>
+$ <userinput>./cli.sh encrypt ... </userinput>
  </screen>
  
  <para>By default, the command-line utilities run with the properties defined 
@@ -87,11 +91,12 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
 
   <screen>$ ./cli.sh configexport /tmp/conf</screen>
   
-  <para>Configuration objects are exported, as <filename>.json</filename> files, 
-  to the specified directory. Configuration files that are present in this 
-  directory are renamed as backup files, with a timestamp, for example, 
-  <filename>audit.json.2012-12-19T12-00-28.bkp</filename>, and are not 
-  overwritten. The following configuration objects are exported:</para>
+  <para>Configuration objects are exported, as <filename>.json</filename>
+   files, to the specified directory. Configuration files
+   that are present in this directory are renamed as backup files, with a
+   timestamp, for example, <filename>audit.json.2014-02-19T12-00-28.bkp
+   </filename>, and are not overwritten. The following configuration
+   objects are exported:</para>
   
   <itemizedlist>
     <listitem>
@@ -99,11 +104,27 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
       </filename> or <filename>repo.jdbc.json</filename>)</para>
     </listitem>
     <listitem>
+     <para>Default and custom configuration directories (<filename>script.json
+     </filename>)</para>
+    </listitem>
+    <listitem>
       <para>The log configuration (<filename>audit.json</filename>)</para>
     </listitem>
     <listitem>
       <para>The authentication configuration (<filename>authentication.json
       </filename>)</para>
+    </listitem>
+    <listitem>
+     <para>The cluster configuration (<filename>cluster.json</filename>)</para>
+    </listitem>
+    <listitem>
+     <para>The configuration of a connected SMNP email server
+     (<filename>external.email.json)</filename></para>
+    </listitem>
+    <listitem>
+     <para>Custom configuration information
+      (<filename>info-<replaceable>name</replaceable>.json</filename>)
+     </para>
     </listitem>
     <listitem>
       <para>The managed object configuration (<filename>managed.json</filename>)
@@ -141,6 +162,10 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
     <listitem>
       <para>The configuration of any custom endpoints 
       (<filename>endpoint-*.json</filename>)</para>
+    </listitem>
+    <listitem>
+     <para>The configuration of servlet filters
+     (<filename>servletfilter-*.json</filename>)</para>
     </listitem>
     <listitem>
       <para>The policy configuration (<filename>policy.json</filename>)</para>
@@ -205,33 +230,39 @@ $ ./cli.sh configimport --replaceAll /tmp/conf
   <para>Select the type of connector that you want to configure. The following 
   example configures a new XML connector.
   </para>
-  
-  <screen width="85">$ ./cli.sh configureconnector myXmlConnector
-Using boot properties at /openidm/conf/boot/boot.properties
-Dec 11, 2012 10:35:37 AM org.restlet.ext.httpclient.HttpClientHelper start
-INFO: Starting the HTTP client
-0. CSV File Connector version <?eval ${openicfBundleVersion}?>
-1. LDAP Connector version <?eval ${openicfBundleVersion}?>
-2. org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector version <?eval ${openicfBundleVersion}?>
-3. XML Connector version <?eval ${openicfBundleVersion}?>
-4. Exit
-Select [0..4]: 3
+
+  <!-- Removed <?eval ${openicfBundleVersion}?> as that doesn't match
+  the version numbers shown in command output. If there is a future mismatch
+   in version numbers, I do not know if that's a "big deal". -->
+
+  <screen width="85">$ <userinput>./cli.sh configureconnector myXmlConnector
+   </userinput>
+   <computeroutput>
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+0. Scripted SQL Connector version 1.1.0.1
+1. XML Connector version 1.1.0.1
+2. Database Table Connector version 1.1.0.0
+3. CSV File Connector version 1.1.0.1
+4. LDAP Connector version 1.1.1.2
+5. Exit
+Select [0..5]: 0
 Edit the configuration file and run the command again. The configuration was 
-  saved to /openidm/temp/provisioner.openicf-myXmlConnector.json
+  saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput>
   </screen>
   
   <para>The basic configuration is saved in a file named 
   <filename>/openidm/temp/provisioner.openicf-<replaceable>connector-name</replaceable>.json</filename>.
   Edit the <literal>configurationProperties</literal> parameter in this file to 
   complete the connector configuration. For an XML connector, you can use the 
-  schema definitions in sample 0 for an example configuration.</para>
+  schema definitions in sample 1 for an example configuration.</para>
   
   <programlisting language="javascript">
   "configurationProperties" : {
-    "xmlFilePath" : "samples/sample0/data/resource-schema-1.xsd",
+    "xmlFilePath" : "samples/sample1/data/resource-schema-1.xsd",
     "createFileIfNotExists" : false,
-    "xsdFilePath" : "samples/sample0/data/resource-schema-extension.xsd",
-    "xsdIcfFilePath" : "samples/sample0/data/xmlConnectorData.xml"
+    "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+    "xsdIcfFilePath" : "samples/sample1/data/xmlConnectorData.xml"
   },  
   </programlisting>
   
@@ -283,7 +314,8 @@ $ ./cli.sh encrypt [-j] <replaceable>string</replaceable>
   <para>The following example encrypts a normal string value:</para>
   
   <screen width="85">
-$ ./cli.sh encrypt mypassword
+$ <userinput>./cli.sh encrypt mypassword  </userinput>
+  <computeroutput>
 Executing ./cli.sh
 Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -303,15 +335,15 @@ CryptoService is initialized with 2 keys.
     "type" : "x-simple-encryption"
   }
 }
-------END ENCRYPTED VALUE------
+------END ENCRYPTED VALUE------ </computeroutput>
   </screen>  
 
   <para>The following example encrypts a JSON object. The input string must be 
   a valid JSON object.</para>
   
   <screen width="85">
-$ ./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}
-
+$ <userinput>./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}</userinput>
+<computeroutput>
 Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
@@ -330,14 +362,14 @@ CryptoService is initialized with 2 keys.
     "type" : "x-simple-encryption"
   }
 }
-------END ENCRYPTED VALUE------
+------END ENCRYPTED VALUE------  </computeroutput>
   </screen>
 
   <para>The following example prompts for a JSON object to be encrypted. In 
   this case, you need not escape the special characters.</para>
   
   <screen width="85">
-$ ./cli.sh encrypt -j
+$ <userinput>./cli.sh encrypt -j
 
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 Enter the Json value
@@ -345,8 +377,8 @@ Enter the Json value
 > Press ctrl-D to finish input
 Start data input:
 {"password":"myPassw0rd"}
-^D
-
+^D        </userinput>
+<computeroutput>
 Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
 Available cryptography key: openidm-sym-default
 Available cryptography key: openidm-localhost
@@ -363,7 +395,7 @@ CryptoService is initialized with 2 keys.
     "type" : "x-simple-encryption"
   }
 }
-------END ENCRYPTED VALUE------
+------END ENCRYPTED VALUE------</computeroutput>
   </screen>
 
  </section>
@@ -390,12 +422,14 @@ CryptoService is initialized with 2 keys.
   <para>For example, to export the default OpenIDM symmetric key, run the 
   following command:</para>
   
-  <screen>$ ./cli.sh keytool --export openidm-sym-default
+  <screen>
+$ <userinput>./cli.sh keytool --export openidm-sym-default</userinput>
+   <computeroutput>
 Using boot properties at /openidm/conf/boot/boot.properties
 Use KeyStore from: /openidm/security/keystore.jceks
 Please enter the password: 
 [OK] Secret key entry with algorithm AES
-AES:606d80ae316be58e94439f91ad8ce1c0
+AES:606d80ae316be58e94439f91ad8ce1c0  </computeroutput>
   </screen>
   
   <para>The default keystore password is <literal>changeit</literal>. You 
@@ -404,12 +438,14 @@ AES:606d80ae316be58e94439f91ad8ce1c0
   <para>To import a new secret key named <replaceable>my-new-key</replaceable>, 
   run the following command:</para>
   
-  <screen>$ ./cli.sh keytool --import my-new-key
+  <screen>
+$ <userinput>./cli.sh keytool --import my-new-key   </userinput>
+   <computeroutput>
 Using boot properties at /openidm/conf/boot/boot.properties
 Use KeyStore from: /openidm/security/keystore.jceks
 Please enter the password: 
 Enter the key: 
-AES:606d80ae316be58e94439f91ad8ce1c0
+AES:606d80ae316be58e94439f91ad8ce1c0 </computeroutput>
   </screen>
   
   <para>If a secret key of that name already exists, OpenIDM returns the 
@@ -433,8 +469,8 @@ AES:606d80ae316be58e94439f91ad8ce1c0
   <para>Usage is as follows:</para>
   
   <screen>
-$ ./cli.sh validate
-
+$ <userinput>./cli.sh validate   </userinput>
+   <computeroutput>
 Executing ./cli.sh
 Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -443,28 +479,15 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 [Validating] 	/path/to/openidm/conf
 [Validating] audit.json .................................. SUCCESS
 [Validating] authentication.json ......................... SUCCESS
-[Validating] endpoint-getavailableuserstoassign.json ..... SUCCESS
-[Validating] endpoint-getprocessesforuser.json ........... SUCCESS
-[Validating] endpoint-gettasksview.json .................. SUCCESS
-[Validating] endpoint-securityQA.json .................... SUCCESS
-[Validating] endpoint-siteIdentification.json ............ SUCCESS
-[Validating] endpoint-usernotifications.json ............. SUCCESS
-[Validating] managed.json ................................ SUCCESS
-[Validating] policy.json ................................. SUCCESS
-[Validating] process-access.json ......................... SUCCESS
-[Validating] provisioner.openicf-ldap.json ............... SUCCESS
-[Validating] provisioner.openicf-xml.json ................ SUCCESS
-[Validating] repo.orientdb.json .......................... SUCCESS
-[Validating] router.json ................................. SUCCESS
-[Validating] schedule-recon.json ......................... SUCCESS
-[Validating] schedule-reconcile_systemXmlAccounts_managedUser.json  SUCCESS
-[Validating] scheduler.json .............................. SUCCESS
+
+    ...
+
 [Validating] sync.json ................................... SUCCESS
 [Validating] ui-configuration.json ....................... SUCCESS
 [Validating] ui-countries.json ........................... SUCCESS
 [Validating] ui-secquestions.json ........................ SUCCESS
 [Validating] workflow.json ............................... SUCCESS
-  </screen>  
+  </computeroutput></screen>
 
 </section>
 

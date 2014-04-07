@@ -217,7 +217,6 @@
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
  "https://localhost:8443/openidm/managed/..."</screen>
       </listitem>
@@ -242,7 +241,6 @@
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
  "https://localhost:8443/openidm/system/..."
        </screen>

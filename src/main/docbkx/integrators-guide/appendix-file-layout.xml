@@ -270,6 +270,12 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/conf/script.json</filename></term>
+   <listitem>
+    <para>Script configuration file with default script directories.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/conf/system.properties</filename></term>
    <listitem>
     <para>System configuration properties used when starting OpenIDM

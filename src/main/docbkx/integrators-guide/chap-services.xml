@@ -254,16 +254,17 @@ Stopping OpenIDM (454)</screen>
       <para>This information can be accessed over REST at 
       <literal>https://localhost:8443/openidm/info/ping</literal>. For example:
       </para>
-      <screen><?dbfo pgwide="1"?>$ curl
+      <screen><?dbfo pgwide="1"?>
+ $ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/info/ping"
+ "https://localhost:8443/openidm/info/ping"</userinput>
 
+   <computeroutput>
  {"state":"ACTIVE_READY","shortDesc":"OpenIDM ready"}
-      </screen>
+   </computeroutput></screen>
       <para>The information is provided by the script 
       <filename>openidm/bin/defaults/script/info/ping.js</filename>.</para>
     </listitem>
@@ -272,13 +273,15 @@ Stopping OpenIDM (454)</screen>
       <para>This information can be accessed over REST at 
       <literal>https://localhost:8443/openidm/info/login</literal>. For example:
       </para>
-      <screen width="91"><?dbfo pgwide="1"?>$ curl
+      <screen width="91"><?dbfo pgwide="1"?>
+ $ <userinput>curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/info/login"
+ "https://localhost:8443/openidm/info/login" </userinput>
 
-
+    <computeroutput>
 {
   "authenticationId": "openidm-admin",
   "class": "org.forgerock.json.resource.SecurityContext",
@@ -295,7 +298,7 @@ Stopping OpenIDM (454)</screen>
     "component": "internal/user",
     "id": "openidm-admin"
   }
-}</screen>
+}</computeroutput></screen>
         <para>The information is provided by the script 
       <filename>openidm/bin/defaults/script/info/login.js</filename>.</para>
     </listitem>
@@ -409,9 +412,10 @@ Stopping OpenIDM (454)</screen>
    <member><literal>STOPPING</literal> - OpenIDM is shutting down</member>   
   </simplelist>
   
-  <para>By default, OpenIDM checks the following modules and services:</para>
+  <para>OpenIDM checks all required modules and services. Examples of those
+  services are shown here.</para>
 
-  <para><emphasis role="bold">Required Modules</emphasis></para>
+  <para><emphasis role="bold">Required Modules</emphasis> (examples)</para>
   <screen>
 "org.forgerock.openicf.framework.connector-framework"
 "org.forgerock.openicf.framework.connector-framework-internal"
@@ -420,16 +424,9 @@ Stopping OpenIDM (454)</screen>
 "org.forgerock.openidm.core"
 "org.forgerock.openidm.enhanced-config"
 "org.forgerock.openidm.external-email"
-"org.forgerock.openidm.external-rest"
-"org.forgerock.openidm.filter"
-"org.forgerock.openidm.httpcontext"
-"org.forgerock.openidm.infoservice"
-"org.forgerock.openidm.policy"
-"org.forgerock.openidm.provisioner"
-"org.forgerock.openidm.provisioner-openicf"
-"org.forgerock.openidm.repo"
-"org.forgerock.openidm.restlet"
-"org.forgerock.openidm.smartevent"
+
+   ...
+
 "org.forgerock.openidm.system"
 "org.forgerock.openidm.ui"
 "org.forgerock.openidm.util"
@@ -449,7 +446,7 @@ Stopping OpenIDM (454)</screen>
 "org.forgerock.openidm.crypto"  
   </screen>
   
-  <para><emphasis role="bold">Required Services</emphasis></para>
+  <para><emphasis role="bold">Required Services</emphasis> (examples)</para>
 <screen>
 "org.forgerock.openidm.config"
 "org.forgerock.openidm.provisioner"
@@ -507,30 +504,18 @@ Stopping OpenIDM (454)</screen>
 
      <para>On a running OpenIDM instance, you can list the installed modules
      and their states by typing the following command in the Felix
-     administration console:</para>
-     <screen>-&gt; scr list
+     administration console. (The output will vary by configuration.)</para>
+     <screen>-&gt; <userinput>scr list </userinput>
+      <computeroutput>
    Id   State          Name
 [  12] [active       ] org.forgerock.openidm.endpoint
 [  13] [active       ] org.forgerock.openidm.endpoint
 [  14] [active       ] org.forgerock.openidm.endpoint
 [  15] [active       ] org.forgerock.openidm.endpoint
 [  16] [active       ] org.forgerock.openidm.endpoint
-[  17] [active       ] org.forgerock.openidm.endpoint
-[  23] [unsatisfied  ] org.forgerock.openidm.info
-[  27] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[  35] [active       ] org.forgerock.openidm.ui.simple
-[  29] [active       ] org.forgerock.openidm.restlet
-[   3] [active       ] org.forgerock.openidm.repo.orientdb
-[   7] [active       ] org.forgerock.openidm.scope
-[   5] [active       ] org.forgerock.openidm.audit
-[  32] [active       ] org.forgerock.openidm.schedule
-[   2] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
-[  31] [active       ] org.forgerock.openidm.workflow
-[   9] [active       ] org.forgerock.openidm.managed
-[  28] [active       ] org.forgerock.openidm.provisioner.openicf
-[  22] [active       ] org.forgerock.openidm.health
-[  26] [active       ] org.forgerock.openidm.provisioner
-[   0] [active       ] org.forgerock.openidm.config.starter
+
+      ...
+
 [  34] [active       ] org.forgerock.openidm.taskscanner
 [  20] [active       ] org.forgerock.openidm.external.rest
 [   6] [active       ] org.forgerock.openidm.router
@@ -546,7 +531,7 @@ Stopping OpenIDM (454)</screen>
 [  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
 [  24] [active       ] org.forgerock.openidm.infoservice
 [  21] [active       ] org.forgerock.openidm.authentication
--&gt;</screen>
+</computeroutput>-&gt;</screen>
 
      <para>To display additional information about a particular module or
      service, run the following command, substituting the <literal>Id</literal>
@@ -557,7 +542,8 @@ Stopping OpenIDM (454)</screen>
      <para>The following example displays additional information about the
      router service:</para>
 
-     <screen>-&gt; scr info 6
+     <screen>-&gt; <userinput>scr info 6 </userinput>
+      <computeroutput>
 ID: 6
 Name: org.forgerock.openidm.router
 Bundle: org.forgerock.openidm.core (41)
@@ -603,7 +589,7 @@ Properties:
     openidm.restlet.path = /
     service.description = OpenIDM internal JSON resource router
     service.pid = org.forgerock.openidm.router
-    service.vendor = ForgeRock AS
+    service.vendor = ForgeRock AS </computeroutput>
 -&gt;</screen>
 
  </section>
