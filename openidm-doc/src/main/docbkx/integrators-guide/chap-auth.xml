@@ -135,6 +135,9 @@
  
  <section xml:id="openidm-authentication">
   <title>Authentication</title>
+
+  <!-- I'm tempted to split this into three subsections (MJ) -->
+
   <para>
    OpenIDM does not allow access to the REST interface unless you authenticate.
    If a project requires anonymous access, to enable users to self-register for
@@ -143,6 +146,7 @@
    <xref linkend="internal-users" />. In production, only applications are
    expected to access the REST interface.
   </para>
+
   <variablelist>
    <para>OpenIDM supports an improved authentication mechanism on the REST 
    interface. Unlike basic authentication or form-based authentication, the 
@@ -166,11 +170,22 @@
     </listitem>
    </varlistentry>
   </variablelist>
+
+  <note>
+   <para>
+    This document uses the OpenIDM authentication options for all REST calls.
+    Where no OpenIDM options exist, the "long-form" option such as
+    <command>--data</command> is used. In contrast, the README files that
+    accompany OpenIDM generally use "short-form" options such as
+    <command>-X</command> (instead of <command>--request</command>) and
+    <command>-H</command> (instead of <command>--header</command>).
+   </para>
+  </note>
   
-  <para>For more information about the OpenIDM authentication mechanism, see <link
-  xlink:href="integrators-guide#security-messages"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Use Message Level Security</citetitle></link>.</para>
+  <para>For more information about the OpenIDM authentication mechanism, see
+   <link xlink:href="integrators-guide#security-messages"
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Use Message Level Security</citetitle></link>.</para>
   
   <para>You can change the attributes that OpenIDM uses to store user login 
   and password values. The attribute names are shown in a database query
@@ -279,7 +294,7 @@
     </listitem>
    </varlistentry>
   </variablelist>
-  
+
   <para>
    A user's roles are defined by the <literal>"roles"</literal> property, and
    are fetched <emphasis>after</emphasis> authentication. If no roles are
@@ -966,7 +981,8 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
  --insecure
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET "https://localhost:8443/openidm/managed/user/bjensen"
+ --request GET
+ "https://localhost:8443/openidm/managed/user/bjensen"
      </userinput>
 {
   "effectiveAssignments": {

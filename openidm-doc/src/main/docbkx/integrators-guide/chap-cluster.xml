@@ -20,16 +20,16 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !
 -->
 <chapter xml:id='chap-cluster'
          xmlns='http://docbook.org/ns/docbook'
          version='5.0' xml:lang='en'
          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
-         xmlns:xlink='http://www.w3.org/1999/xlink'
-         xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+         xsi:schemaLocation='http://docbook.org/ns/docbook
+         http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Configuring OpenIDM to Work in a Cluster</title>
  <indexterm>
   <primary>cluster management</primary>
@@ -218,12 +218,13 @@ openidm.node.id=instance1</screen>
             <para>The following REST request displays the nodes configured
             in the cluster, and their status.</para>
 
-            <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/cluster"
-{
+            <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/cluster" </userinput>
+             <computeroutput>{
   "results": [
     {
       "shutdown": "",
@@ -237,7 +238,7 @@ openidm.node.id=instance1</screen>
       "instanceId": "openidm-2",
       "state": "running"
     }
-  ]
+  ]</computeroutput>
 }</screen>
         </example>
 
@@ -247,18 +248,20 @@ openidm.node.id=instance1</screen>
             <para>To check the status of a specific node, include its instance
             ID in the URL, for example:</para>
 
-            <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/cluster/openidm-1"
-{
+            <screen>$ <userinput> curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/cluster/openidm-1"
+             </userinput>
+             <computeroutput>{
   "results": {
     "shutdown": "",
     "startup": "2013-10-28T11:48:29.026+02:00",
     "instanceId": "openidm-1",
     "state": "running"
-  }
+  }</computeroutput>
 }</screen>
         </example>
     </section>

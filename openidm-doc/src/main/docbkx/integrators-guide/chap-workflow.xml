@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Integrating Business Processes and Workflows</title>
  <indexterm>
@@ -99,6 +100,18 @@
     </listitem>
   </itemizedlist>
 
+  <note>
+   <para>
+    With the latest version of Activiti, JavaScript tasks can now be added
+    to the definition of workflows. However, OpenIDM functions cannot be called
+    from a JavaScript task in a workflow.
+   </para>
+   <para>
+    As a workaround, use JavaScript for non-OpenIDM workflow tasks. Use the
+    <literal>activiti:expression</literal> construct to call OpenIDM functions.
+   </para>
+  </note>
+
 <section xml:id="setting-up-local-integration">
   <title>Setting Up Local Integration</title>
 
@@ -132,42 +145,52 @@ $ cp samples/misc/example.bpmn20.xml workflow/</screen>
   <para>You can verify the workflow integration by using the REST API. The 
   following REST call lists the defined workflows:</para>
   
-  <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
-  </screen>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"
+  </userinput></screen>
   <para>The sample workflow definition that you copied in the previous step is 
   named <literal>osgiProcess</literal>. The result of the preceding REST call 
-  is therefore something like:</para>
+  therefore includes output similar to:</para>
   
-  <screen>
-{"result":[
-     {"_id":"osgiProcess:1:3",
-      "name":"Osgi process"
+  <screen><computeroutput>{
+...
+  "result":[
+     {
+        ...
+        "key": "osgiProcess",
+        ...
+        "name":"Osgi process",
+        ...
+        "_id":"osgiProcess:1:3",
+        ...
      }
         ]
-}
-  </screen>
+}</computeroutput></screen>
+
+ <!-- Current command leads to a 501 not implemented message for ACTION -->
   
   <para>The <literal>osgiProcess</literal> definition calls OpenIDM, queries 
   the available workflow definitions from Activiti, then prints the list of 
   workflow definitions to the OpenIDM logs. Invoke the <literal>osgiProcess
   </literal> workflow with the following REST call to OpenIDM:</para>
   
-  <screen width="100"><?dbfo pgwide="1"?>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"_key":"osgiProcess"}'
-  </screen>
+  <screen width="100"><?dbfo pgwide="1"?>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create" \
+ --data '{"_key":"osgiProcess"}'</userinput></screen>
   
   <para>The workflow prints the list of workflow definitions to the OpenIDM 
   console. With the default sample, you should see something like this on the 
   console:</para>
-  <screen>
+  <screen><computeroutput>
 script task using resolver: [
   result:[
     [_id:osgiProcess:1:3, name:Osgi process]
@@ -177,8 +200,7 @@ script task using expression resolver: [
   result:[
     [_id:osgiProcess:1:3, name:Osgi process]
   ]
-]
-  </screen>
+]</computeroutput></screen>
 
  </section>
  
@@ -200,21 +222,26 @@ script task using expression resolver: [
     Guide</citetitle></link>.</para>
    </step>
    <step>
-    <para>Download and unzip the Activiti zip file 
-    (<filename>activiti-5.10.zip</filename>) from <link xlink:href=
-    "http://activiti.org/download.html" xlink:show="new">
+    <para>Download and unzip the latest version of the Activiti 5.x zip file
+    (<filename>activiti-5.<replaceable>version</replaceable>.zip</filename>)
+    from <link xlink:href="http://activiti.org/download.html" xlink:show="new">
     Activiti Downloads</link> page.</para>
    </step>
    <step>
-    <para>Edit the Activiti configuration file to avoid a port conflict with 
-    OpenIDM. OpenIDM runs on port 8080 by default. Edit the file so that 
-    Activiti Explorer runs on port 9090 (by replacing each instance of 8080 
-    with 9090). The following example uses <literal>sed</literal> on a UNIX 
-    system to replace all instances of 8080 with 9090.
+    <para>
+     Install another Java EE container. Activiti suggests Tomcat.
     </para>
-    <screen>$ cd /path/to/activiti/setup/
-$ sed -i.bak 's/8080/9090/g' build.xml
-    </screen>
+   </step>
+   <step>
+    <para>Edit the Tomcat server configuration file to avoid a port conflict with
+    OpenIDM. OpenIDM runs on port 8080 by default. Edit the <filename>server.xml
+    </filename> file so that
+    Activiti Explorer runs on port 9090 (by replacing each instance of 8080 
+    with 9090).
+   </para>
+
+    <!-- My Activiti.only changes ended here -->
+
     <note><para>There is currently a bug in the Activiti demo which might mean 
     that all port replacements are not made. If you cannot access Activiti 
     Explorer (in the next step) after making this change, <emphasis>also</emphasis> 
@@ -247,7 +274,7 @@ $ ant tomcat.stop
       <para>Copy the OpenIDM remote workflow WAR file to the Tomcat webapps 
       folder.</para>
       <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow
-$ cp openidm-workflow-remote-<?eval ${docTargetVersion}?>.war \
+$ cp openidm-workflow-remote-<?eval ${serverDocTargetVersion}?>.war \
  /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/
       </screen>
      </listitem>
@@ -255,7 +282,7 @@ $ cp openidm-workflow-remote-<?eval ${docTargetVersion}?>.war \
       <para>Copy the OpenIDM workflow Activiti demo jar file to the Tomcat 
       Activiti Explorer library.</para>
      <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow/
-$ cp openidm-workflow-activiti-<?eval ${docTargetVersion}?>-jar-with-dependencies.jar \
+$ cp openidm-workflow-activiti-<?eval ${serverDocTargetVersion}?>-jar-with-dependencies.jar \
  /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/activiti-explorer/WEB-INF/lib/
       </screen>
      </listitem>
@@ -369,12 +396,13 @@ $ ./startup.sh
    <step>
     <para>Test the integration by sending the following CURL request to list 
     the available workflows:</para>
-    <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET 
- "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
-    </screen>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"
+    </userinput></screen>
    </step>
    <step>
     <para>Log in to the Activiti Explorer of the remote Activiti engine (with 
@@ -398,23 +426,22 @@ $ ./startup.sh
    </step>
    <step>
     <para>Verify the integration by sending the following CURL request:</para>
-    <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"_key":"osgiProcess"}'
-    </screen>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create" \
+ --data '{"_key":"osgiProcess"}'</userinput></screen>
     <para>The request should return a process ID, similar to the following:</para>
-    <screen>
-{
+    <screen><computeroutput>{
   "_id":"614",
   "processInstanceId":"614",
   "status":"ended",
   "businessKey":null,
   "processDefinitionId":"osgiProcess:7:603"
-}
-    </screen>
+}</computeroutput></screen>
     <para>This request starts the osgiProcess and writes the list of installed 
     workflows to the Tomcat server log file (<filename>/path/to/activiti/apps/
     apache-tomcat-6.0.32/logs/catalina.out</filename>).
@@ -473,7 +500,7 @@ $ ./startup.sh
     "enabled"  : "true",
     "location" : "remote",
     "engine" : {
-        "url" : "http://localhost:9090/openidm-workflow-remote-<?eval ${docTargetVersion}?>",
+        "url" : "http://localhost:9090/openidm-workflow-remote-<?eval ${serverDocTargetVersion}?>",
         "username" : "youractivitiuser",
         "password" : "youractivitipassword"
     },
@@ -625,12 +652,14 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
 
   <para>You can invoke the same workflow from the REST interface by sending 
   the following REST call to OpenIDM:</para>
-  <screen width="90">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"_key":"myWorkflow", "foo":"bar"}'
+  <screen width="90">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create" \
+ --data '{"_key":"myWorkflow", "foo":"bar"}' </userinput>
   </screen>
   
   <para>There are two ways in which you can specify the workflow definition 
@@ -676,19 +705,22 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
       precise.</para>
     </listitem>
   </itemizedlist>
-  
+
+  <!-- As I haven't tested with Activiti 5.15, I don't know whether POST or
+  PUT works, or whether one works better than another. (mj) -->
+
   <para>You can use the optional <literal>_businessKey</literal> parameter to 
   add specific business logic information to the workflow when it is invoked.
   For example, the following workflow invocation assigns the workflow a 
   business key of <literal>"newOrder"</literal>. This business key can later 
   be used to query "newOrder" processes.</para>
-  <screen width="90">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}'
-  </screen>
+  <screen width="90">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+ --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}'</userinput></screen>
  </section>
 
  <section xml:id="querying-activiti-workflows">
@@ -696,15 +728,17 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
 
   <para>The Activiti implementation supports filtered queries that enable you 
   to query the running process instances and tasks, based on specific query 
-  parameters. For example, the following query returns all process instances 
+  parameters. For example, the following query returns all process instances
   with the business key <literal>"newOrder"</literal>, as invoked in the previous 
   section.</para>
   
-  <screen width="102">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+  <screen width="102">$ curl \
+ --cacert self-signed.crt
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query
  &amp;businessKey=newOrder"
   </screen>  
   
@@ -712,11 +746,13 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
   instance variable by prefixing the variable name with <literal>_var-</literal>.
   For example:</para>
 
-  <screen width="102">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+  <screen width="102">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json"
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query
  &amp;_var-processvariablename=processvariablevalue"
   </screen>   
 
@@ -738,16 +774,18 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
    is provided in <literal>openidm/samples/workflow</literal>.</para>
    
    <variablelist>
-     <varlistentry>
-       <term><literal>openidm/workflow/processdefinition</literal></term>
-       <listitem>
-             <para>List the available workflow definitions, for example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
- 
+    <varlistentry>
+     <term><literal>openidm/workflow/processdefinition</literal></term>
+     <listitem>
+      <para>List the available workflow definitions, for example:</para>
+      <screen>$ <userinput> curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"
+      </userinput>
+      <computeroutput>
 {
   "result": [
     {
@@ -755,16 +793,21 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
       "_id": "managedUserApproval:1:3"
     }
   ]
-}        
-             </screen>
-             <para>List the workflows, based on certain filter criteria, for example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/processdefinition?_queryId=
+}
+      </computeroutput>
+      </screen>
+      <para>
+       List the workflows, based on certain filter criteria, for example:
+      </para>
+       <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=
 filtered-query&amp;category=Examples"
- 
+       </userinput>
+       <computeroutput>
 {
   "result": [
     {
@@ -772,22 +815,24 @@ filtered-query&amp;category=Examples"
       "_id": "managedUserApproval:1:3"
     }
   ]
-}          
-        </screen>   
-       </listitem> 
+}</computeroutput></screen>
+     </listitem>
      </varlistentry>
      <varlistentry>
-       <term><literal>openidm/workflow/processdefinition/{id}</literal></term>
-       <listitem>
-             <para>Obtain detailed information for a process definition, based 
-             on the ID. (The ID can be determined by querying all available 
-             process definitions). For example:</para>
-             <screen>$ curl
+      <term><literal>openidm/workflow/processdefinition/{id}</literal></term>
+      <listitem>
+       <para>
+        Obtain detailed information for a process definition, based
+        on the ID. (The ID can be determined by querying all available
+        process definitions). For example:</para>
+         <screen>$ <userinput>curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET       
- "http://localhost:8080/openidm/workflow/processdefinition/contractorOnboarding:1:3"
- 
+ "https://localhost:8443/openidm/workflow/processdefinition/contractorOnboarding:1:3"
+          </userinput>
+          <computeroutput>
 {
   "key": "managedUserApproval",
   "_rev": "0",
@@ -798,62 +843,68 @@ filtered-query&amp;category=Examples"
   "description": null,
   "name": "Managed User Approval Workflow",
   "deploymentId": "1"
-}        
-             </screen>
-         </listitem>
-       </varlistentry>
+}</computeroutput></screen>
+      </listitem>
+     </varlistentry>
      <varlistentry>
-       <term><literal>openidm/workflow/processinstance</literal></term>
+      <term><literal>openidm/workflow/processinstance</literal></term>
        <listitem>
-             <para>Obtain the list of running workflows (process instances).
-             The query returns a list of IDs. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/workflow/processinstance?_queryId=query-all-ids"
-
-{
+        <para>
+         Obtain the list of running workflows (process instances).
+         The query returns a list of IDs. For example:
+        </para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids"
+         </userinput>
+         <computeroutput>{
   "result": [
     {
       "processDefinitionId": "contractorOnboarding:1:3",
       "_id": "4"
     }
   ]
-}
-             </screen>
+}</computeroutput></screen>
 
-             <para>Obtain the list of running workflows based on specific
-             filter criteria. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/workflow/processinstance?_queryId=
+        <para>
+         Obtain the list of running workflows based on specific
+         filter criteria. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+  \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=
 filtered-query&amp;businessKey=myBusinessKey"
-             </screen>
-
-             <para>Start a workflow process instance. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --data {"_key":"contractorOnboarding"}
- --request POST
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
-             </screen>
+         </userinput></screen>
+        <para>Start a workflow process instance. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --data {"_key":"contractorOnboarding"} \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+       </userinput></screen>
        </listitem>
      </varlistentry>
      <varlistentry>
-       <term><literal>openidm/workflow/processinstance/{id}</literal></term>
-       <listitem>
-             <para>Obtain the details of the specified process instance. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/workflow/processinstance/4"
-
-{
+      <term><literal>openidm/workflow/processinstance/{id}</literal></term>
+      <listitem>
+       <para>Obtain the details of the specified process instance. For example:</para>
+       <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/4"
+        </userinput>
+        <computeroutput>{
   "deleteReason": null,
   "processDefinitionId": "contractorOnboarding:1:3",
   "_rev": "0",
@@ -864,30 +915,33 @@ filtered-query&amp;businessKey=myBusinessKey"
   "durationInMillis": null,
   "endTime": null,
   "superProcessInstanceId": null
-}
-             </screen>
+}</computeroutput></screen>
 
-             <para>Stop the specified process instance. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request DELETE
- "http://localhost:8080/openidm/workflow/processinstance/4"
-             </screen>
+       <para>Stop the specified process instance. For example:</para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/workflow/processinstance/4"</userinput>
+        </screen>
        </listitem>
      </varlistentry>
      <varlistentry>
-       <term><literal>openidm/workflow/taskdefinition</literal></term>
-       <listitem>
-             <para>Query a task definition based on the process definition ID 
-             and the task name (<literal>taskDefinitionKey</literal>). For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/taskdefinition?_queryId=query-taskdefinition
-&amp;processDefinitionId=contractorOnboarding:1:6&amp;taskDefinitionKey=decideApprovalTask"
-{
+      <term><literal>openidm/workflow/taskdefinition</literal></term>
+      <listitem>
+       <para>
+        Query a task definition based on the process definition ID
+        and the task name (<literal>taskDefinitionKey</literal>). For example:</para>
+        <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition/contractorOnboarding:1:6/taskDefinition/decideApprovalTask"
+         </userinput>
+         <computeroutput>{
   "dueDate": null,
   "taskCandidateGroup": [
     {
@@ -901,98 +955,108 @@ filtered-query&amp;businessKey=myBusinessKey"
           "accept": "Accept",
           "reject": "Reject"
 ...
-             </screen>
+        </computeroutput></screen>
        </listitem> 
      </varlistentry>  
      <varlistentry>
-       <term><literal>openidm/workflow/taskinstance</literal></term>
+      <term><literal>openidm/workflow/taskinstance</literal></term>
        <listitem>
-             <para>Query all running task instances. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
- 
-{
+        <para>Query all running task instances. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
+          </userinput>
+          <computeroutput>{
   "result": [
     {
       "name": "Contractor Approval",
       "_id": "70"
     }
   ]
-}
-             </screen>
+}</computeroutput></screen>
 
-             <para>Query task instances based on candidate users or candidate
-             groups. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateUser=manager1"
-             </screen>
-             <para>or</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateGroup=management"
-             </screen>
+        <para>Query task instances based on candidate users or candidate
+         groups. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateUser=manager1"
+          </userinput></screen>
+           <para>or</para>
+            <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateGroup=management"
+            </userinput></screen>
              <para>Note that you can include both users and groups in the same 
              query.</para>          
        </listitem>       
      </varlistentry>
      <varlistentry>
-       <term><literal>openidm/workflow/taskinstance/{id}</literal></term>
+      <term><literal>openidm/workflow/taskinstance/{id}</literal></term>
        <listitem>
-             <para>Obtain detailed information for a running task, based on the 
-             task ID. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance/70"
- 
+        <para>Obtain detailed information for a running task, based on the
+         task ID. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance/70"
+          </userinput>
+          <computeroutput>
 {
   "dueDate": null,
   "processDefinitionId": "contractorOnboarding:1:3",
   "owner": null,
   "taskDefinitionKey": "decideApprovalTask",
   "name": "Contractor Approval",
-...
+...</computeroutput>
              </screen>
 
-             <para>Update task-related data stored in the Activiti workflow
-             engine. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "If-Match : *"
- --request PUT       
- --data '{"description":"updated description"}'
- "http://localhost:8080/openidm/workflow/taskinstance/70"
-             </screen>
+        <para>Update task-related data stored in the Activiti workflow
+         engine. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-Match : *" \
+ --request PUT \
+ --data '{"description":"updated description"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/70" </userinput>
+         </screen>
 
-             <para>Complete the specified task. The variables required by the
-             task are provided in the request body. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST       
- --data '{"requestApproved":"true"}'
- "http://localhost:8080/openidm/workflow/taskinstance/70?_action=complete"
-             </screen>
+        <para>Complete the specified task. The variables required by the
+         task are provided in the request body. For example:</para>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{"requestApproved":"true"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/70?_action=complete"
+          </userinput></screen>
 
-             <para>Claim the specified task. The ID of the user who claims the
-             task is provided in the request body. For example:</para>
-             <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST       
- --data '{"userId":"manager1"}'
- "http://localhost:8080/openidm/workflow/taskinstance/70?_action=claim"
-             </screen>
+         <para>Claim the specified task. The ID of the user who claims the
+          task is provided in the request body. For example:</para>
+          <screen>$<userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{"userId":"manager1"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/70?_action=claim"
+           </userinput></screen>
        </listitem>                 
      </varlistentry>         
    </variablelist>
@@ -1135,13 +1199,15 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
    <para>You can also invoke the workflow over the REST interface with the 
    following REST command:</para>
    
-   <screen width="100"><?dbfo pgwide="1"?>$ curl
- --header "X-OpenIDM-Username: openidm-admin" 
- --header "X-OpenIDM-Password: openidm-admin"
- --data '{"_key":"EmailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}'
- --request POST 
- "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
-   </screen>
+   <screen width="100"><?dbfo pgwide="1"?>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --data '{"_key":"EmailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}' \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+   </userinput></screen>
 
    <para>To schedule the workflow to be invoked regularly, create a schedule 
    configuration object named 
@@ -1217,17 +1283,20 @@ INFO: XPath currently not supported as expressionLanguage
      <step>
      <para>Start OpenIDM with the configuration for the workflow sample.</para>
      
-     <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/workflow</screen>     
+     <screen>$ <userinput>cd /path/to/openidm
+$ ./startup.sh -p samples/workflow</userinput></screen>
      </step>
      <step>
      <para>Run reconciliation over the REST interface.</para>
 
-     <screen width="99">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+     <screen width="100">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+     </userinput></screen>
 
      <para>Successful reconciliation returns an "_id" object, such as the 
      following:</para>
@@ -1237,12 +1306,14 @@ $ ./startup.sh -p samples/workflow</screen>
      the following REST query, which shows the two users, 
      <literal>manager1</literal> and <literal>user1</literal>.</para>
    
-     <screen>$ curl 
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET 
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
+      </userinput>
+      <computeroutput>
 {
   "conversion-time-ms": 0,
   "result": [
@@ -1256,7 +1327,7 @@ $ ./startup.sh -p samples/workflow</screen>
     }
   ],
   "query-time-ms": 1
-}
+}</computeroutput>
      </screen>        
      </step>
      
@@ -1311,12 +1382,14 @@ $ ./startup.sh -p samples/workflow</screen>
      <para>If you Accept the new contractor details, the user account is 
      created in the repository. You can check the new account by running the 
      following REST command:</para>
-     <screen>$ curl 
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET 
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
+      </userinput>
+      <computeroutput>
 {
   "conversion-time-ms": 0,
   "result": [
@@ -1334,18 +1407,20 @@ $ ./startup.sh -p samples/workflow</screen>
     }
   ],
   "query-time-ms": 1
-}
+}</computeroutput>
      </screen>
      
      <para>Display the details of the new user, by running a REST query on the 
      user ID, as follows:</para>
-     
-     <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET     
- "http://localhost:8080/openidm/managed/user/51afe0f8-94c3-45c5-8c69-319e6ef5981f"
 
+      <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/51afe0f8-94c3-45c5-8c69-319e6ef5981f"
+       </userinput>
+       <computeroutput>
 {
   "city": "",
   "country": "",
@@ -1374,7 +1449,7 @@ $ ./startup.sh -p samples/workflow</screen>
   "roles": [
          "openidm-authorized"
   ]
-}     
+}     </computeroutput>
      </screen>
      
      <para>You can now log in to the UI as the new user (with the details that 
@@ -1386,8 +1461,9 @@ $ ./startup.sh -p samples/workflow</screen>
      <para>If you specified that the new user should be added to the original 
      data source, you will see that the account was added to the XML file:</para>
      
-     <screen>$ cd /path/to/openidm
-$ cat samples/workflow/data/xmlConnectorData.xml
+     <screen>$ <userinput> cd /path/to/openidm
+$ cat samples/workflow/data/xmlConnectorData.xml </userinput>
+      <computeroutput>
 ...
    &gt;ri:__ACCOUNT__&lt;
       &gt;icf:__DESCRIPTION__&lt;Contract accountant&gt;/icf:__DESCRIPTION__&lt;
@@ -1405,7 +1481,7 @@ $ cat samples/workflow/data/xmlConnectorData.xml
       &gt;ri:endDate&lt;12/12/2012&gt;/ri:endDate&lt;
       &gt;ri:lastname&lt;Doe&gt;/ri:lastname&lt;
    &gt;/ri:__ACCOUNT__&lt;
-...
+... </computeroutput>
      </screen>
      
      <para>If you declined the approval request, the user will not be created 

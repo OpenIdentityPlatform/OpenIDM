@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Scheduling Tasks and Events</title>
  <indexterm>
@@ -85,7 +86,7 @@
     file for each configured schedule</para>
   </listitem>
  </itemizedlist>
- 
+
   <para>The scheduler service configuration file 
   (<filename>openidm/conf/scheduler.json</filename>) governs the configuration
   for a specific scheduler instance, and has the following format:
@@ -101,7 +102,8 @@
      "instanceTimeout" : "60000",
      "instanceRecoveryTimeout" : "60000",
      "instanceCheckInInterval" : "10000",
-     "instanceCheckInOffset" : "0"
+     "instanceCheckInOffset" : "0",
+     "instanceId" : { }
  },
  "advancedProperties" : {
      "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
@@ -532,20 +534,23 @@
   delivery as 
   <filename>openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json</filename>. 
   To use this sample file, you must copy it to the <filename>openidm/conf</filename> 
-  directory.</para>
+  directory. Since that file calls for a <filename>script/sunset.js</filename>
+  file, you will also need to copy that script file from
+  <filename>openidm/samples/taskscanner/script/sunset.js</filename> to the
+  <filename>openidm/script</filename> directory</para>
   
   <programlisting language="javascript">
 {
     "enabled" : true,
     "type" : "cron",
     "schedule" : "0 0 * * * ?",
+    "concurrentExecution" : false,
     "invokeService" : "taskscanner",
     "invokeContext" : {
         "waitForCompletion" : false,
         "maxRecords" : 2000,
         "numberOfThreads" : 5,
         "scan" : {
-            "object" : "managed/user",
             "_queryId" : "scan-tasks",
             "property" : "sunset/date",
             "condition" : {
@@ -741,7 +746,7 @@
   <title>Managing Scanning Tasks Over REST</title>
    <para>You can trigger, cancel, and monitor scanning tasks over the REST 
    interface, using the REST endpoint 
-   <literal>http://localhost:8080/openidm/taskscanner</literal>.</para>
+   <literal>https://localhost:8443/openidm/taskscanner</literal>.</para>
    
    <section xml:id="triggering-task-scanner">
     <title>Triggering a Scanning Task</title>
@@ -750,10 +755,12 @@
     <filename>openidm/conf/schedule-taskscan_sunset.json</filename>.</para>
  
     <screen width="91"><?dbfo pgwide="1"?>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset"
+ "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset"
    </screen>
    
    <para>By default, a scanning task ID is returned immediately when the task 
@@ -772,10 +779,12 @@
     initiated. For example:</para>
 
     <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset&amp;waitForCompletion=true"
+ "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset&amp;waitForCompletion=true"
     </screen>       
    
    </section>
@@ -788,13 +797,15 @@
     </para>
     
     <screen width="91"><?dbfo pgwide="1"?>$curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request POST
- "http://localhost:8080/openidm/taskscanner/edfaf59c-aad1-442a-adf6-3620b24f8385?_action=cancel"
+ "https://localhost:8443/openidm/taskscanner/edfaf59c-aad1-442a-adf6-3620b24f8385?_action=cancel"
     </screen>
     
-    <para>The output for a scanning task cancelation request is similar to the
+    <para>The output for a scanning task cancellation request is similar to the
     following, but on a single line:</para>
     
     <screen width="91">
@@ -814,28 +825,31 @@
     example displays all scanning tasks.</para>
     
     <screen>$curl
+ --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
  --request GET
- "http://localhost:8080/openidm/taskscanner"
+ "https://localhost:8443/openidm/taskscanner"
     </screen>
     
     <para>The output of such a request is similar to the following, with one 
     item for each scanning task. The output appears on a single line, but
     has been indented here, for legibility.</para>
     
-    <screen width="91">{"tasks": [
+    <screen width="91">{
+ "tasks": [
     {
-      "_id": "edfaf59c-aad1-442a-adf6-3620b24f8385",
-      "progress": {
-        "state": "COMPLETED",
-        "processed": 2400,
-        "total": 2400,
-        "successes": 2400,
-        "failures": 0
-      },
-      "started": 1352455546149,
       "ended": 1352455546182
+      "started": 1352455546149,
+      "progress": {
+        "failures": 0
+        "successes": 2400,
+        "total": 2400,
+        "processed": 2400,
+        "state": "COMPLETED",
+      },
+      "_id": "edfaf59c-aad1-442a-adf6-3620b24f8385",
     }
   ]
 }
@@ -844,9 +858,15 @@
     <variablelist>
      <para>Each scanning task has the following properties:</para>
      <varlistentry>
-      <term><literal>_id</literal></term>
+      <term><literal>ended</literal></term>
       <listitem>
-       <para>The ID of the scanning task.</para>
+       <para>The time at which the scanning task ended.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>started</literal></term>
+      <listitem>
+       <para>The time at which the scanning task started.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -855,33 +875,28 @@
        <para>The progress of the scanning task, summarised in the following 
        fields:</para>
        <simplelist>
-        <member><literal>state</literal> - the overall state of the task, 
-          <literal>INITIALIZED</literal>, <literal>ACTIVE</literal>, <literal>
+        <member><literal>failures</literal> - the number of records not able
+        to be processed</member>
+        <member><literal>successes</literal> - the number of records processed
+         successfully</member>
+        <member><literal>total</literal> - the total number of records</member>
+        <member><literal>processed</literal> - the number of processed records
+        </member>
+        <member><literal>state</literal> - the overall state of the task,
+         <literal>INITIALIZED</literal>, <literal>ACTIVE</literal>, <literal>
           COMPLETED</literal>, <literal>CANCELLED</literal>, or <literal>
           ERROR</literal>
         </member>
-        <member><literal>processed</literal> - the number of processed records
-        </member>
-        <member><literal>total</literal> - the total number of records</member>
-        <member><literal>successes</literal> - the number of records processed 
-        successfully</member>
-        <member><literal>failures</literal> - the number of records not able 
-        to be processed</member>
        </simplelist>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>started</literal></term>
+      <term><literal>_id</literal></term>
       <listitem>
-       <para>The time at which the scanning task started, .</para>
+       <para>The ID of the scanning task.</para>
       </listitem>
-     </varlistentry>     <varlistentry>
-      <term><literal>ended</literal></term>
-      <listitem>
-       <para>The time at which the scanning task ended.</para>
-      </listitem>
-     </varlistentry>                
-    </variablelist> 
+     </varlistentry>
+    </variablelist>
     
     <para>The number of processed tasks whose details are retained is governed 
     by the <literal>"openidm.taskscanner.maxcompletedruns"</literal> property 
