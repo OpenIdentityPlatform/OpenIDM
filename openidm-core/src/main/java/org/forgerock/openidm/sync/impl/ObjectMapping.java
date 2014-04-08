@@ -1322,6 +1322,10 @@ class ObjectMapping implements SynchronizationListener {
                                     throw new SynchronizationException("no target object to link");
                                 }
 
+                                // get a copy of the target before the onLink trigger,
+                                // the onUpdate trigger or the mappings are applied
+                                JsonValue oldTarget = getTargetObject().copy();
+
                                 if (isLinkingEnabled() && linkObject._id == null) {
                                     try {
                                         createLink(getSourceObjectId(), targetId, reconId);
@@ -1348,7 +1352,6 @@ class ObjectMapping implements SynchronizationListener {
                                     break; // do not update target
                                 }
                                 if (getSourceObject() != null && getTargetObject() != null) {
-                                    JsonValue oldTarget = getTargetObject().copy();
                                     applyMappings(getSourceObject(), getTargetObject());
                                     execScript("onUpdate", onUpdateScript);
                                     if (JsonPatch.diff(oldTarget, getTargetObject())
