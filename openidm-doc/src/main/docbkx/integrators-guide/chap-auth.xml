@@ -814,7 +814,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
             "name": "managedUser_systemLdapAccounts",
             "source": "managed/user",
             "sourceCondition": {
-                "effectiveRoles": "ad-role"
+                "effectiveRoles": "managed/role/ad-role"
             },
             "target": "system/ad/account"
             ...
