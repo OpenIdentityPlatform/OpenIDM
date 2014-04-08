@@ -388,17 +388,12 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     </para>
 
     <para>
-     These endpoints are serviced by <literal>SingletonResourceProviders</literal>
-     where the keystore and truststore are themselves the resource.
-    </para>
-
-    <para>
      You can use these endpoints to READ the contents on the keystore and
      truststore.
     </para>
 
     <para>
-     You can also use these endpoints to perform related actions such as
+     In addition, you can use these endpoints to perform related actions such as
      <literal>generateCert</literal> and <literal>generateCSR</literal>.
     </para>
 
@@ -416,19 +411,18 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     </para>
 
     <para>
-     The security service includes endpoints for the keystore and truststore:
-     <literal>openidm/security/keystore</literal> and
-     <literal>openidm/security/truststore</literal>. Certificates and private
+     Certificates and private
      keys are associated with <literal>openidm/security/keystore/cert</literal>,
      <literal>openidm/security/keystore/privatekey</literal>, and
      <literal>openidm/security/truststore/cert</literal>.
     </para>
 
     <para>
-     These endpoints are serviced by <literal>CollectionResourceProviders</literal>
-     that provide access to certificates and private keys within the keystore
-     and truststore.
+     All CRUD requests on such certificates and private/public keys use these
+     endpoints.
     </para>
+
+   <!-- CRUD functionality confirmed via CollectionResourceProvider javadoc -->
 
   </section>
 
