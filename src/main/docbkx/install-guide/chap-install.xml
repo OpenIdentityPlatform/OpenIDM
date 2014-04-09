@@ -406,6 +406,14 @@ $</screen>
       <filename>openidm/conf</filename> and <filename>openidm/script</filename>,
       you might need to modify the RESTful commands to reflect those changes.
      </para>
+     <para>
+      Most of the examples in this guide use client-assigned IDs when creating
+      resources, as it makes the examples easier to read.
+     </para>
+     <para>
+      In general, server-assigned UUIDs are better in production, as they can be
+      generated easily in clustered environments.
+     </para>
     </note>
 
    <procedure xml:id="first-rest-steps">

@@ -39,12 +39,14 @@
    <primary>REST API</primary>
   </indexterm>
 
-    <para>Representational State Transfer (REST) is a software architecture style
-        for exposing resources, using the technologies and protocols of the World
-        Wide Web. REST describes how distributed data objects, or resources, can be
-        defined and addressed. OpenIDM provides a RESTful API for accessing managed
-        objects, system objects, workflows, and some elements of the system
-        configuration.</para>
+    <para>
+     Representational State Transfer (REST) is a software architecture style
+     for exposing resources, using the technologies and protocols of the World
+     Wide Web. REST describes how distributed data objects, or resources, can be
+     defined and addressed. OpenIDM provides a RESTful API for accessing managed
+     objects, system objects, workflows, and some elements of the system
+     configuration.
+    </para>
 
     <para>
      The ForgeRock implementation of REST, known as commons REST (CREST),
@@ -138,9 +140,21 @@
   generated in the form of a UUID. If you create an object by using PUT, the
   client assigns the ID in whatever format you specify.</para>
 
-  <para>In general, UUIDs are better in that they can be generated easily in
-  clustered environments. However, you might have specific reasons that dictate
-  a different scheme for generating IDs.</para>
+  <para>
+   Most of the examples in this guide use client-assigned IDs, as it makes the
+   examples easier to read.
+  </para>
+
+  <para>
+   In general, UUIDs are better in production, as they can be generated easily
+   in clustered environments. However, you might have specific reasons that
+   dictate a different scheme for generating IDs.
+  </para>
+
+  <para>
+   Most of the examples in this guide use client-assigned IDs, as it makes the
+   examples easier to read.
+  </para>
 
   <para>Object identifiers that begin with underscore ( <literal>_</literal> )
   are reserved for future use.</para>
