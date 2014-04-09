@@ -151,11 +151,6 @@
    dictate a different scheme for generating IDs.
   </para>
 
-  <para>
-   Most of the examples in this guide use client-assigned IDs, as it makes the
-   examples easier to read.
-  </para>
-
   <para>Object identifiers that begin with underscore ( <literal>_</literal> )
   are reserved for future use.</para>
  </section>
