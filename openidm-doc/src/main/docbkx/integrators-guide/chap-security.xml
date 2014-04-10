@@ -775,17 +775,25 @@ mysql&gt; select objectid,roles from internaluser;
    <literal>openidm-sym-default</literal>. Change this default key before
    deploying OpenIDM in production.</para>
 
+   <para>
+    As noted in the section on the<link xlink:show="new"
+    xlink:href="integrators-guide#cli-keytool"
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>keytool</citetitle></link> command, the default keystore
+    password is <literal>changeit</literal>.
+   </para>
+
    <step>
     <para>Add the new key to the key store.</para>
     <screen>
-     <userinput>
-$ cd /path/to/openidm/
-$ keytool
- -genseckey
- -alias new-sym-key
- -keyalg AES
- -keysize 128
- -keystore security/keystore.jceks
+
+$ <userinput>cd /path/to/openidm/</userinput>
+$ <userinput>keytool \
+ -genseckey \
+ -alias new-sym-key \
+ -keyalg AES \
+ -keysize 128 \
+ -keystore security/keystore.jceks \
  -storetype JCEKS
      </userinput>
      <computeroutput>
@@ -795,7 +803,8 @@ Enter key password for &lt;new-sym-key&gt;
 Re-enter new password:
      </computeroutput>
     </screen>
-    <para>Also see
+    <para>Additional options associated with the <command>keytool</command>
+     command in OpenIDM are shown in the following file:
     <filename>openidm/samples/security/keystore_readme.txt</filename>.</para>
    </step>
    <step>
