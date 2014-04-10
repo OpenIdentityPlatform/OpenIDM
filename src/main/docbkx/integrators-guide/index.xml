@@ -102,6 +102,7 @@
  <xinclude:include href='chap-ui.xml' />
  <xinclude:include href='chap-configuration.xml' />
  <xinclude:include href='chap-data.xml' />
+ <xinclude:include href='chap-users-groups-roles.xml' />
  <xinclude:include href='chap-policies.xml' />
  <xinclude:include href='chap-logs.xml' />
  <xinclude:include href='chap-resource-conf.xml' />

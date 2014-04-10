@@ -38,8 +38,9 @@
   <primary>Authorization</primary>
  </indexterm>
 
- <para>OpenIDM provides a simple, yet flexible authentication and authorization 
- mechanism based on REST interface URLs and on roles stored in the repository.
+ <para>
+  OpenIDM provides a flexible authentication and authorization mechanism, based
+  on REST interface URLs and on roles stored in the repository.
  </para>
 
  <section xml:id="openidm-users">
@@ -58,17 +59,20 @@
   <section xml:id="internal-users">
    <title>Internal Users</title>
    
-   <para>Two internal users are created by default - <literal>anonymous</literal> 
-   and <literal>openidm-admin</literal>. These accounts are separated from 
-   other user accounts to protect them from any reconciliation or 
-   synchronization processes.</para>
+   <para>
+    Two internal users are created by default - <literal>anonymous</literal> and
+    <literal>openidm-admin</literal>. These accounts are separated from other
+    user accounts to protect them from any reconciliation or synchronization
+    processes.
+   </para>
    
-   <para>OpenIDM stores internal users and their role membership in a table
-   in the repository called <literal>internaluser</literal> when implemented
-   in MySQL, and in the <literal>internal_user</literal> table for an OrientDB 
-   repository. You can add or remove internal users over the REST interface 
-   (at <literal>https://localhost:8443/openidm/repo/internal/user</literal>) or
-   directly in the repository.
+   <para>
+    OpenIDM stores internal users and their role membership in a table in the
+    repository (named <literal>internaluser</literal> in JDBC repositories, and
+    <literal>internal_user</literal> for an OrientDB repository). You can add or
+    remove internal users over the REST interface
+    (at <literal>https://localhost:8443/openidm/repo/internal/user</literal>) or
+    directly in the repository.
    </para>
 
    <variablelist>
@@ -119,10 +123,10 @@
    <secondary>Managed objects</secondary>
   </indexterm>
    <para>
-    External users that OpenIDM manages are referred to as managed users. When
-    implemented in MySQL, OpenIDM stores managed users in the managed objects
+    External users that OpenIDM manages are referred to as managed users. For
+    JDBC repositories, OpenIDM stores managed users in the managed objects
     table of the repository, named <literal>managedobjects</literal>. A second
-    MySQL table, <literal>managedobjectproperties</literal>, serves as the index
+    table, <literal>managedobjectproperties</literal>, serves as the index
     table. When implemented in OrientDB, managed objects are stored in the table
     <literal>managed_user</literal>.
    </para>
@@ -187,10 +191,11 @@
    xlink:role="http://docbook.org/xlink/role/olink">
    <citetitle>Use Message Level Security</citetitle></link>.</para>
   
-  <para>You can change the attributes that OpenIDM uses to store user login 
-  and password values. The attribute names are shown in a database query
-  that is defined in 
-  <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
+  <para>
+   You can change the attributes that OpenIDM uses to store user login and
+   password values. The attribute names are shown in a database query that is
+   defined in
+   <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
   </para>
 
   <variablelist>
@@ -218,28 +223,211 @@
 {
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
-    "defaultUserRoles" : [ ]
+...
 }</programlisting>
 
- <para>You can explicitly define the properties that constitute passwords or 
- roles by setting the <literal>propertyMapping</literal> object in the 
- <filename>conf/authentication.json</filename> file. By default, the property 
- mapping is configured as follows:</para>
+ <para>
+  You can explicitly define the properties that constitute passwords or roles by
+  setting the <literal>propertyMapping</literal> object in the
+  <filename>conf/authentication.json</filename> file. By default, the property
+  mapping is configured as follows:
+ </para>
  
  <programlisting language="javascript">
  ...
     "propertyMapping" : {
         "authenticationId" : "_id",
         "userCredential" : "password",
-        "userRoles" : ["roles"]
+        "userRoles" : "roles"
     },
  ... 
  </programlisting>
 
  </section>
 
+ <section xml:id="passthrough-auth">
+  <title>Using Pass-Through Authentication</title>
+  <para>
+   In addition to the internal and managed user authentication modules, OpenIDM
+   ${serverDocTargetVersion} supports a pass-through authentication mechanism.
+   With pass-through authentication, the username and password that are provided
+   as part of the REST request are validated against those stored in a remote
+   system, such as an LDAP server.
+  </para>
+  <para>
+   Pass-through authentication is not configured by default, and can be
+   configured by adding the pass-through authentication module to the
+   authentication configuration file
+   (<filename>conf/authentication.json</filename>). The structure of the
+   pass-through authentication configuration object is as follows:
+  </para>
+  <programlisting language="javascript">
+"authModules" : [
+    {
+        "name" : "PASSTHROUGH",
+        "properties" : {
+            "augmentSecurityContext": {
+                "type" : "text/javascript",
+                "file" : "auth/passthroughAuthnPopulateContext.js"
+            },
+            "passThroughAuth" : "system/ldap/account",
+            "propertyMapping" : {
+                "authenticationId" : "uid",
+                "groupMembership" : "memberOf"
+            },
+            "groupRoleMapping" : {
+                "openidm-admin" : ["cn=admins"]
+            },
+            "managedUserLink" : "systemLdapAccounts_managedUser",
+            "defaultUserRoles" : [
+                "openidm-authorized"
+            ]
+        },
+        "enabled" : true
+    },
+...
+]
+  </programlisting>
+  <variablelist>
+   <varlistentry>
+    <term><literal>"name"</literal></term>
+    <listitem>
+     <para>
+      The name of the authentication module. For pass-through authentication,
+      the name is <literal>"PASSTHROUGH"</literal>. OpenIDM supports any of the
+      authentication modules that are available in the Common Authentication
+      Framework (currently IWA, JWT, and OpenID Connect). OpenIDM also provides
+      two additional authentication modules by default -
+      <literal>"MANAGED_USER"</literal> and <literal>"INTERNAL_USER"</literal>.
+      For more information, see <xref linkend="openidm-users" />.
+     </para>
+    </listitem>
+   </varlistentry>
+  <varlistentry>
+    <term><literal>"passThroughAuth"</literal></term>
+    <listitem>
+     <para>
+      The system end point against which the user authenticates, for example
+      <literal>"system/ldap/account"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"augmentSecurityContext"</literal> (optional)</term>
+    <listitem>
+     <para>
+      This parameter points to a script that can be executed after a successful
+      authentication request to provide additional information for the expected
+      security context. For pass-through authentication, the
+      <filename>passthroughAuthnPopulateContext.js</filename> script is provided
+      by default. This sample script uses the authentication details that are
+      returned from the pass-through authentication module to find a linked
+      managed user record. If a linked record is found, the script adjusts the
+      security context details so that they match that managed user object. The
+      adjusted security context enables additional operations for the
+      authenticated user, such as the ability to access the default user
+      interface.
+     </para>
+     <para>
+      The script must be either JavaScript
+      (<literal>"type":"text/javascript"</literal>) or Groovy
+      (<literal>"type":"groovy"</literal>, and can be provided inline
+      (<literal>"source":script source</literal>) or in a file
+      (<literal>"file":filename</literal>).
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"propertyMapping"</literal> (optional)</term>
+    <listitem>
+     <para>
+      A list that enables you to map the following OpenIDM properties to fields
+      in the system resource used for the authentication.
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        <literal>"authenticationId"</literal> specifies the property that will
+        be used to authenticate, for example, <literal>"uid"</literal> or
+        <literal>"sAMAccountName"</literal>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>"groupMembership"</literal> specifies the name of the property
+        in the remote system that contains the list of groups of which the
+        authenticated user is a member, for example
+        <literal>"memberOf"</literal>, or <literal>"ldapGroups"</literal>.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"groupRoleMapping"</literal> (optional)</term>
+    <listitem>
+     <para>
+      Enables you to assign roles to users, based on their group membership in
+      the system resource. In this example, users who are members
+      of the <literal>"cn=admins"</literal> group in the LDAP directory
+      automatically acquire the <literal>"openidm-admin"</literal> role. Group
+      membership is determined, based on the
+      <literal>"groupMembership"</literal> property, described previously.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"managedUserLink"</literal> (optional)</term>
+    <listitem>
+     <para>
+      Used by the script specified in <literal>"augmentSecurityContext"</literal>
+      to switch the context of an authenticated user from their original
+      security context to a context that is based on the related
+      <literal>managed/user</literal> account.
+     </para>
+     <para>
+      The value of this property is the <literal>"links"</literal> entry
+      (usually the mapping name defined in <literal>sync.json</literal>) that
+      was used to relate the remote system users with the managed users.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"defaultUserRoles"</literal> (optional)</term>
+    <listitem>
+     <para>
+      Specifies any default roles that should be assigned to the user after he
+      has authenticated with pass-through authentication.
+     </para>
+     <para>
+      The roles specified here are added to whatever roles were assigned by the
+      <literal>"groupRoleMapping"</literal> property.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"enabled"</literal></term>
+    <listitem>
+     <para>
+      Specifies whether the pass-through authentication module is enabled
+      (<literal>true</literal>) or disabled (<literal>false</literal>).
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  <para>
+   A sample pass-through authentication configuration is provided in
+   <link xlink:show="new" xlink:href="install-guide#more-sample2"
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Sample 2</citetitle></link> in the
+   <citetitle>Installation Guide</citetitle>. In this sample, managed user
+   entries created from an LDAP directory server are able to log in to the
+   OpenIDM UI, using their LDAP credentials.
+  </para>
+ </section>
+
  <section xml:id="openidm-roles">
-  <title>Roles</title>
+  <title>Roles and Authentication</title>
   <indexterm>
    <primary>Authentication</primary>
    <secondary>Roles</secondary>
@@ -248,13 +436,19 @@
    <primary>Roles</primary>
   </indexterm>
 
+  <para>
+   OpenIDM includes a number of default roles, and supports the configuration of
+   managed roles, enabling you to customize the roles mechanism to suit the
+   requirements of your deployment.
+  </para>
   <variablelist>
-   <para>OpenIDM sets up the following roles by default:</para>
+   <para>The following roles are set up by default:</para>
    <varlistentry>
     <term>openidm-reg</term>
     <listitem>
      <para>
-      Role for users accessing OpenIDM with the default anonymous account.
+      Role assigned to users who access OpenIDM with the default anonymous
+      account.
      </para>
      <para>
       The <literal>openidm-reg</literal> role is excluded from the
@@ -275,7 +469,8 @@
     <term>openidm-authorized</term>
     <listitem>
      <para>
-      Default role for any user authenticated with a user name and password.
+      Default role for any user who has authenticated with a user name and
+      password.
      </para>
     </listitem>
    </varlistentry>
@@ -322,788 +517,6 @@
     more information, see the following section covering
     <xref linkend="openidm-authorization" />.
    </para>
-
- <section xml:id="configuring-custom-roles">
-  <title>Configuring Custom Roles</title>
-  <para>
-   The default managed object model includes a managed <literal>role</literal>
-   object that can be manipulated in the same way as any other managed object.
-   The primary use for roles is the management of user access to system
-   resources. User access is controlled by the <emphasis>assignments</emphasis>
-   or entitlements provided by the role.
-  </para>
-  <orderedlist>
-   <para>
-    Configuring a custom role involves the following steps:
-   </para>
-   <listitem>
-    <para>
-     Create the managed role definition.
-    </para>
-   </listitem>
-   <listitem>
-    <para>
-     Check that the effective roles and effective assignments have been
-     generated as you expect.
-    </para>
-   </listitem>
-   <listitem>
-    <para>
-     Add a default mapping to your synchronization configuration to apply the
-     effective assignments to the target resource.
-    </para>
-   </listitem>
-  </orderedlist>
-  <para>
-   Each of these steps is discussed in the following sections.
-  </para>
-
-  <section xml:id="role-definitions">
-   <title>Creating Role Definitions</title>
-   <para>
-    Role definitions are stored in the repository and are accessible at the
-    <literal>/openidm/managed/role</literal> context path. Role definitions
-    have a structure similar to the following:
-   </para>
-   <programlisting language="java">
- "_id": "sample-role",
-     "assignments": {
-         "ad": {
-             "attributes": [
-                 {
-                     "name": "cns",
-                     "value": [
-                         "CN=fileshare,O=corp",
-                         "CN=desktop,O=corp",
-                         "CN=terminal,O=corp",
-                         "CN=intranet,O=corp"
-                     ],
-                     "operation": "insert"
-                 }
-             ]
-         },
-         "ldap": {
-             "attributes": [
-                 {
-                     "name": "cns",
-                     "value": [
-                         "CN=employees,O=corp"
-                     ],
-                     "operation": "insert"
-                 },
-                 {
-                     "name": "employeeType",
-                     "value": "employee"
-                 }
-             ]
-         }
-     }
-   </programlisting>
-   <itemizedlist>
-    <listitem>
-     <para>
-      <literal>"_id"</literal> is the name of the role. The role name can be any
-      string, as long as it is unique. Avoid using special characters
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <literal>"assignments"</literal> provides the list of assignments (or
-      entitlements) that this role will create on the specified system.
-     </para>
-     <para>
-      Each assignment includes the name of the external system
-      (<literal>ad</literal> and <literal>ldap</literal> in the previous
-      example), the attribute or attributes whose values will be generated, on
-      the external system, and the value or values that will be applied to each
-      attribute.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <literal>"operation"</literal> specifies the way in which the value will
-      be applied, and can be either <literal>"insert"</literal> or
-      <literal>"replace"</literal>.
-     </para>
-     <para>
-      The <literal>"insert"</literal> operation takes the source attribute value
-      and inserts it as the target (system) attribute. Note that the insert
-      operation does not obtain the target value before inserting the new value,
-      but regards the source as the authoritative source for the assignment and
-      inserts the entire source value.
-     </para>
-     <para>
-      The <literal>"replace"</literal> operation replaces the target attribute
-      value with whatever is specified in the role definition. If no operation
-      type is specified, the assignment has a <literal>"replace"</literal>
-      operation by default.
-     </para>
-    </listitem>
-   </itemizedlist>
-   <para>
-    Any changes to a managed role definition are logged in the audit log.
-   </para>
-  <para>
-   The managed role object has the following structure:
-  </para>
-  <programlisting language="javascript">
-        {
-            "name" : "role",
-            "postCreate" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            },
-            "postUpdate" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            },
-            "postDelete" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            }
-        }
-  </programlisting>
-  <para>
-   The <literal>"postCreate"</literal>, <literal>"postUpdate"</literal>, and
-   <literal>"postDelete"</literal> properties enable you to specify what should
-   happen when a role definition is created, updated, or deleted. By default,
-   the <filename>update-users-of-role.js</filename> script runs in each of these
-   cases.
-  </para>
-  <para>
-   This script iterates over all managed users, locates the users who have been
-   assigned this role, and regenerates their effective assignments on the target
-   resource. So, for example, if the role <literal>"ldap"</literal> gives a user
-   an assignment on the resource "Active Directory", when, that role definition
-   is deleted, a reconciliation operation runs to remove the assignment for that
-   user on the "Active Directory" resource.
-  </para>
-  </section>
-
-  <section xml:id="effective-roles-and-assignments">
-   <title>Understanding Effective Roles and Effective Assignments</title>
-   <para>
-    This section refers to two distinct types of roles - direct (static) and
-    indirect (dynamic) roles. Direct roles refer to roles that are specifically
-    added to the user's <literal>"roles"</literal> attribute by an administrator
-    operation. Indirect roles might be added to the user entry as a result of a
-    script or rule that assigns the role. For example, a user might acquire a
-    <literal>"sales-role"</literal> as a result of being in the
-    <literal>"sales"</literal> organization.
-   </para>
-   <para>
-    A managed user's <literal>"roles"</literal> attribute takes an array as a
-    value. Currently, only flat strings are supported in this array.
-   </para>
-   <para>
-    The <literal>"roles"</literal> attribute includes any specifically assigned
-    roles, and any roles assigned internally by OpenIDM. So, the
-    <literal>"roles"</literal> attribute of a particular user entry might
-    appear as follows:
-   </para>
-   <programlisting language="java">
-"roles" : [
-    "name" : "managed/role/sample-role",
-    "name" : "openidm-authorized"
-]
-   </programlisting>
-   <para>
-    A role value that includes a <literal>/</literal> character is considered to
-    be a URL that points to the role details on the router, for example,
-    <literal>managed/role/sample-role</literal>.
-   </para>
-   <para>
-    Based on the set of role definitions that are assigned to a specific user,
-    the roles mechanism generates two virtual attributes on the user entry -
-    <literal>effectiveRoles</literal> and <literal>effectiveAssignments</literal>.
-   </para>
-   <para>
-    The logic that calculates the <literal>effectiveRoles</literal> and
-    <literal>effectiveAssignments</literal> attribute values is located in two
-    scripts:
-    <filename>/path/to/openidm/bin/defaults/script/roles/effectiveRoles.js</filename>
-    and
-    <filename>/path/to/openidm/bin/defaults/script/roles/effectiveAssignments.js</filename>.
-    You should not alter these scripts. If you need to modify how roles and
-    assignments are handled, create your own custom script and reference it in
-    the <filename>conf/managed.json</filename> file. For information about using
-    custom scripts, see the
-    <link xlink:href="integrators-guide#appendix-scripting"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
-    Reference</citetitle></link>.
-   </para>
-   <para>
-    The <literal>effectiveRoles</literal> attribute lists the specific role
-    definitions that are applied to a user entry. By default, the effective
-    roles script supports direct role assignments only. Dynamic role assignment
-    is not provided out of the box, but can be added with a custom script that
-    overrides the default <filename>effectiveRoles.js</filename> script. For
-    more information, see <xref linkend="dynamic-role-assignments" />.
-   </para>
-   <para>
-    Based on the effective roles, the <literal>effectiveAssignments</literal>
-    attribute provides the calculated resource assignments, that is the
-    amalgamated set of entitlements for a specific user.
-   </para>
-   <para>The value of the <literal>effectiveAssignments</literal> attribute
-    provides the information required for the provisioner to apply the effective
-    assignments, and provides a reference to the source of the assignment. In
-    reading this attribute, it is therefore possible to find and change the root
-    source of an assignment.
-   </para>
-   <para>
-    Effective assignments can merge attribute operations on the same system from
-    multiple roles. For example, role A might add group A to a user's group
-    membership list, and role B might add group B to the same group membership
-    property on the same assigned system.
-   </para>
-   <para>
-    The effective roles and effective assignments attributes are configured in
-   <filename>conf/managed.json</filename> as follows:
-   </para>
-   <programlisting language="java">
- {
-     "name" : "effectiveRoles",
-     "type" : "virtual",
-     "onRetrieve" : {
-         "type" : "text/javascript",
-         "file" : "roles/effectiveRoles.js",
-         "rolesPropName" : "roles"
-     }
- },
- {
-     "name" : "effectiveAssignments",
-     "type" : "virtual",
-     "onRetrieve" : {
-         "type" : "text/javascript",
-         "file" : "roles/effectiveAssignments.js",
-         "effectiveRolesPropName" : "effectiveRoles"
-     }
- }
-   </programlisting>
-
-   <para>
-    By default, the <filename>effectiveRoles.js</filename> script uses the
-    <literal>"roles"</literal> attribute of a user entry to determine the
-    direct roles assigned to the user. The
-    <filename>effectiveAssignments.js</filename> script uses the virtual
-    <literal>"effectiveRoles"</literal> attribute of the user entry to calculate
-    the user's effective assignments. If your deployment uses different
-    attributes to store this information, change the
-    <literal>"rolesPropName"</literal> and the
-    <literal>"effectiveRolesPropName"</literal> properties of the virtual
-    attribute definitions accordingly.
-   </para>
-
-   <para>
-    When a user entry is assigned a role, the <literal>effectiveRoles</literal>
-    and <literal>effectiveAssignments</literal> of that entry are calculated
-    according to the role definition. A managed user entry, whose roles have
-    been generated based on the role definition illustrated previously, might
-    appear as follows:
-   </para>
-
-   <programlisting language="javascript">
- {
-    "_id":"i",
-    "_rev":"1",
-    "roles":[
-       "openidm-authorized",
-       "managed/role/sample-role"
-    ],
-    "effectiveRoles":[
-       "openidm-authorized",
-       "managed/role/sample-role"
-    ],
-    "effectiveAssignments":{
-       "ldap":{
-          "attributes":[
-             {
-                "value":[
-                   "CN=employees,O=corp"
-                ],
-                "operation":"insert",
-                "name":"cns",
-                "assignedThrough":"managed/role/sample-role"
-             },
-             {
-                "value":"employee",
-                "name":"employeeType",
-                "assignedThrough":"managed/role/sample-role"
-             }
-          ]
-       },
-       "ad":{
-          "attributes":[
-             {
-                "value":[
-                   "CN=fileshare,O=corp",
-                   "CN=desktop,O=corp",
-                   "CN=terminal,O=corp",
-                   "CN=intranet,O=corp"
-                ],
-                "operation":"insert",
-                "name":"cns",
-                "assignedThrough":"managed/role/sample-role"
-             }
-          ]
-       }
-    }
- }</programlisting>
-
-   <para>
-    Note that the value of the <literal>"assignedThrough"</literal> property
-    of the virtual <literal>"effectiveAssignments"</literal> attribute indicates
-    how each assignment has been generated.
-   </para>
-
-   <procedure xml:id="dynamic-role-assignments">
-    <title>To Add Support for Dynamic Assignments</title>
-    <para>
-     Although support for dynamic role assignments is not provided by default,
-     it can easily be added with a custom script, as follows.
-    </para>
-    <step>
-     <para>
-      Copy the default effective roles script to your project's
-      <literal>script/roles</literal> directory.
-     </para>
-     <screen width="92">
-$ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>project-dir</replaceable>/script/roles/
-     </screen>
-     <para>
-      The new script will override the default effective roles script.
-     </para>
-    </step>
-    <step>
-     <para>Modify the effective roles script to include the dynamic role
-      assignment logic.
-     </para>
-     <para>
-      For example, to enable dynamic role assignment for the
-      <literal>example</literal> organization, you might add the following
-      extract after the section:
-     </para>
-     <programlisting language="java">
- // This is the location to expand to dynamic roles,
- // project role script return values can then be added via
- // effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
-     </programlisting>
-
-     <programlisting language="java">
- if (object.org === 'example') {
-     effectiveRoles = effectiveRoles.concat(['dynamic-role1', 'dynamic-role2']);
- }
-     </programlisting>
-    </step>
-    <step performance="optional">
-     <para>
-      To apply changes to the dynamic assignment rules to existing users, run a
-      reconciliation operation on those users.
-     </para>
-    </step>
-   </procedure>
-  </section>
-
-  <section xml:id="role-mapping">
-   <title>Setting up the Role Mapping</title>
-
-   <para>
-    After the role has been defined, and the effective assignments checked, you
-    must set up mapping for the role and, optionally, restrict provisioning
-    based on the effective assignments.
-   </para>
-   <para>
-    This section describes these two steps.
-   </para>
-
-  <section xml:id="roles-default-mapping">
-   <title>Creating a Mapping For Effective Assignments</title>
-   <para>
-    After the effective assignments have been calculated, these assignments must
-    be applied to the target resources. A mapping script
-    (<filename>/path/to/openidm/bin/defaults/script/roles/defaultMapping.js</filename>)
-    applies the effective assignments as part of the mapping. To enable this
-    default mapping for a specific assignment, add the following extract to
-    your synchronization configuration (<filename>sync.json</filename>) file.
-   </para>
-   <programlisting language="java">
-"defaultMapping" : {
-    "type" : "text/javascript",
-    "file" : "roles/defaultMapping.js"
-    },
-    "assignments" : [
-        <replaceable>assignmentName</replaceable>
-    ],
-</programlisting>
-   <para>
-    For example, to apply the <literal>ldap</literal> and <literal>ad</literal>
-    assignments illustrated in the previous section, add the following mapping
-    to your <filename>sync.json</filename> file.
-   </para>
-   <programlisting language="java">
-"defaultMapping" : {
-    "type" : "text/javascript",
-    "file" : "roles/defaultMapping.js"
-    },
-    "assignments" : [
-        "ldap", "ad"
-    ],
-</programlisting>
-  </section>
-
-  <section xml:id="conditional-mapping">
-   <title>Using Roles For Conditional Mapping</title>
-   <para>
-    The roles mechanism provides the ability to restrict provisioning based on
-    a user's effective assignments. For example, you might want to prevent users
-    from being provisioned to an Active Directory system, if they do not have
-    specific access to that system.
-   </para>
-   <para>
-    Based on the <literal>"effectiveAssignments"</literal> virtual attribute,
-    described in the previous section, you could configure a conditional mapping
-    for this example, as follows:
-   </para>
-   <orderedlist>
-    <listitem>
-     <para>
-      Create a role definition that gives the user the Active Directory
-      assignment, for example:
-     </para>
-     <programlisting language="javascript">
- "_id": "ad-role",
-     "assignments": {
-         "ad": {
-             "attributes": [
-                 {
-                     "name": "cns",
-                     "value": [
-                         "CN=fileshare,O=corp",
-                         "CN=desktop,O=corp",
-                         "CN=terminal,O=corp",
-                         "CN=intranet,O=corp"
-                     ],
-                     "operation": "insert"
-                 }
-             ]
-         }
-     </programlisting>
-    </listitem>
-    <listitem>
-     <para>Add the role directly as a value of the user's
-      <literal>"roles"</literal> attribute.</para>
-     <programlisting>
-"roles" : [
-    "name" : "managed/role/ad-role",
-    "name" : "openidm-authorized"
-]
-     </programlisting>
-    </listitem>
-    <listitem>
-     <para>
-      Add a condition in the mapping that restricts provisioning to user's who
-      have the <literal>"ad-role"</literal> as an effective role. The effective
-      roles are calculated from the values in the user's
-      <literal>"roles"</literal> attribute.
-     </para>
-     <programlisting language="java">
-{
-    "mappings": [
-        {
-            "name": "managedUser_systemLdapAccounts",
-            "source": "managed/user",
-            "sourceCondition": {
-                "effectiveRoles": "managed/role/ad-role"
-            },
-            "target": "system/ad/account"
-            ...
-        }
-    ]
-}
-     </programlisting>
-    </listitem>
-   </orderedlist>
-  </section>
-
- </section>
-
-  <section xml:id="managing-roles-over-rest">
-   <title>Managing Roles Over REST</title>
-   <para>
-    As with any other managed object, you can manage role objects over the REST
-    interface, as described in the following sections.
-   </para>
-
-   <section xml:id="create-role-over-rest">
-    <title>To Create a Role Definition</title>
-    <para>
-     Use a PUT request to create the role definition, because you want to be
-     able to specify the role ID. The ID will be used to assign the role
-     directly to user entries.
-    </para>
-    <para>
-     The following simple example adds a role definition with the ID
-     <literal>ldap</literal>. The JSON payload, and the resultant output, have
-     been formatted for legibility.
-    </para>
-
-    <screen>
-    <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --header "If-None-Match: *"
- --request PUT
- --data '{
-  "assignments": {
-    "ldap": {
-      "attributes": [
-        {
-          "name": "cns",
-          "value": [
-            "cn=printers,ou=Groups,dc=example,dc=com",
-            "cn=intranet,ou=Groups,dc=example,dc=com"
-          ],
-          "operation": "insert"
-        }
-      ]
-    }
-  }
-}'
- "https://localhost:8443/openidm/managed/role/ldap"
-    </userinput>
-{
-  "assignments": {
-    "ldap": {
-      "attributes": [
-        {
-          "name": "cns",
-          "operation": "insert",
-          "value": [
-            "cn=printers,ou=Groups,dc=example,dc=com",
-            "cn=intranet,ou=Groups,dc=example,dc=com"
-          ]
-        }
-      ]
-    }
-  },
-  "_id": "ldap",
-  "_rev": "0"
-}
-    </screen>
-    <para>
-     Remember to add the default mapping with the relevant assignment to your
-     <filename>sync.json</filename> file. For this example, the following
-     addition is made to <literal>sync.json</literal>.
-    </para>
-    <programlisting language="javascript">
-        {
-            "defaultMapping": {
-                "type": "text/javascript",
-                "file": "roles/defaultMapping.js"
-            },
-            "assignments": [
-                "ldap"
-            ]
-        }
-    </programlisting>
-   </section>
-
-   <section xml:id="role-assign-to-user">
-    <title>To Assign a Role to a User</title>
-    <para>
-     To assign a direct role to a user, you can update the user's entry over
-     REST, adding the
-     <literal>managed/role/<replaceable>role ID</replaceable></literal> to the
-     user's <literal>roles</literal> attribute. The following example adds the
-     <literal>ldap</literal> role to user
-     <literal>bjensen</literal>.
-    </para>
-
-    <screen>
-    <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --header "If-Match: *"
- --request PATCH
- --data '[
-    {
-        "operation": "replace",
-        "field": "/roles",
-        "value": [
-            "openidm-authorized",
-            "managed/role/ldap"
-        ]
-    }
-]'
- "http://localhost:8080/openidm/managed/user/bjensen"
-     </userinput>
-
-{
-  "displayName": "Babara Jensen",
-  "stateProvince": "",
-  "userName": "bjensen",
-  "postalAddress": "",
-  "telephoneNumber": "",
-  "roles": [
-    "openidm-authorized",
-    "managed/role/ldap"
-  ],
-  "city": "",
-  "givenName": "Barbara",
-  "lastPasswordAttempt": "Wed Mar 05 2014 13:50:19 GMT+0200 (SAST)",
-  "address2": "",
-  "familyName": "Jensen",
-  "passwordAttempts": "0",
-  "sn": "",
-  "mail": "",
-  "country": "",
-  "_rev": "1",
-  "lastPasswordSet": "",
-  "postalCode": "",
-  "_id": "bjensen",
-  "email": "bjensen@example.com",
-  "accountStatus": "active",
-  "description": "Barbara Jensen"
-}
-    </screen>
-    <para>
-     If you query <literal>bjensen's</literal> user entry again, you will note
-     that her effective assignments have been updated to include the assignments
-     given by the <literal>ldap</literal> role.
-    </para>
-    <screen>
-     <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/user/bjensen"
-     </userinput>
-{
-  "effectiveAssignments": {
-    "ldap": {
-      "attributes": [
-        {
-          "assignedThrough": "managed/role/ldap",
-          "name": "cns",
-          "operation": "insert",
-          "value": [
-            "cn=printers,ou=Groups,dc=example,dc=com",
-            "cn=intranet,ou=Groups,dc=example,dc=com"
-          ]
-        }
-      ]
-    }
-  },
-  ...
-    </screen>
-   </section>
-
-   <section xml:id="remove-role-assignment">
-    <title>To Remove a Role Assignment</title>
-
-    <para>
-     To remove a role assignment from a user, simply replace that user's
-     <literal>"roles"</literal> attribute with the array of roles that the user
-     should have. The following example removes the <literal>ldap</literal> role
-     from user <literal>bjensen</literal>.
-    </para>
-
-    <screen>
-    <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --header "If-Match: *"
- --request PATCH
- --data '[
-    {
-        "operation": "replace",
-        "field": "/roles",
-        "value": [
-            "openidm-authorized"
-        ]
-    }
-]'
- "http://localhost:8080/openidm/managed/user/bjensen"
-     </userinput>
-    </screen>
-    <para>
-     In the role definition, you can specify what should happen when an
-     assignment of that role is removed.
-    </para>
-   </section>
-
-   <section xml:id="query-role-definitions">
-    <title>To Query the Defined Managed Roles</title>
-    <para>
-     To list the managed roles that have been defined, run the following query:
-    </para>
-    <screen>
-    <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/role?_queryId=query-all-ids"
-    </userinput>
-
-     {
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 1,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "ldap"
-    }
-  ]
-}    </screen>
-
-   </section>
-
-   <section xml:id="query-role-membership">
-    <title>To Query the Members of a Specific Role</title>
-    <para>
-     To return a list of all users who have a specific directly assigned role,
-     specify the role ID in the query. It is not currently possible to query
-     role membership for indirect roles.
-    </para>
-    <para>
-     The following query returns all members of the <literal>"ldap"</literal>
-     role created previously. Currently that role has only one member,
-     <literal>bjensen</literal>.
-    </para>
-
-    <screen width="104">
-     <userinput>$ curl
- --insecure
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/role?_queryId=get-users-of-direct-role&amp;role=managed/role/ldap"
-     </userinput>
-     <computeroutput>
-{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 0,
-  "result": []
-}
-     </computeroutput>
-     <!--TODO this isn't currently working for me - I get zero results -->
-    </screen>
-   </section>
-
-  </section>
-
- </section>
 
  </section>
  
