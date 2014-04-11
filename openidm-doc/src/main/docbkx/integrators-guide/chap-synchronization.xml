@@ -573,6 +573,12 @@
    <para>
     Reconciliation of an empty source effectively wipes out the target.
    </para>
+   <para>
+    You can update mappings in the synchronization configuration file
+    (<filename>sync.json</filename>) while the server is running, provided you
+    do not update a mapping that is currently in use by a reconciliation
+    process.
+   </para>
   </section>
 
   <section xml:id="sync-encrypted-values">
