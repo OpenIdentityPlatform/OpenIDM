@@ -923,24 +923,28 @@ class ObjectMapping  {
         }
     }
 
-    public void setReconEntryMessage(ReconEntry entry, Exception se) {
-        ResourceException jre = null;
-        Throwable throwable = se;
-        entry.exception = se;
-        while (throwable.getCause() != null) { // want message associated with original cause
-            if (jre == null && throwable instanceof ResourceException) {
-                jre = (ResourceException) throwable;
+    public void setReconEntryMessage(ReconEntry entry, Exception syncException) {
+        JsonValue messageDetail = null;  // top level ResourceException
+        Throwable cause = syncException; // Root cause
+        entry.exception = syncException;
+        
+        // Loop to find original cause and top level ResourceException (if any)
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+            if (messageDetail == null && cause instanceof ResourceException) {
+                messageDetail = ((ResourceException) cause).toJsonValue();
+                // Check if there is a detail field to use
+                if (!messageDetail.get("detail").isNull()) {
+                	messageDetail = messageDetail.get("detail");
+                }
             }
-            throwable = throwable.getCause();
         }
-        if (se != throwable) {
-            entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-        } else {
-            entry.message = throwable.getMessage();
-        }
-        if (jre != null) {
-            entry.messageDetail = jre.toJsonValue();
-        }
+        
+        // Set message and messageDetail
+        entry.messageDetail = messageDetail;
+        entry.message = syncException != cause 
+                ? syncException.getMessage() + ". Root cause: " + cause.getMessage()
+                : cause.getMessage();
     }
 
     /**
