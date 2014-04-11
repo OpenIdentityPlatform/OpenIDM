@@ -867,21 +867,31 @@ $ cli.sh encrypt newpwd
   <filename>openidm/conf/jetty.xml</filename> that enables HTTP on port
   8080.</para>
 
+  <para>
+   The following excerpt includes the Java comment code that you would add
+   around the <literal>openidm.port.http</literal> argument. The value of this
+   argument (8080 by default) is taken from the
+   <filename>/path/to/openidm/conf/boot/boot.properties</filename> file.
+  </para>
+
   <programlisting language="xml">
-&lt;!--
-&lt;Item&gt;
+&lt;Call name="addConnector&gt;
+  &lt;Arg&gt;
     &lt;New class=&quot;org.eclipse.jetty.server.nio.SelectChannelConnector&quot;&gt;
-        &lt;Set name=&quot;host&quot;&gt;&lt;Property name=&quot;jetty.host&quot; /&gt;&lt;/Set&gt;
-        &lt;Set name=&quot;port&quot;&gt;8080&lt;/Set&gt;
+      &lt;Set name=&quot;host&quot;&gt;&lt;Property name=&quot;jetty.host&quot; /&gt;&lt;/Set&gt;
+&lt;!-- &lt;Set name=&quot;port&quot;&gt;&lt;Call class="org.forgerock.openidm.jetty.Param"
+          name="getProperty"&lt;/Arg&gt;&lt;/Call&gt;&lt;/Set&gt;  --&gt;
         &lt;Set name=&quot;maxIdleTime&quot;&gt;300000&lt;/Set&gt;
         &lt;Set name=&quot;Acceptors&quot;&gt;2&lt;/Set&gt;
         &lt;Set name=&quot;statsOn&quot;&gt;false&lt;/Set&gt;
         &lt;Set name=&quot;confidentialPort&quot;&gt;8443&lt;/Set&gt;
-        &lt;Set name=&quot;lowResourcesConnections&quot;&gt;20000&lt;/Set&gt;
-        &lt;Set name=&quot;lowResourcesMaxIdleTime&quot;&gt;5000&lt;/Set&gt;
-    &lt;/New&gt;
-&lt;/Item&gt;
---&gt;</programlisting>
+          &lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty"&gt;
+            &lt;Arg&gt;openidm.port.https&lt;/Arg&gt;
+          &lt;/Call&gt;
+        &lt;/Set&gt;
+      &lt;/New&gt;
+   &lt;/Arg&gt;
+&lt;/Call&gt;</programlisting>
  </section>
  
  <section xml:id="security-urls">
