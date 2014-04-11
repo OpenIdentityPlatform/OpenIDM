@@ -92,7 +92,11 @@
                     "target" : "sn"
                 },
                 {
-                    "source" : "displayName",
+                    "source" : "",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.displayName || (source.givenName + ' ' + source.sn);"
+                    },
                     "target" : "cn"
                 },
                 {
@@ -101,7 +105,11 @@
                 },
                 {
                     "source" : "description",
-                    "target" : "description"
+                    "target" : "description",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "typeof(object.description) !== 'undefined' && object.description !== null;"
+                    }
                 },
                 {
                     "source" : "mail",
