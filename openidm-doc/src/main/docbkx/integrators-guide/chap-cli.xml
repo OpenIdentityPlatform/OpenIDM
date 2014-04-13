@@ -118,7 +118,7 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
      <para>The cluster configuration (<filename>cluster.json</filename>)</para>
     </listitem>
     <listitem>
-     <para>The configuration of a connected SMNP email server
+     <para>The configuration of a connected SMTP email server
      (<filename>external.email.json)</filename></para>
     </listitem>
     <listitem>
