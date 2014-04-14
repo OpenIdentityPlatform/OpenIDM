@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.provisioner.openicf;
+package org.forgerock.openidm.provisioner.openicf.impl;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -207,7 +207,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                         if (connectorLocation
                                                 .equals(ConnectorReference.ConnectorLocation.OSGI)) {
                                             listener.addingConnectorInfo(ci,
-                                                    osgiConnectorFacadeFactory);
+                                                    connectorFacadeFactory);
                                         } else {
                                             listener.addingConnectorInfo(ci, ConnectorFacadeFactory
                                                     .getInstance());
@@ -238,14 +238,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      */
     @Reference(referenceInterface = ConnectorInfoManager.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
-    private ConnectorInfoManager osgiConnectorInfoManager = null;
+    private ConnectorInfoManager connectorInfoManager = null;
 
     /**
      * ConnectorFacadeFactory service.
      */
     @Reference(referenceInterface = ConnectorFacadeFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
-    private ConnectorFacadeFactory osgiConnectorFacadeFactory = null;
+    private ConnectorFacadeFactory connectorFacadeFactory = null;
 
     /**
      * ConnectorEventPublisher service.
@@ -262,7 +262,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     @Activate
-    protected void activate(ComponentContext context) {
+    public void activate(ComponentContext context) {
         logger.trace("Activating Service with configuration {}", context.getProperties());
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 
@@ -387,7 +387,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     @Deactivate
-    protected void deactivate(ComponentContext context) {
+    public void deactivate(ComponentContext context) {
         logger.trace("Deactivating Component: {}", context.getProperties().get(
                 ComponentConstants.COMPONENT_NAME));
         if (null != scheduledExecutorService) {
@@ -495,7 +495,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                             .getLocalManager(getConnectorURLs(), getBundleParentClassLoader());
             break;
         case OSGI:
-            connectorInfoManager = osgiConnectorInfoManager;
+            connectorInfoManager = this.connectorInfoManager;
             break;
         case REMOTE:
             Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler> rfci =
@@ -571,7 +571,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 
             if (null != ci) {
                 if (connectorReference.equals(ConnectorReference.ConnectorLocation.OSGI)) {
-                    handler.addingConnectorInfo(ci, osgiConnectorFacadeFactory);
+                    handler.addingConnectorInfo(ci, connectorFacadeFactory);
                 } else {
                     handler.addingConnectorInfo(ci, ConnectorFacadeFactory.getInstance());
                 }
@@ -602,8 +602,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         List<ConnectorInfo> result =
                 new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
 
-        if (null != osgiConnectorInfoManager) {
-            result.addAll(osgiConnectorInfoManager.getConnectorInfos());
+        if (null != this.connectorInfoManager) {
+            result.addAll(this.connectorInfoManager.getConnectorInfos());
         }
         for (Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler> entry : remoteFrameworkConnectionInfo
                 .values()) {
@@ -632,8 +632,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             result.add(connectorReference);
         }
 
-        if (null != osgiConnectorInfoManager) {
-            for (ConnectorInfo info : osgiConnectorInfoManager.getConnectorInfos()) {
+        if (null != this.connectorInfoManager) {
+            for (ConnectorInfo info : this.connectorInfoManager.getConnectorInfos()) {
                 Map<String, Object> connectorReference =
                         ConnectorUtil.getConnectorKey(info.getConnectorKey());
                 connectorReference.put("displayName", info.getConnectorDisplayName());
@@ -674,9 +674,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         try {
             ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
             ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
-            if (null == facade && null != osgiConnectorInfoManager) {
+            if (null == facade && null != connectorInfoManager) {
                 try {
-                    facade = osgiConnectorFacadeFactory.newInstance(configuration);
+                    facade = this.connectorFacadeFactory.newInstance(configuration);
                 } catch (Exception e) {
                     logger.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
                 }
@@ -701,9 +701,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
-        if (null == facade && null != osgiConnectorInfoManager) {
+        if (null == facade && null != connectorInfoManager) {
             try {
-                facade = osgiConnectorFacadeFactory.newInstance(configuration);
+                facade = this.connectorFacadeFactory.newInstance(configuration);
             } catch (Exception e) {
                 logger.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
             }
