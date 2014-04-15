@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
@@ -42,7 +41,7 @@ import java.util.Map;
  */
 public class PassthroughModule extends IDMServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(PassthroughModule.class);
 
     // config properties
     private static final String PASS_THROUGH_AUTH = "passThroughAuth";
@@ -78,7 +77,8 @@ public class PassthroughModule extends IDMServerAuthModule {
      * @param handler {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler)
+            throws AuthException {
 
         passThroughAuth = properties.get(PASS_THROUGH_AUTH).asString();
 
@@ -96,8 +96,8 @@ public class PassthroughModule extends IDMServerAuthModule {
                             .asEnum(PassthroughAuthenticator.GroupComparison.class)
             );
         } catch (ResourceException e) {
-            //TODO
-            e.printStackTrace();
+            // pity AuthException doesn't allow cause-chaining
+            throw new AuthException("Unable to create initialize passthrough module: " + e.getMessage());
         }
     }
 
@@ -127,41 +127,40 @@ public class PassthroughModule extends IDMServerAuthModule {
     protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
             SecurityContextMapper securityContextMapper) throws AuthException {
 
-        LOGGER.debug("PassthroughModule: validateRequest START");
+        logger.debug("PassthroughModule: validateRequest START");
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
-            //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
+            // Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
             setPassThroughAuthOnRequest(messageInfo);
 
-            final String username = request.getHeader(HEADER_USERNAME);
-            String password = request.getHeader(HEADER_PASSWORD);
+            if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)
+                    || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)) {
 
-            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-                LOGGER.debug("Failed authentication, missing or empty headers");
-                //Auth failure will be logged in IDMServerAuthModule super type.
-                return AuthStatus.SEND_FAILURE;
-            }
+                logger.debug("PassthroughModule: Authentication successful");
+                logger.debug("Found valid session for {} with roles {}",
+                        securityContextMapper.getAuthenticationId(), securityContextMapper.getRoles());
 
-            boolean authenticated = passthroughAuthenticator.authenticate(username, password, securityContextMapper);
-
-            if (authenticated) {
-                LOGGER.debug("PassthroughModule: Authentication successful");
-                LOGGER.debug("Found valid session for {} with roles {}", username,
-                        securityContextMapper.getRoles());
-
-                //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;
             } else {
-                LOGGER.debug("PassthroughModule: Authentication failed");
-                //Auth failure will be logged in IDMServerAuthModule super type.
+                logger.debug("PassthroughModule: Authentication failed");
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            LOGGER.debug("PassthroughModule: validateRequest END");
+            logger.debug("PassthroughModule: validateRequest END");
         }
+    }
+
+    private boolean authenticate(Credential credential, SecurityContextMapper securityContextMapper)
+            throws AuthException {
+
+        if (!credential.isComplete()) {
+            logger.debug("Failed authentication, missing or empty headers");
+            return false;
+        }
+
+        return passthroughAuthenticator.authenticate(credential.username, credential.password, securityContextMapper);
     }
 
     /**
