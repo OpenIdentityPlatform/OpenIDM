@@ -16,7 +16,9 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

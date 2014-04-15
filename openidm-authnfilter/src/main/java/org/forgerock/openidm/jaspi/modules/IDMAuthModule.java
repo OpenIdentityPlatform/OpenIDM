@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock Inc.
+ * Copyright 2013 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -29,16 +29,16 @@ public enum IDMAuthModule {
 
     /** JWT Session Auth Module. */
     JWT_SESSION(JwtSessionModule.class),
-    /** Client-cert auth module. */
-    CLIENT_CERT(ClientCertAuthModule.class),
     /** Managed User Auth Module. */
-    MANAGED_USER(IDMUserAuthModule.class),
+    MANAGED_USER(ManagedUserAuthModule.class),
     /** Internal User Auth Module. */
-    INTERNAL_USER(IDMUserAuthModule.class),
+    INTERNAL_USER(InternalUserAuthModule.class),
     /** Passthrough to OpenICF connector Auth Module. */
     PASSTHROUGH(PassthroughModule.class),
     /** IWA Auth Module. */
-    IWA(IWAModule.class);
+    IWA(IWAModule.class),
+    /** IWA and Passthrough Auth Module. */
+    IWA_PASSTHROUGH(IWAPassthroughModule.class);
 
     private Class<? extends ServerAuthModule> clazz;
 

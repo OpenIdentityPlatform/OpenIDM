@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -26,7 +24,6 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
-
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.exception.ScriptThrownException;
@@ -48,86 +45,29 @@ import java.util.Map;
 
 /**
  * Basis of all commons authentication filter modules. Ensures the required attributes/properties are set
- * after a request has been validated to ensure the attributes/properties needed by the rest of OpenIDM
- * are present so OpenIDM can operate properly.
+ * after a request has been validated to ensure the attributes/properties needed by the rest of OpenIDM are present
+ * so OpenIDM can operate properly.
  *
  * @author Phill Cunnington
  * @author brmiller
  */
 public abstract class IDMServerAuthModule implements ServerAuthModule {
 
-    /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(IDMServerAuthModule.class);
 
     // common config property keys
-    static final String QUERY_ID = "queryId";
-    static final String COMPONENT = "component";
-    static final String AUTHENTICATION_ID = "authenticationId";
-    static final String DEFAULT_USER_ROLES = "defaultUserRoles";
-    static final String PROPERTY_MAPPING = "propertyMapping";
+    protected static final String AUTHENTICATION_ID = "authenticationId";
+    protected static final String DEFAULT_USER_ROLES = "defaultUserRoles";
+    protected static final String PROPERTY_MAPPING = "propertyMapping";
+
+    /** Authentication username header. */
+    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
+
+    /** Authentication password header. */
+    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
     /** Authentication without a session header. */
-    static final String NO_SESSION = "X-OpenIDM-NoSession";
-
-    /**
-     * Internal credential bean - more descriptive than Pair<String,String>
-     */
-    static class Credential {
-        final String username;
-        final String password;
-
-        Credential(final String username, final String password) {
-            this.username = username;
-            this.password = password;
-        }
-
-        boolean isComplete() {
-            return (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password));
-        }
-    }
-
-    /**
-     * Interface for a helper that returns user credentials from an HttpServletRequest
-     */
-    static interface CredentialHelper {
-        public Credential getCredential(HttpServletRequest request);
-    }
-
-    /** CredentialHelper to get auth header creds from request */
-    static final CredentialHelper HEADER_AUTH_CRED_HELPER = new CredentialHelper() {
-        /** Authentication username header. */
-        private static final String HEADER_USERNAME = "X-OpenIDM-Username";
-
-        /** Authentication password header. */
-        private static final String HEADER_PASSWORD = "X-OpenIDM-Password";
-
-        @Override
-        public Credential getCredential(HttpServletRequest request) {
-            return new Credential(request.getHeader(HEADER_USERNAME), request.getHeader(HEADER_PASSWORD));
-        }
-    };
-
-    /** CredentialHelper to get Basic-Auth creds from request */
-    static final CredentialHelper BASIC_AUTH_CRED_HELPER  = new CredentialHelper() {
-        /** Basic auth header. */
-        private static final String HEADER_AUTHORIZATION = "Authorization";
-        private static final String AUTHORIZATION_HEADER_BASIC = "Basic";
-
-        @Override
-        public Credential getCredential(HttpServletRequest request) {
-            final String authHeader = request.getHeader(HEADER_AUTHORIZATION);
-            if (authHeader != null) {
-                final String[] authValue = authHeader.split("\\s", 2);
-                if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
-                    final String[] creds = new String(Base64.decodeBase64(authValue[1].getBytes())).split(":");
-                    if (creds.length == 2) {
-                        return new Credential(creds[0], creds[1]);
-                    }
-                }
-            }
-            return new Credential(null, null);
-        }
-    };
+    public static final String NO_SESSION = "X-OpenIDM-NoSession";
 
     private String logClientIPHeader = null;
 
@@ -138,8 +78,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     private ScriptEntry augmentScript = null;
 
     /**
-     * Extracts the "clientIPHeader" value from the json configuration; initializes concrete module
-     * from json configuration.
+     * Extracts the "clientIPHeader" value from the json configuration.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
@@ -305,7 +244,7 @@ public abstract class IDMServerAuthModule implements ServerAuthModule {
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        String noSession = request.getHeader(NO_SESSION);
+        String noSession = request.getHeader(IDMServerAuthModule.NO_SESSION);
 
         if (Boolean.parseBoolean(noSession)) {
             messageInfo.getMap().put("skipSession", true);

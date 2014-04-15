@@ -22,41 +22,26 @@
             }
         },
         "authModules" : [
-            {   "name" : "CLIENT_CERT",
-                "properties" : {
-                    "component" : "security/truststore",
-                    "defaultUserRoles" : [ "openidm-cert" ],
-                    "allowedAuthenticationIdPatterns" : [
-                        "ou=Eng,dc=forgerock,dc=com"
-                    ]
-                }
-            },
             {
                 "name" : "MANAGED_USER",
                 "properties" : {
-                    "queryId" : "credential-query",
-                    "component" : "managed/user",
                     "propertyMapping" : {
                         "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
-                    "defaultUserRoles" : [ ],
-                    "allowBasicAuth" : true
+                    "defaultUserRoles" : [ ]
                 }
             },
             {
                 "name" : "INTERNAL_USER",
                 "properties" : {
-                    "queryId" : "credential-internaluser-query",
-                    "component" : "repo/internal/user",
                     "propertyMapping" : {
                         "authenticationId" : "_id",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
-                    "defaultUserRoles" : [ ],
-                    "allowBasicAuth" : true
+                    "defaultUserRoles" : [ ]
                 }
             }
         ]
