@@ -52,6 +52,14 @@
   should follow before deploying OpenIDM in a production environment.
  </para>
 
+ <note>
+  <para>
+   In a production environment, we recommend that you avoid the use of:
+   communications over insecure HTTP, self-signed certificates, and
+   certificates associated with insecure ciphers.
+  </para>
+ </note>
+
  <section xml:id="security-management-service">
   <title>Accessing the Security Management Service</title>
 
@@ -83,22 +91,20 @@ $ curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
  --request GET
- https://localhost:8443/openidm/security/keystore
+ "https://localhost:8443/openidm/security/keystore?_prettyPrint=true"
     </userinput>
     <computeroutput>
 {
-  "aliases": [
-    "openidm-sym-default",
-    "openidm-localhost"
-  ],
-  "provider": {
-    "KeyGenerator.Blowfish": "com.sun.crypto.provider.BlowfishKeyGenerator",
-    "Alg.Alias.KeyFactory.DH": "DiffieHellman",
+  "type" : "JCEKS",
+  "provider" : {
+     "Cipher.Blowfish SupportedKeyFormats" : "RAW",
+     "AlgorithmParameters.DESede" : "com.sun.crypto.provider.DESedeParameters",
+     "AlgorithmParameters.DES" : "com.sun.crypto.provider.DESParameters",
   ...
-  }
-    </computeroutput>
+  },
+  "aliases" : [ "openidm-sym-default", "openidm-localhost" ]
+}</computeroutput>
    </screen>
 
    <itemizedlist>
@@ -170,67 +176,61 @@ $ curl
  "C"  : "US",
  "returnPrivateKey" : true,
  "alias" : "openidm-localhost"}'
- "https://localhost:8443/openidm/security/keystore?_action=generateCSR"
+ "https://localhost:8443/openidm/security/keystore?_action=generateCSR&amp;_prettyPrint=true"
     </userinput>
     <computeroutput>
 {
-  "privateKey": {
-     "algorithm": "RSA",
-     "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOU
-             VP9cPP3+DhQ5H0V0qB+9YjE4\nXUtuwUGqaUmuT+mrXHwGpLAqvUmNsVyXJj9sJhX6PCyXzO3RdK
-             BVC8pphMfKXodj\nBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpkcc/A1RmLZdPmcuKmN5vQl4E3
-             Z6F4\nYyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh+8QSfmLCC94Ro+VUAF9Q6nk2j0Pg\nTi+Q
-             Z0i93jbKAWWX57w6S5i7CpEptKyeP9iGcFnJddSICPHkbQJ73gulyZYkbcBb\nlNUxIhODZV5bJ0
-             oxn9qgYvzlxJupldYsYkBocwIDAQABAoIBAGmfpopRIPWbaBb8\nWNIBcuz9qSsaX1ZolP+qNWVZ
-             bgfq7Y0FMlo/frQXEYBzqSETGJHC6wVn0+bF6scV\nVw86dLtyVWVr8I77HdoitfZ2hZLuZ/rh4d
-             BohpPi63YoyJs7DPTy4y2/v1aLuwoy\nMiQ0l6c3bm6sr+eIVgMH4A9Xk5/jzAHVTCBrvfTYZnh6
-             qD4Qmiuj8pQn79HQV8NK\nLt/5kmV1+uGj78jg7NR06NjNsa4L3mNZSiqsn2haPXZAnBjKfWApxe
-             GugURgNBCO\ncmYqCDZLvpMy4S/qoRBu+6qdYGprb+tHshBYNywuDkrgszhwgr5yRm8VQ60T9tM/
-             \nceKM+TECgYEA2Az2DkpC9TjJHPJG7x4boRRVqV5YRgPf5MrU+7PxDMb+EauXXUXg\nsch9Eeon
-             30yINqSv6FwATLVlkzQpZLkkJ6GJqAxUmPjRslAuosiSJqKaWamDUDbz\nSu/7iANJWvRGayqZsa
-             GQqFwM0Xpfp/EiBGe757k0D02u8sAv94A75bsCgYEAy9FQ\nMwDU3CaDzgv0qgR1ojXkSW0dCbv0
-             QPEkKZ2Ik7JbXzwVGzfdv2VUVrzRKBGReYzn\nGg/s4HbZkYy4O+SJo44n/5iO2pgKG5MEDFHSpw
-             X54Rm+qabT2fQ2lFJ/myWKsPgJ\n4gZ9bUvcemCcLLzsiAphueulQp49eOLnkzPlQKkCgYEAy7A0
-             jrZuuDjoStUUET5G\neC/urvZWrPPcMx0TfZZhTVWSlWA8HWDS/WnymGA1ZS4HQdU0TxHl6mwerp
-             C/8ckn\nEAIZAQlW/L2hHcbAoRIN0ET+1kedmJOl/mGQt+O5Vfn1JfYM3s5ezouyPhBsfK43\nDw
-             Ypvsb6EO+BYDXXQzVvwx8CgYB9o67LcfTFLNzNFCOi9pLJBm2OMbvXt0wPCFch\nbCG34hdfMntU
-             RvDjvgPqYASSrZm+kvQW5cBAciMWDOe4y91ovAW+En3lFBoO+2Zg\nbcPr/8wUTblxfQxU660Fa4
-             GL0u2Wv5/f+94vlLb5nTpIfcFU7wllAXTjBwaf0Uet\nPy1P2QKBgQDPoyJqPi2TdN7ZQYcoXAM4
-             Gl5Yv9oO16RC917XH6SLvj0ePmdLgBXo\nrR6aAmOjLzFp9jiytWZqVR9DbAWd2YNpvQav4Gude3
-             lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
-             6w==\n-----END RSA PRIVATE KEY-----\n",
-    "format": "PKCS#8"
-  },
+  "_id": "openidm-localhost",
+  "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmzCCAYMCAQAwWDEZMBcGA1UEAwwQd3d3MS5
+leGFtcGxlLmNvbTELMAkGA1UE\nCwwCSFIxDTALBgNVBAoMBE5vbmUxEjAQBgNVBAcMCUN1cGVyd
+GlubzELMAkGA1UE\nBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDAjCjTt1b
+o0WKH\nP/4PR/Td3A1ElTo4/J/7o7eWflOqs8vW5d76SMcJFKOQ6FhoOcOHRNewch+a0DBK\njKF
+aRCE1c0PuXiIlrO7wsF4dFTtTZKAhrpFdM+0hU4LeyCDxQQ5UDga3rmyVIvC8\nL1PvW+sZEcZ9r
+T67XOV03cwUpjvG4W58FCUKd6UAI0szfIrFdvJp4q4LkkBNkk9J\nUf+MXsSVuHzZrqvqhX900Is
+a19mXD6/P9Cql8KmwEzzbglGFf6uYAK33F71Kx409\nTeS85sjmBbyJwUVwhgQ0R35H3HC6jex4P
+jx1rSfPmsi61JBx9kyGu6rnSv5FOQGy\nBQpgQFnJAgMBAAEwDQYJKoZIhvcNAQENBQADggEBAKc
+yInfo2d7/12jUrOjL4Bqt\nStuQS/HkO2KAsc/zUnlpJyd3RPI7Gs1C6FxIRVCzi4Via5QzE06n2
+F8HHkinqc6m\nBWhIcf5Omk6fSqG0aw7fqn20XWDkRm+I4vtm8P8CuWftUj5qv5kmyUtrcQ3+YPD
+O\nL+cK4cfuCkjLQ3h4GIgBJP+gfWX8fTmCHyaHEFjLTMj1hZYEx+3f8awOVFoNmr3/\nB8LIJNH
+UiFHO6EED7LDOwa/z32mTRET0nK5DVO60H80JSWxzdWYZQV/IzHzm8ST4\n6j6vuheBZiG5gZR2V
+F0x5XoudQrSg7lpVslXBHNeiM85+H08RMQh8Am2bp+Xstw=\n",-----END CERTIFICATE REQUEST-----\n",
   "publicKey": {
-    "algorithm": "RSA",
-    "encoded": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr
-             ALtYU662bNbQZG7JZ3M\noOUmVP9cPP3+DhQ5H0V0qB+9YjE4XUtuwUGqaUmuT+mrXHwGpLAqvUm
-             NsVyXJj9s\nJhX6PCyXzO3RdKBVC8pphMfKXodjBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpk\
-             ncc/A1RmLZdPmcuKmN5vQl4E3Z6F4YyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh\n+8QSfmLCC
-             94Ro+VUAF9Q6nk2j0PgTi+QZ0i93jbKAWWX57w6S5i7CpEptKyeP9iG\ncFnJddSICPHkbQJ73gu
-             lyZYkbcBblNUxIhODZV5bJ0oxn9qgYvzlxJupldYsYkBo\ncwIDAQAB\n-----END PUBLIC KEY
-             -----\n",
-    "format": "X.509"
-  }
-     },
-     "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmzCCAYMCAQAwWDEZMBcGA1UEAwwQd3d3MS5
-             leGFtcGxlLmNvbTELMAkGA1UE\nCwwCSFIxDTALBgNVBAoMBE5vbmUxEjAQBgNVBAcMCUN1cGVyd
-             GlubzELMAkGA1UE\nBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDAjCjTt1b
-             o0WKH\nP/4PR/Td3A1ElTo4/J/7o7eWflOqs8vW5d76SMcJFKOQ6FhoOcOHRNewch+a0DBK\njKF
-             aRCE1c0PuXiIlrO7wsF4dFTtTZKAhrpFdM+0hU4LeyCDxQQ5UDga3rmyVIvC8\nL1PvW+sZEcZ9r
-             T67XOV03cwUpjvG4W58FCUKd6UAI0szfIrFdvJp4q4LkkBNkk9J\nUf+MXsSVuHzZrqvqhX900Is
-             a19mXD6/P9Cql8KmwEzzbglGFf6uYAK33F71Kx409\nTeS85sjmBbyJwUVwhgQ0R35H3HC6jex4P
-             jx1rSfPmsi61JBx9kyGu6rnSv5FOQGy\nBQpgQFnJAgMBAAEwDQYJKoZIhvcNAQENBQADggEBAKc
-             yInfo2d7/12jUrOjL4Bqt\nStuQS/HkO2KAsc/zUnlpJyd3RPI7Gs1C6FxIRVCzi4Via5QzE06n2
-             F8HHkinqc6m\nBWhIcf5Omk6fSqG0aw7fqn20XWDkRm+I4vtm8P8CuWftUj5qv5kmyUtrcQ3+YPD
-             O\nL+cK4cfuCkjLQ3h4GIgBJP+gfWX8fTmCHyaHEFjLTMj1hZYEx+3f8awOVFoNmr3/\nB8LIJNH
-             UiFHO6EED7LDOwa/z32mTRET0nK5DVO60H80JSWxzdWYZQV/IzHzm8ST4\n6j6vuheBZiG5gZR2V
-             F0x5XoudQrSg7lpVslXBHNeiM85+H08RMQh8Am2bp+Xstw=\n
-     -----END CERTIFICATE REQUEST-----\n",
-     "_id": "openidm-localhost"
-     }
-}
-    </computeroutput>
+     "format": "X.509",
+     "encoded": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr
+ALtYU662bNbQZG7JZ3M\noOUmVP9cPP3+DhQ5H0V0qB+9YjE4XUtuwUGqaUmuT+mrXHwGpLAqvUm
+NsVyXJj9s\nJhX6PCyXzO3RdKBVC8pphMfKXodjBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpk\
+ncc/A1RmLZdPmcuKmN5vQl4E3Z6F4YyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh\n+8QSfmLCC
+94Ro+VUAF9Q6nk2j0PgTi+QZ0i93jbKAWWX57w6S5i7CpEptKyeP9iG\ncFnJddSICPHkbQJ73gu
+lyZYkbcBblNUxIhODZV5bJ0oxn9qgYvzlxJupldYsYkBo\ncwIDAQAB\n-----END PUBLIC KEY-----\n",
+     "algorithm": "RSA"
+  },
+  "privateKey": {
+     "format": "PKCS#8",
+     "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOU
+VP9cPP3+DhQ5H0V0qB+9YjE4\nXUtuwUGqaUmuT+mrXHwGpLAqvUmNsVyXJj9sJhX6PCyXzO3RdK
+BVC8pphMfKXodj\nBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpkcc/A1RmLZdPmcuKmN5vQl4E3
+Z0i93jbKAWWX57w6S5i7CpEptKyeP9iGcFnJddSICPHkbQJ73gulyZYkbcBb\nlNUxIhODZV5bJ0
+Z6F4\nYyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh+8QSfmLCC94Ro+VUAF9Q6nk2j0Pg\nTi+Q
+oxn9qgYvzlxJupldYsYkBocwIDAQABAoIBAGmfpopRIPWbaBb8\nWNIBcuz9qSsaX1ZolP+qNWVZ
+bgfq7Y0FMlo/frQXEYBzqSETGJHC6wVn0+bF6scV\nVw86dLtyVWVr8I77HdoitfZ2hZLuZ/rh4d
+BohpPi63YoyJs7DPTy4y2/v1aLuwoy\nMiQ0l6c3bm6sr+eIVgMH4A9Xk5/jzAHVTCBrvfTYZnh6
+qD4Qmiuj8pQn79HQV8NK\nLt/5kmV1+uGj78jg7NR06NjNsa4L3mNZSiqsn2haPXZAnBjKfWApxe
+GugURgNBCO\ncmYqCDZLvpMy4S/qoRBu+6qdYGprb+tHshBYNywuDkrgszhwgr5yRm8VQ60T9tM/
+\nceKM+TECgYEA2Az2DkpC9TjJHPJG7x4boRRVqV5YRgPf5MrU+7PxDMb+EauXXUXg\nsch9Eeon
+30yINqSv6FwATLVlkzQpZLkkJ6GJqAxUmPjRslAuosiSJqKaWamDUDbz\nSu/7iANJWvRGayqZsa
+GQqFwM0Xpfp/EiBGe757k0D02u8sAv94A75bsCgYEAy9FQ\nMwDU3CaDzgv0qgR1ojXkSW0dCbv0
+QPEkKZ2Ik7JbXzwVGzfdv2VUVrzRKBGReYzn\nGg/s4HbZkYy4O+SJo44n/5iO2pgKG5MEDFHSpw
+X54Rm+qabT2fQ2lFJ/myWKsPgJ\n4gZ9bUvcemCcLLzsiAphueulQp49eOLnkzPlQKkCgYEAy7A0
+jrZuuDjoStUUET5G\neC/urvZWrPPcMx0TfZZhTVWSlWA8HWDS/WnymGA1ZS4HQdU0TxHl6mwerp
+C/8ckn\nEAIZAQlW/L2hHcbAoRIN0ET+1kedmJOl/mGQt+O5Vfn1JfYM3s5ezouyPhBsfK43\nDw
+Ypvsb6EO+BYDXXQzVvwx8CgYB9o67LcfTFLNzNFCOi9pLJBm2OMbvXt0wPCFch\nbCG34hdfMntU
+RvDjvgPqYASSrZm+kvQW5cBAciMWDOe4y91ovAW+En3lFBoO+2Zg\nbcPr/8wUTblxfQxU660Fa4
+GL0u2Wv5/f+94vlLb5nTpIfcFU7wllAXTjBwaf0Uet\nPy1P2QKBgQDPoyJqPi2TdN7ZQYcoXAM4
+Gl5Yv9oO16RC917XH6SLvj0ePmdLgBXo\nrR6aAmOjLzFp9jiytWZqVR9DbAWd2YNpvQav4Gude3
+lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
+6w==\n-----END RSA PRIVATE KEY-----\n",
+     "algorithm": "RSA"
+} </computeroutput>
    </screen>
 
    <para>
@@ -252,7 +252,9 @@ $ curl
    </para>
 
    <para>Send the output from
-    <literal>"csr": "-----BEGIN CERTIFICATE REQUEST----- ... -----END CERTIFICATE REQUEST-----</literal>
+    <screen>"csr": "-----BEGIN CERTIFICATE REQUEST-----
+     ...
+     -----END CERTIFICATE REQUEST-----</screen>
     to your certificate authority for signature.
    </para>
   </section>
@@ -411,8 +413,8 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     </para>
 
     <para>
-     Certificates and private
-     keys are associated with <literal>openidm/security/keystore/cert</literal>,
+     Certificates and private keys are associated with the following endpoints:
+     <literal>openidm/security/keystore/cert</literal>,
      <literal>openidm/security/keystore/privatekey</literal>, and
      <literal>openidm/security/truststore/cert</literal>.
     </para>
@@ -421,8 +423,6 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
      All CRUD requests on such certificates and private/public keys use these
      endpoints.
     </para>
-
-   <!-- CRUD functionality confirmed via CollectionResourceProvider javadoc -->
 
   </section>
 
@@ -446,7 +446,7 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
    <secondary>SSL</secondary>
   </indexterm>
 
-  <para>Disable plain HTTP access, included for development convenience, as
+  <para>We recommend that you disable plain HTTP access, as
   described in the section titled <link
   xlink:role="http://docbook.org/xlink/role/olink"
   xlink:href="integrators-guide#security-jetty"><citetitle>Secure
@@ -454,9 +454,9 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
 
   <para>Use TLS/SSL to access OpenIDM, ideally with mutual authentication so
   that only trusted systems can invoke each other. TLS/SSL protects data on
-  the wire. Mutual authentication with certificates imported into the
-  applications' trust and key stores provides some confidence for trusting
-  application access.</para>
+  the network. Mutual authentication with strong certificates, imported into the
+  trust and key stores of each application, provides a level of confidence
+  for trusting application access.</para>
 
   <para>Augment this protection with message level security where
   appropriate.</para>
@@ -466,15 +466,20 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
   <title>Restrict REST Access to the HTTPS Port</title>
 
   <para>
-   Use certificates to secure REST access, over HTTPS. OpenIDM generates a
-   self-signed certificate when it first starts up. You can use this certificate
-   to test secure REST access. Note that in production systems, it is
-   recommended that you replace this certificate with a certificate that has
-   been signed by a certificate authority.
+   When possible, use a certificate to secure REST access, over HTTPS. For
+   production, that certificate should be signed by a certificate authority.
   </para>
+
   <para>
-   The following procedure shows how to secure REST access using the default
-   self-signed certificate.
+   OpenIDM generates a self-signed certificate when it first starts up. You can
+   use this certificate to test secure REST access.
+  </para>
+
+  <para>
+   While not recommended for production, you can test secure REST access using
+   the default self-signed certificate. To do so, you can create a self-signed
+   certificate file, <filename>self-signed.crt</filename>, using the following
+   procedure:
   </para>
 
   <procedure>
@@ -493,10 +498,9 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     <para>
      Using any text editor, create a file named
      <filename>self-signed.crt</filename>. Copy the portion of the certificate
-     from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal> to
-     <literal>­­­­­END CERTIFICATE­­­­­</literal> and paste it into the
-     <filename>self-signed.crt</filename> file. Your
-     <filename>self-signed.crt</filename> file should now contain something like
+     from <literal>-----BEGIN CERTIFICATE-----</literal> to
+     <literal>----END CERTIFICATE-----</literal> and paste it into the
+     <filename>self-signed.crt</filename> file, which should appear similar to
      the following:
     </para>
     <screen>
@@ -532,19 +536,17 @@ $ curl
  --header "X-OpenIDM-Password:openidm-admin"
  --cacert self-signed.crt
  --request GET
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"
      </userinput>
      <computeroutput>
 {
-    "remainingPagedResuts": -1,
-    "pagedResultsCooke": null,
-    "resultCount": 0,
     "result": [],
+    "resultCount": 0,
+    "pagedResultsCooke": null,
+    "remainingPagedResuts": -1
 }
      </computeroutput>
     </screen>
-
-    <!-- Note removed, as the ambiguous message no longer seems to be an issue -->
 
    </step>
   </procedure>
@@ -562,7 +564,7 @@ $ curl
 
   <para>Beyond relying on end-to-end availability of TLS/SSL to protect
   data, OpenIDM also supports explicit encryption of data that goes on the
-  wire. This can be important if the TLS/SSL termination happens prior to
+  network. This can be important if the TLS/SSL termination happens prior to
   the final endpoint.</para>
 
   <para>OpenIDM also supports encryption of data stored in the repository,
@@ -606,7 +608,7 @@ $ curl
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
 Cache-Control: no-cache
-Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas;Path=/
+Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas ...;Path=/
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Vary: Accept-Encoding, User-Agent
 Content-Length: 82
@@ -617,6 +619,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
 
    <userinput>
 $ curl
+ --cacert self-signed.crt
  --dump-header /dev/stdout
  --header "Content-Type: application/json"
  --header "X-OpenIDM-Username: openidm-admin"
@@ -627,7 +630,7 @@ $ curl
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
 Cache-Control: no-cache
-Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas;Path=/
+Set-Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas ...;Path=/
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Vary: Accept-Encoding, User-Agent
 Content-Length: 82
@@ -860,12 +863,10 @@ $ cli.sh encrypt newpwd
    <secondary>Disabling</secondary>
   </indexterm>
 
-  <para>Before running OpenIDM in production, edit the
-  <filename>openidm/conf/jetty.xml</filename> configuration to avoid
-  clear text HTTP. Opt instead for HTTPS, either with or without mutual
-  authentication. To disable plain HTTP access, comment out the section in
-  <filename>openidm/conf/jetty.xml</filename> that enables HTTP on port
-  8080.</para>
+  <para>If you do not want to use regular HTTP on a production OpenIDM system,
+   edit the <filename>openidm/conf/jetty.xml</filename> configuration file.
+   Comment out the line that enables regular HTTP.
+  </para>
 
   <para>
    The following excerpt includes the Java comment code that you would add
@@ -880,7 +881,7 @@ $ cli.sh encrypt newpwd
     &lt;New class=&quot;org.eclipse.jetty.server.nio.SelectChannelConnector&quot;&gt;
       &lt;Set name=&quot;host&quot;&gt;&lt;Property name=&quot;jetty.host&quot; /&gt;&lt;/Set&gt;
 &lt;!-- &lt;Set name=&quot;port&quot;&gt;&lt;Call class="org.forgerock.openidm.jetty.Param"
-          name="getProperty"&lt;/Arg&gt;&lt;/Call&gt;&lt;/Set&gt;  --&gt;
+          name="getProperty"&lt;Arg&gt;openidm.port.http&lt;/Arg&gt;&lt;/Call&gt;&lt;/Set&gt;  --&gt;
         &lt;Set name=&quot;maxIdleTime&quot;&gt;300000&lt;/Set&gt;
         &lt;Set name=&quot;Acceptors&quot;&gt;2&lt;/Set&gt;
         &lt;Set name=&quot;statsOn&quot;&gt;false&lt;/Set&gt;
@@ -897,22 +898,27 @@ $ cli.sh encrypt newpwd
  <section xml:id="security-urls">
   <title>Protect Sensitive REST Interface URLs</title>
 
-  <para>Although the repository is accessible directly by default, since
-  anything attached to the router is accessible with the default policy,
-  avoid direct HTTP access in production. If you do not need such access,
-  deny it in the authorization policy to reduce the attack surface.</para>
+  <para>
+   Anything attached to the router is accessible with the default policy,
+   including the repository. If you do not need such access,
+   deny it in the authorization policy to reduce the attack surface.
+  </para>
 
-  <para>Similarly deny direct HTTP access to system objects in production,
-  particularly access to <literal>action</literal>. As a rule of thumb, do not 
-  expose anything that is not used in production. The main public interfaces 
-  over HTTP are <literal>/openidm/managed/</literal> and <literal>/openidm/config/</literal>.
-  Other URIs are triggered indirectly, or are for internal consumption.</para>
+  <!-- TODO: explain how to deny "it" in the authorization policy -->
+
+  <para>
+   In addition, you can deny direct HTTP access to system objects in production,
+   particularly access to <literal>action</literal>. As a rule of thumb, do not
+   expose anything that is not used in production. The main public interfaces
+   over HTTP are <literal>/openidm/managed/</literal> and
+   <literal>/openidm/config/</literal>. Other URIs are triggered indirectly,
+   or are used for internal consumption.
+  </para>
   
   <para>OpenIDM supports native query expressions on the repository, and it is
    possible to enable these over HTTP, for example, the following query should
    identify managed users in an OrientDB repository:</para>
- <!-- Changed call to managed_user for OrientDB (managedobjects is for MySQL) -->
-  
+
   <screen width="91">$ curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
@@ -922,10 +928,15 @@ $ cli.sh encrypt newpwd
   
   <para>
    By default, direct HTTP access to native queries is disallowed, and should
-   remain so in production systems. To enable native queries on the repository
-   over HTTP, specifically for testing or development purposes, edit the access
-   control configuration file (<filename>access.js</filename>) to remove any
-   instances of <literal>"disallowQueryExpression()"</literal>. For example:
+   remain so in production systems.
+  </para>
+
+  <para>
+   For testing or development purposes, it can be helpful to enable native
+   queries on the repository over HTTP. To do so, edit the access
+   control configuration file (<filename>access.js</filename>). In that file,
+   remove any instances of <literal>"disallowQueryExpression()"</literal>
+   such as the following:
   </para>
   
   <programlisting language="javascript">
@@ -1107,6 +1118,8 @@ password=<replaceable>password</replaceable></programlisting>
 
  <section xml:id="security-protect-repo">
   <title>Protect the OpenIDM Repository</title>
+
+  <!-- TODO: change if OrientDB is supported in production for 3.0 -->
 
   <para>Use the JDBC or MSSQL repositories. OrientDB is not yet supported for
   production use.</para>
