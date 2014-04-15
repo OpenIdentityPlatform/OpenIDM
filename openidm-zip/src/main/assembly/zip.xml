@@ -461,6 +461,9 @@
                 <includes>
                     <include>bin/**</include>
                 </includes>
+                <excludes>
+                    <exclude>bin/launcher.bat</exclude>
+                </excludes>
             </unpackOptions>
         </dependencySet>
     </dependencySets>
