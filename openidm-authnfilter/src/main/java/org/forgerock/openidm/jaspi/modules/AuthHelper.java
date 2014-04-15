@@ -87,19 +87,19 @@ public class AuthHelper {
     /**
      * Performs the authentication using the given query id, resource, username and password.
      *
-     * @param passQueryId The query id.
-     * @param passQueryOnResource The query resource.
+     * @param queryId The query id.
+     * @param queryResource The query resource.
      * @param username The username.
      * @param password The password.
      * @param securityContextMapper The SecurityContextMapper object.
      * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
-    public boolean authenticate(String passQueryId, String passQueryOnResource, String username, String password,
+    public boolean authenticate(String queryId, String queryResource, String username, String password,
             SecurityContextMapper securityContextMapper, ServerContext context) {
 
         try {
-            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, username, securityContextMapper, context);
+            UserInfo userInfo = getRepoUserInfo(queryId, queryResource, username, securityContextMapper, context);
             if (userInfo != null && userInfo.checkCredential(password)) {
                 if (securityContextMapper != null) {
                     securityContextMapper.setRoles(userInfo.getRoleNames());
@@ -122,12 +122,15 @@ public class AuthHelper {
         Credential credential = null;
         List<String> roleNames = new ArrayList<String>();
 
-        QueryRequest request = Requests.newQueryRequest("/repo/" + repoResource);
-        request.setQueryId(repoQueryId);
-        //TODO NPE check
-        request.getAdditionalParameters().put("username", username);
+        final String resourceName = repoResource.startsWith("repo")
+                ? repoResource
+                : "repo/" + repoResource;
 
-        Set<Resource> result = new HashSet<Resource>();
+        QueryRequest request = Requests.newQueryRequest(resourceName)
+                .setQueryId(repoQueryId)
+                .setAdditionalParameter("username", username);
+
+        final Set<Resource> result = new HashSet<Resource>();
         connectionFactory.getConnection().query(context, request, result);
 
         if (result.size() > 1) {
