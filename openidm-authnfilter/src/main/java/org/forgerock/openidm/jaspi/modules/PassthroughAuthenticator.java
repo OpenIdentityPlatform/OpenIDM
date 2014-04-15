@@ -21,11 +21,9 @@ import java.util.List;
 import java.util.Map;
 import javax.security.auth.message.AuthException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -43,9 +41,6 @@ import org.slf4j.LoggerFactory;
 public class PassthroughAuthenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
-
-    /** anonymous user */
-    private static final String ANONYMOUS = "anonymous";
 
     /**
      * The modes of group-comparison supported to see if a user's membership in a given
@@ -123,7 +118,7 @@ public class PassthroughAuthenticator {
 
     /**
      * Performs the pass-through authentication to an external system endpoint, such as an OpenICF provisioner at
-     * "system/AD/account".
+     * the passThroughAuth configured property, such as "system/AD/account".
      *
      * @param username The user's username
      * @param password The user's password.
@@ -133,10 +128,6 @@ public class PassthroughAuthenticator {
      */
     public boolean authenticate(String username, String password, SecurityContextMapper securityContextMapper)
             throws AuthException {
-
-        if (StringUtils.isEmpty(passThroughAuth) || ANONYMOUS.equals(username)) {
-            return false;
-        }
 
         try {
             final JsonValue result = connectionFactory.getConnection().action(context,
@@ -159,7 +150,7 @@ public class PassthroughAuthenticator {
                 securityContextMapper.setRoles(defaultRoles);
             }
 
-            // Then, apply role mapping if available:
+            // Then, getCredential role mapping if available:
             // If the propertyMapping specifies a authenticationId property and the roleMapping has been provided,
             // attempt to read the user from the pass-through source and set roles based on the roleMapping
             if (authenticationId != null && roleMapping.size() > 0) {

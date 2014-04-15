@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
@@ -29,35 +27,29 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
- * Authentication Module for authenticating users against a managed users table.
+ * Authentication Module for authenticating users against an OpenIDM users table.
  *
  * @author Phill Cunnington
  * @author brmiller
  */
-public abstract class IDMUserAuthModule extends IDMServerAuthModule {
+public class IDMUserAuthModule extends IDMServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(IDMUserAuthModule.class);
 
     // property config keys
     private static final String USER_CREDENTIAL = "userCredential";
     private static final String USER_ROLES = "userRoles";
-
-    private final String queryId;
-    private final String queryOnResource;
 
     // A list of ports that allow authentication purely based on client certificates (SSL mutual auth)
     private Set<Integer> clientAuthOnly = new HashSet<Integer>();
@@ -66,13 +58,14 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
 
     private Accessor<ServerContext> accessor;
 
+    private String queryId;
+    private String component;
+
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public IDMUserAuthModule(String queryId, String queryOnResource) {
-        this.queryId = queryId;
-        this.queryOnResource = queryOnResource;
+    public IDMUserAuthModule() {
         this.accessor = new Accessor<ServerContext>() {
             public ServerContext access() {
                 try {
@@ -89,22 +82,23 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      *
      * @param authHelper A mock of an AuthHelper instance.
      */
-    public IDMUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor, String queryId, String queryOnResource) {
+    public IDMUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor, String queryId, String component) {
         this.queryId = queryId;
-        this.queryOnResource = queryOnResource;
+        this.component = component;
         this.authHelper = authHelper;
         this.accessor = accessor;
     }
 
     /**
-     * Initialises the ManagedUserAuthModule.
+     * Initialises the IDMUserAuthModule.
      *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
+    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler)
+            throws AuthException {
 
         String clientAuthOnlyStr = IdentityServer.getInstance().getProperty("openidm.auth.clientauthonlyports");
         if (clientAuthOnlyStr != null) {
@@ -115,21 +109,27 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
         }
         logger.info("Authentication disabled on ports: {}", clientAuthOnly);
 
-        JsonValue propertyMapping = properties.get(PROPERTY_MAPPING);
-        String authenticationIdProperty = propertyMapping.get(AUTHENTICATION_ID).asString();
-        String userCredentialProperty = propertyMapping.get(USER_CREDENTIAL).asString();
-        String userRolesProperty = propertyMapping.get(USER_ROLES).asString();
-        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES).asList(String.class);
+        try {
+            queryId = properties.get(QUERY_ID).required().asString();
+            component = properties.get(COMPONENT).required().asString();
+            JsonValue propertyMapping = properties.get(PROPERTY_MAPPING);
+            String authenticationIdProperty = propertyMapping.get(AUTHENTICATION_ID).asString();
+            String userCredentialProperty = propertyMapping.get(USER_CREDENTIAL).asString();
+            String userRolesProperty = propertyMapping.get(USER_ROLES).asString();
+            List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES).asList(String.class);
 
-        authHelper = new AuthHelper(
-                OSGiAuthnFilterBuilder.getCryptoService(),
-                OSGiAuthnFilterBuilder.getConnectionFactory(),
-                authenticationIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
+            authHelper = new AuthHelper(
+                    OSGiAuthnFilterBuilder.getCryptoService(),
+                    OSGiAuthnFilterBuilder.getConnectionFactory(),
+                    authenticationIdProperty, userCredentialProperty, userRolesProperty, defaultRoles);
+        } catch (Exception e) {
+            throw new AuthException("Unable to initialize user auth module: " + e.getMessage());
+        }
     }
 
     /**
-     * Validates the request by authenticating against either the client certificate in the request, internally or
-     * Basic Authentication from the request header internally.
+     * Validates the request by authenticating against an internal resource using either
+     * Basic Authentication from the request header or the X-OpenIDM-* request headers.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
@@ -142,117 +142,40 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
             SecurityContextMapper securityContextMapper) {
 
         HttpServletRequest req = (HttpServletRequest) messageInfo.getRequestMessage();
-        boolean authenticated;
 
-        final String headerLogin = req.getHeader(HEADER_USERNAME);
-        String basicAuth = req.getHeader("Authorization");
-        // if we see the certificate port this request is for client auth only
-        if (allowClientCertOnly(req)) {
-            authenticated = authenticateUsingClientCert(req, securityContextMapper);
-            //Auth success will be logged in IDMServerAuthModule super type.
-        } else if (headerLogin != null) {
-            authenticated = authenticateUser(req, securityContextMapper);
-            //Auth success will be logged in IDMServerAuthModule super type.
-        } else if (basicAuth != null) {
-            authenticated = authenticateUsingBasicAuth(basicAuth, securityContextMapper);
-            //Auth success will be logged in IDMServerAuthModule super type.
-        } else {
-            //Auth failure will be logged in IDMServerAuthModule super type.
-            return AuthStatus.SEND_FAILURE;
-        }
-        securityContextMapper.setResource(queryOnResource);
-        
-        final String authcid = securityContextMapper.getAuthenticationId();
-        if (authenticated) {
+        if (authenticateUser(HEADER_AUTH_CRED_HELPER.getCredential(req), securityContextMapper)
+                || authenticateUser(BASIC_AUTH_CRED_HELPER.getCredential(req), securityContextMapper)) {
+            final String authcid = securityContextMapper.getAuthenticationId();
             clientSubject.getPrincipals().add(new Principal() {
                 public String getName() {
                     return authcid;
                 }
             });
-        }
-
-        return authenticated ? AuthStatus.SUCCESS : AuthStatus.SEND_FAILURE;
-    }
-
-    /**
-     * Whether to allow authentication purely based on client certificates.
-     *
-     * Note that the checking of the certificates MUST be done by setting jetty up for client auth required.
-     *
-     * @return true if authentication via client certificate only is sufficient.
-     */
-    private boolean allowClientCertOnly(ServletRequest request) {
-        return clientAuthOnly.contains(Integer.valueOf(request.getLocalPort()));
-    }
-
-    /**
-     * Authenticates the request using the client certificate from the request.
-     *
-     * @param request The ServletRequest.
-     */
-    // This is currently Jetty specific
-    private boolean authenticateUsingClientCert(ServletRequest request, SecurityContextMapper securityContextMapper) {
-
-        logger.debug("Client certificate authentication request");
-        X509Certificate[] certs = getClientCerts(request);
-
-        if (certs != null) {
-            Principal existingPrincipal = request instanceof HttpServletRequest ?
-                    ((HttpServletRequest) request).getUserPrincipal() : null;
-            logger.debug("Request {} existing Principal {} has {} certificates", request, existingPrincipal,
-                    certs.length);
-            for (X509Certificate cert : certs) {
-                logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
-            }
-        }
-        String username = certs[0].getSubjectDN().getName();
-        if (certs == null || certs.length < 1 || certs[0] == null) {
-            return false;
-        }
-        List<String> roles = new ArrayList<String>(1);
-        roles.add("openidm-cert");
-        securityContextMapper.setRoles(roles);
-        securityContextMapper.setAuthenticationId(username);
-        securityContextMapper.setUserId(username);
-        logger.debug("Authentication client certificate subject {}", username);
-        return true;
-    }
-
-    /**
-     * Gets the client certificates from the request.
-     *
-     * @param request The ServletRequest.
-     * @return An array of X509Certificates.
-     */
-    // This is currently Jetty specific
-    private X509Certificate[] getClientCerts(ServletRequest request) {
-
-        Object checkCerts = request.getAttribute("javax.servlet.request.X509Certificate");
-        if (checkCerts instanceof X509Certificate[]) {
-            return (X509Certificate[]) checkCerts;
+            return AuthStatus.SUCCESS;
         } else {
-            logger.warn("Unknown certificate type retrieved {}", checkCerts);
-            return null;
+            return AuthStatus.SEND_FAILURE;
         }
     }
 
     /**
-     * Authenticates the request.
+     * Authenticate the username and password.
      *
-     * @param request The HttpServletRequest.
+     * @param cred the username/password credential
+     * @param securityContextMapper The SecurityContextMapper.
+     * @return whether the authentication is successful
      */
-    private boolean authenticateUser(HttpServletRequest request, SecurityContextMapper securityContextMapper) {
-
-        logger.debug("No session, authenticating user");
-        String username = request.getHeader(HEADER_USERNAME);
-        String password = request.getHeader(HEADER_PASSWORD);
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+    private boolean authenticateUser(Credential cred, SecurityContextMapper securityContextMapper) {
+        // set authenticationId and resource so long as username isn't null
+        if (cred.username != null) {
+            securityContextMapper.setAuthenticationId(cred.username);
+            securityContextMapper.setResource(component);
+        }
+        if (!cred.isComplete()) {
             logger.debug("Failed authentication, missing or empty headers");
             return false;
         }
-        securityContextMapper.setAuthenticationId(username);
         try {
-            return authHelper.authenticate(queryId, queryOnResource, username, password, securityContextMapper, accessor.access());
+            return authHelper.authenticate(queryId, component, cred.username, cred.password, securityContextMapper, accessor.access());
         } catch (IllegalStateException e) {
             logger.error(e.getMessage(), e);
             return false;
@@ -260,38 +183,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
     }
 
     /**
-     * Authenticates the request using the contents of the Http Authorization Header.
-     *
-     * @param authorizationHeader The Http Authorization Header value.
-     */
-    private boolean authenticateUsingBasicAuth(String authorizationHeader, SecurityContextMapper securityContextMapper) {
-        logger.debug("HTTP basic authentication request");
-        StringTokenizer st = new StringTokenizer(authorizationHeader);
-        String isBasic = st.nextToken();
-        if (isBasic == null || !isBasic.equalsIgnoreCase("Basic")) {
-            return false;
-        }
-        String creds = st.nextToken();
-        if (creds == null) {
-            return false;
-        }
-        String dcreds = new String(Base64.decodeBase64(creds.getBytes()));
-        String[] t = dcreds.split(":");
-        if (t.length != 2) {
-            return false;
-        }
-        securityContextMapper.setAuthenticationId(t[0]);
-
-        try {
-            return authHelper.authenticate(queryId, queryOnResource, t[0], t[1], securityContextMapper, accessor.access());
-        } catch (IllegalStateException e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    /**
-     * No work to do here so always returns AuthStatus.SEND_SUCCESS.
+     * No work to do here so chain super-class result.
      *
      * @param messageInfo {@inheritDoc}
      * @param serviceSubject {@inheritDoc}

@@ -28,7 +28,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.JaspiRuntimeFilter;
 import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;
 
-import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;

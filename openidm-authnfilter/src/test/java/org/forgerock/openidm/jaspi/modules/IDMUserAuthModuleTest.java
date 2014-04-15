@@ -11,12 +11,11 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2013 ForgeRock AS.
+* Copyright 2013-2014 ForgeRock AS.
 */
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.util.Accessor;
 import org.testng.annotations.BeforeMethod;
@@ -35,11 +34,15 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 /**
-* @author Phill Cunnington
-*/
-public class InternalUserAuthModuleTest {
+ * Tests IDMUserAuthModule using "internal/user" resource/query
+ * @author Phill Cunnington
+ */
+public class IDMUserAuthModuleTest {
 
-    private InternalUserAuthModule internalUserAuthModule;
+    public static final String INTERNAL_USER_RESOURCE = "repo/internal/user";
+    public static final String INTERNALUSER_CREDENTIAL_QUERY = "credential-internaluser-query";
+
+    private IDMUserAuthModule idmUserAuthModule;
 
     private AuthHelper authHelper;
 
@@ -50,13 +53,13 @@ public class InternalUserAuthModuleTest {
 
         context = mock(ServerContext.class);
         authHelper = mock(AuthHelper.class);
-        internalUserAuthModule = new InternalUserAuthModule(authHelper,
+        idmUserAuthModule = new IDMUserAuthModule(authHelper,
                 new Accessor<ServerContext>() {
                     @Override
                     public ServerContext access() {
                         return context;
                     }
-                });
+                }, INTERNALUSER_CREDENTIAL_QUERY, INTERNAL_USER_RESOURCE);
     }
 
     @Test
@@ -75,7 +78,7 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
@@ -100,12 +103,12 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
         verifyZeroInteractions(authHelper);
-        verify(securityContextMapper).setResource("internal/user");
+        verify(securityContextMapper).setResource(INTERNAL_USER_RESOURCE);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -125,12 +128,12 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
         verifyZeroInteractions(authHelper);
-        verify(securityContextMapper).setResource("internal/user");
+        verify(securityContextMapper).setResource(INTERNAL_USER_RESOURCE);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -150,12 +153,12 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
         verifyZeroInteractions(authHelper);
-        verify(securityContextMapper).setResource("internal/user");
+        verify(securityContextMapper).setResource(INTERNAL_USER_RESOURCE);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -175,16 +178,16 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         given(authHelper.authenticate(
-                    "credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD", securityContextMapper, context))
+                    INTERNALUSER_CREDENTIAL_QUERY, INTERNAL_USER_RESOURCE, "USERNAME", "PASSWORD", securityContextMapper, context))
             .willReturn(true);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
         verify(securityContextMapper).setAuthenticationId("USERNAME");
-        verify(securityContextMapper).setResource("internal/user");
+        verify(securityContextMapper).setResource(INTERNAL_USER_RESOURCE);
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
@@ -204,21 +207,21 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         given(authHelper.authenticate(
-                    "credential-internaluser-query", "internal/user", "USERNAME", "PASSWORD", securityContextMapper, context))
+                    INTERNALUSER_CREDENTIAL_QUERY, INTERNAL_USER_RESOURCE, "USERNAME", "PASSWORD", securityContextMapper, context))
             .willReturn(false);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject,
                 securityContextMapper);
 
         //Then
         verify(securityContextMapper).setAuthenticationId("USERNAME");
-        verify(securityContextMapper).setResource("internal/user");
+        verify(securityContextMapper).setResource(INTERNAL_USER_RESOURCE);
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
     @Test
-    public void shouldSecureResponseIfAnonymousUserSetSkipSession() throws AuthException {
+    public void shouldSecureResponseIfNoSessionHeaderSetSkipSession() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -228,11 +231,11 @@ public class InternalUserAuthModuleTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("anonymous");
+        given(request.getHeader("X-OpenIDM-NoSession")).willReturn("true");
         given(messageInfo.getMap()).willReturn(messageInfoMap);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
@@ -241,7 +244,7 @@ public class InternalUserAuthModuleTest {
     }
 
     @Test
-    public void shouldSecureResponseIfNotAnonymousUser() throws AuthException {
+    public void shouldSecureResponseIfNotNoSessionHeaderSet() throws AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -251,11 +254,11 @@ public class InternalUserAuthModuleTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
+        given(request.getHeader("X-OpenIDM-NoSession")).willReturn(null);
         given(messageInfo.getMap()).willReturn(messageInfoMap);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.secureResponse(messageInfo, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);

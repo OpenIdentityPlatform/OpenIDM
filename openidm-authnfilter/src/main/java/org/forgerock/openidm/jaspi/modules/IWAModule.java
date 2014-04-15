@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock Inc.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -103,8 +103,7 @@ public class IWAModule extends IDMServerAuthModule {
             AuthStatus authStatus = commonsIwaModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
             if (!AuthStatus.SUCCESS.equals(authStatus)) {
-                LOGGER.debug("IWAModule: IWA response to send to client, returning status, {}",
-                        response.getStatus());
+                LOGGER.debug("IWAModule: IWA response to send to client, returning status, {}", response.getStatus());
                 return authStatus;
             }
 
@@ -132,7 +131,6 @@ public class IWAModule extends IDMServerAuthModule {
             //Auth success will be logged in IDMServerAuthModule super type.
             return AuthStatus.SUCCESS;
         } catch (AuthException e) {
-            // fallback to AD passthrough
             LOGGER.debug("IWAModule: IWA has failed");
             //Auth failure will be logged in IDMServerAuthModule super type.
             return AuthStatus.SEND_FAILURE;
