@@ -43,52 +43,56 @@ import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActivityLog {
+/**
+ * Creates an audit activity log message using the router.
+ */
+public class RouterActivityLogger implements ActivityLogger {
 
     /**
-     * Setup logging for the {@link ActivityLog}.
+     * Setup logging for the {@link ActivityLogger}.
      */
-    final static Logger logger = LoggerFactory.getLogger(ActivityLog.class);
+    final static Logger logger = LoggerFactory.getLogger(RouterActivityLogger.class);
 
-    private final static boolean suspendException;
-    private static DateUtil dateUtil;
-
-    public static final String TIMESTAMP = "timestamp";
-    public static final String ACTION = "action";
-    public static final String MESSAGE = "message";
-    public static final String OBJECT_ID = "objectId";
-    public static final String REVISION = "rev";
-    public static final String ACTIVITY_ID = "activityId";
-    public static final String ROOT_ACTION_ID = "rootActionId";
-    public static final String PARENT_ACTION_ID = "parentActionId";
-    public static final String REQUESTER = "requester";
-    public static final String BEFORE = "before";
-    public static final String AFTER = "after";
-    public static final String STATUS = "status";
-    public static final String CHANGED_FIELDS = "changedFields";
-    public static final String PASSWORD_CHANGED = "passwordChanged";
+    private final ConnectionFactory connectionFactory;
+    private final boolean suspendException;
+    private final DateUtil dateUtil;
 
     /**
-     * Creates a Jackson object mapper. By default, it calls
-     * {@link org.codehaus.jackson.map.ObjectMapper#ObjectMapper()}.
-     * 
+     * Creates an AuditLogger to create activity messages on the router.
+     *
+     * @param connectionFactory The {@link ConnectionFactory} to use.
      */
-    static {
-        String config = IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
-        suspendException = "suspend".equals(config);
+    public RouterActivityLogger(ConnectionFactory connectionFactory) {
+        this(connectionFactory,
+                "suspend".equals(IdentityServer.getInstance().getProperty(ActivityLogger.class.getName().toLowerCase())));
+    }
+
+    /**
+     * Creates an AuditLogger to create activity messages on the router.
+     *
+     * @param connectionFactory The {@link ConnectionFactory} to use.
+     * @param suspendException whether to throw Exceptions on failure to log or not
+     */
+    public RouterActivityLogger(ConnectionFactory connectionFactory, boolean suspendException) {
+        this.connectionFactory = connectionFactory;
+        this.suspendException = suspendException;
         // TODO Allow for configured dateUtil
         dateUtil = DateUtil.getDateUtil("UTC");
     }
 
-    public static String getRequester(Context context) {
+    private String getRequester(Context context) {
         SecurityContext securityContext = context.asContext(SecurityContext.class);
         return securityContext != null
                 ? securityContext.getAuthenticationId()
                 : null;
     }
 
-    public static void log(ConnectionFactory connectionFactory, ServerContext context, RequestType requestType, String message, String objectId,
-                           JsonValue before, JsonValue after, Status status) throws ResourceException {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void log(ServerContext context, RequestType requestType, String message, String objectId,
+                    JsonValue before, JsonValue after, Status status) throws ResourceException {
         if (requestType == null) {
             throw new NullPointerException("Request can not be null when audit.");
         }
@@ -98,15 +102,18 @@ public class ActivityLog {
             connectionFactory.getConnection().create(new ServerContext(context),
                     Requests.newCreateRequest("audit/activity", new JsonValue(activity)));
         } catch (ResourceException ex) {
-            logger.warn("Failed to write activity log {}", ex);
-            if (!suspendException) {
+            // TODO: should this stop the activity itself?
+            if (suspendException) {
+                // log on exception if we're suspending the exception-propagation
+                logger.warn("Failed to write activity log {}", ex);
+            } else {
+                // let the caller handle/log the exception
                 throw ex;
-                // TODO: should this stop the activity itself?
             }
         }
     }
 
-    private static Map<String, Object> buildLog(Context context, RequestType requestType, String message,
+    private Map<String, Object> buildLog(Context context, RequestType requestType, String message,
             String objectId, JsonValue before, JsonValue after, Status status) {
         String rev = null;
         if (after != null && after.get(Resource.FIELD_CONTENT_REVISION).isString()) {
