@@ -24,45 +24,62 @@
 
 /*
  * Default mapping script for processing effectiveAssignments
- * Supported operations: "insert", "replace"
+ * Supported operations: "replaceTarget", "mergeWithTarget"
  */
 
 var map = { "result" : true };
 var assignments = config.assignments;
-if (assignments != null) {
-	var effectiveAssignments = source.effectiveAssignments;
-	if (effectiveAssignments != null) {
-		for (var key in effectiveAssignments) {
-			if (assignments.indexOf(key) != -1) {
-				var assignment = effectiveAssignments[key];
-				var attributes = assignment.attributes;
-				//for (var attributeName in attributes) {
-				for (var i = 0; i<attributes.length; i++) {
-					//var attribute = attributes[attributeName];
-				    var attribute = attributes[i];
-					var operation = attribute.operation;
-					var value = attribute.value;
-					var name = attribute.name;
-					if (operation == null) {
-						// Default to replace and use the entire value
-						operation = "replace";
-						target[name] = attribute;
-					} else {
-						// Process the operation
-						if (operation == "insert") {
-							if (target[name] == null) {
-								target[name] = [];
-							}
-							for (var x = 0; x < value.length; x++) {
-								target[name].push(value[x]);
-							}
-						} else if (operation == "replace") {
-							target[name] = value;
-						}
-					}
-				}
-			}
-		}
-	}
+
+function mergeValues(targetValue, value) {
+    if (targetValue != null && targetValue instanceof Array) {
+        for (var x = 0; x < value.length; x++) {
+            if (targetValue.indexOf(value) == -1) {
+                targetValue.push(value[x]);
+            }
+        }
+    } else if (targetValue != null && targetValue instanceof Object) {
+        for (var key in value) {
+            targetValue[key] = value[key];
+        }
+    } else {
+        targetValue = value;
+    }
 }
+
+if (assignments != null) {
+    var effectiveAssignments = source.effectiveAssignments;
+    if (effectiveAssignments != null) {
+        for (var key in effectiveAssignments) {
+            if (assignments.indexOf(key) != -1) {
+                var assignment = effectiveAssignments[key];
+                var attributes = assignment.attributes;
+                //for (var attributeName in attributes) {
+                for (var i = 0; i<attributes.length; i++) {
+                    //var attribute = attributes[attributeName];
+                    var attribute = attributes[i];
+                    var operation = attribute.operation;
+                    var value = attribute.value;
+                    var name = attribute.name;
+                    if (operation == null) {
+                        // Default to replace and use the entire value
+                        operation = "replaceTarget";
+                    }
+                    // Process the operation
+                    if (operation == "replaceTarget") {
+                        mergeValues(target[name], value);
+                    } else if (operation == "mergeWithTarget") {
+                        if (existingTarget[name] !== null) {
+                            mergeValues(target[name], existingTarget[name]);
+                        }
+                        mergeValues(target[name], value);
+                    } else {
+                        console.log("WARNING: Unsupported assignment operation: " + operation);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 map;
