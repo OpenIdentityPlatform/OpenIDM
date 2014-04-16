@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-1014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -27,6 +27,8 @@ package org.forgerock.openidm.quartz.impl;
 
 import java.util.Map;
 
+import org.forgerock.json.resource.ServerContext;
+
 /**
  * OSGi services wanting to be schedulable via the Scheduler service must
  * implement this interface.
@@ -49,10 +51,11 @@ public interface ScheduledService {
     /**
      * Invoked by the scheduler when the scheduler triggers.
      *
-     * @param context Context information passed by the scheduler service
+     * @param context the ServerContext to use for the request
+     * @param scheduledContext Context information passed by the scheduler service
      * @throws ExecutionException if execution of the scheduled work failed.
      * Implementations can also throw RuntimeExceptions which will get logged.
      * @throws org.forgerock.openidm.scheduler.ExecutionException
      */
-    void execute(Map<String, Object> context) throws ExecutionException;
+    void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException;
 }

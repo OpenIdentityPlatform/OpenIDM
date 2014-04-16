@@ -293,7 +293,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */
-    public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
+    public void execute(ServerContext context, Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();

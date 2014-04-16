@@ -48,7 +48,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.script.Script;
@@ -65,15 +64,13 @@ public class TaskScannerJob {
 
     private ConnectionFactory connectionFactory;
     private TaskScannerContext taskScannerContext;
-    private RouteService routeService;
     private ScriptRegistry scopeFactory;
     private ScriptEntry script;
 
-    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, RouteService routeService, ScriptRegistry scopeFactory)
+    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, ScriptRegistry scopeFactory)
             throws ExecutionException, ScriptException {
         this.connectionFactory = connectionFactory;
         this.taskScannerContext = context;
-        this.routeService = routeService;
         this.scopeFactory = scopeFactory;
 
         JsonValue scriptValue = context.getScriptValue();
