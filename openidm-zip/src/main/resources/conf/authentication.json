@@ -22,15 +22,6 @@
             }
         },
         "authModules" : [
-            {   "name" : "CLIENT_CERT",
-                "properties" : {
-                    "component" : "security/truststore",
-                    "defaultUserRoles" : [ "openidm-cert" ],
-                    "allowedAuthenticationIdPatterns" : [
-                        "ou=Eng,dc=forgerock,dc=com"
-                    ]
-                }
-            },
             {
                 "name" : "MANAGED_USER",
                 "properties" : {
@@ -57,6 +48,15 @@
                     },
                     "defaultUserRoles" : [ ],
                     "allowBasicAuth" : true
+                }
+            },
+            {   "name" : "CLIENT_CERT",
+                "properties" : {
+                    "component" : "security/truststore",
+                    "defaultUserRoles" : [ "openidm-cert" ],
+                    "allowedAuthenticationIdPatterns" : [
+                        "ou=Eng,dc=forgerock,dc=com"
+                    ]
                 }
             }
         ]
