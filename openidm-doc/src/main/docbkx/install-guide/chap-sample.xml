@@ -27,7 +27,8 @@
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xsi:schemaLocation='http://docbook.org/ns/docbook
+ http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
 
 <title>First OpenIDM Sample</title>
@@ -118,7 +119,7 @@ orientdb&gt; </screen>
  <section xml:id="about-the-sample">
   <title>About the Sample</title>
 
-  <para>OpenIDM connects identity data objects held in external resources
+  <para>OpenIDM connects data objects held in external resources
   by mapping one object to another. To connect to external resources,
   OpenIDM uses <link xlink:href="http://openicf.forgerock.org">OpenICF</link>
   connectors, configured for use with the external resources.</para>
@@ -140,13 +141,19 @@ orientdb&gt; </screen>
   Synchronization</citetitle></link> in the <citetitle>Integrator's
   Guide</citetitle>.</para>
 
-  <para>This sample connects to an XML file that holds sample user data. The 
-  XML file is configured as the authoritative source. In this sample, users are
-  created in the local repository to show you how you can manage local users
-  through the REST APIs. You can also use OpenIDM without storing managed
-  objects for users in the local repository, instead reconciling and
-  synchronizing objects directly through connectors to external
-  resources.</para>
+  <para>
+   This sample connects to an XML file that holds sample user data. The
+   XML file is configured as the authoritative source. In this sample, users are
+   created in the local repository to show you how you can manage local users
+   through the REST APIs as well as through the OpenIDM UI.
+  </para>
+
+  <para>
+   You can also use OpenIDM without storing managed
+   objects for users in the local repository, instead reconciling and
+   synchronizing objects directly through connectors to external
+   resources.
+  </para>
 
   <para>Furthermore, this sample involves only one external resource. In
   practice, you can connect as many resources as needed for your
@@ -182,7 +189,26 @@ orientdb&gt; </screen>
     database and also the flat files in the <filename>openidm/audit</filename>
     directory.</para>
     </listitem>
+    <listitem>
+     <para>
+      In some cases, the <filename>conf/authentication.json</filename> file
+      includes a <literal>PASSTHROUGH</literal> authentication module that
+      allows newly created users to log into the UI. For more information,
+      see the Integrator's Guide section on <link xlink:show="new"
+      xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="integrators-guide#passthrough-auth">
+      <citetitle>Using Pass-Through Authentication</citetitle></link>.
+     </para>
+    </listitem>
    </orderedlist>
+
+   <para>
+    When you start OpenIDM with the
+    <command>./startup.sh -p samples/sample1</command>,
+    that sets <literal>&amp;{launcher.project.location}</literal> to a value of
+    <literal>to a value of samples/sample1</literal>. As seen shortly, the
+    configuration files use that variable.
+   </para>
 
    <para>The following configuration files play important roles in this
    sample.</para>
@@ -194,8 +220,11 @@ orientdb&gt; </screen>
      In this sample, the connector instance acts as the authoritative source
      for users. In the configuration file you can see that the
      <literal>xmlFilePath</literal> is set to
-     <filename>samples/sample1/data/xmlConnectorData.xml</filename>, which
-     contains two users, in XML format.</para>
+     <filename>&amp;{launcher.project.location}/data/xmlConnectorData.xml</filename>.
+     </para>
+     <para>
+      The <literal>&amp;{launcher.project.location}</literal>, in this case, is
+      <filename>sample/sample1</filename>.</para>
      <para>For details on the OpenICF connector configuration files see
      <link xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
@@ -217,7 +246,7 @@ orientdb&gt; </screen>
     "schedule": "30 0/1 * * * ?",
     "persisted" : true,
     "misfirePolicy" : "fireAndProceed",
-    "invokeService": "org.forgerock.openidm.sync",
+    "invokeService": "sync",
     "invokeContext": {
         "action": "reconcile",
         "mapping": "systemXmlfileAccounts_managedUser"
@@ -240,6 +269,17 @@ orientdb&gt; </screen>
  --header "Content-Type: application/json"
  --request POST
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+
+     <note>
+      <para>If you do not want to bother with creating a self-signed certificate
+      as noted in <link xlink:show="new"
+      xlink:href="integrators-guide#rest-over-https"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict REST
+       Access to the HTTPS Port</citetitle></link>, just substitute a
+      <command>-k</command> or <command>--insecure</command> for
+      <command>--cacert self-signed.crt</command> in the REST call (the
+      <command>curl</command> command).</para>
+     </note>
      
     </listitem>
    </varlistentry>
@@ -298,15 +338,11 @@ orientdb&gt; </screen>
                     "target" : "telephoneNumber"
                 },
                 {
-                    "source" : "securityQuestion",
-                    "target" : "securityQuestion"
-                },
-                {
-                    "source" : "securityAnswer",
-                    "target" : "securityAnswer"
-                },
-                {
                     "source" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.split(',')"
+                    },
                     "target" : "roles"
                 }           
             ],
@@ -352,21 +388,17 @@ orientdb&gt; </screen>
      local OpenIDM repository. Paths that start with <literal>system</literal>, 
      such as <literal>system/xmlfile/account</literal>, refer to connector 
      objects, in this case the XML file connector.</para>
-     <para>To filter objects from the resource for a particular target, you can
-     use the <literal>validTarget</literal> script in the mapping to ensure 
-     that only users who match specified criteria are considered part of the
-     reconciliation. You can use an <literal>onCreate</literal> script in a
-     mapping to set default values for a user created in the target resource.
-     For details on scripting see the <link
+
+     <para>For more information about synchronization, reconciliation, and
+      <filename>sync.json</filename>, see <link
+       xlink:href="integrators-guide#chap-synchronization"
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Configuring Synchronization</citetitle></link> in the
+      <citetitle>Integrator's Guide</citetitle>.</para>
+     <para>For additional examples related to scripting, see the <link
      xlink:href="integrators-guide#appendix-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scripting Reference</citetitle></link> appendix in the
-     <citetitle>Integrator's Guide</citetitle>.</para>
-     <para>For more information about synchronization, reconciliation, and
-     <filename>sync.json</filename>, see <link
-     xlink:href="integrators-guide#chap-synchronization"
-     xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Configuring Synchronization</citetitle></link> in the
      <citetitle>Integrator's Guide</citetitle>.</para>
      </listitem>
    </varlistentry>
@@ -384,7 +416,7 @@ $ ./startup.sh -p samples/sample1
   
   <para>Reconcile the objects in the resources, either by setting 
   <literal>"enabled" : true</literal> in the schedule configuration file 
-  (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json.json</filename>) 
+  (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</filename>)
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface. Note how the following command uses a regular HTTP connection.
   </para>
@@ -413,26 +445,46 @@ $ ./startup.sh -p samples/sample1
 
  <section xml:id="sample-viewing-users-logs">
   <title>Viewing Users and Logs</title>
-  <para>After reconciliation runs, you can use the REST interface to display
+
+  <para>
+   After reconciliation, you can use the UI to review confiugred users.
+   Navigate to the URL where OpenIDM is installed. If it is local, navigate to
+   <literal>https://localhost:8443/openidmui</literal>. Use the OpenIDM user
+   credentials noted, where the default administrative username and password
+   are <literal>openidm-admin</literal>. When you login with these credentials
+   and select users, you should see the result of the reconciliation:
+  </para>
+
+  <mediaobject>
+   <alt>List of users after first reconciliation for sample 1</alt>
+   <imageobject>
+    <imagedata fileref="images/users-recon-sample1.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+  <para>Alternatively, you can use the REST interface to display
   all users in the local repository. Use a REST client to perform an HTTP 
   GET on the following URL:
-  <literal>https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids</literal>
+  <literal>https://localhost:8443/openidm/managed/user?_queryId=query-all-ids</literal>
   with the headers <literal>"X-OpenIDM-Username: openidm-admin"</literal> and 
   <literal>"X-OpenIDM-Password: openidm-admin"</literal>.
   </para>
 
-  <para>OpenIDM returns JSON data. Depending on your browser, it can display
-  the JSON or download it as a file. Alternatively, you can use the following
-  <link xlink:href="http://curl.haxx.se/"><command>curl</command></link>
-  command to get the JSON response.</para>
-  <screen>$ curl
+  <para>OpenIDM returns JSON data. Depending on the browser, you can use a
+   REST client to display the JSON or download it as a file. Alternatively,
+   you can use the following
+   <link xlink:href="http://curl.haxx.se/"><command>curl</command></link>
+   command to get the JSON response.
+  </para>
+
+  <screen>$ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Conent-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+   </userinput>
+   <computeroutput>
 {
  "remainingPagedResults" -1
  "pagedResultsCookie" null
@@ -447,14 +499,14 @@ $ ./startup.sh -p samples/sample1
 
    "_rev"  "0"
    "_id"  "scarter"
-}
+} </computeroutput>
 </screen>
 
   <para>If you created user <literal>joe</literal> as described in the procedure
   entitled <link xlink:href="integrators-guide#first-steps-with-rest"
   xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>To Get Started With the OpenIDM REST Interface</citetitle></link>.
-  this guide, you should see the ID for that user somewhere in this list. If
+  you should see the ID for that user somewhere in this list. If
   you did not include <literal>"_id:joe"</literal> in the command to create
   user <literal>joe</literal>.
   </para>
@@ -463,38 +515,37 @@ $ ./startup.sh -p samples/sample1
   <literal>bjensen</literal> by appending the user ID to the managed user URL 
   (<literal>https://localhost:8443/openidm/managed/user/</literal>).</para>
 
-  <screen>$ curl
+  <screen>$ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "https://localhost:8443/openidm/managed/user/bjensen"
-
-   "effectiveAssignments": {},
-   "effectiveRoles": [
-   "openidm-authorized"
-   ],
-   "userName": "bjensen@example.com",
-   "stateProvince": "",
-   "postalAddress": "",
-   "roles": "openidm-authorized",
-   "givenName": "Barbara",
-   "address2": "",
-   "lastPasswordAttempt": "Tue Feb 25 2014 13:32:52 GMT-0800 (PST)",
-   "passwordAttempts": "0",
-   "sn": "Jensen",
-   "mail": "bjensen@example.com",
-   "_rev": "9",
-   "_id": "bjensen",
-   "securityQuestion": "1",
-   "country": "",
-   "city": "",
-   "lastPasswordSet": "",
-   "postalCode": "",
-   "description": "Created By XML1",
-   "accountStatus": "active",
-   "telephoneNumber": "1234567"
-}</screen>
+ "https://localhost:8443/openidm/managed/user/bjensen?_prettyPrint=true"
+   </userinput>
+   <computeroutput>{
+    "_id" : "bjensen",
+    "_rev" : "1",
+    "mail" : "bjensen@example.com",
+    "sn" : "Jensen",
+    "passwordAttempts" : "0",
+    "lastPasswordAttempt" : "Tue Apr 15 2014 20:58:46 GMT-0800 (GMT-08:00)",
+    "address2" : "",
+    "givenName" : "Barbara",
+    "country" : "",
+    "city" : "",
+    "lastPasswordSet" : "",
+    "postalCode" : "",
+    "description" : "Created By XML1",
+    "accountStatus" : "active",
+    "telephoneNumber" : "1234567",
+    "roles" : [ "openidm-authorized" ],
+    "postalAddress" : "",
+    "stateProvince" : "",
+    "userName" : "bjensen@example.com",
+    "effectiveRoles" : [ "openidm-authorized" ],
+    "effectiveAssignments" : { }
+}</computeroutput>
+</screen>
 
   <para>In the OrientDB console, connect to the database, and then query the
   users and audit logs. The following shows edited excerpts from a console
@@ -552,8 +603,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <para>This information is also available in the CSV format audit logs located 
   in the <filename>openidm/audit</filename> directory.</para>
 
-  <screen>$ ls /path/to/openidm/audit/
-access.csv activity.csv recon.csv</screen>
+  <screen>$ <userinput>ls /path/to/openidm/audit/</userinput>
+   <computeroutput>
+access.csv activity.csv recon.csv
+   </computeroutput></screen>
  </section>
 
  <section xml:id="sample-adding-users-resource">
@@ -573,8 +626,6 @@ access.csv activity.csv recon.csv</screen>
     &lt;ri:lastname&gt;Morris&lt;/ri:lastname&gt;
     &lt;ri:email&gt;tmorris@example.com&lt;/ri:email&gt;
     &lt;ri:mobileTelephoneNumber&gt;1234567&lt;/ri:mobileTelephoneNumber&gt;
-    &lt;ri:securityQuestion&gt;1&lt;/ri:securityQuestion&gt;
-    &lt;ri:securityAnswer&gt;Some security answer&lt;/ri:securityAnswer&gt;
     &lt;ri:roles&gt;openidm-authorized&lt;/ri:roles&gt;
     &lt;icf:__DESCRIPTION__&gt;Created By XML1&lt;/icf:__DESCRIPTION__&gt;
  &lt;/ri:__ACCOUNT__&gt;</programlisting>
@@ -583,38 +634,32 @@ access.csv activity.csv recon.csv</screen>
   linkend="sample-running-reconciliation"><citetitle>Running
   Reconciliation</citetitle></link>. After reconciliation has run, query the
   local repository to see the new user appear in the list of all users under
-  <literal>https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids</literal>.</para>
+  <literal>https://localhost:8443/openidm/managed/user?_queryId=query-all-ids</literal>.</para>
 
   <screen>$ curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --header "Conent-Type: application/json"
  --request GET
- https://localhost:8443/openidm/managed/user?_queryId=query-all-ids
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
 
 {
-"remainingPagedResults": -1,
-"pagedResultsCookie": null,
-"resultCount": 4,
-"result": [
-   {
-   "_rev": "0",
-   "_id": "bjensen"
-   },
-   {
-   "_rev": "0",
-   "_id": "scarter"
-   },
-   {
-   "_rev": "0",
-   "_id": "joe"
-   },
-   {
-   "_rev": "0",
-   "_id": "tmorris"
-   }
-]
+   "result": [ {
+      "_id": "bjensen"
+      "_rev": "0",
+   }, {
+      "_id": "scarter"
+      "_rev": "0",
+   }, {
+      "_id": "joe"
+      "_rev": "0",
+   }, {
+      "_id": "tmorris"
+      "_rev": "0",
+   } ]
+   "resultCount": 4,
+   "pagedResultsCookie": null,
+   "remainingPagedResults": -1,
 }
 </screen>
 
@@ -634,11 +679,12 @@ access.csv activity.csv recon.csv</screen>
 "23...","IGNORE",...,"aa9...", "UNQUALIFIED","",...,                        "managed/user/joe",...;
 </programlisting>
 
-  <para>The important fields in the audit log are the action, the situation,
-  the source <literal>sourceObjectId</literal>, and the target
-  <literal>targetObjectId</literal>. For each object in the source,
-  reconciliation results in a situation that leads to an action on the
-  target.</para>
+  <para>
+   The relevant audit log fields in this example are: action, situation,
+   <literal>sourceObjectId</literal>, and <literal>targetObjectId</literal>.
+   For each object in the source, reconciliation leads to an action on the
+   target.
+  </para>
 
   <para>In the first reconciliation run (the abbreviated
   <literal>reconID</literal> is shown as <literal>486...</literal>), the source
@@ -671,17 +717,31 @@ access.csv activity.csv recon.csv</screen>
  <section xml:id="sample-adding-users-rest">
   <title>Adding Users Through REST</title>
 
+  <para>
+   You can add users through the UI. Once you are logged in as the OpenIDM
+   administrator, the process is straightforward, as shown in the following
+   figure.
+  </para>
+
+  <mediaobject>
+   <alt>Examples of adding a new user</alt>
+   <imageobject>
+    <imagedata fileref="images/sample1-useradd.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
   <para>You can also add users directly to the local repository through the
   REST interface. The following example adds a user named James Berg.</para>
 
   <para>Create <literal>james</literal> (UNIX).</para>
-  <screen>$ curl
+  <screen>$ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
  --data '{
+  "_id":"jberg",
   "userName":"jberg",
   "sn":"Berg",
   "givenName":"James",
@@ -690,54 +750,53 @@ access.csv activity.csv recon.csv</screen>
   "description":"Created by OpenIDM REST.",
   "password":"MyPassw0rd"
  }'
- "https://localhost:8443/openidm/managed/user?_action=create"
-
-{
-   "stateProvince": "",
-   "userName": "jberg1",
-   "postalAddress": "",
-   "effectiveAssignments": {},
-   "roles": [
-   "openidm-authorized"
-   ],
-   "telephoneNumber": "555-123-1234",
-   "password": {
-     "$crypto": {
-       "type": "x-simple-encryption",
-       "value": {
-         "key": "openidm-sym-default",
-         "iv": "U5pC7nU/8fYg8zssId2/Ng==",
-         "cipher": "AES/CBC/PKCS5Padding",
-         "data": "kPFbn3N2BTzJn0DdDLY9wA=="
-       }
-     }
-   },
-   "effectiveRoles": [
-     "openidm-authorized"
-   ],
-   "givenName": "james",
-   "address2": "",
-   "lastPasswordAttempt": "Tue Feb 25 2014 17:37:31 GMT-0800 (PST)",
-   "passwordAttempts": "0",
-   "sn": "berg",
-   "mail": "berg@example.com",
-   "country": "",
-   "city": "",
-   "_rev": "1",
-   "lastPasswordSet": "",
-   "postalCode": "",
-   "_id": "190be001-9439-4f05-8732-db2c62ca3214",
-   "accountStatus": "active",
-   "description": "Created by OpenIDM REST</screen>
+ "https://localhost:8443/openidm/managed/user?_action=create&amp;_prettyPrint=true"
+   </userinput>
+   <computeroutput>{
+    "mail" : "jberg@example.com",
+    "sn" : "Berg",
+    "passwordAttempts" : "0",
+    "lastPasswordAttempt" : "Tue Apr 15 2014 21:05:12 GMT-0800 (GMT-08:00)",
+    "address2" : "",
+    "givenName" : "James",
+    "effectiveRoles" : [ "openidm-authorized" ],
+    "password" : {
+      "$crypto" : {
+        "type" : "x-simple-encryption",
+        "value" : {
+          "data" : "QYRcIS9FbksBEwyd4dNEpg==",
+          "cipher" : "AES/CBC/PKCS5Padding",
+          "iv" : "R5Kjs6jZZtqCockFCS6BfA==",
+          "key" : "openidm-sym-default"
+        }
+      }
+    },
+    "country" : "",
+    "city" : "",
+    "_rev" : "1",
+    "lastPasswordSet" : "",
+    "postalCode" : "",
+    "_id" : "jberg",
+    "description" : "Created by OpenIDM REST.",
+    "accountStatus" : "active",
+    "telephoneNumber" : "5556787",
+    "roles" : [ "openidm-authorized" ],
+    "effectiveAssignments" : { },
+    "postalAddress" : "",
+    "stateProvince" : "",
+    "userName" : "jberg"
+}</computeroutput>
+   </screen>
 
   <para>Create <literal>james</literal> (Windows).</para>
-  <screen>C:\&gt;curl
+  <screen>C:\&gt; <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
  --data "{
+ \"_id\":\"jberg\",
  \"userName\":\"jberg\",
  \"sn\":\"Berg\",
  \"givenName\":\"James\",
@@ -746,7 +805,7 @@ access.csv activity.csv recon.csv</screen>
  \"description\":\"Created by OpenIDM REST.\",
  \"password\":\"MyPassw0rd\"
  }"
- "https://localhost:8443/openidm/managed/user?_action=create"
+ "https://localhost:8443/openidm/managed/user?_action=create&amp;_prettyPrint=true"</userinput>
 </screen>
 
   <para>The output is essentially identical to that for UNIX.</para>
