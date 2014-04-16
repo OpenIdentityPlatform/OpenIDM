@@ -821,14 +821,16 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
      <title>Patching Objects</title>
 
      <para>You can partially update a managed object using the patch method, 
-     which changes only the specified properties of the object. OpenIDM 
-     implements the JSON patch media type version 02, described at 
-     <link xlink:href="https://tools.ietf.org/html/draft-pbryan-json-patch-02">
-     https://tools.ietf.org/html/draft-pbryan-json-patch-02</link>.</para>
+      which changes only the specified properties of the object. OpenIDM
+      implements the JSON patch media type version 02, described at
+      <link xlink:show="new" xlink:href="http://tools.ietf.org/html/rfc6902" />.
+     </para>
      
-     <para>The following script example updates an object type.</para>
+     <para>
+      The following script example updates an object type.
+     </para>
      
-          <programlisting language="javascript">
+     <programlisting language="javascript">
 openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
 
      <para>The patch method supports a revision of <literal>"null"</literal>, 
