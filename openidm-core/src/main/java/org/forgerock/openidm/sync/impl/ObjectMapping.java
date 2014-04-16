@@ -520,7 +520,7 @@ class ObjectMapping  {
      * @param target TODO.
      * @throws SynchronizationException TODO.
      */
-    private void applyMappings(JsonValue source, JsonValue target) throws SynchronizationException {
+    private void applyMappings(JsonValue source, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
         EventEntry measure = Publisher.start(getObjectMappingEventName(), source, null);
         try {
             for (PropertyMapping property : properties) {
@@ -531,16 +531,17 @@ class ObjectMapping  {
             measure.end();
         }
         // Apply default mapping, if configured
-        applyDefaultMappings(source, target);
+        applyDefaultMappings(source, target, existingTarget);
     }
 
-    private JsonValue applyDefaultMappings(JsonValue source, JsonValue target) throws SynchronizationException {
+    private JsonValue applyDefaultMappings(JsonValue source, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
         JsonValue result = null;
         if (defaultMapping != null) {
             Map<String, Object> queryScope = service.newScope();
             queryScope.put("source", source.asMap());
             queryScope.put("target", target.asMap());
             queryScope.put("config", config.asMap());
+            queryScope.put("existingTarget", existingTarget.asMap());
             try {
                 result = new JsonValue(defaultMapping.exec(queryScope));
             } catch (ScriptException se) {
@@ -1306,7 +1307,7 @@ class ObjectMapping  {
                                     throw new SynchronizationException("target object already exists");
                                 }
                                 JsonValue createTargetObject = new JsonValue(new HashMap<String, Object>());
-                                applyMappings(getSourceObject(), createTargetObject); // apply property mappings to target
+                                applyMappings(getSourceObject(), createTargetObject, new JsonValue(null)); // apply property mappings to target
                                 targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet,
                                         createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
@@ -1379,7 +1380,7 @@ class ObjectMapping  {
                                     break; // do not update target
                                 }
                                if (getSourceObject() != null && getTargetObject() != null) {
-                                    applyMappings(getSourceObject(), getTargetObject());
+                                    applyMappings(getSourceObject(), getTargetObject(), oldTarget);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     if (JsonPatch.diff(oldTarget, getTargetObject())
                                             .size() > 0) { // only update if target changes
