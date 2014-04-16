@@ -839,6 +839,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         QueryRequest repoRequest = Requests.copyOfQueryRequest(request);
         repoRequest.setResourceName(repoId(null));
+        
+        // The "executeOnRetrieve" parameter is used to indicate if is returning a full managed object
+        String executeOnRetrieve = request.getAdditionalParameters().get("executeOnRetrieve");
+        
+        // The onRetrieve script should only be run queries that return full managed objects
+        final boolean onRetrieve = executeOnRetrieve == null 
+                ? false 
+                : Boolean.parseBoolean(executeOnRetrieve);
 
         final List<Map<String,Object>> results = new ArrayList<Map<String,Object>>();
         try {
@@ -850,6 +858,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
                 @Override
                 public boolean handleResource(Resource resource) {
+                    // Check if the onRetrieve script should be run
+                    if (onRetrieve) {
+                        try {
+                            onRetrieve(context, resource);
+                        } catch (ResourceException e) {
+                            handler.handleError(e);
+                            return false;
+                        }
+                    }
                     results.add(resource.getContent().asMap());
                     if (ContextUtil.isExternal(context)) {
                         // If it came over a public interface we have to cull
@@ -979,20 +996,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *             if an exception occurs processing the notification.
      */
     public void onCreate(ServerContext context, String resourceContainer, String resourceId, Resource value) throws ResourceException {
-        final RouteService sync = syncRoute.get();
-        if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONCREATE")
-                    .setAdditionalParameter("resourceContainer", resourceContainer)
-                    .setAdditionalParameter("resourceId", resourceId)
-                    .setContent(value.getContent());
-            try {
-                connectionFactory.getConnection().action(context, request);
-            } catch (NotFoundException e) {
-                logger.error("Failed to sync onCreate {}:{}",name, request.getResourceName(), e);
-            }
-        } else {
-            logger.warn("Sync service was not available.");
-        }
+        performSyncAction(context, resourceContainer, resourceId, "ONCREATE", value.getContent());
     }
 
     /**
@@ -1007,23 +1011,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @throws ResourceException
      *             if an exception occurs processing the notification.
      */
-    public JsonValue onUpdate(ServerContext context, String resourceContainer, String resourceId, Resource oldValue,
+    public void onUpdate(ServerContext context, String resourceContainer, String resourceId, Resource oldValue,
             JsonValue newValue) throws ResourceException {
-        final RouteService sync = syncRoute.get();
-        if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE")
-                    .setAdditionalParameter("resourceContainer", resourceContainer)
-                    .setAdditionalParameter("resourceId", resourceId)
-                    .setContent(newValue);  // TODO Where to store the old value???
-            try {
-                return connectionFactory.getConnection().action(context, request);
-            } catch (NotFoundException e) {
-                logger.error("Failed to sync onUpdate {}:{}",name, request.getResourceName(), e);
-            }
-        } else {
-            logger.warn("Sync service was not available.");
-        }
-        return null;
+        performSyncAction(context, resourceContainer, resourceId, "ONUPDATE", newValue);
     }
 
     /**
@@ -1038,16 +1028,37 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      */
     public void onDelete(ServerContext context, String resourceContainer, String resourceId, Resource oldValue)
             throws ResourceException {
+        performSyncAction(context, resourceContainer, resourceId, "ONDELETE", oldValue.getContent());
+    }
+
+    /**
+     * Sends a sync action request to the synchronization service
+     * 
+     * @param context the ServerContext of the request
+     * @param request the ActionRequest to send
+     * @throws ResourceException in case of a failure that was not handled by the ResultHander
+     */
+    private void performSyncAction(ServerContext context, String resourceContainer, String resourceId, String actionId, JsonValue value) throws ResourceException {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
-            ActionRequest request = Requests.newActionRequest("sync", "ONDELETE")
+            final ActionRequest request = Requests.newActionRequest("sync", actionId)
                     .setAdditionalParameter("resourceContainer", resourceContainer)
                     .setAdditionalParameter("resourceId", resourceId)
-                    .setContent(oldValue.getContent());
+                    .setContent(value);
             try {
-                connectionFactory.getConnection().action(context, request);
+                connectionFactory.getConnection().actionAsync(context, request, new ResultHandler<JsonValue>() {
+                    @Override
+                    public void handleError(final ResourceException e) {
+                        logger.error("Failed to sync {} {}:{}", request.getAction(), name, request.getResourceName(), e);
+                    }
+
+                    @Override
+                    public void handleResult(final JsonValue result) {
+                        logger.debug("Successfully completed sync {} {}:{}", request.getAction(), name, request.getResourceName());
+                    }
+                });
             } catch (NotFoundException e) {
-               logger.error("Failed to sync onDelete {}:{}",name, request.getResourceName(), e);
+                logger.error("Failed to sync {} {}:{}", request.getAction(), name, request.getResourceName(), e);
             }
         } else {
             logger.warn("Sync service was not available.");
