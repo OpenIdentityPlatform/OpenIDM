@@ -39,6 +39,7 @@ import static org.identityconnectors.framework.common.objects.filter.FilterBuild
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,13 +97,16 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.audit.util.NullActivityLogger;
+import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
+import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -118,6 +122,7 @@ import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -207,9 +212,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private ConnectorReference connectorReference = null;
     private SyncFailureHandler syncFailureHandler = null;
 
+    /** use null-object activity logger until/unless ConnectionFactory binder updates it */
+    private ActivityLogger activityLogger = NullActivityLogger.INSTANCE;
+
     /**
-     * Cache the SystemActions from local and {@code provisioner.json}
-     * jsonConfiguration.
+     * Cache the SystemActions from local and {@code provisioner.json} jsonConfiguration.
      */
     private final ConcurrentMap<String, SystemAction> localSystemActionCache =
             new ConcurrentHashMap<String, SystemAction>();
@@ -236,6 +243,18 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
+
+    private void bindConnectionFactory(final ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+        // update activityLogger to use the "real" activity logger on the router
+        this.activityLogger = new RouterActivityLogger(connectionFactory);
+    }
+
+    private void unbindConnectionFactory(final RouteService service) {
+        this.connectionFactory = null;
+        // ConnectionFactory has gone away, use null activity logger
+        this.activityLogger = NullActivityLogger.INSTANCE;
+    }
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
@@ -447,186 +466,94 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return connectorFacade.get();
     }
 
-    // TODO include e.getMessage() both in the audit log and the propagated
-    // exception
-    protected void handleError(ServerContext router, Request request, Exception exception, String id,
-            JsonValue before, JsonValue after, ResultHandler<?> handler) {
+    /**
+     * Handle ConnectorExceptions from ConnectorFacade invocations.  Maps each ConnectorException subtype to the
+     * appropriate {@link ResourceException} for passing to {@code handleError}.  Optionally logs to activity log.
+     *
+     * @param context the ServerContext from the original request
+     * @param request the original request
+     * @param exception the ConnectorException that was thrown by the facade
+     * @param resourceId the resourceId being operated on
+     * @param before the object value "before" the request
+     * @param after the object value "after" the request
+     * @param handler the ResultHandler on which to call handleError
+     * @param connectorExceptionActivityLogger the ActivityLogger to use to log the exception
+     */
+    private void handleConnectorException(ServerContext context, Request request, ConnectorException exception,
+            String resourceId, JsonValue before, JsonValue after, ResultHandler<?> handler,
+            ActivityLogger connectorExceptionActivityLogger) {
+
+        // default message
+        String message = MessageFormat.format("Operation {0} failed with {1} on system object: {2}",
+                request.getRequestType(), exception.getClass().getSimpleName(), resourceId);
 
         try {
-            if (exception instanceof AlreadyExistsException) {
-                logger.error("System object {} already exists", request.getResourceName(), exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ConflictException(exception));
-            } else if (exception instanceof ConfigurationException) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new InternalServerErrorException(exception));
-            } else if (exception instanceof ConnectionBrokenException) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ServiceUnavailableException(exception));
-            } else if (exception instanceof ConnectionFailedException) {
-                logger.error("Connection failed during operation {} on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id}, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ServiceUnavailableException(exception));
-            } else if (exception instanceof ConnectorIOException) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ServiceUnavailableException(exception));
-            } else if (exception instanceof OperationTimeoutException) {
-                logger.error("Operation {} Timeout on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ServiceUnavailableException(exception));
-            } else if (exception instanceof PasswordExpiredException) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ForbiddenException(exception));
-            } else if (exception instanceof InvalidPasswordException) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, exception.getMessage(),
-                        exception));
-            } else if (exception instanceof UnknownUidException) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new NotFoundException("Not found " + request.getResourceName(),
-                        exception).setDetail(new JsonValue(new HashMap<String, Object>())));
-            } else if (exception instanceof InvalidCredentialException) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, exception.getMessage(),
-                        exception));
-            } else if (exception instanceof PermissionDeniedException) {
-                logger.error("Permission was denied on {} operation for system object: {}",
-                        new Object[]{ request.getRequestType().toString(), id  }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new ForbiddenException(exception));
-            } else if (exception instanceof ConnectorSecurityException) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new InternalServerErrorException(exception));
-            } else if (exception instanceof ConnectorException) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new InternalServerErrorException(exception));
-            } else if (exception instanceof ResourceException) {
-                // rethrow the the expected JsonResourceException
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError((ResourceException) exception);
-            } else if (exception instanceof JsonValueException) {
-                logger.error("Operation {} failed with Exception on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Bad Request", null, before, after, Status.FAILURE);
-                handler.handleError(new BadRequestException(exception));
-            } else {
-                logger.error("Operation {} failed with Exception on system object: {}",
-                        new Object[] { request.getRequestType().toString(), id }, exception);
-                ActivityLog.log(connectionFactory, router, request.getRequestType(), "Operation " + request.getRequestType().toString() +
-                        " failed with " + exception.getClass().getSimpleName(), id, before, after, Status.FAILURE);
-                handler.handleError(new InternalServerErrorException(exception));
+            throw exception;
+        } catch (AlreadyExistsException e) {
+            message = MessageFormat.format("System object {0} already exists", request.getResourceName());
+            handler.handleError(new ConflictException(message, exception));
+        } catch (ConfigurationException e) {
+            message = MessageFormat.format("Operation {0} failed with ConfigurationException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new InternalServerErrorException(message, exception));
+        } catch (ConnectionBrokenException e) {
+            message = MessageFormat.format("Operation {0} failed with ConnectionBrokenException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ServiceUnavailableException(message, exception));
+        } catch (ConnectionFailedException e) {
+            message = MessageFormat.format("Connection failed during operation {0} on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ServiceUnavailableException(message, exception));
+        } catch (ConnectorIOException e) {
+            message = MessageFormat.format("Operation {0} failed with ConnectorIOException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ServiceUnavailableException(message, exception));
+        } catch (OperationTimeoutException e) {
+            message = MessageFormat.format("Operation {0} Timeout on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ServiceUnavailableException(message, exception));
+        } catch (PasswordExpiredException e) {
+            message = MessageFormat.format("Operation {0} failed with PasswordExpiredException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ForbiddenException(message, exception));
+        } catch (InvalidPasswordException e) {
+            message = MessageFormat.format("Invalid password has been provided to operation {0} for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, message, exception));
+        } catch (UnknownUidException e) {
+            message = MessageFormat.format("Operation {0} could not find resource {1} on system object: {2}",
+                    request.getRequestType().toString(), request.getResourceName(), resourceId);
+            handler.handleError(
+                    new NotFoundException(message, exception)
+                            .setDetail(new JsonValue(new HashMap<String, Object>())));
+        } catch (InvalidCredentialException e) {
+            message = MessageFormat.format("Invalid credential has been provided to operation {0} for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, message, exception));
+        } catch (PermissionDeniedException e) {
+            message = MessageFormat.format("Permission was denied on {0} operation for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ForbiddenException(message, exception));
+        } catch (ConnectorSecurityException e) {
+            message = MessageFormat.format("Operation {0} failed with ConnectorSecurityException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new InternalServerErrorException(message, exception));
+        } catch (ConnectorException e) {
+            message = MessageFormat.format("Operation {0} failed with ConnectorException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new InternalServerErrorException(message, exception));
+        } finally {
+            // log the ConnectorException
+            logger.debug(message, exception);
+            try {
+                connectorExceptionActivityLogger.log(context, request.getRequestType(), message, resourceId,
+                        before, after, Status.FAILURE);
+            } catch (ResourceException e) {
+                // this means the ActivityLogger couldn't log request; log to error log
+                logger.warn("Failed to write activity log", e);
             }
-        } catch (ResourceException e) {
-            // must have been from the activity log
         }
     }
-
-    // /**
-    // * TODO: Description.
-    // * <p/>
-    // * This method catches any thrown {@code JsonValueException}, and rethrows
-    // it as a
-    // * {@link org.forgerock.json.resource.JsonResourceException#BAD_REQUEST}.
-    // */
-    // @Override
-    // public JsonValue handle(JsonValue request) throws JsonResourceException {
-    //
-    // JsonValue before = null;
-    // JsonValue after = null;
-    // try {
-    // try {
-    // traceObject(METHOD, id, value);
-    // switch (METHOD) {
-    // case create:
-    // before = value;
-    // after = create(id, value.required(), params);
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // case read:
-    // after = read(id, params);
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // case update:
-    // before = value;
-    // after = update(id, rev, value.required(), params);
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // case delete:
-    // try {
-    // before = read(id, params);
-    // } catch (Exception e) {
-    // logger.info("Operation read of {} failed before delete", id, e);
-    // }
-    // after = delete(id, rev, params);
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // case query:
-    // // FIXME: According to the JSON resource specification (now published),
-    // query parameters are
-    // // required. There is a unit test that attempts to query all merely by
-    // executing query
-    // // without any parameters. As a result, the commented-out line
-    // below—which conforms to the
-    // // spec—breaks during unit testing.
-    // // return query(id, params.required());
-    // before = params;
-    // after = query(id, params.required());
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // case action:
-    // before = new JsonValue(new HashMap());
-    // before.put("value", value);
-    // before.put("params", params);
-    // ActionId actionId =
-    // params.get(ServerConstants.ACTION_NAME).required().asEnum(ActionId.class);
-    // after = action(id, actionId, value, params.required());
-    // ActivityLog.log(router, request, "message", id.toString(), before, after,
-    // Status.SUCCESS);
-    // return after;
-    // default:
-    // throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
-    // }
-    // } catch (AlreadyExistsException e) {
-    // }
 
     /**
      * @return the smartevent Name for a given query
@@ -645,16 +572,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 */
     private enum ConnectorAction {
-        script,
-        test;
-
-        public static ConnectorAction fromActionValue(String action) {
-            try {
-                return valueOf(action.toLowerCase());
-            } catch (IllegalArgumentException e) {
-                return null;
-            }
-        }
+        script, test
     }
 
     @Override
@@ -668,7 +586,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     public void actionInstance(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
         try {
-            switch (ConnectorAction.fromActionValue(request.getAction())) {
+            switch (request.getActionAsEnum(ConnectorAction.class)) {
                 case script:
                     handleScriptAction(request, handler);
                     break;
@@ -683,7 +601,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (ConnectorException e) {
-            handleError(context, request, e, request.getResourceName(), null, null, handler);
+            handleConnectorException(context, request, e, request.getResourceName(), null, null, handler, activityLogger);
         } catch (JsonValueException e) {
             handler.handleError(new BadRequestException(e));
         } catch (Exception e) {
@@ -729,104 +647,106 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             final ConnectorFacade facade = getConnectorFacade0(handler,
                     onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
+            if (null == facade) {
+                // getConnectorFacade0 already handles error when returning null
+                return;
+            }
 
-            if (null != facade) {
-                String variablePrefix = request.getAdditionalParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+            String variablePrefix = request.getAdditionalParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
 
-                List<Map<String, Object>> resultList =
-                        new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
-                result.put("actions", resultList);
+            List<Map<String, Object>> resultList =
+                    new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
+            result.put("actions", resultList);
 
-                for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
-                    boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
-                    for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
-                        if (entry.getKey().startsWith("_")) {
-                            continue;
+            for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
+                boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
+                for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
+                    if (entry.getKey().startsWith("_")) {
+                        continue;
+                    }
+                    Object value = entry.getValue();
+                    Object newValue = value;
+                    if (isShell) {
+                        if ("password".equalsIgnoreCase(entry.getKey())) {
+                            if (value instanceof String) {
+                                newValue = new GuardedString(((String) value).toCharArray());
+                            } else {
+                                throw new BadRequestException("Invalid type for password.");
+                            }
                         }
-                        Object value = entry.getValue();
-                        Object newValue = value;
-                        if (isShell) {
-                            if ("password".equalsIgnoreCase(entry.getKey())) {
-                                if (value instanceof String) {
-                                    newValue = new GuardedString(((String) value).toCharArray());
-                                } else {
-                                    throw new BadRequestException("Invalid type for password.");
-                                }
+                        if ("username".equalsIgnoreCase(entry.getKey())) {
+                            if (value instanceof String == false) {
+                                throw new BadRequestException("Invalid type for username.");
                             }
-                            if ("username".equalsIgnoreCase(entry.getKey())) {
-                                if (value instanceof String == false) {
-                                    throw new BadRequestException("Invalid type for username.");
-                                }
-                            }
-                            if ("workingdir".equalsIgnoreCase(entry.getKey())) {
-                                if (value instanceof String == false) {
-                                    throw new BadRequestException("Invalid type for workingdir.");
-                                }
-                            }
-                            if ("timeout".equalsIgnoreCase(entry.getKey())) {
-                                if (!(value instanceof String) && !(value instanceof Number)) {
-                                    throw new BadRequestException("Invalid type for timeout.");
-                                }
-                            }
-                            contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                            continue;
                         }
-
-                        if (null != value) {
-                            if (value instanceof Collection) {
-                                newValue =
-                                        Array.newInstance(Object.class,
-                                                ((Collection) value).size());
-                                int i = 0;
-                                for (Object v : (Collection) value) {
-                                    if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                        Array.set(newValue, i, v);
-                                    } else {
-                                        // Serializable may not be
-                                        // acceptable
-                                        Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
-                                    }
-                                    i++;
-                                }
-
-                            } else if (value.getClass().isArray()) {
-                                // TODO implement the array support later
-                            } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                                // Serializable may not be acceptable
-                                newValue = value instanceof Serializable ? value : value.toString();
+                        if ("workingdir".equalsIgnoreCase(entry.getKey())) {
+                            if (value instanceof String == false) {
+                                throw new BadRequestException("Invalid type for workingdir.");
+                            }
+                        }
+                        if ("timeout".equalsIgnoreCase(entry.getKey())) {
+                            if (!(value instanceof String) && !(value instanceof Number)) {
+                                throw new BadRequestException("Invalid type for timeout.");
                             }
                         }
                         contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                    }
-                    // contextBuilder.addScriptArgument("openidm_id", id.toString());
-
-                    // ScriptContext scriptContext = script.getScriptContextBuilder().build();
-                    OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-
-                    // It's necessary to keep the backward compatibility with Waveset IDM
-                    if (null != variablePrefix && isShell) {
-                        operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+                        continue;
                     }
 
-                    Map<String, Object> actionResult = new HashMap<String, Object>(2);
-                    try {
-                        Object scriptResult = null;
-                        if (onConnector) {
-                            scriptResult = facade.runScriptOnConnector(
-                                    contextBuilder.build(), operationOptionsBuilder.build());
-                        } else {
-                            scriptResult = facade.runScriptOnResource(
-                                    contextBuilder.build(), operationOptionsBuilder.build());
+                    if (null != value) {
+                        if (value instanceof Collection) {
+                            newValue =
+                                    Array.newInstance(Object.class,
+                                            ((Collection) value).size());
+                            int i = 0;
+                            for (Object v : (Collection) value) {
+                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                    Array.set(newValue, i, v);
+                                } else {
+                                    // Serializable may not be
+                                    // acceptable
+                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                                }
+                                i++;
+                            }
+
+                        } else if (value.getClass().isArray()) {
+                            // TODO implement the array support later
+                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                            // Serializable may not be acceptable
+                            newValue = value instanceof Serializable ? value : value.toString();
                         }
-                        actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-                    } catch (Throwable t) {
-                        if (logger.isDebugEnabled()) {
-                            logger.error("Script execution error.", t);
-                        }
-                        actionResult.put("error", t.getMessage());
                     }
-                    resultList.add(actionResult);
+                    contextBuilder.addScriptArgument(entry.getKey(), newValue);
                 }
+                // contextBuilder.addScriptArgument("openidm_id", id.toString());
+
+                // ScriptContext scriptContext = script.getScriptContextBuilder().build();
+                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+
+                // It's necessary to keep the backward compatibility with Waveset IDM
+                if (null != variablePrefix && isShell) {
+                    operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+                }
+
+                Map<String, Object> actionResult = new HashMap<String, Object>(2);
+                try {
+                    Object scriptResult = null;
+                    if (onConnector) {
+                        scriptResult = facade.runScriptOnConnector(
+                                contextBuilder.build(), operationOptionsBuilder.build());
+                    } else {
+                        scriptResult = facade.runScriptOnResource(
+                                contextBuilder.build(), operationOptionsBuilder.build());
+                    }
+                    actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+                } catch (Throwable t) {
+                    if (logger.isDebugEnabled()) {
+                        logger.error("Script execution error.", t);
+                    }
+                    actionResult.put("error", t.getMessage());
+                }
+                resultList.add(actionResult);
             }
         }
     }
@@ -1009,8 +929,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
     }
 
+    /**
+     * ActionRequest actions we support on /system/[systemName]/[objectClass/{id}
+     */
     private enum ObjectClassAction {
-        authenticate, resolveUsername, liveSync;
+        authenticate, resolveUsername, liveSync
     }
 
     /**
@@ -1075,54 +998,20 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public void actionCollection(ServerContext context, ActionRequest request,
-                ResultHandler<JsonValue> handler) {
+        public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
             try {
-                JsonValue params = new JsonValue(request.getAdditionalParameters());
-                if (ObjectClassAction.authenticate.name().equalsIgnoreCase(request.getAction())) {
-                    final ConnectorFacade facade =
-                            getConnectorFacade0(handler, AuthenticationApiOp.class);
-                    if (null != facade) {
-                        String username = params.get("username").required().asString();
-                        String password = params.get("password").required().asString();
-
-                        OperationOptions operationOptions = operations.get(AuthenticationApiOp.class)
-                                .build(jsonConfiguration, objectClassInfoHelper)
-                                .build();
-
-                        // Throw ConnectorException
-                        Uid uid = facade.authenticate(objectClassInfoHelper.getObjectClass(), username,
-                                new GuardedString(password.toCharArray()), operationOptions);
-
-                        JsonValue result = new JsonValue(new HashMap<String, Object>());
-                        result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
-                        if (null != uid.getRevision()) {
-                            result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
-                        }
-
-                        handler.handleResult(result);
-                    }
-                } else if (ObjectClassAction.liveSync.name().equalsIgnoreCase(request.getAction())) {
-                    try {
-                        String source = getSource(objectClass);
-                        ActionRequest forwardRequest = Requests.newActionRequest("system/", request.getAction());
-                        forwardRequest.setAdditionalParameter("source", source);
-
-                        // forward request to be handled in SystemObjectSetService#actionInstance
-                        handler.handleResult(connectionFactory
-                                .getConnection()
-                                .action(context, forwardRequest));
-
-                    } catch (ResourceException e) {
-                        handler.handleError(e);
-                    }
-                } else {
-                    handler.handleError(new BadRequestException("Unsupported action: " + request.getAction()));
+                switch (request.getActionAsEnum(ObjectClassAction.class)) {
+                    case authenticate:
+                        handleAuthenticate(context, request, handler);
+                        break;
+                    case liveSync:
+                        handleLiveSync(context, request, handler);
+                        break;
+                    default:
+                        throw new BadRequestException("Unsupported action: " + request.getAction());
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
-            } catch (ConnectorException e) {
-                handleError(context, request, e, null, null, null, handler);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1130,12 +1019,58 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
         }
 
+        private void handleAuthenticate(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler)
+                throws ResourceException, IOException {
+            try {
+                final ConnectorFacade facade = getConnectorFacade0(handler, AuthenticationApiOp.class);
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
+                }
+
+                final JsonValue params = new JsonValue(request.getAdditionalParameters());
+                final String username = params.get("username").required().asString();
+                final String password = params.get("password").required().asString();
+
+                OperationOptions operationOptions = operations.get(AuthenticationApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper)
+                        .build();
+
+                // Throw ConnectorException
+                Uid uid = facade.authenticate(objectClassInfoHelper.getObjectClass(), username,
+                        new GuardedString(password.toCharArray()), operationOptions);
+
+                JsonValue result = new JsonValue(new HashMap<String, Object>());
+                result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
+                if (null != uid.getRevision()) {
+                    result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
+                }
+                handler.handleResult(result);
+            } catch (ConnectorException e) {
+                // handle ConnectorException from facade.authenticate:
+                // log to activity log only if this is an external request
+                // (let internal requests do their own logging upon the handleError...)
+                handleConnectorException(context, request, e, null, null, null, handler,
+                        ContextUtil.isExternal(context) ? activityLogger : NullActivityLogger.INSTANCE);
+            }
+        }
+
+        private void handleLiveSync(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler)
+                throws ResourceException {
+            final ActionRequest forwardRequest =
+                    Requests.newActionRequest(SystemObjectSetService.ROUTER_PREFIX, request.getAction())
+                            .setAdditionalParameter("source", getSource(objectClass));
+
+            // forward request to be handled in SystemObjectSetService#actionInstance
+            handler.handleResult(connectionFactory
+                    .getConnection()
+                    .action(context, forwardRequest));
+        }
+
         @Override
         public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
                 ResultHandler<JsonValue> handler) {
-            final ResourceException e =
-                    new NotSupportedException("Actions are not supported for resource instances");
-            handler.handleError(e);
+            handler.handleError(new NotSupportedException("Actions are not supported for resource instances"));
         }
 
         @Override
@@ -1145,19 +1080,21 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (objectClassInfoHelper.isCreateable()) {
                     if (null == request.getNewResourceId()) {
                         final ConnectorFacade facade = getConnectorFacade0(handler, CreateApiOp.class);
-                        if (null != facade) {
-                            final Set<Attribute> createAttributes =
-                                    objectClassInfoHelper.getCreateAttributes(request, cryptoService);
-
-                            OperationOptions operationOptions = operations.get(CreateApiOp.class)
-                                    .build(jsonConfiguration, objectClassInfoHelper)
-                                    .build();
-
-                            Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
-                                    AttributeUtil.filterUid(createAttributes), operationOptions);
-
-                            returnResource(request, handler, facade, uid);
+                        if (null == facade) {
+                            // getConnectorFacade0 already handles error when returning null
+                            return;
                         }
+                        final Set<Attribute> createAttributes =
+                                objectClassInfoHelper.getCreateAttributes(request, cryptoService);
+
+                        OperationOptions operationOptions = operations.get(CreateApiOp.class)
+                                .build(jsonConfiguration, objectClassInfoHelper)
+                                .build();
+
+                        Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
+                                AttributeUtil.filterUid(createAttributes), operationOptions);
+
+                        returnResource(request, handler, facade, uid);
                     } else {
                         // If the __NAME__ attribute is not mapped then fail
                         final ResourceException e =
@@ -1175,7 +1112,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, request.getNewResourceId(), request.getContent(), null, handler);
+                handleConnectorException(context, request, e, request.getNewResourceId(), request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage()));
             } catch (Exception e) {
@@ -1188,29 +1125,31 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResultHandler<Resource> handler) {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, DeleteApiOp.class);
-                if (null != facade) {
-
-                    OperationOptions operationOptions = operations.get(DeleteApiOp.class)
-                            .build(jsonConfiguration, objectClassInfoHelper)
-                            .build();
-
-                    Uid uid =
-                            null != request.getRevision() ? new Uid(resourceId, request
-                                    .getRevision()) : new Uid(resourceId);
-                    facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
-
-                    JsonValue result = new JsonValue(new HashMap<String, Object>());
-                    result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
-                    if (null != uid.getRevision()) {
-                        result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
-                    }
-
-                    handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
                 }
+
+                OperationOptions operationOptions = operations.get(DeleteApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper)
+                        .build();
+
+                Uid uid =
+                        null != request.getRevision() ? new Uid(resourceId, request
+                                .getRevision()) : new Uid(resourceId);
+                facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
+
+                JsonValue result = new JsonValue(new HashMap<String, Object>());
+                result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
+                if (null != uid.getRevision()) {
+                    result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
+                }
+
+                handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, resourceId, null, null, handler);
+                handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage()));
             } catch (Exception e) {
@@ -1221,9 +1160,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
                 ResultHandler<Resource> handler) {
-            final ResourceException e =
-                    new NotSupportedException("Patch operations are not supported");
-            handler.handleError(e);
+            handler.handleError(new NotSupportedException("Patch operations are not supported"));
         }
 
         @Override
@@ -1234,61 +1171,64 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                       // queryId.asString()), null, id);
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, SearchApiOp.class);
-                if (null != facade) {
-                    OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
-                                .build(jsonConfiguration, objectClassInfoHelper);
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
+                }
 
-                    Filter filter = null;
+                OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
+                            .build(jsonConfiguration, objectClassInfoHelper);
 
-                    if (request.getQueryId() != null) {
-                        if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                            operationOptionsBuilder.setAttributesToGet(Uid.NAME);
-                        } else {
-                            handler.handleError(new BadRequestException("Unsupported _queryId: "
-                                    + request.getQueryId()));
-                            return;
-                        }
-                    } else if (request.getQueryExpression() != null) {
-                        filter = QueryFilter.valueOf(request.getQueryExpression()).accept(
-                                RESOURCE_FILTER, objectClassInfoHelper);
+                Filter filter = null;
 
+                if (request.getQueryId() != null) {
+                    if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
+                        operationOptionsBuilder.setAttributesToGet(Uid.NAME);
                     } else {
-                        // No filtering or query by filter.
-                        filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
+                        handler.handleError(new BadRequestException("Unsupported _queryId: "
+                                + request.getQueryId()));
+                        return;
                     }
+                } else if (request.getQueryExpression() != null) {
+                    filter = QueryFilter.valueOf(request.getQueryExpression()).accept(
+                            RESOURCE_FILTER, objectClassInfoHelper);
 
-                    // If paged results are requested then decode the cookie in
-                    // order to determine
-                    // the index of the first result to be returned.
-                    final int pageSize = request.getPageSize();
-                    final String pagedResultsCookie = request.getPagedResultsCookie();
-                    final boolean pagedResultsRequested = request.getPageSize() > 0;
+                } else {
+                    // No filtering or query by filter.
+                    filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
+                }
 
-                    facade.search(objectClassInfoHelper.getObjectClass(), filter,
-                            new ResultsHandler() {
-                                @Override
-                                public boolean handle(ConnectorObject obj) {
-                                    try {
-                                        return handler.handleResource(objectClassInfoHelper.build( obj, cryptoService));
-                                    } catch (Exception e) {
-                                        handler.handleError(new InternalServerErrorException(e));
-                                        return false;
-                                    }
+                // If paged results are requested then decode the cookie in
+                // order to determine
+                // the index of the first result to be returned.
+                final int pageSize = request.getPageSize();
+                final String pagedResultsCookie = request.getPagedResultsCookie();
+                final boolean pagedResultsRequested = request.getPageSize() > 0;
+
+                facade.search(objectClassInfoHelper.getObjectClass(), filter,
+                        new ResultsHandler() {
+                            @Override
+                            public boolean handle(ConnectorObject obj) {
+                                try {
+                                    return handler.handleResource(objectClassInfoHelper.build( obj, cryptoService));
+                                } catch (Exception e) {
+                                    handler.handleError(new InternalServerErrorException(e));
+                                    return false;
                                 }
-                            }, operationOptionsBuilder.build());
-                    if (request.getPageSize() > 0) {
-                        // pagedResultsRequested
-                        handler.handleResult(new QueryResult());
-                        // handler.handleResult(new QueryResult(nextCookie,
-                        // remaining));
-                    } else {
-                        handler.handleResult(new QueryResult());
-                    }
+                            }
+                        }, operationOptionsBuilder.build());
+                if (request.getPageSize() > 0) {
+                    // pagedResultsRequested
+                    handler.handleResult(new QueryResult());
+                    // handler.handleResult(new QueryResult(nextCookie,
+                    // remaining));
+                } else {
+                    handler.handleResult(new QueryResult());
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, null, null, null, handler);
+                handleConnectorException(context, request, e, null, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1303,31 +1243,34 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResultHandler<Resource> handler) {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, GetApiOp.class);
-                OperationOptions operationOptions;
-                if (null != facade) {
-                    OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-                    if (null == request.getFields() || request.getFields().isEmpty()) {
-                        operationOptions = operations.get(GetApiOp.class)
-                                .build(jsonConfiguration, objectClassInfoHelper)
-                                .build();
-                    } else {
-                        objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
-                        operationOptions = operationOptionsBuilder.build();
-                    }
-                    Uid uid = new Uid(resourceId);
-                    ConnectorObject connectorObject =
-                            facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
+                }
 
-                    if (null != connectorObject) {
-                        handler.handleResult(objectClassInfoHelper.build(connectorObject, cryptoService));
-                    } else {
-                        handler.handleError(new NotFoundException(request.getResourceName()));
-                    }
+                OperationOptions operationOptions = null;
+                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+                if (null == request.getFields() || request.getFields().isEmpty()) {
+                    operationOptions = operations.get(GetApiOp.class)
+                            .build(jsonConfiguration, objectClassInfoHelper)
+                            .build();
+                } else {
+                    objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
+                    operationOptions = operationOptionsBuilder.build();
+                }
+                Uid uid = new Uid(resourceId);
+                ConnectorObject connectorObject =
+                        facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
+
+                if (null != connectorObject) {
+                    handler.handleResult(objectClassInfoHelper.build(connectorObject, cryptoService));
+                } else {
+                    handler.handleError(new NotFoundException(request.getResourceName()));
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, resourceId, null, null, handler);
+                handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e));
             } catch (Exception e) {
@@ -1340,31 +1283,33 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResultHandler<Resource> handler) {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, UpdateApiOp.class);
-                if (null != facade) {
-                    // TODO Fix for
-                    // http://bugster.forgerock.org/jira/browse/CREST-29
-                    final Name newName = null;
-                    final Set<Attribute> replaceAttributes =
-                            objectClassInfoHelper.getUpdateAttributes(request, newName,
-                                    cryptoService);
-
-                    OperationOptions operationOptions = operations.get(UpdateApiOp.class)
-                            .build(jsonConfiguration, objectClassInfoHelper)
-                            .build();
-
-                    Uid _uid = null != request.getRevision()
-                        ? new Uid(resourceId, request.getRevision())
-                        : new Uid(resourceId);
-
-                    Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
-                            AttributeUtil.filterUid(replaceAttributes), operationOptions);
-
-                    returnResource(request, handler, facade, uid);
+                if (null == facade) {
+                    // getConnectorFacade0 already handles error when returning null
+                    return;
                 }
+
+                // TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
+                final Name newName = null;
+                final Set<Attribute> replaceAttributes =
+                        objectClassInfoHelper.getUpdateAttributes(request, newName,
+                                cryptoService);
+
+                OperationOptions operationOptions = operations.get(UpdateApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper)
+                        .build();
+
+                Uid _uid = null != request.getRevision()
+                    ? new Uid(resourceId, request.getRevision())
+                    : new Uid(resourceId);
+
+                Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
+                        AttributeUtil.filterUid(replaceAttributes), operationOptions);
+
+                returnResource(request, handler, facade, uid);
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(context, request, e, resourceId, request.getContent(), null, handler);
+                handleConnectorException(context, request, e, resourceId, request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1635,11 +1580,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @return
      */
     private String getSource(final String objectClass, final String... optionalId) {
-        final StringBuilder sb = new StringBuilder("system/");
-        sb.append(systemIdentifier.getName());
-        sb.append("/");
-        sb.append(objectClass);
-        for(String id : optionalId) {
+        final StringBuilder sb = new StringBuilder("system")
+                .append("/")
+                .append(systemIdentifier.getName())
+                .append("/")
+                .append(objectClass);
+        for (String id : optionalId) {
             sb.append("/").append(id);
         }
         return sb.toString();
@@ -1828,7 +1774,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         try {
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
-                                            String resourceContainer = getSource(objectType);
+                                            final String resourceContainer = getSource(objectType);
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
@@ -1841,14 +1787,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                             .setContent(new JsonValue(deltaObject));
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
-                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
+                                                    activityLogger.log(routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE")
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
-                                                    ActivityLog.log(connectionFactory, routerContext, RequestType.ACTION, "sync-delete", onDeleteRequest.getResourceName(), null, null, Status.SUCCESS);
+                                                    activityLogger.log(routerContext, RequestType.ACTION, "sync-delete", onDeleteRequest.getResourceName(), null, null, Status.SUCCESS);
                                                     break;
                                             }
                                         } catch (Exception e) {

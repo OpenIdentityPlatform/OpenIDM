@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,15 +24,25 @@
 
 package org.forgerock.openidm.audit.util;
 
-import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.RequestType;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 
 /**
- * A NAME does ...
+ * A null-object ActivityLogger that doesn't [log].
  *
- * @author Laszlo Hordos
+ * @author brmiller
  */
-public interface AuditLogger {
+public class NullActivityLogger implements ActivityLogger {
 
+    public static final ActivityLogger INSTANCE = new NullActivityLogger();
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void log(ServerContext context, RequestType requestType, String message, String objectId, JsonValue before, JsonValue after, Status status) throws ResourceException {
+        // don't log
+    }
 }

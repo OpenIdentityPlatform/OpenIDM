@@ -73,7 +73,6 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
-import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -91,6 +90,21 @@ import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.forgerock.openidm.audit.util.ActivityLogger.ACTION;
+import static org.forgerock.openidm.audit.util.ActivityLogger.ACTIVITY_ID;
+import static org.forgerock.openidm.audit.util.ActivityLogger.AFTER;
+import static org.forgerock.openidm.audit.util.ActivityLogger.BEFORE;
+import static org.forgerock.openidm.audit.util.ActivityLogger.CHANGED_FIELDS;
+import static org.forgerock.openidm.audit.util.ActivityLogger.MESSAGE;
+import static org.forgerock.openidm.audit.util.ActivityLogger.OBJECT_ID;
+import static org.forgerock.openidm.audit.util.ActivityLogger.PARENT_ACTION_ID;
+import static org.forgerock.openidm.audit.util.ActivityLogger.PASSWORD_CHANGED;
+import static org.forgerock.openidm.audit.util.ActivityLogger.REQUESTER;
+import static org.forgerock.openidm.audit.util.ActivityLogger.REVISION;
+import static org.forgerock.openidm.audit.util.ActivityLogger.ROOT_ACTION_ID;
+import static org.forgerock.openidm.audit.util.ActivityLogger.STATUS;
+import static org.forgerock.openidm.audit.util.ActivityLogger.TIMESTAMP;
 
 /**
  * Audit module
@@ -352,8 +366,8 @@ public class AuditServiceImpl implements AuditService {
         List<String> changedFields = new ArrayList<String>();
         boolean passwordChanged = false;
 
-        Object rawBefore = activity.get(ActivityLog.BEFORE);
-        Object rawAfter = activity.get(ActivityLog.AFTER);
+        Object rawBefore = activity.get(BEFORE);
+        Object rawAfter = activity.get(AFTER);
 
         if (!(rawBefore == null && rawAfter == null)) {
             JsonValue before = new JsonValue(rawBefore);
@@ -372,21 +386,21 @@ public class AuditServiceImpl implements AuditService {
             // TODO Figure out if this is even necessary? Doesn't seem to be... Once it goes to the log,
             // the object will have toString() called on it anyway which will convert it to (seemingly) the same format
             try {
-                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper.writeValueAsString(before.getObject()));
+                activity.put(BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper.writeValueAsString(before.getObject()));
             } catch (IOException e) {
-                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before.getObject().toString());
+                activity.put(BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before.getObject().toString());
             }
             try {
-                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper.writeValueAsString(after.getObject())); // how can we know for system objects?
+                activity.put(AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper.writeValueAsString(after.getObject())); // how can we know for system objects?
             } catch (IOException e) {
-                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : after.getObject().toString()); // how can we know for system objects?
+                activity.put(AFTER, (JsonUtil.jsonIsNull(after)) ? null : after.getObject().toString()); // how can we know for system objects?
             }
         }
 
         // Add the list of changed fields to the object
-        activity.put(ActivityLog.CHANGED_FIELDS, changedFields.isEmpty() ? null : changedFields);
+        activity.put(CHANGED_FIELDS, changedFields.isEmpty() ? null : changedFields);
         // Add the flag indicating password fields have changed
-        activity.put(ActivityLog.PASSWORD_CHANGED, passwordChanged);
+        activity.put(PASSWORD_CHANGED, passwordChanged);
     }
 
     /**
@@ -891,20 +905,20 @@ public class AuditServiceImpl implements AuditService {
     private static Map<String,Object> formatActivityEntry(Map<String,Object> entry) {
         Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
         formattedEntry.put(LOG_ID, entry.get(LOG_ID));
-        formattedEntry.put(ActivityLog.ACTIVITY_ID, entry.get(ActivityLog.ACTIVITY_ID));
-        formattedEntry.put(ActivityLog.TIMESTAMP, entry.get(ActivityLog.TIMESTAMP));
-        formattedEntry.put(ActivityLog.ACTION, entry.get(ActivityLog.ACTION));
-        formattedEntry.put(ActivityLog.MESSAGE, entry.get(ActivityLog.MESSAGE));
-        formattedEntry.put(ActivityLog.OBJECT_ID, entry.get(ActivityLog.OBJECT_ID));
-        formattedEntry.put(ActivityLog.REVISION, entry.get(ActivityLog.REVISION));
-        formattedEntry.put(ActivityLog.ROOT_ACTION_ID, entry.get(ActivityLog.ROOT_ACTION_ID));
-        formattedEntry.put(ActivityLog.PARENT_ACTION_ID, entry.get(ActivityLog.PARENT_ACTION_ID));
-        formattedEntry.put(ActivityLog.REQUESTER, entry.get(ActivityLog.REQUESTER));
-        formattedEntry.put(ActivityLog.BEFORE, entry.get(ActivityLog.BEFORE));
-        formattedEntry.put(ActivityLog.AFTER, entry.get(ActivityLog.AFTER));
-        formattedEntry.put(ActivityLog.STATUS, entry.get(ActivityLog.STATUS));
-        formattedEntry.put(ActivityLog.CHANGED_FIELDS, entry.get(ActivityLog.CHANGED_FIELDS));
-        formattedEntry.put(ActivityLog.PASSWORD_CHANGED, entry.get(ActivityLog.PASSWORD_CHANGED));
+        formattedEntry.put(ACTIVITY_ID, entry.get(ACTIVITY_ID));
+        formattedEntry.put(TIMESTAMP, entry.get(TIMESTAMP));
+        formattedEntry.put(ACTION, entry.get(ACTION));
+        formattedEntry.put(MESSAGE, entry.get(MESSAGE));
+        formattedEntry.put(OBJECT_ID, entry.get(OBJECT_ID));
+        formattedEntry.put(REVISION, entry.get(REVISION));
+        formattedEntry.put(ROOT_ACTION_ID, entry.get(ROOT_ACTION_ID));
+        formattedEntry.put(PARENT_ACTION_ID, entry.get(PARENT_ACTION_ID));
+        formattedEntry.put(REQUESTER, entry.get(REQUESTER));
+        formattedEntry.put(BEFORE, entry.get(BEFORE));
+        formattedEntry.put(AFTER, entry.get(AFTER));
+        formattedEntry.put(STATUS, entry.get(STATUS));
+        formattedEntry.put(CHANGED_FIELDS, entry.get(CHANGED_FIELDS));
+        formattedEntry.put(PASSWORD_CHANGED, entry.get(PASSWORD_CHANGED));
         return formattedEntry;
     }
 
