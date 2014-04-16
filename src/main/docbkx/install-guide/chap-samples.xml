@@ -81,11 +81,23 @@
    <para>Install an instance of OpenIDM specifically to try the samples. That
    way you can experiment as much as you like, and discard the result if you
    are not satisfied.</para>
+
+   <para>
+    If you are using the same instance of OpenIDM for multiple samples, it is
+    helpful to clear out the repository created for an earlier sample. To do so,
+    shut down OpenIDM and delete the <filename>openidm/db/openidm</filename>
+    directory.
+   </para>
    
-   <para>Shut down OpenIDM, and delete the <literal>openidm/felix-cache</literal> 
-   directory before you try a new sample.</para>
-   
-   <screen>$ rm -rf /path/to/openidm/felix-cache</screen>
+   <screen>$ rm -rf /path/to/openidm/db/openidm</screen>
+
+   <para>
+    OpenIDM should now be ready to start with a new sample. For a number of
+    the following samples, users are created either at the UI or with a
+    commons REST call. Once added, and when reconciliation is complete, such
+    users should be able to log into the UI. Any changes they make to their
+   </para>
+
   </section>
  </section>
 
@@ -135,12 +147,14 @@
     <literal>inetOrgPerson</literal>.</para></listitem>
     <listitem><para>User objects have the following attributes:</para>
      <itemizedlist>
-      <listitem><para><literal>uid</literal></para></listitem>
-      <listitem><para><literal>sn</literal></para></listitem>
       <listitem><para><literal>cn</literal></para></listitem>
+      <listitem><para><literal>description</literal></para></listitem>
       <listitem><para><literal>givenName</literal></para></listitem>
       <listitem><para><literal>mail</literal></para></listitem>
-      <listitem><para><literal>description</literal></para></listitem>
+      <listitem><para><literal>sn</literal></para></listitem>
+      <listitem><para><literal>telephoneNumber</literal></para></listitem>
+      <listitem><para><literal>uid</literal></para></listitem>
+      <listitem><para><literal>userPassword</literal></para></listitem>
      </itemizedlist>
      <para>An example user object follows.</para>
      <programlisting language="ldif">
@@ -152,10 +166,11 @@ objectClass: top
 givenName: John
 uid: jdoe
 cn: John Doe
-telephoneNumber: 12345
+telephoneNumber: 1-415-523-0772
 sn: Doe
 mail: jdoe@example.com
-description: Created by OpenIDM</programlisting>
+description: Created by OpenIDM
+userPassword: password</programlisting>
     </listitem>
    </itemizedlist>
 
@@ -186,17 +201,17 @@ objectClass: top
 givenName: John
 uid: jdoe
 cn: John Doe
-telephoneNumber: 12345
+telephoneNumber: 1-415-523-0772
 sn: Doe
 mail: jdoe@example.com
 description: Created for OpenIDM
+userPassword: password
 </programlisting>
       <para>There is an additional user, <literal>bjensen</literal> in the
       sample LDIF file. This user is essentially a "dummy" user, provided for
       compliance with RFC 4519, which stipulates that every
       <literal>groupOfUniqueNames</literal> object must contain at least one
-      <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
-      used in this sample.</para>
+      <literal>uniqueMember</literal>.</para>
   </section>
 
   <section xml:id="install-sample2">
@@ -247,29 +262,46 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
 
-   <para>The resulting JSON object should include content similar to the
-    following, but all on one line.</para>
+   <para>If you do not include the <literal>_prettyPrint=true</literal>
+    request parameter or pipe the output to a JSON parser such as
+    <command>jq</command>, the resulting JSON object would appear all on one
+    line.</para>
 
    <programlisting language="javascript">
 {
-    "remainingPagedResults": -1,
-    "pagedResultsCookie": null,
-    "resultCount": 2,
     "result": [
       {
-        "_rev": "0",
         "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d"
+        "_rev": "0",
       },
       {
-        "_rev": "0",
         "_id": "ae0aed26-2a9c-43e3-a6f0-ca707c9c6455"
+        "_rev": "0",
       }
     ],
+    "resultCount": 2,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1,
  }</programlisting>
 
-   <para>To retrieve the user, get the object by ID.</para>
+   <para>
+    You should now be able to review reconciled users in the UI. Connect to
+    an appropriate URI such as <literal>https://localhost:8443/openidmui</literal>,
+    log in as the <literal>openidm-admin</literal> user, and navigate to the
+    Users tab. Select the desired user for current profile information as shown.
+   </para>
+
+   <mediaobject>
+    <alt>Example of adding a new user</alt>
+    <imageobject>
+     <imagedata fileref="images/sample2-bjensen.png" format="PNG" />
+    </imageobject>
+   </mediaobject>
+
+   <para>Alternatively, you can still retrieve individual user objects by ID, as
+    shown here.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
@@ -304,6 +336,12 @@ $ curl
    <para>Configure the LDAP server as for sample 2,
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
+
+   <para>
+    When configuring the LDAP server, be sure to import the appropriate
+    LDIF file, in this case,
+    <filename>/path/to/openidm/samples/sample2b/data/Example.ldif</filename>
+   </para>
   </section>
 
   <section xml:id="install-sample2b">
@@ -339,30 +377,37 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
    </screen>
 
    <para>The resulting JSON object should include content similar to the
-    following, but all on one line.</para>
+    following.</para>
 
    <programlisting language="javascript">
 {
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
   "result": [
     {
-      "_rev": "0",
       "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d"
+      "_rev": "0",
     },
     {
-      "_rev": "0",
       "_id": "6490489f-bbff-4855-808a-5c1862b09339"
+      "_rev": "0",
     }
+    "resultCount": 2,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1,
 ],
  }</programlisting>
 
-   <para>To retrieve the user, get the object by ID.</para>
+   <para>To retrieve the user, log into the UI, on an URI such as
+    <literal>https://localhost:8443/openidmui</literal> as the administrative
+    user
+   </para>
+
+   <para>
+    Alternatively, you can make a commons REST call to get a specific user
+    object by ID.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
@@ -380,8 +425,9 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
- --data '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe",
- "givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe"}'
+ --data '{"mail":"fdoe@example.com","sn":"Doe","telephoneNumber","555-1234",
+ "userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe",
+ "displayName":"fdoe"}'
  --request POST
  "http://localhost:8443/openidm/managed/user?_action=create"</screen>
  
@@ -393,8 +439,9 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
- --data "{\"email\":\"fdoe@example.com\",\"familyName\":\"Doe\",
- \"userName"\":\"fdoe\", \"givenName\":\"Felicitas\",
+ --data "{\"mail\":\"fdoe@example.com\",\"sn\":\"Doe\",
+ \"telephoneNumber"\:\"555-1234\",
+ \"userName\":\"fdoe\", \"givenName\":\"Felicitas\",
  \"description\":\"Felicitas Doe\",\"displayName\":\"fdoe\"}"
  "http://localhost:8443/openidm/managed/user?_action=create"</screen>
 
@@ -411,11 +458,11 @@ $ curl
    locating the new user in the LDAP directory.</para>
    
    <screen>$ /path/to/OpenDJ/bin/ldapsearch
- --bindDN "cn=Directory Manager"
- --bindPassword password
- --hostname localhost
- --port 1389
- --baseDN "dc=example,dc=com"
+ -bindDN "cn=Directory Manager"
+ -bindPassword password
+ -hostname localhost
+ -port 1389
+ -baseDN "dc=example,dc=com"
  "uid=fdoe"
 dn: uid=fdoe,ou=People,dc=example,dc=com
 mail: fdoe@example.com
@@ -476,8 +523,8 @@ objectClass: top</programlisting>
    <literal>bjensen</literal> is essentially a "dummy" user, provided for
    compliance with RFC 4519, which stipulates that every
    <literal>groupOfUniqueNames</literal> object must contain at least one
-   <literal>uniqueMember</literal>. <literal>bjensen</literal> is not actually
-   used in this sample.)</para>
+   <literal>uniqueMember</literal>. User <literal>bjensen</literal> is not
+   actually used in this sample.)</para>
   </section>
   
   <section xml:id="install-sample2c">
@@ -495,13 +542,14 @@ $ ./startup.sh -p samples/sample2c</screen>
 
    <para>Run reconciliation over the REST interface.</para>
 
-   <screen width="91"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
---request POST
-  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+   <screen width="91"><?dbfo pgwide="1"?>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </userinput></screen>
 
    <para>Successful reconciliation returns an "_id" object.</para>
 
@@ -515,30 +563,33 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
    </screen>
 
-   <para>The resulting JSON object should look something like this, but all on
-   one line.</para>
+   <para>The resulting JSON object should appear similar to the following:</para>
 
    <programlisting language="javascript">
 {
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 2,
   "result": [
     {
-      "_rev": "0",
       "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d"
+      "_rev": "0",
     }
     {
       "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
       "_rev": "0"
     }
     ]
+    "resultCount": 2,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1,
  }</programlisting>
 
-   <para>Retrieve John Doe's user object by his ID.</para>
+   <para>You should now be able to retrieve John Doe's user object in the UI,
+    navigating to the domain for OpenIDM such as
+    <literal>https://localhost:8443/openidmui</literal>. Alternatively, with a
+    bit of trial and error, you can retrieve John Doe's user object at the
+    command line by his ID.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
@@ -603,7 +654,7 @@ $ curl
    xlink:role="http://docbook.org/xlink/role/olink">
    <citetitle>Synchronization Mappings File</citetitle></link> in the 
    <citetitle>Integrator's Guide</citetitle>.</para>
-   
+
   </section>
  </section>
   
@@ -694,7 +745,7 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/group?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/group?_queryId=query-all-ids&amp;_prettyPrint=true"
    </screen>
 
    <para>The resulting JSON object should include content similar to the
@@ -702,19 +753,19 @@ $ curl
 
    <programlisting language="javascript">
 {
-   "remainingPagedResults": -1,
-   "pagedResultsCookie": null,
-   "resultCount": 2,
    "result":[
       {
-         "_rev": "0",
          "_id":"3c704429-aacd-4995-816a-fac33451c642"
+         "_rev": "0",
       },
       {
-         "_rev": "0",
          "_id":"b0982152-5099-4358-bdd1-45a39ebe0d77"
+         "_rev": "0",
       }
    ]
+    "resultCount": 2,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1,
 }</programlisting>
 
    <para>To retrieve a group, get the object by ID.</para>
@@ -755,162 +806,215 @@ $ curl
   </indexterm>
 
   <para>Sample 3 shows an example configuration for the Scripted SQL connector.
-  The Scripted SQL connector communicates with the database through
-  configurable SQL scripts. Each operation, like create or delete, is
-  represented by its own script.</para>
+   The Scripted SQL connector communicates with the database through
+   configurable SQL scripts. Each operation, like create or delete, is
+   represented by its own script.</para>
 
   <para>Prepare a fresh installation of OpenIDM before trying this
-  sample.</para>
+   sample.</para>
 
   <section xml:id="external-mysql-config-sample3">
    <title>External Configuration</title>
-   
-   <para>In this example OpenIDM communicates with an external MySQL database 
-   server.</para>
-   
+
+   <para>In this example OpenIDM communicates with an external MySQL database
+    server.</para>
+
+   <para>
+    Make sure MySQL is running.
+   </para>
+
    <itemizedlist>
     <para>The sample expects the following configuration for MySQL:</para>
     <listitem><para>The database is available on the local host.</para></listitem>
     <listitem><para>The database listens on port 3306.</para></listitem>
     <listitem><para>You can connect over the network to the database with user
-    <literal>root</literal> and password <literal>password</literal>.</para></listitem>
+     <literal>root</literal> and password <literal>password</literal>.</para></listitem>
     <listitem><para>MySQL serves a database called <literal>HRDB</literal> with
-    a table called <literal>Users</literal>.</para></listitem>
+     a table called <literal>Users</literal>.</para></listitem>
     <listitem><para>The database schema is as described in the data definition
-    language file,
-    <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
-    Import the file into MySQL before running the sample.</para>
-    <screen width="87"><?dbfo pgwide="1"?>
-$ ./bin/mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+     language file,
+     <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
+     Import the file into MySQL before running the sample.</para>
+     <screen width="87"><?dbfo pgwide="1"?>
+$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+</userinput>
 Enter password:
 $ </screen>
     </listitem>
    </itemizedlist>
 
-   <para>Make sure MySQL is running.</para>
+   <para>
+    Once imported, you can review the contents of the sample in MySQL. The
+    following command accesses the MySQL prompt:
+   </para>
+
+   <screen>
+    $ mysql -u root -p
+   </screen>
+
+   <para>
+    From the <literal>mysql &gt;</literal> prompt, use the following commands
+    to review the users configured in the <filename>sample_HR_DB.mysql</filename>
+    file:
+   </para>
+
+   <screen>
+    mysql &gt; <userinput>use HRDB;</userinput>
+    <computeroutput>
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+    </computeroutput>
+    mysql &gt; <userinput>select * from Users</userinput>
+    <computeroutput>
+     +----+--------+--------------+-----------+----------+---------------+------...
+     | id | uid    | password     | firstname | lastname | fullname      | email...
+     +----+--------+------------------------------------------+-----------+-----...
+     |  1 | bob    | e38ad2149... | Bob       | Fleming  | Bob Fleming   | Bob. ...
+     |  2 | rowley | 2aa60a8ff... | Rowley    | Birkin   | Rowley Birkin | Rowl ...
+     |  3 | louis  | 1119cfd37... | Louis     | Balfour  | Louis Balfour | Loui ...
+     |  4 | john   | a1d7584da... | John      | Smith    | John Smith    | John ...
+     |  5 | jdoe   | edba955d0... | John      | Doe      | John Doe      | John ...
+     +----+--------+------------------------------------------+-----------+---- ...
+     5 rows in set (0.01 sec)
+    </computeroutput>
+    </screen>
+
+    <para>
+     You can exit from the MySQL prompt with the <command>quit</command>
+     command.
+    </para>
+
+   <note>
+    <para>
+     The passwords in the output shown above are hashed to the SHA-1 standard,
+     as they cannot be read into OpenIDM as cleartext.
+    </para>
+    <para>
+     The SHA-1 Hash function is used for compatibility reasons. When configuring
+     a database for production, more secure algorithms should be used.
+    </para>
+   </note>
+
   </section>                                                                                                                       sp
 
   <section xml:id="install-sample3">
    <title>Install the Sample</title>
 
    <itemizedlist>
-     <listitem><para>Prepare OpenIDM as described in <xref 
+    <listitem><para>Prepare OpenIDM as described in <xref
      linkend="preparing-openidm"/>.</para></listitem>
-     <listitem>
+    <listitem>
      <para>OpenIDM requires a MySQL driver, the MySQL Connector/J. Download
-         MySQL Connector/J, version 5.1 or later. Unpack the delivery and
-         copy the .jar into the <filename>openidm/bundle</filename> directory.</para>
+      MySQL Connector/J, version 5.1 or later. Unpack the delivery and
+      copy the .jar into the <filename>openidm/bundle</filename> directory.</para>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
-     </listitem>
-     <listitem>
-      <para>Start OpenIDM with the configuration for sample 3.</para>
-      <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/sample3</screen>    
-     </listitem>
-   </itemizedlist> 
+    </listitem>
+    <listitem>
+     <para>Start OpenIDM with the configuration for sample 3.</para>
+     <screen>$ cd /path/to/openidm
+      $ ./startup.sh -p samples/sample3</screen>
+    </listitem>
+   </itemizedlist>
 
-   <para>If the configuration of the external database is correct, then
-   OpenIDM should show five users during startup, for example:</para>
-   <screen>./startup.sh -p samples/sample3
-Using OPENIDM_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
-Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
-Using boot properties at /path/to/openidm/conf/boot/boot.properties
-OpenIDM version "<?eval ${serverDocTargetVersion}?>" (revision: XXXX)
-bob
-rowley
-louis
-john
-jdoe</screen>
-   <para>The check method, executed for each connected resource, executes a 
-   <literal>select * from Users</literal> statement.</para>
-   
-  </section>  
+  </section>
 
   <section xml:id="run-sample3">
    <title>Run the Sample</title>
 
    <para>The sample 3 <filename>sync.json</filename> configuration file
-   contains a mapping to reconcile OpenIDM and the external database.
-   Run the reconciliation with the following command.</para>
+    contains a mapping to reconcile OpenIDM and the external database.
+    Run the reconciliation with the following command.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
+--cacert self-signed.crt
+--header "X-OpenIDM-Username: openidm-admin"
+--header "X-OpenIDM-Password: openidm-admin"
+--header "Content-Type: application/json"
+--request POST
+"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
 
    <para>Reconciliation creates the five users from the database in the
-   OpenIDM repository. Check the result with the following command.</para>
+    OpenIDM repository. Check the result with the following command.</para>
 
    <screen>
 $ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</screen>
+--cacert self-signed.crt
+--header "X-OpenIDM-Username: openidm-admin"
+--header "X-OpenIDM-Password: openidm-admin"
+--request GET
+"https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
 
    <para>The result should resemble the following JSON object.</para>
 
    <programlisting language="javascript">
 {
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 5,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "8366a23d-f6cf-46df-9746-469bf45aafcd"
+    "result": [ {
+        "_id": "8366a23d-f6cf-46df-9746-469bf45aafcd"
+        "_rev": "0",
     },
     {
-      "_rev": "0",
-      "_id": "3f90933b-9397-4897-84d0-03ed8d99f61e"
+        "_id": "3f90933b-9397-4897-84d0-03ed8d99f61e"
+        "_rev": "0",
     },
     {
-      "_rev": "0",
-      "_id": "8fbf759d-bebc-42ed-b321-b69487b4470f"
+        "_id": "8fbf759d-bebc-42ed-b321-b69487b4470f"
+        "_rev": "0",
     },
     {
-      "_rev": "0",
-      "_id": "9592de42-a8ef-4db3-9c6c-7d191e39b084"
+        "_id": "9592de42-a8ef-4db3-9c6c-7d191e39b084"
+        "_rev": "0",
     },
     {
-      "_rev": "0",
-      "_id": "fd962b71-752a-444b-8492-35bff57bec69"
-    }
-  ],
-}
-</programlisting>
+        "_id": "d933441b-684b-446c-a89e-01eca6d21ef3"
+        "_rev": "0",
+    },
+    {
+        "_id": "fd962b71-752a-444b-8492-35bff57bec69"
+        "_rev": "0",
+    } ],
+    "resultCount": 6,
+    "pagedResultsCookie": null,
+    "remainingPagedResults": -1,
+}</programlisting>
 
-   <para>To view the JSON for one of the users, get the user by
-   the value of the <literal>_id</literal>.</para>
+   <para>
+    Naturally, you can review the users from the UI, navigating to the domain
+    where OpenIDM is installed, with a URI similar to
+    <literal>https://localhost:8443/openidmui</literal>
+   </para>
+
+   <para>Alternatively, to view the JSON for one of the users, get the user by
+    the value of the <literal>_id</literal>.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
+--cacert self-signed.crt
+--header "X-OpenIDM-Username: openidm-admin"
+--header "X-OpenIDM-Password: openidm-admin"
+--request GET
+"https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd?_prettyPrint=true"</screen>
 
   </section>
-
  </section>
 
+
  <section xml:id="more-sample4">
-  <title>Sample 4 - CSV File</title>
+  <title>Sample 4 - CSV to XML File</title>
   <indexterm>
    <primary>Samples</primary>
    <secondary>Sample 4 - CSV file</secondary>
   </indexterm>
 
-  <para>Sample 4 deals with a comma-separated value file as the external
-  resource. The file name is part of the sample configuration. Therefore you
-  do not need to manage any other external resources.</para>
+  <para>Sample 4 works with two databases, a comma-separated value file
+   and an XML file. There is no need to include any external
+   resources.
+  </para>
+
+  <para>
+   A correlation query is used to relate the records in these
+   two files.
+  </para>
 
   <section xml:id="install-sample4">
    <title>Install the Sample</title>
@@ -923,12 +1027,30 @@ $ curl
 $ ./startup.sh -p samples/sample4</screen>
   </section>
 
-  <section xml:id="run-sample4">
-   <title>Run the Sample</title>
+  <section xml:id="examine-sample4">
+   <title>Check and then Run the Sample</title>
 
-   <para>The <filename>sample4/data/hr.csv</filename> file contains two example
-   users. The first line of the file sets the attribute names. Running
-   reconciliation creates two users in the OpenIDM repository</para>
+   <para>
+    The <filename>sample4/data/hr.csv</filename> file contains two example
+    users. The first line of the file sets the attribute names.
+   </para>
+
+   <para>
+    Review the current contents of the database in the
+    <filename>sample4/data/xmlConnectorData.xml</filename> file. For comparison
+    purposes, make a copy of the file in a temporary directory with a command
+    like:
+   </para>
+
+   <screen>
+    $ cp /path/to/openidm/samples/sample4/data/xmlConnectorData.xml /tmp/
+   </screen>
+
+   <para>
+    The reconciliation command run here uses the information
+    from the <filename>hr.csv</filename> file to update the database in the
+    <filename>sample4/data/xmlConnectorData.xml</filename> file.
+   </para>
 
    <screen width="89"><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
@@ -936,62 +1058,24 @@ $ ./startup.sh -p samples/sample4</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrAccounts_managedUser"</screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=csv_xmlfile"</screen>
  
-   <para>Check the results of reconciliation with the following command.</para>
+   <para>Check the results of reconciliation. Review the updated contents
+    of the <filename>sample4/data/xmlConnectorData.xml</filename> file.</para>
 
-   <screen>
-$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</screen>
+   <para>
+    If you want to experiment further, try changing the data in the
+    <filename>hr.csv</filename> file. Run the noted reconciliation command
+    again.
+   </para>
 
-   <para>The result should resemble the following JSON object, but all on one
-   line.</para>
+   <para>
+    These users will not be visible from the OpenIDM UI, since they are mapped
+    directly between the XML and CSV files. The internal OpenIDM repository is
+    not updated in this sample.
+   </para>
 
-   <programlisting language="javascript">
-{
-    "remainingPagedResults": -1,
-    "pagedResultsCookie": null,
-    "resultCount": 2,
-    "result": [
-        {
-            "_id": "VDART",
-            "_rev": "0"
-        },
-        {
-            "_id": "DDOE",
-            "_rev": "0"
-        }
-    ],
-    "conversion-time-ms": 0
- }</programlisting>
 
-   <para>To view the JSON for one of the users, get the user by
-   the value of the <literal>_id</literal>.</para>
-
-   <screen width="83"><?dbfo pgwide="1"?>
-$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/managed/user/DDOE"
-
-{
-  "password": "Z29vZA==",
-  "employeeNumber": "123456",
-  "givenName": "Darth",
-  "userName": "DDOE",
-  "familyName": "Doe",
-  "email": "doe@forgerock.org",
-  "_rev": "0",
-  "_id": "DDOE"
-}</screen>
   </section>
  </section>
 
@@ -1252,24 +1336,25 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
 
     <para>The result should resemble the following JSON object.</para>
 
     <programlisting language="javascript">
 {
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 1,
   "result": [
     {
       "_rev": "0",
       "_id": "b6b76e9c-d534-4d0a-ac81-87153169a223"
     }
   ],
+  "resultCount": 1,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1,
 }</programlisting>
 
-    <para>To read the user object, use the <literal>_id</literal> value.</para>
+    <para>To read the user object, navigate to the OpenIDM UI as the
+     administrative user, or use the <literal>_id</literal> value.</para>
 
     <screen width="83"><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
@@ -1691,7 +1776,7 @@ $ ./startup.sh -p samples/sample9</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids&amp;_prettyPrint=true"
          </screen>
          <para>The request returns a workflow process ID as well as a
           process definition ID.</para>
@@ -1771,7 +1856,7 @@ $ ./startup.sh -p samples/sample9</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
          </screen>
          <para>One user is returned.</para>
          <screen>

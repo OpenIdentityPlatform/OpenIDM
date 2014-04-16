@@ -562,10 +562,6 @@ $</screen>
 }</computeroutput></screen>
     </step>
     <step>
-     <para>
-      OpenIDM returns the JSON object all on one line. To format the JSON for
-      legibility, use a JSON parser, such as <link
-      xlink:href="http://stedolan.github.com/jq/">jq</link>.</para>
 
      <para>
       Notice that more attributes are returned for user <literal>joe</literal>
@@ -587,6 +583,76 @@ $</screen>
     </step>
 
    </procedure>
+
+   <section xml:id="rest-output-format">
+    <title>Format REST Output for Readability</title>
+
+    <para>
+     With all <command>curl</command>-based REST calls, OpenIDM returns the JSON
+     object all on one line.
+    </para>
+
+    <para>
+     Without a bit of help, the JSON output is formatted all on one line.
+     One example is shown below, and it is difficult to read:
+    </para>
+
+    <screen>
+     <computeroutput>
+      {"mail":"joe@example.com","sn":"smith","passwordAttempts":"0",
+      "lastPasswordAttempt":"Mon Apr 14 2014 11:13:37 GMT-0800 (GMT-08:00)",
+      "address2":"","givenName":"joe","effectiveRoles":["openidm-authorized"],
+      "password":{"$crypto":{"type":"x-simple-encryption","value":{"data":
+      "OBFVL9cG8uaLoo1N+SMJ3g==","cipher":"AES/CBC/PKCS5Padding","iv":
+      "7rlV4EwkwdRHkt19F8g22A==","key":"openidm-sym-default"}}},"country":"",
+      "city":"","_rev":"1","lastPasswordSet":"","postalCode":"","_id":"joe3",
+      "description":"My first user","accountStatus":"active","telephoneNumber":
+      "555-123-1234","roles":["openidm-authorized"],"effectiveAssignments":{},
+      "postalAddress":"","stateProvince":"","userName":"joe3"}
+     </computeroutput>
+    </screen>
+
+    <para>
+     At least two options are available to clean up this output.
+    </para>
+
+    <para>
+     The standard way to format JSON output is with a JSON parser such as
+     <link xlink:href="http://stedolan.github.com/jq/">jq</link>. You would
+     "pipe" the output of a REST call to the <command>jq</command>, as follows:
+    </para>
+
+    <screen>$<userinput> curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+"https://localhost:8443/openidm/managed/user/joe" \
+| jq .
+     </userinput>
+    </screen>
+
+    <para>
+     The ForgeRock REST API includes an optional <literal>_prettyPrint</literal>
+     request parameter. The default value is <literal>false.</literal>. To
+     use the ForgeRock REST API to format output, you would add a parameter such
+     as <literal>?_prettyPrint=true</literal> or
+     <literal>&amp;_prettyPrint=true</literal>, depending on whether its added to
+     the end of an existing request parameter. In this case, the following
+     command would return formatted output:
+    </para>
+
+    <screen>$<userinput> curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+"https://localhost:8443/openidm/managed/user/joe?_prettyPrint=true"
+    </userinput>
+    </screen>
+
+   </section>
+
   </section>
 
  </chapter>
