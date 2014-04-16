@@ -122,11 +122,7 @@ public class AuthHelper {
         Credential credential = null;
         List<String> roleNames = new ArrayList<String>();
 
-        final String resourceName = repoResource.startsWith("repo")
-                ? repoResource
-                : "repo/" + repoResource;
-
-        QueryRequest request = Requests.newQueryRequest(resourceName)
+        QueryRequest request = Requests.newQueryRequest(repoResource)
                 .setQueryId(repoQueryId)
                 .setAdditionalParameter("username", username);
 
