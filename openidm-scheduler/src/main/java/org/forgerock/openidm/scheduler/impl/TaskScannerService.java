@@ -65,7 +65,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
@@ -101,9 +100,6 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scopeFactory;
 
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService routeService;
-
     @Activate
     public void activate(ComponentContext context) {
         String maxCompletedStr =
@@ -115,16 +111,10 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      * Invoked by the Task Scanner whenever the task scanner is triggered by the scheduler
      */
     @Override
-    public void execute(Map<String, Object> contextMap) throws ExecutionException {
+    public void execute(ServerContext context, Map<String, Object> contextMap) throws ExecutionException {
         String invokerName = (String) contextMap.get(INVOKER_NAME);
         String scriptName = (String) contextMap.get(CONFIG_NAME);
         JsonValue params = new JsonValue(contextMap).get(CONFIGURED_INVOKE_CONTEXT);
-        ServerContext context;
-        try {
-            context = routeService.createServerContext();
-        } catch (ResourceException e) {
-            throw new ExecutionException(e);
-        }
         startTaskScanJob(context, invokerName, scriptName, params);
     }
 
@@ -244,7 +234,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         addTaskScanRun(taskScannerContext);
         TaskScannerJob taskScanJob = null;
         try {
-            taskScanJob = new TaskScannerJob(connectionFactory, taskScannerContext, routeService, scopeFactory);
+            taskScanJob = new TaskScannerJob(connectionFactory, taskScannerContext, scopeFactory);
         } catch (ScriptException e) {
             throw new ExecutionException(e);
         }

@@ -635,11 +635,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     }
     
     @Override
-    public void execute(Map<String, Object> context) throws ExecutionException {
+    public void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException {
         
         try {
-            String scriptName = (String) context.get(CONFIG_NAME);
-            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+            String scriptName = (String) scheduledContext.get(CONFIG_NAME);
+            JsonValue params = new JsonValue(scheduledContext).get(CONFIGURED_INVOKE_CONTEXT);
             JsonValue scriptValue = params.get("script").expect(Map.class).clone();
             
             if (scriptValue.get("name").isNull()) {
@@ -651,7 +651,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             if (!scriptValue.isNull()) {
                 ScriptEntry entry = takeScript(scriptValue);
                 JsonValue input = params.get("input");
-                execScript(new RootContext(), entry, input);
+                execScript(context, entry, input);
             } else {
                 throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }

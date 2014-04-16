@@ -258,27 +258,18 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     /**
      * @deprecated Use {@code sync} resource interface.
      */
-    @Deprecated
-    private ServerContext newFauxContext(JsonValue mapping) throws ResourceException {
-        ServerContext context = new ServerContext(/*"sync",*/ routeService.createServerContext());
-        return context;
-    }
-
-    /**
-     * @deprecated Use {@code sync} resource interface.
-     */
     @Override // ScheduledService
     @Deprecated // use resource interface
-    public void execute(Map<String, Object> context) throws ExecutionException {
+    public void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException {
         try {
-            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+            JsonValue params = new JsonValue(scheduledContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
 
             // "reconcile" in schedule config is the legacy equivalent of the action "recon"
             if ("reconcile".equals(action)
                     || ReconciliationService.ReconAction.isReconAction(action)) {
                 JsonValue mapping = params.get("mapping");
-                ObjectSetContext.push(newFauxContext(mapping));
+                ObjectSetContext.push(context);
 
                 // Legacy support for spelling recon action as reconcile
                 if ("reconcile".equals(action)) {
@@ -296,8 +287,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                 throw new ExecutionException("Action '" + action +
                         "' configured in schedule not supported.");
             }
-        } catch (ResourceException re) {
-            throw new ExecutionException(re);
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
         } catch (SynchronizationException se) {

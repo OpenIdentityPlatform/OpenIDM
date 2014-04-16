@@ -25,9 +25,14 @@
 
 package org.forgerock.openidm.quartz.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
@@ -63,6 +68,22 @@ public class SchedulerServiceJob implements Job {
         // Instances of Job must have a public no-argument constructor.
     }
 
+    /**
+     * Builds the ServerContext
+     * 
+     * @param id  The authentication id
+     * @return the new ServerContext
+     */
+    private ServerContext newScheduledServerContext(String id) {
+        final Map<String, Object> authzid = new HashMap<String, Object>();
+        authzid.put(SecurityContext.AUTHZID_ID, id);
+        List<String> roles = new ArrayList<String>();
+        roles.add("system");
+        authzid.put(SecurityContext.AUTHZID_ROLES, roles);
+        authzid.put(SecurityContext.AUTHZID_COMPONENT, "scheduler");
+        SecurityContext securityContext = new SecurityContext(new RootContext(), id, authzid);
+        return new ServerContext(securityContext);
+    }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
@@ -89,12 +110,11 @@ public class SchedulerServiceJob implements Job {
 
         ScheduledService scheduledService = (ScheduledService) scheduledServiceTracker.getService();
         if (scheduledService == null) {
-            // TODO: consider guarding against too frequent logging
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
             try {
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                scheduledService.execute(scheduledServiceContext);
+                scheduledService.execute(newScheduledServerContext((String)scheduledServiceContext.get(ScheduledService.INVOKER_NAME)), scheduledServiceContext);
                 LogUtil.logAtLevel(logger, logLevel, "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
