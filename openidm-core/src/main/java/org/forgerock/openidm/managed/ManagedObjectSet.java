@@ -965,7 +965,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     public String getTemplate() {
-        return name.indexOf('/') == 1 ? name : '/' + name;
+        return name.indexOf('/') == 0 ? name : '/' + name;
     }
 
     /**
