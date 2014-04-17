@@ -1,7 +1,7 @@
 {
     "name" : "ldap",
     "connectorRef" : {
-        "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
+        "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
         "bundleVersion" : "1.1.0.1",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     },
@@ -29,9 +29,9 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "samples/sample5/data/resource-schema-1.xsd",
-        "xsdFilePath" : "samples/sample5/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "samples/sample5/data/xml_LDAP_Data.xml"
+        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&{launcher.project.location}/data/xml_LDAP_Data.xml"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,
@@ -72,9 +72,12 @@
                     "required" : true,
                     "nativeName" : "__PASSWORD__",
                     "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
-                    "flags" : [ "NOT_READABLE", "NOT_RETURNED_BY_DEFAULT" ]
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
                 },
-                "name" : {
+                "uid" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -89,6 +92,5 @@
             }
         }
     },
-    "operationOptions" : {
-    }
+    "operationOptions" : { }
 }
