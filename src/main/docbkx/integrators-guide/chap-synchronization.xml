@@ -901,17 +901,17 @@
      previous section:
     </para>
 
-    <screen width="91"><?dbfo pgwide="1"?>$curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
+    <screen width="91"><?dbfo pgwide="1"?>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
     </screen>
 
     <para>
-     The output for a reconciliation cancelation request is similar to the
+     The output for a reconciliation cancellation request is similar to the
      following:
     </para>
 
@@ -939,12 +939,12 @@
      example displays all reconciliation runs.
     </para>
 
-    <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
+    <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request GET \
  "https://localhost:8443/openidm/recon"
     </screen>
 
@@ -1219,14 +1219,13 @@
       resource. This is the recommended method. The following example calls a
       LiveSync operation on the user accounts in an external LDAP system.
      </para>
-     <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/system/ldap/account?_action=liveSync"
-     </screen>
+     <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/ldap/account?_action=liveSync"</screen>
     </listitem>
     <listitem>
      <para>
@@ -1239,14 +1238,13 @@
       The following example calls the same LiveSync operation as the previous
       example.
      </para>
-     <screen width="84">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/system?_action=liveSync&amp;source=system/ldap/account"
-     </screen>
+     <screen width="84">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=liveSync&amp;source=system/ldap/account"</screen>
     </listitem>
    </itemizedlist>
 
@@ -1260,26 +1258,24 @@
         "nativeType": "integer",
         "syncToken": 1
     }
-}
-   </screen>
+}</screen>
    <para>
-    You should not run two identical LiveSync operations simultaneously - you
-    must ensure that the first operation has completed before a second similar
-    operation is launched.
+    Do not run two identical LiveSync operations simultaneously - rather, ensure
+    that the first operation has completed before a second similar operation is
+    launched.
    </para>
    <para>
     To troubleshoot a LiveSync operation that has not succeeded, you can include
     an optional parameter (<literal>detailedFailure</literal>) to return
     additional information. For example:
    </para>
-   <screen width="95">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/system/ldap/account?_action=liveSync&amp;detailedFailure=true"
-   </screen>
+   <screen width="95">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/ldap/account?_action=liveSync&amp;detailedFailure=true"</screen>
 
    <note>
     <para>
@@ -1299,8 +1295,7 @@
     </para>
    </note>
   </section>
-
-  </section>
+ </section>
 
  <section xml:id="recon-by-query">
   <title>Restricting Reconciliation by Using Queries</title>
@@ -1402,8 +1397,7 @@
  --header "Content-Type: application/json" \
  --request POST \
  --data '{"sourceQuery": {"_queryId" : "query-all-ids"}}' \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=managedUser_systemLdapAccounts"
-  </screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=managedUser_systemLdapAccounts"</screen>
   <para>
    By default, a reconciliation operation runs both the source and target phase,
    that is both the source and the target resources are queried. To specify that
@@ -1468,7 +1462,7 @@
   </screen>
   <para>
    Note that the URL in this example is broken for legibility - in a real
-   command the URL must all be on the same line.
+   command the entire URL must be on line.
   </para>
   <para>
    A reconciliation by ID takes the default reconciliation options that are
@@ -1621,8 +1615,7 @@
         "mapping": "systemXmlfileAccounts_managedUser"
       }
     ]
-}
-    </programlisting>
+}    </programlisting>
 
     <para>
      Most of the fields in this audit log are self-explanatory. Each distinct
@@ -1637,14 +1630,12 @@
      <literal>_id</literal> in the URL. For example:
     </para>
 
-    <screen width="80">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"
-    </screen>
+    <screen width="83">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"</screen>
 
     <para>
      The following sample output shows the results of a read operation on a
@@ -1668,8 +1659,7 @@
  "status": "SUCCESS",
  "message": null,
  "messageDetail": null
-}
-    </programlisting>
+}   </programlisting>
 
     <para>
      To query the audit log for a particular reconciliation operation, use the
@@ -1677,14 +1667,12 @@
      ID, as follows:
     </para>
 
-    <screen width="91">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"
-    </screen>
+    <screen width="91">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"</screen>
 
     <para>
      Output similar to the following is returned, for the specified
@@ -1836,15 +1824,14 @@
      reconciliation operation:
     </para>
 
-    <screen width="98">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT
- &amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"
-    </screen>
+    <screen width="98">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation
+   &amp;situation=ABSENT
+   &amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</screen>
 
     <para>
      Output similar to the following is returned, with one entry for each record
@@ -1890,8 +1877,7 @@
       "sourceObjectId": "system/xmlfile/account/bjensen"
     }
   ]
-}
-    </programlisting>
+}   </programlisting>
 
     <para>
      The activity logs track all operations on internal (managed) and external
@@ -1904,12 +1890,11 @@
      You can access the activity logs over REST with the following call:
     </para>
 
-    <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
+    <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/audit/activity"
     </screen>
 
@@ -1960,14 +1945,12 @@
      <literal>_id</literal> of the action in the endpoint, for example:
     </para>
 
-    <screen width="85">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"
-    </screen>
+    <screen width="85">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"</screen>
 
     <para>
      Results similar to the following are returned:
@@ -2084,15 +2067,13 @@
      <literal>parentActionId</literal> in the query. For example:
     </para>
 
-    <screen width="90">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;
- parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"
-    </screen>
+    <screen width="90">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action
+   &amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</screen>
 
     <para>
      The following sample output shows the result of a query that requests
@@ -2239,10 +2220,10 @@
     same modification. You can then specify what OpenIDM does with failed
     LiveSync changes. The failed modification can be stored in a "dead letter
     queue", discarded, or reapplied. Alternatively, an administrator can be
-    notified of the failure by email or by some other means. This behavior is
-    scriptable. The default configuration, in the samples provided with OpenIDM,
-    is to retry a failed modification five times, and then to log and ignore the
-    failure.
+    notified of the failure by email or by some other means. This behavior can
+    be scripted. The default configuration, in the samples provided with
+    OpenIDM, is to retry a failed modification five times, and then to log and
+    ignore the failure.
    </para>
    <para>
     The LiveSync retry policy is configured in the connector configuration file
@@ -2406,13 +2387,11 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     <para>You can view the failed modification in the dead letter queue, over
      the REST interface, as follows:
     </para>
-    <screen width="98">
-    <userinput>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
+    <screen width="98">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"
     </userinput>
     {
@@ -2431,15 +2410,12 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      To view the details of a specific failed modification, include its ID in
      the URL:
     </para>
-    <screen>
-    <userinput>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap/4"
-    </userinput>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap/4"</userinput>
 {
   "objectType": "account",
   "systemIdentifier": "ldap",
@@ -2458,10 +2434,6 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     </screen>
    </section>
 
-
-
-
-
  <section xml:id="handling-sync">
   <title>Synchronization Situations and Actions</title>
    <indexterm>
@@ -2473,15 +2445,21 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     <secondary>Actions</secondary>
    </indexterm>
 
-  <para>During synchronization, OpenIDM categorizes objects by situation.
-  Situations are characterized by whether an object exists on a source or
-  target system, whether OpenIDM has registered a link between the source
-  object and the target object, and whether the object is considered valid.
-  OpenIDM takes action depending on the situation.</para>
+  <para>
+   During synchronization, OpenIDM categorizes objects according to their
+   <firstterm>situation</firstterm>. Situations are characterized by whether an
+   object exists on a source or target system, whether OpenIDM has registered a
+   link between the source object and the target object, and whether the object
+   is considered <firstterm>valid</firstterm>, as assessed by the
+   <literal>validSource</literal> and <literal>validTarget</literal> scripts.
+   OpenIDM then takes a specific action, depending on the situation.
+  </para>
 
-  <para>You can define actions for particular situations in the
-  <literal>policies</literal> section of a synchronization mapping, as
-  shown in the following excerpt.</para>
+  <para>
+   You can define actions for particular situations in the
+   <literal>policies</literal> section of a synchronization mapping, as shown in
+   the following excerpt.
+  </para>
 
   <programlisting language="javascript">
 {
@@ -2517,116 +2495,169 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     ]
 }</programlisting>
 
-  <para>If you do not define a policy for a particular situation, OpenIDM
-  takes the default action for the situation.</para>
-
-  <para>The situations and their corresponding actions are described in the
-  following sections.</para>
+  <para>
+   If you do not define a policy for a particular situation, OpenIDM takes the
+   <firstterm>default action</firstterm> for the situation.
+  </para>
+  <para>
+   The following sections describe the possible situations and their default
+   corresponding actions.
+  </para>
 
   <section xml:id="sync-situations">
    <title>Synchronization Situations</title>
 
    <orderedlist>
-       <para>OpenIDM performs a reconciliation action in two phases:</para>
-       <listitem>
-           <para>Source reconciliation, where OpenIDM accounts for source
-           objects and associated links based on the configured mapping.</para>
-       </listitem>
-       <listitem>
-           <para>Target reconciliation, where OpenIDM iterates over the target
-           objects that were not processed in the first phase.</para>
-       </listitem>
+    <para>
+     OpenIDM performs a reconciliation operation in two phases:
+    </para>
+    <listitem>
+     <para>
+      <firstterm>Source reconciliation</firstterm>, where OpenIDM accounts for
+      source objects and associated links, based on the configured mapping.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <firstterm>Target reconciliation</firstterm>, where OpenIDM iterates over
+      the target objects that were not processed in the first phase.
+     </para>
+    </listitem>
    </orderedlist>
 
    <orderedlist>
-    <para>During reconciliation OpenIDM builds three lists, assigning values
-    to the objects to reconcile.</para>
+    <para>
+     During the source reconciliation phase, OpenIDM builds three lists,
+     assigning values to the objects to reconcile.
+    </para>
     <listitem>
-     <para>All valid objects from the source</para>
-
-     <para>OpenIDM assigns valid source objects <literal>qualifies=1</literal>.
-     Invalid objects, including those not found in the source system, and
-     those filtered out by the script specified <literal>validSource</literal>
-     property, are assigned <literal>qualifies=0</literal>.</para>
+     <para>
+      All valid objects from the source
+     </para>
+     <para>
+      OpenIDM assigns valid source objects <literal>qualifies=1</literal>.
+      Invalid objects, including those that were not found in the source system,
+      and those that were filtered out by the script specified in the
+      <literal>validSource</literal> property, are assigned
+      <literal>qualifies=0</literal>.
+     </para>
     </listitem>
     <listitem>
-     <para>All records from the appropriate link table</para>
-
-     <para>Objects with corresponding links in the link table of the repository
-     are assigned <literal>link=1</literal>. Objects without corresponding links
-     are assigned <literal>link=0</literal>.</para>
+     <para>
+      All records from the appropriate links table
+     </para>
+     <para>
+      Objects that have a corresponding link in the links table of the
+      repository are assigned <literal>link=1</literal>. Objects that do not
+      have a corresponding link are assigned <literal>link=0</literal>.
+     </para>
     </listitem>
     <listitem>
-     <para>All valid objects on the target system</para>
-
-     <para>Objects found in the target system are assigned <literal>target=1</literal>.
-     Objects that are not found in the target system are assigned
-     <literal>target=0</literal>.</para>
+     <para>
+      All valid objects on the target system
+     </para>
+     <para>
+      Objects that are found in the target system are assigned
+      <literal>target=1</literal>. Objects that are not found in the target
+      system are assigned <literal>target=0</literal>.
+     </para>
     </listitem>
    </orderedlist>
 
    <variablelist>
-    <para>Based on the values assigned to objects during source reconciliation,
-    OpenIDM assigns situations, listed here with their default actions.</para>
+    <para>
+     Based on the values assigned to objects during source reconciliation,
+     OpenIDM assigns situations, listed here with their default actions.
+    </para>
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, and a link to an
-      existing target object was found. Detected during change events and
-      reconciliation. Default action: "UPDATE".</para>
+      <para>
+       The source object qualifies for a target object, and a link to an
+       existing target object was found. This situation is detected during
+       change events and during reconciliation. Default action: "UPDATE" the
+       target object.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"FOUND" (qualifies=1, link=0, target=1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, there is no link to a
-      target object, and there is a single target object, correlated by the
-      logic found in the correlationQuery. Detected during change events and
-      reconciliation. Default action: "UPDATE".</para>
+      <para>
+       The source object qualifies for a target object and there is no link to
+       an existing target object. There is a single target object, that
+       correlates with this source object, according to the logic in the
+       correlation query. This situation is detected during change events and
+       reconciliation. Default action: "UPDATE" the target object.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"FOUND_ALREADY_LINKED" (qualifies=1, link=1, target=1)</term>
+     <listitem>
+      <para>
+       The source object qualifies for a target object and there is no link from
+       that source object to an existing target object. There is a single target
+       object, that correlates with this source object, according to the logic
+       in the correlation query, but that target object is already linked to a
+       different source object. This situation is detected during change events
+       and reconciliation. Default action: log an "EXCEPTION".
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, there is no link to a
-      target object, and there is no correlated target object found.
-      Detected during change events and reconciliation. Default action:
-      "CREATE".</para>
+      <para>
+       The source object qualifies for a target object, there is no link to an
+       existing target object, and there is no correlated target object found.
+       This situation is detected during change events and reconciliation.
+       Default action: "CREATE" a target object.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, there is no link to a
-      target object, but there is more than one correlated target object.
-      Detected during source object changes and reconciliation. Default
-      action: "EXCEPTION".</para>
+      <para>
+       The source object qualifies for a target object, there is no link to an
+       existing target object, but there is more than one correlated target
+       object (that is, more than one possible match on the target system). This
+       situation is detected during source object changes and reconciliation.
+       Default action: log an "EXCEPTION".
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"MISSING" (qualifies=1, link=1, target=0)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, and there is a
-      qualified link to a target object, but the target object is missing.
-      Only detected during reconciliation and source object changes in
-      synchronous mappings. Default action: "EXCEPTION".</para>
+      <para>
+       The source object qualifies for a target object, and there is a link to a
+       target object, but the target object is missing. This situation is
+       detected during reconciliation operations and during source object
+       changes. Default action: log an "EXCEPTION".
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"UNQUALIFIED" (qualifies=0, link=0 or 1, target=1 or &gt;1)</term>
      <listitem>
-      <para>The mapping is not qualified for a source object. One or more
-      targets are found through the correlation logic. Detected during change
-      events and reconciliation. Default action: "DELETE".</para>
+      <para>
+       The source object is unqualified (by the "validSource" script). One or
+       more target objects are found through the correlation logic. This
+       situation is detected during change events and reconciliation. Default
+       action: "DELETE" the target object or objects.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"TARGET_IGNORED" (qualifies=0, link=0 or 1, target=1)</term>
      <listitem>
       <para>
-       The mapping is not qualified for a source object. One or more targets are
-       found through the correlation logic. Detected only during source object
-       changes. Default action: "IGNORE".
+       The source object is unqualified (by the "validSource" script). One or
+       more target objects are found through the correlation logic. This
+       situation is detected only during source object changes. Default action:
+       "IGNORE" the target object until the next full reconciliation operation.
       </para>
      </listitem>
     </varlistentry>
@@ -2634,102 +2665,184 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
      <listitem>
       <para>
-       The source object is unqualified (by validSource), no link, no target is
-       found. Detected during source object changes and reconciliation. Default
-       action: "IGNORE".
+       The source object is unqualified (by the "validSource" script), no link
+       is found, and no correlated target exists. This situation is detected
+       during source object changes and reconciliation. Default action: "IGNORE"
+       the source object.
       </para>
      </listitem>
-   </varlistentry>
-   <varlistentry>
-       <term>"LINK_ONLY" (qualifies=n/a, link=1, target=0)</term>
+    </varlistentry>
+    <varlistentry>
+     <term>"LINK_ONLY" (qualifies=n/a, link=1, target=0)</term>
+     <listitem>
+      <para>
+       The source may or may not be qualified, a link is found, but no target
+       object is found. This situation is detected only during source object
+       changes. Default action: Log an "EXCEPTION".
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"ALL_GONE" (qualifies=n/a, link=0, cannot-correlate)</term>
+     <listitem>
+      <para>
+       The source object has been removed. No link is found. Correlation is not
+       possible, for one of the following reasons:
+      </para>
+      <itemizedlist>
        <listitem>
-           <para>The source may or may not be qualified, a link is found, but
-           no target object is found. Detected only during source object
-           changes. Default action: "EXCEPTION".</para>
+        <para>
+         No previous source value can be found
+        </para>
        </listitem>
-   </varlistentry>
-   <varlistentry>
-       <term>"ALL_GONE" (qualifies=n/a, link=0, no previous object available)</term>
        <listitem>
-           <para>The source may or may not be qualified, no link is found, and
-               the server is unable to correlate, as the source cannot
-               supply the deleted object. Detected only during source object
-               changes. Default action: "IGNORE".</para>
+        <para>
+         There is no correlation query
+        </para>
        </listitem>
-   </varlistentry>
+       <listitem>
+        <para>
+         A previous value was found, and a correlation query exists, but no
+         corresponding target was found
+        </para>
+       </listitem>
+      </itemizedlist>
+      <para>This situation is detected only during source object changes.
+       Default action: "IGNORE" the source object.
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
 
-    <para>Based on the values assigned to objects during target reconciliation,
-    OpenIDM assigns situations, listed here with their default actions.</para>
+   <orderedlist>
+    <para>
+     During the target reconciliation phase, OpenIDM assigns the following
+     values as it iterates through the target objects that were not accounted
+     for during the source reconciliation.
+    </para>
+    <listitem>
+     <para>
+      Valid objects from the target
+     </para>
+     <para>
+      OpenIDM assigns valid target objects <literal>qualifies=1</literal>.
+      Invalid objects, including those that are filtered out by the script
+      specified in the <literal>validTarget</literal> property, are assigned
+      <literal>qualifies=0</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      All records from the appropriate links table
+     </para>
+     <para>
+      Objects that have a corresponding link in the links table of the
+      repository are assigned <literal>link=1</literal>. Objects that do not
+      have a corresponding link are assigned <literal>link=0</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      All valid objects on the source system
+     </para>
+     <para>
+      Objects that are found in the source system are assigned
+      <literal>source=1</literal>. Objects that are not found in the source
+      system are assigned <literal>source=0</literal>.
+     </para>
+    </listitem>
+   </orderedlist>
+
+    <para>
+     Based on the values that are assigned to objects during the target
+     reconciliation phase, OpenIDM assigns situations, listed here with their
+     default actions.
+    </para>
    <variablelist>
     <varlistentry>
      <term>"TARGET_IGNORED" (qualifies=0)</term>
      <listitem>
-      <para>During target reconciliation the target becomes unqualified by the
-      "validTarget" script. Only detected during reconciliation. Default
-      action: "IGNORE"</para>
+      <para>
+       During target reconciliation, the target becomes unqualified by the
+      "validTarget" script. This situation is detected only during
+       reconciliation operations. Default action: "IGNORE" the target object.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"UNASSIGNED" (qualifies=1, link=0)</term>
      <listitem>
-      <para>A target object exists for which there is no link. Only detected
-      during reconciliation. Default action: "EXCEPTION".</para>
+      <para>
+       A valid target object exists, for which there is no link. This situation
+       is detected only during reconciliation operations. Default action:
+       log an "EXCEPTION".
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, and a link to a
-      source object exists. Detected only during reconciliation. Default
-      action: "UPDATE".</para>
+      <para>
+       The target object qualifies, and a link to a source object exists. This
+       situation is detected only during reconciliation operations. Default
+       action: "UPDATE" the target object.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"UNQUALIFIED" (qualifies=0, link=1, source=1, but source does not
      qualify)</term>
      <listitem>
-      <para>The mapping is not qualified (by validTarget) for a target object,
-      and there is a link from an existing source object where the source
-      exists. Detected during change events and reconciliation. Default
-      action: "DELETE".</para>
+      <para>
+       The target object is unqualified, (by the "validTarget" script), but
+       there is a link to an existing source object, which is also unqualified.
+       This situation is detected during change events and reconciliation.
+       Default action: "DELETE" the target object.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
-      <para>The target qualifies and a link is found. But the source object is
-      missing. Detected during change events and reconciliation. Default action:
-      "EXCEPTION".</para>
+      <para>
+       The target object qualifies and a link is found. But the source object is
+       missing. This situation is detected during change events and
+       reconciliation. Default action: log an "EXCEPTION".</para>
      </listitem>
     </varlistentry>
    </variablelist>
 
-   <para>The following sections reiterate in detail how OpenIDM assigns
-   situations during each of the two synchronization phases.</para>
+   <para>
+    The following sections reiterate in detail how OpenIDM assigns situations
+    during each of the two synchronization phases.
+   </para>
   </section>
 
   <section xml:id="source-reconciliation">
    <title>Source Reconciliation</title>
 
-   <para>OpenIDM starts reconciliation and LiveSync by reading a list of
-   objects from the resource. For reconciliation, the list includes all
-   objects available through the connector. For LiveSync, the list contains
-   only changed objects. The connector can filter objects out of the list, too.
-   You can filter objects out of the list by using the
-   <literal>validSource</literal> property.</para>
+   <para>
+    OpenIDM starts reconciliation and LiveSync by reading a list of objects from
+    the resource. For reconciliation, the list includes all objects that are
+    available through the connector. For LiveSync, the list contains only
+    changed objects. The connector can filter objects out of the list, too, by
+    using the script specified in the <literal>validSource</literal> property.
+   </para>
 
-   <para>OpenIDM then iterates over the list, checking each entry against the
-   <literal>validSource</literal> filter, classifying objects according to
-   their situations as described in <xref linkend="sync-situations"/>. OpenIDM
-   uses the list of links for the current mapping to classify objects. Finally,
-   OpenIDM executes the action configured for the situation.</para>
+   <para>
+    OpenIDM then iterates over the list, checking each entry against the
+    <literal>validSource</literal> filter, and classifying objects according to
+    their situations as described in <xref linkend="sync-situations"/>. OpenIDM
+    uses the list of links for the current mapping to classify objects. Finally,
+    OpenIDM executes the action that is configured for each situation.
+   </para>
 
-   <para>The following table shows how OpenIDM assigns the appropriate
-   situation during source reconciliation, depending on whether a valid
-   source exists (Source Qualifies), whether a link with the appropriate type
-   exists in the repository (Link Exists), and how many target objects are
-   found, either based on links or correlation results.</para>
+   <para>
+    The following table shows how OpenIDM assigns the appropriate situation
+    during source reconciliation, depending on whether a valid source exists
+    (Source Qualifies), whether a link exists in the repository (Link Exists),
+    and how many target objects are found, based either on links or on the
+    results of the correlation query.
+   </para>
 
    <table pgwide="1" rules="none">
     <title>Resolving Source Reconciliation Situations</title>
@@ -2763,16 +2876,6 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       </row>
      </thead>
      <tbody>
-      <row>
-          <entry>&#160;</entry>
-          <entry>X</entry>
-          <entry>&#160;</entry>
-          <entry>&#160;</entry>
-          <entry>&#160;</entry>
-          <entry>X</entry>
-          <entry>&#160;</entry>
-          <entry>TARGET_IGNORED</entry>
-      </row>
       <row>
        <entry>&#160;</entry>
        <entry>X</entry>
@@ -2847,6 +2950,17 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        <entry>X</entry>
        <entry>&#160;</entry>
        <entry>&#160;</entry>
+       <entry>X<footnote><para>A link does exist from the target object but it
+        not for this specific source object.</para></footnote></entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>FOUND_ALREADY_LINKED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
        <entry>X</entry>
        <entry>&#160;</entry>
        <entry>&#160;</entry>
@@ -2881,22 +2995,26 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   <section xml:id="target-reconciliation">
    <title>Target Reconciliation</title>
 
-   <para>During source reconciliation, OpenIDM cannot detect situations where
-   no source object exists, such as the UNASSIGNED situation. When no source
-   object exists, OpenIDM detects the situation during the second
-   reconciliation phase, target reconciliation. During target reconciliation,
-   OpenIDM iterates over all target objects that do not have a representation
-   on the source, checking each object against the
-   <literal>validTarget</literal> filter, determining the appropriate situation,
-   and executing the action configured for the situation.</para>
+   <para>
+    During source reconciliation, OpenIDM cannot detect situations where no
+    source object exists, such as the UNASSIGNED situation. When no source
+    object exists, OpenIDM detects the situation during the second
+    reconciliation phase, target reconciliation. During target reconciliation,
+    OpenIDM iterates over all target objects that do not have a representation
+    on the source, checking each object against the
+    <literal>validTarget</literal> filter, determining the appropriate situation,
+    and executing the action configured for the situation.
+   </para>
 
-   <para>The following table shows how OpenIDM assigns the appropriate
-   situation during target reconciliation, depending on whether a valid target
-   exists (Target Qualifies), whether a link with an appropriate type exists
-   in the repository (Link Exists), whether a source object exists
-   (Source Exists), and whether the source object qualifies (Source Qualifies).
-   Not all situations assigned during source reconciliation are assigned
-   during target reconciliation.</para>
+   <para>
+    The following table shows how OpenIDM assigns the appropriate situation
+    during target reconciliation, depending on whether a valid target exists
+    (Target Qualifies), whether a link with an appropriate type exists in the
+    repository (Link Exists), whether a source object exists (Source Exists),
+    and whether the source object qualifies (Source Qualifies). Not all
+    situations assigned during source reconciliation are assigned during target
+    reconciliation.
+   </para>
 
    <table pgwide="1" rules="none">
     <title>Resolving Target Reconciliation Situations</title>
@@ -3128,7 +3246,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <term>"EXCEPTION"</term>
      <listitem>
       <para>Flag the link situation as an exception.</para>
-      <para>Do <emphasis>not</emphasis> use this action for LiveSync mappings.</para>
+      <para>You should not use this action for LiveSync mappings.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -3137,22 +3255,50 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>Do not change the link or target object state.</para>
      </listitem>
     </varlistentry>
+    <varlistentry>
+     <term>"REPORT"</term>
+     <listitem>
+      <para>
+       Do not perform any action but report on what would happen if the default
+       action were performed.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"NOREPORT"</term>
+     <listitem>
+      <para>
+       Do not perform any action or generate any report.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"ASYNC"</term>
+     <listitem>
+      <para>
+       An asynchronous process has been started so do not perform any action or
+       generate any report. <!--TODO Clarify this -->
+      </para>
+     </listitem>
+    </varlistentry>
    </variablelist>
   </section>
 
   <section xml:id="script-actions">
-      <title>Providing a Script as an Action</title>
+   <title>Providing a Script as an Action</title>
 
-      <para>In addition to the static synchronization actions described in the
-      previous section, you can provide a script that is run in specific
-      synchronization situations. The following extract of a sample
-      <filename>sync.json</filename> file specifies that when a synchronization
-      operation assesses an entry as <literal>ABSENT</literal>, the workflow
-      named <literal>managedUserApproval</literal> is invoked. The parameters
-      for the workflow are passed in as properties of the <literal>action</literal>
-      parameter.</para>
+   <para>
+    In addition to the static synchronization actions described in the previous
+    section, you can provide a script that is run in specific synchronization
+    situations. The following extract of a sample <filename>sync.json</filename>
+    file specifies that when a synchronization operation assesses an entry as
+    <literal>ABSENT</literal>, the workflow named
+    <literal>managedUserApproval</literal> is invoked. The parameters for the
+    workflow are passed in as properties of the <literal>action</literal>
+    parameter.
+   </para>
 
-      <programlisting language="javascript">
+   <programlisting language="javascript">
 {
     "situation" : "ABSENT",
     "action" : {
@@ -3161,13 +3307,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
         "file" : "bin/defaults/script/workflow/workflow.js"
     }
 }
-      </programlisting>
+   </programlisting>
 
-      <para>The variables available to these scripts are described in
-      <link xlink:href="integrators-guide#appendix-scripting"
-      xlink:role="http://docbook.org/xlink/role/olink">
-      <citetitle>Variables Available in Scripts</citetitle></link> in the
-      <citetitle>Scripting Appendix</citetitle>.</para>
+   <para>
+    The variables available to these scripts are described in
+    <link xlink:href="integrators-guide#appendix-scripting"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Variables
+     Available in Scripts</citetitle></link> in the <citetitle>Scripting
+    Appendix</citetitle>.
+   </para>
   </section>
  </section>
 
@@ -3228,8 +3376,53 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
                 },
        </programlisting>
      </listitem>
-     <listitem><para>In the sample configuration, the workflow calls a second,
-     asynchronous reconciliation process as a final step.</para></listitem>
+     <listitem>
+      <para>
+       In the sample configuration, the workflow calls a second, explicit
+       reconciliation process as a final step. This reconciliation process is
+       called on the <literal>sync</literal> context path, with the
+       <literal>performAction</literal> action
+       (<literal>openidm.action('sync', 'performAction', params)</literal>).
+      </para>
+      <para>
+       You can also use this kind of explicit reconciliation to perform a
+       specific action on a source or target record, regardless of the assessed
+       situation.
+      </para>
+      <para>
+       You can call such an operation over the REST interface, specifying the
+       source, and/or target IDs, the mapping, and the action to be taken. The
+       action can be any one of the supported reconciliation actions, that is,
+       <literal>CREATE, UPDATE, DELETE, LINK, UNLINK, EXCEPTION, REPORT,
+       NOREPORT, ASYNC, IGNORE</literal>. In addition, if you specify a
+       <literal>reconId</literal>, the action that is taken is logged in the
+       <literal>audit/recon</literal> log, along with the the other audit data
+       for that reconciliation run.
+      </para>
+      <para>
+       The following sample command calls the DELETE action on user
+       <literal>bjensen</literal>, whose <literal>_id</literal> in the LDAP
+       directory is <literal>uid=bjensen,ou=People,dc=example,dc=com</literal>.
+       The user is deleted in the target resource, in this case, the
+       OpenIDM repository.
+      </para>
+      <para>
+       Note that the <literal>_id</literal> must be URL-encoded in the REST
+       call.
+      </para>
+      <programlisting>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/sync?_action=performAction
+  &amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom
+  &amp;mapping=systemLdapAccounts_ManagedUser
+  &amp;action=DELETE"</userinput>
+<computeroutput>{}</computeroutput>
+      </programlisting>
+     </listitem>
    </orderedlist>
  </section>
 
