@@ -198,15 +198,11 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     interface:
    </para>
 
-   <screen>
-    <userinput>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Conent-Type: application/json"
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-    </userinput>
-   </screen>
+   <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
   </section>
 
   <section xml:id="native-queries">
@@ -237,11 +233,10 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     <literal>_queryExpression</literal> keyword. For example:
    </para>
 
-   <screen width="92">$ curl
- --cacert self-signed.crt
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
+   <screen width="92">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
    </screen>
 
