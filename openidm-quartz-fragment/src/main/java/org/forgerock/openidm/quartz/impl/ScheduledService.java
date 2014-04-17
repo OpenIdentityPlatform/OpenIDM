@@ -55,7 +55,6 @@ public interface ScheduledService {
      * @param scheduledContext Context information passed by the scheduler service
      * @throws ExecutionException if execution of the scheduled work failed.
      * Implementations can also throw RuntimeExceptions which will get logged.
-     * @throws org.forgerock.openidm.scheduler.ExecutionException
      */
     void execute(ServerContext context, Map<String, Object> scheduledContext) throws ExecutionException;
 }
