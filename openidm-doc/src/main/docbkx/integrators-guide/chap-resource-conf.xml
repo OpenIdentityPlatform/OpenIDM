@@ -1555,11 +1555,11 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
      <step>
          <para>The connector is now configured. To verify the configuration,
          perform a RESTful GET request on the remote system URL, for example:</para>
-         <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+         <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids"</screen>
          <para>Such a request should return the user accounts in your Active
          Directory server.</para>
@@ -1606,12 +1606,13 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
       <para>To test the synchronization, run a reconciliation operation by
       running the following command.
       </para>
-      <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
+      <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
       <para>If reconciliation is successful, the command returns a reconciliation
       ID, similar to the following:
       </para>
@@ -2081,9 +2082,13 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
          <step>
           <para>Run reconciliation with the following command:
           </para>
-          <screen>$ curl --header "X-OpenIDM-Username: openidm-admin"  
---header "X-OpenIDM-Password: openidm-admin"  --request POST 
-"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
+          <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
           <para>This will return a reconciliation id similar to the following:
           </para>
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
@@ -2320,9 +2325,13 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
          <step>
           <para>Run reconciliation with the following command.
           </para>
-          <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" 
---header "X-OpenIDM-Password: openidm-admin" --request POST 
-"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+          <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
           <para>This will return a reconciliation id similar to the following:
           </para>
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
@@ -2539,12 +2548,12 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
     <para>To call the PowerShell script over the REST interface, use the 
     following request, specifying the userName as input:</para>
     
-    <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
+    <screen width="100">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  "https://localhost:8443/openidm/system/ActiveDirectory/account?_action=script&amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
    </section>
   </section>
@@ -2757,11 +2766,12 @@ return id;
  
   <para>List available connectors using the following command.</para>
  
-  <screen>$ curl
+  <screen>$ curl \
+ --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+ "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <itemizedlist>
    <para>Available connectors are installed in
@@ -2822,18 +2832,18 @@ return id;
   connectors by copying JSON objects from the list into the body of the REST
   command, as shown below for the XML connector.</para>
 
-  <screen>$ curl
- --cacert self-signed.crt
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
+  <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  --data '{"connectorRef":
  {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
  "displayName": "XML Connector",
  "bundleName": "org.forgerock.openicf.connectors.xml-connector",
  "bundleVersion": "1.1.0.1"}
- }'
- --request POST
+ }' \
  "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <para>The command returns a core connector configuration. The core connector
@@ -2890,11 +2900,12 @@ return id;
   "configurationProperties" to the core configuration, and use the updated
   core configuration as the body for the next command.</para>
   
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
+  <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  --data '{
   "configurationProperties":
     {
@@ -2936,8 +2947,7 @@ return id;
     "displayName": "XML Connector",
     "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
   }
-}'
- --request POST
+}' \
  "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <note>
@@ -2986,14 +2996,14 @@ return id;
    example shows two external LDAP servers connected to OpenIDM:
   </para>
 
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/system?_action=test"
-[
+  <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=test"</userinput>
+   <computeroutput>[
   {
     "ok": true,
     "name": "ldap1"
@@ -3002,7 +3012,7 @@ return id;
     "ok": true,
     "name": "ldap2"
   }
-]</screen>
+]</computeroutput></screen>
   <para>
    The status of the system is provided by the <literal>ok</literal> parameter.
    If the connection is available, the value of this parameter is
@@ -3012,44 +3022,44 @@ return id;
    To obtain the status for a single system, include the name of the connector
    in the URL, for example:
   </para>
-  <screen>$ curl
- --cacert self-signed.crt
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "https://localhost:8443/openidm/system/ldap1?_action=test"
-{
+  <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/system/ldap1?_action=test"</userinput>
+   <computeroutput>{
   "ok": true,
   "name": "ldap1"
-}</screen>
+}</computeroutput></screen>
   <para>
    If there is a problem with the connection, the request returns an error
    message. In the following example, the LDAP server named
    <literal>ldap1</literal> is down.
   </para>
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/system/ldap1?_action=test"
-{
+  <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/ldap1?_action=test"</userinput>
+   <computeroutput>{
   "error": "javax.naming.CommunicationException: localhost:1389
             [Root exception is java.net.ConnectException: Connection refused]",
   "name": "ldap"
-}</screen>
+}</computeroutput></screen>
   <para>
    To test the validity of a connector configuration, use the
    <literal>testConfig</literal> action and include the configuration in the
    command. For example:
   </para>
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
+  <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
  --data '{
     "name" : "xmlfile",
     "connectorRef" : {
@@ -3160,9 +3170,9 @@ return id;
         }
     },
     "operationOptions" : { }
-}'
- --request POST
- "http://localhost:8080/openidm/system?_action=testConfig"
+}' \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=testConfig"
   </screen>
   <para>
    If the configuration is valid, the command returns
