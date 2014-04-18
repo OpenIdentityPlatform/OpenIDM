@@ -222,8 +222,7 @@
                 <include>**</include>
             </includes>
             <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
-                <exclude>data/Example.ldif</exclude>
+                <exclude>conf/authentication.json</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample6</outputDirectory>
         </fileSet>

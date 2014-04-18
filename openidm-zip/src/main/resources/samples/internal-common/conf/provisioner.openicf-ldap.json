@@ -38,15 +38,7 @@
         "baseContextsToSynchronize" : [
             "dc=example,dc=com"
         ],
-        "attributesToSynchronize" : [
-            "uid",
-            "sn",
-            "cn",
-            "givenName",
-            "mail",
-            "description",
-            "telephoneNumber"
-        ],
+        "attributesToSynchronize" : [ ],
         "changeNumberAttribute" : "changeNumber",
         "passwordDecryptionInitializationVector" : null,
         "filterWithOrInsteadOfAnd" : false,
