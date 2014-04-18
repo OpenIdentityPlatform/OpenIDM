@@ -184,7 +184,7 @@
 
   <para>
    The <literal>application/json</literal> content type is not needed when a REST
-   call is made using the GET method.
+   call is made using the GET and DELETE methods.
   </para>
 
  </section>
