@@ -130,10 +130,6 @@
    /openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com
   </literallayout>
 
-  <screen>
-
-  </screen>
-
  </section>
 
  <section xml:id="rest-object-identifier">
