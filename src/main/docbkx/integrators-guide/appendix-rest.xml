@@ -606,7 +606,7 @@ ETag: "0"
      <para>Example Response: Updating an existing object when no version is
      supplied</para>
      <programlisting language="http">
-HTTP/1.1 412 Precondition Required
+HTTP/1.1 409 Conflict
 Content-Type: application/json
 Content-Length: 89
 ...
@@ -615,7 +615,7 @@ Content-Length: 89
       <para>Example Response: Updating an existing object when an invalid
       version is supplied (version conflict)</para>
       <programlisting language="http">
-HTTP/1.1 409 Conflict
+HTTP/1.1 412 Precondition Required
 Content-Type: application/json
 Content-Length: 89
 ...
@@ -691,8 +691,7 @@ If-Match: "0"
      <programlisting language="http">
 HTTP/1.1 200 OK
 ...</programlisting>
-     <para>Deleting an existing object when no version is supplied (version
-     conflict)</para>
+     <para>Deleting an existing object when no version is supplied</para>
      <programlisting language="http">
 HTTP/1.1 409 Conflict
 Content-Type: application/json;charset=UTF-8
