@@ -1,0 +1,12 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0/15 * * * * ?",
+    "concurrentExecution" : false,
+    "invokeService" : "provisioner",
+    "invokeContext" : {
+        "action" : "liveSync",
+        "source" : "system/ad/account"
+    },
+    "invokeLogLevel" : "debug"
+}
