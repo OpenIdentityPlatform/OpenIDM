@@ -864,6 +864,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
                     handler.handleResult(patchAction(context, request));
+                    break;
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
