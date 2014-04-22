@@ -398,7 +398,7 @@
                         "CN=terminal,O=corp",
                         "CN=intranet,O=corp"
                     ],
-                    "operation": "insert"
+                    "operation": "mergeWithTarget"
                 }
             ]
         },
@@ -409,7 +409,7 @@
                     "value": [
                         "CN=employees,O=corp"
                     ],
-                    "operation": "insert"
+                    "operation": "mergeWithTarget"
                 },
                 {
                     "name": "employeeType",
@@ -449,21 +449,24 @@
     <listitem>
      <para>
       <literal>"operation"</literal> specifies the way in which the value will
-      be applied, and can be either <literal>"insert"</literal> or
-      <literal>"replace"</literal>.
+      be applied, and can be either <literal>"mergeWithTarget"</literal> or
+      <literal>"replaceTarget"</literal>.
      </para>
      <para>
-      The <literal>"insert"</literal> operation takes the source attribute value
-      and inserts it as the target (system) attribute. Note that the insert
-      operation does not obtain the target value before inserting the new value,
-      but regards the source as the authoritative source for the assignment and
-      inserts the entire source value.
+      The <literal>"mergeWithTarget"</literal> operation first merges the source
+      value with the existing target value, then adds the value or values from
+      the role assignment. In the event that duplicate values are found (for
+      attributes that take a list as a value), each value is included only once
+      in the resulting target value.
      </para>
      <para>
-      The <literal>"replace"</literal> operation replaces the target attribute
-      value with whatever is specified in the role definition. If no operation
-      type is specified, the assignment has a <literal>"replace"</literal>
-      operation by default.
+      The <literal>"replaceTarget"</literal> operation replaces the entire
+      target attribute value with whatever is specified in the role definition.
+      When this operation is specified, the source becomes the only
+      authoritative source for the attribute. Existing values on the target are
+      either reported or overwritten, depending on the configuration of the
+      synchronization actions. If no operation type is specified, the assignment
+      has a <literal>"replaceTarget"</literal> operation by default.
      </para>
     </listitem>
    </itemizedlist>
