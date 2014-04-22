@@ -99,7 +99,7 @@ public class LazyObjectAccessor {
         if (!loaded) {
             try {
                 // If not found, the object will be null
-                object = rawReadObject(service.getRouter(), service.getConnectionFactory(), componentContext, localId);
+                object = rawReadObject(service.getServerContext(), service.getConnectionFactory(), componentContext, localId);
             } catch (SynchronizationException ex) {
                 throw ex; // being explicit that this would not be considered loaded
             }
