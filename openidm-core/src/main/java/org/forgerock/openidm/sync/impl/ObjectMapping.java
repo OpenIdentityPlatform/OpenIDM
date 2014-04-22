@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -408,7 +407,7 @@ class ObjectMapping  {
             for (Map.Entry<String, Object> e: query.entrySet()) {
                 r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
-            service.getConnectionFactory().getConnection().query(service.getRouter(), r, new QueryResultHandler() {
+            service.getConnectionFactory().getConnection().query(service.getServerContext(), r, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore
@@ -444,7 +443,7 @@ class ObjectMapping  {
         LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
             CreateRequest cr = Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            Resource r =  service.getConnectionFactory().getConnection().create(service.getRouter(), cr);
+            Resource r =  service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
             targetObject = new LazyObjectAccessor(service, targetObjectSet, r.getId(), target);
             measure.setResult(target);
         } catch (JsonValueException jve) {
@@ -473,7 +472,7 @@ class ObjectMapping  {
             LOGGER.trace("Update target object {}", id);
             UpdateRequest ur = Requests.newUpdateRequest(id, target);
             ur.setRevision(target.get("_rev").asString());
-            service.getConnectionFactory().getConnection().update(service.getRouter(), ur);
+            service.getConnectionFactory().getConnection().update(service.getServerContext(), ur);
             measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
@@ -499,7 +498,7 @@ class ObjectMapping  {
                 DeleteRequest ur = Requests.newDeleteRequest(targetObjectSet, target.get("_id").required().asString());
                 ur.setRevision(target.get("_rev").asString());
                 LOGGER.trace("Delete target object {}", ur.getResourceName());
-                service.getConnectionFactory().getConnection().delete(service.getRouter(), ur);
+                service.getConnectionFactory().getConnection().delete(service.getServerContext(), ur);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
             } catch (NotFoundException nfe) {
@@ -570,7 +569,7 @@ class ObjectMapping  {
     public void onCreate(String resourceContainer, String resourceId, JsonValue value) throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
             if (value == null || value.getObject() == null) { // notification without the actual value
-                value = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), resourceContainer, resourceId);
+                value = LazyObjectAccessor.rawReadObject(service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
             doSourceSync(resourceId, value); // synchronous for now
         }
@@ -579,7 +578,7 @@ class ObjectMapping  {
     public void onUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
             if (newValue == null || newValue.getObject() == null) { // notification without the actual value
-                newValue = LazyObjectAccessor.rawReadObject(service.getRouter(), service.getConnectionFactory(), resourceContainer, resourceId);
+                newValue = LazyObjectAccessor.rawReadObject(service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
             // TODO: use old value to project incremental diff without fetch of source
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
@@ -1026,7 +1025,7 @@ class ObjectMapping  {
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
             CreateRequest cr = Requests.newCreateRequest("audit/recon",entry.toJsonValue());
-            service.getConnectionFactory().getConnection().create(service.getRouter(), cr);
+            service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
         } catch (ResourceException ose) {
             throw new SynchronizationException(ose);
         }

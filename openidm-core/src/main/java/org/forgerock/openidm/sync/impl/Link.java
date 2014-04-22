@@ -115,7 +115,7 @@ class Link {
      * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {
-        JsonValue results = linkQuery(mapping.getService().getRouter(), mapping.getService().getConnectionFactory(), query);
+        JsonValue results = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
         if (results.size() == 1) {
             fromJsonValue(results.get(0));
         } else if (results.size() > 1) { // shouldn't happen if index is unique
@@ -308,7 +308,7 @@ class Link {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryRequest.FIELD_QUERY_ID, "links-for-linkType");
             query.put("linkType", mapping.getLinkType().getName());
-            JsonValue queryResults = linkQuery(mapping.getService().getRouter(), mapping.getService().getConnectionFactory(), query);
+            JsonValue queryResults = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {
                 Link link = new Link(mapping);
                 link.fromJsonValue(entry);
@@ -343,7 +343,7 @@ class Link {
         JsonValue jv = toJsonValue();
         try {
             CreateRequest r = Requests.newCreateRequest(linkId(null), _id, jv);
-            Resource resource = mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getRouter(), r);
+            Resource resource = mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getServerContext(), r);
             this._id = resource.getId();
             this._rev = resource.getRevision();
             this.initialized = true;
@@ -363,7 +363,7 @@ class Link {
             try {
                 DeleteRequest r = Requests.newDeleteRequest(linkId(_id));
                 r.setRevision(_rev);
-                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getRouter(),r);
+                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getServerContext(),r);
             } catch (ResourceException ose) {
                 LOGGER.warn("Failed to delete link", ose);
                 throw new SynchronizationException(ose);
@@ -385,7 +385,7 @@ class Link {
         try {
             UpdateRequest r = Requests.newUpdateRequest(linkId(_id), jv);
             r.setRevision(_rev);
-            mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getRouter(),r);
+            mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getServerContext(),r);
         } catch (ResourceException ose) {
             LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);
