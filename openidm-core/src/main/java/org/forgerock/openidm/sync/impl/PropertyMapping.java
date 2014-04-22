@@ -21,15 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 // SLF4J
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.script.ScriptEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON Fluent
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
@@ -125,7 +120,7 @@ class PropertyMapping {
      */
     public void apply(JsonValue sourceObject, JsonValue targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition
-            Map<String, Object> scope = service.newScope();
+            Map<String, Object> scope = new HashMap<String, Object>();
             try {
                 scope.put("object", sourceObject.copy().asMap());
                 Object o = condition.exec(scope);
@@ -148,7 +143,7 @@ class PropertyMapping {
             }
         }
         if (transform != null) { // optional property mapping script
-            Map<String, Object> scope = service.newScope();
+            Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("source", result);
             try {
                 result = transform.exec(scope); // script yields transformation result

@@ -536,7 +536,7 @@ class ObjectMapping  {
     private JsonValue applyDefaultMappings(JsonValue source, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
         JsonValue result = null;
         if (defaultMapping != null) {
-            Map<String, Object> queryScope = service.newScope();
+            Map<String, Object> queryScope = new HashMap<String, Object>();
             queryScope.put("source", source.asMap());
             queryScope.put("target", target.asMap());
             queryScope.put("config", config.asMap());
@@ -730,7 +730,7 @@ class ObjectMapping  {
 
     private void doResults(ReconciliationContext reconContext) throws SynchronizationException {
         if (resultScript != null) {
-            Map<String, Object> scope = service.newScope();
+            Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("source", reconContext.getStatistics().getSourceStat().asMap());
             scope.put("target", reconContext.getStatistics().getSourceStat().asMap());
             scope.put("global", reconContext.getStatistics().asMap());
@@ -1496,7 +1496,7 @@ class ObjectMapping  {
             boolean result = false;
             if (hasSourceObject() || sourceObjectOverride != null) { // must have a source object to be valid
                 if (validSource != null) {
-                    Map<String, Object> scope = service.newScope();
+                    Map<String, Object> scope = new HashMap<String, Object>();
                     if (sourceObjectOverride != null) {
                         scope.put("source", sourceObjectOverride.asMap());
                     } else {
@@ -1534,7 +1534,7 @@ class ObjectMapping  {
             boolean result = false;
             if (hasTargetObject()) { // must have a target object to qualify
                 if (validTarget != null && getTargetObject() != null) { // forces pulling object into memory
-                    Map<String, Object> scope = service.newScope();
+                    Map<String, Object> scope = new HashMap<String, Object>();
                     scope.put("target", getTargetObject().asMap());
                     try {
                         Object o = validTarget.exec(scope);
@@ -1573,7 +1573,7 @@ class ObjectMapping  {
          */
         private void execScript(String type, Script script, JsonValue oldTarget) throws SynchronizationException {
             if (script != null) {
-                Map<String, Object> scope = service.newScope();
+                Map<String, Object> scope = new HashMap<String, Object>();
                 // TODO: Once script engine can do on-demand get replace these forced loads
                 if (getSourceObjectId() != null) {
                     JsonValue source = getSourceObject();
@@ -1888,7 +1888,7 @@ class ObjectMapping  {
             } else if (correlationQuery != null && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
                 EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
 
-                Map<String, Object> queryScope = service.newScope();
+                Map<String, Object> queryScope = new HashMap<String, Object>();
                 if (sourceObjectOverride != null) {
                     queryScope.put("source", sourceObjectOverride.asMap());
                 } else {

@@ -201,15 +201,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         return ObjectSetContext.get();
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @return TODO.
-     */
-    Map<String, Object> newScope() {
-        return new HashMap<String, Object>();
-    }
-
     private void onCreate(String resourceContainer, String resourceId, JsonValue object) throws SynchronizationException {
         PendingLink.handlePendingLinks(mappings, resourceContainer, resourceId, object);
         for (ObjectMapping mapping : mappings) {
