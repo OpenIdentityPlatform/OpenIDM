@@ -22,7 +22,6 @@ import java.util.Map;
 
 // SLF4J
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.openidm.core.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +119,7 @@ class Policy {
         if (action != null) { // static action specified
             result = action;
         } else if (script != null) { // action is dynamically determine
-            Map<String, Object> scope = service.newScope();
+            Map<String, Object> scope = new HashMap<String, Object>();
             if (null != scriptScope) {
                 //Make a thread safe copy and put the variables into the scope
                 for (Map.Entry<String,Object> entry: Utils.deepCopy(scriptScope).entrySet()){
@@ -167,7 +166,7 @@ class Policy {
 
     public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, Action action, boolean sourceAction) throws SynchronizationException {
         if (postAction != null) {
-            Map<String, Object> scope = service.newScope();
+            Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("sourceAction", sourceAction);
             scope.put("action", action.name());
             scope.put("situation", situation.name());
