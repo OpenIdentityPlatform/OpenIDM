@@ -57,7 +57,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 delete data.passwordConfirm;
                 
                 this.delegate.createEntity(null, data, function(user) {
-                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: false });
+                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, autoLogin: false });
+                    router.navigate(router.configuration.routes.adminUsers.url, {trigger: true});
                 }, function() {
                     _this.unlock();
                 });

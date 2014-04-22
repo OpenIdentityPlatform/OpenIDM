@@ -36,6 +36,10 @@ define("UserDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm/managed/user");
 
+    obj.getUserResourceName = function (user) {
+        return (user.component === "internal/user" ? "repo/internal/user": user.component) + "/" + user._id;
+    };
+
     obj.usersCallback = null;
     obj.users = null;
     obj.numberOfUsers = 0;
@@ -76,9 +80,18 @@ define("UserDelegate", [
 
         this.serviceCall({
             serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
-            success: successCallback, 
             error: errorCallback,
-            errorsHandlers: errorsHandlers});
+            errorsHandlers: errorsHandlers}).then(function (user) {
+                if (!_.has(user, 'uid')) {
+                    user.uid = user.userName || user._id;
+                }
+
+                if (successCallback) {
+                    successCallback(user);
+                }
+
+                return user;
+            });
     };
 
        
@@ -130,6 +143,7 @@ define("UserDelegate", [
                     data = {
                         id : rawData.authorizationId.id,
                         username : rawData.authenticationId,
+                        uid : rawData.authenticationId,
                         roles: rawData.authorizationId.roles,
                         component: rawData.authorizationId.component
                     };
@@ -225,31 +239,36 @@ define("UserDelegate", [
                     if(errorCallback) {
                         errorCallback();
                     }
-                } else if(successCallback) {
+                    return;
+                } else {
+                    if (!_.has(data.result[0], 'uid')) {
+                        data.result[0].uid = data.result[0].userName || data.result[0]._id;
+                    }
+                }
+
+                if(successCallback) {
                     successCallback(data.result[0]);
                 }
+
+                return data.result[0];
             },
             error: errorCallback
         });
     };
     
-    obj.getForUserID = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "/" + uid, 
-            success: successCallback,
-            error: errorCallback
-        });
-    };
-
     /**
      * See AbstractDelegate.patchEntityDifferences
      */
     obj.patchUserDifferences = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
+        delete oldUserData.uid;
+        delete newUserData.uid;
         console.info("updating user");
         obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers);
     };
     
-    obj.updateUser = function(oldUserData, stub, newUserData, successCallback, errorCallback, noChangesCallback) {
+    obj.updateUser = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
+        delete oldUserData.uid;
+        delete newUserData.uid;
         obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
                 "forbidden": {
                     status: "403",

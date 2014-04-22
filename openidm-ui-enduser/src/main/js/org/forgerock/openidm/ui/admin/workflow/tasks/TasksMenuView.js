@@ -67,8 +67,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             }
             
             $("#taskDetails").closest("tr").remove();
-            $("#myTasks").accordion("resize");   
-            $("#candidateTasks").accordion("resize");
         },
         
         showTask: function(event) {
@@ -188,7 +186,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     task = process.tasks[i];
                     data.tasks.push(this.prepareParamsFromTask(task));
                 }
- 
 
                 this.$el.append(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
@@ -198,7 +195,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                 active = this.$el.accordion("option", "active");
             }
             
-            this.$el.accordion('destroy');
             this.$el.accordion({heightStyle: "content", collapsible: true, autoHeight: false, active: active});
             
             this.refreshAssignedSelectors();
