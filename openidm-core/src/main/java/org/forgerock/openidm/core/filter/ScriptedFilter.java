@@ -153,6 +153,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             } catch (ResourceException e) {
                 logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
+                // handler.handleError(e);
+            } finally {
                 handler.handleError(error);
             }
         } else {
@@ -216,6 +218,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             } catch (ResourceException e) {
                 logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
+                // handler.handleError(e);
+            } finally {
                 handler.handleError(error);
             }
         } else {
@@ -291,6 +295,8 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
             } catch (ResourceException e) {
                 logger.debug("Failed the execute the onFailure script", e);
                 // TODO combine the messages
+                // handler.handleError(e);
+            } finally {
                 handler.handleError(error);
             }
         } else {
