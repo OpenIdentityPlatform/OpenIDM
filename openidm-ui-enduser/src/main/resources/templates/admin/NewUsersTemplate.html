@@ -1,9 +1,11 @@
 <div id="users" class="content-bg">
-    <div class="offset20">
-        <h2 style="display:inline;">{{t "common.user.usersList"}}</h2>
-        <a href="#users/add/" class="button active" style="margin-left:30px;">{{t "common.form.addUser"}}</a>
-        <a class="button active" id="reloadGridBtn" style="margin-left:30px;">{{t "common.form.reloadGrid"}}</a>
-        <a class="button active" id="clearFiltersBtn" style="margin-left:30px;display:none;">{{t "common.form.clearFilters"}}</a>
+    <div class="clearfix">
+        <h1 class="float-left">{{t "common.user.usersList"}}</h1>
+        <div class="float-right">
+        	<a href="#users/add/" class="button" >{{t "common.form.addUser"}}</a>
+        	<input type="button"  class="button"  id="reloadGridBtn" value="{{t 'common.form.reloadGrid'}}" />
+        	<input type="button"  class="button"  id="clearFiltersBtn" value="{{t 'common.form.clearFilters'}}" disabled />
+        </div>
     </div>
         
     

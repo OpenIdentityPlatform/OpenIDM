@@ -74,7 +74,7 @@ define("org/forgerock/openidm/ui/user/UserRegistrationView", [
                 
                 console.log("ADDING USER: " + JSON.stringify(data));                
                 this.delegate.createEntity(null, data, function(user) {
-                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, selfRegistration: true });                    
+                    eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULLY_REGISTERED, { user: data, autoLogin: true });                    
                 }, _.bind(function(response) {
                     console.warn(response);
                     if (response.error === 'Conflict') {

@@ -93,7 +93,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
             });
             
             $(grid_id).trigger("reloadGrid", [{ page: 1}]);
-            $('#clearFiltersBtn').hide();
+            $('#clearFiltersBtn').prop('disabled', true);
         },
         
         render: function() {
@@ -190,10 +190,10 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                            $('#gs_accountStatus').val(params.accountStatus);
                            $('#' + grid_id).jqGrid("sortGrid", params.sidx, false, params.sord);
                            cookieHelper.deleteCookie("userGridParams");
-                           $('#clearFiltersBtn').show();
+                           $('#clearFiltersBtn').prop('disabled', false);
                        }
                        if(!hasFilters()){
-                           $('#clearFiltersBtn').hide();
+                           $('#clearFiltersBtn').prop('disabled', true);
                        }
                     },
                     onCellSelect: function(rowid,iCol,val,e){
@@ -263,7 +263,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         $('#' + grid_id).setGridParam({ postData: posted_data });
                     },
                     afterSearch: function(){
-                        $('#clearFiltersBtn').show();
+                        $('#clearFiltersBtn').prop('disabled', false);
                     }
                 });
             });

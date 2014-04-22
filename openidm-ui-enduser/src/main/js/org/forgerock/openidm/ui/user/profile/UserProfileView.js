@@ -52,10 +52,6 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
                 baseEntity = "repo/internal/user/" + conf.loggedUser._id;
             }
 
-            _.each(conf.loggedUser, function(val,key){
-                this.$el.find('[name=' + key.toLowerCase() + ']').prop("name",key);
-            },this);
-
             validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
                 
                 countryStateDelegate.getAllCountries( function(countries) {
