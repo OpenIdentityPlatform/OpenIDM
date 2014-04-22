@@ -30,19 +30,20 @@
 var map = { "result" : true };
 var assignments = config.assignments;
 
-function mergeValues(targetValue, value) {
-    if (targetValue != null && targetValue instanceof Array) {
+function mergeValues(target, name, value) {
+    if (target[name] != null && target[name] instanceof Array) {
         for (var x = 0; x < value.length; x++) {
-            if (targetValue.indexOf(value) == -1) {
-                targetValue.push(value[x]);
+            if (target[name].indexOf(value) == -1) {
+                target[name].push(value[x]);
             }
         }
-    } else if (targetValue != null && targetValue instanceof Object) {
+    } else if (target[name] != null && target[name] instanceof Object) {
+        var obj = target[name];
         for (var key in value) {
-            targetValue[key] = value[key];
+            obj[key] = value[key];
         }
     } else {
-        targetValue = value;
+        target[name] = value;
     }
 }
 
@@ -66,12 +67,12 @@ if (assignments != null) {
                     }
                     // Process the operation
                     if (operation == "replaceTarget") {
-                        mergeValues(target[name], value);
+                        mergeValues(target, name, value);
                     } else if (operation == "mergeWithTarget") {
                         if (existingTarget[name] !== null) {
-                            mergeValues(target[name], existingTarget[name]);
+                            mergeValues(target, name, existingTarget[name]);
                         }
-                        mergeValues(target[name], value);
+                        mergeValues(target, name, value);
                     } else {
                         console.log("WARNING: Unsupported assignment operation: " + operation);
                     }
