@@ -11,7 +11,7 @@
     <process id="orphanAccountReport" name="Orphan Account Handling Workflow">
         <startEvent id="start" />
         <sequenceFlow sourceRef="start" targetRef="readUserData"/>
-        <scriptTask id="readUserData" scriptFormat="groovy">
+        <scriptTask id="readUserData" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script>
                 user = openidm.read('system/business/account/'+ targetId)
                 userName = user.userName
@@ -63,16 +63,15 @@
         <scriptTask id="deleteAccount" scriptFormat="groovy">
             <script>
                 params = new java.util.HashMap();
-                params.put('_action', 'performAction')
                 params.put('reconId', reconId)
                 params.put('mapping', mapping)
                 params.put('action', 'delete')
-                params.put('target', user)
+                params.put('target', 'true')
                 targetId = execution.getVariables().get("targetId")
                 if (targetId!=null){
                     params.put('targetId', targetId)
                 }
-                openidm.action('sync', params)
+                openidm.action('sync', 'performAction', params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="deleteAccount" targetRef="end"/>
@@ -85,13 +84,12 @@
         <scriptTask id="linkAccount" scriptFormat="groovy">
             <script>
                 params = new java.util.HashMap();
-                params.put('_action', 'performAction')
                 params.put('reconId', reconId)
                 params.put('mapping', mapping)
                 params.put('action', 'link')
                 params.put('sourceId', linkTo)
                 params.put('targetId', targetId)
-                openidm.action('sync', params)
+                openidm.action('sync', 'performAction', params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="linkAccount" targetRef="end"/>

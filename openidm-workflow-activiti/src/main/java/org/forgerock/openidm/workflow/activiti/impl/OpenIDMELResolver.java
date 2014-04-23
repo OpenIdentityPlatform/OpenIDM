@@ -73,7 +73,7 @@ public class OpenIDMELResolver extends ELResolver {
         Bindings bindings = null;
         String key = (String) property;
         try {
-            JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, base, ActivitiConstants.OPENIDM_CONTEXT);
+            JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, null, ActivitiConstants.OPENIDM_CONTEXT);
             ServerContext serverContext = new ServerContext(openidmContext, persistenceConfig);
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {

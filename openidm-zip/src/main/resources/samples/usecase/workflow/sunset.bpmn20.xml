@@ -16,16 +16,17 @@
                 user = openidm.read(userId)
                 userName = user.userName
                 givenName = user.givenName
-                familyName = user.familyName
+                familyName = user.sn
                 department = user.department
                 endDate = user.sunset.date
                 employeeNumber = user.employeeNumber
+                manager = user.manager.managerId
           ]]>
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="fetchData" targetRef="decideApprovalTask"/>
         
-        <userTask id="decideApprovalTask" name="Contract Termination" activiti:assignee="${user.manager.managerId}">
+        <userTask id="decideApprovalTask" name="Contract Termination" activiti:assignee="${manager}">
             <extensionElements>
                 <activiti:formProperty id="userName"
                                        name="Username"

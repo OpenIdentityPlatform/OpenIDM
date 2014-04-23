@@ -1,0 +1,54 @@
+
+<style>
+#targetLinking fieldset {
+       margin-top: 0;
+}
+#targetLinking .group-field {
+       float: left !important;
+       width: 100%;
+}
+#targetLinking .field label {
+       text-align: left;
+}
+#targetLinking .field input,#targetLinking .field select {
+       clear: both;
+}
+#targetLinking .field .validation-message {
+       clear: none !important;
+       margin-left: 20px !important;
+       float: left !important;
+}
+</style>
+
+<h2 class="header">Source Account Details</h2>
+<fieldset>
+    <div class="fields">
+        <div class="field">
+            <label>UserName</label> 
+            <input type="text" value="{{variables.sourceuser.userName}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Family Name</label> 
+            <input type="text" value="{{variables.sourceuser.sn}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Given Name</label> 
+            <input type="text" value="{{variables.sourceuser.givenName}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Email</label> 
+            <input type="text" value="{{variables.sourceuser.mail}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Department</label> 
+            <input type="text" value="{{variables.sourceuser.department}}" readonly/> 
+        </div>
+        <div class="field">  
+            <label class="light">{{t "Possible targets"}}</label> 
+            {{select  variables.possibleTargets "target" "0" ""  " data-validator='required' "}}
+
+            <span class="ok" style="">✔</span>
+            <div class="validation-message"></div> 
+        </div>
+    </div>
+</fieldset>
