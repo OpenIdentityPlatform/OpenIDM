@@ -10,15 +10,16 @@
         <startEvent id="start" activiti:initiator="startUserId" />
         <sequenceFlow sourceRef="start" targetRef="readUserData"/>
 
-        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
+        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[ 
                 user = openidm.read("managed/user/" + userId)
                 userName = user.userName
                 givenName = user.givenName
-                familyName = user.familyName
-                email = user.email 
+                sn = user.sn
+                mail = user.mail 
                 department = user.department
-                candidateManagers = openidm.query('endpoint/getusermanager', [userId:userId]).managers
+                params = [ _queryId: 'getManager', userId: userId];
+                candidateManagers = openidm.query('endpoint/getusermanager', params).result
                 hasBusiness = (user.accounts != null && user.accounts.contains("Business"))
                 hasProject = (user.accounts != null && user.accounts.contains("Project"))
                 ]]>
@@ -37,11 +38,11 @@
                                        name="First Name"
                                        writable="false"
                                        type="string" />
-                <activiti:formProperty id="familyName"
+                <activiti:formProperty id="sn"
                                        name="Last Name"
                                        writable="false"
                                        type="string" />
-                <activiti:formProperty id="email"
+                <activiti:formProperty id="mail"
                                        name="Email"
                                        writable="false"
                                        type="string" />
@@ -77,11 +78,11 @@
                                        name="First Name"
                                        writable="false"
                                        type="string" />
-                <activiti:formProperty id="familyName"
+                <activiti:formProperty id="sn"
                                        name="Last Name"
                                        writable="false"
                                        type="string" />
-                <activiti:formProperty id="email"
+                <activiti:formProperty id="mail"
                                        name="Email"
                                        writable="false"
                                        type="string" />
@@ -114,11 +115,8 @@
                 if (project) {
                     newAccounts.push("Project")
                 }
-                params = new java.util.HashMap()
-                params.put('_action', 'patch')
-                list = [[replace:'accounts',value:newAccounts]]
-                params.put('_entity', list)
-                openidm.action('managed/user/'+userName, params)
+                patchParams = [[operation:'replace', field: 'accounts', value : newAccounts]]
+                openidm.patch('managed/user/'+userName, null, patchParams)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
@@ -139,7 +137,7 @@
                 "message" : "Your system access was reviewed by your manager"
                 ];
                 
-                openidm.create("repo/ui/notification/", requesterNotification)
+                openidm.create("repo/ui/notification/", null, requesterNotification)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
@@ -168,7 +166,7 @@
                 "notificationSubtype" : "",
                 "message" : "Your system access review for " + userId +" was denied by systemadmin"
                 ];
-                openidm.create("repo/ui/notification/", requesterNotification)
+                openidm.create("repo/ui/notification/", null, requesterNotification)
                 
             </script>
         </scriptTask>

@@ -498,8 +498,9 @@
                 <include>script/getUserManager.js</include>
                 <include>script/isSourceValidBusiness.js</include>
                 <include>script/on*.js</include>
+                <include>script/correlationQuery.js</include>
                 <include>workflow/orphanAccountReport.bpmn20.xml</include>
-                <include>workflow/manualMatch.bpmn20.xml</include>
+                <include>workflow/manualMatch.bar</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
         </fileSet>

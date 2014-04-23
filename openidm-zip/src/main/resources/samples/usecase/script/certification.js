@@ -5,9 +5,7 @@ function startCertificationWorkflow(user) {
         "_businessKey" : "UserId: " + user._id
     };
  
-    openidm.action('workflow/processinstance', {
-        "_action" : "createProcessInstance"
-    }, params);
+    openidm.create('workflow/processinstance', null,  params);
 }
 
 var allUsers = openidm.query("managed/user", {

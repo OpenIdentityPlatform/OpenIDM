@@ -149,6 +149,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             } else if (ActivitiConstants.QUERY_FILTERED.equals(request.getQueryId())) {
                 HistoricProcessInstanceQuery query = processEngine.getHistoryService().createHistoricProcessInstanceQuery();
                 setProcessInstanceParams(query, request);
+                query = query.unfinished();
                 List<HistoricProcessInstance> list = query.list();
                 for (HistoricProcessInstance processinstance : list) {
                     Map value = mapper.convertValue(processinstance, HashMap.class);

@@ -6,7 +6,7 @@
             "target" : "system/business/account",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "map = {'query': {'Equals': {'field': 'userName', 'values': [ source.userName ]}}};map;"
+                "file" : "script/correlationQuery.js"
             },
             "enableSync" : false,
             "validSource" : {
@@ -27,7 +27,7 @@
                     "target" : "department"
                 },
                 {
-                    "source" : "email",
+                    "source" : "mail",
                     "target" : "email"
                 },
                 {
@@ -35,7 +35,7 @@
                     "target" : "employeeNumber"
                 },
                 {
-                    "source" : "familyName",
+                    "source" : "sn",
                     "target" : "familyName"
                 },
                 {
@@ -43,7 +43,7 @@
                     "target" : "givenName"
                 },
                 {
-                    "source" : "phoneNumber",
+                    "source" : "telephoneNumber",
                     "target" : "phoneNumber"
                 },
                 {
@@ -113,7 +113,7 @@
             "links" : "managedUser_systemBusiness",
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "map = {'query': {'Equals': {'field': 'userName', 'values': [ source.userName ]}}};map;"
+                "file" : "script/correlationQuery.js"
             },
             "enableSync" : false,
             "validSource" : {
@@ -134,7 +134,7 @@
                     "target" : "department"
                 },
                 {
-                    "source" : "email",
+                    "source" : "mail",
                     "target" : "email"
                 },
                 {
@@ -142,7 +142,7 @@
                     "target" : "employeeNumber"
                 },
                 {
-                    "source" : "familyName",
+                    "source" : "sn",
                     "target" : "familyName"
                 },
                 {
@@ -150,7 +150,7 @@
                     "target" : "givenName"
                 },
                 {
-                    "source" : "phoneNumber",
+                    "source" : "telephoneNumber",
                     "target" : "phoneNumber"
                 },
                 {
@@ -196,7 +196,7 @@
                     "action" : {
                         "workflowName" : "manualMatch",
                         "type" : "text/javascript",
-                        "file" : "workflow/workflow.js"
+                        "file" : "workflow/asyncProcess.js"
                     }
                 },
                 {
@@ -212,7 +212,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "workflow/workflow.js"
+                        "file" : "workflow/asyncProcess.js"
                     }
                 },
                 {
@@ -220,7 +220,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "workflow/workflow.js"
+                        "file" : "workflow/asyncProcess.js"
                     }
                 }
             ]

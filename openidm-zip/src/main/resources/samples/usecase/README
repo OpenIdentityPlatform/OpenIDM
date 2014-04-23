@@ -41,7 +41,7 @@ Usecase1 - Initial reconciliation
 
     2. Run reconciliation.
 
-    $ curl -k -u openidm-admin:openidm-admin -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
 
     3. Query the managed users created by reconciliation
 
@@ -225,3 +225,61 @@ Usecase 3 - User access request
     the user task within 10 minutes then a new user task is created and assigned to superadmin. It has the same user interface
     as the one assigned to the manager of the user and has the same functionalities. If the superadmin 
     completes this task then the execution is passed to the administrator approval (systemadmin).
+
+Usecase 4 - Orphan account detection and manual linking task started from reconciliation
+    In this use case we show two different asynchronous tasks started from reconciliation:
+    detecting orphan accounts on the target objects set and handling ambiguous results of correlation phase.
+
+    1. Before starting the test we need to rename the following file:
+    rename samples/usecase/usecase4/conf/syncManagedBusiness.json to samples/usecase/usecase4/conf/sync.json
+
+    In that file we have a mapping defined: recon_managedUser_systemBusiness.
+    This mapping has managed users as source and a csv file as target object set. The target object set 
+    is defined in samples/usecase/usecase4/data/business.csv file.
+    In that file we have all the users of the initial reconciliation (usecase1) which are employees
+    and therefore have "Business" in the 'accounts' attribute (see usecase2 User Type).
+    Since this mapping has a 'validSource' field defined only those managed users will be taken into
+    account which are employees.
+
+    There are some extra users in that csv file:
+    - user.50 is defined only in the csv file so when running the reconciliation this user will be 
+        detected as an orphan account (situation "UNQUALIFIED").
+
+    - user.33: the 'userName' attribute of this user is 'user.3', same as for user.3.
+        When running the correlation query during reconciliation there will be two candidate users
+        to be linked with user.3 from managed users (correlation query is based on userName attribute).   
+    
+    2. Start OpenIDM with the configuration for usecase4.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase4
+
+    3. Run reconciliation.
+
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=recon_managedUser_systemBusiness"
+
+    Two asynchronous workflows are started: an orphanAccountReport for user.50 and a
+    manualMatch for user.3 of managed users.
+
+    4. Log in to the UI as systemadmin (default password is 'Passw0rd').
+
+    5. Click on the 'Details' button of the 'Manual Linking' task.
+        The 'Possible targets' field is modifiable by systemadmin and it is required.
+        The decision can be
+        - Ignore: no action will be taken (no link will be created) and the workflow terminates.
+        - user.3 (user.3 - Atrc, Aaron) or user.3 (user.33 - Atrc, Aaron): these are the two candidate
+            users found in the target object set by executing the correlation query. These values 
+            are queried in the workflow and the possible values of that field are determined
+            runtime. Here we can choose the user we need.
+            After choosing one of the users the workflow will link user.3 of managed user to the selected user 
+            of the target object set.
+
+    6. Click on the 'Details' button of the 'Orphan Account' task.
+        'Link to' and 'Decision' fields are modifiable by systemadmin.
+        Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The decision can be
+        - Delete: the user will be deleted from the target object set and the workflow terminates.
+        - Link: when choosing this option valid managed user id needs to be entered to link the orphan account to.
+            Pick any user id from managed users where the managed user is not linked to any users in the csv file yet:
+            if this use case is started after the initial reconciliation then pick e.g. user.5.
+            If users are created e.g. by using sample2 that user can be used heres as well.
