@@ -10,21 +10,21 @@
             },
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/onCreate.js"
+                "source" : "logger.warn('Case onCreate: the source object contains: = {} ', source); source;"
             },
             "onUpdate" : {
                 "type" : "text/javascript",
-                "file" : "script/onUpdate.js"
+                "source" : "logger.warn('Case onUpdate: the source object contains: = {} ', source); source;"
             },
             "result" : {
                 "type" : "text/javascript",
-                "file" : "script/result.js"
+                "source" : "logger.warn('Case result: the source object contains: = {} ', source); source;"
             },
             "properties" : [
                 {
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/noSource.js"
+                        "source" : "logger.warn('Case no Source: the source object contains: = {} ', source); source;"
                     },
                     "target" : "sourceTest1Nosource"
                 },
@@ -32,7 +32,7 @@
                     "source" : "",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/emptySource.js"
+                        "source" : "logger.warn('Case emptySource: the source object contains: = {} ', source); source;"
                     },
                     "target" : "sourceTestEmptySource"
                 },
@@ -40,7 +40,7 @@
                     "source" : "description",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/sourceDescription.js"
+                        "source" : "logger.warn('Case sourceDescription: the source object contains: = {} ', source); source"
                     },
                     "target" : "sourceTestDescription"
                 },
@@ -50,19 +50,31 @@
                 },
                 {
                     "source" : "email",
-                    "target" : "email"
+                    "target" : "mail"
                 },
                 {
                     "source" : "lastname",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "name",
                     "target" : "userName"
                 },
                 {
+                    "source" : "password",
+                    "target" : "password"
+                },
+                {
                     "source" : "name",
                     "target" : "_id"
+                },
+                {
+                    "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
+                    "target" : "roles"
                 }
             ],
             "policies" : [
@@ -72,7 +84,7 @@
                 },
                 {
                     "situation" : "FOUND",
-                    "action" : "IGNORE"
+                    "action" : "UPDATE"
                 },
                 {
                     "situation" : "ABSENT",

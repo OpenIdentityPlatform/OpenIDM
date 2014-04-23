@@ -2,7 +2,7 @@
     "mappings" : [
         {
             "name" : "systemHrdb_managedUser",
-            "source" : "system/hrdb/account",
+            "source" : "system/scriptedsql/account",
             "target" : "managed/user",
             "properties" : [
                 {
@@ -64,7 +64,7 @@
         {
             "name" : "managedUser_systemHrdb",
             "source" : "managed/user",
-            "target" : "system/hrdb/account",
+            "target" : "system/scriptedsql/account",
             "links" : "systemHrdb_managedUser",
             "correlationQuery" : {
                 "type" : "text/javascript",

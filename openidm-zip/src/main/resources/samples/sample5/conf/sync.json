@@ -88,10 +88,6 @@
                 "type" : "text/javascript",
                 "source" : "var map = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; map;"
             },
-            "validSource" : {
-                "type" : "text/javascript",
-                "source" : "source.userName != null && source.password != null"
-            },
             "properties" : [
                 {
                     "source" : "userName",
@@ -111,7 +107,11 @@
                 },
                 {
                     "source" : "password",
-                    "target" : "userPassword"
+                    "target" : "userPassword",
+                    "condition": {
+                        "type": "text/javascript",
+                        "source": "object.password !== undefined && object.password !== null"
+                    }
                 }
             ],
             "policies" : [

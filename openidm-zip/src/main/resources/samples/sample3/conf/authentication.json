@@ -41,7 +41,7 @@
                         "type" : "text/javascript",
                         "file" : "auth/passthroughAuthnPopulateContext.js"
                     },
-                    "passThroughAuth" : "system/hrdb/account",
+                    "passThroughAuth" : "system/scriptedsql/account",
                     "propertyMapping" : {
                         "authenticationId" : "uid"
                     },

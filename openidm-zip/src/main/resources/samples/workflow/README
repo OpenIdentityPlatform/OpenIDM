@@ -4,7 +4,7 @@ Workflow Sample
 This sample demonstrates a typical use case of a workflow for provisioning.  After starting this sample, the first
 step is to load users from the XML file into your managed/user store, like so:
 
-curl -k -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
 This will create two users: user1 and manager1.  Both have the same password, "Welcome1".
 

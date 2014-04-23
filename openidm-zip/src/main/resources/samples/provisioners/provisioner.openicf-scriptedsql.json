@@ -1,30 +1,20 @@
 {
-    "_id" : "scriptedsql",
-    "_rev" : "1",
-    "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-    "_schema_rev" : "1",
     "name" : "scriptedsql",
-    "displayName" : "Scripted SQL Connector",
-    "typeString" : "DB",
-    "hasId" : "true",
-    "connectorRef" :
-    {
+    "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.scriptedsql-connector",
-        "bundleVersion" : "1.1.0.1",
+        "bundleVersion" : "1.1.2.0-SNAPSHOT",
         "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,
     "connectorPoolingSupported" : true,
-    "poolConfigOption" :
-    {
+    "poolConfigOption" : {
         "maxObjects" : 10,
         "maxIdle" : 10,
         "maxWait" : 150000,
         "minEvictableIdleTimeMillis" : 120000,
         "minIdle" : 1
     },
-    "operationTimeout" :
-    {
+    "operationTimeout" : {
         "CREATE" : -1,
         "TEST" : -1,
         "AUTHENTICATE" : -1,
@@ -38,17 +28,18 @@
         "SYNC" : -1,
         "SCHEMA" : -1
     },
-    "configurationProperties" :
-    {
+    "configurationProperties" : {
         "host" : "localhost",
         "port" : "3306",
         "user" : "root",
-        "password" : "xxxxx",
+        "password" : "password",
         "database" : "HRDB",
-        "jdbcDriver" : "com.mysql.jdbc.Driver",
-        "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
+        "jdbcDriver" : "com.mysql.jdbc.Driver",
+        "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/HRDB",
+        "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
+        "authenticateScriptFileName" : "&{launcher.project.location}/tools/AuthenticateScript.groovy",
         "createScriptFileName" : "&{launcher.project.location}/tools/CreateScript.groovy",
         "testScriptFileName" : "&{launcher.project.location}/tools/TestScript.groovy",
         "searchScriptFileName" : "&{launcher.project.location}/tools/SearchScript.groovy",
@@ -56,37 +47,30 @@
         "updateScriptFileName" : "&{launcher.project.location}/tools/UpdateScript.groovy",
         "syncScriptFileName" : "&{launcher.project.location}/tools/SyncScript.groovy"
     },
-    "syncFailureHandler" : 
-    {
+    "syncFailureHandler" : {
         "maxRetries" : 5,
         "postRetryAction" : "logged-ignore"
     },
-    "objectTypes" :
-    {
-        "group" :
-        {
+    "objectTypes" : {
+        "group" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "__GROUP__",
             "type" : "object",
             "nativeType" : "__GROUP__",
-            "properties" :
-            {
-                "name" :
-                {
+            "properties" : {
+                "name" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
-                "gid" :
-                {
+                "gid" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "gid",
                     "nativeType" : "string"
                 },
-                "description" :
-                {
+                "description" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "description",
@@ -94,23 +78,19 @@
                 }
             }
         },
-        "organization" :
-        {
+        "organization" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "organization",
             "type" : "object",
             "nativeType" : "organization",
-            "properties" :
-            {
-                "name" :
-                {
+            "properties" : {
+                "name" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
-                "description" :
-                {
+                "description" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "description",
@@ -118,65 +98,47 @@
                 }
             }
         },
-        "user" :
-        {
+        "account" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "__ACCOUNT__",
             "type" : "object",
             "nativeType" : "__ACCOUNT__",
-            "properties" :
-            {
-                "firstname" :
-                {
+            "properties" : {
+                "firstName" : {
                     "type" : "string",
                     "nativeName" : "firstname",
                     "nativeType" : "string",
                     "required" : true
                 },
-                "email" :
-                {
-                    "type" : "array",
-                    "items" :
-                    {
-                        "type" : "string",
-                        "nativeType" : "string"
-                    },
+                "email" : {
+                    "type" : "string",
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "password" :
-                {
+                "password" : {
                     "type" : "string",
-                    "nativeName" : "__PASSWORD__",
-                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
-                    "flags" :
-                    [
-                    "NOT_READABLE",
-                    "NOT_RETURNED_BY_DEFAULT"
-                    ]
+                    "nativeName" : "password",
+                    "nativeType" : "string",
+                    "flags" : [ "NOT_READABLE", "NOT_RETURNED_BY_DEFAULT" ]
                 },
-                "uid" :
-                {
+                "uid" : {
                     "type" : "string",
                     "nativeName" : "__NAME__",
                     "required" : true,
                     "nativeType" : "string"
                 },
-                "fullname" :
-                {
+                "fullName" : {
                     "type" : "string",
                     "nativeName" : "fullname",
                     "nativeType" : "string"
                 },
-                "lastname" :
-                {
+                "lastName" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "lastname",
                     "nativeType" : "string"
                 },
-                "organization" :
-                {
+                "organization" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "organization",
@@ -185,7 +147,6 @@
             }
         }
     },
-    "operationOptions" :
-    {
-}
+    "operationOptions" : {
+    }
 }
