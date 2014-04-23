@@ -1,9 +1,29 @@
+/** 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
 Sample 3 - Scripted SQL
 -----------------------
-Copyright (c) 2012-2014 ForgeRock AS
-This work is licensed under a Creative Commons Attribution-
-NonCommercial-NoDerivs 3.0 Unported License. See
-http://creativecommons.org/licenses/by-nc-nd/3.0/
 
 This sample demonstrates an example configuration for a scripted SQL
 connector, a connector that communicates with a database through configurable
@@ -55,53 +75,72 @@ To try the example, follow these steps.
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&_prettyPrint=true"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all&fields=_openidm_id,userName,sn,givenName&_prettyPrint=true"
     {
       "result" : [ {
-        "_id" : "1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d",
-        "_rev" : "0"
+        "_id" : "5b8c0ea8-3f11-4588-97af-723a76c8ef40",
+        "_rev" : "0",
+        "userName" : "rowley",
+        "sn" : "Birkin",
+        "givenName" : "Rowley"
       }, {
-        "_id" : "3afdc6a9-c296-44db-864c-32d3a5bdd713",
-        "_rev" : "0"
+        "_id" : "7de6b0f6-2930-43fc-8e66-c6dd79e37160",
+        "_rev" : "0",
+        "userName" : "john",
+        "sn" : "Smith",
+        "givenName" : "John"
       }, {
-        "_id" : "6e435110-3d08-48f2-b955-15308310ec32",
-        "_rev" : "0"
+        "_id" : "6fc473c4-9837-43f0-af6f-6fb4aa13a666",
+        "_rev" : "0",
+        "userName" : "louis",
+        "sn" : "Balfour",
+        "givenName" : "Louis"
       }, {
-        "_id" : "a114aa7d-6edf-4394-8ebb-197eaeb57598",
-        "_rev" : "0"
+        "_id" : "163237fd-934d-4160-878d-c59f32a3eec9",
+        "_rev" : "0",
+        "userName" : "jdoe",
+        "sn" : "Doe",
+        "givenName" : "John"
       }, {
-        "_id" : "d32b9667-9ee4-41cc-9374-ac70e5554aeb",
-        "_rev" : "0"
+        "_id" : "3bbc3706-b6e2-4013-960a-6d1beed582e1",
+        "_rev" : "0",
+        "userName" : "bob",
+        "sn" : "Fleming",
+        "givenName" : "Bob"
       } ],
       "resultCount" : 5,
       "pagedResultsCookie" : null,
       "remainingPagedResults" : -1
     }
 
-    8. Retrieve an individual user, using an ID value from the previous GET:
+    8. Query for an individual user (by userName):
 
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d?_prettyPrint=true"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user?_queryId=for-userName&uid=rowley&_prettyPrint=true"
     {
-      "_id" : "1c5dbec3-8f51-44c0-ae5a-30c06ed6aa6d",
-      "_rev" : "1",
-      "mail" : "Rowley.Birkin@example.com",
-      "sn" : "Birkin",
-      "passwordAttempts" : "0",
-      "address2" : "",
-      "lastPasswordAttempt" : "Sun Mar 16 2014 12:15:59 GMT-0700 (PDT)",
-      "givenName" : "Rowley",
-      "city" : "",
-      "country" : "",
-      "lastPasswordSet" : "",
-      "postalCode" : "",
-      "accountStatus" : "active",
-      "telephoneNumber" : "",
-      "roles" : [ "openidm-authorized" ],
-      "userName" : "rowley",
-      "stateProvince" : "",
-      "postalAddress" : "",
-      "effectiveRoles" : [ "openidm-authorized" ],
-      "effectiveAssignments" : { }
+      "result" : [ {
+        "userName" : "rowley",
+        "mail" : "Rowley.Birkin@example.com",
+        "sn" : "Birkin",
+        "passwordAttempts" : "0",
+        "lastPasswordAttempt" : "Fri Apr 18 2014 11:40:38 GMT-0700 (PDT)",
+        "address2" : "",
+        "givenName" : "Rowley",
+        "country" : "",
+        "city" : "",
+        "lastPasswordSet" : "",
+        "organization" : "SALES",
+        "postalCode" : "",
+        "_id" : "5b8c0ea8-3f11-4588-97af-723a76c8ef40",
+        "_rev" : "1",
+        "accountStatus" : "active",
+        "telephoneNumber" : "",
+        "roles" : [ "openidm-authorized" ],
+        "postalAddress" : "",
+        "stateProvince" : ""
+      } ],
+      "resultCount" : 1,
+      "pagedResultsCookie" : null,
+      "remainingPagedResults" : -1
     }
 
 You can login to the OpenIDM UI (https://localhost:8443/openidmui) with any of

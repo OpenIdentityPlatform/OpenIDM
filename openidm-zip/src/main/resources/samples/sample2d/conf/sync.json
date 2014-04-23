@@ -163,7 +163,7 @@
                 },
                 {
                     "situation" : "SOURCE_MISSING",
-                    "action" : "IGNORE"
+                    "action" : "DELETE"
                 },
                 {
                     "situation" : "UNQUALIFIED",

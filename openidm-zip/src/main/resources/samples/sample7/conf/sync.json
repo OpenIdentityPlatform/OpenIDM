@@ -29,7 +29,7 @@
                     "target" : "name",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimName.js"
+                        "source" : "require('scim').getName(source)"
                     },
                     "source" : ""
                 },
@@ -37,7 +37,7 @@
                     "target" : "displayName",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimDisplayName.js"
+                        "source" : "require('scim').getDisplayName(source.firstName, source.lastName, source.name)"
                     },
                     "source" : ""
                 },
@@ -49,49 +49,49 @@
                     "target" : "profileUrl",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimProfileUrl.js"
+                        "source" : "require('scim').getProfileUrl(source)"
                     },
-                    "source" : ""
+                    "source" : "name"
                 },
                 {
                     "target" : "emails",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimEmails.js"
+                        "source" : "require('scim').getEmails(source)"
                     },
-                    "source" : ""
+                    "source" : "emails"
                 },
                 {
                     "target" : "addresses",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimAddresses.js"
+                        "source" : "require('scim').getAddresses(source)"
                     },
-                    "source" : ""
+                    "source" : "addresses"
                 },
                 {
                     "target" : "phoneNumbers",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimPhoneNumbers.js"
+                        "source" : "require('scim').getPhoneNumbers(source)"
                     },
-                    "source" : ""
+                    "source" : "phoneNumbers"
                 },
                 {
                     "target" : "ims",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimIms.js"
+                        "source" : "require('scim').getIMs(source)"
                     },
-                    "source" : ""
+                    "source" : "ims"
                 },
                 {
                     "target" : "photos",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimPhotos.js"
+                        "source" : "require('scim').getPhotos(source)"
                     },
-                    "source" : ""
+                    "source" : "photos"
                 },
                 {
                     "target" : "userType",
@@ -117,14 +117,18 @@
                     "target" : "groups",
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/setScimGroups.js"
+                        "source" : "require('scim').getGroups(source)"
                     },
-                    "source" : ""
+                    "source" : "groups"
                 }
             ],
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/setScimMetaCreate.js"
+                "source" : "target.meta = require('scim').getMetaData()"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "target.meta = require('scim').getMetaData(target.meta)"
             },
             "policies" : [
                 {
@@ -133,7 +137,7 @@
                 },
                 {
                     "situation" : "FOUND",
-                    "action" : "IGNORE"
+                    "action" : "UPDATE"
                 },
                 {
                     "situation" : "ABSENT",

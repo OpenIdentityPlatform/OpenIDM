@@ -29,9 +29,9 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "samples/sample7/data/resource-schema-1.xsd",
-        "xsdFilePath" : "samples/sample7/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "samples/sample7/data/xmlConnectorData.xml"
+        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,

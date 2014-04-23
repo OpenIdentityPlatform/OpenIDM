@@ -71,17 +71,24 @@
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
         <!-- Setup Sample1  -->
-        <!--fileSet>
+        <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
                 <include>**</include>
             </includes>
             <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
                 <exclude>data/Example.ldif</exclude>
+                <exclude>conf/authentication.json</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample1</outputDirectory>
-        </fileSet-->
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-xml.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample1/conf</outputDirectory>
+        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -96,7 +103,18 @@
             <includes>
                 <include>**</include>
             </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/sample2</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -112,7 +130,18 @@
             <includes>
                 <include>**</include>
             </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/sample2b</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2b/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -128,7 +157,18 @@
             <includes>
                 <include>**</include>
             </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/sample2c</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2c/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -144,7 +184,18 @@
             <includes>
                 <include>**</include>
             </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/sample2d</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2d/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -156,15 +207,11 @@
         </fileSet>
         <!-- Setup Sample3  -->
         <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
-                <include>**</include>
+                <include>provisioner.openicf-scriptedsql.json</include>
             </includes>
-            <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
-                <exclude>data/Example.ldif</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample3</outputDirectory>
+            <outputDirectory>/openidm/samples/sample3/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -182,10 +229,17 @@
             </includes>
             <excludes>
                 <exclude>conf/authentication.json</exclude>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
                 <exclude>data/Example.ldif</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample4</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-csv.json</include>
+                <include>provisioner.openicf-xml.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample4/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -199,12 +253,8 @@
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
-                <include>**</include>
+                <include>conf/authentication.json</include>
             </includes>
-            <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
-                <exclude>data/Example.ldif</exclude>
-            </excludes>
             <outputDirectory>/openidm/samples/sample5</outputDirectory>
         </fileSet>
         <fileSet>
@@ -215,17 +265,21 @@
             </includes>
             <outputDirectory>/openidm/samples/sample5</outputDirectory>
         </fileSet>
-        <!-- Setup Sample6  -->
+        <!-- Setup Sample6 (also see below 'files' entry) -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
-                <include>**</include>
+                <include>data/Example.ldif</include>
             </includes>
-            <excludes>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
             <outputDirectory>/openidm/samples/sample6</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample6/conf</outputDirectory>
+        </fileSet>        
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -235,17 +289,6 @@
             <outputDirectory>/openidm/samples/sample6</outputDirectory>
         </fileSet>
         <!-- Setup Sample7  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
-                <exclude>data/Example.ldif</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample7</outputDirectory>
-        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -261,10 +304,17 @@
                 <include>**</include>
             </includes>
             <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
                 <exclude>data/Example.ldif</exclude>
+                <exclude>conf/authentication.json</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample8</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-xml.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample8/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -281,10 +331,17 @@
                 <include>**</include>
             </includes>
             <excludes>
-                <exclude>conf/provisioner.openicf-ldap.json</exclude>
                 <exclude>data/Example.ldif</exclude>
+                <exclude>conf/authentication.json</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample9</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-xml.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample9/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -296,31 +353,16 @@
         </fileSet>
         <!-- Setup workflow sample -->
         <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <directory>${basedir}/src/main/resources</directory>
             <includes>
-                <include>conf/workflow.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/conf</directory>
-            <includes>
-                <include>**</include>
+                <include>conf/**</include>
+                <include>script/**</include>
             </includes>
             <excludes>
-                <exclude>managed.json</exclude>
                 <exclude>process-access.json</exclude>
-                <exclude>sync.json</exclude>
                 <exclude>ui-configuration.json</exclude>
             </excludes>
-            <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/script</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/workflow/script</outputDirectory>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
         </fileSet>
         <!-- Setup use case samples-->
         <fileSet>
@@ -528,6 +570,14 @@
             <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
         </fileSet>
     </fileSets>
+    <!-- sample6 -->
+    <files>
+        <file>
+            <source>${basedir}/src/main/resources/samples/provisioners/provisioner.openicf-adldap.json</source>
+            <destName>provisioner.openicf-realad.json</destName>
+            <outputDirectory>/openidm/samples/sample6/alternatives</outputDirectory>
+        </file>
+    </files>    
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

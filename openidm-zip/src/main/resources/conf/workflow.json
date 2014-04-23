@@ -1,3 +1,4 @@
 {
-    "enabled" : true
+    "enabled" : true,
+    "workflowDirectory" : "&{launcher.project.location}/workflow"
 }

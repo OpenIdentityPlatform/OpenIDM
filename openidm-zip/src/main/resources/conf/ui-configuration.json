@@ -3,7 +3,7 @@
         "selfRegistration" : false,
         "securityQuestions" : false,
         "siteIdentification" : false,
-        "language" : "en-US",
+        "lang" : "en",
         "passwordResetLink": "",
         "roles" : {
             "openidm-admin" : "Administrator",

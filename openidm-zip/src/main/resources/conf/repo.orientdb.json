@@ -84,6 +84,15 @@
                     }
                 ]
             },
+            "managed_group" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "ui_notification" : {
                 "index" : [
                     {

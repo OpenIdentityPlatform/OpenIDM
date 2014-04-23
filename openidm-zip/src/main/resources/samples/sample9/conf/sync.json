@@ -23,11 +23,11 @@
                 },
                 {
                     "source" : "email",
-                    "target" : "email"
+                    "target" : "mail"
                 },
                 {
                     "source" : "lastname",
-                    "target" : "familyName"
+                    "target" : "sn"
                 },
                 {
                     "source" : "name",
@@ -39,22 +39,14 @@
                 },
                 {
                     "source" : "mobileTelephoneNumber",
-                    "target" : "phoneNumber"
-                },
-                {
-                    "source" : "securityQuestion",
-                    "target" : "securityQuestion"
-                },
-                {
-                    "source" : "securityAnswer",
-                    "target" : "securityAnswer"
-                },
-                {
-                    "source" : "passPhrase",
-                    "target" : "passPhrase"
+                    "target" : "telephoneNumber"
                 },
                 {
                     "source" : "roles",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.split(',')"
+                    },
                     "target" : "roles"
                 }
             ],
@@ -72,7 +64,7 @@
                     "action" : {
                         "workflowName" : "managedUserApproval",
                         "type" : "text/javascript",
-                        "file" : "workflow/workflow.js"
+                        "file" : "workflow/asyncProcess.js"
                     }
                 },
                 {
