@@ -885,7 +885,7 @@ $ cli.sh encrypt newpwd
         &lt;Set name=&quot;maxIdleTime&quot;&gt;300000&lt;/Set&gt;
         &lt;Set name=&quot;Acceptors&quot;&gt;2&lt;/Set&gt;
         &lt;Set name=&quot;statsOn&quot;&gt;false&lt;/Set&gt;
-        &lt;Set name=&quot;confidentialPort&quot;&gt;8443&lt;/Set&gt;
+        &lt;Set name=&quot;confidentialPort&quot;&gt;
           &lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty"&gt;
             &lt;Arg&gt;openidm.port.https&lt;/Arg&gt;
           &lt;/Call&gt;
