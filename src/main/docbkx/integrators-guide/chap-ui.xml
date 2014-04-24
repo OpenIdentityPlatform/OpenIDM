@@ -529,28 +529,30 @@
   </procedure>
  </section>
 
-<section xml:id="ui-managing-workflows">
+ <section xml:id="ui-managing-workflows">
   <title>Managing Workflows From the User Interface</title>
-  
-  <para>The user interface is integrated with the embedded Activiti worfklow 
-  engine, enabling users to interact with workflows. Available workflows are 
-  displayed under the Processes item on the Dashboard. In order for a workflow 
-  to be displayed here, the workflow definition file must be present in the 
-  <filename>openidm/workflow</filename> directory.</para>
-  
-  <para>A sample workflow integration with the user interface is provided in 
-  <filename>openidm/samples/workflow</filename>, and documented in <link 
-  xlink:href="integrators-guide#example-provisioning-workflow" 
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample Workflow - 
-  Provisioning User Accounts</citetitle></link>. Follow the steps in that 
-  sample for an understanding of how the workflow integration works.</para>
-  
-  <para>Access to workflows is based on OpenIDM roles, and is configured in 
-  the file <filename>conf/process-access.json</filename>. By default all users 
-  with the role <literal>openidm-authorized</literal> or 
-  <literal>openidm-admin</literal> can invoke any available workflow. The 
-  default <filename>process-access.json</filename> file is as follows:</para>
-  
+  <para>
+   The UI is integrated with the embedded Activiti worfklow engine, enabling
+   users to interact with workflows. Available workflows are displayed under the
+   Processes item on the Dashboard. In order for a workflow to be displayed
+   here, the workflow definition file must be present in the
+   <filename>openidm/workflow</filename> directory.
+  </para>
+  <para>
+   A sample workflow integration with the user interface is provided in
+   <filename>openidm/samples/workflow</filename>, and documented in <link
+   xlink:href="integrators-guide#example-provisioning-workflow"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample Workflow -
+   Provisioning User Accounts</citetitle></link>. Follow the steps in that
+   sample for an understanding of how the workflow integration works.
+  </para>
+  <para>
+   Access to workflows is based on OpenIDM roles, and is configured in the file
+   <filename>conf/process-access.json</filename>. By default all users with the
+   role <literal>openidm-authorized</literal> or
+   <literal>openidm-admin</literal> can invoke any available workflow. The
+   default <filename>process-access.json</filename> file is as follows:
+  </para>
   <programlisting language="javascript">
 {
     "workflowAccess" : [
@@ -571,11 +573,9 @@
     ]
 }  
   </programlisting>
-    
+ </section>
 
-</section>
-
-<section xml:id="ui-customizing">
+ <section xml:id="ui-customizing">
   <title>Changing the UI Theme</title>
   
   <para>You can customize the theme of the default user interface to apply your 
