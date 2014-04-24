@@ -50,7 +50,7 @@ public abstract class ReconFeeder {
     Iterator<String> idsIter;
     ReconciliationContext reconContext;
 
-    protected ReconFeeder(Iterator<String> idsIter, ReconciliationContext reconContext) {
+    protected ReconFeeder(Iterator<String> idsIter, ReconciliationContext reconContext, ReconAction reconById) {
         this.idsIter = idsIter;
         this.reconContext = reconContext;
     }
