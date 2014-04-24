@@ -92,6 +92,10 @@
    </imageobject>
   </mediaobject>
   <para>
+   You can sort the list of users alphabetically, by any of the column values.
+   Click on the column title to sort.
+  </para>
+  <para>
    The <literal>Profile</literal> link enables the user to modify his username
    or password. The <literal>Change Security Data</literal> link, accessed from
    the top of the screen, or from the user's Profile page enables the user to
@@ -340,122 +344,190 @@
    can add, modify, and delete user accounts. Regular users can modify certain
    aspects of their own accounts.
   </para>
-  <procedure>
+
+  <procedure xml:id="add-user-account">
    <title>To Add a User Account</title>
    <step>
-     <para>Log into the user interface as an administrative user.</para>
+    <para>
+     Log into the user interface as an administrative user.
+    </para>
    </step>
    <step>
-     <para>Select the Users tab.</para>
+    <para>
+     Select the Users tab.
+    </para>
    </step>
    <step>
-     <para>Click Add User.</para>
+    <para>
+     Click Add User.
+    </para>
    </step>
    <step>
-     <para>Complete the fields on the Create new account page.</para>
-     <para>Most of these fields are self-explanatory. Be aware that the user 
-     interface is subject to policy validation, as described in <link 
+    <para>
+     Complete the fields on the Create new account page.
+    </para>
+    <para>
+     Most of these fields are self-explanatory. Be aware that the user interface
+     is subject to policy validation, as described in <link
      xlink:href="integrators-guide#chap-policies" 
      xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Using Policies to Validate Data</citetitle></link>. So, for 
-     example, the Email address must be of valid email address format, and 
-     the Password must comply with the password validation settings that are 
-     indicated in the panel to the right.</para>
-     <para>The Admin Role field reflects the roles that are defined in the 
-     <filename>ui-configuration.json</filename> file. The roles are mapped as 
-     follows:</para>
-     <programlisting language="javascript">
+     <citetitle>Using Policies to Validate Data</citetitle></link>. So, for
+     example, the Email address must be of valid email address format, and the
+     Password must comply with the password validation settings that are
+     indicated in the panel to the right.
+    </para>
+    <para>
+     The Admin Role field reflects the roles that are defined in the
+     <filename>ui-configuration.json</filename> file. The roles are mapped as
+     follows:
+    </para>
+    <programlisting language="javascript">
 "roles" : {
     "openidm-admin" : "Administrator",
     "openidm-authorized" : "User",
     "tasks-manager" : "Tasks Manager"
-},     
-     </programlisting>
-     <para>By default, a user can be assigned more than one role. Only users 
-     with the <literal>tasks-manager</literal> role can assign tasks to any 
-     candidate user for that task.</para>
+},  </programlisting>
+    <para>
+     By default, a user can be assigned more than one role. Only users with the
+     <literal>tasks-manager</literal> role can assign tasks to any candidate
+     user for that task.
+    </para>
    </step>
- </procedure>
- 
- 
- <procedure xml:id="ui-update-account">
+  </procedure>
+
+  <mediaobject>
+   <alt>OpenIDM UI - Create User Account</alt>
+   <imageobject>
+    <imagedata fileref="images/ui-create-account.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+  <procedure xml:id="ui-update-account">
    <title>To Update a User Account</title>  
    <step>
-     <para>Log into the user interface as an administrative user.</para>
+    <para>
+     Log into the user interface as an administrative user.
+    </para>
    </step>
    <step>
-     <para>Select the Users tab.</para>
+    <para>
+     Select the Users tab.
+    </para>
    </step>
    <step>
-     <para>Click the Username of the user that you want to update.</para>
+    <para>
+     Click the Username of the user that you want to update.
+    </para>
    </step>
    <step>
-     <para>On the user's profile page, modify the fields you want to change 
-     and click Update.</para>
-     <para>The user account is updated in the internal repository.</para>     
+    <para>
+     On the user's profile page, modify the fields you want to change and click
+     Update.
+    </para>
+    <para>
+     The user account is updated in the OpenIDM repository.
+    </para>
    </step>
- </procedure>
+  </procedure>
  
- <!-- Not supported for Xpress
- <procedure>
+  <procedure xml:id="deactivate-account">
    <title>To Deactivate a User Account</title>
    <step>
-     <para>Follow steps 1-3 in <xref linkend="ui-update-account" />.</para>
+    <para>
+     Follow steps 1-3 in <xref linkend="ui-update-account" />.
+    </para>
    </step>
    <step>
-     <para>On the user's profile page, select Inactive from the Account status 
-     list.</para>
+    <para>
+     On the user's profile page, select Inactive from the Account status list.
+    </para>
    </step>
-    <step>
-     <para>Click Update.</para>
-     <para>The user account is deactivated and the user can no longer log in 
-     to the system.</para>
+   <step>
+    <para>
+     Click Update.
+    </para>
+    <para>
+     The user account is deactivated and the user can no longer log in to the
+     system.
+    </para>
+    <para>
+     Inactive users are indicated with a X icon in the Status column of the
+     Users page. The following image shows that Steven Carter's account has been
+     deactivated.
+    </para>
    </step>  
- </procedure>
- -->
- 
-  <procedure>
+  </procedure>
+
+  <mediaobject>
+   <alt>OpenIDM UI - Deactivate User Account</alt>
+   <imageobject>
+    <imagedata fileref="images/ui-deactivate-account.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
+  <procedure xml:id="reset-user-password">
    <title>To Reset a User's Password</title>
-   <para>Users can change their own passwords by following the Change Security 
-   Data link in their profiles. This process requires that users know their 
-   existing passwords.</para>
-   <para>In a situation where a user forgets his password, an administrator 
-   can reset the password of that user without knowing the user's existing 
-   password.</para>
+   <para>
+    Users can change their own passwords by following the Change Security Data
+    link in their profiles. This process requires that users know their existing
+    passwords.
+   </para>
+   <para>
+    In a situation where a user forgets his password, an administrator can reset
+    the password of that user without knowing the user's existing password.
+   </para>
    <step>
-     <para>Follow steps 1-3 in <xref linkend="ui-update-account" />.</para>
+    <para>
+     Follow steps 1-3 in <xref linkend="ui-update-account" />.
+    </para>
    </step>
    <step>
-     <para>On the user's profile page, click Change password.</para>
+    <para>
+     On the user's profile page, click Change password.
+    </para>
    </step>
-    <step>
-     <para>Enter a new password that conforms to the password policy and click 
-     Update.</para>
-     <para>The user password is updated in the repository.</para>
+   <step>
+    <para>
+     Enter a new password that conforms to the password policy and click Update.
+    </para>
+    <para>
+     The user password is updated in the repository.
+    </para>
    </step>  
- </procedure>
+  </procedure>
  
-  <procedure>
+  <procedure xml:id="delete-user-account">
    <title>To Delete a User Account</title>  
    <step>
-     <para>Log into the user interface as an administrative user.</para>
+    <para>
+     Log into the user interface as an administrative user.
+    </para>
    </step>
    <step>
-     <para>Select the Users tab.</para>
+    <para>
+     Select the Users tab.
+    </para>
    </step>
    <step>
-     <para>Click the Username of the user that you want to delete.</para>
+    <para>
+     Click the Username of the user that you want to delete.
+    </para>
    </step>
    <step>
-     <para>On the user's profile page, click Delete.</para>
+    <para>
+     On the user's profile page, click Delete.
+    </para>
    </step>
    <step>
-     <para>Click OK to confirm the deletion.</para>
-     <para>The user is deleted from the internal repository.</para>
+    <para>
+     Click OK to confirm the deletion.
+    </para>
+    <para>
+     The user is deleted from the internal repository.
+    </para>
    </step>
- </procedure>
- 
-</section>
+  </procedure>
+ </section>
 
 <section xml:id="ui-managing-workflows">
   <title>Managing Workflows From the User Interface</title>
