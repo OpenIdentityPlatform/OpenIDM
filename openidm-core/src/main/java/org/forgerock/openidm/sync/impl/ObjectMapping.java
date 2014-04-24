@@ -782,51 +782,21 @@ class ObjectMapping implements SynchronizationListener {
 
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
-            
-            SourceReconPhase sourcePhase = new SourceReconPhase(sourceIdsIter, reconContext, context, 
-                    rootContext, allLinks, remainingTargetIds);
+
+            ReconPhase sourcePhase = new ReconPhase(sourceIdsIter, reconContext, context,
+                    rootContext, allLinks, remainingTargetIds, sourceRecon);
             sourcePhase.execute();
             measureSource.end();
 
             LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
 
             EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-            reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
-            for (String targetId : remainingTargetIds) {
-                checkCanceled(reconContext);
-                TargetSyncOperation op = new TargetSyncOperation();
-                op.reconContext = reconContext;
-                ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-                entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
-                op.reconId = reconId;
-                try {
-                    op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
-                    op.sync();
-                } catch (SynchronizationException se) {
-                    if (op.action != Action.EXCEPTION) {
-                        entry.status = Status.FAILURE; // exception was not intentional
-                        LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
-                    }
-                    Throwable throwable = se;
-                    while (throwable.getCause() != null) { // want message associated with original cause
-                        throwable = throwable.getCause();
-                    }
-                    if (se != throwable) {
-                        entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                    } else {
-                        entry.message = throwable.getMessage();
-                    }
-                }
-                if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
-                    entry.timestamp = new Date();
-                    entry.reconciling = "target";
-                    if (op.getSourceObjectId() != null) {
-                        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
-                    }
-                    entry.actionId = op.actionId;
-                    logReconEntry(entry);
-                }
-            }
+            reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);              
+
+            ReconPhase targetPhase = new ReconPhase(remainingTargetIds.iterator(), reconContext, context, 
+                    rootContext, allLinks, null, targetRecon);
+            targetPhase.execute();
+
             measureTarget.end();
             logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
@@ -842,98 +812,149 @@ class ObjectMapping implements SynchronizationListener {
 // TODO: cleanup orphan link objects (no matching source or target) here
     }
 
-    /**
-     * Reconcile a given source ID
-     * @param sourceId the id to reconcile
-     * @param reconContext reconciliation context
-     * @param rootContext json resource root ctx
-     * @param allLinks all links if pre-queried, or null for on-demand link querying
-     * @param remainingTargetIds The set to update/remove any targets that were matched
-     * @throws SynchronizationException if there is a failure reported in reconciling this id
-     */
-    void reconSourceById(String sourceId, ReconciliationContext reconContext, JsonValue rootContext, 
-            Map<String, Link> allLinks, Collection<String> remainingTargetIds) throws SynchronizationException {
-        SourceSyncOperation op = new SourceSyncOperation();
-        op.reconContext = reconContext;
-        ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-        op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceId);
-        if (allLinks != null) {
-            String normalizedSourceId = linkType.normalizeSourceId(sourceId);
-            op.initializeLink(allLinks.get(normalizedSourceId));
-        }
-        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sourceId);
-        op.reconId = reconContext.getReconId();
-        try {
-            op.sync();
-        } catch (SynchronizationException se) {
-            if (op.action != Action.EXCEPTION) {
-                entry.status = Status.FAILURE; // exception was not intentional
-                LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
+    private final ReconAction sourceRecon = new ReconAction() {
+        /**
+         * Reconcile a given source ID
+         * @param id the id to reconcile
+         * @param reconContext reconciliation context
+         * @param rootContext json resource root ctx
+         * @param allLinks all links if pre-queried, or null for on-demand link querying
+         * @param remainingTargetIds The set to update/remove any targets that were matched
+         * @throws SynchronizationException if there is a failure reported in reconciling this id
+         */
+        @Override
+        public void recon(String id, ReconciliationContext reconContext, JsonValue rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
+            SourceSyncOperation op = new SourceSyncOperation();
+            op.reconContext = reconContext;
+            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+            op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
+            if (allLinks != null) {
+                String normalizedSourceId = linkType.normalizeSourceId(id);
+                op.initializeLink(allLinks.get(normalizedSourceId));
             }
-            Throwable throwable = se;
-            while (throwable.getCause() != null) { // want message associated with original cause
-                throwable = throwable.getCause();
-            }
-            if (se != throwable) {
-                entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-            } else {
-                entry.message = throwable.getMessage();
-            }
-        }
-        String[] targetIds = op.getTargetIds();
-        for (String handledId : targetIds) {
-            // If target system has case insensitive IDs, remove without regard to case
-            String normalizedHandledId = linkType.normalizeTargetId(handledId);
-            remainingTargetIds.remove(normalizedHandledId);
-            LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
-        }
-
-        if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
-            entry.timestamp = new Date();
-            entry.reconciling = "source";
+            entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, id);
+            op.reconId = reconContext.getReconId();
             try {
-                if (op.hasTargetObject()) {
-                    entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
+                op.sync();
+            } catch (SynchronizationException se) {
+                if (op.action != Action.EXCEPTION) {
+                    entry.status = Status.FAILURE; // exception was not intentional
+                    LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
                 }
-            } catch (SynchronizationException ex) {
-                entry.message = "Failure in preparing recon entry " + ex.getMessage() 
-                        + " for target: " + op.getTargetObjectId() + " original status: " + entry.status 
-                        + " message: "  + entry.message;
-                entry.status = Status.FAILURE;
+                Throwable throwable = se;
+                while (throwable.getCause() != null) { // want message associated with original cause
+                    throwable = throwable.getCause();
+                }
+                if (se != throwable) {
+                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                } else {
+                    entry.message = throwable.getMessage();
+                }
             }
-            entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
-            entry.actionId = op.actionId;
-            logReconEntry(entry);
-        }
-    }
+            String[] targetIds = op.getTargetIds();
+            for (String handledId : targetIds) {
+                // If target system has case insensitive IDs, remove without regard to case
+                String normalizedHandledId = linkType.normalizeTargetId(handledId);
+                remainingIds.remove(normalizedHandledId);
+                LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
+            }
 
+            if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+                entry.timestamp = new Date();
+                entry.reconciling = "source";
+                try {
+                    if (op.hasTargetObject()) {
+                        entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
+                    }
+                } catch (SynchronizationException ex) {
+                    entry.message = "Failure in preparing recon entry " + ex.getMessage() 
+                            + " for target: " + op.getTargetObjectId() + " original status: " + entry.status 
+                            + " message: "  + entry.message;
+                    entry.status = Status.FAILURE;
+                }
+                entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
+                entry.actionId = op.actionId;
+                logReconEntry(entry);
+            }
+        }
+    };
+
+    private final ReconAction targetRecon = new ReconAction() {
+        /**
+        * Reconcile a given target ID
+        * @param id the id to reconcile
+        * @param reconContext reconciliation context
+        * @param rootContext json resource root ctx
+        * @param allLinks all links if pre-queried, or null for on-demand link querying
+        * @throws SynchronizationException if there is a failure reported in reconciling this id
+        */
+        @Override
+        public void recon(String id, ReconciliationContext reconContext, JsonValue rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
+            checkCanceled(reconContext);
+            TargetSyncOperation op = new TargetSyncOperation();
+            op.reconContext = reconContext;
+            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+            entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
+            op.reconId = reconContext.getReconId();
+            try {
+                op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
+                op.sync();
+            } catch (SynchronizationException se) {
+                if (op.action != Action.EXCEPTION) {
+                    entry.status = Status.FAILURE; // exception was not intentional
+                    LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(), se);
+                }
+                Throwable throwable = se;
+                while (throwable.getCause() != null) { // want message associated with original cause
+                    throwable = throwable.getCause();
+                }
+                if (se != throwable) {
+                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                } else {
+                    entry.message = throwable.getMessage();
+                }
+            }
+            if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+                entry.timestamp = new Date();
+                entry.reconciling = "target";
+                if (op.getSourceObjectId() != null) {
+                    entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
+                }
+                entry.actionId = op.actionId;
+                logReconEntry(entry);
+            }
+        }
+    };
+      
     /**
-     * Wrapper to submit source recon for a given id for concurrent processing
+     * Wrapper to submit source/target recon for a given id for concurrent processing
      * @author aegloff
      */
-    class SourceReconTask implements Callable<Void> {
-        String sourceId;
+    class ReconTask implements Callable<Void> {
+        String id;
         ReconciliationContext reconContext;
         JsonValue parentContext;
         JsonValue rootContext; 
         Map<String, Link> allLinks;
-        Collection<String> remainingTargetIds; 
-        
-        public SourceReconTask(String sourceId, ReconciliationContext reconContext,
+        Collection<String> remainingIds;
+        ReconAction reconById;
+
+        public ReconTask(String id, ReconciliationContext reconContext,
                 JsonValue parentContext, JsonValue rootContext,
-                Map<String, Link> allLinks, Collection<String> remainingTargetIds) {
-            this.sourceId = sourceId;
+                Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
+            this.id = id;
             this.reconContext = reconContext;
             this.parentContext = parentContext;
             this.rootContext = rootContext;
             this.allLinks = allLinks;
-            this.remainingTargetIds = remainingTargetIds;
+            this.remainingIds = remainingIds;
+            this.reconById = reconById;
         }
 
         public Void call() throws SynchronizationException {
             ObjectSetContext.push(JsonResourceContext.newContext("resource", parentContext));
             try {
-                reconSourceById(sourceId, reconContext, rootContext, allLinks, remainingTargetIds);
+                reconById.recon(id, reconContext, rootContext, allLinks, remainingIds);
             } finally {
                 ObjectSetContext.pop();
             }
@@ -942,28 +963,30 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * Reconcile the source phase, multi threaded or single threaded.
+     * Reconcile the source/target phase, multi threaded or single threaded.
      * @author aegloff
      */
-    class SourceReconPhase extends ReconFeeder {
+    class ReconPhase extends ReconFeeder {
         JsonValue parentContext;
         JsonValue rootContext; 
         Map<String, Link> allLinks;
-        Collection<String> remainingTargetIds; 
-        
-        public SourceReconPhase(Iterator<String> sourceIdsIter, ReconciliationContext reconContext,
+        Collection<String> remainingIds;
+        ReconAction reconById;
+
+        public ReconPhase(Iterator<String> idsIter, ReconciliationContext reconContext,
                 JsonValue parentContext, JsonValue rootContext,
-                Map<String, Link> allLinks, Collection<String> remainingTargetIds) {
-            super(sourceIdsIter, reconContext);
+                Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
+            super(idsIter, reconContext, reconById);
             this.parentContext = parentContext;
             this.rootContext = rootContext;
             this.allLinks = allLinks;
-            this.remainingTargetIds = remainingTargetIds;
+            this.remainingIds = remainingIds;
+            this.reconById = reconById;
         }
         @Override
-        Callable createTask(String sourceId) throws SynchronizationException {
-            return new SourceReconTask(sourceId, reconContext, parentContext, rootContext, 
-                    allLinks, remainingTargetIds);
+        Callable createTask(String id) throws SynchronizationException {
+            return new ReconTask(id, reconContext, parentContext, rootContext,
+                    allLinks, remainingIds, reconById);
         }
         @Override
         void checkCanceled() throws SynchronizationException {
@@ -1531,7 +1554,7 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
     }
-
+   
     /**
      * Explicit execution of a sync operation where the appropriate
      * action is known without having to assess the situation and apply
