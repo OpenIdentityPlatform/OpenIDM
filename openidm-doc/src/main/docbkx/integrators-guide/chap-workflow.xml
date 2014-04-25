@@ -684,73 +684,172 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
     <listitem>
      <para>
       Obtain detailed information for a process definition, based on the ID. You
-      can determine the ID by querying all available process definitions.
+      can determine the ID by querying all the available process definitions.
      </para>
      <screen width="102"><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3&amp;_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3?&amp;_prettyPrint=true"</userinput>
       <computeroutput>{
-  "key": "managedUserApproval",
-  "_rev": "0",
-  "formProperties": [],
-  "category": "Examples",
-  "_id": "managedUserApproval:1:3",
-  "processDiagramResourceName": null,
-  "description": null,
-  "name": "Managed User Approval Workflow",
-  "deploymentId": "1"
+  "tenantId" : "",
+  "candidateStarterGroupIdExpressions" : [ ],
+  "candidateStarterUserIdExpressions" : [ ],
+  "participantProcess" : null,
+  "processDiagramResourceName" : null,
+  "historyLevel" : null,
+  "hasStartFormKey" : false,
+  "laneSets" : [ ],
+  "version" : 1,
+  "formProperties" : [ ],
+  "_id" : "managedUserApproval:1:3",
+  "description" : null,
+  "name" : "Managed User Approval Workflow",
+  "executionListeners" : {
+    "end" : [ { } ]
+  },
+  "key" : "managedUserApproval",
+  "resourceName" : "OSGI-INF/activiti/managedUserApproval.bpmn20.xml",
+  "ioSpecification" : null,
+  "taskDefinitions" : {
+    "evaluateRequest" : {
+      "assigneeExpression" : {
+        "expressionText" : "openidm-admin"
+      },
+      "candidateGroupIdExpressions" : [ ],
+      "candidateUserIdExpressions" : [ ],
+      "categoryExpression" : null,
+      "descriptionExpression" : null,
+      "dueDateExpression" : null,
+      "key" : "evaluateRequest",
+      "nameExpression" : {
+        "expressionText" : "Evaluate request"
+      },
+      "ownerExpression" : null,
+      "priorityExpression" : null,
+      "taskFormHandler" : {
+        "deploymentId" : "1",
+        "formKey" : null,
+        "formPropertyHandlers" : [ {
+          "defaultExpression" : null,
+          "id" : "requesterName",
+          "name" : "Requester's name",
+          "readable" : true,
+          "required" : false,
+          "type" : null,
+          "variableExpression" : {
+            "expressionText" : "${sourceId}"
+          },
+          "variableName" : null,
+          "writable" : false
+        }, {
+          "defaultExpression" : null,
+          "id" : "requestApproved",
+          "name" : "Do you approve the request?",
+          "readable" : true,
+          "required" : true,
+          "type" : {
+            "name" : "enum",
+            "values" : {
+              "true" : "Yes",
+              "false" : "No"
+            }
+          },
+          "variableExpression" : null,
+          "variableName" : null,
+          "writable" : true
+        } ]
+      },
+      "taskListeners" : {
+        "assignment" : [ { } ],
+        "create" : [ { } ]
+      }
+    }
+  },
+  "suspensionState" : 1,
+  "deploymentId" : "1",
+  "properties" : {
+    "documentation" : null
+  },
+  "startFormHandler" : {
+    "deploymentId" : "1",
+    "formKey" : null,
+    "formPropertyHandlers" : [ ]
+  },
+  "suspended" : false,
+  "variables" : { },
+  "_rev" : 2,
+  "revisionNext" : 3,
+  "category" : "Examples",
+  "eventSupport" : { },
+  "graphicalNotationDefined" : false
 }       </computeroutput></screen>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term><literal>openidm/workflow/processinstance</literal></term>
-       <listitem>
-        <para>
-         Obtain the list of running workflows (process instances).
-         The query returns a list of IDs. For example:
-        </para>
-        <screen>$ <userinput>curl \
+      <listitem>
+       <para>
+        Obtain the list of running workflows (process instances). The query
+        returns a list of IDs. For example:
+       </para>
+       <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids"
-         </userinput>
-         <computeroutput>{
-  "result": [
-    {
-      "processDefinitionId": "contractorOnboarding:1:3",
-      "_id": "4"
-    }
-  ]
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids&amp;_prettyPrint=true"
+        </userinput>
+        <computeroutput>{
+  "result" : [ {
+    "tenantId" : "",
+    "businessKey" : null,
+    "queryVariables" : null,
+    "durationInMillis" : null,
+    "processVariables" : { },
+    "endTime" : null,
+    "superProcessInstanceId" : null,
+    "startActivityId" : "start",
+    "startTime" : "2014-04-25T09:54:30.035+02:00",
+    "startUserId" : "openidm-admin",
+    "_id" : "4",
+    "endActivityId" : null,
+    "processInstanceId" : "4",
+    "processDefinitionId" : "managedUserApproval:1:3",
+    "deleteReason" : null
+  } ],
+  "resultCount" : 1,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
 }</computeroutput></screen>
-
-        <para>
-         Obtain the list of running workflows based on specific
-         filter criteria. For example:</para>
-         <screen>$ <userinput>curl \
+      <para>
+       Obtain the list of running workflows based on specific filter criteria.
+      </para>
+      <screen>$ curl \
  --cacert self-signed.crt \
-  \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processinstance?_queryId=
-filtered-query&amp;businessKey=myBusinessKey"
-         </userinput></screen>
-        <para>Start a workflow process instance. For example:</para>
-         <screen>$ <userinput>curl \
+filtered-query&amp;businessKey=myBusinessKey"</screen>
+      <para>Start a workflow process instance. For example:</para>
+      <screen width="92"><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --data {"_key":"contractorOnboarding"} \
+ --data '{"_key":"managedUserApproval"}' \
  --request POST \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"
-       </userinput></screen>
-       </listitem>
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create&amp;_prettyPrint=true"</userinput>
+       <computeroutput>{
+  "_id" : "4",
+  "processInstanceId" : "4",
+  "status" : "suspended",
+  "businessKey" : null,
+  "processDefinitionId" : "managedUserApproval:1:3"
+}</computeroutput></screen>
+      </listitem>
      </varlistentry>
      <varlistentry>
       <term><literal>openidm/workflow/processinstance/{id}</literal></term>
