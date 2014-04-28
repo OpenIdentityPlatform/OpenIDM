@@ -34,7 +34,7 @@
         result = [];
 
     limit = parseInt(limit || 20);
-    limit = (limit > 50) ? 50 : limit; // restrict limit to 50 records maximum
+    limit = (limit > 100) ? 100 : limit; // restrict limit to 50 records maximum
 
     offset = limit*(parseInt(page || 1)-1);
 

@@ -246,11 +246,59 @@
                         "propertyName" : "reconId",
                         "propertyType" : "string",
                         "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "targetObjectId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "sourceObjectId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "timestamp",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "mapping",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "entryType",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "situation",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "status",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
                     }
                 ]
             },
             "audit_activity" : {},
-            "audit_access" : {}
+            "audit_access" : { 
+                "index" : [
+                    {
+                        "propertyName" : "status",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "principal",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            }
         }
     },
     "embeddedServer" : {
