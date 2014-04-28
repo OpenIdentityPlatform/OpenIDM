@@ -63,6 +63,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managed_user` (
     INDEX `idx_managed_user_givenName` (`givenName` ASC),
     INDEX `idx_managed_user_sn` (`sn` ASC),
     INDEX `idx_managed_user_mail` (`mail` ASC),
-    INDEX `idx_managed_user_accountStatus` (`accountStatus` ASC)
+    INDEX `idx_managed_user_accountStatus` (`accountStatus` ASC),
+    INDEX `idx_managed_user_roles` (`roles` ASC)
 )
 ENGINE = InnoDB;

@@ -168,6 +168,7 @@
                 "table" : "auditrecon",
                 "objectToColumn" : {
                     "_id" : "objectid",
+                    "_rev" : "rev",
                     "entryType" : "entrytype",
                     "rootActionId" : "rootactionid",
                     "action" : "activity",

@@ -83,7 +83,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
-  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
+  INDEX `idx_managedobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_managedobjectproperties_propvalue` (`propvalue`(23) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -150,6 +151,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
   `rootactionid` VARCHAR(255) NULL ,
   `reconid` VARCHAR(36) NULL ,
@@ -166,7 +168,15 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `exceptiondetail` TEXT NULL ,
   `mapping` TEXT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`objectid`) )
+  PRIMARY KEY (`objectid`),
+  INDEX `idx_auditrecon_reconid` (`reconid` ASC),
+  INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
+  INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
+  INDEX `idx_auditrecon_mapping` (`mapping`(28) ASC),
+  INDEX `idx_auditrecon_entrytype` (`entrytype` ASC),
+  INDEX `idx_auditrecon_situation` (`situation` ASC),
+  INDEX `idx_auditrecon_status` (`status` ASC) )
 ENGINE = InnoDB;
 
 
@@ -218,7 +228,9 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `principal` TEXT NULL ,
   `roles` VARCHAR(1024) NULL ,
   `status` VARCHAR(7) NULL ,
-  PRIMARY KEY (`objectid`) )
+  PRIMARY KEY (`objectid`),
+  INDEX `idx_auditaccess_status` (`status` ASC),
+  INDEX `idx_auditaccess_principal` (`principal`(28) ASC) )
 ENGINE = InnoDB;
 
 
