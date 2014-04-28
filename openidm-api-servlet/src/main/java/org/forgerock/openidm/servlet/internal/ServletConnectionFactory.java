@@ -87,7 +87,7 @@ import java.util.regex.Pattern;
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST Servlet Connection Factory"),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST Servlet Connection Factory")
 })
 public class ServletConnectionFactory implements ConnectionFactory {
 
