@@ -162,12 +162,15 @@ import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
+import org.identityconnectors.framework.common.objects.SearchResult;
+import org.identityconnectors.framework.common.objects.SortKey;
 import org.identityconnectors.framework.common.objects.SyncDelta;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
+import org.identityconnectors.framework.impl.api.remote.RemoteWrappedException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -280,7 +283,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * RouterRegistryService service.
      */
     @Reference(policy = ReferencePolicy.STATIC)
-    protected RouterRegistry routerRegistryService;
+    protected RouterRegistry routerRegistry;
 
     /**
      * Cryptographic service.
@@ -372,7 +375,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             connectorInfoProvider.addConnectorFacadeCallback(connectorReference, connectorFacadeCallback);
 
-            routeEntry = routerRegistryService.addRoute(RouteBuilder.newBuilder()
+            routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
                     .withTemplate("/system/" + systemIdentifier.getName())
                     .withSingletonResourceProvider(this)
                     .buildNext()
@@ -538,6 +541,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             message = MessageFormat.format("Operation {0} failed with ConnectorSecurityException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
             handler.handleError(new InternalServerErrorException(message, exception));
+        } catch (RemoteWrappedException e) {
+            // TODO Implement IDME-181
         } catch (ConnectorException e) {
             message = MessageFormat.format("Operation {0} failed with ConnectorException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
@@ -1205,26 +1210,29 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 final String pagedResultsCookie = request.getPagedResultsCookie();
                 final boolean pagedResultsRequested = request.getPageSize() > 0;
 
-                facade.search(objectClassInfoHelper.getObjectClass(), filter,
+                operationOptionsBuilder.setPageSize(pageSize);
+                operationOptionsBuilder.setPagedResultsCookie(pagedResultsCookie);
+                operationOptionsBuilder.setPagedResultsOffset(request.getPagedResultsOffset());
+                List<SortKey> sortKeys = new ArrayList<SortKey>(request.getSortKeys().size());
+                // TODO copy sort keys from request to ICF version IDME-178
+                operationOptionsBuilder.setSortKeys(sortKeys);
+
+                SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
                         new ResultsHandler() {
                             @Override
                             public boolean handle(ConnectorObject obj) {
                                 try {
-                                    return handler.handleResource(objectClassInfoHelper.build( obj, cryptoService));
+                                    return handler.handleResource(objectClassInfoHelper.build(obj, cryptoService));
                                 } catch (Exception e) {
                                     handler.handleError(new InternalServerErrorException(e));
                                     return false;
                                 }
                             }
                         }, operationOptionsBuilder.build());
-                if (request.getPageSize() > 0) {
-                    // pagedResultsRequested
-                    handler.handleResult(new QueryResult());
-                    // handler.handleResult(new QueryResult(nextCookie,
-                    // remaining));
-                } else {
-                    handler.handleResult(new QueryResult());
-                }
+                handler.handleResult(
+                        new QueryResult(
+                                searchResult.getPagedResultsCookie(),
+                                searchResult.getRemainingPagedResults()));
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
@@ -1573,6 +1581,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return systemIdentifier;
     }
 
+    public String getSystemIdentifierName() {
+        return systemIdentifier.getName();
+    }
+
     /**
      * Gets the fully qualified path name
      * @param objectClass the object class for the intended resource
@@ -1754,7 +1766,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})", 
                                 new Object[] { helper.getObjectClass().getObjectClassValue(), token });
-                        operation.sync(helper.getObjectClass(), token,
+                        // TODO handle token properly IDME-179
+                        SyncToken syncToken = operation.sync(helper.getObjectClass(), token,
                                 new SyncResultsHandler() {
                                     /**
                                      * Called to handle a delta in the stream. The Connector framework will call
@@ -1800,21 +1813,21 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         } catch (Exception e) {
                                             failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
                                             if (logger.isDebugEnabled()) {
-                                                logger.error("Failed synchronise {} object, handle failure using {}", 
+                                                logger.error("Failed synchronise {} object, handle failure using {}",
                                                         syncDelta.getUid(), syncFailureHandler, e);
                                             }
-                                            Map<String,Object> syncFailure = new HashMap<String,Object>(6);
+                                            Map<String, Object> syncFailure = new HashMap<String, Object>(6);
                                             syncFailure.put("token", syncDelta.getToken().getValue());
                                             syncFailure.put("systemIdentifier", systemIdentifier.getName());
                                             syncFailure.put("objectType", objectType);
                                             syncFailure.put("uid", syncDelta.getUid().getUidValue());
                                             syncFailure.put("failedRecord", failedRecord[0]);
                                             syncFailureHandler.invoke(syncFailure, e);
-                                       }
+                                        }
 
-                                       // success (either by original sync or by failure handler)
-                                       lastToken[0] = syncDelta.getToken();
-                                       return true;
+                                        // success (either by original sync or by failure handler)
+                                        lastToken[0] = syncDelta.getToken();
+                                        return true;
                                     }
                                 }, operationOptionsBuilder.build());
                     } catch (Throwable t) {
