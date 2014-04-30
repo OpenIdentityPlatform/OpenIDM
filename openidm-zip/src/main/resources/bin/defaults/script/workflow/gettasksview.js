@@ -105,8 +105,8 @@ if (request.method !== "query") {
         
         getDisplayableOf = function(user) {
             if (typeof user === "object") {
-                if (user.givenName || user.familyName) {
-                    return user.givenName + " " + user.familyName;
+                if (user.givenName || user.sn) {
+                    return user.givenName + " " + user.sn;
                 } else {
                     return user.userName ? user.userName : user._id;
                 }
