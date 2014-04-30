@@ -74,8 +74,8 @@ define("config/AppConfiguration", [
                        loader: [
                            {"routes":"config/routes/CommonRoutesConfig"}, 
                            {"routes":"config/routes/AdminRoutesConfig"},
-                           {"routes":"config/routes/IDMRoutesConfig"},
-                           {"routes":"config/routes/UserRoutesConfig"}
+                           {"routes":"config/routes/UserRoutesConfig"},
+                           {"routes":"config/routes/IDMRoutesConfig"}
                        ]
                    } 
                },
