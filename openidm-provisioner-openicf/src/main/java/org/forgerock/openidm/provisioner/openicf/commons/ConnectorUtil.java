@@ -119,6 +119,7 @@ public class ConnectorUtil {
     public static final String JAVA_TYPE_SCRIPT = "JAVA_TYPE_SCRIPT";
     public static final String JAVA_TYPE_UID = "JAVA_TYPE_UID";
     public static final String JAVA_TYPE_URI = "JAVA_TYPE_URI";
+    public static final String JAVA_TYPE_BYTE = "JAVA_TYPE_BYTE";
 
 
     private static final Map<String, Class> typeMap = new HashMap<String, Class>(43);
@@ -161,6 +162,7 @@ public class ConnectorUtil {
         typeMap.put(JAVA_TYPE_SCRIPT, Script.class);
         typeMap.put(JAVA_TYPE_UID, Uid.class);
         typeMap.put(JAVA_TYPE_URI, URI.class);
+        typeMap.put(JAVA_TYPE_BYTE, Byte.class);
     }
 
     private static final String BUFFER_SIZE = "bufferSize";

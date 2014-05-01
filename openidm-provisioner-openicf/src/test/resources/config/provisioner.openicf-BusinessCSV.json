@@ -4,7 +4,7 @@
         "bundleName" : "org.forgerock.openicf.connectors.csvfile-connector",
         "bundleVersion" : "1.1.0.1",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
-        "XconnectorHostRef" : "testServer"
+        "connectorHostRef" : "testServer"
     },
     "poolConfigOption" : {
         "maxObjects" : 10,
