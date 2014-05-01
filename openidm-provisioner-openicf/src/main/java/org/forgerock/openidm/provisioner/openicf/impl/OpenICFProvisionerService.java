@@ -23,19 +23,6 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -107,9 +94,9 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
-import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
+import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
@@ -176,6 +163,19 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
 
 /**
  * The OpenICFProvisionerService is the implementation of
@@ -259,7 +259,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         this.activityLogger = NullActivityLogger.INSTANCE;
     }
 
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
     ServerContext routerContext = null;
 
@@ -308,12 +308,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             jsonConfiguration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
-            
+
             if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {
-                logger.info("OpenICF Provisioner Service {} is disabled, \"enabled\" set to false in configuration", systemIdentifier.getName());
+                logger.info("OpenICF Provisioner Service {} is disabled, \"enabled\" set to false in configuration",
+                        systemIdentifier.getName());
                 return;
             }
-            
+
             loadLocalSystemActions(jsonConfiguration);
 
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
@@ -395,12 +396,19 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     private void init(JsonValue configuration) {
-        try {
-            operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), configuration,
-                    connectorInfoProvider.findConnectorInfo(connectorReference).createDefaultAPIConfiguration());
-        } catch (Exception e) {
-            logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier, e);
-            throw new ComponentException("OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
+        ConnectorInfo ci = connectorInfoProvider.findConnectorInfo(connectorReference);
+        if (null != ci) {
+            try {
+                operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), configuration,
+                        ci.createDefaultAPIConfiguration());
+            } catch (Exception e) {
+                logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier, e);
+                throw new ComponentException(
+                        "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
+            }
+        } else {
+            throw new ComponentException(
+                    "Can not find the OpenICF Connector: " + connectorReference);
         }
 
         try {
@@ -439,6 +447,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
         logger.debug("OpenICF connector jsonConfiguration has no errors.");
     }
+
     @Deactivate
     protected void deactivate(ComponentContext context) {
         if (null != connectorFacadeCallback) {
@@ -629,7 +638,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         handler.handleError(e);
     }
 
-    private void handleScriptAction(final ActionRequest request, final ResultHandler<JsonValue> handler) throws ResourceException {
+    private void handleScriptAction(final ActionRequest request, final ResultHandler<JsonValue> handler)
+            throws ResourceException {
 
         // TODO NPE check
         if (StringUtils.isBlank(request.getAdditionalParameters().get(SystemAction.SCRIPT_ID))) {
@@ -984,15 +994,18 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             ResourceException e = null;
 
             if (null == facade.getOperation(operation)) {
-                e = new NotSupportedException("Operation " + operation.getCanonicalName() + " is not supported by the Connector");
+                e = new NotSupportedException(
+                        "Operation " + operation.getCanonicalName() + " is not supported by the Connector");
             } else if (null != operationOptionInfoHelper
                     && (null != operationOptionInfoHelper.getSupportedObjectTypes())) {
                 if (!operationOptionInfoHelper.getSupportedObjectTypes().contains(
                         objectClassInfoHelper.getObjectClass().getObjectClassValue())) {
-                    e = new NotSupportedException("Actions are not supported for resource instances");
+                    e = new NotSupportedException(
+                            "Actions are not supported for resource instances");
                 } else if (OperationOptionInfoHelper.OnActionPolicy.THROW_EXCEPTION.equals(
                         operationOptionInfoHelper.getOnActionPolicy())) {
-                    e = new ForbiddenException("Operation " + operation.getCanonicalName() + " is configured to be denied");
+                    e = new ForbiddenException(
+                            "Operation " + operation.getCanonicalName() + " is configured to be denied");
                 }
             }
             if (null != e) {
@@ -1209,13 +1222,20 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 final int pageSize = request.getPageSize();
                 final String pagedResultsCookie = request.getPagedResultsCookie();
                 final boolean pagedResultsRequested = request.getPageSize() > 0;
-
-                operationOptionsBuilder.setPageSize(pageSize);
-                operationOptionsBuilder.setPagedResultsCookie(pagedResultsCookie);
+                if (pageSize > 0) {
+                    operationOptionsBuilder.setPageSize(pageSize);
+                }
+                if (null != pagedResultsCookie) {
+                    operationOptionsBuilder.setPagedResultsCookie(pagedResultsCookie);
+                }
                 operationOptionsBuilder.setPagedResultsOffset(request.getPagedResultsOffset());
-                List<SortKey> sortKeys = new ArrayList<SortKey>(request.getSortKeys().size());
-                // TODO copy sort keys from request to ICF version IDME-178
-                operationOptionsBuilder.setSortKeys(sortKeys);
+                if (null != request.getSortKeys()) {
+                    List<SortKey> sortKeys = new ArrayList<SortKey>(request.getSortKeys().size());
+                    for (org.forgerock.json.resource.SortKey s: request.getSortKeys()){
+                        sortKeys.add(new SortKey(s.getField().leaf(), s.isAscendingOrder()));
+                    }
+                    operationOptionsBuilder.setSortKeys(sortKeys);
+                }
 
                 SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
                         new ResultsHandler() {
@@ -1602,6 +1622,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
         return sb.toString();
     }
+
     /**
      * Gets a brief status report about the current status of this service instance.
      * </p/>
@@ -1656,7 +1677,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
                 facade = connectorFacadeFactory.newInstance(ohb.getRuntimeAPIConfiguration());
             } catch (Exception e) {
-                jv.add("error", "OpenICF connector jsonConfiguration has errors: " +  e.getMessage());
+                jv.add("error", "OpenICF connector jsonConfiguration has errors: " + e.getMessage());
                 return result;
             }
 
@@ -1761,10 +1782,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     final SyncToken[] lastToken = new SyncToken[]{token};
                     final String[] failedRecord = new String[1];
                     OperationOptionsBuilder operationOptionsBuilder =
-                        helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
+                            helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
 
                     try {
-                        logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})", 
+                        logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
                                 new Object[] { helper.getObjectClass().getObjectClassValue(), token });
                         // TODO handle token properly IDME-179
                         SyncToken syncToken = operation.sync(helper.getObjectClass(), token,
@@ -1794,8 +1815,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previous-id", syncDelta.getPreviousUid());
                                                     }
-                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE")
-                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
+                                                    ActionRequest onUpdateRequest = Requests
+                                                            .newActionRequest("sync", "ONUPDATE")
+                                                            .setAdditionalParameter("resourceContainer",
+                                                                    resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(new JsonValue(deltaObject));
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
@@ -1803,8 +1826,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     activityLogger.log(routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
-                                                    ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "ONDELETE")
-                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
+                                                    ActionRequest onDeleteRequest = Requests
+                                                            .newActionRequest("sync", "ONDELETE")
+                                                            .setAdditionalParameter("resourceContainer",
+                                                                    resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
                                                     activityLogger.log(routerContext, RequestType.ACTION, "sync-delete", onDeleteRequest.getResourceName(), null, null, Status.SUCCESS);
@@ -1838,7 +1863,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         }
                         stage.put("lastException", lastException);
                         if (logger.isDebugEnabled()) {
-                            logger.error("Live synchronization of {} failed on {}", 
+                            logger.error("Live synchronization of {} failed on {}",
                                     new Object[] { objectType, systemIdentifier.getName() }, t);
                         }
                     } finally {
