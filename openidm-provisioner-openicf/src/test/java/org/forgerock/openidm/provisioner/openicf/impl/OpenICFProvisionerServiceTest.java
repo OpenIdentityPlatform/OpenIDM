@@ -1,9 +1,5 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.UnsupportedEncodingException;
@@ -14,10 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
@@ -25,20 +23,25 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyAccessor;
-import org.forgerock.openidm.provisioner.openicf.impl.ConnectorInfoProviderService;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
-import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.NullSyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
@@ -49,8 +52,6 @@ import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.util.FileUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.logging.impl.NoOpLogger;
-import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.common.security.SecurityUtil;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
@@ -59,6 +60,7 @@ import org.identityconnectors.framework.api.ConnectorInfoManager;
 import org.identityconnectors.framework.api.ConnectorKey;
 import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
+import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.AbstractConnectorInfo;
 import org.identityconnectors.framework.impl.api.ConfigurationPropertiesImpl;
@@ -78,6 +80,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * A NAME does ...
@@ -106,7 +112,8 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                     "            \"port\"          : 8759,\n" +
                     "            \"useSSL\"        : false,\n" +
                     "            \"timeout\"       : 0,\n" +
-                    "            \"key\"           : \"Passw0rd\"\n" +
+                    "            \"key\"           : \"Passw0rd\",\n" +
+                    "            \"heartbeatInterval\" : 5\n" +
                     "        }\n" +
                     "    ]\n" +
                     "}";
@@ -269,7 +276,6 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
     @BeforeClass
     public void setUp() throws Exception {
-
         // Start OpenICF Connector Server
         String openicfServerPort =
                 IdentityServer.getInstance().getProperty("openicfServerPort", "8759");
@@ -298,9 +304,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
         Assert.assertFalse(bundleURLs.isEmpty(), "No Connectors were found!");
         connectorServer.setBundleURLs(bundleURLs);
-        System.out.println(SecurityUtil.computeBase64SHA1Hash("Passw0rd".toCharArray()));
         connectorServer.setKeyHash("xOS4IeeE6eb/AhMbhxZEC37PgtE=");
-//                                  xOS4IeeE6eb/AhMbhxZEC37PgtE=
         connectorServer.setIfAddress(InetAddress.getByName("127.0.0.1"));
         connectorServer.start();
 
@@ -380,21 +384,80 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
     }
 
+
+    private JsonValue getTestConnectorObject(String name) {
+        JsonValue createAttributes = new JsonValue(new LinkedHashMap<String, Object>());
+        createAttributes.put(Name.NAME, name);
+        createAttributes.put("userName", name);
+        createAttributes.put("email", name + "@example.com");
+        return createAttributes;
+    }
+
+    @Test(dataProvider = "dp", enabled = true)
+    public void testPagedSearch(String systemName) throws Exception {
+        if ("groovyremote".equals(systemName) || "groovy".equals(systemName)) {
+
+            for (int i = 0; i < 100; i++) {
+                JsonValue co = getTestConnectorObject(String.format("TEST%05d", i));
+                co.put("sortKey", i);
+
+                CreateRequest request = Requests.newCreateRequest("system/" + systemName + "/account", co);
+                connection.create(new RootContext(), request);
+            }
+
+            QueryRequest queryRequest = Requests.newQueryRequest("system/" + systemName + "/account");
+            queryRequest.setPageSize(10);
+            queryRequest.addSortKey(SortKey.descendingOrder("sortKey"));
+            queryRequest.setQueryFilter(QueryFilter.startsWith("__NAME__", "TEST"));
+
+            QueryResult result = null;
+
+            final Set<Resource> resultSet = new HashSet<Resource>();
+            int pageIndex = 0;
+
+            while ((result = connection.query(new RootContext(), queryRequest, new QueryResultHandler() {
+
+                private int index = 101;
+
+                public void handleError(ResourceException error) {
+                    Assert.fail(error.getMessage(), error);
+                }
+
+                public boolean handleResource(Resource resource) {
+                    Integer idx = resource.getContent().get("sortKey").asInteger();
+                    Assert.assertTrue(idx < index);
+                    index = idx;
+                    return resultSet.add(resource);
+                }
+
+                public void handleResult(QueryResult result) {
+
+                }
+            })).getPagedResultsCookie() != null) {
+
+                queryRequest.setPagedResultsCookie(result.getPagedResultsCookie());
+                Assert.assertEquals(resultSet.size(), 10 * ++pageIndex);
+            }
+            Assert.assertEquals(pageIndex, 9);
+            Assert.assertEquals(resultSet.size(), 100);
+        }
+    }
+
     @Test(dataProvider = "dp", enabled = false)
     public void testHelloWorldAction(String systemName) throws Exception {
         if ("Test".equals(systemName)) {
 
             //Request#1
             ActionRequest actionRequest = Requests.newActionRequest("/system/Test", "script");
-            actionRequest.setAdditionalActionParameter(SystemAction.SCRIPT_ID, "ConnectorScript#1");
+            actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#1");
 
-            JsonValue result = connection.action(new RootContext(),actionRequest);
+            JsonValue result = connection.action(new RootContext(), actionRequest);
             assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(
                     "Arthur Dent");
 
             //Request#2
             actionRequest = Requests.newActionRequest("/system/Test", "script");
-            actionRequest.setAdditionalActionParameter(SystemAction.SCRIPT_ID, "ConnectorScript#2");
+            actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#2");
             JsonValue content = new JsonValue(new HashMap<String, Object>());
             content.put("testArgument", "Zaphod Beeblebrox");
             actionRequest.setContent(content);
@@ -405,7 +468,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
             //Request#3
             actionRequest = Requests.newActionRequest("/system/Test", "script");
-            actionRequest.setAdditionalActionParameter(SystemAction.SCRIPT_ID, "ConnectorScript#3");
+            actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#3");
             content = new JsonValue(new HashMap<String, Object>());
             content.put("testArgument", Arrays.asList("Ford Prefect", "Tricia McMillan"));
             actionRequest.setContent(content);
@@ -416,7 +479,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
             //Request#4
             actionRequest = Requests.newActionRequest("/system/Test", "script");
-            actionRequest.setAdditionalActionParameter(SystemAction.SCRIPT_ID, "ConnectorScript#4");
+            actionRequest.setAdditionalParameter(SystemAction.SCRIPT_ID, "ConnectorScript#4");
             result = connection.action(new RootContext(), actionRequest);
             assertThat(result.get(new JsonPointer("actions/0/error")).getObject()).isEqualTo(
                     "Marvin");
