@@ -22,9 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global additionalPolicies,resources */
+/*global additionalPolicies,resources, require */
 
-var policyConfig = { 
+var _ = require('lib/lodash'),
+    policyConfig = { 
     "policies" : [
         {   "policyId" : "required",
             "policyExec" : "required",
@@ -153,15 +154,25 @@ policyImpl = (function (){
 
 
     policyFunctions.regexpMatches = function(fullObject, value, params, property) {
-        params.flags = params.flags || "";
         if (typeof(value) === "number") {
             value = value + ""; // cast to string;
         }
-        if (typeof(value) !== "string" || !(new RegExp(params.regexp, params.flags)).test(value)) {
+
+        var pattern = new RegExp(params.regexp, (params.flags || "")),
+            isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) {
+                var testResult = isNonEmptyString ? pattern.test(v) : false;
+                return testResult;
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ {"policyRequirement": "MATCH_REGEXP", "regexp": params.regexp, params: params, "flags": params.flags}];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.required = function(fullObject, value, params, propName) {
@@ -235,11 +246,17 @@ policyImpl = (function (){
     };
 
     policyFunctions.validDate = function(fullObject, value, params, property) {
-        if (typeof(value) === "string" && value.length && isNaN(new Date(value).getTime())) {
+        var isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            isValidDate = isNonEmptyString ? !isNaN(new Date(value).getTime()) : false;
+
+        if ((isRequired || isNonEmptyString) && !isValidDate) {
             return [ {"policyRequirement": "VALID_DATE"}];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.cannotContainCharacters = function(fullObject, value, params, property) {
@@ -263,61 +280,105 @@ policyImpl = (function (){
     };
 
     policyFunctions.validPhoneFormat = function(fullObject, value, params, property) {
-        var phonePattern = /^\+?([0-9\- \(\)])*$/;
-    
-        if (typeof(value) === "string" && value.length && !phonePattern.test(value)) {
+        var pattern = /^\+?([0-9\- \(\)])*$/,
+            isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) { 
+                var testResult = isNonEmptyString ? pattern.test(v) : false;
+                return testResult;
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ {"policyRequirement": "VALID_PHONE_FORMAT"}];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.validNameFormat = function(fullObject, value, params, property) {
-        var namePattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/;
-    
-        if (typeof(value) === "string" && value.length && !namePattern.test(value)) {
+        var pattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/,
+            isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) {
+                var testResult = isNonEmptyString ? pattern.test(v) : false;
+                return testResult;
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ {"policyRequirement": "VALID_NAME_FORMAT"}];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.minLength = function(fullObject, value, params, property) {
-        if (typeof(value) === "string" && value.length && value.length < params.minLength) {
+        var isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            hasMinLength = isNonEmptyString ? (value.length >= params.minLength) : false;
+
+        if ((isRequired || isNonEmptyString) && !hasMinLength) {
             return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":params.minLength} } ];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, property) {
-        var reg = /[(A-Z)]/g;
-        
-        if (typeof(value) === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numCaps)) {
+        var isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) { 
+                var test = isNonEmptyString ? v.match(/[(A-Z)]/g) : null;
+                return test !== null && test.length >= params.numCaps; 
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.atLeastXNumbers = function(fullObject, value, params, property) {
-        var reg = /\d/g;
-        
-        if (typeof(value) === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numNums)) {
+        var isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) { 
+                var test = isNonEmptyString ? v.match(/\d/g) : null;
+                return test !== null && test.length >= params.numNums; 
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.validEmailAddressFormat = function(fullObject, value, params, property) {
-        var emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/; 
-        
-        if (typeof(value) === "string" && value.length && !emailPattern.test(value)) {
+        var pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/,
+            isRequired = _.find(this.failedPolicyRequirements, function (fpr) { 
+                return fpr.policyRequirement === "REQUIRED"; 
+            }),
+            isNonEmptyString = (typeof(value) === "string" && value.length),
+            valuePassesRegexp = (function (v) {
+                var testResult = isNonEmptyString ? pattern.test(v) : false;
+                return testResult;
+            }(value));
+
+        if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
             return [ {"policyRequirement": "VALID_EMAIL_ADDRESS_FORMAT"}];
-        } else {
-            return [];
         }
+
+        return [];
     };
 
     policyFunctions.cannotContainOthers = function(fullObject, value, params, property) {
@@ -558,11 +619,11 @@ policyProcessor = (function (policyConfig,policyImpl){
                         if (openidm.isEncrypted(propValueContainer[j])) {
                             propValueContainer[j] = openidm.decrypt(propValueContainer[j]);
                         }
-                            
                         failed = validationFunc.call({ "failedPolicyRequirements": policyRequirements, "allPolicyRequirements": allPolicyRequirements }, fullObject, propValueContainer[j], params, propName);
                         if (failed.length > 0) {
                             retObj.property = propName.replace(/\[\*\]$/, "["+j+"]");
                             for ( y = 0; y < failed.length; y++) {
+                                policyRequirements.push(failed[y]);
                                 retObj.policyRequirements.push(failed[y]);
                             }
                             retArray.push(retObj);
