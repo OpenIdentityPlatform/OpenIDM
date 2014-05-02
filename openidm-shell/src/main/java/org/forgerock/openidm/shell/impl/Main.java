@@ -73,17 +73,6 @@ public class Main {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
             if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
-                if (cmdScope instanceof AbstractRemoteCommandScope) {
-                    try {
-                        Field router = AbstractRemoteCommandScope.class.getDeclaredField("router");
-                        if (null != router) {
-                            router.setAccessible(true);
-                            router.set(cmdScope, new HttpRemoteJsonResource());
-                        }
-                    } catch (Exception e) {
-                        System.out.append("Failed to set HttpRemoteJsonResource: ").println(e.getMessage());
-                    }
-                }
                 for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
                     Function target = new CommandProxy(cmdScope,
                             entry.getKey());

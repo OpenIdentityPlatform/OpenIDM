@@ -87,57 +87,31 @@ public class HttpRemoteJsonResource implements Connection {
      */
     public static final Method PATCH = new Method("PATCH");
 
+    /**
+     * Base reference used for requesting this resource
+     */
     private Reference baseReference;
 
-    private final ClientResource remoteClient;
+    /** Username used for authentication when accessing the resource */
+    private String username = "";
 
-    public HttpRemoteJsonResource() {
-        Context context = new Context();
-        remoteClient = new ClientResource(context, "http://localhost:8080/openidm/");
+    /** Password used for authentication when accessing the resource */
+    private String password = "";
 
-        /*
-         * Client client = new Client(Protocol.HTTP);
-         * client.setContext(context); remoteClient.setNext(client);
-         */
+    public HttpRemoteJsonResource() { }
 
-        // Accept: application/json
-        List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
-        acceptedMediaTypes.add(new Preference(MediaType.APPLICATION_JSON));
-        remoteClient.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
+    /**
+     * Create a HttpRemoteJsonResource with credentials.
+     *
+     * @param uri URI of this resource.
+     * @param username Username for HTTP basic authentication
+     * @param password Password for HTTP basic authentication.
+     */
+    public HttpRemoteJsonResource(final String uri, final String username, final String password) {
+        this.username = username;
+        this.password = password;
 
-        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
-        remoteClient.setChallengeResponse(rc);
-
-        // -------------------------------------
-        // Add user-defined extension headers
-        // -------------------------------------
-        /*
-         * New Restlet 2.1 API Series<org.restlet.engine.header.Header>
-         * additionalHeaders = (Series<org.restlet.engine.header.Header>)
-         * remoteClient
-         * .getRequest().getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
-         * if (additionalHeaders == null) { additionalHeaders = new
-         * Series<org.restlet
-         * .engine.header.Header>(org.restlet.engine.header.Header.class);
-         * remoteClient
-         * .getRequest().getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS,
-         * additionalHeaders); }
-         */
-
-        /*
-         * org.restlet.data.Form additionalHeaders = (org.restlet.data.Form)
-         * remoteClient
-         * .getRequest().getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
-         * if (additionalHeaders == null) { additionalHeaders = new
-         * org.restlet.data.Form();
-         * remoteClient.getRequest().getAttributes().put
-         * (HeaderConstants.ATTRIBUTE_HEADERS, additionalHeaders); }
-         *
-         * additionalHeaders.add("X-OpenIDM-Username", "openidm-admin");
-         * additionalHeaders.add("X-OpenIDM-Password", "openidm-admin");
-         * additionalHeaders.add("X-PrettyPrint", "1");
-         */
-
+        baseReference = new Reference(uri);
     }
 
     @Override
@@ -156,7 +130,6 @@ public class HttpRemoteJsonResource implements Connection {
 
     @Override
     public void close() {
-        remoteClient.release();
     }
 
     @Override
@@ -253,14 +226,16 @@ public class HttpRemoteJsonResource implements Connection {
     }
     
     public ClientResource getClientResource(Reference ref) {
-        ClientResource clientResource = new ClientResource(new Context(), "http://localhost:8080/openidm/" + ref.toString());
+        ClientResource clientResource = new ClientResource(new Context(), new Reference(baseReference, ref));
+
         List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
         acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
         clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
         clientResource.getLogger().setLevel(Level.WARNING);
         
-        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "openidm-admin", "openidm-admin");
+        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
         clientResource.setChallengeResponse(rc);
+
         return clientResource;
     }
     
@@ -420,5 +395,29 @@ public class HttpRemoteJsonResource implements Connection {
             result.add(Tag.parse(tag));
         }
         return result;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setPort(int port) {
+        baseReference.setHostPort(port);
+    }
+
+    public void setBaseUri(final String baseUri) {
+       baseReference = new Reference(baseUri);
     }
 }

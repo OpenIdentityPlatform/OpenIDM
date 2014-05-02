@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
+import org.forgerock.openidm.shell.felixgogo.MetaVar;
 
 /**
  *
@@ -190,20 +191,26 @@ public abstract class CustomCommandScope {
         for (Annotation[] annotations : parameterAnnotations) {
             String names = null;
             String desc = "";
+            String metaVar = null;
+
             for (Annotation a : annotations) {
                 if (a instanceof Parameter) {
                     Parameter param = (Parameter) a;
                     names = StringUtils.join(param.names(), ", ");
+                } else if (a instanceof MetaVar) {
+                    MetaVar m = (MetaVar) a;
+                    metaVar = m.value();
                 } else if (a instanceof Descriptor) {
                     Descriptor d = (Descriptor) a;
                     desc = d.value();
                 }
-
             }
 
+            String namesWithMeta = StringUtils.isBlank(metaVar) ? names : names + " " + metaVar;
+
             if (names != null) {
-                String str = LEAD_OPTION_SPACE + names +
-                             OPTIONS_SPACE.substring(Math.min(names.length(), OPTIONS_SPACE.length())) +
+                String str = LEAD_OPTION_SPACE + namesWithMeta +
+                             OPTIONS_SPACE.substring(Math.min(namesWithMeta.length(), OPTIONS_SPACE.length())) +
                              desc;
                 opts.add(str);
             }

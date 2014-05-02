@@ -67,7 +67,6 @@ public class BasicCommandScope extends CustomCommandScope {
         System.exit(0);
     }
 
-
     @Descriptor("Displays information about a specific command.")
     public void help(CommandSession session, @Descriptor("target command") String name) {
         Map<String, List<Method>> commands = getCommands();
