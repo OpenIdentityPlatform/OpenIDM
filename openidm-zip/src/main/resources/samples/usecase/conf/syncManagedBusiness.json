@@ -196,7 +196,7 @@
                     "action" : {
                         "workflowName" : "manualMatch",
                         "type" : "text/javascript",
-                        "file" : "workflow/asyncProcess.js"
+                        "file" : "workflow/triggerWorkflowFromSync.js.js"
                     }
                 },
                 {
@@ -212,7 +212,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "workflow/asyncProcess.js"
+                        "file" : "workflow/triggerWorkflowFromSync.js.js"
                     }
                 },
                 {
@@ -220,7 +220,7 @@
                     "action" : {
                         "workflowName" : "orphanAccountReport",
                         "type" : "text/javascript",
-                        "file" : "workflow/asyncProcess.js"
+                        "file" : "workflow/triggerWorkflowFromSync.js.js"
                     }
                 }
             ]
