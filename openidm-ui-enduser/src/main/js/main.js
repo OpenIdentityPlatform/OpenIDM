@@ -32,7 +32,7 @@
 require.config({
     paths: {
         less: "libs/less-1.5.1-min",
-        i18next: "libs/i18next-1.7.1-min",
+        i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.4.4-min",

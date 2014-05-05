@@ -50,7 +50,7 @@ define("UserDelegate", [
         obj.usersCallback = successCallback;
         obj.numberOfUsers = 0;
 
-        obj.serviceCall({url: "/?_queryId=query-all&fields=*", success: function(data) {
+        return obj.serviceCall({url: "?_queryId=query-all&fields=*", success: function(data) {
             if(successCallback) {
                 obj.users = data.result;
                 successCallback(data.result);
@@ -62,14 +62,17 @@ define("UserDelegate", [
      * Starting session. Sending username and password to authenticate and returns user's id.
      */
     obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
-        var headers = {};
+        var headers = {},
+            promise;
         headers[constants.HEADER_PARAM_USERNAME] = uid;
         headers[constants.HEADER_PARAM_PASSWORD] = password;
         headers[constants.HEADER_PARAM_NO_SESSION] = false;
 
-        obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
+        promise = obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
 
         delete headers[constants.HEADER_PARAM_PASSWORD];
+
+        return promise;
     };
     
     obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
@@ -78,7 +81,7 @@ define("UserDelegate", [
             component = "repo/internal/user"; 
         }
 
-        this.serviceCall({
+        return this.serviceCall({
             serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
             error: errorCallback,
             errorsHandlers: errorsHandlers}).then(function (user) {
@@ -102,7 +105,7 @@ define("UserDelegate", [
 
         var headers = {};
         headers[constants.HEADER_PARAM_REAUTH] = password;
-        obj.serviceCall({
+        return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/authentication?_action=reauthenticate",
             url: "",
             type: "POST",
@@ -127,7 +130,7 @@ define("UserDelegate", [
             "openidm-admin": "ui-admin"
         };
 
-        obj.serviceCall({
+        return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/info/login",
             url: "",
             headers: headers,
@@ -175,7 +178,7 @@ define("UserDelegate", [
     };
 
     obj.getSecurityQuestionForUserName = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
+        return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=securityQuestionForUserName&" + $.param({uid: uid}), 
             type: "POST",
             url: "",
@@ -193,7 +196,7 @@ define("UserDelegate", [
      * Check security answer method
      */
     obj.getBySecurityAnswer = function(uid, securityAnswer, successCallback, errorCallback) {
-        obj.serviceCall({
+        return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=checkSecurityAnswerForUserName&" + $.param({uid: uid, securityAnswer: securityAnswer}), 
             type: "POST",
             url: "",
@@ -215,7 +218,7 @@ define("UserDelegate", [
      */
     obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
         console.info("setting new password for user and security question");
-        obj.serviceCall({
+        return obj.serviceCall({
             serviceUrl: constants.host + "/openidm/endpoint/securityQA?_action=setNewPasswordForUserName&" + $.param({newPassword: newPassword, uid: userName, securityAnswer: securityAnswer}), 
             type: "POST",
             url: "",
@@ -232,27 +235,26 @@ define("UserDelegate", [
     };
 
     obj.getForUserName = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "/?_queryId=for-userName&" + $.param({uid: uid}), 
-            success: function (data) {
-                if(data.result.length !== 1) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                    return;
-                } else {
-                    if (!_.has(data.result[0], 'uid')) {
-                        data.result[0].uid = data.result[0].userName || data.result[0]._id;
-                    }
-                }
-
-                if(successCallback) {
-                    successCallback(data.result[0]);
-                }
-
-                return data.result[0];
-            },
+        return obj.serviceCall({
+            url: "?_queryId=for-userName&" + $.param({uid: uid}), 
             error: errorCallback
+        }).then(function (data) {
+            if(data.result.length !== 1) {
+                if(errorCallback) {
+                    errorCallback();
+                }
+                return false;
+            } else {
+                if (!_.has(data.result[0], 'uid')) {
+                    data.result[0].uid = data.result[0].userName || data.result[0]._id;
+                }
+            }
+
+            if(successCallback) {
+                successCallback(data.result[0]);
+            }
+
+            return data.result[0];
         });
     };
     
@@ -263,13 +265,13 @@ define("UserDelegate", [
         delete oldUserData.uid;
         delete newUserData.uid;
         console.info("updating user");
-        obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers);
+        return obj.patchEntityDifferences({id: oldUserData._id, rev: oldUserData._rev}, oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, errorsHandlers);
     };
     
     obj.updateUser = function(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback) {
         delete oldUserData.uid;
         delete newUserData.uid;
-        obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
+        return obj.patchUserDifferences(oldUserData, newUserData, successCallback, errorCallback, noChangesCallback, {
                 "forbidden": {
                     status: "403",
                     event: constants.EVENT_USER_UPDATE_POLICY_FAILURE
@@ -282,7 +284,7 @@ define("UserDelegate", [
      */
     obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
-        obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
+        return obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
     };
 
     return obj;
