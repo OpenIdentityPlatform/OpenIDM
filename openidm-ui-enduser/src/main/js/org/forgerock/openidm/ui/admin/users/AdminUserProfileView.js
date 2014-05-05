@@ -37,8 +37,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/components/ConfirmationDialog",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate) {
+    "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate",
+    "org/forgerock/openidm/ui/user/delegates/RoleDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate, roleDelegate) {
     var AdminUserProfileView = AbstractView.extend({
         template: "templates/admin/AdminUserProfileTemplate.html",
         events: {
@@ -88,27 +89,40 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         render: function(userName, callback) {
             userName = userName[0].toString();
             
-            userDelegate.getForUserName(userName, _.bind(function(user) {
-                this.editedUser = user;
-                this.data.user = user;
-                this.data.roles = conf.globalData.userRoles;
-                this.data.profileName = user.givenName + ' ' + user.sn;
-                
-                this.parentRender(_.bind(function() {
-                    this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
-                    
-                        this.reloadData();
-                        
-                        if(callback) {
-                            callback();
-                        }
+            $.when(
+                userDelegate.getForUserName(userName),
+                roleDelegate.getAllRoles()
+            ).then(
+                _.bind(function(user, roles) {
 
+                    var managedRoleMap = _.chain(roles.result)
+                                          .map(function (r) { return [r._id, r.name || r._id]; })
+                                          .object()
+                                          .value();
+
+                    this.editedUser = user;
+                    this.data.user = user;
+                    this.data.roles = _.extend({}, conf.globalData.userRoles, managedRoleMap);
+                    this.data.profileName = user.givenName + ' ' + user.sn;
+                    
+                    this.parentRender(_.bind(function() {
+                        this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
+                        validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
+                        
+                            this.reloadData();
+                            
+                            if(callback) {
+                                callback();
+                            }
+
+                        }, this));
                     }, this));
-                }, this));
-            }, this), function() {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
-            });
+                }, this), 
+
+                function() {
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
+                }
+            );
         },
         
         loadStates: function() {

@@ -35,8 +35,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/Router"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/user/delegates/RoleDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, router, roleDelegate) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
         delegate: userDelegate,
@@ -66,14 +67,23 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         },
         
         render: function() {
-            this.data.roles = conf.globalData.userRoles;
-            
-            this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/*", _.bind(function () {
-                    validatorsManager.validateAllFields(this.$el);
-                    this.unlock();
-                }, this));
-            });            
+            roleDelegate.getAllRoles().then(_.bind(function (roles) {
+
+                var managedRoleMap = _.chain(roles.result)
+                                      .map(function (r) { return [r._id, r.name || r._id]; })
+                                      .object()
+                                      .value();
+
+                this.data.roles = _.extend({}, conf.globalData.userRoles, managedRoleMap);
+                
+                this.parentRender(function() {
+                    validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/*", _.bind(function () {
+                        validatorsManager.validateAllFields(this.$el);
+                        this.unlock();
+                    }, this));
+                });
+
+            }, this));
         },
         
         back: function() {

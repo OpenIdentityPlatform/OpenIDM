@@ -224,7 +224,7 @@
             "address2" : "Address 2",
             "country" : "Country",
             "city" : "City",
-            "role" : "Admin Role",
+            "role" : "Role",
             "stateProvince" : "State/Province",
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
