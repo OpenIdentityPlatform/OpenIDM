@@ -851,8 +851,9 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
      </para>
     </step>
     <step>
-     <para>Modify the effective roles script to include the dynamic role
-      assignment logic.
+     <para>
+      Modify the effective roles script to include the dynamic role assignment
+      logic.
      </para>
      <para>
       For example, to enable dynamic role assignment for the
@@ -878,6 +879,18 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
      </para>
     </step>
    </procedure>
+   <para>
+    Note that changes to dynamic role assignments for existing users require a
+    manual reconciliation of the affected group of users for those changes to
+    take effect. So, if a new dynamic role definition is created, if an existing
+    dynamic role definition is changed, or if changes are made to the dynamic
+    assignment rule, the group of users affected by that assignment rule must be
+    reconciled manually. and changes to the assigned roles.
+   </para>
+   <para>
+    When a user entry is changed or synchronized, however, all dynamic role
+    assignments are reassessed automatically.
+   </para>
   </section>
 
   <section xml:id="role-mapping">
