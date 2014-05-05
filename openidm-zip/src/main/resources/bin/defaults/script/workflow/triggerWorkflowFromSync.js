@@ -26,7 +26,7 @@
 
 
 /* 
-    asyncProcess.js - A script designed to start asynchronous actions via workflows. Asynchronous actions
+    triggerWorkflowFromSync.js.js - A script designed to start asynchronous actions via workflows. Asynchronous actions
     differ from the more typical synchronous actions defined in sync.json mappings in that they may involve 
     waiting for some external trigger (such as a user interaction) before they continue performing their 
     action.
@@ -39,7 +39,7 @@
             "action" : {
                 "workflowName" : "managedUserApproval",
                 "type" : "text/javascript",
-                "file" : "workflow/asyncProcess.js"
+                "file" : "workflow/triggerWorkflowFromSync.js.js"
             }
         },    
 
