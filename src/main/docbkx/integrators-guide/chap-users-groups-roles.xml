@@ -329,16 +329,6 @@
 
    <section xml:id="delete-role-definition">
     <title>To Delete a Managed Role Definition</title>
-    <!--TODO the delete functionality does not seem intuitive:
-    - Add a role (ldap)
-    - Assign ldap to bjensen
-    - Check that user bjensen has the role
-    - Check the list of users who have role ldap (returns bjensen)
-    - Query the defined roles (returns ldap)
-    - Now, delete the role
-    - Query the defined roles -> no records
-    - Check what roles user bjensen has -> she still has ldap
-    - Check the list of users who have role ldap (still returns bjensen)-->
     <para>
       Note that when you delete a role definition, that role is not
       automatically removed from the <literal>"roles"</literal> attribute of any
@@ -630,7 +620,7 @@
                 "value":[
                    "CN=employees,O=corp"
                 ],
-                "operation":"insert",
+                "operation":"replaceTarget",
                 "name":"cns",
                 "assignedThrough":"managed/role/sample-role"
              },
@@ -650,7 +640,7 @@
                    "CN=terminal,O=corp",
                    "CN=intranet,O=corp"
                 ],
-                "operation":"insert",
+                "operation":"replaceTarget",
                 "name":"cns",
                 "assignedThrough":"managed/role/sample-role"
              }
@@ -702,7 +692,7 @@
             "cn=printers,ou=Groups,dc=example,dc=com",
             "cn=intranet,ou=Groups,dc=example,dc=com"
           ],
-          "operation": "insert"
+          "operation": "replaceTarget"
         }
       ]
     }
@@ -715,7 +705,7 @@
       "attributes": [
         {
           "name": "cns",
-          "operation": "insert",
+          "operation": "replaceTarget",
           "value": [
             "cn=printers,ou=Groups,dc=example,dc=com",
             "cn=intranet,ou=Groups,dc=example,dc=com"
@@ -814,7 +804,7 @@
         {
           "assignedThrough": "managed/role/ldap",
           "name": "cns",
-          "operation": "insert",
+          "operation": "replaceTarget",
           "value": [
             "cn=printers,ou=Groups,dc=example,dc=com",
             "cn=intranet,ou=Groups,dc=example,dc=com"
@@ -972,7 +962,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
                          "CN=terminal,O=corp",
                          "CN=intranet,O=corp"
                      ],
-                     "operation": "insert"
+                     "operation": "replaceTarget"
                  }
              ]
          }
