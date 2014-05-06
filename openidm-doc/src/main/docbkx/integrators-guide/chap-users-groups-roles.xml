@@ -160,8 +160,7 @@
   "name": "ldap",
   "_id": "ldap",
   "_rev": "1"
-}
-      </computeroutput>
+}      </computeroutput>
      </screen>
      <para>
       Most of the examples in this guide use client-assigned IDs when creating
@@ -194,8 +193,7 @@
       "_id": "ldap"
     }
   ]
-}
-     </computeroutput>
+}     </computeroutput>
     </screen>
    </section>
 
@@ -267,7 +265,7 @@
      from user <literal>bjensen</literal>.
     </para>
 
-    <screen><userinput>$ curl \
+    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -283,9 +281,7 @@
         ]
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"
-     </userinput>
-    </screen>
+ "https://localhost:8443/openidm/managed/user/bjensen"</screen>
     <para>
      In the role definition, you can specify what should happen when an
      assignment of that role is removed.
@@ -350,8 +346,7 @@
   "name": "ldap",
   "_id": "ldap",
   "_rev": "1"
-}
-      </computeroutput>
+}     </computeroutput>
      </screen>
    </section>
 
