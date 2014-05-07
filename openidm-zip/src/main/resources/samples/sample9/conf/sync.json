@@ -64,7 +64,7 @@
                     "action" : {
                         "workflowName" : "managedUserApproval",
                         "type" : "text/javascript",
-                        "file" : "workflow/triggerWorkflowFromSync.js.js"
+                        "file" : "workflow/triggerWorkflowFromSync.js"
                     }
                 },
                 {
