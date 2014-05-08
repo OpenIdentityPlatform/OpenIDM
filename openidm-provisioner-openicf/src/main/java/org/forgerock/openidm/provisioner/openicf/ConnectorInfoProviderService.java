@@ -865,9 +865,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         File file = new File(resourceURL.toURI());
                         if (file.isDirectory()) {
                             FileFilter filter = new FileFilter() {
-
                                 public boolean accept(File f) {
-                                    return (f.isDirectory()) || (f.getName().endsWith(".jar"));
+                                    File fManifest = new File(f.getPath(), "META-INF/MANIFEST.MF");
+                                    return ((f.isDirectory()) && fManifest.isFile()) || (f.getName().endsWith(".jar"));
                                 }
                             };
                             File[] files = file.listFiles(filter);
