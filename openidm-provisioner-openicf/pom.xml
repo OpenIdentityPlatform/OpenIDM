@@ -36,7 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
-        <openicf.framework.version>1.4.0.0-SNAPSHOT</openicf.framework.version>
+        <openicf.framework.version>1.4.0.0-RC1</openicf.framework.version>
     </properties>
     <dependencies>
         <dependency>

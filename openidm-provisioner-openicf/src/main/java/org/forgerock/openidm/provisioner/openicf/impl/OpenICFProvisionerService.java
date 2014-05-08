@@ -247,13 +247,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
-    private void bindConnectionFactory(final ConnectionFactory connectionFactory) {
+    void bindConnectionFactory(final ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
         // update activityLogger to use the "real" activity logger on the router
         this.activityLogger = new RouterActivityLogger(connectionFactory);
     }
 
-    private void unbindConnectionFactory(final RouteService service) {
+    void unbindConnectionFactory(final RouteService service) {
         this.connectionFactory = null;
         // ConnectionFactory has gone away, use null activity logger
         this.activityLogger = NullActivityLogger.INSTANCE;
@@ -640,13 +640,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     private void handleScriptAction(final ActionRequest request, final ResultHandler<JsonValue> handler)
             throws ResourceException {
-
-        // TODO NPE check
-        if (StringUtils.isBlank(request.getAdditionalParameters().get(SystemAction.SCRIPT_ID))) {
+        final String scriptId = request.getAdditionalParameter(SystemAction.SCRIPT_ID);
+        if (StringUtils.isBlank(scriptId)) {
             handler.handleError(new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID));
             return;
         }
-        SystemAction action = localSystemActionCache.get(request.getAdditionalParameters().get(SystemAction.SCRIPT_ID));
+        SystemAction action = localSystemActionCache.get(scriptId);
 
         String systemType = connectorReference.getConnectorKey().getConnectorName();
         List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
@@ -1453,18 +1452,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitAndFilter(final ObjectClassInfoHelper helper,
                         List<QueryFilter> subFilters) {
-                    final Iterator<QueryFilter> iterator = subFilters.iterator();
-                    if (iterator.hasNext()) {
-                        final QueryFilter left = iterator.next();
-                        return buildAnd(helper, left, iterator);
-                    } else {
-                        return new Filter() {
-                            @Override
-                            public boolean accept(ConnectorObject obj) {
-                                return true;
-                            }
-                        };
-                    }
+                    throw new UnsupportedOperationException("visitAndFilter not supported");
                 }
 
                 private Filter buildAnd(final ObjectClassInfoHelper helper, final QueryFilter left,
@@ -1480,18 +1468,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitOrFilter(ObjectClassInfoHelper helper,
                         List<QueryFilter> subFilters) {
-                    final Iterator<QueryFilter> iterator = subFilters.iterator();
-                    if (iterator.hasNext()) {
-                        final QueryFilter left = iterator.next();
-                        return buildOr(helper, left, iterator);
-                    } else {
-                        return new Filter() {
-                            @Override
-                            public boolean accept(ConnectorObject obj) {
-                                return true;
-                            }
-                        };
-                    }
+                    throw new UnsupportedOperationException("visitOrFilter not supported");
                 }
 
                 private Filter buildOr(final ObjectClassInfoHelper helper, final QueryFilter left,
@@ -1508,12 +1485,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper,
                         final boolean value) {
-                    return new Filter() {
-                        @Override
-                        public boolean accept(ConnectorObject obj) {
-                            return value;
-                        }
-                    };
+                    throw new UnsupportedOperationException("visitBooleanLiteralFilter not supported");
                 }
 
                 @Override
@@ -1787,7 +1759,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
                                 new Object[] { helper.getObjectClass().getObjectClassValue(), token });
-                        // TODO handle token properly IDME-179
                         SyncToken syncToken = operation.sync(helper.getObjectClass(), token,
                                 new SyncResultsHandler() {
                                     /**
@@ -1804,16 +1775,34 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      * @throws RuntimeException If the application encounters an exception. This will
                                      * stop iteration and the exception will propagate to the application.
                                      */
+                                    @SuppressWarnings("fallthrough")
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
                                             final String resourceContainer = getSource(objectType);
                                             switch (syncDelta.getDeltaType()) {
+                                                case CREATE: {
+                                                    JsonValue deltaObject = helper.build(syncDelta.getObject());
+                                                    ActionRequest onCreateRequest = Requests
+                                                            .newActionRequest("sync", "ONCREATE")
+                                                            .setAdditionalParameter("resourceContainer",
+                                                                    resourceContainer)
+                                                            .setAdditionalParameter("resourceId", resourceId)
+                                                            .setContent(new JsonValue(deltaObject));
+                                                    connectionFactory.getConnection()
+                                                            .action(routerContext, onCreateRequest);
+
+                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                                    "sync-create", onCreateRequest.getResourceName(),
+                                                                    deltaObject, deltaObject, Status.SUCCESS);
+                                                    break;
+                                                }
+                                                case UPDATE:
                                                 case CREATE_OR_UPDATE:
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
-                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid());
+                                                        deltaObject.put("_previous-id", syncDelta.getPreviousUid().getUidValue());
                                                     }
                                                     ActionRequest onUpdateRequest = Requests
                                                             .newActionRequest("sync", "ONUPDATE")
@@ -1826,6 +1815,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     activityLogger.log(routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
                                                 case DELETE:
+                                                    // TODO Pass along the old deltaObject
                                                     ActionRequest onDeleteRequest = Requests
                                                             .newActionRequest("sync", "ONDELETE")
                                                             .setAdditionalParameter("resourceContainer",
@@ -1855,6 +1845,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         return true;
                                     }
                                 }, operationOptionsBuilder.build());
+                        if (syncToken != null) {
+                            lastToken[0] = syncToken;
+                        }
                     } catch (Throwable t) {
                         Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
                         lastException.put("throwable", t.getMessage());
