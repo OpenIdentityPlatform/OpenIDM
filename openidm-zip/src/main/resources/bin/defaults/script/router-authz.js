@@ -396,7 +396,8 @@ function allow() {
     
     // Check REST requests against the access configuration
     if (context.caller.external) {
-        if (!isAJAXRequest()) {
+        // We only need to block non-AJAX requests when the action is not "read"
+        if (request.method !== "read" && !isAJAXRequest()) {
             return false;
         }
         
