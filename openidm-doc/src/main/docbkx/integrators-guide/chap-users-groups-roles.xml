@@ -897,8 +897,10 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
     be applied to the target resources. A mapping script
     (<filename>/path/to/openidm/bin/defaults/script/roles/defaultMapping.js</filename>)
     applies the effective assignments as part of the mapping. To enable this
-    default mapping for a specific assignment, add the following extract to
-    your synchronization configuration (<filename>sync.json</filename>) file.
+    default mapping for an assignment, edit the specific synchronization mapping
+    to which the assignment should be applied, by adding the following extract
+    to that mapping in your synchronization configuration
+    (<filename>sync.json</filename>) file.
    </para>
    <programlisting language="java">
 "defaultMapping" : {
@@ -910,9 +912,15 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
     ],
 </programlisting>
    <para>
-    For example, to apply the <literal>ldap</literal> and <literal>ad</literal>
-    assignments illustrated in the previous section, add the following mapping
-    to your <filename>sync.json</filename> file.
+    You must also set a condition on the mapping so that only user entries with
+    this effective assignment qualify for a target entry.
+   </para>
+   <para>
+    The following sample extract of a <filename>sync.json</filename> file
+    applies the <literal>ldap</literal> assignment, illustrated in the previous
+    section, on the target resource (<literal>system/ldap/account</literal>) for
+    all entries that have <literal>"effectiveAssignments" : "ldap"</literal> in
+    the source.
    </para>
    <programlisting language="java">
 "defaultMapping" : {
@@ -923,6 +931,24 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
         "ldap", "ad"
     ],
 </programlisting>
+   <programlisting language="javascript">
+{
+    "name" : "managedUser_systemLdapAccounts",
+    "source" : "managed/user",
+    "target" : "system/ldap/account",
+    "links" : "systemLdapAccounts_managedUser",
+    "sourceCondition" : {
+        "effectiveAssignments" : "ldap"
+    },
+    "defaultMapping" : {
+        "type" : "text/javascript",
+        "file" : "roles/defaultMapping.js"
+    },
+    "assignments": [
+        "ldap"
+    ],
+    ...
+}   </programlisting>
   </section>
 
   <section xml:id="conditional-mapping">
