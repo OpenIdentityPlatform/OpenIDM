@@ -49,8 +49,10 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -81,6 +83,7 @@ public class ConnectorInfoProviderServiceTest {
                 new JsonValue((new ObjectMapper()).readValue(config, Map.class));
 
         properties = new Hashtable<String, Object>();
+        properties.put(ComponentConstants.COMPONENT_NAME, getClass().getName());
         properties.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, config);
 
         // Set root
@@ -95,6 +98,15 @@ public class ConnectorInfoProviderServiceTest {
         ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
         instance.activate(context);
         testableConnectorInfoProvider = instance;
+    }
+
+    @AfterTest
+    public void afterTest() throws Exception {
+        ComponentContext context = mock(ComponentContext.class);
+        // stubbing
+        when(context.getProperties()).thenReturn(properties);
+        testableConnectorInfoProvider.deactivate(context);
+        testableConnectorInfoProvider = null;
     }
 
     // @Test(expectedExceptions = ComponentException.class)
