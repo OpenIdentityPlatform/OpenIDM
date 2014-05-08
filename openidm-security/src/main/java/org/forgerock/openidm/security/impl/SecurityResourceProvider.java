@@ -390,6 +390,7 @@ public class SecurityResourceProvider {
         sb.append(", OU=").append(params.get("OU").defaultTo("None").asString().replaceAll(",", "\\\\,"));
         sb.append(", O=").append(params.get("O").defaultTo("None").asString().replaceAll(",", "\\\\,"));
         sb.append(", L=").append(params.get("L").defaultTo("None").asString().replaceAll(",", "\\\\,"));
+        sb.append(", ST=").append(params.get("ST").defaultTo("None").asString().replaceAll(",", "\\\\,"));
         sb.append(", C=").append(params.get("C").defaultTo("None").asString().replaceAll(",", "\\\\,"));
 
         // Create the principle subject name
