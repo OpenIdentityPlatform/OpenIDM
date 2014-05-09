@@ -324,8 +324,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                                 + result.getObject().getClass()));
                     }
                 }
-                handler.handleResult(queryResult);
             }
+            handler.handleResult(queryResult);
         } catch (ScriptException e) {
             handleScriptException(handler, e);
         } catch (ResourceException e) {
