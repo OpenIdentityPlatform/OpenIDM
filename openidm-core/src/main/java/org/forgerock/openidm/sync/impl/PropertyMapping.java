@@ -114,15 +114,20 @@ class PropertyMapping {
     /**
      * TODO: Description.
      *
-     * @param sourceObject TODO.
-     * @param targetObject TODO.
+     * @param sourceObject Current specified source property/object to map from
+     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, 
+     * null if not provided
+     * @param targetObject Current specified target property/object to modify
      * @throws SynchronizationException TODO.
      */
-    public void apply(JsonValue sourceObject, JsonValue targetObject) throws SynchronizationException {
+    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition
             Map<String, Object> scope = new HashMap<String, Object>();
             try {
                 scope.put("object", sourceObject.copy().asMap());
+                if (oldSource != null) {
+                    scope.put("oldSource", oldSource.asMap());
+                }
                 Object o = condition.exec(scope);
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
                     return; // property mapping is not applicable; do not apply

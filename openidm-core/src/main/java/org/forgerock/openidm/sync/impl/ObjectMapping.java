@@ -55,7 +55,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
-
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -63,7 +62,6 @@ import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.script.ScriptException;
 
 /**
@@ -513,31 +511,38 @@ class ObjectMapping  {
     }
 
     /**
-     * TODO: Description.
+     * Apply the configured sync mappings
      *
-     * @param source TODO.
-     * @param target TODO.
-     * @throws SynchronizationException TODO.
+     * @param source The current source object 
+     * @param oldSource an optional previous source object before the change(s) that triggered the sync, 
+     * null if not provided
+     * @param target the current target object to modify
+     * @param existingTarget the full existing target object
+     * @throws SynchronizationException if applying the mappings fails.
      */
-    private void applyMappings(JsonValue source, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
+    private void applyMappings(JsonValue source, JsonValue oldSource, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
         EventEntry measure = Publisher.start(getObjectMappingEventName(), source, null);
         try {
             for (PropertyMapping property : properties) {
-                property.apply(source, target);
+                property.apply(source, oldSource, target);
             }
+            // Apply default mapping, if configured
+            applyDefaultMappings(source, oldSource, target, existingTarget);
+            
             measure.setResult(target);
         } finally {
             measure.end();
         }
-        // Apply default mapping, if configured
-        applyDefaultMappings(source, target, existingTarget);
     }
 
-    private JsonValue applyDefaultMappings(JsonValue source, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
+    private JsonValue applyDefaultMappings(JsonValue source, JsonValue oldSource, JsonValue target, JsonValue existingTarget) throws SynchronizationException {
         JsonValue result = null;
         if (defaultMapping != null) {
             Map<String, Object> queryScope = new HashMap<String, Object>();
             queryScope.put("source", source.asMap());
+            if (oldSource != null) {
+            	queryScope.put("oldSource", oldSource.asMap());
+            }
             queryScope.put("target", target.asMap());
             queryScope.put("config", config.asMap());
             queryScope.put("existingTarget", existingTarget.asMap());
@@ -577,12 +582,12 @@ class ObjectMapping  {
 
     public void onUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
-            if (newValue == null || newValue.getObject() == null) { // notification without the actual value
+        	if (newValue == null || newValue.getObject() == null) { // notification without the actual value
                 newValue = LazyObjectAccessor.rawReadObject(service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
-            // TODO: use old value to project incremental diff without fetch of source
+
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
-                doSourceSync(resourceId, newValue); // synchronous for now
+                doSourceSync(resourceId, newValue, false, oldValue); // synchronous for now
             } else {
                 LOGGER.trace("There is nothing to update on {}", resourceContainer + "/" + resourceId);
             }
@@ -1156,7 +1161,7 @@ class ObjectMapping  {
         public LazyObjectAccessor sourceObjectAccessor;
         /** Access to the target object */
         public LazyObjectAccessor targetObjectAccessor;
-        /** Optional value of the object before the change that triggered this sync, or null if not supplied */
+        /** Optional value of the source object before the change that triggered this sync, or null if not supplied */
         public JsonValue oldValue;
 
         /**
@@ -1384,7 +1389,7 @@ class ObjectMapping  {
                                     throw new SynchronizationException("target object already exists");
                                 }
                                 JsonValue createTargetObject = new JsonValue(new HashMap<String, Object>());
-                                applyMappings(getSourceObject(), createTargetObject, new JsonValue(null)); // apply property mappings to target
+                                applyMappings(getSourceObject(), oldValue, createTargetObject, new JsonValue(null)); // apply property mappings to target
                                 targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet,
                                         createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
@@ -1457,7 +1462,7 @@ class ObjectMapping  {
                                     break; // do not update target
                                 }
                                if (getSourceObject() != null && getTargetObject() != null) {
-                                    applyMappings(getSourceObject(), getTargetObject(), oldTarget);
+                                    applyMappings(getSourceObject(), oldValue, getTargetObject(), oldTarget);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     if (JsonPatch.diff(oldTarget, getTargetObject())
                                             .size() > 0) { // only update if target changes

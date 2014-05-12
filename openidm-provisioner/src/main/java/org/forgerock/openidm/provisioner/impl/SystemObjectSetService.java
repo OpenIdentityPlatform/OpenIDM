@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -266,7 +267,10 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             throws ResourceException {
         ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
         request.setAdditionalParameter("id", id);
-        request.setContent(newValue);
+        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
+        content.put("oldValue", oldValue);
+        content.put("newValue", newValue);
+        request.setContent(content);
         connectionFactory.getConnection().action(context, request);
     }
 
