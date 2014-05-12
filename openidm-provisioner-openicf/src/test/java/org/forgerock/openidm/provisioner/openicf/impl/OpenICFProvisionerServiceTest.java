@@ -22,12 +22,21 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.MemoryBackend;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PermanentException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.PreconditionRequiredException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -41,7 +50,9 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
@@ -618,6 +629,174 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             assertThat(result.get(new JsonPointer("actions/0/error")).getObject()).isEqualTo(
                     "Marvin");
         }
+    }
+
+    // AlreadyExistsException -> ConflictException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ConflictException.class, enabled = true)
+    public void testConflictException(String systemName) throws Exception {
+        CreateRequest createRequest = Requests.newCreateRequest("system/" + systemName + "/__TEST__", getTestConnectorObject("TEST1"));
+        connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest);
+    }
+
+    // ConnectorIOException -> ServiceUnavailableException - Will work when new groovy script is updated
+    @Test(dataProvider = "groovy-only", expectedExceptions = ServiceUnavailableException.class , enabled = true)
+    public void testServiceUnavailableExceptionFromConnectorIOException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CIO");
+        connection.delete((new SecurityContext(new RootContext(), "system", null )), deleteRequest);
+    }
+
+    // OperationTimeoutException -> ServiceUnavailableException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ServiceUnavailableException.class , enabled = true)
+    public void testServiceUnavailableExceptionFromOperationTimeoutException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_OT");
+        connection.delete((new SecurityContext(new RootContext(), "system", null )), deleteRequest);
+
+    }
+
+    // RetryableException -> ServiceUnavailableException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ServiceUnavailableException.class , enabled = true)
+    public void testServiceUnavailableExceptionFromRetryableException(String systemName) throws Exception {
+        CreateRequest createRequest = Requests.newCreateRequest("system/" + systemName + "/__TEST__", getTestConnectorObject("TEST4"));
+        connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest);
+    }
+
+    // ConfigurationException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromConfigurationException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CE");
+        connection.delete(new RootContext(), deleteRequest);
+    }
+
+    // ConnectionBrokenException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromConnectionBrokenException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CB");
+        connection.delete(new RootContext(), deleteRequest);
+    }
+
+    // ConnectionFailedException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromConnectionFailedException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CF");
+        connection.delete(new RootContext(), deleteRequest);
+    }
+
+    // ConnectorException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromConnectorException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_C");
+        connection.delete(new RootContext(), deleteRequest);
+    }
+
+    // NullPointerException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromNullPointerException(String systemName) throws Exception {
+        DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_NPE");
+        connection.delete(new RootContext(), deleteRequest);
+    }
+
+    // IllegalArgumentException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromIllegalArgumentException(String systemName) throws Exception {
+        CreateRequest createRequest = Requests.newCreateRequest("system/" + systemName + "/__TEST__", getTestConnectorObject("TEST3"));
+        connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest);
+    }
+
+    // ConnectorSecurityException -> InternalServerErrorException
+    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
+    public void testInternalServerErrorExceptionFromConnectorSecurityException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__TEST__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST1");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // InvalidCredentialException - >  PermanentException (UNAUTHORIZED_ERROR_CODE)
+    @Test(dataProvider = "groovy-only", expectedExceptions = PermanentException.class, enabled = true)
+    public void testPermanentExceptionFromInvalidCredentialException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__TEST__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST2");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // InvalidPasswordException -> PermanentException (UNAUTHORIZED_ERROR_CODE)
+    @Test(dataProvider = "groovy-only", expectedExceptions = PermanentException.class, enabled = true)
+    public void testPermanentExceptionFromInvalidPasswordException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__TEST__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST3");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // PermissionDeniedException -> ForbiddenException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ForbiddenException.class, enabled = true)
+    public void testForbiddenExceptionPermissionDeniedException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__TEST__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST4");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // PasswordExpiredException -> ForbiddenException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ForbiddenException.class, enabled = true)
+    public void testForbiddenExceptionFromPasswordExpiredException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__TEST__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST5");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // UnknownUidException -> NotFoundException
+    @Test(dataProvider = "groovy-only", expectedExceptions = NotFoundException.class, enabled = true)
+    public void testNotFoundExceptionFromUnknownException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/__SAMPLE__", "authenticate");
+        actionRequest.setAdditionalParameter("username", "Unknown-UID");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // UnsupportedOperationException -> NotFoundException
+    @Test(dataProvider = "groovy-only", expectedExceptions = NotFoundException.class, enabled = true)
+    public void testNotFoundExceptionFromUnsupportedOperationException(String systemName) throws Exception {
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/Unsupported-Object", "authenticate");
+        actionRequest.setAdditionalParameter("username", "TEST6");
+        actionRequest.setAdditionalParameter("password", "Passw0rd");
+        connection.action(new RootContext(), actionRequest);
+    }
+
+    // InvalidAttributeValueException - > BadRequestException
+    @Test(dataProvider = "groovy-only", expectedExceptions = BadRequestException.class, enabled = true)
+    public void testBadRequestException(String systemName) throws Exception {
+        CreateRequest createRequest = Requests.newCreateRequest("system/" + systemName + "/__TEST__", getTestConnectorObject("TEST2"));
+        connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest);
+    }
+
+    // PreconditionFailedException ->  org.forgerock.json.resource.PreconditionFailedException
+    @Test(dataProvider = "groovy-only", expectedExceptions = PreconditionFailedException.class, enabled = true)
+    public void testPreconditionFailedException(String systemName) throws Exception {
+        final String resourceId = "TEST4";
+        UpdateRequest updateRequest = Requests.newUpdateRequest("system/" + systemName + "/__TEST__/",
+                resourceId,
+                createUserObject(resourceId));
+        connection.update(new SecurityContext(new RootContext(), "system", null ), updateRequest);
+    }
+
+    // PreconditionRequiredException ->  org.forgerock.json.resource.PreconditionRequiredException
+    @Test(dataProvider = "groovy-only", expectedExceptions = PreconditionRequiredException.class, enabled = true)
+    public void testPreconditionRequiredException(String systemName) throws Exception {
+        final String resourceId = "TEST5";
+        UpdateRequest updateRequest = Requests.newUpdateRequest("system/" + systemName + "/__TEST__/",
+                                                                resourceId,
+                                                                createUserObject(resourceId));
+        connection.update(new SecurityContext(new RootContext(), "system", null ), updateRequest);
+    }
+
+    private JsonValue createUserObject(String name) {
+        JsonValue createAttributes = new JsonValue(new LinkedHashMap<String, Object>());
+        createAttributes.put("userName", name);
+        createAttributes.put("email", name + "@example.com");
+        return createAttributes;
     }
 
     @Test(dataProvider = "groovy-only", enabled = true)
