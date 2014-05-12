@@ -41,6 +41,19 @@
         "updateScriptFileName": "UpdateScript.groovy"
     },
     "objectTypes": {
+        "all": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ALL__",
+            "type": "object",
+            "nativeType": "__ALL__",
+            "properties": {
+                "attribute": {
+                    "type": "string",
+                    "nativeName": "attribute",
+                    "nativeType": null
+                }
+            }
+        },
         "group": {
             "$schema": "http://json-schema.org/draft-03/schema",
             "id": "__GROUP__",

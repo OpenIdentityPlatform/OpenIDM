@@ -529,7 +529,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
     }
 
 
-    @Test(dataProvider = "groovy-only", enabled = true)
+    @Test(dataProvider = "groovy-only", enabled = false)
     public void testPagedSearch(String systemName) throws Exception {
 
         for (int i = 0; i < 100; i++) {
@@ -618,6 +618,31 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             assertThat(result.get(new JsonPointer("actions/0/error")).getObject()).isEqualTo(
                     "Marvin");
         }
+    }
+
+    @Test(dataProvider = "groovy-only", enabled = true)
+    public void testSyncWithAllObjectClass(String systemName) throws Exception {
+
+        JsonValue stage = new JsonValue(new LinkedHashMap<String, Object>());
+        stage.put("connectorData", ConnectorUtil.convertFromSyncToken(new SyncToken(0)));
+        CreateRequest createRequest = Requests
+                .newCreateRequest("repo/synchronisation/pooledSyncStage",
+                        ("system" + systemName).toUpperCase(),
+                        stage);
+        connection.create(new RootContext(), createRequest);
+
+        SyncStub sync = new SyncStub();
+        Route r = router.addRoute("sync", sync);
+
+
+        ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName,
+                SystemObjectSetService.ACTION_LIVE_SYNC);
+
+        stage = connection.action(new RootContext(), actionRequest);
+        Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 17);
+        Assert.assertEquals(sync.requests.size(), 0);
+
+        router.removeRoute(r);
     }
 
     @Override
