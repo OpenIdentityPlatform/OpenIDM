@@ -33,10 +33,10 @@
         "removeLogEntryObjectClassFromFilter" : true,
         "modifiersNamesToFilterOut" : [ ],
         "passwordDecryptionKey" : null,
-        "credentials" : "cangetin",
+        "credentials" : "password",
         "changeLogBlockSize" : 100,
         "baseContextsToSynchronize" : [
-            "dc=openam,dc=forgerock,dc=org"
+            "dc=example,dc=com"
         ],
         "attributesToSynchronize" : [ ],
         "changeNumberAttribute" : "changeNumber",
@@ -45,7 +45,7 @@
         "objectClassesToSynchronize" : [
             "inetOrgPerson"
         ],
-        "port" : 50389,
+        "port" : 1389,
         "vlvSortAttribute" : "uid",
         "passwordAttribute" : "userPassword",
         "useBlocks" : false,
@@ -54,7 +54,7 @@
         "ssl" : false,
         "principal" : "cn=Directory Manager",
         "baseContexts" : [
-            "dc=openam,dc=forgerock,dc=org"
+            "dc=example,dc=com"
         ],
         "readSchema" : true,
         "accountObjectClasses" : [
