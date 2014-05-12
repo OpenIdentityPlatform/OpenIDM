@@ -170,6 +170,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final String PROP_CONSOLE = "console";
     
     private static final String SOURCE_DIRECTORY = "directory";
+    private static final String SOURCE_FILE = "file";
     private static final String SOURCE_SUBDIRECTORIES = "subdirectories";
     private static final String SOURCE_VISIBILITY = "visibility";
     private static final String SOURCE_TYPE = "type";
@@ -178,6 +179,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
     private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<String, Object>();
 
+    private enum Action {
+        eval
+    }
+    
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
     @Activate
@@ -439,7 +444,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // Check if "name" is missing and "file" is used instead
         JsonValue scriptConfig = script.clone();
         if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {
-            JsonValue file = scriptConfig.get("file");
+            JsonValue file = scriptConfig.get(SOURCE_FILE);
             if (!file.isNull()) {
                 scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
             }
@@ -509,43 +514,57 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         };
         static final long serialVersionUID = 1L;
     }
+    
+    private boolean isSourceUnit(String name) {
+        if (SourceUnit.ATTR_NAME.equals(name) ||
+                SourceUnit.ATTR_REQUEST_BINDING.equals(name) ||
+                SourceUnit.ATTR_REVISION.equals(name) ||
+                SourceUnit.ATTR_SOURCE.equals(name) ||
+                SourceUnit.ATTR_TYPE.equals(name) ||
+                SourceUnit.ATTR_VISIBILITY.equals(name) ||
+                SourceUnit.AUTO_DETECT.equals(name) ||
+                SOURCE_FILE.equals(name)) {
+            return true;
+        }
+        return false;
+    }
 
     // ----- Implementation of RequestHandler interface
 
-    private Pattern scriptNamePattern = Pattern.compile(
-            "^\\/([a-zA-Z]+)\\/([a-zA-Z0-9_-]+)\\/(.+)$", Pattern.CASE_INSENSITIVE
-                    | Pattern.UNICODE_CASE);
-
-    private Pattern containerPattern = Pattern.compile("^\\/([a-zA-Z]+)\\/([a-zA-Z0-9_-]+)$",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
+        String resourceName = request.getResourceName();
+        JsonValue content = request.getContent();
+        Map<String, Object> bindings = new HashMap<String, Object>();
+        JsonValue config = new JsonValue(new HashMap<String, Object>());
+        ScriptEntry scriptEntry = null;
         try {
-            Matcher matcher = scriptNamePattern.matcher(request.getResourceName());
-            if (matcher.matches()) {
-                if ("eval".equals(request.getAction())) {
-                    ScriptName name = new ScriptName(matcher.group(3), matcher.group(1));
-                    ScriptEntry entry = takeScript(name);
-                    if (entry.isActive()) {
-                        Script script = entry.getScript(context);
-                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(request.getContent().asMap()))));
+            if (resourceName == null || "".equals(resourceName)) {
+                for (String key : content.keys()) {
+                    if (isSourceUnit(key)) {
+                        config.put(key, content.get(key).getObject());
+                    } else {
+                        bindings.put(key, content.get(key).getObject());
+                    }
+                }
+                // The script will be in the request content
+                scriptEntry = takeScript(config);
+                // Add any additional parameters to the map of bindings
+                bindings.putAll(request.getAdditionalParameters());
+            } else {
+                throw new NotSupportedException("Actions are not supported for resource instances");
+            }
+            switch (request.getActionAsEnum(Action.class)) {
+                case eval:
+                    if (scriptEntry.isActive()) {
+                        Script script = scriptEntry.getScript(context);
+                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(bindings))));
                     } else {
                         throw new ServiceUnavailableException();
                     }
-
-                } else if ("batch".equals(request.getAction())) {
-                    ScriptName name = new ScriptName(matcher.group(3), matcher.group(1));
-                    ScriptEntry entry = takeScript(name);
-
-                } else {
-                    throw new NotSupportedException("Unrecognized action ID '" + request.getAction() 
-                            + "'. Supported action IDs: [eval, batch]");
-                }
-            } else {
-                final ResourceException e = new NotSupportedException(
-                                "Actions are not supported for resource collections");
-                handler.handleError(e);
+                    break;
+                default:
+                    throw new NotSupportedException("Unrecognized action ID " + request.getAction());
             }
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -556,58 +575,14 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
-        try {
-            if (request.getResourceName().indexOf('/') != 0) {
-                for (ScriptName name : listScripts()) {
-                    ScriptEntry entry = takeScript(name);
-                    Resource resource = retrieveEntry(name, entry, false);
-                    if (null != resource) {
-                        handler.handleResource(resource);
-                    }
-                }
-            } else {
-                handler.handleError(new NotFoundException("Script " + request.getResourceName()));
-            }
-            /*
-             * } catch (final ResourceException e) { handler.handleError(e);
-             */
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
-        }
+        final ResourceException e = new NotSupportedException("Query operations are not supported");
+        handler.handleError(e);
     }
 
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
-        try {
-            Matcher matcher = scriptNamePattern.matcher(request.getResourceName());
-            if (matcher.matches()) {
-                ScriptName name = new ScriptName(matcher.group(3), matcher.group(1));
-                ScriptEntry entry = takeScript(name);
-                handler.handleResult(retrieveEntry(name, entry, true));
-            } else {
-                handler.handleError(new NotFoundException());
-            }
-            /*
-             * } catch (final ResourceException e) { handler.handleError(e);
-             */
-        } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
-        }
-    }
-
-    private Resource retrieveEntry(ScriptName name, ScriptEntry entry, boolean isRead)
-            throws NotFoundException {
-        if (ScriptEntry.Visibility.PUBLIC.equals(entry.getVisibility())) {
-            JsonValue resource = new JsonValue(new HashMap<String, Object>());
-            resource.put(Resource.FIELD_CONTENT_ID, name.getName());
-            resource.put(Resource.FIELD_CONTENT_REVISION, "0");
-            resource.put("active", entry.isActive());
-            return new Resource(name.getName(), "0", resource);
-        } else if (isRead) {
-            throw new NotFoundException("Script is not visible" + name.getName());
-        } else {
-            return null;
-        }
+        final ResourceException e = new NotSupportedException("Read operations are not supported");
+        handler.handleError(e);
     }
 
     public void handleCreate(final ServerContext context, final CreateRequest request,
@@ -642,9 +617,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             JsonValue params = new JsonValue(scheduledContext).get(CONFIGURED_INVOKE_CONTEXT);
             JsonValue scriptValue = params.get("script").expect(Map.class).clone();
             
-            if (scriptValue.get("name").isNull()) {
-                if (!scriptValue.get("file").isNull()) {
-                    scriptValue.put("name", scriptValue.get("file").getObject());
+            if (scriptValue.get(SourceUnit.ATTR_NAME).isNull()) {
+                if (!scriptValue.get(SOURCE_FILE).isNull()) {
+                    scriptValue.put(SourceUnit.ATTR_NAME, scriptValue.get(SOURCE_FILE).getObject());
                 }
             }
             
