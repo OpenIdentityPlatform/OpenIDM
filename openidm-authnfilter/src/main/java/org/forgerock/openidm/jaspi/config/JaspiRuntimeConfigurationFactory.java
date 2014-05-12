@@ -24,6 +24,7 @@ import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,6 +148,13 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
             moduleConfig.remove("name");
             moduleConfig.add("className", className);
         }
+
+        String className = moduleConfig.get("className").asString();
+        moduleConfig.put("className", IDMJaspiModuleWrapper.class.getName());
+        if (!moduleConfig.isDefined("properties")) {
+            moduleConfig.put("properties", new HashMap<String, Object>());
+        }
+        moduleConfig.get("properties").put("authModuleClassName", className);
 
         return true;
     }

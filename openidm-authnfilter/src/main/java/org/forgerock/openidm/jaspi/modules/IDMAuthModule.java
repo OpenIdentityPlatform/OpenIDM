@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
+import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
 
 import javax.security.auth.message.module.ServerAuthModule;
 
@@ -29,6 +30,8 @@ public enum IDMAuthModule {
 
     /** JWT Session Auth Module. */
     JWT_SESSION(JwtSessionModule.class),
+    /** OpenAM Session Auth Module. */
+    OPENAM_SESSION(OpenAMSessionModule.class),
     /** Managed User Auth Module. */
     MANAGED_USER(ManagedUserAuthModule.class),
     /** Internal User Auth Module. */

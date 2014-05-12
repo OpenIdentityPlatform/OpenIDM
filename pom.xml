@@ -249,7 +249,7 @@
         <!--fasterxml.jackson.version>2.2.1</fasterxml.jackson.version-->
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-        <authnfilter.commons.version>1.3.0</authnfilter.commons.version>
+        <authnfilter.commons.version>1.4.0-SNAPSHOT</authnfilter.commons.version>
 
         <!-- Commons JSON versions -->
         <commons.forgerock-util.version>1.3.2-SNAPSHOT</commons.forgerock-util.version>
@@ -442,6 +442,11 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
+                <version>${authnfilter.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-jaspi-openam-session-module</artifactId>
                 <version>${authnfilter.commons.version}</version>
             </dependency>
             <dependency>

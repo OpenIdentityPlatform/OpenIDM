@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -64,7 +64,7 @@ public class InternalUserAuthModule extends IDMUserAuthModule {
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        String xOpenIDMUsername = request.getHeader(IDMServerAuthModule.HEADER_USERNAME);
+        String xOpenIDMUsername = request.getHeader(IDMJaspiModuleWrapper.HEADER_USERNAME);
 
         if ("anonymous".equals(xOpenIDMUsername)) {
             messageInfo.getMap().put("skipSession", true);

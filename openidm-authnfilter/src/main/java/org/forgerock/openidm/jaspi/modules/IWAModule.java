@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -25,9 +25,11 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,7 +37,7 @@ import java.util.Set;
  *
  * @author Phill Cunnington
  */
-public class IWAModule extends IDMServerAuthModule {
+public class IWAModule implements ServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(IWAModule.class);
 
@@ -54,8 +56,16 @@ public class IWAModule extends IDMServerAuthModule {
      *
      * @param commonsIwaModule A mock of the Commons IWAModule.
      */
-    public IWAModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule) {
+    IWAModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule) {
         this.commonsIwaModule = commonsIwaModule;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class[] getSupportedMessageTypes() {
+        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
     }
 
     /**
@@ -68,8 +78,8 @@ public class IWAModule extends IDMServerAuthModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) throws AuthException {
-        commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, properties.asMap());
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
+        commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, options);
     }
 
     /**
@@ -83,13 +93,11 @@ public class IWAModule extends IDMServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @param securityContextMapper {@inheritDoc}
      * @return {@inheritDoc}
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            SecurityContextMapper securityContextMapper) throws AuthException {
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
 
         LOGGER.debug("IWAModule: validateRequest START");
 
@@ -122,10 +130,10 @@ public class IWAModule extends IDMServerAuthModule {
                 LOGGER.error("IWAModule: Username not found by IWA");
                 throw new AuthException("Could not get username");
             }
-            securityContextMapper.setAuthenticationId(username);
+            final String principal = username;
             // Need to set as much information as possible so it can be put in both the request and JWT for IDM
             // and later use
-            securityContextMapper.setResource("system/AD/account");
+            SecurityContextMapper.fromMessageInfo(principal, messageInfo).setResource("system/AD/account");//TODO shouldn't this be configurable?...
 
             LOGGER.debug("IWAModule: Successful log in with user, {}", username);
 

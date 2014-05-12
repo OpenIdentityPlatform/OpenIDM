@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -27,6 +27,10 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_PASSWORD;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_USERNAME;
 
 /**
  * This Authentication Module uses the IWA authentication module with fall through to the Passthrough authentication
@@ -55,7 +59,7 @@ public class IWAPassthroughModule extends IWAModule {
      * @param commonsIwaModule A mock of the Commons IWAModule.
      * @param passthroughModule A mock of the ADPassthroughMdoule.
      */
-    public IWAPassthroughModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule,
+    IWAPassthroughModule(org.forgerock.jaspi.modules.iwa.IWAModule commonsIwaModule,
             PassthroughModule passthroughModule) {
         super(commonsIwaModule);
         this.passthroughModule = passthroughModule;
@@ -70,9 +74,10 @@ public class IWAPassthroughModule extends IWAModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) throws AuthException {
-        super.initialize(requestPolicy, responsePolicy, handler);
-        passthroughModule.initialize(requestPolicy, responsePolicy, handler);
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map options) throws AuthException {
+        super.initialize(requestPolicy, responsePolicy, handler, options);
+        passthroughModule.initialize(requestPolicy, responsePolicy, handler, options);
     }
 
     /**
@@ -88,30 +93,29 @@ public class IWAPassthroughModule extends IWAModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @param securityContextMapper {@inheritDoc}
      * @return {@inheritDoc}
      * @throws AuthException If there is a problem performing the authentication.
      */
     @Override
-    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            SecurityContextMapper securityContextMapper) throws AuthException {
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
+            throws AuthException {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         // Set pass through auth resource on request so it can be accessed by an augmentation script.
         passthroughModule.setPassThroughAuthOnRequest(messageInfo);
 
-        String xOpenIDMUsername = request.getHeader(HEADER_USERNAME);
-        String xOpenIdmPassword = request.getHeader(HEADER_PASSWORD);
+        final String xOpenIDMUsername = request.getHeader(HEADER_USERNAME);
+        final String xOpenIdmPassword = request.getHeader(HEADER_PASSWORD);
         if (!StringUtils.isEmpty(xOpenIDMUsername) && !StringUtils.isEmpty(xOpenIdmPassword)) {
             // skip straight to ad passthrough
             LOGGER.debug("IWAPassthroughModule: Have OpenIDM username, falling back to AD Passthrough");
-            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
+            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
         }
 
-        AuthStatus authStatus = super.validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
+        AuthStatus authStatus = super.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         if (AuthStatus.SEND_FAILURE.equals(authStatus)) {
-            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
+            return passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
         } else {
             return authStatus;
         }

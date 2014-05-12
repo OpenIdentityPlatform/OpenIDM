@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
@@ -32,15 +32,24 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.DEFAULT_USER_ROLES;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_PASSWORD;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_USERNAME;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY_MAPPING;
 
 /**
  * Authentication Module for authenticating users against a managed users table.
@@ -48,7 +57,7 @@ import java.util.StringTokenizer;
  * @author Phill Cunnington
  * @author brmiller
  */
-public abstract class IDMUserAuthModule extends IDMServerAuthModule {
+public abstract class IDMUserAuthModule implements ServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(IDMUserAuthModule.class);
 
@@ -89,11 +98,19 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      *
      * @param authHelper A mock of an AuthHelper instance.
      */
-    public IDMUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor, String queryId, String queryOnResource) {
+    IDMUserAuthModule(AuthHelper authHelper, Accessor<ServerContext> accessor, String queryId, String queryOnResource) {
         this.queryId = queryId;
         this.queryOnResource = queryOnResource;
         this.authHelper = authHelper;
         this.accessor = accessor;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class[] getSupportedMessageTypes() {
+        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
     }
 
     /**
@@ -104,7 +121,10 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      * @param handler {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map options) {
+
+        final JsonValue properties = new JsonValue(options);
 
         String clientAuthOnlyStr = IdentityServer.getInstance().getProperty("openidm.auth.clientauthonlyports");
         if (clientAuthOnlyStr != null) {
@@ -134,12 +154,12 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @param securityContextMapper {@inheritDoc}
      * @return {@inheritDoc}
      */
     @Override
-    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            SecurityContextMapper securityContextMapper) {
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) {
+
+        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(null, messageInfo);
 
         HttpServletRequest req = (HttpServletRequest) messageInfo.getRequestMessage();
         boolean authenticated;
@@ -299,7 +319,7 @@ public abstract class IDMUserAuthModule extends IDMServerAuthModule {
      */
     @Override
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return super.secureResponse(messageInfo, serviceSubject);
+        return AuthStatus.SEND_SUCCESS;
     }
 
     /**

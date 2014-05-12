@@ -11,14 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock Inc.
+ * Copyright 2013-2014 ForgeRock AS.
  */
 
 package org.forgerock.openidm.jaspi.modules;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +29,15 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
+import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
+import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
+import java.util.List;
 import java.util.Map;
+
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_PASSWORD;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_USERNAME;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
@@ -40,17 +46,14 @@ import java.util.Map;
  * @author Phill Cunnington
  * @author brmiller
  */
-public class PassthroughModule extends IDMServerAuthModule {
+public class PassthroughModule implements ServerAuthModule {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
 
     // config properties
-    private static final String PASS_THROUGH_AUTH = "passThroughAuth";
-    private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
-    private static final String GROUP_MEMBERSHIP = "groupMembership";
-    private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
+    private static final String QUERY_ON_RESOURCE = "queryOnResource";
 
-    private static String passThroughAuth;
+    private static String queryOnResource;
 
     private PassthroughAuthenticator passthroughAuthenticator;
 
@@ -66,8 +69,16 @@ public class PassthroughModule extends IDMServerAuthModule {
      *
      * @param passthroughAuthenticator A mock of an PassthroughAuthenticator instance.
      */
-    public PassthroughModule(PassthroughAuthenticator passthroughAuthenticator) {
+    PassthroughModule(PassthroughAuthenticator passthroughAuthenticator) {
         this.passthroughAuthenticator = passthroughAuthenticator;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class[] getSupportedMessageTypes() {
+        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
     }
 
     /**
@@ -78,22 +89,16 @@ public class PassthroughModule extends IDMServerAuthModule {
      * @param handler {@inheritDoc}
      */
     @Override
-    protected void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler) {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map options) {
 
-        passThroughAuth = properties.get(PASS_THROUGH_AUTH).asString();
+        queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).asString();
 
         try {
             passthroughAuthenticator = new PassthroughAuthenticator(
                     OSGiAuthnFilterBuilder.getConnectionFactory(),
                     OSGiAuthnFilterBuilder.getRouter().createServerContext(),
-                    passThroughAuth,
-                    properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString(),
-                    properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString(),
-                    properties.get(DEFAULT_USER_ROLES).defaultTo(Collections.emptyList()).asList(String.class),
-                    properties.get(GROUP_ROLE_MAPPING).defaultTo(Collections.emptyMap()).asMapOfList(String.class),
-                    properties.get(GROUP_COMPARISON_METHOD)
-                            .defaultTo(PassthroughAuthenticator.GroupComparison.equals.name())
-                            .asEnum(PassthroughAuthenticator.GroupComparison.class)
+                    queryOnResource
             );
         } catch (ResourceException e) {
             //TODO
@@ -102,30 +107,17 @@ public class PassthroughModule extends IDMServerAuthModule {
     }
 
     /**
-     * Set pass through auth resource in context map on request so can be accessed by authnPopulateContext.js script.
-     *
-     * @param messageInfo The MessageInfo.
-     */
-    @SuppressWarnings("unchecked")
-    void setPassThroughAuthOnRequest(MessageInfo messageInfo) {
-        Map<String, Object> contextMap =
-                (Map<String, Object>) messageInfo.getMap().get(SecurityContextFactory.ATTRIBUTE_AUTHZID);
-        contextMap.put(PASS_THROUGH_AUTH, passThroughAuth);
-    }
-
-    /**
      * Validates the client's request by passing through the request to be authenticated against a OpenICF Connector.
      *
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @param securityContextMapper {@inheritDoc}
      * @return {@inheritDoc}
      * @throws AuthException If there is a problem performing the authentication.
      */
     @Override
-    protected AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject,
-            SecurityContextMapper securityContextMapper) throws AuthException {
+    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
+            throws AuthException {
 
         LOGGER.debug("PassthroughModule: validateRequest START");
 
@@ -133,8 +125,6 @@ public class PassthroughModule extends IDMServerAuthModule {
 
         try {
             LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
-            //Set pass through auth resource on request so can be accessed by authnPopulateContext.js script.
-            setPassThroughAuthOnRequest(messageInfo);
 
             final String username = request.getHeader(HEADER_USERNAME);
             String password = request.getHeader(HEADER_PASSWORD);
@@ -145,12 +135,20 @@ public class PassthroughModule extends IDMServerAuthModule {
                 return AuthStatus.SEND_FAILURE;
             }
 
-            boolean authenticated = passthroughAuthenticator.authenticate(username, password, securityContextMapper);
+            boolean authenticated = passthroughAuthenticator.authenticate(username, password,
+                    SecurityContextMapper.fromMessageInfo(username, messageInfo));
 
             if (authenticated) {
                 LOGGER.debug("PassthroughModule: Authentication successful");
+                List<String> roles = SecurityContextMapper.fromMessageInfo(username, messageInfo).getRoles();
                 LOGGER.debug("Found valid session for {} with roles {}", username,
-                        securityContextMapper.getRoles());
+                        roles);
+
+                clientSubject.getPrincipals().add(new Principal() {
+                    public String getName() {
+                        return username;
+                    }
+                });
 
                 //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;

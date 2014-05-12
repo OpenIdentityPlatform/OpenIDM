@@ -41,7 +41,7 @@
                         "type" : "text/javascript",
                         "file" : "auth/passthroughAuthnPopulateContext.js"
                     },
-                    "passThroughAuth" : "system/ldap/account",
+                    "queryOnResource" : "system/ldap/account",
                     "propertyMapping" : {
                         "authenticationId" : "uid"
                     },

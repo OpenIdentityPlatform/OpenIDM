@@ -35,7 +35,7 @@ logger.debug("Augment context for: {}", security.authenticationId);
 var userDetail,
     i,
     role,
-    resource = properties.passThroughAuth,
+    resource = properties.queryOnResource,
     propertyMapping = properties.propertyMapping,
     userIdPropertyName = propertyMapping.authenticationId,
     groupMembershipProperty = propertyMapping.groupMembership,
