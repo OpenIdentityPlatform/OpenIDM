@@ -23,31 +23,6 @@
         },
         "authModules" : [
             {
-                "name": "OPENAM_SESSION",
-                "properties": {
-                    "openamDeploymentUrl": "http://phill.internal.forgerock.com:8080/openam",
-                    "openamSSOTokenCookieName": "iPlanetDirectoryPro",
-                    "openamUserAttribute": "uid",
-                    "truststorePath": "/Users/Phill/ForgeRockDev/servers/ssltruststore",
-                    "truststoreType": "JKS",
-                    "truststorePassword": "cangetin",
-                    "queryOnResource" : "system/ldap/account",
-                    "groupRoleMapping": {
-                        "openidm-admin": [ "cn=mygroup,ou=groups,dc=openam,dc=forgerock,dc=org" ]
-                    },
-                    "groupComparisonMethod": "ldap",
-                    "propertyMapping": {
-                        "authenticationId" : "uid",
-                        "groupMembership": "ldapGroups"
-                    },
-                    "augmentSecurityContext": {
-                        "type" : "text/javascript",
-                        "file" : "auth/passthroughAuthnPopulateContext.js"
-                    },
-                    "managedUserLink" : "systemLdapAccounts_managedUser"
-                }
-            },
-            {
                 "name" : "MANAGED_USER",
                 "properties" : {
                     "propertyMapping" : {
