@@ -416,6 +416,7 @@
             <excludes>
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
@@ -425,6 +426,7 @@
             <includes>
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/sync.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/provisioner.openicf-HRldap.json</include>
@@ -444,6 +446,7 @@
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
                 <exclude>conf/workflow.json</exclude>
             </excludes>
@@ -456,6 +459,7 @@
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-taskscan_sun*.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
@@ -480,6 +484,7 @@
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
                 <exclude>conf/workflow.json</exclude>
             </excludes>
@@ -493,6 +498,7 @@
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
                 <include>script/getUserManager.js</include>
@@ -512,6 +518,7 @@
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
                 <exclude>conf/workflow.json</exclude>
             </excludes>
@@ -525,6 +532,7 @@
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/provisioner.openicf-BusinessCSV.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/syncManagedBusiness.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
@@ -549,6 +557,7 @@
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
                 <exclude>conf/workflow.json</exclude>
             </excludes>
@@ -561,6 +570,7 @@
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-certification.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
@@ -582,6 +592,7 @@
                 <exclude>conf/managed.json</exclude>
                 <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
+                <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
                 <exclude>conf/workflow.json</exclude>
             </excludes>
@@ -594,6 +605,7 @@
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
+                <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-taskscan_passwordchange.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>

@@ -77,7 +77,7 @@
 
         <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
             <script><![CDATA[ 
-                params = [_queryExpression:"select * from managed_user where title='manager' and department='"+department+"'"];
+                params = [_queryId:"get-managers-of-department", department : department];
                 manager = openidm.query("managed/user", params)
 
                 candidateUsers = []
@@ -256,7 +256,7 @@
                 requestDate = formatUTC.format(new Date());
                 
                 def newRequesterNotification = [
-                "receiverId": "hradmin",
+                "receiverId": startUserId,
                 "requesterId" : "",
                 "requester" : "",
                 "createDate" : requestDate,
@@ -299,7 +299,7 @@
                 requestDate = formatUTC.format(new Date());
                 
                 def newRequesterNotification = [
-                "receiverId": "hradmin",
+                "receiverId": startUserId,
                 "requesterId" : "",
                 "requester" : "",
                 "createDate" : requestDate,
