@@ -88,7 +88,7 @@ import org.slf4j.LoggerFactory;
 public class SynchronizationService implements SingletonResourceProvider, Mappings, ScheduledService {
 
     /** Actions suppoorted by this service. */
-    enum Action {
+    public enum Action {
         onCreate, onUpdate, onDelete, recon, performAction
     }
 
@@ -283,8 +283,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                 case onUpdate:
                     resourceContainer =  _params.get("resourceContainer").required().asString();
                     resourceId = _params.get("resourceId").required().asString();
+                    JsonValue oldValue = request.getContent().get("oldValue");
+                    JsonValue newValue = request.getContent().get("newValue").required();
                     logger.debug("Synchronization action=onUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    onUpdate(resourceContainer, resourceId, null, request.getContent());
+                    onUpdate(resourceContainer, resourceId, oldValue, newValue);
                     break;
                 case onDelete:
                     resourceContainer =  _params.get("resourceContainer").required().asString();
@@ -312,6 +314,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                 default:
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
+            
             handler.handleResult(new JsonValue(result));
         } catch (IllegalArgumentException e) {
             handler.handleError(new BadRequestException("Action:" + request.getAction()

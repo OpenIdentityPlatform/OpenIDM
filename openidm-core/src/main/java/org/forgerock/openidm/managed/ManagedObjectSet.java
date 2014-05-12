@@ -27,6 +27,7 @@ package org.forgerock.openidm.managed;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,6 +69,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -100,7 +102,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
     /** Actions supported by this resource provider */
     enum Action {
-        patch
+        patch,
+        triggerSyncCheck
     }
 
     /** Supported script hooks */
@@ -418,20 +421,19 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         // Perform pre-property encryption
         onStore(context, newValue); // performs per-property encryption
 
+        // Populate the virtual properties (so they are updated for sync-ing)
+        populateVirtualProperties(context, newValue);
+        
         // Perform update
         UpdateRequest request = Requests.newUpdateRequest(repoId(id), newValue);
         request.setRevision(rev);
         Resource response = connectionFactory.getConnection().update(context, request);
 
-        // Populate the virtual properties
-        populateVirtualProperties(context, newValue);
-
         // Execute the postUpdate script if configured
         executePostScript(context, postUpdate, id, oldValue.getContent(), newValue);
         
         // Perform any onUpdate synchronization
-        // TODO: Pass the oldValue
-        performSyncAction(context, getManagedObjectPath(), id, "ONUPDATE", newValue);
+        performSyncAction(context, getManagedObjectPath(), id, "ONUPDATE", oldValue.getContent(), newValue);
 
         return response;
     }
@@ -562,6 +564,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(request.getContent());
             execScript(context, onCreate, value, null);
+            
+            // Populate the virtual properties (so they are available for sync-ing)
+            populateVirtualProperties(context, value);
+            
             // includes per-property encryption
             onStore(context, value);
 
@@ -574,14 +580,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             activityLogger.log(context, request.getRequestType(), "create", managedId(_new.getId()),
                     null, _new.getContent(), Status.SUCCESS);
-
-            populateVirtualProperties(context, _new.getContent());
             
             // Execute the postCreate script if configured
             executePostScript(context, postCreate, id, new JsonValue(null), _new.getContent());
 
             // Sync any targets after managed object is created
-            performSyncAction(context, getManagedObjectPath(), _new.getId(), "ONCREATE", _new.getContent());
+            performSyncAction(context, getManagedObjectPath(), _new.getId(), "ONCREATE", null, _new.getContent());
 
             // TODO Check the relative id
             handler.handleResult(_new);
@@ -835,6 +839,26 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     Resource resource = patchResource(context, request.getRequestType(), request.getResourceName(), resourceId, null, operations);
                     handler.handleResult(resource.getContent());
                     break;
+                case triggerSyncCheck:
+                    // Sync changes if required, in particular virtual/calculated attribute changes
+                    final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId));
+                    logger.debug("Attempt sync of {}", readRequest.getResourceName());
+                    Resource currentResource = connectionFactory.getConnection().read(context, readRequest);
+                    UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourceName(), currentResource.getContent());
+                    final ResultHandler<JsonValue> resultHandler = handler;
+                    updateInstance(context, resourceId, updateRequest, new ResultHandler<Resource>() {
+                        @Override
+                        public void handleError(ResourceException error) {
+                            resultHandler.handleError(error);
+                        }
+
+                        @Override
+                        public void handleResult(Resource result) {
+                            logger.debug("Sync of {} complete", readRequest.getResourceName());
+                            resultHandler.handleResult(result.getContent());
+                        }
+                    });
+                    break;
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
@@ -913,7 +937,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         }
         return jv;
     }
-
+    
+    private void performSyncAction(ServerContext context, String resourceContainer, String resourceId, String actionId, 
+    		JsonValue newValue) throws ResourceException {
+    	performSyncAction(context, resourceContainer, resourceId, actionId, null, newValue);
+    }
+    
     /**
      * Sends a sync action request to the synchronization service
      * 
@@ -923,17 +952,27 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param resourceId the additional resourceId parameter telling the synchronization service which object
      *                   is being synchronized
      * @param actionId the actionId for the SynchronizationService
-     * @param value the object value to sync
+     * @param oldValue the previous object value before the change (if applicable, or null if not)
+     * @param newValue the object value to sync
      * @throws ResourceException in case of a failure that was not handled by the ResultHandler
      */
-    private void performSyncAction(ServerContext context, String resourceContainer, String resourceId, String actionId, JsonValue value)
-            throws ResourceException {
+    private void performSyncAction(ServerContext context, String resourceContainer, String resourceId, String actionId, 
+    		JsonValue oldValue, JsonValue newValue) throws ResourceException {
         final RouteService sync = syncRoute.get();
         if (null != sync) {
+
+        	JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
+        	if (SynchronizationService.Action.onUpdate.equals(new JsonValue(actionId).asEnum(SynchronizationService.Action.class))) {
+	            content.put("oldValue", oldValue); 
+	        	content.put("newValue", newValue);
+        	} else {
+        		content = newValue;
+        	}
+        	
             final ActionRequest request = Requests.newActionRequest("sync", actionId)
                     .setAdditionalParameter("resourceContainer", resourceContainer)
                     .setAdditionalParameter("resourceId", resourceId)
-                    .setContent(value);
+                    .setContent(content);
             try {
                 connectionFactory.getConnection().actionAsync(context, request, new ResultHandler<JsonValue>() {
                     @Override

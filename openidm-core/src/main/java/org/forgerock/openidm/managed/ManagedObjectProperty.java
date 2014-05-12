@@ -251,10 +251,7 @@ class ManagedObjectProperty {
      */
     void onStore(ServerContext context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
-        // Virtual properties do not get stored with the DB
-        if (type.equals(PropertyType.VIRTUAL)) {
-            value.remove(name);
-        }
+
         setEncryptor();
         if (encryptor != null && value.isDefined(name)) {
             if (!cryptoService.isEncrypted(value)) {

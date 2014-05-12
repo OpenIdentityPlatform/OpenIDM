@@ -1781,10 +1781,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previous-id", syncDelta.getPreviousUid());
                                                     }
+                                                    
+                                                    JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
+                                                    content.put("newValue", deltaObject);                                                    
                                                     ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE")
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
-                                                            .setContent(new JsonValue(deltaObject));
+                                                            .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
                                                     activityLogger.log(routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
