@@ -137,11 +137,15 @@ import org.identityconnectors.framework.common.exceptions.ConnectionFailedExcept
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
 import org.identityconnectors.framework.common.exceptions.ConnectorSecurityException;
+import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.exceptions.InvalidCredentialException;
 import org.identityconnectors.framework.common.exceptions.InvalidPasswordException;
 import org.identityconnectors.framework.common.exceptions.OperationTimeoutException;
 import org.identityconnectors.framework.common.exceptions.PasswordExpiredException;
 import org.identityconnectors.framework.common.exceptions.PermissionDeniedException;
+import org.identityconnectors.framework.common.exceptions.PreconditionFailedException;
+import org.identityconnectors.framework.common.exceptions.PreconditionRequiredException;
+import org.identityconnectors.framework.common.exceptions.RetryableException;
 import org.identityconnectors.framework.common.exceptions.UnknownUidException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
@@ -559,8 +563,35 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             message = MessageFormat.format("Operation {0} failed with ConnectorSecurityException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
             handler.handleError(new InternalServerErrorException(message, exception));
+        } catch (InvalidAttributeValueException e) {
+            message = MessageFormat.format("Attribute value conflicts with the attribute's schema definition on " +
+                    "operation {0} for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new BadRequestException(e));
+        } catch (PreconditionFailedException e) {
+            message = MessageFormat.format("The resource version for {0} does not match the version provided on " +
+                    "operation {1} for system object: {2}",
+                    request.getResourceName(), request.getRequestType().toString(), resourceId);
+            handler.handleError(new org.forgerock.json.resource.PreconditionFailedException(e));
+        } catch (PreconditionRequiredException e) {
+            message = MessageFormat.format("No resource version for resource {0} has been provided on operation {1} for system object: {2}",
+                    request.getResourceName(), request.getRequestType().toString(), resourceId);
+            handler.handleError(new org.forgerock.json.resource.PreconditionRequiredException(e));
+        } catch (RetryableException e) {
+            message = MessageFormat.format("Request temporarily unavailable on operation {0} for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new ServiceUnavailableException(e));
+        } catch (UnsupportedOperationException e) {
+            message = MessageFormat.format("Operation {0} is no supported for system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new NotFoundException(e));
+        } catch (IllegalArgumentException e) {
+            message = MessageFormat.format("Operation {0} failed with IllegalArgumentException on system object: {1}",
+                    request.getRequestType().toString(), resourceId);
+            handler.handleError(new InternalServerErrorException(e));
         } catch (RemoteWrappedException e) {
-            // TODO Implement IDME-181
+            handleRemoteWrappedException(context, request, exception, resourceId,
+                    before, after, handler, connectorExceptionActivityLogger);
         } catch (ConnectorException e) {
             message = MessageFormat.format("Operation {0} failed with ConnectorException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
@@ -578,6 +609,142 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
     }
 
+    /**
+     * .NET Exceptions that may be wrapped in a RemoteWrappedException
+     */
+    private enum DotNetExceptionHelper {
+
+        ArgumentException("System.ArgumentException") {
+            Exception getMappedException(Exception e) {
+                return new IllegalArgumentException(e.getMessage(), e.getCause());
+            }
+        },
+        InvalidOperationException("System.InvalidOperationException") {
+            Exception getMappedException(Exception e) {
+                return new IllegalStateException(e.getMessage(), e.getCause());
+            }
+        },
+        NullReferenceException("System.NullReferenceException") {
+            Exception getMappedException(Exception e) {
+                return new NullPointerException(e.getMessage());
+            }
+        },
+        NotSupportedException("System.NotSupportedException") {
+            Exception getMappedException(Exception e) {
+                return new UnsupportedOperationException(e.getMessage(), e.getCause());
+            }
+        },
+        UnknownDotNetException("") {
+            Exception getMappedException(Exception e) {
+                return new InternalServerErrorException(e.getMessage(), e.getCause());
+            }
+        };
+
+        private final String exceptionName;
+
+        private DotNetExceptionHelper(final String exceptionName) {
+            this.exceptionName = exceptionName;
+        }
+
+        abstract Exception getMappedException(Exception e);
+
+        ConnectorException getConnectorException(Exception e) {
+            return new ConnectorException(e.getMessage(), getMappedException(e));
+        }
+
+        static DotNetExceptionHelper fromExceptionClass(String name) {
+            for (DotNetExceptionHelper helper : values()) {
+                if (helper.exceptionName.equals(name)) {
+                    return helper;
+                }
+
+            }
+            return UnknownDotNetException;
+        }
+    }
+
+    /**
+     * Checks the RemoteWrappedException to determine which Exception has been wrapped and handles
+     * the appropriate Exception which is wrapped.
+     *
+     * @param context the ServerContext from the original request
+     * @param request the original request
+     * @param exception the ConnectorException that was thrown by the facade
+     * @param resourceId the resourceId being operated on
+     * @param before the object value "before" the request
+     * @param after the object value "after" the request
+     * @param handler the ResultHandler on which to call handleError
+     * @param connectorExceptionActivityLogger the ActivityLogger to use to log the exception
+     */
+    private void handleRemoteWrappedException(ServerContext context,
+                                              Request request,
+                                              ConnectorException exception,
+                                              String resourceId,
+                                              JsonValue before,
+                                              JsonValue after,
+                                              ResultHandler<?> handler,
+                                              ActivityLogger connectorExceptionActivityLogger) {
+
+        RemoteWrappedException remoteWrappedException = (RemoteWrappedException) exception;
+        final String message = exception.getMessage();
+        final Throwable cause = exception.getCause();
+
+        if (remoteWrappedException.is(AlreadyExistsException.class)) {
+            handleConnectorException(context, request, new AlreadyExistsException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(ConfigurationException.class)) {
+            handleConnectorException(context, request, new ConfigurationException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(ConnectionBrokenException.class)) {
+            handleConnectorException(context, request, new ConnectionBrokenException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(ConnectionFailedException.class)) {
+            handleConnectorException(context, request, new ConnectionFailedException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(ConnectorIOException.class)) {
+            handleConnectorException(context, request, new ConnectorIOException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(InvalidAttributeValueException.class)) {
+            handleConnectorException(context, request, new InvalidAttributeValueException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(InvalidCredentialException.class)) {
+            handleConnectorException(context, request, new InvalidCredentialException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(InvalidPasswordException.class)) {
+            handleConnectorException(context, request, new InvalidPasswordException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(OperationTimeoutException.class)) {
+            handleConnectorException(context, request, new OperationTimeoutException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(PasswordExpiredException.class)) {
+            handleConnectorException(context, request, new PasswordExpiredException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(PermissionDeniedException.class)) {
+            handleConnectorException(context, request, new PermissionDeniedException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(PreconditionFailedException.class)) {
+            handleConnectorException(context, request, new PreconditionFailedException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(PreconditionRequiredException.class)) {
+            handleConnectorException(context, request, new PreconditionRequiredException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(RetryableException.class)) {
+            handleConnectorException(context, request, RetryableException.wrap(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(UnknownUidException.class)) {
+            handleConnectorException(context, request, new UnknownUidException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else if (remoteWrappedException.is(ConnectorException.class)) {
+            handleConnectorException(context, request, new ConnectorException(message, cause),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        } else {
+            // handle .NET exceptions
+            handleConnectorException(context, request,
+                    DotNetExceptionHelper.fromExceptionClass(remoteWrappedException.getExceptionClass())
+                            .getConnectorException(remoteWrappedException),
+                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+        }
+    }
     /**
      * @return the smartevent Name for a given query
      */
