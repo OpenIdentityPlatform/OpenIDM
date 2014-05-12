@@ -45,7 +45,7 @@
 $ <userinput>cd /path/to/openidm </userinput>
 $ <userinput>./cli.sh </userinput>
   <computeroutput>
-Using boot properties at /openidm/conf/boot/boot.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
 openidm# encrypt ....</computeroutput>
  </screen>
  
@@ -58,6 +58,13 @@ $ <userinput>./cli.sh encrypt ... </userinput>
  
  <para>By default, the command-line utilities run with the properties defined 
  in <filename>/path/to/openidm/conf/boot/boot.properties</filename>.</para>
+
+ <para>
+  If you run the <command>./cli.sh</command> command by itself, it opens an
+  OpenIDM-specific shell prompt:
+ </para>
+
+ <screen>openidm#</screen>
  
  <para>The startup and shutdown scripts are not discussed in this chapter. For 
  information about these scripts, see <link xlink:href="integrators-guide#chap-services" 
@@ -68,6 +75,83 @@ $ <userinput>./cli.sh encrypt ... </userinput>
  assume that you are running the commands on a UNIX system. For Windows 
  systems, use <command>cli.bat</command> instead of <command>cli.sh</command>.
  </para>
+
+ <para>
+  For a list of subcommands available from the <literal>openidm#</literal>
+  prompt, run the <command>./cli.sh help</command> command. The
+  <command>help</command> and <command>exit</command> options shown below are
+  self-explanatory. The other subcommands are explained in the subsections
+  that follow.
+ </para>
+
+ <screen>local:keytool	Export or import a SecretKeyEntry.
+     The Java Keytool does not allow for exporting or importing SecretKeyEntries.
+local:encrypt	Encrypt the input string.
+local:validate	Validates all json configuration files in the configuration (
+     default: /conf) folder.
+basic:help	Displays available commands.
+basic:exit	Exit from the console.
+remote:configureconnector	Generate connector configuration.
+remote:configexport	exports all configurations
+remote:configimport	Imports the configuration set from local file/directory</screen>
+
+  <para>
+   The <command>configexport</command>, <command>configimport</command>, and
+   <command>configconnector</command> subcommands support up to four options:
+  </para>
+ 
+  <variablelist>
+   <varlistentry>
+    <term>-u or --user USER[:PASSWORD]</term>
+    <listitem>
+     <para>
+      Allows you to specify the server user and password. If you do not specify 
+      a password, the <command>cli.sh</command> script prompts for one before 
+      completing the command. This option is used by all three commands.
+     </para>
+     <para>
+      If you do not specify the <literal>-u</literal> or
+      <literal>--user</literal>, you may see the following erorr:
+      <literal>Remote operation failed: Unauthorized null</literal>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+     <term>--url URL</term>
+     <listitem>
+      <para>
+       The URL of the OpenIDM REST service. The default URL is
+       <literal>http://localhost:8080/openidm/</literal>. This can
+       be used to import configuration files from a remote running
+       instance of OpenIDM. This option is used with the
+       <command>configimport</command> and <command>configexport</command>
+       commands.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>-P or --port PORT</term>
+     <listitem>
+      <para>
+       The port number associated with the OpenIDM REST service. If specified,
+       this option overrides any port number specified with the
+       <command>--url</command> option. The default port is 8080. This option is
+       used with the <command>configimport</command> and
+       <command>configexport</command> commands.
+      </para>
+     </listitem>
+    </varlistentry>
+   <varlistentry>
+    <term>-r or --replaceall or --replaceAll</term>
+    <listitem>
+     <para>
+      Replaces the entire list of configuration files with the files in the
+      specified backup directory. This option is used with only the
+      <command>configimport</command> command.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
 
  <section xml:id="cli-configexport">
   <title>configexport</title>
@@ -92,7 +176,8 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
   <screen>$ ./cli.sh configexport /tmp/conf</screen>
   
   <para>Configuration objects are exported, as <filename>.json</filename>
-   files, to the specified directory. Configuration files
+   files, to the specified directory. The command creates the directory if
+   needed. Configuration files
    that are present in this directory are renamed as backup files, with a
    timestamp, for example, <filename>audit.json.2014-02-19T12-00-28.bkp
    </filename>, and are not overwritten. The following configuration
