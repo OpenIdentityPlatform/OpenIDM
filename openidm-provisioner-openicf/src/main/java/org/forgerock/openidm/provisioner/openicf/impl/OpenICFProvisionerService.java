@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -111,6 +112,7 @@ import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.util.Predicate;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -145,6 +147,7 @@ import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
@@ -164,6 +167,7 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.util.Iterables.filter;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
@@ -229,6 +233,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     /* Internal routing objects to register and remove the routes. */
     private RouteEntry routeEntry;
+
+    /* Object Types*/
+    private Map<String, ObjectClassInfoHelper> objectTypes;
 
     /**
      * Holder of non ObjectClass operations:
@@ -421,8 +428,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
                     ConnectorUtil.getOperationOptionConfiguration(configuration);
 
+            objectTypes = ConnectorUtil.getObjectTypes(configuration);
+
             for (Map.Entry<String, ObjectClassInfoHelper> entry :
-                    ConnectorUtil.getObjectTypes(configuration).entrySet()) {
+                    objectTypes.entrySet()) {
 
                 objectClassHandlers.put(entry.getKey(),
                         Resources.newCollection(
@@ -586,7 +595,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 */
     private enum ConnectorAction {
-        script, test
+        script, test, livesync
     }
 
     @Override
@@ -607,6 +616,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
                 case test:
                     handleTestAction(request, handler);
+                    break;
+
+                case livesync:
+                    handleLiveSyncAction(context, request, handler);
                     break;
 
                 default:
@@ -767,6 +780,28 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     private void handleTestAction(ActionRequest request, ResultHandler<JsonValue> handler) {
         handler.handleResult(new JsonValue(getStatus()));
+    }
+
+    private void handleLiveSyncAction(final ServerContext context, final ActionRequest request, final ResultHandler<JsonValue> handler)
+            throws ResourceException {
+
+        // find the object class with __ALL__ object class
+        final Predicate<Entry<String, ObjectClassInfoHelper>> onlyAll = new Predicate<Entry<String, ObjectClassInfoHelper>>() {
+            public boolean apply(Entry<String, ObjectClassInfoHelper> entry) {
+                return ObjectClass.ALL.equals(entry.getValue().getObjectClass());
+            }
+        };
+
+        final Iterable<Entry<String, ObjectClassInfoHelper>> iter = filter(objectTypes.entrySet(), onlyAll);
+
+        if (!iter.iterator().hasNext()) {
+            throw new BadRequestException("__ALL__ object class is not configured");
+        }
+
+        ActionRequest forwardRequest = Requests.newActionRequest(getSource(iter.iterator().next().getKey()),request.getAction());
+
+        // forward request to be handled in ObjectClassResourceProvider#actionCollection
+        handler.handleResult(connectionFactory.getConnection().action(context, forwardRequest));
     }
 
     /**
