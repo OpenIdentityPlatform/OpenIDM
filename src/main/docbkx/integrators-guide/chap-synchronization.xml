@@ -3410,7 +3410,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        Note that the <literal>_id</literal> must be URL-encoded in the REST
        call.
       </para>
-      <programlisting>$ <userinput>curl \
+      <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -3421,7 +3421,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   &amp;mapping=systemLdapAccounts_ManagedUser
   &amp;action=DELETE"</userinput>
 <computeroutput>{}</computeroutput>
-      </programlisting>
+      </screen>
      </listitem>
    </orderedlist>
  </section>
