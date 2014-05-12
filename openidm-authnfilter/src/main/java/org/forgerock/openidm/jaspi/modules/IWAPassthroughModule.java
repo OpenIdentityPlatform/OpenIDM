@@ -101,8 +101,6 @@ public class IWAPassthroughModule extends IWAModule {
             throws AuthException {
 
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        // Set pass through auth resource on request so it can be accessed by an augmentation script.
-        passthroughModule.setPassThroughAuthOnRequest(messageInfo);
 
         final String xOpenIDMUsername = request.getHeader(HEADER_USERNAME);
         final String xOpenIdmPassword = request.getHeader(HEADER_PASSWORD);
