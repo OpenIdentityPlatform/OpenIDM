@@ -124,7 +124,6 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 
@@ -151,7 +150,6 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
@@ -217,7 +215,6 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 }
