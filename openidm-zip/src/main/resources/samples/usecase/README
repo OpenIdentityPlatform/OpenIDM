@@ -47,7 +47,7 @@ Usecase1 - Initial reconciliation
 
     $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
     
-    There should be 23 users created.
+    There should be 23 users created. The default password of the imported users is "Passw0rd".
 
 Usecase 2 - New user onboarding
     In this step we simulate an HR employee starting the onboarding process for an employee
@@ -119,6 +119,7 @@ Usecase 2 - New user onboarding
        Complete the task by clicking on 'Complete' button.
 
     9. If 'Accept' was selected then the user is created as a managed user in OpenIDM.
+        The password of the new user is "Passw0rd".
         Two OpenIDM notifications are created about this event: one for the start user and one for the
         new user. Those are visible on the UI after login with the appropriate user.
 
@@ -243,7 +244,8 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
 
     There are some extra users in that csv file:
     - user.50 is defined only in the csv file so when running the reconciliation this user will be 
-        detected as an orphan account (situation "UNQUALIFIED").
+        detected as an orphan account (orphan account workflow is triggered when the situation is
+        "UNQUALIFIED" or "UNASSIGNED").
 
     - user.33: the 'userName' attribute of this user is 'user.3', same as for user.3.
         When running the correlation query during reconciliation there will be two candidate users
