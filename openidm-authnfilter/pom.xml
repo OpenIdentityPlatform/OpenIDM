@@ -92,6 +92,10 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-jaspi-openam-session-module</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-runtime</artifactId>
         </dependency>
         <dependency>

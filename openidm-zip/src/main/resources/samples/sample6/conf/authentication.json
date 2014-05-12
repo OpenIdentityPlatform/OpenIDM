@@ -41,7 +41,7 @@
                         "type" : "text/javascript",
                         "file" : "auth/passthroughAuthnPopulateContext.js"
                     },
-                    "passThroughAuth" : "system/ad/account",
+                    "queryOnResource" : "system/ad/account",
                     "propertyMapping" : {
                         "authenticationId" : "sAMAccountName"
                     },

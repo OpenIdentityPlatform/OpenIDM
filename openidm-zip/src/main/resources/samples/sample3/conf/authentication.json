@@ -41,7 +41,7 @@
                         "type" : "text/javascript",
                         "file" : "auth/passthroughAuthnPopulateContext.js"
                     },
-                    "passThroughAuth" : "system/scriptedsql/account",
+                    "queryOnResource" : "system/scriptedsql/account",
                     "propertyMapping" : {
                         "authenticationId" : "uid"
                     },

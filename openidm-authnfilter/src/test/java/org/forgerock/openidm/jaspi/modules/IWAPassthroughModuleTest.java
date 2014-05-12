@@ -1,18 +1,18 @@
 /*
-* The contents of this file are subject to the terms of the Common Development and
-* Distribution License (the License). You may not use this file except in compliance with the
-* License.
-*
-* You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-* specific language governing permission and limitations under the License.
-*
-* When distributing Covered Software, include this CDDL Header Notice in each file and include
-* the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-* Header, with the fields enclosed by brackets [] replaced by your own identifying
-* information: "Portions copyright [year] [name of copyright owner]".
-*
-* Copyright 2013 ForgeRock AS.
-*/
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013-2014 ForgeRock AS.
+ */
 
 package org.forgerock.openidm.jaspi.modules;
 
@@ -73,7 +73,7 @@ public class IWAPassthroughModuleTest {
 
         //Then
         verify(commonsIwaModule).initialize(requestPolicy, responsePolicy, handler, optionsMap);
-        verify(passthroughModule).initialize(requestPolicy, responsePolicy, handler);
+        verify(passthroughModule).initialize(requestPolicy, responsePolicy, handler, optionsMap);
     }
 
     @Test
@@ -83,7 +83,6 @@ public class IWAPassthroughModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        SecurityContextMapper securityContextMapper = mock(SecurityContextMapper.class);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -91,16 +90,14 @@ public class IWAPassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper))
+        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_CONTINUE);
 
         //When
-        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
-                securityContextMapper);
+        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
-        verifyZeroInteractions(securityContextMapper);
+        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 
@@ -111,7 +108,6 @@ public class IWAPassthroughModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        SecurityContextMapper securityContextMapper = mock(SecurityContextMapper.class);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -124,13 +120,11 @@ public class IWAPassthroughModuleTest {
                 .willReturn(AuthStatus.SEND_CONTINUE);
 
         //When
-        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
-                securityContextMapper);
+        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
-        verifyZeroInteractions(securityContextMapper);
         assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
     }
 
@@ -141,7 +135,6 @@ public class IWAPassthroughModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        SecurityContextMapper securityContextMapper = mock(SecurityContextMapper.class);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -154,13 +147,11 @@ public class IWAPassthroughModuleTest {
                 .willReturn(AuthStatus.SEND_SUCCESS);
 
         //When
-        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
-                securityContextMapper);
+        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
-        verifyZeroInteractions(securityContextMapper);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
@@ -171,7 +162,6 @@ public class IWAPassthroughModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        SecurityContextMapper securityContextMapper = mock(SecurityContextMapper.class);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -182,17 +172,15 @@ public class IWAPassthroughModuleTest {
 
         given(commonsIwaModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_FAILURE);
-        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper))
+        given(passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(AuthStatus.SEND_SUCCESS);
 
         //When
-        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
-                securityContextMapper);
+        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
-        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject, securityContextMapper);
-        verifyZeroInteractions(securityContextMapper);
+        verify(passthroughModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
@@ -203,7 +191,6 @@ public class IWAPassthroughModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
-        SecurityContextMapper securityContextMapper = mock(SecurityContextMapper.class);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -226,14 +213,11 @@ public class IWAPassthroughModuleTest {
                 .willReturn(AuthStatus.SUCCESS);
 
         //When
-        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject,
-                securityContextMapper);
+        AuthStatus authStatus = iwaAdPassthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verify(commonsIwaModule).validateRequest(messageInfo, clientSubject, serviceSubject);
         verify(passthroughModule).setPassThroughAuthOnRequest(messageInfo);
-        verify(securityContextMapper).setAuthenticationId("USERNAME");
-        verify(securityContextMapper).setResource("system/AD/account");
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 }

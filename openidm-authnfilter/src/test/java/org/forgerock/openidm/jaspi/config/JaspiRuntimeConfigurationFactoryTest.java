@@ -25,6 +25,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -170,7 +171,9 @@ public class JaspiRuntimeConfigurationFactoryTest {
                 .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
                 .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
         assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
-                "AUTH_MODULE_CLASS_NAME");
+                IDMJaspiModuleWrapper.class.getName());
+        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+                .get("authModuleClassName").asString(), "AUTH_MODULE_CLASS_NAME");
         assertFalse(sessionModuleConfig.isDefined("enabled"));
     }
 
@@ -197,7 +200,9 @@ public class JaspiRuntimeConfigurationFactoryTest {
                 .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
                 .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
         assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
-                "AUTH_MODULE_CLASS_NAME");
+                IDMJaspiModuleWrapper.class.getName());
+        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+                .get("authModuleClassName").asString(), "AUTH_MODULE_CLASS_NAME");
     }
 
     @Test
@@ -223,7 +228,9 @@ public class JaspiRuntimeConfigurationFactoryTest {
                 .get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
                 .get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
         assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
-                IDMAuthModule.IWA.getAuthModuleClass().getName());
+                IDMJaspiModuleWrapper.class.getName());
+        assertEquals(sessionModuleConfig.get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+                .get("authModuleClassName").asString(), IDMAuthModule.IWA.getAuthModuleClass().getName());
     }
 
     @Test
@@ -255,7 +262,9 @@ public class JaspiRuntimeConfigurationFactoryTest {
                 .get(ModuleConfigurationFactory.AUTH_MODULES_KEY);
         assertEquals(authModuleConfig.size(), 1);
         assertEquals(authModuleConfig.get(0).get(ModuleConfigurationFactory.AUTH_MODULE_CLASS_NAME_KEY).asString(),
-                IDMAuthModule.JWT_SESSION.getAuthModuleClass().getName());
+                IDMJaspiModuleWrapper.class.getName());
+        assertEquals(authModuleConfig.get(0).get(ModuleConfigurationFactory.AUTH_MODULE_PROPERTIES_KEY)
+                .get("authModuleClassName").asString(), IDMAuthModule.JWT_SESSION.getAuthModuleClass().getName());
     }
 
     @Test
