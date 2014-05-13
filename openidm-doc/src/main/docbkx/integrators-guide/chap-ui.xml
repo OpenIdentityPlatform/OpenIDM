@@ -200,6 +200,7 @@
     <imagedata fileref="images/ui-security-questions.png" format="PNG" />
     </imageobject>
    </mediaobject>
+
    <para>
     In addition, a "Reset your password" link is provided on the login page.
     When a user attempts to reset her password, she is prompted for the
@@ -218,6 +219,33 @@
      password reset functionality.
     </para>
    </note>
+  </section>
+
+  <section xml:id="ui-minimum-length">
+   <title>Minimum Length Security Answers</title>
+
+   <para>
+    The password, passphrase, and security answer are all associated with
+    some minimum length. To change that minimum, edit the
+    <filename>conf/policy.json</filename> file.
+    Navigate to the appropriate section. Set the <literal>minLength</literal>
+    option to the desired number.
+   </para>
+
+   <para>
+    For example, the following excerpt from the
+    <filename>conf/policy.json</filename> file shows a default
+    <literal>minLength</literal> of 16 associated with the security answer.
+   </para>
+
+   <programlisting language="javascript">
+{
+    "policyId" : "minimum-length",
+    "params" : {
+        "minLength" : 16
+    }
+},</programlisting>
+
   </section>
   
   <section xml:id="ui-site-identification">
