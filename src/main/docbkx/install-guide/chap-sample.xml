@@ -217,10 +217,14 @@ orientdb&gt; </screen>
     <term><filename>samples/sample1/conf/provisioner.openicf-xml.json</filename></term>
     <listitem>
      <para>This connector configuration file serves as the XML file resource.
-     In this sample, the connector instance acts as the authoritative source
-     for users. In the configuration file you can see that the
-     <literal>xmlFilePath</literal> is set to
-     <filename>&amp;{launcher.project.location}/data/xmlConnectorData.xml</filename>.
+      It is a copy of the file of the same name found in the
+      <filename>samples/provisioners</filename> directory.
+     </para>
+     <para>
+      In this sample, the connector instance acts as the authoritative source
+      for users. In the configuration file you can see that the
+      <literal>xmlFilePath</literal> is set to
+      <filename>&amp;{launcher.project.location}/data/xmlConnectorData.xml</filename>.
      </para>
      <para>
       The <literal>&amp;{launcher.project.location}</literal>, in this case, is
