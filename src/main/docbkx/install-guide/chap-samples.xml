@@ -1210,9 +1210,8 @@ $ ./startup.sh -p samples/sample5</screen>
 
     <para>
      Now that you know the files and port numbers to use, it is time to
-     configure your instance of OpenDJ. For sample 6, use the GUI-based
-     OpenDJ installation tool. Download and start installing OpenDJ as described
-     in the OpenDJ Installation Guide chapter on <link xlink:show="new"
+     configure your instance of OpenDJ. Download and start installing OpenDJ as
+     described in the OpenDJ Installation Guide chapter on <link xlink:show="new"
      xlink:href="http://opendj.forgerock.org/opendj-server/doc/install-guide/index.html#chap-install-gui">
      <citetitle>Installing OpenDJ With the Quick Setup Wizard</citetitle>.</link>
     </para>
