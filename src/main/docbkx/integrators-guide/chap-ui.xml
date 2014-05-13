@@ -701,7 +701,7 @@ $ cp -r en fr-FR </screen>
     "changedPassword" : "Mot de passe a été modifié",
     "profileUpdateFailed" : "Problème lors de la mise à jour du profil",
     "profileUpdateSuccessful" : "Profil a été mis à jour",
-    "userNameUpdated" : "Nom d'utilisateur a été modifiée",
+    "userNameUpdated" : "Nom d'utilisateur a été modifié",
 .... </programlisting>
     </step>
     <step>
