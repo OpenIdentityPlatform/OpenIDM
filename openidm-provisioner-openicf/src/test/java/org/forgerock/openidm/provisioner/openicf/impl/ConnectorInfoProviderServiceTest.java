@@ -45,13 +45,14 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -59,18 +60,6 @@ import org.testng.annotations.Test;
  *
  */
 public class ConnectorInfoProviderServiceTest {
-
-    public static class InnerConnectorInfoProviderService extends ConnectorInfoProviderService {
-        @Override
-        public void activate(ComponentContext context) {
-            super.activate(context);
-        }
-
-        @Override
-        public void deactivate(ComponentContext context) {
-            super.deactivate(context);
-        }
-    }
 
     private Dictionary properties = null;
     private JsonValue connectorInfoProviderServiceConfiguration = null;
@@ -94,6 +83,7 @@ public class ConnectorInfoProviderServiceTest {
                 new JsonValue((new ObjectMapper()).readValue(config, Map.class));
 
         properties = new Hashtable<String, Object>();
+        properties.put(ComponentConstants.COMPONENT_NAME, getClass().getName());
         properties.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, config);
 
         // Set root
@@ -105,9 +95,18 @@ public class ConnectorInfoProviderServiceTest {
         ComponentContext context = mock(ComponentContext.class);
         // stubbing
         when(context.getProperties()).thenReturn(properties);
-        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
+        ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
         instance.activate(context);
         testableConnectorInfoProvider = instance;
+    }
+
+    @AfterTest
+    public void afterTest() throws Exception {
+        ComponentContext context = mock(ComponentContext.class);
+        // stubbing
+        when(context.getProperties()).thenReturn(properties);
+        testableConnectorInfoProvider.deactivate(context);
+        testableConnectorInfoProvider = null;
     }
 
     // @Test(expectedExceptions = ComponentException.class)
@@ -177,7 +176,6 @@ public class ConnectorInfoProviderServiceTest {
         assertThat(result).isNotNull().as("XML connector must be in /connectors/ directory")
                 .isNotEmpty();
     }
-
 
     @Test(enabled = false)
     public void testPropertiesToEncrypt() throws Exception {

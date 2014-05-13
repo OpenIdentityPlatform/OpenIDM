@@ -36,7 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
-        <openicf.framework.version>1.1.2.0</openicf.framework.version>
+        <openicf.framework.version>1.4.0.0-RC1</openicf.framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -72,6 +72,11 @@
                     <artifactId>connector-test-common</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>connector-framework</artifactId>
+            <version>${openicf.framework.version}</version>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->
@@ -119,6 +124,18 @@
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
             <version>${openicf.framework.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>groovy-connector</artifactId>
+            <version>1.4.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -192,10 +209,39 @@
                                     <artifactId>csvfile-connector</artifactId>
                                     <version>1.1.0.1</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <artifactId>groovy-connector</artifactId>
+                                    <version>1.4.0.0-SNAPSHOT</version>
+                                </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${project.build.testOutputDirectory}/connectors
+                            <outputDirectory>
+                                ${project.build.testOutputDirectory}/connectors
                             </outputDirectory>
                             <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                    <!-- Unpack sample scripts -->
+                    <execution>
+                        <id>unpack-connector-samples</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <artifactId>groovy-connector</artifactId>
+                                    <version>1.4.0.0-SNAPSHOT</version>
+                                    <classifier>samples</classifier>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.testOutputDirectory}/samples
+                            </outputDirectory>
+                            <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
                         </configuration>
                     </execution>
                     <!--execution>

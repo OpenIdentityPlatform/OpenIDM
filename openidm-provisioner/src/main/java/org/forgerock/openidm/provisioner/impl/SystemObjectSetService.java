@@ -101,12 +101,24 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     @Reference(referenceInterface = ProvisionerService.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            bind = "bindProvisionerServices",
-            unbind = "unbindProvisionerServices",
+            bind = "bindProvisionerService",
+            unbind = "unbindProvisionerService",
             policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
+    protected void bindProvisionerService(ProvisionerService service, Map properties) {
+        provisionerServices.put(service.getSystemIdentifier(), service);
+    }
+
+    protected void unbindProvisionerService(ProvisionerService service, Map properties) {
+        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+            if (service.equals(entry.getValue())) {
+                provisionerServices.remove(entry.getKey());
+                break;
+            }
+        }
+    }
 
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
     RouteService routeService;
@@ -133,22 +145,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
 
-    protected void bindProvisionerServices(ProvisionerService service, Map properties) {
-        provisionerServices.put(service.getSystemIdentifier(), service);
-//        logger.info("ProvisionerService {} is bound with system identifier {}.",
-//                properties.get(ComponentConstants.COMPONENT_ID),
-//                service.getSystemIdentifier());
-    }
-
-    protected void unbindProvisionerServices(ProvisionerService service, Map properties) {
-        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-            if (service.equals(entry.getValue())) {
-                provisionerServices.remove(entry.getKey());
-                break;
-            }
-        }
-//        logger.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
-    }
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
@@ -160,7 +156,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     handler.handleError(e);
                 } catch (Exception e) {
                     handler.handleError(new InternalServerErrorException(e));
-                } 
+                }
             } else {
                 handler.handleError(new ServiceUnavailableException("The required service is not available"));
             }
@@ -313,7 +309,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             throw new ExecutionException(e);
         }
     }
-    
+
     /**
      * @param action the requested action
      * @return true if the action string is to live sync
@@ -325,7 +321,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     /**
      * Live sync the specified provisioner resource
      * @param source the URI of the provisioner instance to live sync
-     * @param detailedFailure whether in the case of failures additional details such as the 
+     * @param detailedFailure whether in the case of failures additional details such as the
      * record content of where it failed should be included in the response
      */
     private JsonValue liveSync(String source, boolean detailedFailure) throws ResourceException {
