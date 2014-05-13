@@ -24,11 +24,28 @@
 
 /*
  * Default mapping script for processing effectiveAssignments
- * Supported operations: "replaceTarget", "mergeWithTarget"
+ * Assignment and unassignment operations are configured as scripts.
+ * An example operation configuration is:
+ * {
+ *    "file" : "roles/replaceTarget.js",
+ *    "type" : "text/javascript"
+ * }; 
  */
 
+// The result map
 var map = { "result" : true };
+// The "assignments" configured for this mapping
 var assignments = config.assignments;
+
+var defaultAssignmentOperation = { 
+        "file" : "roles/replaceTarget.js",
+        "type" : "text/javascript"
+    };
+
+var defaultUnassignmentOperation = { 
+        "file" : "roles/removeFromTarget.js",
+        "type" : "text/javascript"
+    };
 
 function mergeValues(target, name, value) {
     if (target[name] != null && target[name] instanceof Array) {
@@ -47,34 +64,74 @@ function mergeValues(target, name, value) {
     }
 }
 
-if (assignments != null) {
-    var effectiveAssignments = source.effectiveAssignments;
-    if (effectiveAssignments != null) {
-        for (var key in effectiveAssignments) {
-            if (assignments.indexOf(key) != -1) {
-                var assignment = effectiveAssignments[key];
-                var attributes = assignment.attributes;
-                //for (var attributeName in attributes) {
-                for (var i = 0; i<attributes.length; i++) {
-                    //var attribute = attributes[attributeName];
-                    var attribute = attributes[i];
-                    var operation = attribute.operation;
-                    var value = attribute.value;
-                    var name = attribute.name;
-                    if (operation == null) {
-                        // Default to replace and use the entire value
-                        operation = "replaceTarget";
-                    }
-                    // Process the operation
-                    if (operation == "replaceTarget") {
-                        mergeValues(target, name, value);
-                    } else if (operation == "mergeWithTarget") {
-                        if (existingTarget[name] !== null) {
-                            mergeValues(target, name, existingTarget[name]);
+function getConfig(baseConfig) {
+    scope.sourceObject = source;
+    scope.targetObject = target;
+    scope.existingTargetObject = existingTarget;
+    for (var key in baseConfig) {
+        scope[key] = baseConfig[key];
+    }
+    return scope;
+}
+
+function execOnScript(scriptConfig) {
+    var result = openidm.action("script", "eval", {}, getConfig(scriptConfig));
+    for (key in target) { 
+        delete target[key]; 
+    }
+    for (key in result) { 
+        target[key] = result[key]; 
+    }
+}
+
+// Check for any assignments that have been removed or modified
+if (typeof oldSource !== "undefined") {
+    var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
+    var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
+    var unassigned = [];
+    // Loop through old assignments
+    for (var key in oldAssignments) {
+        // Check that this key is relevant to this mapping
+        if (assignments.indexOf(key) > -1) {
+            var oldAssignment = oldAssignments[key];
+            // Check if this old assignment is in the currentAssignments
+            if (!currentAssignments.hasOwnProperty(key)) {
+                // This assignment has been unassigned
+                var onUnassignment = oldAssignment.onUnassignment;
+                // Check if an onUnassignment script is configured
+                if (onUnassignment != "undefined" && onUnassignment != null) {
+                    execOnScript(onUnassignment);
+                }
+            } else {
+                // This assignment is still assigned, check for any removed attributes
+                var currentAssignment = currentAssignments[key];
+                var oldAttributes = oldAssignment.attributes;
+                var currentAttributes = currentAssignment.attributes;
+                // Loop through old attributes
+                for (var i = 0; i < oldAttributes.length; i++) {
+                    var oldAttribute = oldAttributes[i];
+                    var removed = true;
+                    for (var j = 0; j < currentAttributes.length; j++) {
+                        var currentAttribute = currentAttributes[j];
+                        if (oldAttribute.name == currentAttribute.name) {
+                            removed = false;
+                            break;
                         }
-                        mergeValues(target, name, value);
-                    } else {
-                        console.log("WARNING: Unsupported assignment operation: " + operation);
+                    }
+                    // Check if the old attribute has been removed
+                    if (removed) {
+                        var unassignmentOperation = oldAttribute.unassignmentOperation;
+                        if (unassignmentOperation == null) {
+                            // Default to replace and use the entire value
+                            unassignmentOperation = defaultUnassignmentOperation;
+                        }
+                        if (unassignmentOperation != "undefined" && unassignmentOperation != null) {
+                            var config = getConfig(unassignmentOperation);
+                            config.attributeName = oldAttribute.name;
+                            config.attributeValue = oldAttribute.value;
+                            var unassignmentResult = openidm.action("script", "eval", {}, config);
+                            target[oldAttribute.name] = unassignmentResult;
+                        }
                     }
                 }
             }
@@ -82,5 +139,39 @@ if (assignments != null) {
     }
 }
 
+// If any assignments are configured for this mapping, process any matching effectiveAssignments
+if (assignments != null) {
+    var effectiveAssignments = source.effectiveAssignments;
+    if (effectiveAssignments != null) {
+        for (var key in effectiveAssignments) {
+            if (assignments.indexOf(key) != -1) {
+                var assignment = effectiveAssignments[key];
+                var attributes = assignment.attributes;
+                var onAssignment = assignment.onAssignment;
+                // Check if an onAssignment script is configured
+                if (onAssignment != "undefined" && onAssignment != null) {
+                    execOnScript(onAssignment);
+                }
+
+                for (var i = 0; i < attributes.length; i++) {
+                    var attribute = attributes[i];
+                    var assignmentOperation = attribute.assignmentOperation;
+                    var value = attribute.value;
+                    var name = attribute.name;
+                    if (assignmentOperation == null) {
+                        // Default to replace and use the entire value
+                        assignmentOperation = defaultAssignmentOperation;
+                    }
+                    // Process the assignmentOperation
+                    var config = getConfig(assignmentOperation);
+                    config.attributeName = name;
+                    config.attributeValue = value;
+                    var assignmentResult = openidm.action("script", "eval", {}, config);
+                    target[name] = assignmentResult;
+                }
+            }
+        }
+    }
+}
 
 map;
