@@ -594,11 +594,60 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
    <literal>_var-</literal>. For example:
   </para>
   <screen>_var-processvariablename=processvariablevalue</screen>
-  <para>
-   The following query returns all process instances that were started by the
-   user <literal>openidm-admin</literal>:
-  </para>
   </section>
+ </section>
+
+ <section xml:id="activiti-custom-templates">
+  <title>Using Custom Templates for Activiti Workflows</title>
+  <para>
+   The embedded Activiti engine is integrated with the default user interface.
+   For simple workflows, you can use the standard Activiti form properties, and
+   have the UI render the corresponding generic forms automatically. If you
+   require a more complex form template, (including input validation,
+   rich input field types, complex CSS, and so forth) you must define a custom
+   form template.
+  </para>
+  <itemizedlist>
+   <para>
+    There are two ways in which you can define custom form templates for your
+    workflows:
+   </para>
+   <listitem>
+    <para>
+     Create an HTML template, and refer to that template in the workflow
+     definition.
+    </para>
+    <para>
+     This is the recommended method of creating custom form templates. To refer
+     to the HTML template in the workflow definition, use the
+     <literal>activiti:formKey</literal> attribute, for example
+     <literal>activiti:formKey="nUCStartForm.xhtml"</literal>.
+    </para>
+    <para>The HTML file must be deployed as part of the workflow definition.
+     Create a .zip file that contains the HTML template and the workflow
+     definition file. Rename the .zip file with a .bar extension.
+    </para>
+    <para>
+     For a sample workflow that uses external, referenced form templates, see
+     <literal>samples/usecase/workflow/newUserCreate.bpmn20.xml</literal>. The
+     HTML templates, and the corresponding .bar file are included in that
+     directory.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Use an embedded template within the workflow definition.
+    </para>
+    <para>
+     This method is not ideal, because the HTML code must be escaped, and is
+     difficult to read, edit, or maintain, as a result. Also, sections of HTML
+     code will most likely need to be duplicated if your workflow includes
+     multiple task stages. However, you might want to use this method if your
+     form is small, not too complex and you do not want to bother with creating
+     a separate HTML file and .bar deployment.
+    </para>
+   </listitem>
+  </itemizedlist>
  </section>
 
  <section xml:id="workflows-REST">
