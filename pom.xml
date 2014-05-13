@@ -391,6 +391,11 @@
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-web-token</artifactId>
+                <version>${commons.forgerock-rest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-patch</artifactId>
                 <version>${commons.forgerock-rest.version}</version>
             </dependency>
