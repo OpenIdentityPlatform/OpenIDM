@@ -22,43 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var mappings,
-    syncConfig,
-    sourceQuery,
-    sourceQueryId,
-    result, 
-    params = {
-        "waitForCompletion": "true"
-    },
-    value = {
-    	"sourceQuery" : {
-            "queryId": "get-users-of-direct-role",
-            "role": resourceName	
-        }
+var users,
+    query = {
+        "_queryId": "get-users-of-direct-role", 
+        "role": resourceName
     };
 
-// Check if default sourceQuery is overridden
-if (sourceQuery) {
-	value.sourceQuery = sourceQuery;
-}
 
-// Check if the queryId is overridden
-if (sourceQueryId) {
-	value.sourceQuery.queryId = sourceQueryId;
-}
+// Query users of role
+users = openidm.query("managed/user", query).result;
 
-// Get sync mappings
-syncConfig = openidm.read("config/sync");
-
-// Iterate over mappings calling recon on each one
-if (syncConfig && syncConfig.mappings) {
-    mappings = syncConfig.mappings;
-    for (i = 0; i < mappings.length; i++) {
-        var mapping = mappings[i];
-        if (mapping.source == "managed/user") {
-            var name = mapping.name;
-            params.mapping = name;
-            openidm.action("recon", "recon", params, value);
-        }
-    }
+for (var i = 0; i < users.length; i++) {
+    var user = users[i];
+    logger.debug("Trigger sync check for user: {}", user);
+    openidm.action("managed/user/" + user._id, "triggerSyncCheck", {}, {});
 }
