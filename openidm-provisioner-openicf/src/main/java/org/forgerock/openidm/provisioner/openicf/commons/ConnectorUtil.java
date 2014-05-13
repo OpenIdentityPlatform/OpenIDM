@@ -85,6 +85,7 @@ public class ConnectorUtil {
     private static final String OPENICF_RESULTSHANDLER_CONFIG_OPTION = "resultsHandlerConfig";
     private static final String OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER = "enableNormalizingResultsHandler";
     private static final String OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER = "enableFilteredResultsHandler";
+    private static final String OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER = "enableCaseInsensitiveFilter";
     private static final String OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER = "enableAttributesToGetSearchResultsHandler";
     private static final String OPENICF_OPERATION_TIMEOUT = "operationTimeout";
     public static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";
@@ -119,6 +120,8 @@ public class ConnectorUtil {
     public static final String JAVA_TYPE_SCRIPT = "JAVA_TYPE_SCRIPT";
     public static final String JAVA_TYPE_UID = "JAVA_TYPE_UID";
     public static final String JAVA_TYPE_URI = "JAVA_TYPE_URI";
+    public static final String JAVA_TYPE_BYTE = "JAVA_TYPE_BYTE";
+    public static final String JAVA_TYPE_PRIMITIVE_BYTE = "JAVA_TYPE_PRIMITIVE_BYTE";
 
 
     private static final Map<String, Class> typeMap = new HashMap<String, Class>(43);
@@ -161,6 +164,8 @@ public class ConnectorUtil {
         typeMap.put(JAVA_TYPE_SCRIPT, Script.class);
         typeMap.put(JAVA_TYPE_UID, Uid.class);
         typeMap.put(JAVA_TYPE_URI, URI.class);
+        typeMap.put(JAVA_TYPE_BYTE, Byte.class);
+        typeMap.put(JAVA_TYPE_PRIMITIVE_BYTE, Byte.TYPE);
     }
 
     private static final String BUFFER_SIZE = "bufferSize";
@@ -285,6 +290,9 @@ public class ConnectorUtil {
         if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()) {
             target.setEnableFilteredResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).asBoolean());
         }
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()) {
+            target.setEnableCaseInsensitiveFilter(source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).asBoolean());
+        }
         if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()) {
             target.setEnableAttributesToGetSearchResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).asBoolean());
         }
@@ -301,6 +309,7 @@ public class ConnectorUtil {
         Map<String, Object> config = new LinkedHashMap<String, Object>(5);
         config.put(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER, info.isEnableNormalizingResultsHandler());
         config.put(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER, info.isEnableFilteredResultsHandler());
+        config.put(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER, info.isEnableCaseInsensitiveFilter());
         config.put(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER, info.isEnableAttributesToGetSearchResultsHandler());
         return config;
     }

@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.provisioner.openicf;
+package org.forgerock.openidm.provisioner.openicf.impl;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -41,13 +41,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -79,7 +78,6 @@ import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
@@ -152,7 +150,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     // Private
     private Map<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>> remoteFrameworkConnectionInfo =
             new HashMap<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>>();
-    private ScheduledExecutorService scheduledExecutorService = null;
+    private Timer timer = null;
     private List<URL> connectorURLs = null;
     private ClassLoader bundleParentClassLoader = null;
     private final MetaDataProviderCallback[] callback = new MetaDataProviderCallback[1];
@@ -179,7 +177,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         public void handleEvent(ConnectorEvent connectorEvent) {
             if (null == connectorEvent)
                 return;
-            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent.getTopic(), connectorEvent.getSource());
+            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent.getTopic(),
+                    connectorEvent.getSource());
 
             MetaDataProviderCallback cb = callback[0];
             if (null != cb && ConnectorEvent.CONNECTOR_REGISTERED.equals(connectorEvent.getTopic())) {
@@ -207,7 +206,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                         if (connectorLocation
                                                 .equals(ConnectorReference.ConnectorLocation.OSGI)) {
                                             listener.addingConnectorInfo(ci,
-                                                    osgiConnectorFacadeFactory);
+                                                    connectorFacadeFactory);
                                         } else {
                                             listener.addingConnectorInfo(ci, ConnectorFacadeFactory
                                                     .getInstance());
@@ -238,14 +237,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      */
     @Reference(referenceInterface = ConnectorInfoManager.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
-    private ConnectorInfoManager osgiConnectorInfoManager = null;
+    private ConnectorInfoManager connectorInfoManager = null;
 
     /**
      * ConnectorFacadeFactory service.
      */
     @Reference(referenceInterface = ConnectorFacadeFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
-    private ConnectorFacadeFactory osgiConnectorFacadeFactory = null;
+    private ConnectorFacadeFactory connectorFacadeFactory = null;
 
     /**
      * ConnectorEventPublisher service.
@@ -262,7 +261,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     @Activate
-    protected void activate(ComponentContext context) {
+    public void activate(ComponentContext context) {
         logger.trace("Activating Service with configuration {}", context.getProperties());
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 
@@ -313,8 +312,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                     .getUnCheckedRemoteManager(rfi);
                     if (connectorInfoManager instanceof Runnable
                             && connectorInfoManager instanceof ConnectorEventPublisher) {
-                        if (null == scheduledExecutorService) {
-                            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+                        if (null == timer) {
+                            timer = new Timer("OpenIDM Remote Connector Server Timer");
                         }
                         pair.second = new ConnectorEventHandlerImpl(name);
                         ((ConnectorEventPublisher) connectorInfoManager)
@@ -333,9 +332,19 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                          * .get("heartbeatThreshold").defaultTo
                          * (1).expect(Number.class);
                          */
-                        scheduledExecutorService.scheduleWithFixedDelay(
-                                (Runnable) connectorInfoManager, 0, heartbeatInterval.asLong(),
-                                TimeUnit.SECONDS);
+                        final Runnable task = (Runnable) connectorInfoManager;
+                        try {
+                            task.run();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    task.run();
+                                }
+                            }, heartbeatInterval.asLong());
+                        } catch (IllegalStateException e) {
+                            //The task has been scheduled or the scheduler is cancelled. This is safe to ignore this
+                            logger.debug(e.getMessage(), e);
+                        }
                     }
                 } else {
                     logger.error("RemoteFrameworkConnectionInfo has no name");
@@ -387,12 +396,12 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     @Deactivate
-    protected void deactivate(ComponentContext context) {
+    public void deactivate(ComponentContext context) {
         logger.trace("Deactivating Component: {}", context.getProperties().get(
                 ComponentConstants.COMPONENT_NAME));
-        if (null != scheduledExecutorService) {
-            scheduledExecutorService.shutdown();
-            scheduledExecutorService = null;
+        if (null != timer) {
+            timer.cancel();
+            timer = null;
         }
         connectorEventHandler.clear();
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
@@ -495,7 +504,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                             .getLocalManager(getConnectorURLs(), getBundleParentClassLoader());
             break;
         case OSGI:
-            connectorInfoManager = osgiConnectorInfoManager;
+            connectorInfoManager = this.connectorInfoManager;
             break;
         case REMOTE:
             Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler> rfci =
@@ -571,7 +580,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 
             if (null != ci) {
                 if (connectorReference.equals(ConnectorReference.ConnectorLocation.OSGI)) {
-                    handler.addingConnectorInfo(ci, osgiConnectorFacadeFactory);
+                    handler.addingConnectorInfo(ci, connectorFacadeFactory);
                 } else {
                     handler.addingConnectorInfo(ci, ConnectorFacadeFactory.getInstance());
                 }
@@ -602,8 +611,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         List<ConnectorInfo> result =
                 new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
 
-        if (null != osgiConnectorInfoManager) {
-            result.addAll(osgiConnectorInfoManager.getConnectorInfos());
+        if (null != this.connectorInfoManager) {
+            result.addAll(this.connectorInfoManager.getConnectorInfos());
         }
         for (Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler> entry : remoteFrameworkConnectionInfo
                 .values()) {
@@ -632,8 +641,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             result.add(connectorReference);
         }
 
-        if (null != osgiConnectorInfoManager) {
-            for (ConnectorInfo info : osgiConnectorInfoManager.getConnectorInfos()) {
+        if (null != this.connectorInfoManager) {
+            for (ConnectorInfo info : this.connectorInfoManager.getConnectorInfos()) {
                 Map<String, Object> connectorReference =
                         ConnectorUtil.getConnectorKey(info.getConnectorKey());
                 connectorReference.put("displayName", info.getConnectorDisplayName());
@@ -674,9 +683,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         try {
             ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
             ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
-            if (null == facade && null != osgiConnectorInfoManager) {
+            if (null == facade && null != connectorInfoManager) {
                 try {
-                    facade = osgiConnectorFacadeFactory.newInstance(configuration);
+                    facade = this.connectorFacadeFactory.newInstance(configuration);
                 } catch (Exception e) {
                     logger.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
                 }
@@ -701,9 +710,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
-        if (null == facade && null != osgiConnectorInfoManager) {
+        if (null == facade && null != connectorInfoManager) {
             try {
-                facade = osgiConnectorFacadeFactory.newInstance(configuration);
+                facade = this.connectorFacadeFactory.newInstance(configuration);
             } catch (Exception e) {
                 logger.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
             }
