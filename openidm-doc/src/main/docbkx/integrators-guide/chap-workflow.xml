@@ -905,7 +905,7 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
     <term><literal>openidm/workflow/taskdefinition</literal></term>
     <listitem>
      <para>
-      Query the list of tasks defined for a specific process defintion. For
+      Query the list of tasks defined for a specific process definition. For
       example:
      </para>
      <screen><userinput>$ curl \
