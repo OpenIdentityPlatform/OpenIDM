@@ -18,10 +18,12 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -30,7 +32,6 @@ import java.util.*;
  * @version $Revision$ $Date$
  */
 public class BasicCommandScope extends CustomCommandScope {
-
     /**
      * {@inheritDoc}
      */
@@ -53,10 +54,32 @@ public class BasicCommandScope extends CustomCommandScope {
     @Descriptor("Displays available commands.")
     public void help(CommandSession session) {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
+        PrintStream console = session.getConsole();
+
         for (CustomCommandScope cmdScope : ldr) {
-            if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
-                for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
-                    session.getConsole().append("\t").append(cmdScope.getScope()).append(":").append(entry.getKey()).append("\t").println(entry.getValue());
+            String scope = cmdScope.getScope();
+            Map<String, String> functionMap = cmdScope.getFunctionMap();
+
+            if (StringUtils.isNotEmpty(scope) && functionMap != null) {
+                int maxEntryLen = 0;
+
+                for (Map.Entry<String, String> entry : functionMap.entrySet()) {
+                    int len = scope.length() + entry.getKey().length() + 4; // 4 for ':' +3 space
+                    maxEntryLen = len > maxEntryLen ? len : maxEntryLen;
+                }
+
+                StringBuilder spaceBuilder = new StringBuilder();
+                for (int i = 0; i < maxEntryLen; i++)
+                    spaceBuilder.append(' ');
+                String spacer = spaceBuilder.toString();
+
+                for (Map.Entry<String, String> entry : functionMap.entrySet()) {
+                    String name = scope + ":" + entry.getKey();
+                    String desc = entry.getValue();
+
+                    console.append(LEAD_OPTION_SPACE).append(name)
+                            .append(spacer.substring(Math.min(name.length(), spacer.length())))
+                            .println(desc);
                 }
             }
         }

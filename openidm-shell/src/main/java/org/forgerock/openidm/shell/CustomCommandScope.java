@@ -43,8 +43,8 @@ import org.forgerock.openidm.shell.felixgogo.MetaVar;
  * @version $Revision$ $Date$
  */
 public abstract class CustomCommandScope {
-    private static String LEAD_OPTION_SPACE = "  ";
-    private static String OPTIONS_SPACE = "                                  ";
+    protected static final String LEAD_OPTION_SPACE = "  ";
+    protected static final String OPTIONS_SPACE = "                                  ";
 
     /**
      * Get the {@link org.apache.felix.service.command.CommandProcessor#COMMAND_FUNCTION} value.
