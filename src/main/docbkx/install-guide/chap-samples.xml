@@ -58,22 +58,25 @@
     <secondary>Samples</secondary>
    </indexterm>
 
-   <para>Each sample directory in <filename>openidm/samples/</filename> contains
-    a list of subdirectories, such as <filename>conf/</filename> and
-    <filename>script/</filename>. To start OpenIDM with a
-    <filename>/path/to/openidm/samples/sampleX</filename> configuration,
-    navigate to the <filename>/path/to/openidm</filename> directory and  /configure a new installation
-   for one of the samples is to use the <literal>-p</literal> option of the
-   <literal>startup</literal> command to point to the directory whose 
-   configuration you want to use. Some, but not all samples require additional 
-   software, such as an external LDAP server or database.</para>
+   <para>
+    Each sample directory in <filename>openidm/samples/</filename> contains a
+    number of subdirectories, such as <filename>conf/</filename> and
+    <filename>script/</filename>. To start OpenIDM with a sample configuration,
+    navigate to the <filename>/path/to/openidm</filename> directory and use the
+    <literal>-p</literal> option of the <command>startup</command> command to
+    point to the sample whose configuration you want to use. Some, but not all
+    samples require additional software, such as an external LDAP server or
+    database.
+   </para>
    
-   <para>When you move from one sample to the next, bear in mind that you are
-   changing the OpenIDM configuration. For information on how configuration 
-   changes work, see <link xlink:href="integrators-guide#when-configuring-notes" 
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Changing the Configuration</citetitle></link> in the 
-   <citetitle>Integrator's Guide</citetitle>.</para>
+   <para>
+    When you move from one sample to the next, bear in mind that you are
+    changing the OpenIDM configuration. For information on how configuration
+    changes work, see <link xlink:href="integrators-guide#when-configuring-notes"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the
+    Configuration</citetitle></link> in the <citetitle>Integrator's
+    Guide</citetitle>.
+   </para>
   </section>
 
   <section xml:id="preparing-openidm">
@@ -798,39 +801,50 @@ $ curl \
    <primary>Samples</primary>
    <secondary>Sample 3 - Scripted SQL</secondary>
   </indexterm>
+  <para>
+   Sample 3 shows an example configuration for the Scripted SQL connector. The
+   Scripted SQL connector communicates with the database through configurable
+   SQL scripts. Each operation, like create or delete, is represented by its own
+   script.
+  </para>
 
-  <para>Sample 3 shows an example configuration for the Scripted SQL connector.
-   The Scripted SQL connector communicates with the database through
-   configurable SQL scripts. Each operation, like create or delete, is
-   represented by its own script.</para>
-
-  <para>Prepare a fresh installation of OpenIDM before trying this
-   sample.</para>
+  <para>
+   Prepare a fresh installation of OpenIDM before trying this sample.
+  </para>
 
   <section xml:id="external-mysql-config-sample3">
    <title>External Configuration</title>
-
-   <para>In this example OpenIDM communicates with an external MySQL database
-    server.</para>
-
+   <para>
+    In this example OpenIDM communicates with an external MySQL database server.
+   </para>
    <para>
     Make sure MySQL is running.
    </para>
 
    <itemizedlist>
     <para>The sample expects the following configuration for MySQL:</para>
-    <listitem><para>The database is available on the local host.</para></listitem>
-    <listitem><para>The database listens on port 3306.</para></listitem>
-    <listitem><para>You can connect over the network to the database with user
-     <literal>root</literal> and password <literal>password</literal>.</para></listitem>
-    <listitem><para>MySQL serves a database called <literal>HRDB</literal> with
-     a table called <literal>Users</literal>.</para></listitem>
-    <listitem><para>The database schema is as described in the data definition
-     language file,
-     <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
-     Import the file into MySQL before running the sample.</para>
+    <listitem>
+     <para>The database is available on the local host.</para>
+    </listitem>
+    <listitem>
+     <para>The database listens on port 3306.</para>
+    </listitem>
+    <listitem>
+     <para>You can connect over the network to the database with user
+     <literal>root</literal> and password <literal>password</literal>.</para>
+    </listitem>
+    <listitem>
+     <para>MySQL serves a database called <literal>HRDB</literal> with a table
+      called <literal>Users</literal>.</para>
+    </listitem>
+    <listitem>
+     <para>
+      The database schema is as described in the data definition language file,
+      <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
+      Import the file into MySQL before running the sample.
+     </para>
      <screen width="87"><?dbfo pgwide="1"?>
-$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+      $ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
 </userinput>
 Enter password:
 $ </screen>
@@ -890,15 +904,14 @@ Database changed
      a database for production, more secure algorithms should be used.
     </para>
    </note>
+  </section>
 
-  </section>                                                                                                                       sp
-
-  <section xml:id="install-sample3">
+<section xml:id="install-sample3">
    <title>Install the Sample</title>
 
    <itemizedlist>
     <listitem><para>Prepare OpenIDM as described in <xref
-     linkend="preparing-openidm"/>.</para></listitem>
+    linkend="preparing-openidm"/>.</para></listitem>
     <listitem>
      <para>OpenIDM requires a MySQL driver, the MySQL Connector/J. Download
       MySQL Connector/J, version 5.1 or later. Unpack the delivery and
@@ -917,9 +930,11 @@ Database changed
   <section xml:id="run-sample3">
    <title>Run the Sample</title>
 
-   <para>The sample 3 <filename>sync.json</filename> configuration file
-    contains a mapping to reconcile OpenIDM and the external database.
-    Run the reconciliation with the following command.</para>
+   <para>
+    The sample 3 <filename>sync.json</filename> configuration file contains a
+    mapping to reconcile OpenIDM and the external database. Run the
+    reconciliation with the following command.
+   </para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl \
 --cacert self-signed.crt \
@@ -929,18 +944,21 @@ Database changed
 --request POST \
 "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
 
-   <para>Reconciliation creates the five users from the database in the
-    OpenIDM repository. Check the result with the following command.</para>
+   <para>
+    Reconciliation creates the five users from the database in the OpenIDM
+    repository. Check the result with the following command.
+   </para>
 
-   <screen>
-$ curl \
+   <screen>$ curl \
 --cacert self-signed.crt \
 --header "X-OpenIDM-Username: openidm-admin" \
 --header "X-OpenIDM-Password: openidm-admin" \
 --request GET
 "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
 
-   <para>The result should resemble the following JSON object.</para>
+   <para>
+    The result should resemble the following JSON object.
+   </para>
 
    <programlisting language="javascript">
 {
@@ -990,6 +1008,7 @@ $ curl \
 "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd?_prettyPrint=true"</screen>
 
   </section>
+
  </section>
 
  <section xml:id="more-sample4">
