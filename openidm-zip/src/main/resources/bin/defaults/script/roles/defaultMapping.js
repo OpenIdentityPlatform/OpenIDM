@@ -37,15 +37,30 @@ var map = { "result" : true };
 // The "assignments" configured for this mapping
 var assignments = config.assignments;
 
-var defaultAssignmentOperation = { 
-        "file" : "roles/replaceTarget.js",
-        "type" : "text/javascript"
-    };
+// Default operations
+var defaultAssignmentOperation = "replaceTarget";
+var defaultUnassignmentOperation = "removeFromTarget";
 
-var defaultUnassignmentOperation = { 
-        "file" : "roles/removeFromTarget.js",
-        "type" : "text/javascript"
-    };
+// A map of operation aliases to their corresponding script configurations
+var operations = {
+        "replaceTarget" : { 
+            "file" : "roles/replaceTarget.js",
+            "type" : "text/javascript"
+        },
+        "mergeWithTarget" : { 
+            "file" : "roles/mergeWithTarget.js",
+            "type" : "text/javascript"
+        },
+        "removeFromTarget" : { 
+            "file" : "roles/removeFromTarget.js",
+            "type" : "text/javascript"
+        },
+        "noOp" : { 
+            "file" : "roles/noOp.js",
+            "type" : "text/javascript"
+        } 
+}
+
 
 function mergeValues(target, name, value) {
     if (target[name] != null && target[name] instanceof Array) {
@@ -64,12 +79,28 @@ function mergeValues(target, name, value) {
     }
 }
 
-function getConfig(baseConfig) {
+// Returns the script configuration with the necessary scope fields added
+function getConfig(script) {
+    var config;
+    var scope = {};
+    // Check if the script is an alias or a full configuration
+    if (script instanceof Object) {
+        // Full configuration
+        config = script;
+    } else if (script instanceof String || typeof(script) === 'string') {
+        // Alias
+        if (operations.hasOwnProperty(script)) {
+            config = operations[script];
+        } else {
+            throw "Unsupported operation alias " + script;
+        }
+    }
+    // Add additional scope fields
     scope.sourceObject = source;
     scope.targetObject = target;
     scope.existingTargetObject = existingTarget;
-    for (var key in baseConfig) {
-        scope[key] = baseConfig[key];
+    for (var key in config) {
+        scope[key] = config[key];
     }
     return scope;
 }

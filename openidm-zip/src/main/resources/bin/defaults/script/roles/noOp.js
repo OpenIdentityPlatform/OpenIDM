@@ -23,33 +23,10 @@
  */
 
 /*
- * This script removes an attribute value from the existing target attribute and returns the new target attribute value
+ * This script simply returns the mapped attribute value in the target object.
  * 
  * The following variables are supplied: 
  *   targetObject, sourceObject, existingTargetObject, attributeName, attributeValue
  */
 
-function removeValues(target, name, value) {
-    if (target[name] != null) {
-        var targetValue = target[name];
-        if (targetValue instanceof Array) {
-            for (var x = 0; x < value.length; x++) {
-                var index = targetValue.indexOf(value[x]);
-                if (index > -1) {
-                    targetValue.splice(index, 1);
-                }
-            }
-        } else if (targetValue instanceof Object) {
-            if (targetValue.hasOwnProperty(name)) {
-                delete targetValue[name];
-            }
-        }
-    }
-}
-
-if (existingTargetObject !== null && existingTargetObject !== undefined) {
-    removeValues(existingTargetObject, attributeName, attributeValue);
-    existingTargetObject[attributeName];
-} else {
-    null;
-}
+targetObject[attributeName];
