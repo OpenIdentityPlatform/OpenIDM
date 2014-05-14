@@ -53,8 +53,19 @@
 exports.fetch = function (resourceName) {
 
     var _ = require('lib/lodash'),
+        getException = function (e) {
+            if (_.has(e, "javaException") && _.has(e.javaException, "cause")) {
+                return e.javaException.cause.localizedMessage || e.javaException.cause.message;
+            } else if (_.has(e, "messageDetail") && _.has(e.messageDetail, "message")) {
+                return e.messageDetail.message;
+            } else if (_.has(e, "message")) {
+                return e.message;
+            } else {
+                return e;
+            }
+        },
         syncConfig = openidm.read("config/sync"),
-        currentResource = openidm.read(resourceName, null, context.current),
+        currentResource = {},
         resourceParts = resourceName.match(/(.*)\/(.*?)$/), // ["component/id", "component", "id"]
 
         component = resourceParts[1],
@@ -90,6 +101,12 @@ exports.fetch = function (resourceName) {
         }),
         allLinks = firstIdLinks.result.concat(secondIdLinks.result);
 
+        try {
+            currentResource = openidm.read(resourceName, null, context.current);
+        } catch (e) {
+            currentResource["error"] = getException(e);
+        }
+
         return _.extend(currentResource, {
             "linkedTo": _(allLinks)
 
@@ -103,7 +120,8 @@ exports.fetch = function (resourceName) {
                 // For each of the found links, determine the full linked resourceName and return some useful 
                 // information about it.
                 .map(function (l) {
-                    var linkedResourceName;
+                    var linkedResourceName,
+                        linkedResource = {};
 
                     if (resourceMap[l.linkType].firstContainer === component) {
                         linkedResourceName = resourceMap[l.linkType].secondContainer + '/' + l.secondId;
@@ -111,9 +129,15 @@ exports.fetch = function (resourceName) {
                         linkedResourceName = resourceMap[l.linkType].firstContainer + '/' + l.firstId;
                     }
 
+                    try {
+                        linkedResource = openidm.read(linkedResourceName, null, context.current);
+                    } catch (e) {
+                        linkedResource["error"] = getException(e);
+                    }
+
                     return {
                         "resourceName": linkedResourceName,
-                        "content": openidm.read(linkedResourceName, null, context.current),
+                        "content": linkedResource,
                         "linkType": l.linkType,
                         "mappings": _(syncConfig.mappings)
                                         .filter(function (m) {
