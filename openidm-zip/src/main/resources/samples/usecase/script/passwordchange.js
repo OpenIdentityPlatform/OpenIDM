@@ -3,10 +3,11 @@
 (function () {
     var params = {
  "userId" : objectID,
+ "emailEnabled" : "false",
  "_key": "passwordChangeReminder"
 };
  
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, params);
+openidm.create('workflow/processinstance', null, params);
     
     return true; // return true to indicate successful completion
 }());

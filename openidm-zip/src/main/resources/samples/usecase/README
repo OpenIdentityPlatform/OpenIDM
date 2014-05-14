@@ -285,3 +285,69 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
             Pick any user id from managed users where the managed user is not linked to any users in the csv file yet:
             if this use case is started after the initial reconciliation then pick e.g. user.5.
             If users are created e.g. by using sample2 that user can be used heres as well.
+
+Usecase5 - Certification workflow
+    In this use case we have a scheduled task fetching all the managed users and starting a certification workflow
+    for all of them.
+
+    1. Start OpenIDM with the configuration for usecase5.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase5
+
+    2. The scheduled task can be triggered by enabling the scheduled task in the 
+        samples/usecase/usecase5/conf/schedule-certification.json file.
+
+    3. Log in to the UI as user.0 (default password is 'Passw0rd').
+
+    4. Click on the Certification process task appearing on UI as task in the group queue
+        and assign the user task to user.0 (select 'Assign it to me'). The task appears now in 'My tasks'.
+
+    5. Click on the 'Details' button of the 'Access Status Check' task.
+        - 'Access to Business system:' and 'Access to Project system:' fields can be modified.
+        Those reflect the content of the 'accounts' field of the managed user being certified.
+
+    6. Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The decision can be
+        - Certify: no action will be taken, the certified user is not modified and the workflow terminates.
+        - Change: a new user task is created and assigned to systemadmin user.
+
+    7. If 'Change' was selected in the previous step log in to the UI as systemadmin.
+
+    8. Click on the 'Details' button of the 'Access Status Check' task.
+        - 'Access to Business system:' and 'Access to Project system:' fields can be modified.
+
+    9. Complete the task by clicking on 'Complete' button after selecting the Decision.
+        The decision can be
+        - Accept: the user being certified is updated by the actual values of the access fields
+            and a notification is sent to the user about the change
+            (visible on the UI after log in with the appropriate user).
+        - Reject: the user being certified will not be modified and a notification is sent to the manager
+            about the certification change request being rejected by systemadmin.
+
+
+Usecase6 - Password change reminder
+    In this use case we use TaskScanner to trigger a password change reminder workflow.
+    Every managed user created in OpenIDM has a dedicated attribute to store the date of the last password change event (lastPasswordSet).
+    This value is updated by an onStore script defined in managed.json which
+    sets the date of this attribute if a new password is stored for the user. The TaskScanner
+    scans that attribute and starts a workflow if the password was changed more than an hour ago.
+
+    The workflow is started by passwordchange.js javascript. There are two options to run this workflow:
+    - By default it sends the default OpenIDM notifications to the user (visible on the UI).
+
+    - It can send email notification to the user if configured. 
+        External email service of OpenIDM has to be configured using the following file:
+        samples/usecase/conf/external.email.json
+        Update the smtp settings of this file and copy it to samples/usecase/usecase6/conf/ folder.
+        Note that if you want to use this option you have to make sure that the 'mail' attribute of the
+        managed user(s) used for this test case are valid email addresses.
+
+        To enable email notifications change the following parameter of passwordchange.js:
+        change "emailEnabled" : "false", 
+        to "emailEnabled" : "true",
+
+    The workflow does the following:
+    - sends a notification to the user 
+    - five minutes later sends an other notification to the user (if password was not changed yet)
+    - two minutes later changes the user's 'accountStatus' to 'inactive' and sends notification to the user (if password was not changed yet)
