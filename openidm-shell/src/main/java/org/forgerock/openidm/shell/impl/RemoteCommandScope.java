@@ -119,11 +119,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
 
         if (StringUtils.isNotBlank(idmUrl)) {
-            if (idmUrl.endsWith("/")) {
-                resource.setBaseUri(idmUrl);
-            } else {
-                resource.setBaseUri(idmUrl + "/");
-            }
+            resource.setBaseUri( idmUrl.endsWith("/") ? idmUrl : idmUrl + "/" );
         }
 
         if (StringUtils.isNotBlank(idmPort)) {
