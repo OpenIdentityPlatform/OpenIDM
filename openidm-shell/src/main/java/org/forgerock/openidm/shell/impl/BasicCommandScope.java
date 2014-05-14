@@ -69,8 +69,11 @@ public class BasicCommandScope extends CustomCommandScope {
                 }
 
                 StringBuilder spaceBuilder = new StringBuilder();
-                for (int i = 0; i < maxEntryLen; i++)
+
+                for (int i = 0; i < maxEntryLen; i++) {
                     spaceBuilder.append(' ');
+                }
+
                 String spacer = spaceBuilder.toString();
 
                 for (Map.Entry<String, String> entry : functionMap.entrySet()) {
