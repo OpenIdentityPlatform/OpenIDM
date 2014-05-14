@@ -29,8 +29,7 @@
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          xmlns:xinclude="http://www.w3.org/2001/XInclude">
+          xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Scripting Reference</title>
     <indexterm>
         <primary>Scripting</primary>
@@ -874,6 +873,8 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                                 <para>onCreate, onUpdate, onDelete, onLink, onUnlink</para>
                             </listitem>
                         </varlistentry>
+                     <!-- what of postCreate, postUpdate, postDelete? -->
+
                         <varlistentry>
                             <term>Object filter</term>
                             <listitem>
@@ -911,7 +912,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                 </term>
                 <listitem>
                     <para>onCreate, onRead, onUpdate, onDelete, onValidate,
-                        onRetrieve and onStore
+                     onRetrieve, onStore, postCreate, postUpdate, and postDelete
                     </para>
                     <para><literal>managed.json</literal> supports only one script
                         per hook. If multiple scripts are defined for the same hook, only the last
@@ -959,13 +960,13 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term>onCreate</term>
+                <term>onCreate, postCreate</term>
                 <listitem>
                     <para>object, source, target</para>
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term>onDelete</term>
+                <term>onDelete, postDelete</term>
                 <listitem>
                     <para>object</para>
                 </listitem>
@@ -985,7 +986,9 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
             <varlistentry>
                 <term>onRetrieve</term>
                 <listitem>
-                    <para>object, property</para>
+                    <para>object (when called from either an object or a
+                     property storage trigger); property (only when
+                     called from a property storage trigger)</para>
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -1001,7 +1004,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                 </listitem>
             </varlistentry>
             <varlistentry>
-                <term>onUpdate</term>
+                <term>onUpdate, postUpdate</term>
                 <listitem>
                     <para>oldObject, newObject</para>
                 </listitem>

@@ -247,6 +247,7 @@
 
  <section xml:id="passthrough-auth">
   <title>Using Pass-Through Authentication</title>
+
   <para>
    In addition to the internal and managed user authentication modules, OpenIDM
    ${serverDocTargetVersion} supports a pass-through authentication mechanism.
@@ -254,41 +255,56 @@
    as part of the REST request are validated against those stored in a remote
    system, such as an LDAP server.
   </para>
+
   <para>
-   Pass-through authentication is not configured by default, and can be
+   The samples listed in the <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:show="new" xlink:href="install-guide#chap-samples"><citetitle>OpenIDM
+   Installation Guide</citetitle></link> include several different
+   options for authentication mechanisms.
+  </para>
+
+  <para>
+   Pass-through authentication is not configured by default It can be
    configured by adding the pass-through authentication module to the
    authentication configuration file
-   (<filename>conf/authentication.json</filename>). The structure of the
-   pass-through authentication configuration object is as follows:
+   (<filename>conf/authentication.json</filename>). The following excerpt from
+   that file illustrates the structure of the pass-through authentication
+   configuration object.
   </para>
+
   <programlisting language="javascript">
 "authModules" : [
-    {
-        "name" : "PASSTHROUGH",
-        "properties" : {
-            "augmentSecurityContext": {
-                "type" : "text/javascript",
-                "file" : "auth/passthroughAuthnPopulateContext.js"
-            },
-            "passThroughAuth" : "system/ldap/account",
-            "propertyMapping" : {
-                "authenticationId" : "uid",
-                "groupMembership" : "memberOf"
-            },
-            "groupRoleMapping" : {
-                "openidm-admin" : ["cn=admins"]
-            },
-            "managedUserLink" : "systemLdapAccounts_managedUser",
-            "defaultUserRoles" : [
-                "openidm-authorized"
-            ]
-        },
-        "enabled" : true
-    },
-...
+   {
+      "name" : "PASSTHROUGH",
+      "properties" : {
+         "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/passthroughAuthnPopulateContext.js"
+         },
+         "queryOnResource" : "system/ldap/account",
+         "propertyMapping" : {
+            "authenticationId" : "uid",
+            "groupMembership" : "memberOf"
+         },
+         "groupRoleMapping" : {
+            "openidm-admin" : ["cn=admins"]
+         },
+         "managedUserLink" : "systemLdapAccounts_managedUser",
+         "defaultUserRoles" : [
+            "openidm-authorized"
+         ]
+      },
+      "enabled" : true
+   },
+   ...
 ]
   </programlisting>
+
   <variablelist>
+   <para>
+    The properties shown in the excerpt from the <filename>authentication.json
+    </filename> configuration file are described here:
+   </para>
    <varlistentry>
     <term><literal>"name"</literal></term>
     <listitem>
@@ -304,11 +320,13 @@
     </listitem>
    </varlistentry>
   <varlistentry>
-    <term><literal>"passThroughAuth"</literal></term>
+    <term><literal>"queryOnResource"</literal></term>
     <listitem>
      <para>
-      The system end point against which the user authenticates, for example
-      <literal>"system/ldap/account"</literal>.
+      The system end point against which the user authenticates, such as
+      <literal>"system/ldap/account"</literal>,
+      <literal>"system/scriptedsql/account"</literal>, and
+      <literal>"system/ad/account"</literal>.
      </para>
     </listitem>
    </varlistentry>
@@ -354,9 +372,9 @@
       </listitem>
       <listitem>
        <para>
-        <literal>"groupMembership"</literal> specifies the name of the property
-        in the remote system that contains the list of groups of which the
-        authenticated user is a member, for example
+        <literal>"groupMembership"</literal> (optional) specifies the name of
+        the property in the remote system that contains the list of groups of
+        which the authenticated user is a member, for example
         <literal>"memberOf"</literal>, or <literal>"ldapGroups"</literal>.
        </para>
       </listitem>
@@ -383,7 +401,9 @@
       Used by the script specified in <literal>"augmentSecurityContext"</literal>
       to switch the context of an authenticated user from their original
       security context to a context that is based on the related
-      <literal>managed/user</literal> account.
+      <literal>managed/user</literal> account. The value is based on the
+      <literal>name</literal> of the mapping in the associated
+      <filename>sync.json</filename> file.
      </para>
      <para>
       The value of this property is the <literal>"links"</literal> entry
@@ -415,15 +435,68 @@
     </listitem>
    </varlistentry>
   </variablelist>
+
   <para>
-   A sample pass-through authentication configuration is provided in
-   <link xlink:show="new" xlink:href="install-guide#more-sample2"
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Sample 2</citetitle></link> in the
-   <citetitle>Installation Guide</citetitle>. In this sample, managed user
-   entries created from an LDAP directory server are able to log in to the
-   OpenIDM UI, using their LDAP credentials.
+   The content of the pass-through authentication object varies. Samples
+   2/2b/2c/2d, 3, 5, and 6 include slightly different versions of the
+   <filename>conf/authentication.json</filename> file.
   </para>
+
+  <variablelist>
+   <varlistentry>
+    <term>Samples 2, 2b, 2c, 2d (LDAP)</term>
+    <listitem>
+     <para>
+      Samples 2, 2b, 2c, and 2d relate to connections to an LDAP server.
+      Sample 5 is quite similar, as it uses XML information to masquerade as
+      an LDAP server. The <filename>authentication.json</filename> file
+      is identical in each of these samples.
+     </para>
+     <para>
+      In the common <filename>authentication.json</filename> file, the
+      <literal>queryOnResource</literal> endpoint is
+      <literal>system/ldap/account</literal>. The
+      <literal>managedUserLink</literal> is
+      <literal>systemLdapAccounts_managedUser</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Sample 3 (Scripted SQL)</term>
+    <listitem>
+     <para>
+      Sample 3 relates to a connection to a scripted SQL database. As such, the
+      <literal>queryOnResource</literal> endpoint is
+      <literal>system/scriptedsql/account</literal>. The
+      <literal>managedUserLink</literal> is
+      <literal>systemHrdb_managedUser</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Sample 5 (Synchronization of two resources)</term>
+    <listitem>
+     <para>
+      The XML files used in sample 5 simulate a connection between LDAP servers.
+      For that reason, the <filename>conf/authentication.json</filename> file
+      used in this sample is identical to that for sample 2/2b/2c/2d.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Sample 6 (LiveSync)</term>
+    <listitem>
+     <para>
+      The <literal>queryOnResource</literal> endpoint is
+      <literal>system/ad/account</literal>. The <literal>autheticationId</literal>
+      matches the AD attribute used for account names. The associated
+      <literal>managedUserLink</literal> is
+      <literal>systemAdAccounts_managedUser</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
  </section>
 
  <section xml:id="openidm-roles">
