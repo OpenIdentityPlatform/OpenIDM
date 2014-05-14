@@ -1459,8 +1459,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         }, operationOptionsBuilder.build());
                 handler.handleResult(
                         new QueryResult(
-                                searchResult.getPagedResultsCookie(),
-                                searchResult.getRemainingPagedResults()));
+                                searchResult != null ? searchResult.getPagedResultsCookie() : null,
+                                searchResult != null ? searchResult.getRemainingPagedResults() : -1));
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
