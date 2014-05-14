@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.repo;
 
+import org.forgerock.json.resource.servlet.HttpUtils;
+
 /**
  * Map key constants for Repository Queries
  *
@@ -54,8 +56,8 @@ public final class QueryConstants {
      * configured query. 
      * 
      * The alternative is to specify a query expression for an in-line query.
-     * 
-     * The configured query can contain tokens in the form of ${<param-map-key>} 
+     *
+     * The configured query can contain tokens in the form of ${<param-map-key>}
      * which will get substituted from the param map passed to the query.
      * 
      * When both an expression and ID are present, the query expression takes precedent
@@ -74,8 +76,8 @@ public final class QueryConstants {
      * resource queried by name. Example use: select * from ${_resource} where ...
      */
     public final static String RESOURCE_NAME = "_resource";
-    
-    
+
+
     // Keys in the query output
     
     /**
@@ -112,4 +114,14 @@ public final class QueryConstants {
      * All ObjectSets supporting query must support the query corresponding to this ID
      */    
     public final static String QUERY_ALL_IDS = "query-all-ids";
+
+    /**
+     * Pagination offset requested. Generally used in an OFFSET clause.
+     */
+    public final static String PAGED_RESULTS_OFFSET = HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
+
+    /**
+     * Page size requested. Generally used in a LIMIT clause.
+     */
+    public static final String PAGE_SIZE = HttpUtils.PARAM_PAGE_SIZE;
 }

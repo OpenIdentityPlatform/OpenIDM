@@ -155,6 +155,15 @@ public interface TableHandler {
     
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
                 throws SQLException, ResourceException;
+
+    /**
+     * Check if a given queryId exists in our set of known queries
+     *
+     * @param queryId Identifier for the query
+     *
+     * @return true if queryId is available
+     */
+    public boolean queryIdExists(final String queryId);
     
     /**
      * Query if a given exception signifies a well known error type

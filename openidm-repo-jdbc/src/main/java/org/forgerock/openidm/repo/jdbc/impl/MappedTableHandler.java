@@ -467,6 +467,11 @@ public class MappedTableHandler implements TableHandler {
         return queries.query(type, params, connection);
     }
 
+    @Override
+    public boolean queryIdExists(String queryId) {
+        return queries.queryIdExists(queryId);
+    }
+
     // TODO: make common to generic and explicit handlers
     /**
      * @inheritDoc

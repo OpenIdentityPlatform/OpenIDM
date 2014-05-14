@@ -28,10 +28,7 @@
 (function (resource, queryId, page, limit, orderBy, orderByDir, searching) {
 
     var pagingQueryId = (!searching) ? queryId : queryId + "-filtered",
-        pagingQueryArgs = request.additionalParameters,
-        countTotalQueryId = pagingQueryId + "-count",
-        countTotalQueryArgs = request.additionalParameters,
-        result = [];
+        pagingQueryArgs = request.additionalParameters;
 
     limit = parseInt(limit || 20);
     limit = (limit > 100) ? 100 : limit; // restrict limit to 100 records maximum
@@ -39,22 +36,21 @@
     offset = limit*(parseInt(page || 1)-1);
 
     pagingQueryArgs._queryId = pagingQueryId;
-    pagingQueryArgs.limit = limit;
-    pagingQueryArgs.skip = offset;
+    pagingQueryArgs._pageSize = limit;
+    pagingQueryArgs._pagedResultsOffset = offset;
     pagingQueryArgs.orderBy = orderBy;
     pagingQueryArgs.orderByDir = orderByDir;
 
-    pagingQueryId = openidm.query(resource, pagingQueryArgs);
+    var queryResult = openidm.query(resource, pagingQueryArgs);
 
-    countTotalQueryArgs._queryId = countTotalQueryId;
-    countTotalQueryId = openidm.query(resource, countTotalQueryArgs);
+    var totalResults = offset + queryResult.result.length + queryResult.remainingPagedResults;
 
     return [
         {
-        "total": Math.ceil(parseInt(countTotalQueryId.result[0].total)/limit),
+        "total": Math.ceil(parseInt(totalResults)/limit),
         "page": Math.ceil((offset+1)/limit),
-        "records": parseInt(countTotalQueryId.result[0].total),
-        "rows": pagingQueryId.result,
+        "records": parseInt(totalResults),
+        "rows": queryResult.result,
         "id": "_id"
         }
     ];
