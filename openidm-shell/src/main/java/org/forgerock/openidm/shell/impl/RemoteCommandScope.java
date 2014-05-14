@@ -119,7 +119,11 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
 
         if (StringUtils.isNotBlank(idmUrl)) {
-            resource.setBaseUri(idmUrl);
+            if (idmUrl.endsWith("/")) {
+                resource.setBaseUri(idmUrl);
+            } else {
+                resource.setBaseUri(idmUrl + "/");
+            }
         }
 
         if (StringUtils.isNotBlank(idmPort)) {
@@ -131,7 +135,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
     }
 
-    @Descriptor("Imports the configuration set from local 'conf' directory")
+    @Descriptor("Imports the configuration set from local 'conf' directory.")
     public void configimport(
             final CommandSession session,
 
@@ -157,7 +161,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
     }
 
-    @Descriptor("Imports the configuration set from local file/directory")
+    @Descriptor("Imports the configuration set from local file/directory.")
     public void configimport(
             final CommandSession session,
 
@@ -283,7 +287,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         }
     }
 
-    @Descriptor("exports all configurations to 'conf' folder")
+    @Descriptor("Exports all configurations to 'conf' folder.")
     public void configexport(
             CommandSession session,
 
@@ -305,7 +309,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         configexport(session, userPass, idmUrl, idmPort, "conf");
     }
 
-    @Descriptor("exports all configurations")
+    @Descriptor("Exports all configurations.")
     public void configexport(
             CommandSession session,
 
