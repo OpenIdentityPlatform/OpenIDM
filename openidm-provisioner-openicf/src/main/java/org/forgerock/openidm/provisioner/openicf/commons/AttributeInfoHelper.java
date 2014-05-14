@@ -322,6 +322,9 @@ public class AttributeInfoHelper {
      * @see {@link org.identityconnectors.framework.common.FrameworkUtil#checkOperationOptionType(Class)}
      */
     public void build(OperationOptionsBuilder builder, Object value) throws IOException {
+        if (value == null || (value instanceof JsonValue && !((JsonValue) value).isNull())) {
+            return;
+        }
         if (OperationOptions.OP_ATTRIBUTES_TO_GET.equals(name)) {
             builder.setAttributesToGet(getMultiValue(value, String.class));
         } else if (OperationOptions.OP_CONTAINER.equals(name)) {
