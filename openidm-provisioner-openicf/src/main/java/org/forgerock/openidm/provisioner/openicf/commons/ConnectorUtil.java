@@ -897,6 +897,28 @@ public class ConnectorUtil {
                         coerced = true;
                     }
                 }
+            } else if (targetClazz.equals(Byte.TYPE) || targetClazz.equals(Byte.class)) {
+                if (sourceClass == Byte.TYPE || sourceClass == Byte.class) {
+                    result = (T) source;
+                    coerced = true;
+                } else if (sourceClass == String.class) {
+                    if (targetClazz.equals(Byte.class)) {
+                        result = (T) new Byte((String) source);
+                        coerced = true;
+                    } else {
+                        result = (T) Byte.valueOf((String) source);
+                        coerced = true;
+                    }
+                } else if (source instanceof Number) {
+                    int sourceInt = ((Number) source).intValue();
+                    if (targetClazz.equals(Byte.TYPE)) {
+                        result = (T) Byte.valueOf((byte) sourceInt);
+                        coerced = true;
+                    } else if (sourceInt > Byte.MIN_VALUE || sourceInt < Byte.MAX_VALUE) {
+                        result = (T) Byte.valueOf((byte) sourceInt);
+                        coerced = true;
+                    }
+                }
             } else if (targetClazz.equals(byte[].class)) {
                 if (sourceClass == String.class) {
                     result = targetClazz.cast(((String) source).getBytes());

@@ -197,6 +197,36 @@ public class ConnectorUtilTest {
         Assert.assertEquals(floatValue, 636.0f);
     }
 
+    @Test void testCoercedTypeCastingForByte() {
+        // String -> Byte
+        Byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.class);
+        Assert.assertEquals(byteValueFromString.byteValue(), 100);
+        // Integer -> Byte
+        Byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.class);
+        Assert.assertEquals(byteValueFromNumber.byteValue(), 10);
+        // Byte -> Byte
+        Byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.class);
+        Assert.assertEquals(byteValueFromBoxedByte.byteValue(), 124);
+        // byte -> Byte
+        Byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.class);
+        Assert.assertEquals(byteValueFromPrimitiveByte.byteValue(), 10);
+    }
+
+    @Test void testCoercedTypeCastingForByteType() {
+        // String -> byte
+        byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.TYPE);
+        Assert.assertEquals(byteValueFromString, 100);
+        //Integer -> byte
+        byte byteValueFromNumber = ConnectorUtil.coercedTypeCasting(10, Byte.TYPE);
+        Assert.assertEquals(byteValueFromNumber, 10);
+        // Byte -> byte
+        byte byteValueFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("124"), Byte.TYPE);
+        Assert.assertEquals(byteValueFromBoxedByte, 124);
+        // byte -> byte
+        byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.TYPE);
+        Assert.assertEquals(byteValueFromPrimitiveByte, 10);
+    }
+
     public APIConfiguration getRuntimeAPIConfiguration() {
         Assertions.nullCheck(runtimeAPIConfiguration, "runtimeAPIConfiguration");
         //clone in case application tries to modify
