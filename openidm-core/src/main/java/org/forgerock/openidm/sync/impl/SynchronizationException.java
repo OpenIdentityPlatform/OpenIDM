@@ -1,11 +1,13 @@
 package org.forgerock.openidm.sync.impl;
 
+import org.forgerock.json.resource.ConflictException;
+
 /**
  * An exception that is thrown during synchronization operations.
  *
  * @author Paul C. Bryan
  */
-public class SynchronizationException extends Exception {
+public class SynchronizationException extends ConflictException {
 
     /** Serializable class a version number. */
     static final long serialVersionUID = 1L;
@@ -14,6 +16,7 @@ public class SynchronizationException extends Exception {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public SynchronizationException() {
+        super();
     }
 
     /**

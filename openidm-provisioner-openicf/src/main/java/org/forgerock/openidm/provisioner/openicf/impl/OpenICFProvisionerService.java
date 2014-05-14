@@ -2029,17 +2029,18 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
                                             final String resourceContainer = getSource(objectType);
+                                            final JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE: {
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
-                                                    ActionRequest onCreateRequest = Requests
-                                                            .newActionRequest("sync", "ONCREATE")
-                                                            .setAdditionalParameter("resourceContainer",
-                                                                    resourceContainer)
+                                                    content.put("oldValue", null);
+                                                    content.put("newValue", deltaObject.getObject());
+                                                    // TODO import SynchronizationService.Action.notifyCreate and ACTION_PARAM_ constants
+                                                    ActionRequest onCreateRequest = Requests.newActionRequest("sync", "notifyCreate")
+                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
-                                                            .setContent(new JsonValue(deltaObject));
-                                                    connectionFactory.getConnection()
-                                                            .action(routerContext, onCreateRequest);
+                                                            .setContent(content);
+                                                    connectionFactory.getConnection().action(routerContext, onCreateRequest);
 
                                                     activityLogger.log(routerContext, RequestType.ACTION,
                                                                     "sync-create", onCreateRequest.getResourceName(),
@@ -2047,31 +2048,36 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     break;
                                                 }
                                                 case UPDATE:
-                                                case CREATE_OR_UPDATE:
+                                                case CREATE_OR_UPDATE: {
                                                     JsonValue deltaObject = helper.build(syncDelta.getObject());
+                                                    content.put("oldValue", null);
+                                                    content.put("newValue", deltaObject.getObject());
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previous-id", syncDelta.getPreviousUid().getUidValue());
                                                     }
-                                                    
-                                                    JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-                                                    content.put("newValue", deltaObject);
-                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "ONUPDATE")
+                                                    // TODO import SynchronizationService.Action.notifyUpdate and ACTION_PARAM_ constants
+                                                    ActionRequest onUpdateRequest = Requests.newActionRequest("sync", "notifyUpdate")
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId)
                                                             .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onUpdateRequest);
 
-                                                    activityLogger.log(routerContext, RequestType.ACTION, "sync-update", onUpdateRequest.getResourceName(), deltaObject, deltaObject, Status.SUCCESS);
+                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                            "sync-update", onUpdateRequest.getResourceName(),
+                                                            deltaObject, deltaObject, Status.SUCCESS);
                                                     break;
+                                                }
                                                 case DELETE:
-                                                    // TODO Pass along the old deltaObject
-                                                    ActionRequest onDeleteRequest = Requests
-                                                            .newActionRequest("sync", "ONDELETE")
-                                                            .setAdditionalParameter("resourceContainer",
-                                                                    resourceContainer)
+                                                    // TODO Pass along the old deltaObject - do we have it?
+                                                    // TODO import SynchronizationService.Action.notifyDelete and ACTION_PARAM_ constants
+                                                    ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "notifyDelete")
+                                                            .setAdditionalParameter("resourceContainer", resourceContainer)
                                                             .setAdditionalParameter("resourceId", resourceId);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
-                                                    activityLogger.log(routerContext, RequestType.ACTION, "sync-delete", onDeleteRequest.getResourceName(), null, null, Status.SUCCESS);
+
+                                                    activityLogger.log(routerContext, RequestType.ACTION,
+                                                            "sync-delete", onDeleteRequest.getResourceName(),
+                                                            null, null, Status.SUCCESS);
                                                     break;
                                             }
                                         } catch (Exception e) {

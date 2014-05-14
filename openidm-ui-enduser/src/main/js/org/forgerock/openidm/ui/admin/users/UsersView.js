@@ -163,6 +163,9 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         total: function(obj){ return obj.result[0].total; },
                         records: function(obj){ return obj.result[0].records; }
                     },
+                    prmNames: {
+                        search: "search"
+                    },
                     url: '/openidm/endpoint/jqgrid?resource=managed/user&_queryId=get-managed-users&formatted=false',
                     datatype: "json",
                     height: 'auto',

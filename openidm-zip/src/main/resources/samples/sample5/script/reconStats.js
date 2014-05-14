@@ -51,7 +51,7 @@ if (openidm.read("config/external.email")) {
         "target": target
     });
 
-    openidm.action("external/email", "noop", params, {});
+    openidm.action("external/email", "noop", {}, params);
 
 } else {
     console.log("Email service not configured; report not generated. ");

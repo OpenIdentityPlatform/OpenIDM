@@ -59,7 +59,7 @@
         }
     ];
 
-}(request.additionalParameters.resource, request.queryId, request.additionalParameters.page, request.additionalParameters.rows, request.additionalParameters.sidx, request.additionalParameters.sord, request.additionalParameters._search === "true"));
+}(request.additionalParameters.resource, request.queryId, request.additionalParameters.page, request.additionalParameters.rows, request.additionalParameters.sidx, request.additionalParameters.sord, request.additionalParameters.search === "true"));
 
 
 

@@ -98,7 +98,8 @@ public class ObjectMappingTest {
         class TestSyncOperation extends SyncOperation {
 
             @Override
-            public void sync() throws SynchronizationException {
+            public JsonValue sync() throws SynchronizationException {
+                return toJsonValue();
             }
 
             @Override
