@@ -469,21 +469,6 @@ var results = openidm.query("system/ScriptedSQL/account", params)
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>NAND Filter</literal></term>
-      <listitem>
-       <para>
-        A filter that filters out matched entries by negating the AND boolean
-        operator on two filters.
-       </para>
-       <para>
-        For example:
-       </para>
-       <programlisting language="javascript">
-"_queryFilter": "(lastName eq \"Smith\") nand (givenName eq \"John\")"
-       </programlisting>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
       <term><literal>OR Filter</literal></term>
       <listitem>
        <para>
@@ -499,17 +484,17 @@ var results = openidm.query("system/ScriptedSQL/account", params)
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>NOR Filter</literal></term>
+      <term><literal>NOT Filter</literal></term>
       <listitem>
        <para>
-        A filter that filters out matched entries by negating the OR boolean
-        operator on two filters.
+        A filter that filters out matched entries by using a query. Syntax is
+        <literal>"! (expression)"</literal>.
        </para>
        <para>
         For example:
        </para>
        <programlisting language="javascript">
-"_queryFilter": "(lastName eq \"Smith\") nor (lastName eq \"Smythe\")"
+"_queryFilter": "! (employeeType eq \"Contractor\")"
        </programlisting>
       </listitem>
      </varlistentry>
