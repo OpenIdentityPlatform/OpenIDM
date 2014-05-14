@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -218,7 +219,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         Resource result = read(request);
         handler.handleResult(result);
     }
-    
+
     public Resource read(ReadRequest request) throws ResourceException {
         if (request.getResourceNameObject().size() < 2) {
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to read: " + request.getResourceName());
@@ -534,13 +535,92 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     //@Override
     public void handleQuery2(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) throws ResourceException {
+
+        // If paged results are requested then decode the cookie in order to determine
+        // the index of the first result to be returned.
+        final int requestPageSize = request.getPageSize();
+
+        // Cookie containing offset of last request
+        final String pagedResultsCookie = request.getPagedResultsCookie();
+
+        final boolean pagedResultsRequested = requestPageSize > 0;
+
+        // index of first record (used for SKIP/OFFSET)
+        final int firstResultIndex;
+
+        if (pagedResultsRequested) {
+            if (StringUtils.isNotEmpty(pagedResultsCookie)) {
+                try {
+                    firstResultIndex = Integer.parseInt(pagedResultsCookie);
+                } catch (final NumberFormatException e) {
+                    throw new BadRequestException("Invalid paged results cookie");
+                }
+            } else {
+                firstResultIndex = Math.max(0, request.getPagedResultsOffset());
+            }
+        } else {
+            firstResultIndex = 0;
+        }
+
+        // Once cookie is processed Queries.query() can rely on the offset.
+        request.setPagedResultsOffset(firstResultIndex);
+
         List<Resource> results = query(request);
         for (Resource result : results) {
             handler.handleResource(result);
         }
-        handler.handleResult(new QueryResult());        
+
+        /*
+         * Execute additional -count query if we are paging
+         */
+
+        final QueryResult result;
+        final String nextCookie;
+        final int remainingResults;
+
+        if (pagedResultsRequested) {
+            final String countQueryId = request.getQueryId() + "-count";
+
+            Integer resultCount = null;
+
+            // Get total if -count query is available
+            if (queries.queryIdExists(countQueryId)) {
+                QueryRequest countRequest = Requests.copyOfQueryRequest(request);
+                countRequest.setQueryId(countQueryId);
+
+                // Strip pagination parameters
+                countRequest.setPageSize(0);
+                countRequest.setPagedResultsOffset(0);
+                countRequest.setPagedResultsCookie(null);
+
+                List<Resource> countResult = query(countRequest);
+
+                if (countResult != null && !countResult.isEmpty()) {
+                    resultCount = countResult.get(0).getContent().get("total").asInteger();
+                }
+            }
+
+            boolean unknownCount = resultCount == null;
+
+            if (results.size() < requestPageSize) {
+                remainingResults = 0;
+            } else {
+                remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
+            }
+
+            if (remainingResults > 0 || unknownCount) {
+                nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+            } else {
+                nextCookie = null;
+            }
+        } else {
+            nextCookie = null;
+            remainingResults = -1;
+        }
+
+        handler.handleResult(new QueryResult(nextCookie, remainingResults));
     }
-    
+
     public List<Resource> query(QueryRequest request) throws ResourceException {
         List<Resource> results = new ArrayList<Resource>();
 

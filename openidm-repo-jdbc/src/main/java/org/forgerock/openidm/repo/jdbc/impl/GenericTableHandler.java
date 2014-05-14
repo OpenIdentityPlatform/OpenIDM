@@ -97,6 +97,11 @@ public class GenericTableHandler implements TableHandler {
         QUERYALLIDS
     }
 
+    @Override
+    public boolean queryIdExists(String queryId) {
+        return queries.queryIdExists(queryId);
+    }
+
     public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
 
@@ -638,11 +643,13 @@ class GenericQueryResultMapper implements QueryResultMapper {
         boolean hasRev = false;
         boolean hasPropKey = false;
         boolean hasPropValue = false;
+        boolean hasTotal = false;
         if (!hasFullObject) {
             hasId = tableQueries.hasColumn(rsMetaData, "objectid");
             hasRev = tableQueries.hasColumn(rsMetaData, "rev");
             hasPropKey = tableQueries.hasColumn(rsMetaData, "propkey");
             hasPropValue = tableQueries.hasColumn(rsMetaData, "propvalue");
+            hasTotal = tableQueries.hasColumn(rsMetaData, "total");
         }
         while (rs.next()) {
             if (hasFullObject) {
@@ -660,6 +667,9 @@ class GenericQueryResultMapper implements QueryResultMapper {
                 }
                 if (hasRev) {
                     obj.put("_rev", rs.getString("rev"));
+                }
+                if (hasTotal) {
+                    obj.put("total", rs.getInt("total"));
                 }
                 // Results from query on individual searchable property
                 if (hasPropKey && hasPropValue) {

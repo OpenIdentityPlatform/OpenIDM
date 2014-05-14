@@ -49,6 +49,11 @@ import org.forgerock.openidm.smartevent.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+
 /**
  * Configured and add-hoc query support on tables in generic (non-object
  * specific) layout
@@ -68,9 +73,6 @@ public class TableQueries {
     
     // Monitoring event name prefix
     static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/jdbc/raw/query/";
-
-    public static final String QUERY_ID = "_queryId";
-    public static final String QUERY_EXPRESSION = "_queryExpression";
 
     // Pre-configured queries, key is query id
     Map<String, QueryInfo> queries = new HashMap<String, QueryInfo>();
@@ -190,6 +192,26 @@ public class TableQueries {
         List<Map<String, Object>> result = null;
         params.put(ServerConstants.RESOURCE_NAME, type);
 
+        // If paged results are requested then decode the cookie in order to determine
+        // the index of the first result to be returned.
+        final int requestPageSize = (Integer) params.get(PAGE_SIZE);
+
+        final String offsetParam;
+        final String pageSizeParam;
+        final String pageClause;
+
+        if (requestPageSize > 0) {
+            offsetParam = String.valueOf((Integer) params.get(PAGED_RESULTS_OFFSET));
+            pageSizeParam = String.valueOf(requestPageSize);
+            pageClause = "SKIP " + offsetParam + " LIMIT " + pageSizeParam;
+        } else {
+            offsetParam = "0";
+            pageSizeParam = String.valueOf(Integer.MAX_VALUE);
+            pageClause = "";
+        }
+
+        params.put(PAGED_RESULTS_OFFSET, offsetParam);
+        params.put(PAGE_SIZE, pageSizeParam);
 
         String queryExpression = (String) params.get(QUERY_EXPRESSION);
         String queryId = (String) params.get(QUERY_ID);
@@ -306,6 +328,17 @@ public class TableQueries {
         }
         PreparedStatement stmt = resolveQuery(info, con, params);
         return stmt;
+    }
+
+    /**
+     * Check if a {@code queryId} is present in the set of configured queries.
+     *
+     * @param queryId Id of the query to check for
+     *
+     * @return true if the queryId is present in the set of configured queries.
+     */
+    public boolean queryIdExists(final String queryId) {
+        return queries.containsKey(queryId);
     }
 
     /**

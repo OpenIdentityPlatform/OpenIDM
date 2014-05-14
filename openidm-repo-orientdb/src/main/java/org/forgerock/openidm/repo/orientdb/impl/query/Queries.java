@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -79,13 +80,31 @@ public class Queries {
     public List<ODocument> query(final String type, QueryRequest request, ODatabaseDocumentTx database) 
             throws BadRequestException {
                 
-        Map<String, String> params = request.getAdditionalParameters();
+        Map<String, String> params = new HashMap<String, String>(request.getAdditionalParameters());
         String orientClassName = OrientDBRepoService.typeToOrientClassName(type);
         
         List<ODocument> result = null;
         QueryInfo foundQueryInfo = null;
-        params.put(QueryConstants.RESOURCE_NAME, orientClassName); 
-        
+        params.put(QueryConstants.RESOURCE_NAME, orientClassName);
+
+        // If paged results are requested then decode the cookie in order to determine
+        // the index of the first result to be returned.
+        final int requestPageSize = request.getPageSize();
+
+        final String offsetParam;
+        final String pageSizeParam;
+
+        if (requestPageSize > 0) {
+            offsetParam = String.valueOf(request.getPagedResultsOffset());
+            pageSizeParam = String.valueOf(requestPageSize);
+        } else {
+            offsetParam = "0";
+            pageSizeParam = "-1"; // unlimited in Orient
+        }
+
+        params.put(QueryConstants.PAGED_RESULTS_OFFSET, offsetParam);
+        params.put(QueryConstants.PAGE_SIZE, pageSizeParam);
+
         String queryExpression = request.getQueryExpression();
         String queryId = null;
         if (queryExpression != null) {
@@ -102,7 +121,7 @@ public class Queries {
                         + " does not match any configured queries on the OrientDB repository service.");
             }
         }
-        
+
         if (foundQueryInfo != null) {
             OSQLSynchQuery<ODocument> query = null;
             
@@ -192,7 +211,18 @@ public class Queries {
             }
         }
         configuredQueries = prepQueries;
-    }    
+    }
+
+    /**
+     * Check if a {@code queryId} is present in the set of configured queries.
+     *
+     * @param queryId Id of the query to check for
+     *
+     * @return true if the queryId is present in the set of configured queries.
+     */
+    public boolean queryIdExists(final String queryId) {
+        return configuredQueries.containsKey(queryId);
+    }
     
     /**
      * Resolve the query string which can contain %{token} tokens to a fully resolved query

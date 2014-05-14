@@ -93,6 +93,11 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+
 /**
  * Repository service implementation using JDBC
  *
@@ -488,11 +493,91 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
     @Override
     public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
         try {
+
+            // If paged results are requested then decode the cookie in order to determine
+            // the index of the first result to be returned.
+            final int requestPageSize = request.getPageSize();
+
+            // Cookie containing offset of last request
+            final String pagedResultsCookie = request.getPagedResultsCookie();
+
+            final boolean pagedResultsRequested = requestPageSize > 0;
+
+            // index of first record (used for SKIP/OFFSET)
+            final int firstResultIndex;
+
+            if (pagedResultsRequested) {
+                if (StringUtils.isNotEmpty(pagedResultsCookie)) {
+                    try {
+                        firstResultIndex = Integer.parseInt(pagedResultsCookie);
+                    } catch (final NumberFormatException e) {
+                        throw new BadRequestException("Invalid paged results cookie");
+                    }
+                } else {
+                    firstResultIndex = Math.max(0, request.getPagedResultsOffset());
+                }
+            } else {
+                firstResultIndex = 0;
+            }
+
+            // Once cookie is processed Queries.query() can rely on the offset.
+            request.setPagedResultsOffset(firstResultIndex);
+
             List<Resource> results = query(request);
             for (Resource result : results) {
                 handler.handleResource(result);
             }
-            handler.handleResult(new QueryResult());
+
+            /*
+             * Execute additional -count query if we are paging
+             */
+            final QueryResult result;
+            final String nextCookie;
+            final int remainingResults;
+
+            if (pagedResultsRequested) {
+                final String countQueryId = request.getQueryId() + "-count";
+
+                Integer resultCount = null;
+
+                TableHandler tableHandler = getTableHandler(trimStartingSlash(request.getResourceName()));
+
+                // Get total if -count query is available
+                if (tableHandler.queryIdExists(countQueryId)) {
+                    QueryRequest countRequest = Requests.copyOfQueryRequest(request);
+                    countRequest.setQueryId(countQueryId);
+
+                    // Strip pagination parameters
+                    countRequest.setPageSize(0);
+                    countRequest.setPagedResultsOffset(0);
+                    countRequest.setPagedResultsCookie(null);
+
+                    List<Resource> countResult = query(countRequest);
+
+                    if (countResult != null && !countResult.isEmpty()) {
+                        resultCount = countResult.get(0).getContent().get("total").asInteger();
+                    }
+                }
+
+                boolean unknownCount = resultCount == null;
+
+                if (results.size() < requestPageSize) {
+                    remainingResults = 0;
+                } else {
+                    remainingResults = unknownCount ? -1 : resultCount - (firstResultIndex + results.size());
+                }
+
+                if (remainingResults > 0 || unknownCount) {
+                    nextCookie = String.valueOf(firstResultIndex + requestPageSize);
+                } else {
+                    nextCookie = null;
+                }
+            } else {
+                nextCookie = null;
+                remainingResults = -1;
+            }
+
+            handler.handleResult(new QueryResult(nextCookie, remainingResults));
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
@@ -507,8 +592,10 @@ public class JDBCRepoService implements RequestHandler, RepoBootService {
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
         Map<String, Object> params = new HashMap<String, Object>();
         params.putAll(request.getAdditionalParameters());
-        params.put(TableQueries.QUERY_ID, request.getQueryId());
-        params.put(TableQueries.QUERY_EXPRESSION, request.getQueryExpression());
+        params.put(QUERY_ID, request.getQueryId());
+        params.put(QUERY_EXPRESSION, request.getQueryExpression());
+        params.put(PAGE_SIZE, request.getPageSize());
+        params.put(PAGED_RESULTS_OFFSET, request.getPagedResultsOffset());
 
         Connection connection = null;
         try {
