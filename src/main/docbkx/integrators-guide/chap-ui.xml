@@ -406,17 +406,17 @@
     </para>
     <para>
      The Admin Role field reflects the roles that are defined in the
-     <filename>ui-configuration.json</filename> file. The roles are mapped as
-     follows:
+     <filename>ui-configuration.json</filename> file, as well as any managed
+     roles that have been added. By default, the roles are mapped as follows:
     </para>
     <programlisting language="javascript">
 "roles" : {
     "openidm-admin" : "Administrator",
     "openidm-authorized" : "User",
-    "tasks-manager" : "Tasks Manager"
+    "openidm-tasks-manager" : "Tasks Manager"
 },  </programlisting>
     <para>
-     By default, a user can be assigned more than one role. Only users with the
+     A user can be assigned more than one role. Only users with the
      <literal>tasks-manager</literal> role can assign tasks to any candidate
      user for that task.
     </para>
