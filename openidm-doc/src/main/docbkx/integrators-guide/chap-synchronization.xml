@@ -715,10 +715,14 @@
     <secondary>Creating attributes</secondary>
    </indexterm>
 
-   <para>OpenIDM enables you to construct and manipulate attributes using
-       scripts that are triggered when an object is created (onCreate), updated
-       (onUpdate), or deleted (onDelete), or when a link is created (onLink),
-       or removed (onUnlink).</para>
+   <para>
+    OpenIDM enables you to construct and manipulate attributes using scripts
+    that are triggered when an object is created (onCreate), updated (onUpdate),
+    retrieved (onRetrieve), or deleted (onDelete). Additional scripts are
+    available when a managed object requires validation (onValidate), and when
+    an object is about to be stored in the repository (onStore). Similar scripts
+    are available for when a link is created (onLink) or removed (onUnlink).
+   </para>
 
    <para>The following example derives a DN for an LDAP entry when the entry
    is created in the internal repository.</para>
@@ -731,6 +735,13 @@
             "target.dn = 'uid=' + source.uid + ',ou=people,dc=example,dc=com'"
     }
 }</programlisting>
+
+   <para>
+    In addition, OpenIDM supports the use of post-action scripts, including
+    after the creation of an object is complete (postCreate), after the update
+    of an object is complete (postUpdate), and after the deletion of an object
+    (postDelete).
+   </para>
   </section>
 
   <section xml:id="reusing-links">
@@ -943,7 +954,6 @@
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
  "https://localhost:8443/openidm/recon"
     </screen>
@@ -3839,8 +3849,11 @@ map;</programlisting>
    in mapping configurations to call scripts.</para>
    <varlistentry>
     <term>Triggered by Situation</term>
+    <!-- All related to the "Supported script hooks" section of
+    ManagedObjectSet.java -->
     <listitem>
-     <para>onCreate, onUpdate, onDelete, onLink, onUnlink</para>
+     <para>onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve,
+      onStore, onLink, onUnlink, postCreate, postUpdate, postDelete</para>
     </listitem>
    </varlistentry>
    <varlistentry>

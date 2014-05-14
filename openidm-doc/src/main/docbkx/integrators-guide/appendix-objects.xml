@@ -253,6 +253,14 @@
       </listitem>
      </varlistentry>
      <varlistentry>
+      <term>postCreate</term>
+      <listitem>
+       <para>
+        Called after the creation of a new object is complete.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
       <term>onRead</term>
       <listitem>
        <para>Called upon a request to retrieve a whole object or portion of
@@ -277,10 +285,26 @@
       </listitem>
      </varlistentry>
      <varlistentry>
+      <term>postUpdate</term>
+      <listitem>
+       <para>
+        Called after an update request is complete.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
       <term>onDelete</term>
       <listitem>
        <para>Called upon a request to delete an object. Throwing an
        exception causes the deletion to fail.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>postDelete</term>
+      <listitem>
+       <para>
+        Called after an object is deleted.
+       </para>
       </listitem>
      </varlistentry>
     </variablelist>
@@ -298,14 +322,6 @@
        <para>Validates an object prior to its storage in the data store.
            Throws an exception in the event of a validation failure.</para>
        <!-- i18n TBD. -->
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>onRetrieve</term>
-      <listitem>
-       <para>Called when an object is retrieved from the data store.
-       Typically used to transform an object after it has been retrieved
-       (for example decryption, JIT data conversion).</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -341,9 +357,9 @@
      <varlistentry>
       <term>onRetrieve</term>
       <listitem>
-       <para>Called after an object is retrieved from the data store.
-       Typically used to transform a given property after its object's
-       retrieval.</para>
+       <para>Called in the result of a query request. Executed only when the
+       <literal>executeOnRetrieve</literal> condition shows a full managed
+       object.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -367,6 +383,13 @@
 
      <listitem>
       <para>Retrieve the raw object from the data store</para>
+     </listitem>
+     <listitem>
+      <para>
+       The <literal>executeOnRetrieve</literal> boolean is used to see
+       if a full managed object is returned. The sequence continues if
+       the boolean is set to <literal>true</literal>.
+      </para>
      </listitem>
      <listitem>
       <para>Call object <literal>onRetrieve</literal> trigger</para>
@@ -463,9 +486,12 @@
   "name"      : <replaceable>string</replaceable>,
   "schema"    : <replaceable>json-schema object</replaceable>,
   "onCreate"  : <replaceable>script object</replaceable>,
+  "postCreate": <replaceable>script object</replaceable>,
   "onRead"    : <replaceable>script object</replaceable>,
   "onUpdate"  : <replaceable>script object</replaceable>,
+  "postUpdate": <replaceable>script object</replaceable>,
   "onDelete"  : <replaceable>script object</replaceable>,
+  "postDelete": <replaceable>script object</replaceable>,
   "onValidate": <replaceable>script object</replaceable>,
   "onRetrieve": <replaceable>script object</replaceable>,
   "onStore"   : <replaceable>script object</replaceable>,
@@ -501,6 +527,14 @@
      </listitem>
     </varlistentry>
     <varlistentry>
+     <term>postCreate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger after an object is created, but
+       before any targets are synchronized.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
      <term>onRead</term>
      <listitem>
       <para>script object, optional</para>
@@ -525,6 +559,14 @@
      </listitem>
     </varlistentry>
     <varlistentry>
+     <term>postUpdate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger after an update to an object is
+       complete, but before any targets are synchronized.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
      <term>onDelete</term>
      <listitem>
       <para>script object, optional</para>
@@ -535,6 +577,13 @@
      </listitem>
     </varlistentry>
     <varlistentry>
+     <term>postDelete</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger after a delete of an object is
+       complete, but before any further synchronization.</para>
+     </listitem>
+    </varlistentry>    <varlistentry>
      <term>onValidate</term>
      <listitem>
       <para>script object, optional</para>
