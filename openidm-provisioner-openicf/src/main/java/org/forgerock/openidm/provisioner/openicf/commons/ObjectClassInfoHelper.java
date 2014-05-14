@@ -207,7 +207,7 @@ public class ObjectClassInfoHelper {
                     throw new BadRequestException("Required attribute {" + attributeInfo.getName()
                             + "} value is null");
                 }
-                Attribute a = attributeInfo.build(v, cryptoService);
+                Attribute a = attributeInfo.build(v.getObject(), cryptoService);
                 if (null != a) {
                     result.put(attributeInfo.getAttributeInfo().getName(), a);
                 }
@@ -238,7 +238,7 @@ public class ObjectClassInfoHelper {
                 continue;
             }
             if (attributeInfo.getAttributeInfo().isUpdateable()) {
-                Object v = content.get(attributeInfo.getName());
+                Object v = content.get(attributeInfo.getName()).getObject();
                 Attribute a = attributeInfo.build(v, cryptoService);
                 if (null != a) {
                     result.put(attributeInfo.getAttributeInfo().getName(), a);
@@ -299,7 +299,7 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 if (attributeInfo.getAttributeInfo().isCreateable()) {
-                    Object v = source.get(attributeInfo.getName());
+                    Object v = source.get(attributeInfo.getName()).getObject();
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
                         throw new IllegalArgumentException("Required attribute {" + attributeInfo.getName() + "} value is null");
                     }
@@ -313,7 +313,7 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
-                    Object v = source.get(attributeInfo.getName());
+                    Object v = source.get(attributeInfo.getName()).getObject();
                     builder.addAttribute(attributeInfo.build(v, cryptoService));
                 }
             }
@@ -323,7 +323,7 @@ public class ObjectClassInfoHelper {
                         !keySet.contains(attributeInfo.getName())) {
                     continue;
                 }
-                Object v = source.get(attributeInfo.getName());
+                Object v = source.get(attributeInfo.getName()).getObject();
                 builder.addAttribute(attributeInfo.build(v, cryptoService));
             }
         }

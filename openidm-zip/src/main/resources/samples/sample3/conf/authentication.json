@@ -35,6 +35,18 @@
                 "enabled" : true
             },
             {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "propertyMapping" : {
+                        "authenticationId" : "_id",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
                 "name" : "PASSTHROUGH",
                 "properties" : {
                     "augmentSecurityContext": {
@@ -49,18 +61,6 @@
                     "defaultUserRoles" : [
                         "openidm-authorized"
                     ]
-                },
-                "enabled" : true
-            },
-            {
-                "name" : "INTERNAL_USER",
-                "properties" : {
-                    "propertyMapping" : {
-                        "authenticationId" : "_id",
-                        "userCredential" : "password",
-                        "userRoles" : "roles"
-                    },
-                    "defaultUserRoles" : [ ]
                 },
                 "enabled" : true
             }

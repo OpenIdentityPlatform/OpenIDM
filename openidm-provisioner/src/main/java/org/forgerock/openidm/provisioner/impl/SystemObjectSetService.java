@@ -60,13 +60,11 @@ import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.router.RouteService;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -232,57 +230,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         final ResourceException e =
                 new NotSupportedException("Update are not supported for resource instances");
         handler.handleError(e);
-    }
-
-
-    /**
-     * Called when a source object has been created.
-     *
-     * @param id    the fully-qualified identifier of the object that was created.
-     * @param value the value of the object that was created.
-     * @throws ResourceException
-     *          if an exception occurs processing the notification.
-     */
-    public void onCreate(ServerContext context, String id, JsonValue value) throws ResourceException {
-        ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
-        request.setAdditionalParameter("id", id);
-        request.setContent(value);
-        connectionFactory.getConnection().action(context, request);
-    }
-
-    /**
-     * Called when a source object has been updated.
-     *
-     * @param id       the fully-qualified identifier of the object that was updated.
-     * @param oldValue the old value of the object prior to the update.
-     * @param newValue the new value of the object after the update.
-     * @throws ResourceException
-     *          if an exception occurs processing the notification.
-     */
-    public void onUpdate(ServerContext context, String id, JsonValue oldValue, JsonValue newValue)
-            throws ResourceException {
-        ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
-        request.setAdditionalParameter("id", id);
-        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-        content.put("oldValue", oldValue);
-        content.put("newValue", newValue);
-        request.setContent(content);
-        connectionFactory.getConnection().action(context, request);
-    }
-
-    /**
-     * Called when a source object has been deleted.
-     *
-     * @param id the fully-qualified identifier of the object that was deleted.
-     * @param oldValue the value before the delete, or null if not supplied
-     * @throws ResourceException
-     *          if an exception occurs processing the notification.
-     */
-    public void onDelete(ServerContext context, String id, JsonValue oldValue) throws ResourceException {
-        ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
-        request.setAdditionalParameter("id", id);
-        request.setContent(oldValue);
-        connectionFactory.getConnection().action(context, request);
     }
 
     /**

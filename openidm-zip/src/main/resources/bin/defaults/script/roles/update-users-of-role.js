@@ -25,7 +25,7 @@
 var users,
     query = {
         "_queryId": "get-users-of-direct-role", 
-        "role": resourceName
+        "role": resourceName.toString()
     };
 
 

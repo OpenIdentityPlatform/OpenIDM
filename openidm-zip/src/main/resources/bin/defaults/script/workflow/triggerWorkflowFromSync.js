@@ -75,7 +75,7 @@
         if (targetId!=null){
             params.put('targetId', targetId)
         }
-       openidm.action('sync', 'performAction', params)
+       openidm.action('sync', 'performAction', {}, params)
 
 */
 

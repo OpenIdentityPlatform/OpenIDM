@@ -106,7 +106,7 @@ function getConfig(script) {
 }
 
 function execOnScript(scriptConfig) {
-    var result = openidm.action("script", "eval", {}, getConfig(scriptConfig));
+    var result = openidm.action("script", "eval", getConfig(scriptConfig), {});
     for (key in target) { 
         delete target[key]; 
     }
@@ -160,7 +160,7 @@ if (typeof oldSource !== "undefined") {
                             var config = getConfig(unassignmentOperation);
                             config.attributeName = oldAttribute.name;
                             config.attributeValue = oldAttribute.value;
-                            var unassignmentResult = openidm.action("script", "eval", {}, config);
+                            var unassignmentResult = openidm.action("script", "eval", config, {});
                             target[oldAttribute.name] = unassignmentResult;
                         }
                     }
@@ -197,7 +197,7 @@ if (assignments != null) {
                     var config = getConfig(assignmentOperation);
                     config.attributeName = name;
                     config.attributeValue = value;
-                    var assignmentResult = openidm.action("script", "eval", {}, config);
+                    var assignmentResult = openidm.action("script", "eval", config, {});
                     target[name] = assignmentResult;
                 }
             }

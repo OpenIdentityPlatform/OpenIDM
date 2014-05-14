@@ -479,28 +479,28 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 1);
             Assert.assertEquals(sync.requests.size(), 1);
             ActionRequest delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "ONCREATE");
+            Assert.assertEquals(delta.getAction(), "notifyCreate");
 
 
             stage = connection.action(new RootContext(), actionRequest);
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 2);
             Assert.assertEquals(sync.requests.size(), 1);
             delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "ONUPDATE");
+            Assert.assertEquals(delta.getAction(), "notifyUpdate");
 
 
             stage = connection.action(new RootContext(), actionRequest);
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 3);
             Assert.assertEquals(sync.requests.size(), 1);
             delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "ONUPDATE");
+            Assert.assertEquals(delta.getAction(), "notifyUpdate");
 
 
             stage = connection.action(new RootContext(), actionRequest);
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 4);
             Assert.assertEquals(sync.requests.size(), 1);
             delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "ONUPDATE");
+            Assert.assertEquals(delta.getAction(), "notifyUpdate");
             Assert.assertEquals(delta.getContent().get("newValue").get("_previous-id").asString(), "001");
 
 
@@ -508,7 +508,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 5);
             Assert.assertEquals(sync.requests.size(), 1);
             delta = sync.requests.remove(0);
-            Assert.assertEquals(delta.getAction(), "ONDELETE");
+            Assert.assertEquals(delta.getAction(), "notifyDelete");
 
 
             stage = connection.action(new RootContext(), actionRequest);

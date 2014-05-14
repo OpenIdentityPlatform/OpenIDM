@@ -44,7 +44,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -54,6 +53,8 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.Predicate;
+import static org.forgerock.util.Iterables.filter;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
@@ -87,13 +88,18 @@ import org.slf4j.LoggerFactory;
 @Service
 public class SynchronizationService implements SingletonResourceProvider, Mappings, ScheduledService {
 
-    /** Actions suppoorted by this service. */
+    /** Actions supported by this service. */
     public enum Action {
-        onCreate, onUpdate, onDelete, recon, performAction
+        notifyCreate, notifyUpdate, notifyDelete, recon, performAction
     }
 
     /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(SynchronizationService.class);
+
+    /** The resource container action parameter. */
+    public static final String ACTION_PARAM_RESOURCE_CONTAINER = "resourceContainer";
+    /** The resource id action parameter. */
+    public static final String ACTION_PARAM_RESOURCE_ID = "resourceId";
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private volatile ArrayList<ObjectMapping> mappings = null;
@@ -201,29 +207,116 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         return ObjectSetContext.get();
     }
 
-    private void onCreate(String resourceContainer, String resourceId, JsonValue object) throws SynchronizationException {
+    /**
+     * Results we can expect from synchronizing a specific source object to a given mapping.
+     */
+    private enum MappingSyncResult {
+        SUCCESSFUL, SKIPPED, FAILED
+    }
+
+    /**
+     * Local interface to encapsulate the notifyCreate/notifyUpdate/notifyDelete ObjectMapping synchronization
+     * across all mappings.
+     *
+     * @see #syncAllMappings(org.forgerock.openidm.sync.impl.SynchronizationService.SyncAction, String, String)
+     */
+    private interface SyncAction {
+        JsonValue sync(ObjectMapping mapping) throws SynchronizationException;
+    }
+
+    /**
+     * Synchronize all mappings; keeping track of success/failure conditions.
+     *
+     * @param action the {@code SyncAction} to perform
+     * @param resourceContainer the source object set
+     * @param resourceId the source object id
+     * @returns a JsonValue list of ObjectMappings' sync results
+     * @throws SynchronizationException on failure to sync one of the mappings
+     */
+    private JsonValue syncAllMappings(SyncAction action, final String resourceContainer, final String resourceId)
+            throws SynchronizationException {
+        final JsonValue syncDetails = new JsonValue(new ArrayList<Object>());
+        SynchronizationException exceptionPending = null;
+
+        // cannot sync anything with empty resourceId
+        if (resourceId.isEmpty()) {
+            return syncDetails;
+        }
+
+        // mappings that should be synced are those which are enabled and whose
+        // source object set matches the resource container
+        final Predicate<ObjectMapping> thatMatchSource = new Predicate<ObjectMapping>() {
+            public boolean apply(ObjectMapping objectMapping) {
+                return objectMapping.isSyncEnabled()
+                        && objectMapping.isSourceObject(resourceContainer, resourceId);
+            }
+        };
+
+        for (final ObjectMapping mapping : filter(mappings, thatMatchSource)) {
+            JsonValue mappingResult = new JsonValue(new HashMap<String,Object>());
+            MappingSyncResult result = MappingSyncResult.SUCCESSFUL;
+            try {
+                if (exceptionPending == null) {
+                    // no failures yet, sync this one
+                    mappingResult = action.sync(mapping);
+                } else {
+                    // we've already failed, skip the sync attempt
+                    result = MappingSyncResult.SKIPPED;
+                }
+            } catch (SynchronizationException e) {
+                // failed to sync; store the exception and mark as failed
+                exceptionPending = new SynchronizationException(e.getMessage(), e.getCause());
+                // the exception detail contains the mapping result
+                mappingResult = e.getDetail();
+                mappingResult.put("cause", exceptionPending.toJsonValue().getObject());
+                result = MappingSyncResult.FAILED;
+            } finally {
+                mappingResult.put("result", result.name());
+                mappingResult.put("mapping", mapping.getName());
+                mappingResult.put("targetObjectSet", mapping.getTargetObjectSet());
+                syncDetails.add(mappingResult);
+            }
+        }
+
+        // If there was a failure, send the synchronization results along in the exception...
+        if (exceptionPending != null) {
+            exceptionPending.setDetail(syncDetails);
+            throw exceptionPending;
+        }
+
+        // ...otherwise, return them
+        return syncDetails;
+    }
+
+    private JsonValue notifyCreate(final String resourceContainer, final String resourceId, final JsonValue object)
+            throws SynchronizationException {
         PendingLink.handlePendingLinks(mappings, resourceContainer, resourceId, object);
-        for (ObjectMapping mapping : mappings) {
-            if (mapping.isSyncEnabled()) {
-                mapping.onCreate(resourceContainer, resourceId, object);
+        return syncAllMappings(new SyncAction() {
+            @Override
+            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyCreate(resourceContainer, resourceId, object);
             }
-        }
+        }, resourceContainer, resourceId);
     }
 
-    private void onUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
-        for (ObjectMapping mapping : mappings) {
-            if (mapping.isSyncEnabled()) {
-                mapping.onUpdate(resourceContainer, resourceId, oldValue, newValue);
+    private JsonValue notifyUpdate(final String resourceContainer, final String resourceId, final JsonValue oldValue, final JsonValue newValue)
+            throws SynchronizationException {
+        return syncAllMappings(new SyncAction() {
+            @Override
+            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyUpdate(resourceContainer, resourceId, oldValue, newValue);
             }
-        }
+        }, resourceContainer, resourceId);
     }
 
-    private void onDelete(String resourceContainer, String resourceId, JsonValue oldValue) throws SynchronizationException {
-        for (ObjectMapping mapping : mappings) {
-            if (mapping.isSyncEnabled()) {
-                mapping.onDelete(resourceContainer, resourceId, oldValue);
+    private JsonValue notifyDelete(final String resourceContainer, final String resourceId, final JsonValue oldValue)
+            throws SynchronizationException {
+        return syncAllMappings(new SyncAction() {
+            @Override
+            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyDelete(resourceContainer, resourceId, oldValue);
             }
-        }
+        }, resourceContainer, resourceId);
     }
 
     /**
@@ -265,37 +358,33 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     }
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
+    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
             ObjectSetContext.push(context);
-            Map<String, Object> result = null;
             JsonValue _params = new JsonValue(request.getAdditionalParameters(), new JsonPointer("params"));
             String resourceContainer;
             String resourceId;
             switch (request.getActionAsEnum(Action.class)) {
-                case onCreate:
-                    resourceContainer = _params.get("resourceContainer").required().asString();
-                    resourceId = _params.get("resourceId").required().asString();
-                    logger.debug("Synchronization action=onCreate, resourceContainer={}, resourceId={} ", resourceContainer, resourceId);
-                    onCreate(resourceContainer, resourceId, request.getContent());
+                case notifyCreate:
+                    resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
+                    resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
+                    logger.debug("Synchronization action=notifyCreate, resourceContainer={}, resourceId={} ", resourceContainer, resourceId);
+                    handler.handleResult(notifyCreate(resourceContainer, resourceId, request.getContent().get("newValue")));
                     break;
-                case onUpdate:
-                    resourceContainer =  _params.get("resourceContainer").required().asString();
-                    resourceId = _params.get("resourceId").required().asString();
-                    JsonValue oldValue = request.getContent().get("oldValue");
-                    JsonValue newValue = request.getContent().get("newValue").required();
-                    logger.debug("Synchronization action=onUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    onUpdate(resourceContainer, resourceId, oldValue, newValue);
+                case notifyUpdate:
+                    resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
+                    resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
+                    logger.debug("Synchronization action=notifyUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
+                    handler.handleResult(notifyUpdate(resourceContainer, resourceId, request.getContent().get("oldValue"), request.getContent().get("newValue")));
                     break;
-                case onDelete:
-                    resourceContainer =  _params.get("resourceContainer").required().asString();
-                    resourceId = _params.get("resourceId").required().asString();
-                    logger.debug("Synchronization action=onDelete, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    onDelete(resourceContainer, resourceId, null);
+                case notifyDelete:
+                    resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
+                    resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
+                    logger.debug("Synchronization action=notifyDelete, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
+                    handler.handleResult(notifyDelete(resourceContainer, resourceId, request.getContent().get("oldValue")));
                     break;
                 case recon:
-                    result = new HashMap<String, Object>();
+                    JsonValue result = new JsonValue(new HashMap<String, Object>());
                     JsonValue mapping = _params.get("mapping").required();
                     logger.debug("Synchronization action=recon, mapping={}", mapping);
                     String reconId = reconService.reconcile(ReconciliationService.ReconAction.recon, mapping, Boolean.TRUE, _params, request.getContent());
@@ -303,24 +392,21 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     result.put("_id", reconId);
                     result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
                     result.put("comment2", "Deprecated return property reconId, use _id instead.");
+                    handler.handleResult(result);
                     break;
                 case performAction:
                     logger.debug("Synchronization action=performAction, params={}", _params);
                     ObjectMapping objectMapping = getMapping(_params.get("mapping").required().asString());
                     objectMapping.performAction(_params);
-                    result = new HashMap<String, Object>();
                     //result.put("status", performAction(_params));
+                    handler.handleResult(new JsonValue(new HashMap<String, Object>()));
                     break;
                 default:
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
-            
-            handler.handleResult(new JsonValue(result));
         } catch (IllegalArgumentException e) {
             handler.handleError(new BadRequestException("Action:" + request.getAction()
                     + " is not supported for resource collection", e));
-        } catch (SynchronizationException se) {
-            handler.handleError(new ConflictException(se.getMessage(), se));
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Throwable t) {

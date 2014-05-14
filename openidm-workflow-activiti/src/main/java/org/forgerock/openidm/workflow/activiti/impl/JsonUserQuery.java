@@ -51,11 +51,11 @@ public class JsonUserQuery extends UserQueryImpl {
 
     @Override
     public List<User> executeList(CommandContext commandContext, Page page) {
-        QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
-        request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
-        List<User> userList = new ArrayList<User>();
-        QueryResultHandler handler = new QueryResultHandlerImpl(userList);
         try {
+            QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
+            request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
+            List<User> userList = new ArrayList<User>();
+            QueryResultHandler handler = new QueryResultHandlerImpl(userList);
             identityService.query(request, handler);
             return userList;
         } catch (ResourceException e) {
@@ -65,15 +65,15 @@ public class JsonUserQuery extends UserQueryImpl {
 
     @Override
     public long executeCount(CommandContext commandContext) {
-        QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
-        if (null == getId()) {
-            request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
-        } else {
-            request.setQueryId("for-userName");
-            request.setAdditionalParameter("uid", getId());
-        }
-        Collection<Resource> result = new ArrayList<Resource>();
         try {
+            QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
+            if (null == getId()) {
+                request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
+            } else {
+                request.setQueryId("for-userName");
+                request.setAdditionalParameter("uid", getId());
+            }
+            Collection<Resource> result = new ArrayList<Resource>();
             identityService.query(request, result);
             return result.size();
         } catch (ResourceException e) {
@@ -87,11 +87,11 @@ public class JsonUserQuery extends UserQueryImpl {
     }
     
     User readUser(String id) {
-        QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
-        request.setQueryId("for-userName");
-        request.setAdditionalParameter("uid", id);
-        List<Resource> result = new ArrayList<Resource>();
         try {
+            QueryRequest request = Requests.newQueryRequest(SharedIdentityService.USER_PATH);
+            request.setQueryId("for-userName");
+            request.setAdditionalParameter("uid", id);
+            List<Resource> result = new ArrayList<Resource>();
             identityService.query(request, result);
             if (result.size() > 0) {
                 JsonUser user = new JsonUser(result.get(0).getContent());

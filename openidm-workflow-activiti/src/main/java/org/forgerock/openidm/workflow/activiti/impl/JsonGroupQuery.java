@@ -63,16 +63,16 @@ public class JsonGroupQuery extends GroupQueryImpl {
 
     @Override
     public long executeCount(CommandContext commandContext) {
-        QueryRequest request = Requests.newQueryRequest(SharedIdentityService.GROUP_PATH);
-        if (null == getId()) {
-            request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
-        } else {
-            request.setQueryId("get-by-field-value");
-            request.setAdditionalParameter("value", getId());
-            request.setAdditionalParameter("field", "id");
-        }
-        Collection<Resource> result = new ArrayList<Resource>();
         try {
+            QueryRequest request = Requests.newQueryRequest(SharedIdentityService.GROUP_PATH);
+            if (null == getId()) {
+                request.setQueryId(ActivitiConstants.QUERY_ALL_IDS);
+            } else {
+                request.setQueryId("get-by-field-value");
+                request.setAdditionalParameter("value", getId());
+                request.setAdditionalParameter("field", "id");
+            }
+            Collection<Resource> result = new ArrayList<Resource>();
             identityService.query(request, result);
             return result.size();
         } catch (ResourceException e) {
@@ -86,12 +86,12 @@ public class JsonGroupQuery extends GroupQueryImpl {
     }
 
     private Group readGroup(String id) {
-        QueryRequest request = Requests.newQueryRequest(SharedIdentityService.GROUP_PATH);
-        request.setQueryId("get-by-field-value");
-        request.setAdditionalParameter("value", id);
-        request.setAdditionalParameter("field", "id");
-        List<Resource> result = new ArrayList<Resource>();
         try {
+            QueryRequest request = Requests.newQueryRequest(SharedIdentityService.GROUP_PATH);
+            request.setQueryId("get-by-field-value");
+            request.setAdditionalParameter("value", id);
+            request.setAdditionalParameter("field", "id");
+            List<Resource> result = new ArrayList<Resource>();
             identityService.query(request, result);
             if (result.size() > 0) {
                 JsonGroup group = new JsonGroup(result.get(0).getContent());

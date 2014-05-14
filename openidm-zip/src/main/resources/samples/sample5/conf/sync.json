@@ -137,7 +137,7 @@
                 },
                 {
                     "situation" : "SOURCE_MISSING",
-                    "action" : "EXCEPTION"
+                    "action" : "UNLINK"
                 },
                 {
                     "situation" : "UNQUALIFIED",
