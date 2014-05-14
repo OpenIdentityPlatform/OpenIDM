@@ -66,6 +66,7 @@ public class ObjectClassInfoHelper {
     private final String nameAttribute;
     private final Set<AttributeInfoHelper> attributes;
     private final Set<String> attributesReturnedByDefault;
+    private final JsonValue properties;
 
     /**
      * Create a custom object class.
@@ -80,7 +81,7 @@ public class ObjectClassInfoHelper {
         objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
 
         //Expect Properties Map
-        JsonValue properties = schema.get(Constants.PROPERTIES).required().expect(Map.class);
+        properties = schema.get(Constants.PROPERTIES).required().expect(Map.class);
         Set<String> propertyNames = properties.keys();
 
         Set<AttributeInfoHelper> attributes0 = new HashSet<AttributeInfoHelper>(propertyNames.size());
@@ -368,5 +369,13 @@ public class ObjectClassInfoHelper {
         } else {
             return AttributeBuilder.build(attributeName, source);
         }
+    }
+
+    /**
+     * Get the object class properties
+     * @return The object class properties as a jsonValue map.
+     */
+    public JsonValue getProperties() {
+        return properties;
     }
 }
