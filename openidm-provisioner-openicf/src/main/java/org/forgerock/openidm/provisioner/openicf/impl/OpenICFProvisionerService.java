@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import static org.forgerock.util.Iterables.filter;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -41,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.forgerock.json.resource.servlet.HttpContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -171,7 +174,6 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.util.Iterables.filter;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
@@ -207,6 +209,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     // Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
+
+    //Private Constants
+    private static final String REAUTH_HEADER = "X-OpenIDM-Reauth-Password";
+    private static final String RUN_AS_USER = "runAsUser";
+    private static final String ACCOUNT_USERNAME_ATTRIBUTES = "accountUserNameAttributes";
 
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
@@ -1523,9 +1530,48 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         objectClassInfoHelper.getUpdateAttributes(request, newName,
                                 cryptoService);
 
-                OperationOptions operationOptions = operations.get(UpdateApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper)
-                        .build();
+                String oldPassword = null;
+                try {
+                    // get reauth password
+                    HttpContext httpContext =  context.asContext(HttpContext.class);
+                    oldPassword = httpContext.getHeaderAsString(REAUTH_HEADER);
+                } catch (Exception e) {
+                    // there will not always be a HttpContext and this is acceptable so catch exception to
+                    // prevent the exception from  stopping the remaining update
+                }
+
+                // check if updating an attribute that requires user credentials
+                final JsonValue properties = objectClassInfoHelper.getProperties();
+                Predicate<String> attributes = new Predicate<String>() {
+                    @Override
+                    public boolean apply(String attribute) {
+                        return properties.get(attribute).isNull()
+                                ? false
+                                : properties.get(attribute).get(RUN_AS_USER).defaultTo(false).asBoolean().booleanValue();
+                    }
+                };
+
+                final boolean runAsUser = StringUtils.isNotEmpty(oldPassword)
+                        && filter(request.getContent().asMap().keySet(), attributes).iterator().hasNext();
+
+                OperationOptions operationOptions;
+                OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper);
+
+                // if reauth and updating attribute requiring user credentials
+                if (runAsUser) {
+                    // get username attribute
+                    final List<String> usernameAttrs = jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
+                            .get(ACCOUNT_USERNAME_ATTRIBUTES).asList(String.class);
+                    final String username = request.getContent().get(usernameAttrs.get(0)).asString();
+
+                    if (StringUtils.isNotBlank(username)) {
+                        operationOptionsBuilder.setRunAsUser(username)
+                            .setRunWithPassword(new GuardedString(oldPassword.toCharArray()));
+                    }
+                }
+
+                operationOptions = operationOptionsBuilder.build();
 
                 Uid _uid = null != request.getRevision()
                     ? new Uid(resourceId, request.getRevision())
