@@ -593,7 +593,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         try {
             // decrypt any incoming encrypted properties
-            JsonValue value = decrypt(request.getContent());
+            JsonValue value = decrypt(content);
             execScript(context, onCreate, value, null);
             
             // Populate the virtual properties (so they are available for sync-ing)
@@ -602,9 +602,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // includes per-property encryption
             onStore(context, value);
 
-            CreateRequest createRequest = Requests.copyOfCreateRequest(request);
-            createRequest.setNewResourceId(resourceId);
-            createRequest.setResourceName(repoId(null));
+            CreateRequest createRequest = Requests.copyOfCreateRequest(request)
+                    .setNewResourceId(resourceId)
+                    .setResourceName(repoId(null))
+                    .setContent(value);
 
             Resource _new = connectionFactory.getConnection().create(context, createRequest);
 
