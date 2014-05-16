@@ -447,7 +447,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
             db.delete(existingDoc); 
             logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
-            return new Resource(localId, null, new JsonValue(null));
+            return DocumentUtil.toResource(existingDoc);
         } catch (ODatabaseException ex) {
             // Without transaction the concurrent modification exception gets nested instead
             if (isCauseConcurrentModificationException(ex, 10)) {
