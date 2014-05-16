@@ -470,9 +470,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         // Perform update
         UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
         updateRequest.setRevision(rev);
-        for (Map.Entry<String,String> entry : request.getAdditionalParameters().entrySet()) {
-            updateRequest.setAdditionalParameter(entry.getKey(), entry.getValue());
-        }
         Resource response = connectionFactory.getConnection().update(context, updateRequest);
 
         // Execute the postUpdate script if configured
