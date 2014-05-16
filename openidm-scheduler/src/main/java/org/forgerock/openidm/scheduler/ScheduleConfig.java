@@ -28,14 +28,14 @@ package org.forgerock.openidm.scheduler;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -55,7 +55,7 @@ public class ScheduleConfig {
     private String invokeLogLevel = null;
     private Boolean concurrentExecution = null;
 
-    public ScheduleConfig(JsonValue config) {
+    public ScheduleConfig(JsonValue config) throws ResourceException {
         JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
         if (enabledValue.isString()) {
             enabled = Boolean.parseBoolean(enabledValue.defaultTo("true").asString());
@@ -77,13 +77,13 @@ public class ScheduleConfig {
         misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
         if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
                 !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
-            throw new InvalidException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
+            throw new BadRequestException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
         }
         cronSchedule = config.get(SchedulerService.SCHEDULE_CRON_SCHEDULE).asString();
         scheduleType = config.get(SchedulerService.SCHEDULE_TYPE).asString();
         invokeService = config.get(SchedulerService.SCHEDULE_INVOKE_SERVICE).asString();
         if (!StringUtils.isNotBlank(invokeService)) {
-            throw new InvalidException("Invalid scheduler configuration, the "
+            throw new BadRequestException("Invalid scheduler configuration, the "
                     + SchedulerService.SCHEDULE_INVOKE_SERVICE
                     + " property needs to be set but is empty. "
                     + "Complete config:" + config);
@@ -103,7 +103,7 @@ public class ScheduleConfig {
             timeZone = TimeZone.getTimeZone(timeZoneString);
             // JDK has fall-back behavior to GMT if it doesn't understand timezone passed
             if (!timeZoneString.equals(timeZone.getID())) {
-                throw new InvalidException("Scheduler configured timezone is not understood: " + timeZoneString);
+                throw new BadRequestException("Scheduler configured timezone is not understood: " + timeZoneString);
             }
         }
         if (StringUtils.isNotBlank(startTimeString)) {
@@ -120,7 +120,7 @@ public class ScheduleConfig {
 
         if (StringUtils.isNotBlank(scheduleType)) {
             if (!scheduleType.equals(SchedulerService.SCHEDULE_TYPE_CRON)) {
-                throw new InvalidException("Scheduler configuration contains unknown schedule type "
+                throw new BadRequestException("Scheduler configuration contains unknown schedule type "
                         + scheduleType + ". Known types include " + SchedulerService.SCHEDULE_TYPE_CRON);
             }
         }
