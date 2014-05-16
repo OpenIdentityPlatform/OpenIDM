@@ -34,7 +34,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.cluster.ClusterManagementService;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -76,7 +76,7 @@ public class ScheduleConfigService {
     }
 
     @Activate
-    void activate(ComponentContext compContext) throws SchedulerException, ParseException {
+    void activate(ComponentContext compContext) throws SchedulerException, ParseException, ResourceException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
         scheduleConfig = initConfig(compContext);
@@ -106,7 +106,7 @@ public class ScheduleConfigService {
      * @param compContext
      * @throws InvalidException if the configuration is invalid.
      */
-    private ScheduleConfig initConfig(ComponentContext compContext) throws InvalidException {
+    private ScheduleConfig initConfig(ComponentContext compContext) throws ResourceException {
 
         // Optional property SERVICE_FACTORY_PID set by JSONConfigInstaller
         configFactoryPID = (String) compContext.getProperties().get("config.factory-pid");

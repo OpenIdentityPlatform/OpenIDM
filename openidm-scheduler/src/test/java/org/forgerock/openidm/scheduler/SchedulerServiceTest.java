@@ -16,28 +16,20 @@
 
 package org.forgerock.openidm.scheduler;
 
-import java.util.ArrayList;
-import java.util.Date;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertNotNull;
+
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.InvalidException;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-
-import static org.mockito.Mockito.*;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-
-import static org.testng.Assert.*;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,13 +41,8 @@ import org.testng.annotations.Test;
  */
 public class SchedulerServiceTest {
 
-//    private HashMap<String, Object> scope;
-    SchedulerService schedulerService;
-
     @BeforeMethod
     public void beforeMethod() {
-        schedulerService = new SchedulerService();
-//        scope = new HashMap<String, Object>();
     }
 
     ComponentContext getMockedContext(Map enhancedConfig, SchedulerService sched) {
@@ -76,9 +63,9 @@ public class SchedulerServiceTest {
     }
 
     @Test
-    public void configParsingTest() throws InvalidException {
+    public void configParsingTest() throws ResourceException {
         // Check valid configuration succeeds
-        Map config = new HashMap();
+        Map<String, Object> config = new HashMap<String, Object>();
         config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
         config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
         config.put(SchedulerService.SCHEDULE_END_TIME, "2011-05-03T15:59:59");
@@ -87,17 +74,16 @@ public class SchedulerServiceTest {
         config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
         config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
 
-        //schedulerService.initConfig(validConfig);
         ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
 
         // mimimize trying to these impl details, basic sanity check on one
         assertNotNull(scheduleConfig.getStartTime());
     }
 
-    @Test(enabled = false, expectedExceptions = InvalidException.class)
-    public void invalidConfigParsingTest() throws InvalidException {
+    @Test(enabled = false, expectedExceptions = ResourceException.class)
+    public void invalidConfigParsingTest() throws ResourceException {
         // Check invalid configuration fails
-        Map config = new HashMap();
+        Map<String, Object> config = new HashMap<String, Object>();
         config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
         config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
         config.put(SchedulerService.SCHEDULE_END_TIME, "2011-05-03T15:59:59");
