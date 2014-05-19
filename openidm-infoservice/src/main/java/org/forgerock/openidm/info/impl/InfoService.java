@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author aegloff
  */
-@Component(name = InfoService.PID, policy = ConfigurationPolicy.REQUIRE,
+@Component(name = InfoService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Info Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),

@@ -198,6 +198,7 @@ import static org.identityconnectors.framework.common.objects.filter.FilterBuild
  */
 @Component(name = OpenICFProvisionerService.PID,
         policy = ConfigurationPolicy.REQUIRE,
+        metatype = true,
         description = "OpenIDM OpenICF Provisioner Service",
         immediate = true)
 @Service(value = {ProvisionerService.class})

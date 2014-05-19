@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Chad Kienle
  */
-@Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE,
+@Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Policy Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),

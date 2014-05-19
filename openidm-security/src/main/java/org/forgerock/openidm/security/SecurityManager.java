@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ckienle
  */
-@Component(name = SecurityManager.PID, policy = ConfigurationPolicy.IGNORE,
+@Component(name = SecurityManager.PID, policy = ConfigurationPolicy.IGNORE, metatype = true, 
         description = "OpenIDM Security Management Service", immediate = true)
 @Service
 @Properties({

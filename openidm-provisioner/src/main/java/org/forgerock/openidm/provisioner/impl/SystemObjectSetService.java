@@ -77,6 +77,7 @@ import java.util.Map;
  */
 @Component(name = "org.forgerock.openidm.provisioner",
         policy = ConfigurationPolicy.IGNORE,
+        metatype = true,
         description = "OpenIDM System Object Set Service",
         immediate = true)
 @Service(value = {ScheduledService.class, SingletonResourceProvider.class})

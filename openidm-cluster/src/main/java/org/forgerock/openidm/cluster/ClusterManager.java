@@ -81,7 +81,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chad Kienle
  */
-@Component(name = ClusterManager.PID, policy = ConfigurationPolicy.REQUIRE,
+@Component(name = ClusterManager.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Policy Service", immediate = true)
 @Service
 @Properties({
