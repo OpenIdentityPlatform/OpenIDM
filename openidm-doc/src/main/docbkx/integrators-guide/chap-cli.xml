@@ -492,20 +492,26 @@ CryptoService is initialized with 2 keys.
     <primary>Keytool</primary>
   </indexterm>   
 
-   <para>The <command>keytool</command> subcommand exports or imports 
-   private key values.</para>
+   <para>
+    The <command>keytool</command> subcommand exports or imports secret key
+    values.
+   </para>
    
-   <para>The Java <command>keytool</command> command enables you to export and 
-   import public keys and certificates, but not private keys. The OpenIDM 
-   <command>keytool</command> subcommand provides this functionality.</para>
+   <para>
+    The Java <command>keytool</command> command enables you to export and import
+    public keys and certificates, but not secret or symmetric keys. The OpenIDM
+    <command>keytool</command> subcommand provides this functionality.
+   </para>
 
   <para>Usage is as follows:</para>
   
   <screen>./cli.sh keytool [--export, --import] <replaceable>alias</replaceable>
   </screen>
   
-  <para>For example, to export the default OpenIDM symmetric key, run the 
-  following command:</para>
+  <para>
+   For example, to export the default OpenIDM symmetric key, run the following
+   command:
+  </para>
   
   <screen>
 $ <userinput>./cli.sh keytool --export openidm-sym-default</userinput>
