@@ -156,7 +156,7 @@ public class AsyncJobResourceProvider extends AbstractAsyncResourceProvider impl
     public void updateInstance(final ServerContext context, final String resourceId,
             final UpdateRequest request, final ResultHandler<Resource> handler) {
         try {
-            JsonValue content = request.getNewContent();
+            JsonValue content = request.getContent();
             JobInfo.Builder builder = new JobInfo.Builder();
             builder.object(content.get("object").asString());
             builder.operation(content.get("operation").asEnum(OperationEnum.class));

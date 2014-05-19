@@ -99,7 +99,7 @@ public class StreamingResourceProvider implements SingletonResourceProvider {
     public void actionInstance(ServerContext serverContext, ActionRequest actionRequest,
             ResultHandler<JsonValue> resultHandler) {
         try {
-            JsonValue params = new JsonValue(actionRequest.getAdditionalActionParameters());
+            JsonValue params = new JsonValue(actionRequest.getAdditionalParameters());
             String topic = params.get("topic").required().asString();
             if (TOPIC_PATTERN.matcher(topic).matches()) {
                 JsonValue result = new JsonValue(new HashMap<String, Object>());

@@ -392,7 +392,7 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
                     cr.setMethod(SalesforceConnection.PATCH);
 
                     JsonValue update =
-                            new JsonValue(describe.beforeUpdate(request.getNewContent()));
+                            new JsonValue(describe.beforeUpdate(request.getContent()));
                     logger.trace("Update sobjects/{} \n content: \n{}\n", type, update);
 
                     cr.getRequest().setEntity(new JacksonRepresentation<Map>(update.asMap()));

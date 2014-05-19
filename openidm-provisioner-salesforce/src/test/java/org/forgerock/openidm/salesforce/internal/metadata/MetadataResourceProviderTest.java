@@ -73,7 +73,7 @@ public class MetadataResourceProviderTest {
         UpdateRequest updateRequest =
                 Requests.newUpdateRequest("/system/test/metadata/SamlSsoConfig", resource1.getId(),
                         content);
-        updateRequest.getNewContent().put("fullName", "Test SAML Config RENAME");
+        updateRequest.getContent().put("fullName", "Test SAML Config RENAME");
         Resource resource2 =
                 routerRegistry.getConnection("test").update(new RootContext(), updateRequest);
 

@@ -192,7 +192,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
         try {
             Class<? extends Metadata> metaClass = getMetadataClass(context);
             Metadata metadata =
-                    OBJECT_MAPPER.convertValue(request.getNewContent().asMap(), metaClass);
+                    OBJECT_MAPPER.convertValue(request.getContent().asMap(), metaClass);
 
             UpdateMetadata updateMetadata = new UpdateMetadata();
             updateMetadata.setCurrentName(resourceId);
