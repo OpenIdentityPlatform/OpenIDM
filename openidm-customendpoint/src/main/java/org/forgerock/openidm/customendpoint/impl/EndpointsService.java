@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author Laszlo Hordos
  * @author aegloff
  */
-@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE,
+@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Custom Endpoints Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),

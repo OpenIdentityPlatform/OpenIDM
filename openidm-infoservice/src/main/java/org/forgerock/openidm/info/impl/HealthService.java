@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author aegloff
  */
-@Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE,
+@Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Health Service", immediate = true)
 @Service
 /*

@@ -123,6 +123,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = ConnectorInfoProviderService.PID,
         policy = ConfigurationPolicy.OPTIONAL,
+        metatype = true,
         description = "OpenICF Connector Info Service",
         immediate = true)
 @Service

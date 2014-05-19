@@ -36,6 +36,7 @@ import org.forgerock.script.ScriptRegistry;
  */
 @Component(name = SyncFailureHandlerFactoryImpl.PID,
         policy = ConfigurationPolicy.IGNORE,
+        metatype = true,
         description = "OpenIDM Sync Failure Handler Factory Service",
         immediate = true
 )

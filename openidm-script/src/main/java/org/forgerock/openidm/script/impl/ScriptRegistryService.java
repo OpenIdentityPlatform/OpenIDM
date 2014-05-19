@@ -108,7 +108,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laszlo Hordos
  */
-@Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE,
+@Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Script Registry Service", immediate = true)
 @Service
 @Properties({
