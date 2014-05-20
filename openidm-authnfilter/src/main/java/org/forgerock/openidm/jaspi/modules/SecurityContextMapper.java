@@ -16,23 +16,23 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.forgerock.jaspi.runtime.JaspiRuntime;
-import org.forgerock.json.fluent.JsonValue;
-import sun.dc.pr.PRError;
-
-import javax.security.auth.message.MessageInfo;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_COMPONENT;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_ID;
 import static org.forgerock.json.resource.SecurityContext.AUTHZID_ROLES;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.security.auth.message.MessageInfo;
+
+import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * A JsonValue-wrapper to contain the security context information before the
