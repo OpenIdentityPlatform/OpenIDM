@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import org.activiti.engine.ActivitiException;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.form.StartFormData;
@@ -45,6 +46,7 @@ import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.apache.ibatis.exceptions.PersistenceException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.forgerock.json.fluent.JsonValue;
@@ -98,7 +100,25 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
 
     @Override
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+        try {
+            Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
+            ProcessDefinition processDefinition = processEngine.getRepositoryService().getProcessDefinition(resourceId);
+            if (processDefinition != null) {
+                processEngine.getRepositoryService().deleteDeployment(processDefinition.getDeploymentId(), false);
+                Map<String, String> result = new HashMap<String, String>(1);
+                result.put("Workflow definition deleted", resourceId);
+                handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
+            } else {
+                handler.handleError(new NotFoundException());
+            }
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
+        } catch (PersistenceException ex) {
+            handler.handleError(new ConflictException("The process definition has running instances, can not be deleted"));
+        }
+        catch (Exception ex) {
+            handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
+        }
     }
 
     @Override
