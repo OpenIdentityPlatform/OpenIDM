@@ -840,7 +840,7 @@
                 <plugin>
                     <groupId>org.forgerock.commons</groupId>
                     <artifactId>i18n-maven-plugin</artifactId>
-                    <version>1.4.1-SNAPSHOT</version>
+                    <version>1.4.1</version>
                     <executions>
                         <execution>
                             <phase>generate-sources</phase>
