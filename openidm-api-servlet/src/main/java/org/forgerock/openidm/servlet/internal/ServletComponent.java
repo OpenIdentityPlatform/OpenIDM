@@ -144,8 +144,7 @@ public class ServletComponent implements EventHandler {
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.debug("Try registering servlet at {}", SERVLET_ALIAS);
-        servlet = new HttpServlet(connectionFactory,
-                new IDMSecurityContextFactory(scriptRegistry, augmentSecurityScripts));
+        servlet = new HttpServlet(connectionFactory, new IDMSecurityContextFactory(augmentSecurityScripts));
 
         servletRegistration.registerServlet(SERVLET_ALIAS, servlet, new Hashtable());
         logger.info("Registered servlet at {}", SERVLET_ALIAS);

@@ -34,9 +34,9 @@ import org.forgerock.json.resource.servlet.HttpServletContextFactory;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.engine.Utils;
 
+import org.forgerock.script.exception.ScriptThrownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,20 +54,15 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
 
     private final static Logger logger = LoggerFactory.getLogger(IDMSecurityContextFactory.class);
 
-    /** the Script Registry */
-    private final ScriptRegistry scriptRegistry;
-
     /** a list of augmentation scripts to run */
     private final List<ScriptEntry> augmentationScripts;
 
     /**
      * Construct the IDMServletContextFactory.
      *
-     * @param scriptRegistry the script registry, for registring auth module scripts
      * @param augmentationScripts the list of configured security context augmentation scripts
      */
-    public IDMSecurityContextFactory(ScriptRegistry scriptRegistry, List<ScriptEntry> augmentationScripts) {
-        this.scriptRegistry = scriptRegistry;
+    public IDMSecurityContextFactory(List<ScriptEntry> augmentationScripts) {
         this.augmentationScripts = augmentationScripts;
     }
 
@@ -126,10 +121,15 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
 
         try {
             script.eval();
+        } catch (ScriptThrownException ste) {
+            throw ste.toResourceException(ResourceException.INTERNAL_ERROR,
+                    "Security Context augmentation script '" + augmentScript.getName().toString()
+                    + "' resulted in an error");
         } catch (Throwable t) {
             ResourceException re = Utils.adapt(t);
             logger.warn("augment script {} encountered exception with detail {} " ,
                     new Object[] { augmentScript.getName().getName(), re.getDetail(), re });
+            throw re;
         }
     }
 }
