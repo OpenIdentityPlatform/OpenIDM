@@ -97,7 +97,7 @@ class SecurityContextMapper {
     }
 
     void setRoles(List<String> roles) {
-        authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, roles);
+        authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>(roles));
     }
 
     void addRole(String role) {
