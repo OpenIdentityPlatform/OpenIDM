@@ -575,28 +575,28 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             message = MessageFormat.format("Attribute value conflicts with the attribute's schema definition on " +
                     "operation {0} for system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            handler.handleError(new BadRequestException(e));
+            handler.handleError(new BadRequestException(message, exception));
         } catch (PreconditionFailedException e) {
             message = MessageFormat.format("The resource version for {0} does not match the version provided on " +
                     "operation {1} for system object: {2}",
                     request.getResourceName(), request.getRequestType().toString(), resourceId);
-            handler.handleError(new org.forgerock.json.resource.PreconditionFailedException(e));
+            handler.handleError(new org.forgerock.json.resource.PreconditionFailedException(message, exception));
         } catch (PreconditionRequiredException e) {
             message = MessageFormat.format("No resource version for resource {0} has been provided on operation {1} for system object: {2}",
                     request.getResourceName(), request.getRequestType().toString(), resourceId);
-            handler.handleError(new org.forgerock.json.resource.PreconditionRequiredException(e));
+            handler.handleError(new org.forgerock.json.resource.PreconditionRequiredException(message, exception));
         } catch (RetryableException e) {
             message = MessageFormat.format("Request temporarily unavailable on operation {0} for system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            handler.handleError(new ServiceUnavailableException(e));
+            handler.handleError(new ServiceUnavailableException(message, exception));
         } catch (UnsupportedOperationException e) {
             message = MessageFormat.format("Operation {0} is no supported for system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            handler.handleError(new NotFoundException(e));
+            handler.handleError(new NotFoundException(message, exception));
         } catch (IllegalArgumentException e) {
             message = MessageFormat.format("Operation {0} failed with IllegalArgumentException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            handler.handleError(new InternalServerErrorException(e));
+            handler.handleError(new InternalServerErrorException(message, e));
         } catch (RemoteWrappedException e) {
             handleRemoteWrappedException(context, request, exception, resourceId,
                     before, after, handler, connectorExceptionActivityLogger);
@@ -805,9 +805,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (ConnectorException e) {
             handleConnectorException(context, request, e, request.getResourceName(), null, null, handler, activityLogger);
         } catch (JsonValueException e) {
-            handler.handleError(new BadRequestException(e));
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
 
@@ -1046,7 +1046,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1063,7 +1063,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1080,7 +1080,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1097,7 +1097,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1114,7 +1114,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1131,7 +1131,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1148,7 +1148,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
     }
@@ -1240,9 +1240,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1341,9 +1341,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ConnectorException e) {
                 handleConnectorException(context, request, e, request.getNewResourceId(), request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e.getMessage()));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e.getMessage()));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
@@ -1378,15 +1378,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ConnectorException e) {
                 handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e.getMessage()));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e.getMessage()));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
         @Override
         public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
                 ResultHandler<Resource> handler) {
+            Map<String, String> headers = new HashMap<String, String>();
             handler.handleError(new NotSupportedException("Patch operations are not supported"));
         }
 
@@ -1453,7 +1454,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 try {
                                     return handler.handleResource(objectClassInfoHelper.build(obj, cryptoService));
                                 } catch (Exception e) {
-                                    handler.handleError(new InternalServerErrorException(e));
+                                    handler.handleError(new InternalServerErrorException(e.getMessage(), e));
                                     return false;
                                 }
                             }
@@ -1467,9 +1468,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ConnectorException e) {
                 handleConnectorException(context, request, e, null, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             } finally {
 //              measure.end();
             }
@@ -1509,9 +1510,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ConnectorException e) {
                 handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
             }
         }
 
