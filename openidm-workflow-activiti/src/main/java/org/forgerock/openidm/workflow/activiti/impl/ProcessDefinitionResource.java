@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
@@ -184,8 +183,8 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
             r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
             handler.handleResult(r);
-        } catch (ActivitiException e) {
-            handler.handleError(new NotFoundException());
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }

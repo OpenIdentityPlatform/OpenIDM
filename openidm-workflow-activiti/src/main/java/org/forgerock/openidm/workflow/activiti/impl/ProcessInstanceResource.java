@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
@@ -105,6 +106,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             } else {
                 handler.handleError(new InternalServerErrorException("The process instance could not be created"));
             }
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
@@ -122,6 +125,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             } else {
                 handler.handleError(new NotFoundException());
             }
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (Exception ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         }
