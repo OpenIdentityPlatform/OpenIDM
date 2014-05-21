@@ -63,9 +63,10 @@ if (effectiveRoles != null)  {
                             // Include information on where the assignment comes from, to allow easier management and debugging
                             assignmentProp[propCount]["assignedThrough"] = roleId;
                         }
-                            
+
                         var existingProp = effectiveAssignments[assignmentName][assignmentPropName];
-                        if (existingProp != null) {
+                        // Only merge "attributes"
+                        if (existingProp != null && assignmentPropName == "attributes") {
                             logger.trace("Merge assignment {}: {}", assignmentPropName, assignmentProp);
                             effectiveAssignments[assignmentName][assignmentPropName] = effectiveAssignments[assignmentName][assignmentPropName].concat(assignmentProp);
                         } else {
