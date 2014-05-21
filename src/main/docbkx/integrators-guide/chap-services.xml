@@ -235,6 +235,28 @@ Stopping OpenIDM (454)</screen>
 
      <para>The database location is then relative to a working location
      defined in the startup configuration.</para>
+
+  <para>
+   Note that property substitution does not work for connector reference
+   properties. So, for example, the following configuration would not be valid:
+  </para>
+  <programlisting language="javascript">"connectorRef" : {
+    "connectorName" : "&amp;{connectorName}",
+    "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
+    "bundleVersion" : "&amp;{LDAP.BundleVersion}"
+    ...
+  </programlisting>
+  <para>
+   The <literal>"connectorName"</literal> must be the precise string from the
+   connector configuration. If you need to specify multiple connector version
+   numbers, use a range instead, for example:
+  </para>
+  <programlisting language="javascript">"connectorRef" : {
+    "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+    "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
+    "bundleVersion" : "[1.1.0.1,1.1.2.0)",
+    ...
+  </programlisting>
   
  </section>
  
