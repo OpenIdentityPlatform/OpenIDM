@@ -30,6 +30,7 @@ import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.RepositoryServiceImpl;
@@ -151,6 +152,8 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                 }
             }
             handler.handleResult(r);
+        } catch (ActivitiObjectNotFoundException ex) {
+            handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (IllegalArgumentException ex) {
             handler.handleError(new InternalServerErrorException(ex.getMessage(), ex));
         } catch (Exception ex) {
