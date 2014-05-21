@@ -135,7 +135,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>groovy-connector</artifactId>
-            <version>1.4.0.0-SNAPSHOT</version>
+            <version>1.4.0.0-RC1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -212,7 +212,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0-SNAPSHOT</version>
+                                    <version>1.4.0.0-RC1</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
@@ -233,7 +233,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0-SNAPSHOT</version>
+                                    <version>1.4.0.0-RC1</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                 </artifactItem>
