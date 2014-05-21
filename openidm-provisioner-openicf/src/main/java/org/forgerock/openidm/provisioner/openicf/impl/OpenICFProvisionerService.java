@@ -1387,7 +1387,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         @Override
         public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
                 ResultHandler<Resource> handler) {
-            Map<String, String> headers = new HashMap<String, String>();
             handler.handleError(new NotSupportedException("Patch operations are not supported"));
         }
 
