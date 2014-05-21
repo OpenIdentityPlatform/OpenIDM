@@ -26,10 +26,8 @@ package org.forgerock.openidm.cluster;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -51,7 +49,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -62,13 +59,14 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
@@ -92,25 +90,38 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
-    private static final String REPO_ID_PREFIX = "/repo/cluster/";
-
     private static final Object repoLock = new Object();
     private static final Object startupLock = new Object();
 
     public static final String PID = "org.forgerock.openidm.cluster";
 
+    /**
+     * Query ID for querying failed instances
+     */
     private static final String QUERY_FAILED_INSTANCE = "query-cluster-instances";
+    
+    /**
+     * Query ID for querying all instances
+     */
     private static final String QUERY_INSTANCES = "query-all";
+
+    /**
+     * Resource name when issuing requests over the router
+     */
+    private static final ResourceName REPO_RESOURCE_CONTAINER = new ResourceName("repo", "cluster", "states");     
+    
+    /**
+     * Resource name when issuing requests directly with the Repository Service
+     */
+    private static final ResourceName RESOURCE_CONTAINER = new ResourceName("cluster", "states"); 
 
     /**
      * The instance ID
      */
     private String instanceId;
-
-    /**
-     * The Repository Service ServerContext
-     */
-    private static ServerContext routeServiceServerContext;
+    
+    @Reference
+    protected RepositoryService repoService;
 
     /**
      * The Connection Factory
@@ -119,15 +130,24 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     protected ConnectionFactory connectionFactory;
 
     /**
-     * A list of listeners to notify when an instance failes
+     * A list of listeners to notify when an instance fails
      */
     private Map<String, ClusterEventListener> listeners =
             new HashMap<String, ClusterEventListener>();
 
+    /**
+     * A thread to perform cluster management
+     */
     private ClusterManagerThread clusterManagerThread = null;
 
+    /**
+     * Enhanced configuration utility
+     */
     private EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
 
+    /**
+     * The Cluster Manager Configuration
+     */
     private ClusterConfig clusterConfig;
 
     /**
@@ -135,26 +155,20 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      */
     private InstanceState currentState = null;
 
+    /**
+     * A flag to indicate if the has checked-in yet
+     */
     private boolean firstCheckin = true;
 
+    /**
+     * A flag to indicate if this instance has failed
+     */
     private boolean failed = false;
 
+    /**
+     * A flag to indicate if the cluster management is enabled
+     */
     private boolean enabled = false;
-
-    /** Internal object set router service. */
-    @Reference(name = "ref_ClusterManager_RepositoryService", bind = "bindRepo",
-            unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
-    protected RouteService repo;
-
-    protected void bindRepo(final RouteService service) throws ResourceException {
-        logger.debug("binding RepositoryService");
-        this.routeServiceServerContext = service.createServerContext();
-    }
-
-    protected void unbindRepo(final RouteService service) {
-        logger.debug("unbinding RepositoryService");
-        this.routeServiceServerContext = null;
-    }
 
     @Activate
     void activate(ComponentContext compContext) throws ParseException {
@@ -238,12 +252,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 logger.debug("Resource Name: " + request.getResourceName());
                 if (request.getResourceName().isEmpty()) {
                     // Return a list of all nodes in the cluster
-                    QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
-                    r.setQueryId(QUERY_INSTANCES);
-                    r.setAdditionalParameter("fields", "*");
+                    QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_CONTAINER.toString());
+                    queryRequest.setQueryId(QUERY_INSTANCES);
+                    queryRequest.setAdditionalParameter("fields", "*");
                     logger.debug("Attempt query {}", QUERY_INSTANCES);
                     final List<Object> list = new ArrayList<Object>();
-                    connectionFactory.getConnection().query(context, r, new QueryResultHandler() {
+                    connectionFactory.getConnection().query(context, queryRequest, new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {
                             // ignore
@@ -261,25 +275,33 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                         }
                     });
                     resultMap.put("results", list);
+                    handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
                 } else {
                     String id = request.getResourceName();
                     logger.debug("Attempting to read instance {} from the database", id);
-                    ReadRequest readRequest = Requests.newReadRequest(getInstanceStateRepoId(id));
+                    ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_CONTAINER.child(id).toString());
                     Resource instanceValue = connectionFactory.getConnection().read(context, readRequest);
-                    if (!instanceValue.getContent().isNull()) {
-                        resultMap.put("results", getInstanceMap(instanceValue.getContent()));
-                    } else {
-                        resultMap.put("results", "{}");
-                    }
+                    JsonValue result = new JsonValue(getInstanceMap(instanceValue.getContent()));
+                    handler.handleResult(new Resource(request.getResourceName(), null, result));
                 }
-                handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
             } catch (ResourceException e) {
-                e.printStackTrace();
-                throw new InternalServerErrorException(e);
+                handler.handleError(e);
             }
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
+    }
+
+    @Override
+    public void register(String listenerId, ClusterEventListener listener) {
+        logger.debug("Registering listener {}", listenerId);
+        listeners.put(listenerId, listener);
+    }
+
+    @Override
+    public void unregister(String listenerId) {
+        logger.debug("Unregistering listener {}", listenerId);
+        listeners.remove(listenerId);
     }
 
     /**
@@ -336,34 +358,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         }
         return instanceInfo;
     }
-    
-    /**
-     * Gets the Instance State repository ID.
-     */
-    private String getInstanceStateRepoId(String instanceId) {
-        return new StringBuilder(REPO_ID_PREFIX).append("states/").append(instanceId).toString();
-    }
-
-    private String getInstanceStateRepoResource() {
-        return new StringBuilder(REPO_ID_PREFIX).append("states").toString();
-    }
-
-    public void register(String listenerId, ClusterEventListener listener) {
-        logger.debug("Registering listener {}", listenerId);
-        listeners.put(listenerId, listener);
-    }
-
-    public void unregister(String listenerId) {
-        logger.debug("Unregistering listener {}", listenerId);
-        listeners.remove(listenerId);
-    }
 
     public void renewRecoveryLease(String instanceId) {
         synchronized (repoLock) {
             try {
                 InstanceState state = getInstanceState(instanceId);
                 // Update the recovery timestamp
-                state = getInstanceState(instanceId);
                 state.updateRecoveringTimestamp();
                 updateInstanceState(instanceId, state);
                 logger.debug("Updated recovery timestamp of instance {}", instanceId);
@@ -388,55 +388,50 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private void updateInstanceState(String instanceId, InstanceState instanceState)
             throws ResourceException {
         synchronized (repoLock) {
-            if (routeServiceServerContext == null) {
-                throw new InternalServerErrorException("Repo router is null");
-            }
-            String repoId = getInstanceStateRepoId(instanceId);
-            UpdateRequest r = Requests.newUpdateRequest(repoId, new JsonValue(instanceState.toMap()));
-            r.setRevision(instanceState.getRevision());
-            connectionFactory.getConnection().update(routeServiceServerContext, r);
+            ResourceName resourceName = RESOURCE_CONTAINER.child(instanceId);
+            UpdateRequest updateRequest = Requests.newUpdateRequest(resourceName.toString(), new JsonValue(instanceState.toMap()));
+            updateRequest.setRevision(instanceState.getRevision());
+            repoService.update(updateRequest);
         }
     }
 
     private InstanceState getInstanceState(String instanceId) throws ResourceException {
         synchronized (repoLock) {
-            return new InstanceState(instanceId,
-                    getOrCreateRepo(getInstanceStateRepoId(instanceId)));
+            ResourceName resourceName = RESOURCE_CONTAINER.child(instanceId);
+            return new InstanceState(instanceId, getOrCreateRepo(resourceName.toString()));
         }
     }
 
-    private Map<String, Object> getOrCreateRepo(String repoId) throws ResourceException {
+    private Map<String, Object> getOrCreateRepo(String resourceName) throws ResourceException {
         synchronized (repoLock) {
-            if (routeServiceServerContext == null) {
-                throw new InternalServerErrorException("Repo router is null");
-            }
             String container, id;
             Map<String, Object> map;
 
-            map = readFromRepo(repoId).asMap();
+            map = readFromRepo(resourceName).asMap();
             if (map == null) {
                 map = new HashMap<String, Object>();
-                // create in repo
-                logger.debug("Creating repo {}", repoId);
-                container = repoId.substring(0, repoId.lastIndexOf("/"));
-                id = repoId.substring(repoId.lastIndexOf("/") + 1);
+                // create resource
+                logger.debug("Creating resource {}", resourceName);
+                container = resourceName.substring(0, resourceName.lastIndexOf("/"));
+                id = resourceName.substring(resourceName.lastIndexOf("/") + 1);
+                Resource resource = null;
                 CreateRequest createRequest = Requests.newCreateRequest(container, id, new JsonValue(map));
-                map = connectionFactory.getConnection().create(routeServiceServerContext, createRequest).getContent().asMap();
+                resource = repoService.create(createRequest);
+                map = resource.getContent().asMap();
             }
             return map;
         }
     }
 
-    private JsonValue readFromRepo(String repoId) throws ResourceException {
+    private JsonValue readFromRepo(String resourceName) throws ResourceException {
         try {
-            if (routeServiceServerContext == null) {
-                throw new InternalServerErrorException("Repo router is null");
-            }
-            logger.debug("Reading from repo {}", repoId);
-            Resource res = connectionFactory.getConnection().read(routeServiceServerContext, Requests.newReadRequest(repoId));
-            res.getContent().put("_id", res.getId());
-            res.getContent().put("_rev", res.getRevision());
-            return res.getContent();
+            logger.debug("Reading resource {}", resourceName);
+            Resource resource = null;
+            ReadRequest readRequest = Requests.newReadRequest(resourceName);
+            resource = repoService.read(readRequest);
+            resource.getContent().put("_id", resource.getId());
+            resource.getContent().put("_rev", resource.getRevision());
+            return resource.getContent();
         } catch (NotFoundException e) {
             return new JsonValue(null);
         }
@@ -480,7 +475,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 return state;
             }
             updateInstanceState(instanceId, state);
-            logger.debug("Instance {} state updated successfully");
+            logger.debug("Instance {} state updated successfully", instanceId);
         } catch (ResourceException e) {
             if (e.getCode() != ResourceException.CONFLICT) {
                 logger.warn("Error updating instance timestamp", e);
@@ -493,6 +488,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         return state;
     }
 
+    /**
+     * Performs an instance check-out, setting the state to down if it is currently running.
+     */
     private void checkOut() {
         logger.debug("checkOut()");
         InstanceState state = null;
@@ -532,58 +530,33 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private Map<String, InstanceState> findFailedInstances() {
         Map<String, InstanceState> failedInstances = new HashMap<String, InstanceState>();
         try {
-            if (routeServiceServerContext == null) {
-                throw new InternalServerErrorException("Repo router is null");
-            }
-            QueryRequest r = Requests.newQueryRequest(getInstanceStateRepoResource());
-            r.setQueryId(QUERY_FAILED_INSTANCE);
-            String time =
-                    InstanceState.pad(System.currentTimeMillis()
-                            - clusterConfig.getInstanceTimeout());
-            r.getAdditionalParameters().put(InstanceState.PROP_TIMESTAMP_LEASE, time);
+            QueryRequest queryRequest = Requests.newQueryRequest(RESOURCE_CONTAINER.toString());
+            queryRequest.setQueryId(QUERY_FAILED_INSTANCE);
+            String time = InstanceState.pad(System.currentTimeMillis() - clusterConfig.getInstanceTimeout());
+            queryRequest.setAdditionalParameter(InstanceState.PROP_TIMESTAMP_LEASE, time);
             logger.debug("Attempt query {} for failed instances", QUERY_FAILED_INSTANCE);
-            JsonValue jv = new JsonValue(new HashMap<String, Object>());
-            final Collection<Map<String, Object>> list = new HashSet<Map<String, Object>>();
-            jv.put("result", list);
-            connectionFactory.getConnection().query(routeServiceServerContext, r, new QueryResultHandler() {
-                @Override
-                public void handleError(ResourceException error) {
-                    // ignore
-                }
-
-                @Override
-                public boolean handleResource(Resource resource) {
-                    list.add(resource.getContent().asMap());
-                    return true;
-                }
-
-                @Override
-                public void handleResult(QueryResult result) {
-                    // ignore
-                }
-            });
-            JsonValue result = jv.get("result");
-            if (!result.isNull()) {
-                for (JsonValue value : result) {
-                    Map<String, Object> valueMap = value.asMap();
-                    String id = (String) valueMap.get("instanceId");
-                    InstanceState state = new InstanceState(id, valueMap);
-                    switch (state.getState()) {
-                    case InstanceState.STATE_RUNNING:
+            List<Resource> resultList = repoService.query(queryRequest);
+            for (Resource resource : resultList) {
+                Map<String, Object> valueMap = resource.getContent().asMap();
+                String id = (String) valueMap.get("instanceId");
+                InstanceState state = new InstanceState(id, valueMap);
+                switch (state.getState()) {
+                case InstanceState.STATE_RUNNING:
+                    // Found failed instance
+                    failedInstances.put(id, state);
+                    break;
+                case InstanceState.STATE_PROCESSING_DOWN:
+                    // Check if recovering has failed
+                    if (state.hasRecoveringFailed(clusterConfig.getInstanceRecoveryTimeout())) {
                         failedInstances.put(id, state);
-                        break;
-                    case InstanceState.STATE_PROCESSING_DOWN:
-                        // Check if recovering has failed
-                        if (state.hasRecoveringFailed(clusterConfig.getInstanceRecoveryTimeout())) {
-                            failedInstances.put(id, state);
-                        }
-                        break;
-                    case InstanceState.STATE_DOWN:
-                        // allready recovered, do nothing
-                        break;
                     }
+                    break;
+                case InstanceState.STATE_DOWN:
+                    // Already recovered instance, do nothing
+                    break;
                 }
             }
+
         } catch (ResourceException e) {
             logger.error("Error reading instance check in map", e);
         }
