@@ -198,14 +198,14 @@ public class ObjectClassInfoHelper {
         for (AttributeInfoHelper attributeInfo : attributes) {
             if (Name.NAME.equals(attributeInfo.getAttributeInfo().getName())
                     || Uid.NAME.equals(attributeInfo.getAttributeInfo().getName())
-                    || !keySet.contains(attributeInfo.getName())) {
+                    || (!keySet.contains(attributeInfo.getName()) && !attributeInfo.getAttributeInfo().isRequired())) {
                 continue;
             }
             if (attributeInfo.getAttributeInfo().isCreateable()) {
                 JsonValue v = content.get(attributeInfo.getName());
                 if (v.isNull() && attributeInfo.getAttributeInfo().isRequired()) {
-                    throw new BadRequestException("Required attribute {" + attributeInfo.getName()
-                            + "} value is null");
+                    throw new BadRequestException("Required attribute '" + attributeInfo.getName()
+                            + "' value is null");
                 }
                 Attribute a = attributeInfo.build(v.getObject(), cryptoService);
                 if (null != a) {
