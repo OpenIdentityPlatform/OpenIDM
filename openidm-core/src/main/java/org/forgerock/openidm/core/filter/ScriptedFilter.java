@@ -359,7 +359,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                         + onFailure.getRight().getName());
             }
             Script script = populateScript(scriptEntry, context, state.request);
-            script.put("exception", error.toJsonValue().asMap());
+            script.put("exception", error.includeCauseInJsonValue().toJsonValue().asMap());
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
