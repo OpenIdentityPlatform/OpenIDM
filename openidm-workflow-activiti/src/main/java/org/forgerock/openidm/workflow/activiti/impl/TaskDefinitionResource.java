@@ -135,23 +135,27 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             String processDefinitionId = ((RouterContext) context).getUriTemplateVariables().get("procdefid");
             ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(processDefinitionId);
             TaskDefinition taskDefinition = procdef.getTaskDefinitions().get(resourceId);
-            Map value = mapper.convertValue(taskDefinition, HashMap.class);
-            Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
-            FormService formService = processEngine.getFormService();
-            String taskFormKey = formService.getTaskFormKey(processDefinitionId, resourceId);
-            if (taskFormKey != null){
-                r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormKey);
-                ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(procdef.getDeploymentId(), taskFormKey);
-                Reader reader = new InputStreamReader(startForm);
-                try {
-                    Scanner s = new Scanner(reader).useDelimiter("\\A");
-                    String formTemplate = s.hasNext() ? s.next() : "";
-                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
-                } finally {
-                    reader.close();
+            if (taskDefinition != null) {
+                Map value = mapper.convertValue(taskDefinition, HashMap.class);
+                Resource r = new Resource(taskDefinition.getKey(), null, new JsonValue(value));
+                FormService formService = processEngine.getFormService();
+                String taskFormKey = formService.getTaskFormKey(processDefinitionId, resourceId);
+                if (taskFormKey != null){
+                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormKey);
+                    ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(procdef.getDeploymentId(), taskFormKey);
+                    Reader reader = new InputStreamReader(startForm);
+                    try {
+                        Scanner s = new Scanner(reader).useDelimiter("\\A");
+                        String formTemplate = s.hasNext() ? s.next() : "";
+                        r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
+                    } finally {
+                        reader.close();
+                    }
                 }
+                handler.handleResult(r);
+            } else {
+                handler.handleError(new NotFoundException("Task definition for " + resourceId + " was not found"));
             }
-            handler.handleResult(r);
         } catch (ActivitiObjectNotFoundException ex) {
             handler.handleError(new NotFoundException(ex.getMessage()));
         } catch (IllegalArgumentException ex) {
