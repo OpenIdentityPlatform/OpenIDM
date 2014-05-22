@@ -84,16 +84,16 @@ $ <userinput>./cli.sh encrypt ... </userinput>
   that follow.
  </para>
 
- <screen>local:keytool	Export or import a SecretKeyEntry.
-     The Java Keytool does not allow for exporting or importing SecretKeyEntries.
-local:encrypt	Encrypt the input string.
-local:validate	Validates all json configuration files in the configuration (
-     default: /conf) folder.
-basic:help	Displays available commands.
-basic:exit	Exit from the console.
-remote:configureconnector	Generate connector configuration.
-remote:configexport	exports all configurations
-remote:configimport	Imports the configuration set from local file/directory</screen>
+ <screen>local:keytool  Export or import a SecretKeyEntry. 
+	   The Java Keytool does not allow for exporting or importing SecretKeyEntries.
+local:encrypt    Encrypt the input string.
+local:validate   Validates all json configuration files in the configuration (default: /conf) folder.
+basic:help   Displays available commands.
+basic:exit   Exit from the console.
+remote:configureconnector   Generate connector configuration.
+remote:configexport         Exports all configurations.
+remote:configimport         Imports the configuration set from local file/directory.</screen>
+
 
   <para>
    The <command>configexport</command>, <command>configimport</command>, and
