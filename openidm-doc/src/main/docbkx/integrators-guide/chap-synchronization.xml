@@ -3361,7 +3361,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <para>Configuring asynchronous reconciliation involves the following
      steps:</para>
      <listitem>
-       <para>Create the workflow definition file (<literal>.bar</literal> file)
+       <para>Create the workflow definition file (<literal>.xml or .bar</literal> file)
        and place it in the <filename>openidm/workflow</filename> directory.
        For more information about creating workflows, see <link
        xlink:href="integrators-guide#chap-workflow" xlink:role="http://docbook.org/xlink/role/olink">
