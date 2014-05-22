@@ -265,6 +265,34 @@
             </includes>
             <outputDirectory>/openidm/samples/sample5</outputDirectory>
         </fileSet>
+        <!-- Setup Sample5b  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>conf/authentication.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
+        </fileSet>
+        <fileSet>
+          <directory>${basedir}/src/main/resources/samples/sample5</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>data/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>README</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
+        </fileSet>
         <!-- Setup Sample6 (also see below 'files' entry) -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
