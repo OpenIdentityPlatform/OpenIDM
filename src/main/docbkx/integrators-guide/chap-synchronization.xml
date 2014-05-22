@@ -690,7 +690,7 @@
    <para>For example, to update the <literal>givenName</literal> of user jdoe,
     you could run the following command:</para>
 
-   <screen width="100">$ curl
+   <screen><?dbfo pgwide="1"?>$ curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
@@ -798,14 +798,13 @@
     defined in the file <filename>conf/sync.json</filename>.
    </para>
 
-   <screen width="91"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-   </screen>
+   <screen><?dbfo pgwide="1"?>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>
     By default, an assigned reconciliation run ID is returned immediately when
@@ -827,14 +826,13 @@
     <literal>true</literal> when the reconciliation is initiated. For example:
    </para>
 
-   <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/recon?_action=recon&amp;
- mapping=systemLdapAccounts_managedUser&amp;waitForCompletion=true"
+   <screen><?dbfo pgwide="1"?>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser&amp;waitForCompletion=true"
    </screen>
   </section>
 
@@ -848,16 +846,13 @@
      section:
     </para>
 
-    <screen>
- $ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e
-     </userinput>
-     <computeroutput>
-{
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e"</userinput>
+     <computeroutput>{
   "ended": "2014-03-06T07:00:32.094Z",
   "_id": "7a07c100-4f11-4d7e-bf8e-fa4594f99d58",
   "mapping": "systemLdapAccounts_managedUser",
@@ -912,22 +907,20 @@
      previous section:
     </para>
 
-    <screen width="91"><?dbfo pgwide="1"?>$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
-    </screen>
+ "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"</screen>
 
     <para>
      The output for a reconciliation cancellation request is similar to the
      following:
     </para>
 
-    <screen>
-{
+    <screen>{
      "status":"SUCCESS",
      "action":"cancel",
      "_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e"
@@ -963,7 +956,7 @@
      each reconciliation run.
     </para>
 
-    <screen width="91">{
+    <screen>{
    "reconciliations": [
      {
        "ended": "2014-03-06T06:14:11.845Z",
@@ -1248,7 +1241,7 @@
       The following example calls the same LiveSync operation as the previous
       example.
      </para>
-     <screen width="84">$ curl \
+     <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1279,7 +1272,7 @@
     an optional parameter (<literal>detailedFailure</literal>) to return
     additional information. For example:
    </para>
-   <screen width="95">$ curl \
+   <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1400,7 +1393,7 @@
    you wanted to reconcile all employee entries, and not just the permanent
    employees, you would run the reconciliation operation as follows:
   </para>
-  <screen width="93">$ curl \
+  <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1460,16 +1453,13 @@
    a reconciliation operation is required to copy changes made in the repository
    to the LDAP system.
   </para>
-  <screen>$ curl \
+  <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=reconById
-   &amp;mapping=managedUser_systemLdapAccounts
-   &amp;ids=b3c2f414-e7b3-46aa-8ce6-f4ab1e89288c"
-  </screen>
+ "https://localhost:8443/openidm/recon?_action=reconById&amp;mapping=managedUser_systemLdapAccounts&amp;ids=b3c2f414-e7b3-46aa-8ce6-f4ab1e89288c"</screen>
   <para>
    Note that the URL in this example is broken for legibility - in a real
    command the entire URL must be on line.
@@ -1506,14 +1496,13 @@
      RESTful GET on the <literal>audit/recon</literal> endpoint. For example:
     </para>
 
-    <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/audit/recon"
-    </screen>
+    <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon"</screen>
 
     <para>
      The following code sample shows an extract of the audit log after the first
@@ -1640,7 +1629,7 @@
      <literal>_id</literal> in the URL. For example:
     </para>
 
-    <screen width="83">$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1677,7 +1666,7 @@
      ID, as follows:
     </para>
 
-    <screen width="91">$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1834,14 +1823,12 @@
      reconciliation operation:
     </para>
 
-    <screen width="98">$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation
-   &amp;situation=ABSENT
-   &amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</screen>
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</screen>
 
     <para>
      Output similar to the following is returned, with one entry for each record
@@ -1905,8 +1892,7 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity"
-    </screen>
+ "https://localhost:8443/openidm/audit/activity"</screen>
 
     <para>
      The following extract of the activity log shows the last entry in the log,
@@ -1955,7 +1941,7 @@
      <literal>_id</literal> of the action in the endpoint, for example:
     </para>
 
-    <screen width="85">$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -2077,13 +2063,12 @@
      <literal>parentActionId</literal> in the query. For example:
     </para>
 
-    <screen width="90">$ curl \
+    <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action
-   &amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</screen>
+ "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</screen>
 
     <para>
      The following sample output shows the result of a query that requests
@@ -2385,7 +2370,7 @@
      modification is still unsuccessful, a message similar to the following is
      logged:
     </para>
-    <screen width="88">INFO: sync retries = 4/4, retries exhausted
+    <screen><?dbfo pgwide="1"?>INFO: sync retries = 4/4, retries exhausted
 Jul 19, 2013 11:59:30 AM
     org.forgerock.openidm.provisioner.openicf.syncfailure.DeadLetterQueueHandler invoke
 INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
@@ -2397,14 +2382,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     <para>You can view the failed modification in the dead letter queue, over
      the REST interface, as follows:
     </para>
-    <screen width="98">$ <userinput>curl \
+    <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"
-    </userinput>
-    {
+ "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap?_queryId=query-all-ids"</userinput>
+     <computeroutput>{
        "query-time-ms": 2,
        "result":
        [
@@ -2414,8 +2398,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
            }
        ],
        "conversion-time-ms": 0
-    }
-    </screen>
+    }</computeroutput></screen>
     <para>
      To view the details of a specific failed modification, include its ID in
      the URL:
@@ -2426,7 +2409,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/repo/synchronisation/deadLetterQueue/ldap/4"</userinput>
-{
+     <computeroutput>{
   "objectType": "account",
   "systemIdentifier": "ldap",
   "failureCause": "org.forgerock.openidm.sync.SynchronizationException:
@@ -2440,8 +2423,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   "uid": "uid=jdoe,ou=people,dc=example,dc=com",
   "_rev": "0",
   "_id": "4"
-}
-    </screen>
+}   </computeroutput></screen>
    </section>
 
  <section xml:id="handling-sync">
@@ -3420,14 +3402,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        Note that the <literal>_id</literal> must be URL-encoded in the REST
        call.
       </para>
-      <screen>$ <userinput>curl \
+      <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
- --request POST \ "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
-<computeroutput>{}</computeroutput>
-      </screen>
+ --request POST \
+ "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
+<computeroutput>{}</computeroutput></screen>
      </listitem>
    </orderedlist>
  </section>
@@ -3480,8 +3462,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <screen>"resultsHandlerConfig" :
 {
     "enableFilteredResultsHandler":false,
-},
-   </screen>
+}, </screen>
 
    <caution>
      <para>Do not disable the filtered results handler for the CSV file
