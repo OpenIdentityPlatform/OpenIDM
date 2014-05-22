@@ -3425,11 +3425,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
- --request POST \
- "https://localhost:8443/openidm/sync?_action=performAction
-  &amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom
-  &amp;mapping=systemLdapAccounts_ManagedUser
-  &amp;action=DELETE"</userinput>
+ --request POST \ "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
 <computeroutput>{}</computeroutput>
       </screen>
      </listitem>
