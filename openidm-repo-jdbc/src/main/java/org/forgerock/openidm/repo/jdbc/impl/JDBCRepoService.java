@@ -80,11 +80,11 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.RepoBootService;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
-import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.util.Accessor;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -112,7 +112,7 @@ import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/*"),
     @Property(name = "db.type", value = "JDBC") })
-public class JDBCRepoService implements RequestHandler, RepoBootService {
+public class JDBCRepoService implements RequestHandler, RepoBootService, RepositoryService {
 
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
