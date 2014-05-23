@@ -36,7 +36,7 @@
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
             "for-internalcredentials" : "select * FROM openidm.internaluser WHERE objectid = ${uid}",      
             "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
-            "get-by-field-value" : "call ${_dbSchema}.byFieldValue('${_dbSchema}','${_table}',${field},${value}, 'userName')",
+            "get-by-field-value" : "call ${_dbSchema}.byFieldValue('${_dbSchema}','${_table}',${field},${value}, 'userName,firstId,secondId')",
             "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",        
             
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${username} and accountStatus = 'active'",

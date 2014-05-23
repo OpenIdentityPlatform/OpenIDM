@@ -71,7 +71,7 @@ exports.fetch = function (resourceName) {
         component = resourceParts[1],
         id = resourceParts[2],
 
-        // uses the sync config to build an map of linkTypes to resource containers
+        // uses the sync config to build a map of linkTypes to resource containers
         resourceMap = _(syncConfig.mappings)
                         .filter(function (m) {
                             // we only care about those mappings which aren't using another mapping's links entry
