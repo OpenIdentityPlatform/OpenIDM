@@ -59,6 +59,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.ServerContext;
@@ -175,14 +176,19 @@ public class ReconciliationService
                     Collection<Resource> queryResult = new ArrayList<Resource>();
                     getConnectionFactory().getConnection().query(routerContext, auditQuery, queryResult);
 
+                    if (queryResult.isEmpty()) {
+                        throw new NotFoundException("Reconciliation with id " + localId + " not found." );
+                    }
+
                     for (Resource resource : queryResult) {
-                        handler.handleResult(new Resource(
-                                localId,
-                                null,
+                        handler.handleResult(new Resource( localId, null,
                                 new JsonValue(resource.getContent().get("messageDetail").asMap())));
                     }
+
                 }
             }
+        } catch (ResourceException e) {
+            handler.handleError(e);
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
