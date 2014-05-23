@@ -116,9 +116,9 @@ To try the sample, follow these steps.
     7. Login to the UI at https://localhost:8443/openidmui. You can use openidm-admin/openidm-admin for admin access or
        DDOE1/TestPassw0rd2 for non-admin access. Updates to DDOE1 will be synced backed to both XML files.
 
-    8. Now make the LDAP xml file unavailable by changing it's permission so it is unreadable.  You may need to have
+    8. Now make the LDAP xml file unavailable by renaming it so it is unreadable.  You may need to have
        root or sudo access to do this:
-       $ sudo chmod 000 /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml
+       $ mv /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml.bak
 
     9. Perform an update to the DDOE1 user.  It will be updated in managed/user, the synchronization to AD will be successful,
        but the synchronization to LDAP should fail.  The compensate.js script will be invoked and will attempt to revert
