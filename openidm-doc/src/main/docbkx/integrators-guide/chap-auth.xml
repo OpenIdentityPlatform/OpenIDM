@@ -349,7 +349,7 @@
      <para>
       The script must be either JavaScript
       (<literal>"type":"text/javascript"</literal>) or Groovy
-      (<literal>"type":"groovy"</literal>, and can be provided inline
+      (<literal>"type":"groovy"</literal>), and can be provided inline
       (<literal>"source":script source</literal>) or in a file
       (<literal>"file":filename</literal>).
      </para>
