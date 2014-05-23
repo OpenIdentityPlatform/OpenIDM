@@ -80,7 +80,6 @@ public class ReconciliationContext {
      * @param mapping the mapping configuration
      * @param callingContext The resource call context
      * @param reconParams configuration options for the recon
-     * @param config the overriding config (if specified in the request body)
      */
     public ReconciliationContext(
             ReconciliationService.ReconAction reconAction,

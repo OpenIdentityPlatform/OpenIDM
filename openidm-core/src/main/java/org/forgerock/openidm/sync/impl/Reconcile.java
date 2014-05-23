@@ -25,6 +25,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 
 
 /**
@@ -50,5 +51,5 @@ public interface Reconcile {
             Boolean synchronous,
             JsonValue reconParams,
             JsonValue config)
-        throws SynchronizationException;
+            throws ResourceException;
 }
