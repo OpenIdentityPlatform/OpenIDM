@@ -316,14 +316,17 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to update.");
         }
+        if (StringUtils.isBlank(request.getRevision())) {
+            throw new ConflictException("The repository requires clients to supply a revision for the object to update.");
+        }
+
         // Parse the remaining resourceName
         final String type = request.getResourceNameObject().parent().toString();
         final String localId = request.getResourceNameObject().leaf();
 
         Map<String, Object> obj = request.getContent().asMap();
-        String rev = request.getRevision() != null && !"".equals(request.getRevision())
-                ? request.getRevision()
-                : read(Requests.newReadRequest(request.getResourceName())).getRevision();
+
+        String rev = request.getRevision();
 
         Connection connection = null;
         Integer previousIsolationLevel = null;
@@ -410,11 +413,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     public Resource delete(DeleteRequest request) throws ResourceException {
         if (request.getResourceNameObject().size() < 2) {
             throw new BadRequestException(
-                    "The repository requires clients to supply an identifier for the object to update.");
+                    "The repository requires clients to supply an identifier for the object to delete.");
         }
-        if (request.getRevision() == null) {
-            throw new ConflictException(
-                    "Object passed into delete does not have revision it expects set.");
+
+        if (StringUtils.isBlank(request.getRevision())) {
+            throw new ConflictException("The repository requires clients to supply a revision for the object to delete.");
         }
 
         // Parse the remaining resourceName

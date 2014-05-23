@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.script.ScriptException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -444,7 +445,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param context the current ServerContext
      * @param request the source Request
      * @param resourceId the resource id of the object being modified
-     * @param rev the revision of hte object being modified
+     * @param rev the revision of the object being modified
      * @param oldValue the old value of the object
      * @param newValue the new value of the object
      * @return the updated resource
@@ -655,6 +656,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 + request.getRevision());
 
         try {
+            if (StringUtils.isBlank(request.getRevision())) {
+                throw new ConflictException("Revision required to update object.");
+            }
+
             // decrypt any incoming encrypted properties
             JsonValue _new = decrypt(request.getContent());
 
@@ -690,9 +695,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
             deleteRequest.setResourceName(repoId(resourceId));
-            if (deleteRequest.getRevision() == null) {
-                deleteRequest.setRevision(resource.getRevision());
+
+            if (StringUtils.isBlank(deleteRequest.getRevision())) {
+                throw new ConflictException("Revision required to delete object.");
             }
+
             Resource deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
 
             activityLogger.log(context, request.getRequestType(), "delete", managedId(resource.getId()).toString(),
