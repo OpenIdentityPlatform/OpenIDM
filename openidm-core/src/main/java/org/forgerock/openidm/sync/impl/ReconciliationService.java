@@ -295,7 +295,7 @@ public class ReconciliationService
      * {@inheritDoc}
      */
     public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams, JsonValue config)
-        throws SynchronizationException {
+            throws ResourceException {
 
         final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams, config);
         if (Boolean.TRUE.equals(synchronous)) {
@@ -334,11 +334,11 @@ public class ReconciliationService
      * @return a new reconciliation context
      */
     private ReconciliationContext newReconContext(ReconAction reconAction, JsonValue mapping, JsonValue reconParams, JsonValue config)
-        throws SynchronizationException {
+            throws ResourceException {
 
         ReconciliationContext reconContext = null;
         if (mappings == null) {
-            throw new SynchronizationException("Unknown mapping type, no mappings configured");
+            throw new BadRequestException("Unknown mapping type, no mappings configured");
         }
 
         ServerContext context = ObjectSetContext.get();
@@ -349,15 +349,10 @@ public class ReconciliationService
 // FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB
             objMapping = mappings.createMapping(mapping);
         } else {
-            throw new SynchronizationException("Unknown mapping type");
+            throw new BadRequestException("Unknown mapping type");
         }
-        try {
-            reconContext = new ReconciliationContext(reconAction, objMapping, context, reconParams, config, this);
-        } catch (BadRequestException ex) {
-            throw new SynchronizationException("Failure in initializing reconciliation: "
-                    + ex.getMessage(), ex);
-        }
-        return reconContext;
+
+        return new ReconciliationContext(reconAction, objMapping, context, reconParams, config, this);
     }
 
     /**

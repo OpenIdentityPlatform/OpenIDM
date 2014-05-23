@@ -352,8 +352,8 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
-        } catch (SynchronizationException se) {
-            throw new ExecutionException(se);
+        } catch (ResourceException re) {
+            throw new ExecutionException(re);
         }
     }
 
