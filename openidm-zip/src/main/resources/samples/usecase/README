@@ -272,7 +272,7 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
         - user.3 (user.3 - Atrc, Aaron) or user.3 (user.33 - Atrc, Aaron): these are the two candidate
             users found in the target object set by executing the correlation query. These values 
             are queried in the workflow and the possible values of that field are determined
-            runtime. Here we can choose the user we need.
+            at runtime. Here we can choose the user we need.
             After choosing one of the users the workflow will link user.3 of managed user to the selected user 
             of the target object set.
 
@@ -284,7 +284,7 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
         - Link: when choosing this option valid managed user id needs to be entered to link the orphan account to.
             Pick any user id from managed users where the managed user is not linked to any users in the csv file yet:
             if this use case is started after the initial reconciliation then pick e.g. user.5.
-            If users are created e.g. by using sample2 that user can be used heres as well.
+            If users are created e.g. by using sample2 that user can be used here as well.
 
 Usecase5 - Certification workflow
     In this use case we have a scheduled task fetching all the managed users and starting a certification workflow
