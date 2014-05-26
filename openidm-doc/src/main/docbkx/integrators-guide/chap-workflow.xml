@@ -471,14 +471,14 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
    You can invoke the same workflow from the REST interface by sending the
    following REST call to OpenIDM:
   </para>
-  <screen>$ curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
  --data '{"_key":"myWorkflow"}' \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput>
   </screen>
 
   <itemizedlist>
@@ -541,13 +541,13 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
    key of <literal>"newOrder"</literal>. This business key can later be used to
    query "newOrder" processes.
   </para>
-  <screen>$ curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
  --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}' \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"</screen>
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput></screen>
  </section>
 
  <section xml:id="querying-activiti-workflows">
@@ -565,13 +565,12 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
    with the business key <literal>"newOrder"</literal>, as invoked in the
    previous example.
   </para>
-  <screen width="102">$ curl \
+  <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query
- &amp;businessKey=newOrder"
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;businessKey=newOrder"</userinput>
   </screen>  
   <para>
    Any Activiti properties can be queried using the same notation, for example,
@@ -580,13 +579,12 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
    The following query returns all process instances that were started by the
    user <literal>openidm-admin</literal>:
   </para>
-  <screen width="102">$ curl \
+  <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query
- &amp;startUserId=openidm-admin"
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;startUserId=openidm-admin"</userinput>
   </screen>
   <para>
    You can also query process instances based on the value of any process
@@ -665,13 +663,14 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       List the available workflow definitions:
      </para>
-     <screen width="102"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
-      <computeroutput>{
+      <computeroutput>
+{
   "result" : [ {
     "tenantId" : "",
     "candidateStarterGroupIdExpressions" : [ ],
@@ -709,14 +708,15 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       List the workflow definitions, based on certain filter criteria:
      </para>
-     <screen width="102"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processdefinition?_queryId=filtered-query&amp;category=Examples&amp;_prettyPrint=true""
       </userinput>
-      <computeroutput>{
+      <computeroutput>
+{
   "result": [
     {
       ...
@@ -738,13 +738,15 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
       can determine the ID by querying all the available process definitions, as
       described in the first example in this section.
      </para>
-     <screen width="102"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3?&amp;_prettyPrint=true"</userinput>
-      <computeroutput>{
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3?&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>
+{
   "tenantId" : "",
   "candidateStarterGroupIdExpressions" : [ ],
   "candidateStarterUserIdExpressions" : [ ],
@@ -836,8 +838,35 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
   "category" : "Examples",
   "eventSupport" : { },
   "graphicalNotationDefined" : false
-}       </computeroutput>
-     </screen>
+}       </computeroutput></screen>
+     <!--Doc for OPENIDM-1865, still in review
+     <para>
+      Delete a workflow process definition, based on its ID. Note that you
+      cannot delete a process definition if there are currently running
+      instances of that process definition.
+     </para>
+     <para>
+      OpenIDM picks up workflow definitions from the files located in the
+      <filename>/path/to/openidm/workflow</filename> directory. You can
+      therefore delete a workflow definition by removing the corresponding
+      <filename>.xml</filename> from the <literal>/workflow</literal> directory.
+      Note that there is only one one representation of a workflow definition in
+      the file system. In Activiti, you might have several versions of the same
+      process. If you want to delete duplicate process definitions, do not
+      delete the definition directly from the file system. Rather, delete the
+      definition over REST, as shown in the following example, <emphasis>making
+      sure that you do not not delete the latest version</emphasis>.
+     </para>
+     <screen><userinput>$ curl \
+ -cacert self-signed.crt \
+ -header "X-OpenIDM-Username: openidm-admin" \
+ -header "X-OpenIDM-Password: openidm-admin" \
+ -header "If-Match: *" \
+ -request DELETE \
+ "http://localhost:8080/openidm/workflow/processdefinition/managedUserApproval:1:3"
+     </userinput>
+     <computeroutput>
+Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</computeroutput></screen>  -->
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -846,15 +875,17 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       Start a workflow process instance. For example:
      </para>
-     <screen width="92"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --data '{"_key":"managedUserApproval"}' \
  --request POST \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create&amp;_prettyPrint=true"</userinput>
-       <computeroutput>{
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>
+{
   "_id" : "4",
   "processInstanceId" : "4",
   "status" : "suspended",
@@ -865,14 +896,15 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
       Obtain the list of running workflows (process instances). The query
       returns a list of IDs. For example:
      </para>
-     <screen><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids&amp;_prettyPrint=true"
       </userinput>
-      <computeroutput>{
+      <computeroutput>
+{
   "result" : [ {
     "tenantId" : "",
     "businessKey" : null,
@@ -897,12 +929,13 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       Obtain the list of running workflows based on specific filter criteria.
      </para>
-     <screen width="110">$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;businessKey=myBusinessKey"</screen>
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;businessKey=myBusinessKey"</userinput>
+     </screen>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -916,8 +949,9 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance/4?&amp;_prettyPrint=true"</userinput>
-      <computeroutput>{
+ "https://localhost:8443/openidm/workflow/processinstance/4?&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>{
   "tenantId" : "",
   "businessKey" : null,
   "queryVariables" : null,
@@ -937,14 +971,15 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       Stop the specified process instance. For example:
      </para>
-     <screen><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
- "https://localhost:8443/openidm/workflow/processinstance/4?&amp;_prettyPrint=true"</userinput>
-         <computeroutput>{
+ "https://localhost:8443/openidm/workflow/processinstance/4?&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>{
   "Process instance deleted" : "4"
 }</computeroutput>
      </screen>
@@ -957,14 +992,14 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
       Query the list of tasks defined for a specific process definition. For
       example:
      </para>
-     <screen><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/
- taskdefinition?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
-      <computeroutput>
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition?_queryId=query-all-ids&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>
 {
   "result" : [ {
     "taskCandidateGroup" : [ ],
@@ -1028,13 +1063,12 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
       Query a task definition based on the process definition ID and the task
       name (<literal>taskDefinitionKey</literal>). For example:
      </para>
-     <screen><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/
- taskdefinition/evaluateRequest?&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition/evaluateRequest?&amp;_prettyPrint=true"
       </userinput>
       <computeroutput>{
   "taskCandidateGroup" : [ ],
@@ -1097,7 +1131,7 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       Query all running task instances. For example:
      </para>
-     <screen><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1143,7 +1177,7 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
       Query task instances based on candidate users or candidate groups. For
       example:
      </para>
-     <screen width="108"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1153,7 +1187,7 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      <para>
       or
      </para>
-     <screen width="110"><userinput>$ curl \
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1177,8 +1211,9 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/taskinstance/15?&amp;_prettyPrint=true"</userinput>
-      <computeroutput>{
+ "https://localhost:8443/openidm/workflow/taskinstance/15?&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>{
   "dueDate": null,
   "processDefinitionId": "managedUserApproval:1:3",
   "owner": null,
@@ -1373,7 +1408,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
     You can also invoke the workflow over the REST interface with the following
     REST command:
    </para>
-   <screen width="100">$ curl \
+   <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -1463,7 +1498,7 @@ $ ./startup.sh -p samples/workflow</screen>
       <para>
        Run reconciliation over the REST interface.
       </para>
-      <screen width="100">$ curl \
+      <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -1480,12 +1515,13 @@ $ ./startup.sh -p samples/workflow</screen>
        <literal>manager1</literal> and <literal>user1</literal>.
       </para>
    
-      <screen><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"
+      </userinput>
       <computeroutput>{
   "result" : [ {
     "_id" : "manager1",
@@ -1596,14 +1632,15 @@ $ ./startup.sh -p samples/workflow</screen>
        in the repository. You can check the new account by running the following
        REST command:
       </para>
-      <screen width="88"><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"
       </userinput>
-      <computeroutput>{
+      <computeroutput>
+{
   "result" : [ {
     "_id" : "manager1",
     "_rev" : "0"
@@ -1622,14 +1659,15 @@ $ ./startup.sh -p samples/workflow</screen>
        Display the details of the new user, by running a REST query on the user
        ID, as follows:
       </para>
-      <screen width="103"><userinput>$ curl \
+      <screen><?dbfo pgwide="1"?><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/managed/user/96a9513b-7896-4d22-83cc-6b35a709f0a8?&amp;_prettyPrint=true"
       </userinput>
-      <computeroutput>{
+      <computeroutput>
+{
   "_id" : "96a9513b-7896-4d22-83cc-6b35a709f0a8",
   "_rev" : "1",
   "startDate" : "05/13/2014",
@@ -1702,5 +1740,1236 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
     </para>
    </section>
   </section>
+ </section>
+
+ <section xml:id="workflow-use-cases">
+  <title>Workflow Use Cases</title>
+  <para>
+   This section describes a number of sample workflows, that demonstrate typical
+   use cases for OpenIDM. The use cases, provided in
+   <filename>/path/to/openidm/samples/usecase</filename>, work together to
+   provide a complete business story, with the same set of sample data. Each of
+   the use cases is integrated with the default UI.
+  </para>
+  <para>
+   The use cases can be run independently, but rely on the data set that is
+   imported during use case 1 - so you <emphasis>must</emphasis> run use case 1
+   before running any of the other use cases.
+  </para>
+  <para>
+   The use cases assume an initial data set of twenty "ordinary" managed users
+   in OpenIDM (user.0 - user.19). The users are divided as follows:
+  </para>
+  <informaltable><?dbfo pgwide="1"?>
+   <tgroup cols="5">
+    <colspec colname="c1" colwidth="2*"/>
+    <colspec colname="c2" colwidth="2*"/>
+    <colspec colname="c3" colwidth="1*"/>
+    <colspec colname="c4" colwidth="2*"/>
+    <colspec colname="c5" colwidth="1*"/>
+   <thead>
+    <row>
+     <entry>Users</entry>
+     <entry>Department</entry>
+     <entry>Manager</entry>
+     <entry>Employees</entry>
+     <entry>Contractors</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry>user.0-user.4</entry>
+     <entry>Human Resources</entry>
+     <entry>user.0</entry>
+     <entry>user.0-user.3</entry>
+     <entry>user.4</entry>
+    </row>
+    <row>
+     <entry>user.5-user.9</entry>
+     <entry>Production Planning</entry>
+     <entry>user.5</entry>
+     <entry>user.5-user.8</entry>
+     <entry>user.9</entry>
+    </row>
+    <row>
+     <entry>user.10-user.14</entry>
+     <entry>Sales &amp; Distribution</entry>
+     <entry>user.10</entry>
+     <entry>user.10-user.13</entry>
+     <entry>user.14</entry>
+    </row>
+    <row>
+     <entry>user.15-user.19</entry>
+     <entry>Treasury &amp; Payments</entry>
+     <entry>user.15</entry>
+     <entry>user.15-user.18</entry>
+     <entry>user.19</entry>
+    </row>
+   </tbody>
+   </tgroup>
+  </informaltable>
+  <itemizedlist>
+   <para>
+    In addition, the following "special" users are defined:
+   </para>
+   <listitem>
+    <para>
+     <literal>hradmin</literal> - represents the human interaction of the HR
+     department
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>systemadmin</literal> - represents the human interaction of the
+     populated systems (Business and Project)
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>superadmin</literal> - represents the manager of the managers
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   Note that the <command>curl</command> commands in this section use the secure
+   port for OpenIDM (8443) and assume a self-signed certificate named
+   <literal>self-signed.crt</literal>, located in the directory from which the
+   command is launched. For instructions on using the self-signed certificate
+   that is generated when OpenIDM first starts up, see
+   <link xlink:show="new" xlink:href="integrators-guide#rest-over-https"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Restrict REST
+   Access to the HTTPS Port</citetitle></link>.
+  </para>
+
+  <section xml:id="use-case-1">
+   <title>Use Case 1 - Initial Reconciliation</title>
+   <para>
+    This use case assumes an OpenDJ server and populates the managed user
+    repository with users from OpenDJ.
+   </para>
+   <itemizedlist>
+    <para>
+     To prepare the sample:
+    </para>
+    <listitem>
+     <para>
+      Download and install OpenDJ with the QuickSetup utility, as described in
+      <link xlink:show="new"
+      xlink:href="http://docs.forgerock.org/en/opendj/2.6.0/install-guide/index.html#chap-install-gui">Installing
+      OpenDJ With the QuickSetup Wizard</link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      During the install, import the user data from the LDIF file
+      <filename>/path/to/openidm/samples/usecase/data/hr_data.ldif</filename>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      The use case assumes a user with DN <literal>cn=Directory Manager</literal>
+      and password <literal>password</literal> who will bind to the directory
+      server.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    The OpenDJ server now contains the users required for all the workflow use
+    cases.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for use case 1.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase1
+     </screen>
+    </step>
+    <step>
+     <para>
+      Run reconciliation to populate the managed user repository with the users
+      from the OpenDJ server.
+     </para>
+     <screen><?dbfo pgwide="1"?>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHRAccounts_managedUser"
+     </screen>
+    </step>
+    <step>
+     <para>
+      Query the managed users that were created by the reconciliation process.
+     </para>
+     <screen><?dbfo pgwide="1"?><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+      </userinput>
+      <computeroutput>{
+  "result" : [ {
+    "_id" : "user.5",
+    "_rev" : "0"
+  }, {
+    "_id" : "user.10",
+    "_rev" : "0"
+  }, {
+    "_id" : "user.1",
+    "_rev" : "0"
+  },
+ ...
+ {
+    "_id" : "hradmin",
+    "_rev" : "0"
+  }, {
+    "_id" : "systemadmin",
+    "_rev" : "0"
+  }, {
+    "_id" : "superadmin",
+    "_rev" : "0"
+  } ],
+  "resultCount" : 23,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}</computeroutput>
+     </screen>
+     <para>
+      23 users will have been created by the reconciliation process. The default
+      password of all the newly created users is <literal>Passw0rd</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Shut down OpenIDM before you proceed with the next use case.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./shutdown.sh
+     </screen>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="use-case-2">
+   <title>Use Case 2 - New User Onboarding</title>
+   <para>
+    This use case demonstrates a new user onboarding process. The process can be
+    initiated by any of the users created in the previous reconciliation
+    process. In this example, we use <literal>user.1</literal> to initiate the
+    process. <literal>user.1</literal> captures the details of a new user, and
+    then submits the new user entry for approval by the prospective manager of
+    that new user.
+   </para>
+   <para>
+    The use case includes three separate workflows - onboarding (creation of the
+    new user), sunrise (commencement of the new user work period) and sunset
+    (termination of the user contract).
+   </para>
+   <para>
+    The use case also demonstrates email notification with the optional
+    configuration of an external email service. If you want to use email
+    notification, you must configure the external email service, as described in
+    <xref linkend="configure-email-notification" />, before you start the
+    workflow.
+   </para>
+   <para>
+    The use case works with the OpenIDM UI, accessible at the following URL by
+    default: <literal>https://localhost:8443/openidmui/</literal>.
+   </para>
+
+   <procedure xml:id="initiate-onboarding">
+    <title>Initiating the Onboarding Workflow</title>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for use case 2.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase2
+     </screen>
+    </step>
+    <step>
+     <para>
+      Log in to the UI as <literal>user.1</literal> with password
+      <literal>Passw0rd</literal>.
+     </para>
+     <mediaobject>
+      <alt>Log in to the UI</alt>
+      <imageobject>
+       <imagedata fileref="images/login-user1.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      In this use case, the processes associated with the new user onboarding
+      workflow are visible to any user who logs into the UI.
+     </para>
+     <mediaobject>
+      <alt>Processes available to user.1</alt>
+      <imageobject>
+       <imagedata fileref="images/processes-user1.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      Click on the User Onboarding Process and complete the fields for a sample
+      new user. Complete at least all mandatory fields.
+     </para>
+     <para>
+      <emphasis>Department</emphasis>. Specifies one of four departments to
+      which the new user will belong (Human Resources, Production Planning,
+      Sales &amp; Distribution, or Treasury &amp; Payments). The value you
+      select here determines the "manager" of the new user, to which the request
+      will be sent for approval. (See the previous table of users for a list of
+      the managers of the various departments.)
+     </para>
+     <para>
+      <emphasis>User Type</emphasis>. Governs user access to specific accounts.
+      If the User Type is "Employee", the new user will have access to an
+      account named "Business". This access is represented as an attribute of
+      the managed user entry in the OpenIDM repository, as follows:
+      <literal>accounts : ["Business"]</literal>. If the User Type is
+      "Contractor", the new user will have no accounts associated with its
+      managed user representation in OpenIDM.
+     </para>
+     <para>
+      <emphasis>Send Email Notification</emphasis>. Indicates whether an email
+      should be sent to alert the manager of the new required approval. The
+      email details used here are defined when you configure email notification,
+      as described in <xref linkend="configure-email-notification" />. If you
+      select not to send an email notification, the notification is simply added
+      to the OpenIDM repository, and appears when the manager logs into the UI.
+     </para>
+    </step>
+    <step>
+     <para>
+      Click Start to initiate the onboarding workflow.
+     </para>
+     <para>
+      This action sends the new user request to the corresponding "management"
+      users (the department manager, as well as the
+      <literal>superadmin</literal> user, who is an overall manager).
+     </para>
+    </step>
+    <step>
+     <para>
+      Log out of the UI, and log back in as the management user of the
+      department that you selected when you completed the new user form. For
+      example, if you selected "Human Resources", log in as
+      <literal>user.0</literal>, which simulates the management user for the HR
+      department. All users have the password <literal>Passw0rd</literal>.
+     </para>
+     <para>
+      Notice that this user now has an Onboarding Approval task in the queue of
+      tasks assigned to his group.
+     </para>
+     <mediaobject>
+      <alt>Approval task in group queue</alt>
+      <imageobject>
+       <imagedata fileref="images/approval-task.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Click on the Onboarding Approval task and select "Assign to Me".
+     </para>
+     <para>
+      This action "claims" the task for <literal>user.0</literal>, removes it
+      from the group queue, and places it in the list of pending tasks for
+      <literal>user.0</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Click on the Onboarding Approval task under the My Tasks list and click
+      Details.
+     </para>
+     <para>
+      The complete new user request is displayed for the manager's approval. As
+      the manager, you can add any information that was missing from the
+      original request.
+     </para>
+     <para>
+      In addition, you can specify the following information for the new user.
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        <emphasis>Start Date</emphasis>. Completing this field results in the
+        user being created, with a <literal>"startDate"</literal> added to that
+        user's managed user entry. The status of the user is
+        <literal>inactive</literal>. This field is optional, and is used by
+        the task scanner to trigger the Sunrise workflow.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <emphasis>End Date</emphasis>. Completing this field results in the user
+        being created, with an <literal>"endDate"</literal> added to that user's
+        managed user entry. The field is optional, and is used by the task
+        scanner to trigger the Sunset workflow.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <emphasis>Manager</emphasis>. Selecting "Yes" here adds a
+        <literal>"title"</literal> property, with a value of
+        <literal>"manager"</literal>, to the new managed user entry.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <emphasis>Decision</emphasis>. Selecting "Reject" here terminates the
+        workflow and sends a notification to the user who initiated the
+        workflow. Selecting "Accept" creates the managed user entry in OpenIDM.
+        The password of the new user is <literal>Passw0rd</literal>.
+       </para>
+       <para>
+        Two notifications are created when the request is accepted - one for the
+        user who initiated the workflow, and one for the newly created user.
+        The notifications are visible in the UI after login. If you selected
+        email notification, one email is sent to the user defined when you
+        configured email notification, as described in
+        <xref linkend="configure-email-notification" />.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </step>
+    <step>
+     <para>
+      At the bottom of the form, there is an option either to Requeue the
+      request or to Complete it. Click Complete.
+     </para>
+     <para>
+      If you click Requeue here, the task is removed from the list of My Tasks
+      for that user, and returned to the list of tasks pending for that group.
+      The task can then be claimed by any member of that group.
+     </para>
+     <para>
+      When the new user request has been approved, the user is created in the
+      OpenIDM repository. If you did not include a Start Date in the manager
+      approval, you should now be able to log in to the UI with the details of
+      the new user. If you included a Start Date, you need to complete the
+      sunrise workflow before the user account is active (which will enable you
+      to log in as this user).
+     </para>
+    </step>
+   </procedure>
+
+   <procedure xml:id="configure-email-notification">
+    <title>Configuring Email Notification</title>
+    <para>
+     This step is optional, and required only if you want to use email
+     notification with this workflow.
+    </para>
+    <step>
+     <para>
+      Edit the settings in the file
+      <filename>/path/to/openidm/samples/usecase/usecase2/conf/external.email.json</filename>
+      to match the settings of your mail server. For example:
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ more samples/usecase/usecase2/conf/external.email.json
+     </userinput>
+     <computeroutput>{
+        "host" : "smtp.gmail.com",
+        "port" : "587",
+        "username" : "my-username"
+        "password" : "my-password",
+        "mail.smtp.auth" : "true",
+        "mail.smtp.starttls.enable" : "true"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Change the notification email parameters in the workflow definition file
+      (<filename>samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml</filename>).
+     </para>
+     <para>
+      The email parameters are towards the end of this file:
+     </para>
+     <screen><?dbfo pgwide="1"?><userinput>$ cd /path/to/openidm/samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml
+$ grep emailParams newUserCreate.bpmn20.xml</userinput>
+     <computeroutput>
+emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com',
+openidm.action("external/email", 'sendEmail',  emailParams);
+emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
+openidm.action("external/email", 'sendEmail', emailParams);
+emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com',
+openidm.action("external/email", 'sendEmail', emailParams);</computeroutput>
+     </screen>
+     <para>
+      Change the <literal>_from</literal> and <literal>_to</literal> parameters
+      to reflect valid email addresses.
+     </para>
+    </step>
+   </procedure>
+
+   <procedure xml:id="initiate-sunrise">
+    <title>Initiating the Sunrise Workflow</title>
+    <para>
+     If a sunrise date is specified for the new user, the user is created in
+     the repository, with an <literal>inactive</literal> account status.
+    </para>
+    <step>
+     <para>
+      To trigger the sunrise workflow (which activates the account), enable the
+      sunrise task scanning schedule. The schedule is disabled by default.
+     </para>
+     <para>
+      Modify the schedule configuration file
+      (<filename>samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</filename>),
+      setting the <literal>"enabled"</literal> property to <literal>true</literal>.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</userinput>
+<computeroutput>"enabled" : true,</computeroutput></screen>
+     <para>
+      The scan runs every minute, and checks the repository for users that have
+      a sunrise date that is anything up to one day after the current date.
+      When the scan is triggered, it locates the newly created user and starts
+      the sunrise workflow on this user. The workflow takes the following
+      actions:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Changes the account status of the user to <literal>active</literal>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Generates a notification for the new user, which is visible when the
+        user logs into the UI.
+       </para>
+      </listitem>
+     </itemizedlist>
+     <mediaobject>
+      <alt>Notifications for newly activated user</alt>
+      <imageobject>
+       <imagedata fileref="images/workflow-notifications.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      Note that, although the sunrise process appears in the UI under the list
+      of processes, it cannot be started directly from the UI.
+     </para>
+    </step>
+   </procedure>
+
+   <procedure xml:id="initiate-sunset">
+    <title>Initiating the Sunset Workflow</title>
+    <para>
+     If a sunset date is set for the new user, you can trigger the sunset
+     workflow to deactivate the user account when the end of his work period is
+     reached.
+    </para>
+    <step>
+     <para>
+      To trigger the sunset workflow, enable the sunset task scanning schedule.
+      The schedule is disabled by default.
+     </para>
+     <para>
+      Modify the schedule configuration file
+      (<filename>samples/usecase/usecase2/conf/schedule-taskscan_sunset.json</filename>),
+      setting the <literal>"enabled"</literal> property to <literal>true</literal>.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
+     </userinput>
+<computeroutput>"enabled" : true,</computeroutput></screen>
+     <para>
+      The scan runs every minute, and checks the repository for users that have
+      a sunset date that is anything up to one day after the current date.
+      When the scan is triggered, it locates users whose contracts are about to
+      end, and starts the sunset workflow on these users. When the workflow is
+      initiated, it assigns a task to the manager of the affected user. In this
+      example, the task is assigned to <literal>user.0</literal>.
+       </para>
+    </step>
+    <step>
+     <para>
+      When the sunset schedule has been enabled, log in to OpenIDM UI as
+      <literal>user.0</literal> (with password <literal>Passw0rd</literal>). If
+      the user's sunset date is within one day of the current date, a "Contract
+      Termination" task becomes available under the 'My tasks' section for the
+      manager of that user.
+     </para>
+     <para>
+      Select the contract termination task and click Details.
+     </para>
+    </step>
+    <step>
+     <para>
+      In the Decision field, select either "Accept termination" or
+      "Modify date", then click Complete.
+     </para>
+     <para>
+      When you accept the termination, the user's account status is set to
+      <literal>inactive</literal> and the HR administrative user receives a
+      notification to that effect, next time that user logs into the UI. The
+      deactivated user is no longer able to log in to the UI.
+     </para>
+     <para>
+      If you select to modify the date, the sunset date of that user is changed
+      to the value that you specify in the End Date field on that form. The
+      management user receives a UI notification that the employee's contract
+      has been extended.
+     </para>
+    </step>
+    <step>
+     <para>
+      Shut down OpenIDM before you proceed with the next use case.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./shutdown.sh
+     </screen>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="use-case-3">
+   <title>Use Case 3 - User Access Request</title>
+   <para>
+    This use case simulates a user access request, with two levels of approval
+    for the request.
+   </para>
+   <para>
+    If you want to use email notification with this workflow, follow the
+    instructions in <xref linkend="configure-email-notification" /> before you
+    start the workflow, substituting
+    <filename>usecase3/conf/external.email.json</filename> and
+    <filename>usecase3/workflow/accessRequest.bpmn20.xml</filename> for the
+    files described in that procedure.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for use case 3.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase3
+     </screen>
+    </step>
+    <step>
+     <para>
+      Log in to the UI as <literal>user.1</literal> with password
+      <literal>Passw0rd</literal>.
+     </para>
+     <para>
+      <literal>user.1</literal> belongs to the HR department and, in this
+      workflow, is requesting access to a Project system.
+     </para>
+    </step>
+    <step>
+     <para>
+      Click on the Access Request Process in the list of available processes and
+      click Start to start the workflow.
+     </para>
+     <para>
+      A User Access Request appears in the list of tasks for
+      <literal>user.1</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the User Access Request task and click Details.
+     </para>
+     <para>
+      The resulting form indicates the various systems to which the user may
+      request access.
+     </para>
+     <para>
+      <emphasis>Access to Business system</emphasis>. This field reflects the
+      current value of the <literal>"accounts"</literal> property for that user
+      in the repository. If the value includes <literal>"Business"</literal>
+      this field is True.
+     </para>
+     <para>
+      <emphasis>Access to Project system</emphasis>. Set this field to True to
+      request Project access for <literal>user.1</literal>.
+     </para>
+     <para>
+      <emphasis>Send Email Notification</emphasis>. Indicates whether an email
+      should be sent to alert the manager of the new access request. The
+      email details used here are defined when you configure email notification,
+      as described in <xref linkend="configure-email-notification" />. If you
+      select not to send an email notification, the notification is simply added
+      to the OpenIDM repository, and appears when the manager logs into the UI.
+     </para>
+     <para>
+      Select either Cancel, to terminate the process, or Request, to start a
+      user task, assigned to the manager of the user requesting access
+      (<literal>user.0</literal> in this example).
+     </para>
+    </step>
+    <step>
+     <para>
+      Log out of the UI and log back in as the manager (<literal>user.0</literal>
+      with password <literal>Passw0rd</literal>).
+     </para>
+    </step>
+    <step>
+     <para>
+      Under "Tasks that are in my group's queue" click "User Access Request
+      Approval" and select "Assign to me".
+     </para>
+     <para>
+      Note that the "User Access Request Approval" task has now moved under
+      "My tasks".
+     </para>
+    </step>
+    <step>
+     <para>
+      Under "My tasks" click "User Access Request Approval" and click Details.
+     </para>
+    </step>
+    <step>
+     <para>
+      The details of the access request are displayed. The manager is able to
+      modify the access rights. Select Accept or Reject to approve or deny the
+      request.
+     </para>
+     <para>
+      Rejecting the request results in a notification being sent to the user
+      who made the request. If you have enabled email notification, a single
+      email is sent to the account defined when you configure email notification,
+      as described in <xref linkend="configure-email-notification" />.
+     </para>
+     <para>
+      Accepting the request initiates a second approval task, assigned to the
+      <literal>systemadmin</literal> user.
+     </para>
+     <mediaobject>
+      <alt>Accepting an access request</alt>
+      <imageobject>
+       <imagedata fileref="images/ui-access-request.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      Click Complete to complete the task.
+     </para>
+    </step>
+    <step>
+     <para>
+      Log out of the UI and log in as the <literal>systemadmin</literal> user
+      (with password <literal>Passw0rd</literal>).
+     </para>
+     <para>
+      This user now has one User Access Request Approval task in his queue.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the task and click Details.
+     </para>
+     <para>
+      This task interface is similar to that of the task that was assigned to
+      the manager.
+     </para>
+     <para>
+      Rejecting the request results in a notification being sent to the user
+      who made the request.
+     </para>
+     <para>
+      Accepting the request updates the managed/user record in OpenIDM, to
+      reflect the approved access changes.
+     </para>
+     <para>
+      If you have enabled email notification, a single email is sent to the
+      account defined when you configured the external email service
+      (<xref linkend="configure-email-notification" />), indicating whether the
+      request has been accepted or rejected.
+     </para>
+    </step>
+   </procedure>
+   <para>
+    Note that this sample includes an <emphasis>escalation</emphasis> step that
+    is attached to the manager approval task. If the manager does not complete
+    assessment of the user task within ten minutes of its initiation, a new user
+    task is created and assigned to the <literal>superadmin</literal> user. This
+    task has the same interface and functionality as the task assigned to the
+    manager. Accordingly, when the <literal>superadmin</literal> user completes
+    the task, the execution is passed to the <literal>systemadmin</literal> user
+    for approval.
+   </para>
+   <para>
+    Shut down OpenIDM before you proceed with the next use case.
+   </para>
+   <screen>$ cd /path/to/openidm
+$ ./shutdown.sh</screen>
+  </section>
+
+  <section xml:id="use-case-4">
+   <title>Use Case 4 - Orphan Account Detection</title>
+   <para>
+    This use case demonstrates two asynchronous tasks, started from a
+    reconciliation process:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Detecting orphan accounts on a target object set
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Handling ambiguous results during correlation
+     </para>
+    </listitem>
+   </itemizedlist>
+   <para>
+    This use case relies on a customized synchronization configuration (mapping)
+    file, named <filename>syncManagedBusiness.json</filename>, in the
+    <filename>/path/to/openidm/samples/usecase/usecase4/conf</filename>
+    directory.
+   </para>
+   <para>
+    This file defines a mapping (<literal>recon_managedUser_systemBusiness</literal>)
+    between a source (managed users) and a target object set. The target object
+    set is defined in the file
+    <literal>samples/usecase/usecase4/data/business.csv</literal>. The
+    <filename>business.csv</filename> file includes all users from the initial
+    reconciliation (described in <xref linkend="use-case-1" />). These users are
+    categorized as <literal>employees</literal>, and therefore include the
+    property <literal>"accounts" : ["Business"]</literal> in their managed user
+    entry     (see <xref linkend="use-case-2" /> for an explanation of the User
+    Type).
+   </para>
+   <para>
+    The mapping includes the following <literal>"validSource"</literal> field:
+   </para>
+   <programlisting>"validSource" : {
+    "type" : "text/javascript",
+    "file" : "script/isSourceValidBusiness.js"
+}, </programlisting>
+   <para>
+    This field references a script which specifies that only those users who
+    are employees are taken into account during the reconciliation.
+   </para>
+   <para>
+    In addition, the <literal>business.csv</literal> file includes the following
+    users:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      <literal>user.50</literal>. This user is defined <emphasis>only</emphasis>
+      in the .csv file, and not in the managed/user repository. When a
+      reconciliation operation is run, this user is detected as an
+      <emphasis>orphan account</emphasis>. The orphan account workflow is
+      triggered when an "UNQUALIFIED" or "UNASSIGNED" situation is encountered,
+      as indicated in this section of the mapping:
+     </para>
+     <programlisting>{
+    "situation" : "UNQUALIFIED",
+    "action" : {
+        "workflowName" : "orphanAccountReport",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+},
+{
+    "situation" : "UNASSIGNED",
+    "action" : {
+        "workflowName" : "orphanAccountReport",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+}</programlisting>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>user.33</literal>. This user has a <literal>"userName"</literal>
+      attribute of <literal>"user.3"</literal> (which is the same as the
+      <literal>"userName"</literal> attribute of the user,
+      <literal>user.3</literal>). The correlation query of the reconciliation
+      operation is based on the <literal>"userName"</literal> attribute. During
+      the correlation query, two candidate users are therefore correlated with
+      the same managed user (<literal>user.3</literal>), and the result is
+      ambiguous. The manual match workflow is triggered when an "AMBIGUOUS"
+      situation is encountered, as indicated in this section of the mapping:
+     </para>
+     <programlisting>{
+    "situation" : "AMBIGUOUS",
+    "action" : {
+        "workflowName" : "manualMatch",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+}</programlisting>
+    </listitem>
+   </itemizedlist>
+
+   <procedure>
+    <step>
+     <para>
+      Before you start with this use case, rename the mapping file to
+      <filename>sync.json</filename>.
+     </para>
+     <screen>$ cd /path/to/openidm/samples/usecase/usecase4/conf
+$ mv syncManagedBusiness.json sync.json</screen>
+    </step>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for use case 4.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase4
+     </screen>
+     <para>
+      You will see a warning in the Felix console about a password not being
+      defined in the CSV file (<literal>WARN Password attribute is not defined.
+      [CSVFileConfiguration]</literal>). You can ignore this warning.
+     </para>
+    </step>
+    <step>
+     <para>
+      Run a reconciliation operation, according to the mapping defined in
+      <filename>sync.json</filename>.
+     </para>
+     <screen><?dbfo pgwide="1"?>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=recon_managedUser_systemBusiness"</screen>
+     <para>
+      When the reconciliation operation finds the ambiguous entry
+      (<literal>user.3</literal>) and the orphan entry (<literal>user.50</literal>)
+      in the CSV file, two asynchronous workflows are launched
+      (<literal>manualMatch</literal> and <literal>orphanAccountReport</literal>),
+      as indicated in the mapping file, described previously.
+     </para>
+    </step>
+    <step>
+     <para>
+      Log in to the UI as the <literal>systemadmin</literal> user, with password
+      <literal>Passw0rd</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the Manual Linking task from the My tasks list and click Details.
+     </para>
+     <para>
+      The <emphasis>Possible targets</emphasis> field presents a list of target
+      entries to which the ambiguous record can be linked. In this example,
+      <literal>user.3 - Atrc, Aaron</literal> and
+      <literal>user.33 - Atrc, Aaron</literal> are the two candidate users found
+      in the target object set by the correlation query. When you select one of
+      these values, the workflow manually links the managed user
+      (<literal>user.3</literal>) to the selected user.
+     </para>
+     <para>
+      If you select Ignore, here, no action is taken (no link is created), and
+      the workflow terminates.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the Orphan Account task from the My tasks list and click Details.
+     </para>
+     <para>
+      The <emphasis>Link to</emphasis> field enables you to enter an existing
+      managed user ID to which this orphan account should be linked. For the
+      purposes of this example, enter <literal>user.5</literal>.
+     </para>
+     <para>
+      The <emphasis>Delete</emphasis> option deletes the user from the target
+      object set (the CSV file in this case) and terminates the workflow.
+     </para>
+    </step>
+    <step>
+     <para>
+      Shut down OpenIDM before you proceed with the next use case.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./shutdown.sh</screen>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="use-case-5">
+   <title>Use Case 5 - Certification</title>
+   <para>
+    This use case demonstrates a scheduled task that retrieves all managed users
+    and starts a certification workflow for each one.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for use case 5.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase5</screen>
+    </step>
+    <step>
+     <para>
+      To start the scheduled task, enable the schedule in
+      <filename>schedule-certification.json</filename>.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ more samples/usecase/usecase5/conf/schedule-certification.json
+{
+    "enabled" : true,
+...  </screen>
+    </step>
+    <step>
+     <para>
+      Log into the UI as <literal>user.0</literal> with password
+      <literal>Passw0rd</literal>.
+     </para>
+     <para>
+      <literal>user.0</literal> represents the manager of the users who are
+      being certified.
+     </para>
+    </step>
+    <step>
+     <para>
+      Under "Tasks that are in my group's queue" click "Certification Process"
+      and select "Assign to me".
+     </para>
+     <para>
+      The "Certification Process" task moves under "My tasks".
+     </para>
+    </step>
+    <step>
+     <para>
+      Under "My tasks" click "Certification Process" and click Details.
+     </para>
+    </step>
+    <step>
+     <para>
+      On the "Access Status Check" task, click Details.
+     </para>
+     <para>
+      The <emphasis>Access to Business system</emphasis> and <emphasis>Access to
+      Project system</emphasis> fields reflect the values of the
+      <literal>"accounts"</literal> property of the managed user that is being
+      certified. These values can be changed on this form, which changes the
+      corresponding values in the managed user object.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select a Decision.
+     </para>
+     <para>
+      If you select <emphasis>Certify</emphasis>, no action
+      is taken, the certified user is not modified and the workflow terminates.
+     </para>
+     <para>
+      Selecting <emphasis>Change</emphasis> results in a new user task being
+      created, and assigned to the <literal>systemadmin</literal> user.
+     </para>
+     <para>
+      Click Complete after you have selected one of the previous options.
+     </para>
+    </step>
+    <step>
+     <para>
+      If you selected <emphasis>Change</emphasis> in the previous step, log in
+      to the UI as the <literal>systemadmin</literal> user with password
+      <literal>Passw0rd</literal>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select the Access Status Check task and click Details.
+     </para>
+     <para>
+      The <emphasis>Access to Business system</emphasis> and
+      <emphasis>Access to Project system</emphasis> fields can be modified on
+      this form, if required.
+     </para>
+    </step>
+    <step>
+     <para>
+      Select a Decision.
+     </para>
+     <para>
+      If you select <emphasis>Accept</emphasis>, the managed user object of the
+      user being certified is updated with values of the access fields on this
+      form. A notification regarding the change is sent to the affected user,
+      visible in the UI when the user next logs in.
+     </para>
+     <para>
+      If you select <emphasis>Reject</emphasis>, the managed user object of the
+      user is not changed. A notification is sent to the manager of the user,
+      indicating that the certification change request has been rejected by
+      the <literal>systemadmin</literal> user.
+     </para>
+     <para>
+      Click Complete after you have selected one of the previous options.
+     </para>
+    </step>
+    <step>
+     <para>
+      Shut down OpenIDM before you proceed with the next use case.
+     </para>
+     <screen>$ cd /path/to/openidm
+$ ./shutdown.sh</screen>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="use-case-6">
+   <title>Use Case 6 - Password Change Reminder</title>
+   <para>
+    This use case demonstrates using the task scanner to trigger a password
+    change reminder workflow for managed users.
+   </para>
+   <para>
+    In this example, each managed user entry in OpenIDM has a dedicated
+    attribute, <literal>lastPasswordSet</literal>, that stores the date on which
+    the password was last changed. The value of this attribute is updated by an
+    <literal>onStore</literal> script, defined in the managed user configuration
+    file (<filename>conf/managed.json</filename>), as follows:
+   </para>
+   <programlisting>
+"onStore" : {
+    "type" : "text/javascript",
+    "file" : "script/onStoreManagedUser.js"
+},
+   </programlisting>
+   <para>
+    When a new password is stored for a user, the script sets the date on which
+    this change was made. The task scanner periodically scans the
+    <literal>lastPasswordSet</literal> attribute, and starts the workflow if the
+    password was changed more than an hour ago. This condition is configured in
+    the schedule configuration file
+    (<filename>schedule-taskscan_passwordchange.json</filename>):
+   </para>
+   <screen><userinput>$ cd /path/to/openidm
+$ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
+<computeroutput>
+...
+"condition" : {
+    "before" : "${Time.now - 1h}"
+},
+....</computeroutput>
+   </screen>
+   <para>
+    Obviously, in a real deployment, the period between required password
+    changes would be longer, and this value would need to be set accordingly.
+   </para>
+   <para>
+    By default, the workflow sends notifications to the user entry, visible when
+    the user logs into the UI. If you want notifications sent by email,
+    configure the external email service, as follows:
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Edit the settings in the file
+      <filename>/path/to/openidm/samples/usecase/usecase6/conf/external.email.json</filename>
+      to match the settings of your mail server. For example:
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ more samples/usecase/usecase6/conf/external.email.json</userinput>
+<computeroutput>
+{
+        "host" : "smtp.gmail.com",
+        "port" : "587",
+        "username" : "my-username"
+        "password" : "my-password",
+        "mail.smtp.auth" : "true",
+        "mail.smtp.starttls.enable" : "true"
+}</computeroutput>
+     </screen>
+    </step>
+    <step>
+     <para>
+      Enable email notification in the script file that starts the workflow
+      (<filename>samples/usecase/usecase6/script/passwordchange.js</filename>).
+      For example:
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ more samples/usecase/usecase6/script/passwordchange.js</userinput>
+<computeroutput>
+/*global  objectID*/
+
+(function () {
+    var params = {
+ "userId" : objectID,
+ "emailEnabled" : "true",
+ "_key": "passwordChangeReminder"
+};</computeroutput>
+     </screen>
+    </step>
+    <step>
+     <para>
+      Make sure that all users have a valid email address as the value of their
+      <literal>mail</literal> attribute, in the OpenIDM repository.
+     </para>
+    </step>
+   </procedure>
+   <para>
+    The task scanning schedule is disabled by default. To test this use case,
+    follow these steps:
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Enable the task scanning schedule by setting <literal>enabled</literal> to
+      <literal>true</literal> in the schedule configuration file
+      (<filename>schedule-taskscan_passwordchange.json</filename>).
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</userinput>
+      <computeroutput>
+{
+    "enabled" : true,
+...
+      </computeroutput>
+     </screen>
+    </step>
+    <step>
+     <para>Start OpenIDM with the configuration for use case 6.
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase6</screen>
+     </para>
+    </step>
+    <step>
+     <para>
+      Log into the UI as any of the users listed in the introduction to this
+      section (for example, <literal>user.4</literal>, with password
+      <literal>Passw0rd</literal>).
+     </para>
+     <para>
+      The user sees the following notification upon login:
+     </para>
+     <mediaobject>
+      <alt>Password expiry notification</alt>
+      <imageobject>
+       <imagedata fileref="images/pwd-expiry.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      If the password has not been changed after five minutes, a second
+      notification is sent to the user.
+     </para>
+     <mediaobject>
+      <alt>Second password expiry notification</alt>
+      <imageobject>
+       <imagedata fileref="images/pwd-expiry2.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+     <para>
+      If the password has not been changed two minutes after this second
+      notification, the user's account is deactivated and that user is no longer
+      able to log in to the UI.
+     </para>
+    </step>
+   </procedure>
+  </section>
+
  </section>
 </chapter>
