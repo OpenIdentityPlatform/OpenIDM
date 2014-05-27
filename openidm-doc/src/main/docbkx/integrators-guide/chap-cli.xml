@@ -60,7 +60,7 @@ $ <userinput>./cli.sh encrypt ... </userinput>
  in <filename>/path/to/openidm/conf/boot/boot.properties</filename>.</para>
 
  <para>
-  If you run the <command>./cli.sh</command> command by itself, it opens an
+  If you run the <command>cli.sh</command> command by itself, it opens an
   OpenIDM-specific shell prompt:
  </para>
 
@@ -78,7 +78,7 @@ $ <userinput>./cli.sh encrypt ... </userinput>
 
  <para>
   For a list of subcommands available from the <literal>openidm#</literal>
-  prompt, run the <command>./cli.sh help</command> command. The
+  prompt, run the <command>cli.sh help</command> command. The
   <command>help</command> and <command>exit</command> options shown below are
   self-explanatory. The other subcommands are explained in the subsections
   that follow.
@@ -105,14 +105,12 @@ remote:configimport         Imports the configuration set from local file/direct
     <term>-u or --user USER[:PASSWORD]</term>
     <listitem>
      <para>
-      Allows you to specify the server user and password. If you do not specify 
-      a password, the <command>cli.sh</command> script prompts for one before 
-      completing the command. This option is used by all three commands.
-     </para>
-     <para>
-      If you do not specify the <literal>-u</literal> or
-      <literal>--user</literal>, you may see the following erorr:
-      <literal>Remote operation failed: Unauthorized null</literal>
+      Allows you to specify the server user and password. Specifying a username
+      is mandatory. If you do not specify a username, the following error is
+      output to the console:
+      <literal>Remote operation failed: Unauthorized</literal>. If you do
+      not specify a password, you are prompted for one. This option is used by
+      all three subcommands.
      </para>
     </listitem>
    </varlistentry>
@@ -168,20 +166,20 @@ remote:configimport         Imports the configuration set from local file/direct
   <para>Usage is as follows:</para>
   
   <screen>
-$ ./cli.sh configexport /<replaceable>export-location</replaceable>
+$ ./cli.sh configexport --user username:passsword <replaceable>export-location</replaceable>
   </screen>
 
   <para>For example:</para>
 
-  <screen>$ ./cli.sh configexport /tmp/conf</screen>
+  <screen>
+$ ./cli.sh --user openidm-admin:openidm-admin configexport /tmp/conf</screen>
   
   <para>Configuration objects are exported, as <filename>.json</filename>
    files, to the specified directory. The command creates the directory if
-   needed. Configuration files
-   that are present in this directory are renamed as backup files, with a
-   timestamp, for example, <filename>audit.json.2014-02-19T12-00-28.bkp
-   </filename>, and are not overwritten. The following configuration
-   objects are exported:</para>
+   needed. Configuration files that are present in this directory are renamed as
+   backup files, with a timestamp, for example,
+   <filename>audit.json.2014-02-19T12-00-28.bkp</filename>, and are not
+   overwritten. The following configuration objects are exported:</para>
   
   <itemizedlist>
     <listitem>
@@ -285,13 +283,13 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
   <para>Usage is as follows:</para>
   
   <screen>
-$ ./cli.sh configimport [--replaceAll] /<replaceable>import-location</replaceable>
+$ ./cli.sh configimport --user username:password [--replaceAll] <replaceable>import-location</replaceable>
   </screen>
   
   <para>For example:</para>
   
   <screen>
-$ ./cli.sh configimport --replaceAll /tmp/conf
+$ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/conf
   </screen>
 
   <para>Configuration objects are imported, as <literal>.json</literal> files, 
@@ -309,7 +307,7 @@ $ ./cli.sh configimport --replaceAll /tmp/conf
   
   <para>Usage is as follows:</para>
   
-  <screen>$ ./cli.sh configureconnector <replaceable>connector-name</replaceable>
+  <screen>$ ./cli.sh --user username:password configureconnector <replaceable>connector-name</replaceable>
   </screen>
   
   <para>Select the type of connector that you want to configure. The following 
@@ -320,7 +318,8 @@ $ ./cli.sh configimport --replaceAll /tmp/conf
   the version numbers shown in command output. If there is a future mismatch
    in version numbers, I do not know if that's a "big deal". -->
 
-  <screen width="85">$ <userinput>./cli.sh configureconnector myXmlConnector
+  <screen width="85">
+$ <userinput>./cli.sh --user openidm-admin:openidm-admin configureconnector myXmlConnector
    </userinput>
    <computeroutput>
 Starting shell in /path/to/openidm
@@ -360,13 +359,14 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <command>configureconnector</command> command again so that OpenIDM can pick 
   up the new connector configuration.</para>
   
-  <screen width="75">$ ./cli.sh configureconnector myXmlConnector
-Using boot properties at /openidm/conf/boot/boot.properties
+  <screen>
+<userinput>$ ./cli.sh --user openidm-admin:openidm-admin configureconnector myXmlConnector</userinput>
+<computeroutput>Using boot properties at /openidm/conf/boot/boot.properties
 Configuration was found and picked up from:
       /openidm/temp/provisioner.openicf-myXmlConnector.json
 Dec 11, 2012 10:55:28 AM org.restlet.ext.httpclient.HttpClientHelper start
 INFO: Starting the HTTP client
-...
+...</computeroutput>
   </screen>  
   
   <para>You can also configure connectors over the REST interface. For more 
