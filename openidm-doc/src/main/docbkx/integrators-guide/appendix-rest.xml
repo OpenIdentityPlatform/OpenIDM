@@ -453,7 +453,8 @@
     <listitem>
      <para>
       Use this as an index in the result set indicating the page to return.
-      The format of the cookie is an integer value.
+      The format of the <literal>_pagedResultsOffset</literal> is an integer
+      value.
      </para>
      <para>
       This request assumes <literal>_pageSize</literal> is set, and the
