@@ -1461,10 +1461,6 @@
  --request POST \
  "https://localhost:8443/openidm/recon?_action=reconById&amp;mapping=managedUser_systemLdapAccounts&amp;ids=b3c2f414-e7b3-46aa-8ce6-f4ab1e89288c"</screen>
   <para>
-   Note that the URL in this example is broken for legibility - in a real
-   command the entire URL must be on line.
-  </para>
-  <para>
    A reconciliation by ID takes the default reconciliation options that are
    specified in the mapping, so the source and target queries, and source and
    target phases described in the previous section apply equally to
@@ -1805,15 +1801,6 @@
  }
 ]
 }</programlisting>
-
-    <para>
-     Note that the response structure of a read request on
-     <literal>audit/recon</literal> differs from the response structure of a
-     query by <literal>recon-id</literal>. The read response contains a flat
-     list of entries. The query response separates the
-     <literal>summary</literal> and <literal>start</literal> event type entries.
-     Other entries are listed under the <literal>result</literal> entry.
-    </para>
 
     <para>
      To query the audit log for a specific reconciliation situation, use the
