@@ -16,13 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -33,11 +26,20 @@ import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_PASSWORD;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_USERNAME;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.Credential;
+
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.BASIC_AUTH_CRED_HELPER;
+import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_AUTH_CRED_HELPER;
 
 /**
  * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
@@ -48,12 +50,9 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_U
  */
 public class PassthroughModule implements ServerAuthModule {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PassthroughModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(PassthroughModule.class);
 
-    // config properties
-    private static final String QUERY_ON_RESOURCE = "queryOnResource";
-
-    private static String queryOnResource;
+    private final OSGiAuthnFilterHelper authnFilterHelper;
 
     private PassthroughAuthenticator passthroughAuthenticator;
 
@@ -61,15 +60,21 @@ public class PassthroughModule implements ServerAuthModule {
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public PassthroughModule() {
+    public PassthroughModule() throws AuthException {
+        authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
+        if (authnFilterHelper == null) {
+            throw new AuthException("OSGiAuthnFilterHelper is not ready.");
+        }
     }
 
     /**
      * Constructor used by tests to inject dependencies.
      *
+     * @param authnFilterHelper A mock of an OSGiAuthnFilterHelper
      * @param passthroughAuthenticator A mock of an PassthroughAuthenticator instance.
      */
-    PassthroughModule(PassthroughAuthenticator passthroughAuthenticator) {
+    PassthroughModule(OSGiAuthnFilterHelper authnFilterHelper, PassthroughAuthenticator passthroughAuthenticator) {
+        this.authnFilterHelper = authnFilterHelper;
         this.passthroughAuthenticator = passthroughAuthenticator;
     }
 
@@ -90,20 +95,10 @@ public class PassthroughModule implements ServerAuthModule {
      */
     @Override
     public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map options) {
+            Map options) throws AuthException {
 
-        queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).asString();
-
-        try {
-            passthroughAuthenticator = new PassthroughAuthenticator(
-                    OSGiAuthnFilterBuilder.getConnectionFactory(),
-                    OSGiAuthnFilterBuilder.getRouter().createServerContext(),
-                    queryOnResource
-            );
-        } catch (ResourceException e) {
-            //TODO
-            e.printStackTrace();
-        }
+        final String queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
+        passthroughAuthenticator = new PassthroughAuthenticator(authnFilterHelper.getConnectionFactory(), queryOnResource);
     }
 
     /**
@@ -119,46 +114,57 @@ public class PassthroughModule implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        LOGGER.debug("PassthroughModule: validateRequest START");
+        logger.debug("PassthroughModule: validateRequest START");
 
+        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(null, messageInfo);
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            LOGGER.debug("PassthroughModule: Delegating call to internal AuthFilter");
+            logger.debug("PassthroughModule: Delegating call to remote authentication");
 
-            final String username = request.getHeader(HEADER_USERNAME);
-            String password = request.getHeader(HEADER_PASSWORD);
+            if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)
+                    || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)) {
 
-            if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-                LOGGER.debug("Failed authentication, missing or empty headers");
-                //Auth failure will be logged in IDMServerAuthModule super type.
-                return AuthStatus.SEND_FAILURE;
-            }
+                logger.debug("PassthroughModule: Authentication successful");
+                logger.debug("Found valid session for {}", securityContextMapper.getAuthenticationId());
 
-            boolean authenticated = passthroughAuthenticator.authenticate(username, password,
-                    SecurityContextMapper.fromMessageInfo(username, messageInfo));
-
-            if (authenticated) {
-                LOGGER.debug("PassthroughModule: Authentication successful");
-                List<String> roles = SecurityContextMapper.fromMessageInfo(username, messageInfo).getRoles();
-                LOGGER.debug("Found valid session for {} with roles {}", username,
-                        roles);
-
+                final String authcid = securityContextMapper.getAuthenticationId();
                 clientSubject.getPrincipals().add(new Principal() {
                     public String getName() {
-                        return username;
+                        return authcid;
                     }
                 });
 
                 //Auth success will be logged in IDMServerAuthModule super type.
                 return AuthStatus.SUCCESS;
             } else {
-                LOGGER.debug("PassthroughModule: Authentication failed");
-                //Auth failure will be logged in IDMServerAuthModule super type.
+                logger.debug("PassthroughModule: Authentication failed");
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            LOGGER.debug("PassthroughModule: validateRequest END");
+            logger.debug("PassthroughModule: validateRequest END");
+        }
+    }
+
+    private boolean authenticate(Credential credential, SecurityContextMapper securityContextMapper)
+            throws AuthException {
+
+        if (!credential.isComplete()) {
+            logger.debug("Failed authentication, missing or empty headers");
+            return false;
+        }
+
+        try {
+            boolean authenticated = passthroughAuthenticator.authenticate(credential.username, credential.password,
+                    authnFilterHelper.getRouter().createServerContext());
+
+            if (authenticated) {
+                // user is authenticated; partially populate security context, rest is done by the role calculation wrapper.
+                securityContextMapper.setAuthenticationId(credential.username);
+            }
+            return authenticated;
+        } catch (ResourceException e) {
+            throw new AuthException(e.getMessage());
         }
     }
 

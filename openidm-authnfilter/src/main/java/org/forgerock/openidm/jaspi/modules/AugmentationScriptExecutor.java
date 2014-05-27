@@ -16,11 +16,12 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.exception.ScriptThrownException;
@@ -38,6 +39,12 @@ import javax.security.auth.message.AuthException;
 class AugmentationScriptExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(AugmentationScriptExecutor.class);
+
+    private final OSGiAuthnFilterHelper authnFilterHelper;
+
+    AugmentationScriptExecutor(OSGiAuthnFilterHelper authnFilterHelper) {
+        this.authnFilterHelper = authnFilterHelper;
+    }
 
     /**
      * Executes the specified augmentation script with the given properties and SecurityContextMapper.
@@ -58,7 +65,7 @@ class AugmentationScriptExecutor {
                 }
 
                 // Create internal ServerContext chain for script-call
-                ServerContext context = OSGiAuthnFilterBuilder.getRouter().createServerContext();
+                ServerContext context = authnFilterHelper.getRouter().createServerContext();
                 final Script script = augmentScript.getScript(context);
                 // Pass auth module properties and SecurityContextWrapper details to augmentation script
                 script.put("properties", properties);
@@ -67,13 +74,13 @@ class AugmentationScriptExecutor {
             } catch (ScriptThrownException e) {
                 final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
                 logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
-                throw new AuthException(re.getMessage()); // silly AuthException does not support chaining cause!!!
+                throw new JaspiAuthException(re.getMessage(), re);
             } catch (ScriptException e) {
                 logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
-                throw new AuthException(e.getMessage()); // silly AuthException does not support chaining cause!!!
+                throw new JaspiAuthException(e.getMessage(), e);
             } catch (ResourceException e) {
                 logger.error("{} when attempting to create server context", e.toString(), e);
-                throw new AuthException(e.getMessage()); // silly AuthException does not support chaining cause!!!
+                throw new JaspiAuthException(e.getMessage(), e);
             }
         }
     }

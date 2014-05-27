@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 
 import javax.security.auth.message.MessageInfo;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -61,7 +62,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         fail();
@@ -78,7 +79,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         fail();
@@ -95,7 +96,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         assertTrue(IDMAuthenticationAuditLogger.class
@@ -116,7 +117,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         assertTrue(TestJaspiAuditLogger.class
@@ -139,7 +140,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         assertFalse(configurationFactory.getConfiguration()
@@ -164,7 +165,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -193,7 +194,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -221,7 +222,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -254,7 +255,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration);
+        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
 
         //Then
         JsonValue authModuleConfig = configurationFactory.getConfiguration()

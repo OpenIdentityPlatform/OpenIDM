@@ -16,8 +16,10 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.openidm.util.Accessor;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,41 +29,43 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
-* @author Phill Cunnington
-*/
-public class InternalUserAuthModuleTest {
+ * Tests IDMUserAuthModule using "internal/user" resource/query
+ * @author Phill Cunnington
+ */
+public class IDMUserAuthModuleTest {
 
-    private InternalUserAuthModule internalUserAuthModule;
+    public static final String INTERNAL_USER_RESOURCE = "repo/internal/user";
+    public static final String INTERNALUSER_CREDENTIAL_QUERY = "credential-internaluser-query";
 
-    private AuthHelper authHelper;
+    private IDMUserAuthModule idmUserAuthModule;
+
+    private ResourceQueryAuthenticator authHelper;
+
+    private OSGiAuthnFilterHelper authnFilterHelper;
+
+    private RouteService routeService;
 
     private ServerContext context;
 
     @BeforeMethod
     public void setUp() {
-
-        context = mock(ServerContext.class);
-        authHelper = mock(AuthHelper.class);
-        internalUserAuthModule = new InternalUserAuthModule(authHelper,
-                new Accessor<ServerContext>() {
-                    @Override
-                    public ServerContext access() {
-                        return context;
-                    }
-                });
+        try {
+            context = mock(ServerContext.class);
+            routeService = mock(RouteService.class);
+            when(routeService.createServerContext()).thenReturn(context);
+            authHelper = mock(ResourceQueryAuthenticator.class);
+            authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
+            when(authnFilterHelper.getRouter()).thenReturn(routeService);
+            idmUserAuthModule = new IDMUserAuthModule(authHelper, authnFilterHelper, INTERNALUSER_CREDENTIAL_QUERY, INTERNAL_USER_RESOURCE);
+        } catch (ResourceException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -79,7 +83,7 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -101,7 +105,7 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -123,7 +127,7 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -145,7 +149,7 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         verifyZeroInteractions(authHelper);
@@ -166,11 +170,10 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate(eq("credential-internaluser-query"), eq("internal/user"), eq("USERNAME"),
-                eq("PASSWORD"), Matchers.<SecurityContextMapper>anyObject(), eq(context))).willReturn(true);
+        given(authHelper.authenticate(eq("USERNAME"), eq("PASSWORD"), eq(context))).willReturn(true);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
@@ -190,58 +193,13 @@ public class InternalUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate(eq("credential-internaluser-query"), eq("internal/user"), eq("USERNAME"),
-                eq("PASSWORD"), Matchers.<SecurityContextMapper>anyObject(), eq(context))).willReturn(false);
+        given(authHelper.authenticate(eq("USERNAME"), eq("PASSWORD"), eq(context))).willReturn(false);
 
         //When
-        AuthStatus authStatus = internalUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
-    @Test
-    public void shouldSecureResponseIfAnonymousUserSetSkipSession() throws AuthException {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
-        Subject serviceSubject = new Subject();
-
-        HttpServletRequest request = mock(HttpServletRequest.class);
-
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("anonymous");
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-
-        //When
-        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
-
-        //Then
-        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
-        verify(messageInfo).getMap();
-        assertTrue((Boolean) messageInfoMap.get("skipSession"));
-    }
-
-    @Test
-    public void shouldSecureResponseIfNotAnonymousUser() throws AuthException {
-
-        //Given
-        MessageInfo messageInfo = mock(MessageInfo.class);
-        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
-        Subject serviceSubject = new Subject();
-
-        HttpServletRequest request = mock(HttpServletRequest.class);
-
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
-        given(messageInfo.getMap()).willReturn(messageInfoMap);
-
-        //When
-        AuthStatus authStatus = internalUserAuthModule.secureResponse(messageInfo, serviceSubject);
-
-        //Then
-        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
-        verify(messageInfo, never()).getMap();
-    }
 }

@@ -25,7 +25,6 @@
 package org.forgerock.openidm.filter;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -57,7 +56,7 @@ import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
-import org.forgerock.openidm.jaspi.modules.AuthHelper;
+import org.forgerock.openidm.jaspi.modules.ResourceQueryAuthenticator;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -94,8 +93,8 @@ public class AuthFilter implements SingletonResourceProvider {
     private String queryId;
     private String queryOnResource;
 
-    /** The authentication module to delegate to.*/
-    private AuthHelper authHelper;
+    /** The authenticator to delegate to.*/
+    private ResourceQueryAuthenticator authenticator;
 
     @Reference(
             name = "AuthenticationConfig",
@@ -135,11 +134,9 @@ public class AuthFilter implements SingletonResourceProvider {
         JsonValue properties = config.get("propertyMapping");
         String authenticationIdProperty = properties.get("authenticationId").asString();
         String userCredentialProperty = properties.get("userCredential").asString();
-        String userRolesProperty = properties.get("userRoles").asString();
-        List<String> defaultRoles = config.get("defaultUserRoles").asList(String.class);
 
-        authHelper = new AuthHelper(cryptoService, connectionFactory, authenticationIdProperty,
-                userCredentialProperty, userRolesProperty, defaultRoles);
+        authenticator = new ResourceQueryAuthenticator(cryptoService, connectionFactory, queryOnResource, queryId, authenticationIdProperty,
+                userCredentialProperty);
     }
 
     // ----- Declarative Service Implementation
@@ -166,7 +163,7 @@ public class AuthFilter implements SingletonResourceProvider {
                         logger.debug("Failed authentication, missing or empty headers");
                         throw new ForbiddenException("Failed authentication, missing or empty headers");
                     }
-                    if (!authHelper.authenticate(queryId, queryOnResource, authcid, password, null, context)) {
+                    if (!authenticator.authenticate(authcid, password, context)) {
                         //TODO Handle message
                         throw new ForbiddenException("Reauthentication failed", new AuthException(authcid));
                     }

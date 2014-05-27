@@ -19,22 +19,29 @@ package org.forgerock.openidm.jaspi.modules;
 import org.forgerock.json.resource.Resource;
 
 import javax.security.auth.message.MessageInfo;
+import java.util.List;
 
 /**
- * Provides automatic role calculation based from the authentication configuration to provide support for common
- * auth modules out of the box.
- *
- * @since 3.0.0
+ * Default role calculator that simply sets the authorizationId to the principal name and
+ * the roles to the default role set.
  */
-interface RoleCalculator {
+class DefaultRoleCalculator implements RoleCalculator {
+    private final List<String> defaultRoles;
 
-    /**
-     * Performs the calculation of roles based on the provided configuration.
-     *
-     * @param principal The principal.
-     * @param messageInfo The message info instance.
-     * @param resource the retrieved resource for the principal.
-     * @return A SecurityContextMapper instance containing the authentication context information.
-     */
-    SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource);
+    public DefaultRoleCalculator(List<String> defaultRoles) {
+        this.defaultRoles = defaultRoles;
+    }
+
+    @Override
+    public SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource) {
+
+        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(principal, messageInfo);
+
+        if (defaultRoles != null && !defaultRoles.isEmpty()) {
+            securityContextMapper.setRoles(defaultRoles);
+        }
+
+        return securityContextMapper;
+    }
+
 }

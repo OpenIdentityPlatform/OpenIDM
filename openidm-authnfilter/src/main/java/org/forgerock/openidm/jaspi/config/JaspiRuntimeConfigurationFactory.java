@@ -88,9 +88,11 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
      * IDM auth module aliases to class names, prior to configuring the Jaspi runtime.
      *
      * @param moduleConfiguration The module configuration json.
+     * @param authnFilterHelper The OSGiAuthnFilterHelper to provide OSGi dependencies.
      * @throws Exception If there is an error when constructing the Audit Logger for the Jaspi Runtime.
      */
-    void setModuleConfiguration(final JsonValue moduleConfiguration) throws Exception {
+    void setModuleConfiguration(final JsonValue moduleConfiguration, OSGiAuthnFilterHelper authnFilterHelper)
+            throws Exception {
 
         final JsonValue moduleConfig = new JsonValue(moduleConfiguration);
 
@@ -99,7 +101,7 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
         String auditLoggerClassName = serverAuthContext.get(CONFIG_AUDIT_LOGGER).asString();
 
         if (auditLoggerClassName == null) {
-            setAuditLogger(new IDMAuthenticationAuditLogger());
+            setAuditLogger(new IDMAuthenticationAuditLogger(authnFilterHelper));
         } else {
             setAuditLogger(constructAuditLogger(auditLoggerClassName));
         }

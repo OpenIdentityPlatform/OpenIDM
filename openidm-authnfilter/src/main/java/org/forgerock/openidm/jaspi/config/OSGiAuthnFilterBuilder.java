@@ -23,12 +23,12 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.jaspi.JaspiRuntimeFilter;
 import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;
 
-import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.ServerConstants;
@@ -48,6 +48,7 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,14 @@ import java.util.Map;
  *     </code>
  * </pre>
  *
+ * Also,
+ * <pre>
+ *     <code>
+ *         OSGiAuthnFilterBuilder.getInstance()
+ *     </code>
+ * </pre>
+ * may be used to inject the OSGi dependencies into other modules as an OSGiAuthnFilterHelper.
+ *
  * @author Jonathan Scudder
  * @author Phill Cunnington
  * @author brmiller
@@ -106,7 +115,7 @@ import java.util.Map;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Commons Authentication Filter Configuration")
 })
-public class OSGiAuthnFilterBuilder {
+public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
 
     /** The PID for this component. */
     public static final String PID = "org.forgerock.openidm.authnfilterbuilder";
@@ -117,6 +126,10 @@ public class OSGiAuthnFilterBuilder {
     private static final int DEFAULT_FILTER_ORDER = 100;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static OSGiAuthnFilterBuilder instance;
+
+    // ----- Declarative Service Implementation
 
     @Reference(
             name = "AuthenticationConfig",
@@ -133,6 +146,29 @@ public class OSGiAuthnFilterBuilder {
     private void unBindAuthenticationConfig(AuthenticationConfig authenticationConfig) {
         config = null;
     }
+
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
+    RouteService repositoryRoute;
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    CryptoService cryptoService;
+
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    ConnectionFactory connectionFactory;
+
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected ScriptRegistry scriptRegistry;
+
+    @Reference(
+            name = "ref_ServletFilterRegistration",
+            referenceInterface = ServletRegistration.class,
+            policy = ReferencePolicy.STATIC,
+            cardinality = ReferenceCardinality.MANDATORY_UNARY
+    )
+    ServletRegistration servletFilterRegistration;
+
+    private RegisteredFilter filter;
 
     /**
      * Configures the commons Authentication Filter with the configuration in the authentication.json file.
@@ -177,78 +213,8 @@ public class OSGiAuthnFilterBuilder {
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
             return;
         }
-        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig);
+        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig, this);
     }
-
-    // ----- Declarative Service Implementation
-    private static OSGiAuthnFilterBuilder instance;
-
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
-    RouteService repositoryRoute;
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    CryptoService cryptoService;
-
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
-
-    /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected ScriptRegistry scriptRegistry;
-
-    /**
-     * Returns the Router instance.
-     *
-     * @return The Router instance.
-     */
-    public static RouteService getRouter() {
-        return instance.repositoryRoute;
-    }
-
-    /**
-     * Returns the Crypto Service instance.
-     *
-     * @return The Crypto Service instance.
-     */
-    public static CryptoService getCryptoService() {
-        return instance.cryptoService;
-    }
-
-    /**
-     * Returns the ScriptRegistry instance
-     *
-     * @return the ScriptRegistry instance
-     */
-    public static ScriptRegistry getScriptRegistry() {
-        return instance.scriptRegistry;
-    }
-
-    /**
-     * Returns the ConnectionFactory instance
-     *
-     * @return The ConnectionFactory instance
-     */
-    public static ConnectionFactory getConnectionFactory() {
-        return instance.connectionFactory;
-    }
-
-    @Reference(
-            name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletRegistration.class,
-            policy = ReferencePolicy.STATIC,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            bind = "bindServletFilterRegistration",
-            unbind = "unbindServletFilterRegistration"
-    )
-    private ServletRegistration servletFilterRegistration;
-    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
-        this.servletFilterRegistration = servletFilterRegistration;
-    }
-    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {
-        this.servletFilterRegistration = null;
-    }
-
-    private RegisteredFilter filter;
 
     /**
      * Registers the Authentication Filter in OSGi.
@@ -302,5 +268,53 @@ public class OSGiAuthnFilterBuilder {
                 logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
             }
         }
+        instance = null;
+    }
+
+    /**
+     * Get this instance of the OSGiAuthnFilterHelper.
+     *
+     * @return the instance of the OSGiAuthnFilterHelper.
+     */
+    public static OSGiAuthnFilterHelper getInstance() {
+        return instance;
+    }
+
+    // ----- OSGiAuthnFilterHelper Implementation
+
+    /**
+     * Returns the Router instance.
+     *
+     * @return The Router instance.
+     */
+    public RouteService getRouter() {
+        return repositoryRoute;
+    }
+
+    /**
+     * Returns the Crypto Service instance.
+     *
+     * @return The Crypto Service instance.
+     */
+    public CryptoService getCryptoService() {
+        return cryptoService;
+    }
+
+    /**
+     * Returns the ScriptRegistry instance
+     *
+     * @return the ScriptRegistry instance
+     */
+    public ScriptRegistry getScriptRegistry() {
+        return scriptRegistry;
+    }
+
+    /**
+     * Returns the ConnectionFactory instance
+     *
+     * @return The ConnectionFactory instance
+     */
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
     }
 }

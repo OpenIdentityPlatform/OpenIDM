@@ -16,8 +16,13 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,6 +38,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -40,16 +46,22 @@ import static org.testng.Assert.assertEquals;
 */
 public class PassthroughModuleTest {
 
+    private OSGiAuthnFilterHelper authnFilterHelper;
+
     private PassthroughModule passthroughModule;
 
     private PassthroughAuthenticator passthroughAuthenticator;
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp() throws ResourceException {
+        authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
+        RouteService router = mock(RouteService.class);
+        when(router.createServerContext()).thenReturn(mock(ServerContext.class));
+        when(authnFilterHelper.getRouter()).thenReturn(router);
 
         passthroughAuthenticator = mock(PassthroughAuthenticator.class);
 
-        passthroughModule = new PassthroughModule(passthroughAuthenticator);
+        passthroughModule = new PassthroughModule(authnFilterHelper, passthroughAuthenticator);
     }
 
     @Test
@@ -179,7 +191,7 @@ public class PassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         given(passthroughAuthenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<SecurityContextMapper>anyObject())).willReturn(true);
+                Matchers.<ServerContext>anyObject())).willReturn(true);
 
         //When
         AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);
@@ -208,7 +220,7 @@ public class PassthroughModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         given(passthroughAuthenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
-                Matchers.<SecurityContextMapper>anyObject())).willReturn(false);
+                Matchers.<ServerContext>anyObject())).willReturn(false);
 
         //When
         AuthStatus authStatus = passthroughModule.validateRequest(messageInfo, clientSubject, serviceSubject);

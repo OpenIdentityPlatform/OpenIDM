@@ -16,15 +16,24 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.util.promise.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +47,7 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,15 +55,15 @@ import java.util.Map;
 
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
-import static org.forgerock.openidm.jaspi.modules.RoleCalculator.GroupComparison;
-import static org.forgerock.openidm.jaspi.modules.RoleCalculator.RoleCalculatorFactory;
+import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
+import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
 /**
  * A Jaspi ServerAuthModule that is designed to wrap any other Jaspi ServerAuthModule. This module provides
  * IDM specific authentication processing to the authentication mechanism of underlying auth module.
  * <br/>
- * This allows IDM to use any common auth module and still benefit from automatical role calculation
+ * This allows IDM to use any common auth module and still benefit from automatic role calculation
  * and augment security context scripts (providing the authentication.json contains the required configuration).
  *
  * @since 3.0.0
@@ -63,21 +73,19 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     private static final Logger logger = LoggerFactory.getLogger(IDMJaspiModuleWrapper.class);
 
     static final String AUTHENTICATION_ID = "authenticationId";
+    static final String USER_ROLES = "userRoles";
     static final String DEFAULT_USER_ROLES = "defaultUserRoles";
     static final String PROPERTY_MAPPING = "propertyMapping";
+    static final String QUERY_ID = "queryId";
+    static final String QUERY_ON_RESOURCE = "queryOnResource";
     private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
     private static final String GROUP_MEMBERSHIP = "groupMembership";
     private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
 
-    /** Authentication username header. */
-    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
-
-    /** Authentication password header. */
-    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
-
     /** Authentication without a session header. */
     public static final String NO_SESSION = "X-OpenIDM-NoSession";
 
+    private final OSGiAuthnFilterHelper authnFilterHelper;
     private final AuthModuleConstructor authModuleConstructor;
     private final AugmentationScriptExecutor augmentationScriptExecutor;
 
@@ -90,26 +98,37 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     private ServerAuthModule authModule;
     private String logClientIPHeader = null;
     private String queryOnResource;
+    private String authenticationId;
+    private Function<QueryRequest, Resource, ResourceException> queryExecutor;
+    private UserDetailQueryBuilder queryBuilder;
     private RoleCalculator roleCalculator;
 
     /**
      * Constructs a new instance of the IDMJaspiModuleWrapper.
      */
-    public IDMJaspiModuleWrapper() {
+    public IDMJaspiModuleWrapper() throws AuthException {
+        this.authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
+        if (authnFilterHelper == null) {
+            throw new AuthException("OSGiAuthnFilterHelper is not ready.");
+        }
         this.authModuleConstructor = new AuthModuleConstructor();
         this.roleCalculatorFactory = new RoleCalculatorFactory();
-        this.augmentationScriptExecutor = new AugmentationScriptExecutor();
+        this.augmentationScriptExecutor = new AugmentationScriptExecutor(authnFilterHelper);
     }
 
     /**
      * Constructs a new instance of the IDMJaspiModuleWrapper with the provided parameters, for test use.
      *
+     * @param authnFilterHelper An instance of the OSGiAuthnFilterHelper.
      * @param authModuleConstructor An instance of the AuthModuleConstructor.
      * @param roleCalculatorFactory An instance of the RoleCalculatorFactory.
      * @param augmentationScriptExecutor An instance of the AugmentationScriptExecutor.
      */
-    IDMJaspiModuleWrapper(AuthModuleConstructor authModuleConstructor, RoleCalculatorFactory roleCalculatorFactory,
+    IDMJaspiModuleWrapper(OSGiAuthnFilterHelper authnFilterHelper,
+            AuthModuleConstructor authModuleConstructor,
+            RoleCalculatorFactory roleCalculatorFactory,
             AugmentationScriptExecutor augmentationScriptExecutor) {
+        this.authnFilterHelper = authnFilterHelper;
         this.authModuleConstructor = authModuleConstructor;
         this.roleCalculatorFactory = roleCalculatorFactory;
         this.augmentationScriptExecutor = augmentationScriptExecutor;
@@ -156,36 +175,54 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
 
         queryOnResource = properties.get("queryOnResource").asString();
+        authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
         logClientIPHeader = properties.get("clientIPHeader").asString();
 
-        ConnectionFactory connectionFactory = getConnectionFactory();
-        ServerContext context = createServerContext();
-        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
+        String queryId = properties.get(QUERY_ID).asString();
+        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
+
         String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
-        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES).defaultTo(Collections.emptyList())
+        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
+                .defaultTo(Collections.emptyList())
                 .asList(String.class);
-        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING).defaultTo(Collections.emptyMap())
+        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING)
+                .defaultTo(Collections.emptyMap())
                 .asMapOfList(String.class);
-        RoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
-                .defaultTo(RoleCalculator.GroupComparison.equals.name())
-                .asEnum(RoleCalculator.GroupComparison.class);
-        roleCalculator = roleCalculatorFactory.create(connectionFactory, context, queryOnResource, authenticationId,
-                groupMembership, defaultRoles, roleMapping, groupComparison);
+        MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
+                .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
+                .asEnum(MappingRoleCalculator.GroupComparison.class);
+
+        final ConnectionFactory connectionFactory = authnFilterHelper.getConnectionFactory();
+        final ServerContext context = createServerContext();
+
+        // a function to perform the user detail query on the router
+        queryExecutor =
+                new Function<QueryRequest, Resource, ResourceException>() {
+                    @Override
+                    public Resource apply(QueryRequest request) throws ResourceException {
+                        final List<Resource> resources = new ArrayList<Resource>();
+                        connectionFactory.getConnection().query(context, request, resources);
+
+                        if (resources.isEmpty()) {
+                            throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");
+                        } else if (resources.size() > 1) {
+                            throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
+                        }
+                        return resources.get(0);
+                    }
+                };
+
+        queryBuilder = queryOnResource != null
+                ? new UserDetailQueryBuilder(queryOnResource).useQueryId(queryId)
+                : null;
+
+        roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership, roleMapping, groupComparison);
 
         JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
         if (!scriptConfig.isNull()) {
             augmentScript = getAugmentScript(scriptConfig);
             logger.debug("Registered script {}", augmentScript);
         }
-    }
-
-    /**
-     * Retrieves the ConnectionFactory.
-     *
-     * @return The ConnectionFactory instance.
-     */
-    ConnectionFactory getConnectionFactory() {
-        return OSGiAuthnFilterBuilder.getConnectionFactory();
     }
 
     /**
@@ -196,7 +233,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      */
     ServerContext createServerContext() throws JaspiAuthException {
         try {
-            return OSGiAuthnFilterBuilder.getRouter().createServerContext();
+            return authnFilterHelper.getRouter().createServerContext();
         } catch (ResourceException e) {
             logger.error("Could not create ServerContext", e);
             throw new JaspiAuthException("Could not create ServerContext", e);
@@ -212,7 +249,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
      */
     ScriptEntry getAugmentScript(JsonValue scriptConfig) throws JaspiAuthException {
         try {
-            return OSGiAuthnFilterBuilder.getScriptRegistry().takeScript(scriptConfig);
+            return authnFilterHelper.getScriptRegistry().takeScript(scriptConfig);
         } catch (ScriptException e) {
             logger.error("{} when attempting to register script {}", e.toString(), scriptConfig, e);
             throw new JaspiAuthException(e.toString(), e);
@@ -261,9 +298,35 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             throw new JaspiAuthException("Underlying Server Auth Module has not set the client subject's principal!");
         }
 
+        // user is authenticated; populate security context
+
         try {
-            final SecurityContextMapper securityContextMapper = roleCalculator.calculateRoles(principalName,
-                    messageInfo);
+            // Attempt to read the user object if we have been given an authenticationId property
+            final Resource resource = (queryBuilder != null && authenticationId != null)
+                    ? queryExecutor.apply(queryBuilder.assignAuthenticationId(authenticationId, principalName).build())
+                    : null;
+
+            final SecurityContextMapper securityContextMapper =
+                    roleCalculator.calculateRoles(principalName, messageInfo, resource);
+
+            // set "resource" (component)
+            if (queryOnResource != null) {
+                securityContextMapper.setResource(queryOnResource);
+            }
+
+            // set "user id" (authorization.id) if not already set
+            if (securityContextMapper.getUserId() == null) {
+                if (resource != null) {
+                    // assign authorization id from resource if present
+                    securityContextMapper.setUserId(
+                            resource.getId() != null
+                                    ? resource.getId()
+                                    : resource.getContent().get(FIELD_CONTENT_ID).asString());
+                } else {
+                    // set to principal otherwise
+                    securityContextMapper.setUserId(principalName);
+                }
+            }
 
             if (augmentScript != null) {
                 augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties, securityContextMapper);
@@ -359,4 +422,114 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
              }
         }
     }
+
+    /**
+     * QueryRequest Builder class for querying the user object detail.
+     *
+     * If queryId is provided, setAuthenticationId will set additional parameters for the authenticationId
+     * property and principal name.  Otherwise a QueryFilter where "authenticationId property = principal name"
+     * is used.
+     *
+     * @since 3.0.0
+     */
+    private static class UserDetailQueryBuilder {
+        private final String queryOnResource;
+        private String queryId = null;
+        private String authenticationId = null;
+        private String principal = null;
+
+        private UserDetailQueryBuilder(final String queryOnResource) {
+            this.queryOnResource = queryOnResource;
+        }
+
+        UserDetailQueryBuilder useQueryId(String queryId) {
+            this.queryId = queryId;
+            return this;
+        }
+
+        UserDetailQueryBuilder assignAuthenticationId(final String authenticationId, final String principal)
+                throws BadRequestException {
+            this.authenticationId = authenticationId;
+            this.principal = principal;
+            return this;
+        }
+
+        QueryRequest build() throws BadRequestException {
+            QueryRequest request = Requests.newQueryRequest(queryOnResource);
+            if (queryId != null) {
+                // if we're using a queryId, provide the additional parameter mapping the authenticationId property
+                // and its value (the principal)
+                request.setQueryId(queryId);
+                request.setAdditionalParameter(authenticationId, principal);
+            } else {
+                // otherwise, use a query filter mapping the authenticationId property to the principal
+                request.setQueryFilter(QueryFilter.equalTo(authenticationId, principal));
+            }
+            return request;
+        }
+    }
+
+    /**
+     * Internal credential bean to hold username/password pair.
+     *
+     * @since 3.0.0
+     */
+    static class Credential {
+        final String username;
+        final String password;
+
+        Credential(final String username, final String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        boolean isComplete() {
+            return (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password));
+        }
+    }
+
+    /**
+     * Interface for a helper that returns user credentials from an HttpServletRequest
+     *
+     * @since 3.0.0
+     */
+    static interface CredentialHelper {
+        public Credential getCredential(HttpServletRequest request);
+    }
+
+    /** CredentialHelper to get auth header creds from request */
+    static final CredentialHelper HEADER_AUTH_CRED_HELPER = new CredentialHelper() {
+        /** Authentication username header. */
+        private static final String HEADER_USERNAME = "X-OpenIDM-Username";
+
+        /** Authentication password header. */
+        private static final String HEADER_PASSWORD = "X-OpenIDM-Password";
+
+        @Override
+        public Credential getCredential(HttpServletRequest request) {
+            return new Credential(request.getHeader(HEADER_USERNAME), request.getHeader(HEADER_PASSWORD));
+        }
+    };
+
+    /** CredentialHelper to get Basic-Auth creds from request */
+    static final CredentialHelper BASIC_AUTH_CRED_HELPER  = new CredentialHelper() {
+        /** Basic auth header. */
+        private static final String HEADER_AUTHORIZATION = "Authorization";
+        private static final String AUTHORIZATION_HEADER_BASIC = "Basic";
+
+        @Override
+        public Credential getCredential(HttpServletRequest request) {
+            final String authHeader = request.getHeader(HEADER_AUTHORIZATION);
+            if (authHeader != null) {
+                final String[] authValue = authHeader.split("\\s", 2);
+                if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
+                    final String[] creds = new String(Base64.decodeBase64(authValue[1].getBytes())).split(":");
+                    if (creds.length == 2) {
+                        return new Credential(creds[0], creds[1]);
+                    }
+                }
+            }
+            return new Credential(null, null);
+        }
+    };
 }
