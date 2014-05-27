@@ -1451,34 +1451,31 @@ class ObjectMapping {
                                         createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
 
-                                ServerContext context = ObjectSetContext.get();
                                 // Allow the early link creation as soon as the target identifier is known
                                 String sourceId = getSourceObjectId();
                                 if (isLinkingEnabled()) {
-                                    PendingLink.populate(context, ObjectMapping.this.name, sourceId, getSourceObject(),
-                                            reconId, situation);
+                                    // Create and populate the PendingLinkContext, replacing the top of the ObjectSetContext stack
+                                    Context oldContext = ObjectSetContext.pop();
+                                    ServerContext newContext = PendingLink.populate(oldContext, ObjectMapping.this.name, sourceId, getSourceObject(), reconId, situation);
+                                    ObjectSetContext.push(newContext);
+                                    
                                 }
+                                Context context = ObjectSetContext.get();
 
                                 targetObjectAccessor = createTargetObject(createTargetObject);
 
                                 if (!isLinkingEnabled()) {
-                                    LOGGER.debug(
-                                            "Linking disabled for {} during {}, skipping additional link processing",
-                                            sourceId, reconId);
+                                    LOGGER.debug("Linking disabled for {} during {}, skipping additional link processing", sourceId, reconId);
                                     break;
                                 }
 
                                 boolean wasLinked = PendingLink.wasLinked(context);
                                 if (wasLinked) {
                                     linkCreated = true;
-                                    LOGGER.debug(
-                                            "Pending link for {} during {} has already been created, skipping additional link processing",
-                                            sourceId, reconId);
+                                    LOGGER.debug("Pending link for {} during {} has already been created, skipping additional link processing", sourceId, reconId);
                                     break;
                                 } else {
-                                    LOGGER.debug(
-                                            "Pending link for {} during {} not yet resolved, proceed to link processing",
-                                            sourceId, reconId);
+                                    LOGGER.debug("Pending link for {} during {} not yet resolved, proceed to link processing", sourceId, reconId);
                                     PendingLink.clear(context); // We'll now handle link creation ourselves
                                 }
                                 // falls through to link the newly created target

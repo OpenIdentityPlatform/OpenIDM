@@ -20,26 +20,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.sync.PendingLinkContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-
 
 /**
- * Pending link handling
- * Helps establish links as soon as target identifiers
- * become known.
+ * Pending link handling. 
+ * Creates and populates a PendingLinkContext to help establish 
+ * links as soon as target identifiers become known.
  *
  * @author aegloff
+ * @author ckienle
  */
 class PendingLink {
 
     private final static Logger logger = LoggerFactory.getLogger(PendingLink.class);
-
-    private static final String PENDING_LINK = "pendingLink";
 
     private static final String ORIGINAL_SITUATION = "originalSituation";
     private static final String RECON_ID = "reconId";
@@ -58,20 +57,18 @@ class PendingLink {
      */
     public static void handlePendingLinks(ArrayList<ObjectMapping> mappings, String resourceContainer, String resourceId, JsonValue targetObject) throws SynchronizationException {
         // Detect if there is a pending link
-        JsonValue pendingLink = null;
-        JsonValue pendingLinkContext = null;
+        PendingLinkContext pendingLinkContext = null;
         Context context = ObjectSetContext.get();
-//        while ((pendingLink == null || pendingLink.isNull())  && context != null && !context.isNull()) {
-//            pendingLink = context.get(PENDING_LINK);
-//            if (pendingLink != null && !(pendingLink.isNull())) {
-//                pendingLinkContext = context;
-//                logger.debug("Pending link found in context {}", pendingLink);
-//            }
-//            context = context.getParent();
-//        }
+        try {
+            pendingLinkContext = context.asContext(PendingLinkContext.class);
+        } catch (IllegalArgumentException e) {
+            logger.debug("No PendingLinkContext found");
+            return;
+        }
 
         // Find right object mapping and create the link
-        if (pendingLink != null && !(pendingLink.isNull())) {
+        if (pendingLinkContext.isPending()) {
+            JsonValue pendingLink = new JsonValue (pendingLinkContext.getPendingLink());
             String mappingName = pendingLink.get(MAPPING_NAME).required().asString();
             String sourceId = pendingLink.get(SOURCE_ID).required().asString();
             JsonValue sourceObject = pendingLink.get(SOURCE_OBJECT);
@@ -83,7 +80,7 @@ class PendingLink {
                 if (mapping.getName().equals(mappingName) && resourceContainer.equals(mapping.getTargetObjectSet())) {
                     logger.debug("Matching mapping {} found for pending link to {}", mappingName, resourceContainer + "/" + resourceId);
                     mapping.explicitOp(sourceObject, targetObject, situation, Action.LINK, reconId);
-                    pendingLinkContext.remove(PENDING_LINK);
+                    pendingLinkContext.clear();
                     logger.debug("Pending link for mapping {} between {}-{} created", new Object[] {mappingName, sourceId, resourceContainer + "/" + resourceId});
                     break;
                 }
@@ -91,31 +88,43 @@ class PendingLink {
         }
     }
 
+
     /**
-     * Add pending link info to the context
-     * @param context to add the pending link info to
+     * Creates and populates a PendingLinkContext.
+     * 
+     * @param context the context to use as the parent context 
+     * @param objectMappingName The name of the mapping
+     * @param sourceId the source ID
+     * @param sourceObject the source Object
+     * @param reconId the reconciliation ID
+     * @param situation the original situation
+     * @return the created PendingLinkContext
      */
-    public static void populate(Context context, String objectMappingName, String sourceId, JsonValue sourceObject,
-            String reconId, Situation situation) {
+    public static ServerContext populate(Context context, String objectMappingName, String sourceId, JsonValue sourceObject, String reconId, Situation situation) {
+        // Create the pending link map
         Map<String, Object> pendingLink = new HashMap<String, Object>();
         pendingLink.put(MAPPING_NAME, objectMappingName);
         pendingLink.put(SOURCE_ID, sourceId);
         pendingLink.put(SOURCE_OBJECT, sourceObject);
         pendingLink.put(RECON_ID, reconId);
         pendingLink.put(ORIGINAL_SITUATION, situation.toString());
-        //TODO FIXME
-        //context.put(PENDING_LINK, pendingLink);
+        // Create new PendingLinkContext with the passed in context as the parent
+        PendingLinkContext pendingLinkContext = new PendingLinkContext(context, pendingLink);
+        return pendingLinkContext;
     }
 
     /**
-     * Remove the pending link info from the context because
-     * it was processed or the caller is taking responsibility
-     * for it.
+     * Clears a PendingLinkContext if found, removing the pending link data and marking it as no longer pending.
      *
-     * @param context level to remove the pending link from
+     * @param context the Context to get the PendingLinkContext from
      */
     public static void clear(Context context) {
-        //context.remove(PENDING_LINK);
+        try {
+            PendingLinkContext pendingLinkContext = context.asContext(PendingLinkContext.class);
+            pendingLinkContext.clear();
+        } catch (IllegalArgumentException e) {
+            logger.debug("No PendingLinkContext found");
+        }
     }
 
     /**
@@ -132,9 +141,13 @@ class PendingLink {
      * @return true if the pending link was linked, false if it still needs linking
      */
     public static boolean wasLinked(Context context) {
-        //TODO FIXME
-        boolean wasLinked = false; //!context.isDefined(PENDING_LINK);
-        return wasLinked;
+        try {
+            PendingLinkContext pendingLinkContext = context.asContext(PendingLinkContext.class);
+            return !pendingLinkContext.isPending();
+        } catch (IllegalArgumentException e) {
+            logger.debug("No PendingLinkContext found");
+            return false;
+        }
     }
 
 }
