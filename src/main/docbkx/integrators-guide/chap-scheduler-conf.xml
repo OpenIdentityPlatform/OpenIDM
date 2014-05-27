@@ -358,7 +358,7 @@
 
   <para>The following example invokes a script, which prints the string 
   <literal>Hello World</literal> to the OpenIDM log 
-  (<filename>/openidm/logs/openidm0.log.X</filename>) each minute.</para>
+  (<filename>/openidm/logs/openidm0.log.X</filename>).</para>
 
   <programlisting language="javascript">
 {
