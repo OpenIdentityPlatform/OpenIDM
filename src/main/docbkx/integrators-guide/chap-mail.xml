@@ -158,15 +158,13 @@ $ cp samples/misc/external.email.json conf/</screen>
   shows up in the log file.  -->
 
   <para>The following example sends a test email using the REST API.</para>
-  <screen>$ <userinput>curl \
+  <screen><?dbfo pgwide="1"?>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/external/email?_action=send&amp;
-_from=openidm@example.com&amp;_to=admin@example.com&amp;
-_subject=Test&amp;_body=Test"</userinput></screen>
+ "https://localhost:8443/openidm/external/email?_action=send&amp;_from=openidm@example.com&amp;_to=admin@example.com&amp;_subject=Test&amp;_body=Test"</userinput></screen>
  </section>
 
  <section xml:id="send-mail-script">
