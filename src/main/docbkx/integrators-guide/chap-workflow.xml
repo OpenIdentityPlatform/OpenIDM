@@ -839,7 +839,6 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
   "eventSupport" : { },
   "graphicalNotationDefined" : false
 }       </computeroutput></screen>
-     <!--Doc for OPENIDM-1865, still in review
      <para>
       Delete a workflow process definition, based on its ID. Note that you
       cannot delete a process definition if there are currently running
@@ -847,26 +846,30 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
      </para>
      <para>
       OpenIDM picks up workflow definitions from the files located in the
-      <filename>/path/to/openidm/workflow</filename> directory. You can
-      therefore delete a workflow definition by removing the corresponding
-      <filename>.xml</filename> from the <literal>/workflow</literal> directory.
-      Note that there is only one one representation of a workflow definition in
-      the file system. In Activiti, you might have several versions of the same
-      process. If you want to delete duplicate process definitions, do not
-      delete the definition directly from the file system. Rather, delete the
-      definition over REST, as shown in the following example, <emphasis>making
-      sure that you do not not delete the latest version</emphasis>.
+      <filename>/path/to/openidm/workflow</filename> directory. If you delete
+      the workflow definition (<filename>.xml</filename> file) from this
+      directory, the OSGI bundle is deleted. However, deleting this file does
+      not remove the workflow definition from the Activiti engine. You must
+      therefore delete the definition over REST, as shown in the following
+      example.
+     </para>
+     <para>
+      Note that, although there is only one representation of a workflow
+      definition in the file system, there might be several versions of the same
+      definition in Activiti. If you want to delete redundant process
+      definitions, delete the definition over REST, <emphasis>making sure that
+      you do not delete the latest version</emphasis>.
      </para>
      <screen><userinput>$ curl \
- -cacert self-signed.crt \
- -header "X-OpenIDM-Username: openidm-admin" \
- -header "X-OpenIDM-Password: openidm-admin" \
- -header "If-Match: *" \
- -request DELETE \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-Match: *" \
+ --request DELETE \
  "http://localhost:8080/openidm/workflow/processdefinition/managedUserApproval:1:3"
      </userinput>
      <computeroutput>
-Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</computeroutput></screen>  -->
+Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</computeroutput></screen>
     </listitem>
    </varlistentry>
    <varlistentry>
