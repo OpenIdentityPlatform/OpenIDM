@@ -661,6 +661,12 @@ return isProcessOnUsersList(processDefinitionId);
     request ID, and the associated roles, methods, and actions that are allowed 
     for requests on that pattern.
    </para>
+
+   <para>
+    The options shown in the default version of the file do not include all of
+    the actions available at each endpoint.
+   </para>
+
    <para>
     The following sample configuration entry indicates the configurable
     parameters and their purpose.
@@ -714,21 +720,7 @@ return isProcessOnUsersList(processDefinitionId);
      </para>
      <simplelist>
       <member>
-       <literal>openidm/managed</literal> - <literal>patch</literal>
-      </member>
-      <member>
-       <literal>openidm/recon</literal> - <literal>recon, cancel</literal>
-      </member>
-      <member>
-       <literal>openidm/sync</literal> - <literal>onCreate, onUpdate, onDelete,
-       recon, performAction</literal>
-      </member>
-      <member>
-       <literal>openidm/external/email</literal> - <literal>(no action parameter
-       applies)</literal>
-      </member>
-      <member>
-       <literal>openidm/external/rest</literal> - <literal>(no action parameter
+       <literal>openidm/info/*</literal> - <literal>(no action parameter
        applies)</literal>
       </member>
       <member>
@@ -736,23 +728,91 @@ return isProcessOnUsersList(processDefinitionId);
        <literal>reauthenticate</literal>
       </member>
       <member>
-       <literal>openidm/system</literal> -
-       <literal>createconfiguration</literal>
+       <literal>openidm/config/ui/*</literal> - <literal>(no action
+       parameter applies)</literal>
       </member>
       <member>
-       <literal>openidm/system/*</literal> - <literal>script</literal>
+       <literal>openidm/endpoint/securityQA</literal> -
+       <literal>securityQuestionForUserName, checkSecurityAnswerForUserName,
+       setNewPasswordForUserName
+       </literal>
+      </member>
+      <member>
+       <literal>openidm/endpoint/getprocessforuser</literal> -
+       <literal>create, complete</literal>
+      </member>
+      <member>
+       <literal>openidm/endpoint/gettaskview</literal> -
+       <literal>create, complete</literal>
+      </member>
+      <member>
+       <literal>openidm/external/email</literal> - <literal>send</literal>
+      </member>
+      <member>
+       <literal>openidm/external/rest</literal> - <literal>(no action parameter
+       applies)</literal>
+      </member>
+      <member>
+       <literal>openidm/managed</literal> - <literal>patch,
+       triggerSyncCheck</literal>
+      </member>
+      <member>
+       <literal>openidm/managed/user</literal> - <literal>validateObject,
+       validateProperty</literal>
+      </member>
+      <member>
+       <literal>openidm/policy</literal> - <literal>validateObject,
+       validateProperty</literal>
+      </member>
+      <member>
+       <literal>openidm/recon</literal> - <literal>recon, reconByQuery,
+       reconById, cancel</literal>
+      </member>
+      <member>
+       <literal>openidm/repo</literal> - <literal>updateDbCredentials</literal>
+      </member>
+      <member>
+       <literal>openidm/script/*</literal> - <literal>eval</literal>
+      </member>
+      <member>
+       <literal>openidm/security/keystore</literal> -
+       <literal>generateCert, generateCSR</literal>
+      </member>
+      <member>
+       <literal>openidm/security/truststore</literal> -
+       <literal>generateCert, generateCSR</literal>
+      </member>
+      <member>
+       <literal>openidm/sync</literal> - <literal>notifyCreate, notifyUpdate,
+       notifyDelete, recon, performAction</literal>
+      </member>
+      <member>
+       <literal>openidm/system</literal> - <literal>test, testConfig,
+       CREATECONFIGURATION, liveSync, authenticate</literal>
+      </member>
+      <member>
+       <literal>openidm/system/&lt;name&gt;</literal> - <literal>script,
+       test, liveSync</literal>
+      </member>
+      <member>
+       <literal>openidm/system/&lt;name&gt;/{id}</literal> -
+       <literal>authenticate, liveSync</literal>
       </member>
       <member>
        <literal>openidm/taskscanner</literal> - <literal>execute,
        cancel</literal>
       </member>
       <member>
-       <literal>openidm/workflow/processinstance</literal> - <literal>(no action
-       parameter applies)</literal>
+       <literal>openidm/workflow/processdefinition</literal> - <literal>
+       create, complete</literal>
       </member>
       <member>
-       <literal>openidm/workflow/taskinstance</literal> - <literal>claim,
+       <literal>openidm/workflow/processinstance</literal> - <literal>create,
        complete</literal>
+      </member>
+      <member>
+       <literal>openidm/workflow/taskinstance</literal> -
+       <literal>claim, create, complete</literal>
       </member>
      </simplelist>
      <para>
