@@ -172,7 +172,7 @@ $ ./cli.sh configexport --user username:passsword <replaceable>export-location</
   <para>For example:</para>
 
   <screen>
-$ ./cli.sh --user openidm-admin:openidm-admin configexport /tmp/conf</screen>
+$ ./cli.sh configexport --user openidm-admin:openidm-admin /tmp/conf</screen>
   
   <para>Configuration objects are exported, as <filename>.json</filename>
    files, to the specified directory. The command creates the directory if
@@ -307,7 +307,7 @@ $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/con
   
   <para>Usage is as follows:</para>
   
-  <screen>$ ./cli.sh --user username:password configureconnector <replaceable>connector-name</replaceable>
+  <screen>$ ./cli.sh configureconnector --user username:password <replaceable>connector-name</replaceable>
   </screen>
   
   <para>Select the type of connector that you want to configure. The following 
@@ -319,7 +319,7 @@ $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/con
    in version numbers, I do not know if that's a "big deal". -->
 
   <screen width="85">
-$ <userinput>./cli.sh --user openidm-admin:openidm-admin configureconnector myXmlConnector
+$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector
    </userinput>
    <computeroutput>
 Starting shell in /path/to/openidm
@@ -360,7 +360,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   up the new connector configuration.</para>
   
   <screen>
-<userinput>$ ./cli.sh --user openidm-admin:openidm-admin configureconnector myXmlConnector</userinput>
+<userinput>$ ./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
 <computeroutput>Using boot properties at /openidm/conf/boot/boot.properties
 Configuration was found and picked up from:
       /openidm/temp/provisioner.openicf-myXmlConnector.json
