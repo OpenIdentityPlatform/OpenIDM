@@ -7,8 +7,8 @@
     "invokeContext": {
         "script" : {
               "type" : "text/javascript",
-              "source" : "java.lang.System.out.println('It is working: ' + input.edit);"
-            },
-        "input": { "edit": 26}
+              "source" : "java.lang.System.out.println('It is working: ' + input.edit);",
+              "input": { "edit": 26}
+            }
     }
 }
