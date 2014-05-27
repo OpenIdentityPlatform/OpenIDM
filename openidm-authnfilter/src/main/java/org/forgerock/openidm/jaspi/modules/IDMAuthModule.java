@@ -32,16 +32,16 @@ public enum IDMAuthModule {
     JWT_SESSION(JwtSessionModule.class),
     /** OpenAM Session Auth Module. */
     OPENAM_SESSION(OpenAMSessionModule.class),
+    /** Client-cert Auth Module. */
+    CLIENT_CERT(ClientCertAuthModule.class),
     /** Managed User Auth Module. */
-    MANAGED_USER(ManagedUserAuthModule.class),
+    MANAGED_USER(IDMUserAuthModule.class),
     /** Internal User Auth Module. */
-    INTERNAL_USER(InternalUserAuthModule.class),
+    INTERNAL_USER(IDMUserAuthModule.class),
     /** Passthrough to OpenICF connector Auth Module. */
     PASSTHROUGH(PassthroughModule.class),
     /** IWA Auth Module. */
-    IWA(IWAModule.class),
-    /** IWA and Passthrough Auth Module. */
-    IWA_PASSTHROUGH(IWAPassthroughModule.class);
+    IWA(IWAModule.class);
 
     private Class<? extends ServerAuthModule> clazz;
 

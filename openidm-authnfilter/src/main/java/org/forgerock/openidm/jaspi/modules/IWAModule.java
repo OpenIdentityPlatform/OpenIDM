@@ -71,14 +71,14 @@ public class IWAModule implements ServerAuthModule {
     /**
      * Initialises the commons IWA authentication module.
      *
-     *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options) throws AuthException {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler, Map options)
+            throws AuthException {
         commonsIwaModule.initialize(requestPolicy, responsePolicy, handler, options);
     }
 

@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
@@ -39,24 +38,18 @@ public class PassthroughAuthenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
 
-    /** anonymous user */
-    private static final String ANONYMOUS = "anonymous";
-
     private final ConnectionFactory connectionFactory;
-    private final ServerContext context;
     private final String passThroughAuth;
 
     /**
      * Constructs an instance of the PassthroughAuthenticator.
      *
      * @param connectionFactory the ConnectionFactory for making an authenticate request on the router
-     * @param context the ServerContext to use when making requests on the router
      * @param passThroughAuth the passThroughAuth resource
      */
-    public PassthroughAuthenticator(ConnectionFactory connectionFactory, ServerContext context,
+    public PassthroughAuthenticator(ConnectionFactory connectionFactory,
             String passThroughAuth) {
         this.connectionFactory = connectionFactory;
-        this.context = context;
         this.passThroughAuth = passThroughAuth;
     }
 
@@ -66,16 +59,11 @@ public class PassthroughAuthenticator {
      *
      * @param username The user's username
      * @param password The user's password.
-     * @param securityContextMapper The SecurityContextMapper object.
+     * @param context the ServerContext to use when making requests on the router
      * @return <code>true</code> if authentication is successful.
      * @throws AuthException if there is a problem whilst attempting to authenticate the user.
      */
-    public boolean authenticate(String username, String password, SecurityContextMapper securityContextMapper)
-            throws AuthException {
-
-        if (StringUtils.isEmpty(passThroughAuth) || ANONYMOUS.equals(username)) {
-            return false;
-        }
+    public boolean authenticate(String username, String password, ServerContext context) throws AuthException {
 
         try {
             final JsonValue result = connectionFactory.getConnection().action(context,
@@ -83,15 +71,8 @@ public class PassthroughAuthenticator {
                             .setAdditionalParameter("username", username)
                             .setAdditionalParameter("password", password));
 
-            // pass-through authentication is successful if _id exists in result; bail here early if not the case
-            if (!result.isDefined(Resource.FIELD_CONTENT_ID)) {
-                return false;
-            }
-
-            // user is authenticated; partially populate security context, rest is done by the role calculation wrapper.
-            securityContextMapper.setUserId(result.get(Resource.FIELD_CONTENT_ID).asString());
-
-            return true;
+            // pass-through authentication is successful if _id exists in result
+            return result.isDefined(Resource.FIELD_CONTENT_ID);
         } catch (ResourceException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Failed pass-through authentication of {} on {}.", username, passThroughAuth, e);

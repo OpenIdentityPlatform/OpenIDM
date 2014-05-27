@@ -21,7 +21,6 @@ import org.forgerock.auth.common.AuthResult;
 import org.forgerock.jaspi.logging.JaspiAuditLogger;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -29,8 +28,7 @@ import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +51,16 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
     private static final DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
     public static final String LOG_CLIENT_IP_HEADER_KEY = "logClientIPHeader";
 
+    private final OSGiAuthnFilterHelper authnFilterHelper;
+
+    public IDMAuthenticationAuditLogger(OSGiAuthnFilterHelper authnFilterHelper) {
+        this.authnFilterHelper = authnFilterHelper;
+    }
+
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void audit(AuditRecord<MessageInfo> auditRecord) {
 
@@ -72,24 +77,6 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
         boolean status = AuthResult.SUCCESS.equals(auditRecord.getAuthResult());
         String logClientIPHeader = (String) messageInfoParams.get(LOG_CLIENT_IP_HEADER_KEY);
         logAuthRequest(request, username, userId, roles, status, logClientIPHeader);
-    }
-
-    /**
-     * Gets the Router used for logging.
-     *
-     * @return The instance of the Router.
-     */
-    private RouteService getRouter() {
-        return OSGiAuthnFilterBuilder.getRouter();
-    }
-
-    /**
-     * Gets the internal connection facotry for internal routing.
-     *
-     * @return the intstance of the ConnectionFactory
-     */
-    private ConnectionFactory getConnectionFactory() {
-        return OSGiAuthnFilterBuilder.getConnectionFactory();
     }
 
     /**
@@ -123,11 +110,11 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
                 }
             }
             entry.put("ip", ipAddress);
-            if (getRouter() != null) {
+            if (authnFilterHelper.getRouter() != null) {
                 // TODO We need Context!!!
                 CreateRequest createRequest = Requests.newCreateRequest("/audit/access", entry);
-                ServerContext ctx = getRouter().createServerContext();
-                getConnectionFactory().getConnection().create(ctx, createRequest);
+                ServerContext ctx = authnFilterHelper.getRouter().createServerContext();
+                authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
             } else {
                 // Filter should have rejected request if router is not available
                 LOGGER.warn("Failed to log entry for {} as router is null.", username);

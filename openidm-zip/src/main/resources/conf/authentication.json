@@ -2,11 +2,9 @@
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
     "propertyMapping" : {
-        "authenticationId" : "_id",
-        "userCredential" : "password",
-        "userRoles" : "roles"
+        "authenticationId" : "username",
+        "userCredential" : "password"
     },
-    "defaultUserRoles" : [ ],
     "serverAuthContext" : {
         "sessionModule" : {
             "name" : "JWT_SESSION",
@@ -25,24 +23,38 @@
             {
                 "name" : "MANAGED_USER",
                 "properties" : {
+                    "queryId" : "credential-query",
+                    "queryOnResource" : "managed/user",
                     "propertyMapping" : {
-                        "authenticationId" : "_id",
+                        "authenticationId" : "username",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [ ]
-                }
+                },
+                "enabled" : true
             },
             {
                 "name" : "INTERNAL_USER",
                 "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
                     "propertyMapping" : {
-                        "authenticationId" : "_id",
+                        "authenticationId" : "username",
                         "userCredential" : "password",
                         "userRoles" : "roles"
                     },
                     "defaultUserRoles" : [ ]
-                }
+                },
+                "enabled" : true
+            },
+            {   "name" : "CLIENT_CERT",
+                "properties" : {
+                    "queryOnResource" : "security/truststore",
+                    "defaultUserRoles" : [ "openidm-cert" ],
+                    "allowedAuthenticationIdPatterns" : [ ]
+                },
+                "enabled" : true
             }
         ]
     }
