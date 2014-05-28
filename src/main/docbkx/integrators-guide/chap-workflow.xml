@@ -1579,7 +1579,7 @@ $ ./startup.sh -p samples/workflow</screen>
      </step>
      <step>
       <para>
-       Log in to the user interface as <literal>user1</literal>, with password
+       Log into the user interface as <literal>user1</literal>, with password
        <literal>Welcome1</literal>. For information about logging in to the user
        interface, see <link xlink:href="integrators-guide#ui-overview"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Overview of
@@ -1615,7 +1615,7 @@ $ ./startup.sh -p samples/workflow</screen>
      </step> 
      <step>
       <para>
-       Log in to the UI as <literal>manager1</literal>, with password
+       Log into the UI as <literal>manager1</literal>, with password
        <literal>Welcome1</literal>.
       </para>
      </step>
@@ -1738,7 +1738,7 @@ $ ./startup.sh -p samples/workflow</screen>
   "postalAddress" : ""
 }</computeroutput></screen>
       <para>
-       You can now log in to the UI as the new user (with the details that you
+       You can now log into the UI as the new user (with the details that you
        specified in Step 5). Under "Notifications" you will see a welcome
        message indicating the working dates of the new user. If you log in as
        <literal>user1</literal> you are notified of the result of the manager's
@@ -2035,11 +2035,11 @@ $ ./startup.sh -p samples/usecase/usecase2
     </step>
     <step>
      <para>
-      Log in to the UI as <literal>user.1</literal> with password
+      Log into the UI as <literal>user.1</literal> with password
       <literal>Passw0rd</literal>.
      </para>
      <mediaobject>
-      <alt>Log in to the UI</alt>
+      <alt>Log into the UI</alt>
       <imageobject>
        <imagedata fileref="images/login-user1.png" format="PNG" />
       </imageobject>
@@ -2194,7 +2194,7 @@ $ ./startup.sh -p samples/usecase/usecase2
      <para>
       When the new user request has been approved, the user is created in the
       OpenIDM repository. If you did not include a Start Date in the manager
-      approval, you should now be able to log in to the UI with the details of
+      approval, you should now be able to log into the UI with the details of
       the new user. If you included a Start Date, you need to complete the
       sunrise workflow before the user account is active (which will enable you
       to log in as this user).
@@ -2335,7 +2335,7 @@ $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
     </step>
     <step>
      <para>
-      When the sunset schedule has been enabled, log in to OpenIDM UI as
+      When the sunset schedule has been enabled, log into OpenIDM UI as
       <literal>user.0</literal> (with password <literal>Passw0rd</literal>). If
       the user's sunset date is within one day of the current date, a "Contract
       Termination" task becomes available under the 'My tasks' section for the
@@ -2354,7 +2354,7 @@ $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
       When you accept the termination, the user's account status is set to
       <literal>inactive</literal> and the HR administrative user receives a
       notification to that effect, next time that user logs into the UI. The
-      deactivated user is no longer able to log in to the UI.
+      deactivated user is no longer able to log into the UI.
      </para>
      <para>
       If you select to modify the date, the sunset date of that user is changed
@@ -2399,7 +2399,7 @@ $ ./startup.sh -p samples/usecase/usecase3
     </step>
     <step>
      <para>
-      Log in to the UI as <literal>user.1</literal> with password
+      Log into the UI as <literal>user.1</literal> with password
       <literal>Passw0rd</literal>.
      </para>
      <para>
@@ -2691,7 +2691,7 @@ $ ./startup.sh -p samples/usecase/usecase4
     </step>
     <step>
      <para>
-      Log in to the UI as the <literal>systemadmin</literal> user, with password
+      Log into the UI as the <literal>systemadmin</literal> user, with password
       <literal>Passw0rd</literal>.
      </para>
     </step>
@@ -2900,6 +2900,9 @@ $ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json</user
    <para>
     Obviously, in a real deployment, the period between required password
     changes would be longer, and this value would need to be set accordingly.
+    For the purposes of testing this use case, you might want to set the value
+    to a shorter period, such as <literal>"${Time.now - 1m}"</literal>, which
+    will send the notification one minute after a password change.
    </para>
    <para>
     By default, the workflow sends notifications to the user entry, visible when
@@ -3006,8 +3009,33 @@ $ ./startup.sh -p samples/usecase/usecase6</screen>
      <para>
       If the password has not been changed two minutes after this second
       notification, the user's account is deactivated and that user is no longer
-      able to log in to the UI.
+      able to log into the UI.
      </para>
+    </step>
+    <step performance="optional">
+     <para>
+      To avoid the second notification, or the account deactivation, you can
+      change the user password through the UI, as follows:
+     </para>
+     <substeps>
+      <step>
+       <para>
+        Log into the UI as the user whose password you want to change and click
+        Change Security Data at the top right of the page.
+       </para>
+      </step>
+      <step>
+       <para>
+        Enter the existing password (in this case <literal>Passw0rd</literal>).
+       </para>
+      </step>
+      <step>
+       <para>
+        Enter a new password that conforms to the requirements of the password
+        policy.
+       </para>
+      </step>
+     </substeps>
     </step>
    </procedure>
   </section>
