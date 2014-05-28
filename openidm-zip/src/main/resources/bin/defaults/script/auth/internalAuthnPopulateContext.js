@@ -20,7 +20,7 @@
  *      {
  *          "authorizationId": {
  *              "id": "jsmith",
- *              "component": "internal/user",
+ *              "component": "repo/internal/user",
  *              "roles": [ "openidm-authorized" ]
  *          },
  *          "authenticationId": "jsmith",

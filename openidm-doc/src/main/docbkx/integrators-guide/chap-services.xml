@@ -317,7 +317,7 @@ Stopping OpenIDM (454)</screen>
       "openidm-admin",
       "openidm-authorized"
     ],
-    "component": "internal/user",
+    "component": "repo/internal/user",
     "id": "openidm-admin"
   }
 }</computeroutput></screen>
