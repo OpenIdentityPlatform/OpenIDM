@@ -164,7 +164,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
             
             _.each(this.editedUser.roles, _.bind(function(v) {
-                this.$el.find("input[name=roles][value="+v+"]").attr('checked', true);
+                this.$el.find("input[name=roles][value='"+v+"']").attr('checked', true);
             }, this));
             
             validatorsManager.validateAllFields(this.$el);
