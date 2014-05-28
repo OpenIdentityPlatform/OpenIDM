@@ -53,11 +53,11 @@
                 },
                 {
                     "situation" : "MISSING",
-                    "action" : "UNLINK"
+                    "action" : "CREATE"
                 },
                 {
                     "situation" : "SOURCE_MISSING",
-                    "action" : "EXCEPTION"
+                    "action" : "DELETE"
                 },
                 {
                     "situation" : "UNQUALIFIED",
@@ -74,10 +74,6 @@
             "source" : "managed/user",
             "target" : "system/ldap/account",
             "links" : "systemLdapAccounts_managedUser",
-            "correlationQuery" : {
-                "type" : "text/javascript",
-                "file" : "script/ldapBackCorrelationQuery.js"
-            },
             "onCreate" : {
                 "type" : "text/javascript",
                 "source" : "target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"
@@ -93,9 +89,9 @@
                 },
                 {
                     "source" : "",
-                    "transform": {
-                        "type": "text/javascript",
-                        "source": "source.displayName || (source.givenName + ' ' + source.sn);"
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.displayName || (source.givenName + ' ' + source.sn);"
                     },
                     "target" : "cn"
                 },
@@ -108,7 +104,7 @@
                     "target" : "description",
                     "condition" : {
                         "type" : "text/javascript",
-                        "source" : "typeof(object.description) !== 'undefined' && object.description !== null;"
+                        "source" : "!!object.description"
                     }
                 },
                 {
@@ -121,11 +117,19 @@
                         "type" : "text/javascript",
                         "source" : "object.password != null"
                     },
-                    "target" : "password"
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "target" : "userPassword"
                 },
                 {
                     "source" : "telephoneNumber",
-                    "target" : "telephoneNumber"
+                    "target" : "telephoneNumber",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "!!object.telephoneNumber"
+                    }
                 }
             ],
             "policies" : [

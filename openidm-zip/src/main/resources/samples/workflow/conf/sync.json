@@ -89,7 +89,7 @@
                 },
                 {
                     "situation" : "MISSING",
-                    "action" : "IGNORE"
+                    "action" : "CREATE"
                 },
                 {
                     "situation" : "SOURCE_MISSING",
@@ -165,6 +165,14 @@
                 },
                 {
                     "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
                     "target" : "password"
                 },
                 {

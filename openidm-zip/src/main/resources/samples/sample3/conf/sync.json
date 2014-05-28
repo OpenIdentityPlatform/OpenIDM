@@ -77,6 +77,10 @@
                 },
                 {
                     "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
                     "condition" : {
                         "type" : "text/javascript",
                         "source" : "object.password != null"
