@@ -37,6 +37,11 @@ define("org/forgerock/openidm/ui/user/delegates/RoleDelegate", [
             "url": "?_queryId=query-all&fields=*"
         }).then(
             function (qry) {
+                qry.result = _.map(qry.result, function (r) { 
+                    r.name = r.name || r._id;
+                    r._id = "managed/role/" + r._id; 
+                    return r; 
+                });
                 promise.resolve(qry);
             },
             function () {
