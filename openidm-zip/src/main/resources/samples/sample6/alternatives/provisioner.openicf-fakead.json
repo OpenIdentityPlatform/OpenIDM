@@ -136,6 +136,15 @@
                     "type" : "string",
                     "nativeName" : "telephoneNumber",
                     "nativeType" : "string"
+                },
+                "userPassword" : {
+                    "type" : "string",
+                    "nativeName" : "userPassword",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
                 }
             }
         }

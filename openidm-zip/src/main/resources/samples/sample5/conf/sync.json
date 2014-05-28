@@ -68,6 +68,10 @@
                 {
                     "default" : "initial_Passw0rd",
                     "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source && openidm.decrypt(source);"
+                    },
                     "target" : "userPassword"
                 }
             ],
@@ -107,10 +111,14 @@
                 },
                 {
                     "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
                     "target" : "userPassword",
                     "condition": {
                         "type": "text/javascript",
-                        "source": "object.password !== undefined && object.password !== null"
+                        "source": "!!object.password"
                     }
                 }
             ],
