@@ -167,6 +167,10 @@ public class SchedulerService implements RequestHandler {
     @Reference
     ClusterManagementService clusterManager;
 
+    @Reference(name = "ref_SchedulerService_PolicyService", 
+            target = "(" + ServerConstants.ROUTER_PREFIX + "=/policy*)")
+    protected RouteService policy;
+
     /** Internal object set router service. */
     @Reference(name = "ref_SchedulerService_RepositoryService", bind = "bindRepo",
             unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
