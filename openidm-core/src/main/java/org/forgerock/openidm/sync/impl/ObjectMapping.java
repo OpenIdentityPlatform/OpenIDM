@@ -1533,7 +1533,8 @@ class ObjectMapping implements SynchronizationListener {
                 Map<String, Object> scope = service.newScope();
                 // TODO: Once script engine can do on-demand get replace these forced loads
                 if (getSourceObjectId() != null) {
-                    scope.put("source", getSourceObject().asMap());
+                    JsonValue source = getSourceObject();
+                    scope.put("source", null != source ? source.getObject() : null);
                 }
                 // Target may not have ID yet, e.g. an onCreate with the target object defined,
                 // but not stored/id assigned.
