@@ -23,6 +23,7 @@ import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
@@ -340,6 +341,10 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             }
 
             messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthenticationId());
+
+            if (securityContextMapper.getRoles().isEmpty()) {
+                throw new ForbiddenException("no roles assigned");
+            }
 
         } catch (ResourceException e) {
             if (logger.isDebugEnabled()) {
