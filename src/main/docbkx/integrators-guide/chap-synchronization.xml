@@ -62,8 +62,13 @@
 
   <variablelist>
    <para>
-    OpenIDM discovers changes on external resources through reconciliation and
-    through LiveSync.
+    OpenIDM discovers and synchronizes changes from external resources
+    through reconciliation and LiveSync.
+   </para>
+
+   <para>
+    In contrast, OpenIDM synchronizes changes from internal resources to
+    external targets using automatic sync.
    </para>
 
    <varlistentry>
@@ -125,24 +130,174 @@
 
     </listitem>
    </varlistentry>
+
+   <varlistentry>
+    <term>Automatic sync</term>
+    <listitem>
+     <para>
+      <firstterm>Automatic sync</firstterm> automatically pushes changes made in
+      the OpenIDM internal repository to external systems.
+     </para>
+
+     <para>
+      In other words, automatic sync pushes data in the opposite direction to
+      LiveSync. The section that follows describes additional features that
+      can be included with automatic sync.
+     </para>
+    </listitem>
+   </varlistentry>
   </variablelist>
 
   <para>
    To determine what to synchronize, and how to carry out synchronization,
-   OpenIDM relies on mappings that you configure. LiveSync relies on the set of
-   mappings that you configure once per OpenIDM server. Reconciliation allows
-   you to configure specific mappings for a particular reconciliation job.
+   OpenIDM relies on mappings configured in the
+   <literal>/path/to/conf/sync.json</literal> file. LiveSync and automatic sync
+   rely on the mappings configured once per OpenIDM server.
   </para>
 
   <para>
-   You must trigger OpenIDM to poll for changes on external resources, usually
-   by scheduling reconciliation or LiveSync, as described in
+   For reconciliation or LiveSync, you can schedule changes as described in
    <link xlink:href="integrators-guide#chap-scheduler-conf"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
-   Tasks and Events</citetitle></link>. Alternatively, you can manage
-   reconciliation and LiveSync over the REST interface, as described in the
-   following sections.
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
+    Tasks and Events</citetitle></link>.
   </para>
+
+  <section xml:id="sync-types-automatic">
+   <title>How Automatic Sync works with <literal>onSync</literal></title>
+
+    <para>
+     When automatic sync is used to push a large number of changes to external
+     databases, that process takes time. Problems such as lost connections
+     could happen, resulting in partial synchronization.
+    </para>
+
+    <para>
+     For example, if a Human Resources manager adds a group of new employees in
+     one database, a partial synchronization may mean that some of those
+     employees do not have access to their email or other systems.
+    </para>
+
+    <para>
+     Automatic sync assumes that the external data sources include all data
+     currently in the internal OpenIDM repository. If that does not reflect
+     your configuration, you should start either with an initial reconciliation,
+     or with LiveSync as described in the Installation Guide,
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="install-guide#more-sample6"><citetitle>Sample 6 - LiveSync
+     with an AD Server</citetitle></link>.
+    </para>
+
+    <para>
+     An example of automatic sync is depicted in the OpenIDM Installation Guide,
+     <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="install-guide#more-sample5b"><citetitle>Sample 5b - Compensated
+     Synchronization with <literal>onSync</literal></citetitle></link>. That
+     sample demonstrates how OpenIDM compensates for the failure of an external
+     resource.
+    </para>
+
+    <para>
+     OpenIDM includes an optional <literal>onSync</literal> hook, which you
+     can include in the <filename>/path/to/conf/managed.json</filename> file.
+     A sample excerpt is shown here:
+    </para>
+
+    <programlisting language="javascript">
+...
+"onDelete" : {
+    "type" : "text/javascript",
+    "file" : "ui/onDelete-user-cleanup.js"
+    },
+"onSync" : {
+    "type" : "text/javascript",
+    "file" : "compensate.js"
+    },
+"properties" : [
+    ...
+    </programlisting>
+
+    <para>
+     Note the reference from <literal>onSync</literal> to
+     <filename>compensate.js</filename>. You can find that file in the
+     <filename>/path/to/openidm/bin/defaults/script</filename> directory.
+    </para>
+
+    <para>
+     When a change to a user is made, either in the UI or through a REST call,
+     a change is made to the managed object for that user.
+    </para>
+
+    <para>
+     The automatic sync feature of OpenIDM attempts to synchronize the change
+     (and any other pending changes) to the external data store(s). The
+     automatic sync process is configured in the associated
+     <filename>sync.json</filename> configuration file.
+    </para>
+
+    <para>
+     Look at the contents of the <filename>sync.json</filename> file. It might
+     start with source and target mappings similar to:
+    </para>
+
+    <programlisting language="javascript">
+   ...
+   "mappings" : [
+     {
+       "name" : "managedUser_systemAdAccounts",
+       "source" : "managed/user",
+       "target" : "system/ad/account",
+     ...
+    </programlisting>
+
+    <para>
+     Based on this excerpt, automatic synchronization takes information from the
+     internal OpenIDM managed user data store, and synchronizes that information
+     to the AD data store. Once complete, it proceeds down the file to the
+     next <literal>source</literal> and <literal>target</literal> to be
+     synchronized.
+    </para>
+
+    <para>
+     The <filename>compensate.js</filename> script is designed to avoid
+     partial synchronization. If synchronization proceeds to completion, OpenIDM
+     exits from the script, based on some of the first active entries in the file:
+    </para>
+
+    <programlisting language="javascript">
+if (syncResults.success) {
+     logger.debug("sync was a success; no compensation necessary");
+     return;
+}</programlisting>
+
+    <para>
+     If synchronization does not complete, OpenIDM proceeds through the
+     remainder of the <filename>compensate.js</filename> script, with warning
+     messages related to the sync action (<literal>notifyCreate, notifyUpdate,
+     notifyDelete</literal>, along with the error that caused the sync failure,
+     which should be available in the standard OpenIDM log file.
+    </para>
+
+    <para>
+     Without the <filename>compensate.js</filename> script, any issues with
+     connections to an external resource can lead to data stores that are
+     out of sync, such as the example cited earlier where some new employees
+     do not have access to their corporate email accounts.
+    </para>
+
+    <para>
+     With the <filename>compensate.js</filename> script, any such errors will
+     result in each data store using the information it had before
+     automatic synchronization started.
+    </para>
+
+    <para>
+     In this particular example, human resource managers should see that
+     new employees are not shown in their database. Then, the administrators
+     of the OpenIDM system can check log files for errors, address them, and
+     then restart automatic synchronization with a new REST call.
+    </para>
+
+  </section>
 
  </section>
 

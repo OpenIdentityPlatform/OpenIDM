@@ -1106,17 +1106,18 @@ $ ./startup.sh -p samples/sample4</screen>
    <title>Install the Sample</title>
 
    <para>No external configuration is required for this sample. Prepare 
-   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start up 
+   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
    OpenIDM with the configuration of sample 5.</para>
 
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample5</screen>
 
    <para>The XML files that are used are located in the
-   <filename>openidm/samples/sample5/data/</filename> folder. When you start
-   OpenIDM with the sample 5 configuration, it creates
-   <filename>xml_AD_Data.xml</filename>, which does not contain users until
-   you run reconciliation.</para>
+    <filename>openidm/samples/sample5/data/</filename> folder. When you start
+    OpenIDM with the sample 5 configuration, it creates
+    <filename>xml_AD_Data.xml</filename>, which does not contain users in this
+    sample until you run reconciliation.
+   </para>
   </section>
 
   <section xml:id="run-sample5">
@@ -1132,9 +1133,335 @@ $ ./startup.sh -p samples/sample5</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>This command creates a user in the repository and also in the pseudo
+   <para>This command creates a user in the repository and also in the simulated
    Active Directory (AD) resource, represented by the
    <filename>samples/sample5/data/xml_AD_Data.xml</filename> file.</para>
+  </section>
+ </section>
+
+ <section xml:id="more-sample5b">
+  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
+
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
+    script hook</secondary>
+  </indexterm>
+
+  <para>
+   The automatic synchronization depicted in this sample can help manage
+   the risks associated with synchronizing large amounts of data. It uses
+   an <literal>onSync</literal> hook configured with a
+   <filename>compensate.js</filename> script.
+  </para>
+
+  <para>
+   Sample 5b is similar to sample 5. Like sample 5, this sample supports
+   automatic synchronization from managed objects to external data sources.
+   Like sample 5, this sample simulates two external data sources with XML files
+   in the <filename>/path/to/samples/sample5*/data</filename> directory. The
+   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
+   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
+   OpenIDM with the sample.
+  </para>
+
+  <para>
+   In both samples, reconciliations are taken from the simulated
+   LDAP XML data source and/or the internal OpenIDM repository, and are
+   synchronized to the simulated Active Directory (AD) data source.
+  </para>
+
+  <para>
+   Sample 5b adds an <literal>onSync</literal> script hook to the process.
+   That hook is configured from the <filename>managed.json</filename> file in the
+   <filename>/path/to/sample5b/conf</filename> directory.
+  </para>
+
+  <para>
+   The <literal>onSync</literal> hook uses a <filename>compensate.js</filename>
+   script.
+  </para>
+
+  <para>
+   The following excerpt of the <filename>managed.json</filename> file shows
+   the <literal>onSync</literal> hook linked to the
+   <filename>compensate.js</filename> file, available in the
+   <filename>/path/to/openidm/bin/defaults/script</filename> directory.
+  </para>
+
+  <programlisting language="javascript">
+...
+},
+"onSync" : {
+   "type" : "text/javascript",
+   "file" " "compensate.js"
+},
+  </programlisting>
+
+  <para>
+   For a detailed analysis of how OpenIDM automatic synchronization, works with
+   the onSync hook, see the Integrator's Guide section on <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#sync-types-automatic"><citetitle>More on
+   Automatic Sync and <literal>onSync</literal></citetitle></link>
+  </para>
+
+  <para>
+   The <literal>onSync</literal> script hook is designed to ensure that either
+   all entries are synchronized from managed resources to external data stores,
+   or no changes are made.
+  </para>
+
+  <section xml:id="email-sample5b">
+   <title>Configure Email for the Sample</title>
+
+   <para>
+    You can configure sample5b with a service to email summary information.
+    If you skip these steps, that does not change the functionality of the
+    sample. However, it may lead to the following message at the OpenIDM console
+    when running a reconciliation:
+   </para>
+
+   <screen>Email service not configured; report not generated.</screen>
+
+   <procedure>
+
+    <para>
+     To configure an email summary, take the following steps:
+    </para>
+
+    <step>
+     <para>
+      Copy the template <filename>external.email.json</filename> file from
+      the <filename>/path/to/openidm/samples/misc</filename> directory:
+     </para>
+     <screen>$ cd /path/to/openidm
+      $ cp samples/misc/external.email.json samples/sample5b/conf
+     </screen>
+    </step>
+
+    <step>
+     <para>
+      Edit the <filename>external.email.json</filename> file in the noted
+      sample5b directory for outbound email, as noted in the chapter on
+      <link xlink:show="new" xlink:href="integrators-guide#chap-email"
+            xlink:role="http://docbook.org/xlink/role/olink">
+       <citetitle>Sending Email</citetitle></link>.
+     </para>
+    </step>
+
+    <step>
+     <para>
+      Edit the <filename>reconStats.js</filename> file from the
+      <filename>/path/to/openidm/samples/sample5b/script</filename> directory.
+      Near the start of the file, configure the OpenIDM email service to send
+      statistics to the email addresses of your choice:
+     </para>
+
+     <programlisting language="javascript">
+var params = {
+      //UPDATE THESE VALUES
+      _from : "openidm@example.com",
+      _to : "youremail@example.com",
+      _cc : "idmadmin2@example.com,idmadmin3@example.com",
+      _subject : "Recon stats for " + global.reconName,
+      _type : "text/html"
+},
+template,
+     </programlisting>
+    </step>
+   </procedure>
+
+  </section>
+
+  <section xml:id="install-sample5b">
+   <title>Install the Sample</title>
+
+   <para>No external configuration is required for this sample. Prepare
+    OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
+    OpenIDM with the configuration of sample 5b.</para>
+
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample5b</screen>
+
+   <para>You can now find XML files that simulate an external LDAP and AD
+    resource in the <filename>openidm/samples/sample5b/data/</filename>
+    directory. The simulated AD data store file,
+    <filename>xml_AD_Data.xml</filename>, does not contain users
+    until you run reconciliation or automatic synchronization runs.
+   </para>
+
+   <para>
+    Run reconciliation, to synchronize the contents of the simulated LDAP
+    resource to the simulated AD resource.
+   </para>
+
+   <screen width="100">$ curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
+   <para>
+    You do not have to run reconciliation. With automatic synchronization, any
+    change in the OpenIDM managed user database propagates changes to the
+    simulated AD resource.
+   </para>
+
+   <para>
+    Review the contents of <filename>xml_AD_Data.xml</filename>. It should now
+    contain information for the same user as is shown in the startup version of
+    the <filename>xml_LDAP_Data.xml</filename> file.
+   </para>
+
+   <para>
+    Alternatively, you can list users in the AD repository with the following
+    command:
+   </para>
+
+   <screen width="100">$ <userinput>curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET
+"https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids&amp;prettyPrint=true"
+   </userinput>
+   <computeroutput>{
+  "result" : [ {
+    "name" : "DDOE1",
+    "__UID__" : "8dad9df3-820d-41ea-a3ab-a80c241bbc98",
+    "_id" : "8dad9df3-820d-41ea-a3ab-a80c241bbc98"
+  } ],
+    "resultCount" : 1,
+    "pagedResultsCookie" : null,
+    "remainingPagedResults" : -1
+}</computeroutput>
+   </screen>
+
+   <para>
+    You should be able to use the <literal>_id</literal> of the user to read
+    information from the simulated AD database. In this case, you can display
+    that information with the following command:
+   </para>
+
+   <screen width="110">$ <userinput>curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET
+"https://localhost:8443/openidm/system/ad/account/8dad9df3-820d-41ea-a3ab-a80c241bbc98?_prettyPrint=true"
+   </userinput>
+   <computeroutput>{
+  "email" : [ "mail1@example.com" ],
+  "name" : "DDOE1",
+  "__UID__" : "8dad9df3-820d-41ea-a3ab-a80c241bbc98",
+  "firstname" : "Darth",
+  "lastname" : "Doe",
+  "_id" : "8dad9df3-820d-41ea-a3ab-a80c241bbc98"
+}[</computeroutput>
+   </screen>
+
+   <para>
+    To verify, repeat the process. Set up a second user in the
+    <filename>xml_LDAP_Data.xml</filename> file. One example of how that file
+    might appear with a second user is shown here:
+   </para>
+
+   <programlisting language="xml" width="120">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;icf:OpenICFContainer
+    xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+    xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension
+    samples/sample5/data/resource-schema-extension.xsd
+    http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd
+    data/resource-schema-1.xsd"&gt;
+    &lt;ri:__ACCOUNT__&gt;
+       &lt;icf:__UID__&gt;1&lt;/icf:__UID__&gt;
+       &lt;icf:__PASSWORD__&gt;TestPassw0rd2&lt;/icf:__PASSWORD__&gt;
+       &lt;ri:firstname&gt;Darth&lt;/ri:firstname&gt;
+       &lt;icf:__DESCRIPTION__&gt;Created By XML1&lt;/icf:__DESCRIPTION__&gt;
+       &lt;icf:__NAME__&gt;DDOE1&lt;/icf:__NAME__&gt;
+       &lt;ri:email&gt;mail1@example.com&lt;/ri:email&gt;
+       &lt;ri:lastname&gt;Doe&lt;/ri:lastname&gt;
+    &lt;/ri:__ACCOUNT__&gt;
+    &lt;ri:__ACCOUNT__&gt;
+       &lt;icf:__UID__&gt;2&lt;/icf:__UID__&gt;
+       &lt;icf:__PASSWORD__&gt;TestPassw0rd2&lt;/icf:__PASSWORD__&gt;
+       &lt;ri:firstname&gt;Garth&lt;/ri:firstname&gt;
+       &lt;icf:__DESCRIPTION__&gt;Created By XML1&lt;/icf:__DESCRIPTION__&gt;
+       &lt;icf:__NAME__&gt;GDOE1&lt;/icf:__NAME__&gt;
+       &lt;ri:email&gt;mail2@example.com&lt;/ri:email&gt;
+       &lt;ri:lastname&gt;Doe&lt;/ri:lastname&gt;
+    &lt;/ri:__ACCOUNT__&gt;
+&lt;/icf:OpenICFContainer&gt;
+    </programlisting>
+
+   <para>
+    Rerun the reconciliation and query REST command calls shown earlier.
+    Substitute for the UID if it has changed. The reconciliation and query
+    commands would take the data from the simulated LDAP resource, and then
+    reconcile them to the OpenIDM managed user database. With automatic sync,
+    those users are then synchronized to the simulated AD resource.
+   </para>
+
+  </section>
+
+  <section xml:id="onsync-sample5b">
+   <title>Demonstrate onSync</title>
+
+   <para>
+    Log into the OpenIDM UI as the administrative user. On a local system,
+    navigate to <literal>https://localhost:8443/openidmui</literal>. The default
+    administrative account and password are both <literal>openidm-admin</literal>.
+   </para>
+
+   <para>
+    Make a change to the data of an existing user. With automatic sync,
+    that change is reflected almost immediately on the external resources.
+    For sample 5b, you would see the changes in both XML files in the
+    <filename>/path/to/openidm/sample5b/data</filename> directory. Alternatively,
+    you could run the REST command calls described earlier.
+   </para>
+
+   <para>
+    Automatic sync works when both external resources are
+    connected. The next step is to simulate a problem connecting to the LDAP
+    resource. One simple way to do so on the local system is to make the LDAP
+    data file unreadable. On a Linux system, the following command, as an
+    administrative user, would serve that purpose:
+   </para>
+
+   <screen>$ cd /path/to/openidm/samples/sample5b/data
+$ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
+
+   <para>
+    In the UI, now try another update to an existing user. You may see the
+    change reflected in only the simulated AD resource. With the change to the
+    filename of the simulated LDAP resource, automatic sync has nothing to write
+    to, and you may see the following error in the standard OpenIDM log file,
+    <filename>openidm0.log.0</filename>:
+   </para>
+
+   <screen>Data file does not exist:
+/path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml</screen>
+
+   <para>
+    With <literal>onSync</literal>, OpenIDM invokes the
+    <filename>compensate.js</filename> script. If an error such as a bad
+    connection to a remote data store occurs, that script should revert the
+    most recent change.
+   </para>
+
+   <para>
+    As an administrator, you might try to make the same change a second time.
+    In that case, the OpenIDM UI should display an error. The user data in the
+    XML files should remain unchanged.
+   </para>
+
   </section>
  </section>
  
