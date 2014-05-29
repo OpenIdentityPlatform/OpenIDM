@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012-2013 ForgeRock AS
+  !      Copyright 2012-2014 ForgeRock AS
   !    
 -->
 <appendix xml:id='appendix-file-layout'
@@ -379,12 +379,6 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    <term><filename>openidm/samples/misc/</filename></term>
    <listitem>
     <para>Sample configuration files</para>
-   </listitem>
-  </varlistentry>
-  <varlistentry>
-   <term><filename>openidm/samples/openam/</filename></term>
-   <listitem>
-    <para>Sample that shows how to protect OpenIDM with OpenAM</para>
    </listitem>
   </varlistentry>
   <varlistentry>
