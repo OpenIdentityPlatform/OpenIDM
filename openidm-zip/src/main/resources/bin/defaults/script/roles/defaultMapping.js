@@ -115,6 +115,10 @@ function execOnScript(scriptConfig) {
     }
 }
 
+function areAttributesEqual(attr1, attr2) {
+    return JSON.stringify(attr1) === JSON.stringify(attr2);
+}
+
 // Check for any assignments that have been removed or modified
 if (typeof oldSource !== "undefined") {
     var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
@@ -124,6 +128,7 @@ if (typeof oldSource !== "undefined") {
     for (var key in oldAssignments) {
         // Check that this key is relevant to this mapping
         if (assignments.indexOf(key) > -1) {
+            var assignmentRemoved = false;
             var oldAssignment = oldAssignments[key];
             // Check if this old assignment is in the currentAssignments
             if (!currentAssignments.hasOwnProperty(key)) {
@@ -133,39 +138,51 @@ if (typeof oldSource !== "undefined") {
                 if (onUnassignment != "undefined" && onUnassignment != null) {
                     execOnScript(onUnassignment);
                 }
-            } else {
-                // This assignment is still assigned, check for any removed attributes
-                var currentAssignment = currentAssignments[key];
-                var oldAttributes = oldAssignment.attributes;
-                var currentAttributes = currentAssignment.attributes;
-                // Loop through old attributes
-                for (var i = 0; i < oldAttributes.length; i++) {
-                    var oldAttribute = oldAttributes[i];
-                    var removed = true;
+                assignmentRemoved = true;
+            }
+            // Get the Current assignment, may be null if it has been removed
+            var currentAssignment = currentAssignments[key];
+            // Get the Old assignment's attributes
+            var oldAttributes = oldAssignment.attributes;
+            // Loop through old attributes and execute the unassignmentOperation on any that were removed or updated
+            for (var i = 0; i < oldAttributes.length; i++) {
+                var oldAttribute = oldAttributes[i];
+                var removedOrUpdated = true;
+                // If the assignment has not been removed, then we need to check if the attribute has been removed or updated.
+                if (!assignmentRemoved) {
+                    var currentAttributes = currentAssignment.attributes;
+                    // Loop through attributes to check if they have been removed/updated
                     for (var j = 0; j < currentAttributes.length; j++) {
                         var currentAttribute = currentAttributes[j];
                         if (oldAttribute.name == currentAttribute.name) {
-                            removed = false;
+                            if (areAttributesEqual(oldAttribute, currentAttribute)) {
+                                // attribute was found and not updated
+                                removedOrUpdated = false;
+                            }
                             break;
                         }
                     }
-                    // Check if the old attribute has been removed
-                    if (removed) {
-                        var unassignmentOperation = oldAttribute.unassignmentOperation;
-                        if (unassignmentOperation == null) {
-                            // Default to replace and use the entire value
-                            unassignmentOperation = defaultUnassignmentOperation;
-                        }
-                        if (unassignmentOperation != "undefined" && unassignmentOperation != null) {
-                            var config = getConfig(unassignmentOperation);
-                            config.attributeName = oldAttribute.name;
-                            config.attributeValue = oldAttribute.value;
-                            var unassignmentResult = openidm.action("script", "eval", config, {});
-                            target[oldAttribute.name] = unassignmentResult;
-                        }
+                }
+                // Check if the old attribute has been removed
+                if (removedOrUpdated) {
+                    var unassignmentOperation = oldAttribute.unassignmentOperation;
+                    if (unassignmentOperation == null) {
+                        // Default to replace and use the entire value
+                        unassignmentOperation = defaultUnassignmentOperation;
+                    }
+                    if (unassignmentOperation != "undefined" && unassignmentOperation != null) {
+                        var config = getConfig(unassignmentOperation);
+                        config.attributeName = oldAttribute.name;
+                        config.attributeValue = oldAttribute.value;
+                        var unassignmentResult = openidm.action("script", "eval", config, {});
+                        // Update the target (working copy)
+                        target[oldAttribute.name] = unassignmentResult;
+                        // Update the existingTarget, in order to carry changes over to additional operations that may use the existingTarget
+                        existingTarget[oldAttribute.name] = unassignmentResult;
                     }
                 }
             }
+
         }
     }
 }

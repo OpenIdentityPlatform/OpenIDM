@@ -43,6 +43,8 @@ function removeValues(target, name, value) {
             if (targetValue.hasOwnProperty(name)) {
                 delete targetValue[name];
             }
+        } else {
+            target[name] = null;
         }
     }
 }
