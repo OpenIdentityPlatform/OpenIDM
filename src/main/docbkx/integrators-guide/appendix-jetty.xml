@@ -180,43 +180,36 @@
 
   <para>You can register generic servlet filters in the embedded Jetty 
   server to perform additional filtering tasks on requests to or responses 
-  from OpenIDM. For example, you might want to use a servlet filter to protect 
-  access to OpenIDM with an access management product such, as OpenAM. Servlet 
-  filters are configured in files named 
+  from OpenIDM. Servlet filters are configured in files named
   <filename>openidm/conf/servletfilter-<replaceable>name</replaceable>.json</filename>. 
   These servlet filter configuration files define the filter class, required 
   libraries, and other settings.</para>
   
-  <para>A sample servlet filter configuration is provided in 
-  <filename>openidm/samples/openam</filename>. The sample configuration includes 
-  the servlet filter configuration file (<filename>conf/servletfilter-openam.json</filename>) 
-  and the extension script that implements the filter 
-  (<filename>script/security/populateContext.js</filename>).
+  <para>
+   One servlet filter configuration is provided in the
+   <filename>servletfilter-cors.json</filename> file in the
+   <filename>/path/to/openidm/conf</filename> directory.
   </para>
   
   <para>The sample servlet filter configuration file is shown below:</para>
   
   <programlisting language="javascript">
 {
-    "classPathURLs" : [
-        "file:/jetty_v61_agent/lib/agent.jar",
-        "file:/jetty_v61_agent/lib/openssoclientsdk.jar",
-        "file:/jetty_v61_agent/lib/",
-        "file:/jetty_v61_agent/locale/"
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "scriptExtensions" : { }.
+    "initParams" : {
+       "allowedOrigins" : "https://localhost:8443",
+       "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
+       "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with",
+       "allowCredentials" : "true",
+       "chainPreflight" : "false"
+    },
+    "urlPatterns" : [
+       "/*"
     ],
-    "systemProperties" : {
-        "openam.agents.bootstrap.dir" : "/jetty_v61_agent/Agent_001/config"
-    },
-    "requestAttributes" : {
-        "openidm.authinvoked" : "servletfilter-openam"
-    },
-    "scriptExtensions" : {
-        "augmentSecurityContext" : {
-            "type" : "text/javascript",
-            "file" : "script/security/populateContext.js"
-        }
-    },
-    "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"
+    "filterClass" : "org.eclipse.jetty.servlets.CrossOriginFilter"
 }  
   </programlisting>
   
@@ -247,20 +240,21 @@
     <varlistentry>
       <term><literal>"scriptExtensions"</literal></term>
       <listitem>
-        <para>Optional script extensions to OpenIDM. Currently only 
-        <literal>"augmentSecurityContext"</literal> is supported. A script 
-        that is defined in <literal>augmentSecurityContext</literal> is 
-        executed by OpenIDM after a successful authentication request. The 
-        script helps to populate the expected security context in OpenIDM. 
-        For example, the login module (servlet filter) might select to supply 
-        only the authenticated user name, while the associated roles and user 
-        ID can be augmented by the script.</para>
-        <para>Only JavaScript is supported 
-        (<literal>"type":"text/javascript"</literal>). The script can be 
-        provided inline (<literal>"source":<replaceable>script source</replaceable></literal>) 
-        or in a file (<literal>"file":<replaceable>filename</replaceable></literal>). 
-        The sample filter extends the filter interface with the functionality in 
-        the script <filename>script/security/populateContext.js</filename>.</para>
+        <para>
+         Optional script extensions to OpenIDM. Currently only
+         <literal>"augmentSecurityContext"</literal> is supported. A script
+         that is defined in <literal>augmentSecurityContext</literal> is
+         executed by OpenIDM after a successful authentication request. The
+         script helps to populate the expected security context in OpenIDM.
+         For example, the login module (servlet filter) might select to supply
+         only the authenticated user name, while the associated roles and user
+         ID can be augmented by the script.</para>
+         <para>Only JavaScript is supported
+         (<literal>"type":"text/javascript"</literal>). The script can be
+         provided inline
+         (<literal>"source":<replaceable>script source</replaceable></literal>)
+         or in a file (<literal>"file":<replaceable>filename</replaceable></literal>).
+        </para>
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -307,16 +301,7 @@
       </listitem>
     </varlistentry>
   </variablelist>
-  
-  <para>When a servlet filter is used to integrate an access management 
-  product, the specific servlet filter that is used, and the configuration 
-  that is associated with that filter, is product-specific. The sample 
-  configuration in <filename>openidm/samples/openam</filename> is specific 
-  to OpenAM. For a detailed description of the OpenAM implementation, 
-  see <link xlink:href="integrators-guide#chap-openam" 
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Protecting OpenIDM With OpenAM</citetitle></link>.</para>
- 
+
  </section>
   
 </appendix>
