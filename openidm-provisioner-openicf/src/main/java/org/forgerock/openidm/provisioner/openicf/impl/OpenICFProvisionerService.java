@@ -166,6 +166,7 @@ import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.identityconnectors.framework.common.objects.filter.FilterVisitor;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.remote.RemoteWrappedException;
 import org.osgi.framework.Constants;
@@ -1701,7 +1702,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitAndFilter(final ObjectClassInfoHelper helper,
                         List<QueryFilter> subFilters) {
-                    throw new UnsupportedOperationException("visitAndFilter not supported");
+                    final Iterator<QueryFilter> iterator = subFilters.iterator();
+                    if (iterator.hasNext()) {
+                        return buildAnd(helper, iterator.next(), iterator);
+                    } else {
+                        throw new IllegalArgumentException("cannot parse 'and' QueryFilter with zero operands");
+                    }
                 }
 
                 private Filter buildAnd(final ObjectClassInfoHelper helper, final QueryFilter left,
@@ -1717,13 +1723,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 @Override
                 public Filter visitOrFilter(ObjectClassInfoHelper helper,
                         List<QueryFilter> subFilters) {
-                    throw new UnsupportedOperationException("visitOrFilter not supported");
+                    final Iterator<QueryFilter> iterator = subFilters.iterator();
+                    if (iterator.hasNext()) {
+                        return buildOr(helper, iterator.next(), iterator);
+                    } else {
+                        throw new IllegalArgumentException("cannot parse 'or' QueryFilter with zero operands");
+                    }
                 }
 
                 private Filter buildOr(final ObjectClassInfoHelper helper, final QueryFilter left,
                         final Iterator<QueryFilter> iterator) {
                     if (iterator.hasNext()) {
-
                         final QueryFilter right = iterator.next();
                         return or(left.accept(this, helper), buildAnd(helper, right, iterator));
                     } else {
