@@ -34,12 +34,14 @@ public enum IDMAuthModule {
     OPENAM_SESSION(OpenAMSessionModule.class),
     /** Client-cert Auth Module. */
     CLIENT_CERT(ClientCertAuthModule.class),
+    /** Delegated auth module using an {@link org.forgerock.openidm.jaspi.auth.Authenticator} */
+    DELEGATED(DelegatedAuthModule.class),
     /** Managed User Auth Module. */
-    MANAGED_USER(IDMUserAuthModule.class),
+    MANAGED_USER(DelegatedAuthModule.class),
     /** Internal User Auth Module. */
-    INTERNAL_USER(IDMUserAuthModule.class),
+    INTERNAL_USER(DelegatedAuthModule.class),
     /** Passthrough to OpenICF connector Auth Module. */
-    PASSTHROUGH(PassthroughModule.class),
+    PASSTHROUGH(DelegatedAuthModule.class),
     /** IWA Auth Module. */
     IWA(IWAModule.class);
 

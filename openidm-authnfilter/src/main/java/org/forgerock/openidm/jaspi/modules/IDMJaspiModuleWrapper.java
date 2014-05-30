@@ -22,19 +22,19 @@ import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.util.promise.Function;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,12 +73,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     private static final Logger logger = LoggerFactory.getLogger(IDMJaspiModuleWrapper.class);
 
-    static final String AUTHENTICATION_ID = "authenticationId";
+    public static final String QUERY_ID = "queryId";
+    public static final String QUERY_ON_RESOURCE = "queryOnResource";
+    public static final String PROPERTY_MAPPING = "propertyMapping";
+    public static final String AUTHENTICATION_ID = "authenticationId";
+    public static final String USER_CREDENTIAL = "userCredential";
+
     static final String USER_ROLES = "userRoles";
     static final String DEFAULT_USER_ROLES = "defaultUserRoles";
-    static final String PROPERTY_MAPPING = "propertyMapping";
-    static final String QUERY_ID = "queryId";
-    static final String QUERY_ON_RESOURCE = "queryOnResource";
     private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
     private static final String GROUP_MEMBERSHIP = "groupMembership";
     private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
@@ -99,7 +101,6 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     private ServerAuthModule authModule;
     private String logClientIPHeader = null;
     private String queryOnResource;
-    private String authenticationId;
     private Function<QueryRequest, Resource, ResourceException> queryExecutor;
     private UserDetailQueryBuilder queryBuilder;
     private RoleCalculator roleCalculator;
@@ -175,13 +176,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
         authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
 
-        queryOnResource = properties.get("queryOnResource").asString();
-        authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
         logClientIPHeader = properties.get("clientIPHeader").asString();
 
-        String queryId = properties.get(QUERY_ID).asString();
-        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
+        queryOnResource = properties.get(QUERY_ON_RESOURCE).asString();
 
+        String queryId = properties.get(QUERY_ID).asString();
+        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
+
+        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
         String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
         List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
                 .defaultTo(Collections.emptyList())
@@ -193,16 +195,17 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
                 .asEnum(MappingRoleCalculator.GroupComparison.class);
 
-        final ConnectionFactory connectionFactory = authnFilterHelper.getConnectionFactory();
-        final ServerContext context = createServerContext();
-
         // a function to perform the user detail query on the router
         queryExecutor =
                 new Function<QueryRequest, Resource, ResourceException>() {
                     @Override
                     public Resource apply(QueryRequest request) throws ResourceException {
+                        if (request == null) {
+                            return null;
+                        }
                         final List<Resource> resources = new ArrayList<Resource>();
-                        connectionFactory.getConnection().query(context, request, resources);
+                        authnFilterHelper.getConnectionFactory().getConnection().query(
+                                authnFilterHelper.getRouter().createServerContext(), request, resources);
 
                         if (resources.isEmpty()) {
                             throw ResourceException.getException(401, "Access denied, no user detail could be retrieved.");
@@ -213,9 +216,9 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                     }
                 };
 
-        queryBuilder = queryOnResource != null
-                ? new UserDetailQueryBuilder(queryOnResource).useQueryId(queryId)
-                : null;
+        queryBuilder = new UserDetailQueryBuilder(queryOnResource)
+                .useQueryId(queryId)
+                .withAuthenticationIdProperty(authenticationId);
 
         roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership, roleMapping, groupComparison);
 
@@ -223,21 +226,6 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         if (!scriptConfig.isNull()) {
             augmentScript = getAugmentScript(scriptConfig);
             logger.debug("Registered script {}", augmentScript);
-        }
-    }
-
-    /**
-     * Creates a new ServerContext.
-     *
-     * @return A ServerContext instance.
-     * @throws JaspiAuthException If there is a problem creating the ServerContext.
-     */
-    ServerContext createServerContext() throws JaspiAuthException {
-        try {
-            return authnFilterHelper.getRouter().createServerContext();
-        } catch (ResourceException e) {
-            logger.error("Could not create ServerContext", e);
-            throw new JaspiAuthException("Could not create ServerContext", e);
         }
     }
 
@@ -302,16 +290,14 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         // user is authenticated; populate security context
 
         try {
-            // Attempt to read the user object if we have been given an authenticationId property
-            final Resource resource = (queryBuilder != null && authenticationId != null)
-                    ? queryExecutor.apply(queryBuilder.assignAuthenticationId(authenticationId, principalName).build())
-                    : null;
+            // Attempt to read the user object; will return null if any of the pieces are null
+            final Resource resource = queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
 
             final SecurityContextMapper securityContextMapper =
                     roleCalculator.calculateRoles(principalName, messageInfo, resource);
 
-            // set "resource" (component)
-            if (queryOnResource != null) {
+            // set "resource" (component) if not already set
+            if (securityContextMapper.getResource() == null) {
                 securityContextMapper.setResource(queryOnResource);
             }
 
@@ -343,7 +329,7 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthenticationId());
 
             if (securityContextMapper.getRoles().isEmpty()) {
-                throw new ForbiddenException("no roles assigned");
+                throw new ForbiddenException("No roles assigned");
             }
 
         } catch (ResourceException e) {
@@ -430,8 +416,8 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
     /**
      * QueryRequest Builder class for querying the user object detail.
-     *
-     * If queryId is provided, setAuthenticationId will set additional parameters for the authenticationId
+     * <p>
+     * If queryId is provided, build() will set additional parameters for the authenticationId
      * property and principal name.  Otherwise a QueryFilter where "authenticationId property = principal name"
      * is used.
      *
@@ -452,14 +438,20 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             return this;
         }
 
-        UserDetailQueryBuilder assignAuthenticationId(final String authenticationId, final String principal)
-                throws BadRequestException {
+        UserDetailQueryBuilder withAuthenticationIdProperty(final String authenticationId) {
             this.authenticationId = authenticationId;
+            return this;
+        }
+
+        UserDetailQueryBuilder forPrincipal(final String principal) {
             this.principal = principal;
             return this;
         }
 
         QueryRequest build() throws BadRequestException {
+            if (queryOnResource == null || authenticationId == null || principal == null) {
+                return null;
+            }
             QueryRequest request = Requests.newQueryRequest(queryOnResource);
             if (queryId != null) {
                 // if we're using a queryId, provide the additional parameter mapping the authenticationId property

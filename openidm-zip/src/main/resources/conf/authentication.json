@@ -1,10 +1,4 @@
 {
-    "queryId" : "credential-query",
-    "queryOnResource" : "managed/user",
-    "propertyMapping" : {
-        "authenticationId" : "username",
-        "userCredential" : "password"
-    },
     "serverAuthContext" : {
         "sessionModule" : {
             "name" : "JWT_SESSION",

@@ -16,18 +16,10 @@
 
 package org.forgerock.openidm.jaspi.config;
 
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * An interface to help provide the auth module dependencies from OSGi.

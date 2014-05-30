@@ -124,7 +124,7 @@
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-filter</artifactId>
+            <artifactId>openidm-authnfilter</artifactId>
             <version>${openidm.version}</version>
         </dependency>
          <dependency>

@@ -81,7 +81,9 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
-            String alias = request.getContent().get("alias").asString();
+            String alias = request.getContent() != null
+                    ? request.getContent().get("alias").asString()
+                    : null;
             if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction()) || 
                     ACTION_GENERATE_CSR.equalsIgnoreCase(request.getAction())) {
                 if (alias == null) {

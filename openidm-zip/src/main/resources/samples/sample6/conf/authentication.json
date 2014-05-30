@@ -1,12 +1,4 @@
 {
-    "queryId" : "credential-query",
-    "queryOnResource" : "managed/user",
-    "propertyMapping" : {
-        "authenticationId" : "username",
-        "userCredential" : "password",
-        "userRoles" : "roles"
-    },
-    "defaultUserRoles" : [ ],
     "serverAuthContext" : {
         "sessionModule" : {
             "name" : "JWT_SESSION",

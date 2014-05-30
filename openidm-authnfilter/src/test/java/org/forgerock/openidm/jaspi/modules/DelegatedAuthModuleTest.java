@@ -18,6 +18,7 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.router.RouteService;
 import org.mockito.Matchers;
@@ -31,41 +32,34 @@ import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
- * Tests IDMUserAuthModule using "internal/user" resource/query
- * @author Phill Cunnington
- */
-public class IDMUserAuthModuleTest {
-
-    public static final String INTERNAL_USER_RESOURCE = "repo/internal/user";
-    public static final String INTERNALUSER_CREDENTIAL_QUERY = "credential-internaluser-query";
-
-    private IDMUserAuthModule idmUserAuthModule;
-
-    private ResourceQueryAuthenticator authHelper;
+* @author Phill Cunnington
+*/
+public class DelegatedAuthModuleTest {
 
     private OSGiAuthnFilterHelper authnFilterHelper;
 
-    private RouteService routeService;
+    private DelegatedAuthModule module;
 
-    private ServerContext context;
+    private Authenticator authenticator;
 
     @BeforeMethod
-    public void setUp() {
-        try {
-            context = mock(ServerContext.class);
-            routeService = mock(RouteService.class);
-            when(routeService.createServerContext()).thenReturn(context);
-            authHelper = mock(ResourceQueryAuthenticator.class);
-            authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
-            when(authnFilterHelper.getRouter()).thenReturn(routeService);
-            idmUserAuthModule = new IDMUserAuthModule(authHelper, authnFilterHelper, INTERNALUSER_CREDENTIAL_QUERY, INTERNAL_USER_RESOURCE);
-        } catch (ResourceException e) {
-            e.printStackTrace();
-        }
+    public void setUp() throws ResourceException {
+        authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
+        RouteService router = mock(RouteService.class);
+        when(router.createServerContext()).thenReturn(mock(ServerContext.class));
+        when(authnFilterHelper.getRouter()).thenReturn(router);
+
+        authenticator = mock(Authenticator.class);
+
+        module = new DelegatedAuthModule(authnFilterHelper, authenticator);
     }
 
     @Test
@@ -83,10 +77,11 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verifyZeroInteractions(authHelper);
+        verifyZeroInteractions(authenticator);
+        assertTrue(clientSubject.getPrincipals().isEmpty());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -105,10 +100,11 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verifyZeroInteractions(authHelper);
+        verifyZeroInteractions(authenticator);
+        assertTrue(clientSubject.getPrincipals().isEmpty());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -127,10 +123,11 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn(null);
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verifyZeroInteractions(authHelper);
+        verifyZeroInteractions(authenticator);
+        assertTrue(clientSubject.getPrincipals().isEmpty());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
@@ -149,15 +146,16 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Password")).willReturn("");
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
-        verifyZeroInteractions(authHelper);
+        verifyZeroInteractions(authenticator);
+        assertTrue(clientSubject.getPrincipals().isEmpty());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
     @Test
-    public void shouldValidateRequestWhenAuthenticationSuccessful() throws AuthException {
+    public void shouldValidateRequestWhenAuthenticationSuccessful() throws ResourceException, AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -170,17 +168,19 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate(eq("USERNAME"), eq("PASSWORD"), eq(context))).willReturn(true);
+        given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
+                Matchers.<ServerContext>anyObject())).willReturn(true);
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
+        assertEquals("USERNAME", clientSubject.getPrincipals().iterator().next().getName());
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
     @Test
-    public void shouldValidateRequestWhenAuthenticationFailed() throws AuthException {
+    public void shouldValidateRequestWhenAuthenticationFailed() throws ResourceException, AuthException {
 
         //Given
         MessageInfo messageInfo = mock(MessageInfo.class);
@@ -193,13 +193,29 @@ public class IDMUserAuthModuleTest {
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
 
-        given(authHelper.authenticate(eq("USERNAME"), eq("PASSWORD"), eq(context))).willReturn(false);
+        given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
+                Matchers.<ServerContext>anyObject())).willReturn(false);
 
         //When
-        AuthStatus authStatus = idmUserAuthModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject);
 
         //Then
+        assertTrue(clientSubject.getPrincipals().isEmpty());
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
+    @Test
+    public void shouldSecureResponse() throws AuthException {
+
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject serviceSubject = new Subject();
+
+        //When
+        AuthStatus authStatus = module.secureResponse(messageInfo, serviceSubject);
+
+        //Then
+        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
+        verifyZeroInteractions(messageInfo);
+    }
 }
