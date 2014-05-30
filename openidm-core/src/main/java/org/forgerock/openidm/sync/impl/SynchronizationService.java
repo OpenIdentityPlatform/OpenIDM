@@ -405,8 +405,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
         } catch (IllegalArgumentException e) {
-            handler.handleError(new BadRequestException("Action:" + request.getAction()
-                    + " is not supported for resource collection", e));
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Throwable t) {
