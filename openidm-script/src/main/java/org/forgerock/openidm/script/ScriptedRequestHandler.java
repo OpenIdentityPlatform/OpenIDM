@@ -396,10 +396,6 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
     }
 
     protected void handleScriptException(final ResultHandler<?> handler, final ScriptException scriptException) {
-        final JsonValue detail = new JsonValue(new HashMap<String, Object>());
-        detail.put("fileName", scriptException.getFileName());
-        detail.put("lineNumber", scriptException.getLineNumber());
-        detail.put("columnNumber", scriptException.getColumnNumber());
 
         ResourceException convertedError;
         try {
@@ -409,7 +405,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         } catch (ScriptException e) {
             convertedError = new InternalServerErrorException(scriptException.getMessage(), scriptException);
         }
-        convertedError.setDetail(detail);
+        if (convertedError.getDetail().isNull()) {
+            convertedError.setDetail(new JsonValue(new HashMap<String, Object>()));
+        }
+        final JsonValue detail = convertedError.getDetail();
+        detail.put("fileName", scriptException.getFileName());
+        detail.put("lineNumber", scriptException.getLineNumber());
+        detail.put("columnNumber", scriptException.getColumnNumber());
 
         handler.handleError(convertedError);
     }
