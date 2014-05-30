@@ -286,6 +286,12 @@
         <releaseDate/>
         <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
         <frDocPluginVersion>2.1.0</frDocPluginVersion>
+
+	<!-- Doc Branding -->
+	<brandingGroupId>org.forgerock.commons</brandingGroupId>
+        <brandingArtifactId>forgerock-doc-default-branding</brandingArtifactId>
+        <brandingVersion>3.0.0-SNAPSHOT</brandingVersion>
+
     </properties>
 
     <modules>

@@ -30,7 +30,9 @@
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM <?eval ${serverDocTargetVersion}?> Release Notes</title>
+  <xinclude:include href="../shared/mediaobject-fr-logo.xml" />
+  <title>OpenIDM Release Notes</title>
+  <subtitle>Version ${serverDocTargetVersion}</subtitle>
   <abstract>
    <para>Notes covering OpenIDM software requirements, fixes, known issues.
    The OpenIDM project offers flexible, open source services for automating
@@ -40,21 +42,23 @@
    <year>2011-2013</year>
    <holder>ForgeRock AS</holder>
   </copyright>
+  <!-- Add a space after the first name so that it appears on the PDF cover -->
   <authorgroup>
    <author>
     <personname>
-     <firstname>Mark</firstname><surname>Craig</surname>
+     <firstname>Mark </firstname><surname>Craig</surname>
     </personname>
    </author>
    <author>
     <personname>
-     <firstname>Lana</firstname><surname>Frost</surname>
+     <firstname>Lana </firstname><surname>Frost</surname>
     </personname>
    </author>   
    <author>
     <personname>
-     <firstname>Andi</firstname><surname>Egloff</surname>
+     <firstname>Andi </firstname><surname>Egloff</surname>
     </personname>
+    <xinclude:include href="../shared/affiliation-fr.xml"/>
    </author>
   </authorgroup>
   <xinclude:include href="../legal.xml" />
