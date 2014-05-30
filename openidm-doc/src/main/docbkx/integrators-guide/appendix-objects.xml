@@ -637,8 +637,10 @@
      <term>type</term>
      <listitem>
       <para>string, required</para>
-      <para>Specifies the type of script to be executed. Currently, only
-      <literal>"text/javascript"</literal> is supported.</para>
+      <para>
+       Specifies the type of script to be executed. Supported types include
+       <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -890,11 +892,19 @@ openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
      <para>The API supports patch by query, so the caller does not need to 
      know the identifier of the object to change.</para>
 
-     <screen width="90"><?dbfo pgwide="1"?>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST -d '[{"replace":"/password","value": "Passw0rd"}]' 
- "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE"</screen>
+     <screen width="90"><?dbfo pgwide="1"?>
+ $ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '[{
+  "operation":"replace",
+  "field":"/password",
+  "value":"Passw0rd"
+  }]' \
+ "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE"</screen>
 
       <para>For the syntax on how to formulate the query
       <literal>_queryId=for-userName&amp;uid=DDOE</literal> see
