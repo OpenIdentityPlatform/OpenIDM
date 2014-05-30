@@ -154,7 +154,7 @@
  --header "If-None-Match: *" \
  --request PUT \
  --data '{"name":"ldap"}' \
- "https://localhost:8443/openidm/managed/role/ldap"</userinput>
+ "https://localhost:8443/openidm/managed/role/ldap?_prettyPrint=true"</userinput>
       <computeroutput>
 {
   "name": "ldap",
@@ -181,7 +181,7 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/role/?_queryId=query-all-ids"</userinput>
+ "https://localhost:8443/openidm/managed/role/?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
      <computeroutput>
 {
   "remainingPagedResults": -1,
@@ -201,15 +201,13 @@
     <title>To Assign a Role to a User</title>
     <para>
      To assign a direct role to a user, you can update the user's entry over
-     REST, adding the
-     <literal>managed/role/<replaceable>role ID</replaceable></literal> to the
-     user's <literal>"roles"</literal> attribute. Note that you must also supply
-     the user's existing roles in the request, as the current value of the
-     <literal>"roles"</literal> attribute is overwritten by the request. The
-     following example adds the <literal>ldap</literal> role, created
-     previously, to user <literal>bjensen</literal>.
+     REST, adding <literal>managed/role/<replaceable>role ID</replaceable></literal>
+     to the user's <literal>"roles"</literal> attribute. The following example
+     adds the <literal>ldap</literal> role, created previously, to user
+     <literal>bjensen</literal>.
     </para>
-    <screen><userinput>$ curl \
+    <screen><userinput>
+$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -218,16 +216,16 @@
  --request PATCH \
  --data '[
     {
-        "operation": "replace",
-        "field": "/roles",
-        "value": [
-            "openidm-authorized",
-            "managed/role/ldap"
-        ]
+        "operation": "add",
+        "field": "/roles/-",
+        "value": "managed/role/ldap"
+
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
-     <computeroutput>{
+ "https://localhost:8443/openidm/managed/user/bjensen?_prettyPrint=true"
+    </userinput>
+    <computeroutput>
+{
     "mail": "bjensen@example.com",
     "sn": "Jensen",
     "passwordAttempts": "0",
@@ -253,6 +251,13 @@
     "displayName": "Babara Jensen"
 }</computeroutput>
     </screen>
+    <para>
+     Note the dash (<literal>-</literal>) character appended to the field name.
+     This character specifies that the role you are adding should be appended to
+     the existing roles for that user. If you do not include the dash character,
+     all current values of the <literal>"roles"</literal> attribute are
+     overwritten by the request.
+    </para>
    </section>
 
    <section xml:id="remove-role-assignment">
