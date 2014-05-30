@@ -87,11 +87,11 @@
 
    <screen>
     <userinput>
-$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/security/keystore?_prettyPrint=true"
     </userinput>
     <computeroutput>
@@ -164,18 +164,18 @@ $ curl
 
    <screen width="90">
     <userinput>
-$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  --data '{"CN" : "www.example.com",
  "OU" : "HR",
  "L"  : "Cupertino",
  "C"  : "US",
  "returnPrivateKey" : true,
- "alias" : "openidm-localhost"}'
+ "alias" : "openidm-localhost"}' \
  "https://localhost:8443/openidm/security/keystore?_action=generateCSR&amp;_prettyPrint=true"
     </userinput>
     <computeroutput>
@@ -274,12 +274,12 @@ lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
     "alias": "openidm-localhost" -->
    <screen width="90">
     <userinput>
-$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request PUT
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
  --data '{
     "alias": "openidm-localhost",
     "fromCSR": true,
@@ -358,7 +358,7 @@ AnFg98sje0DZ+zfsnevGioQMJrG0JSnqTYADxHaauu7NWndkfMZisfNIKA0u+ajU\n
 AbP8xFXIP5JU8O4tWmlbxAbMOYfrZHabFNZx4DH1OVOJqdJIVx0KER0GSZd50D6W\n
 QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
 -----END RSA PRIVATE KEY-----"
- }'
+ }' \
  "https://localhost:8443/openidm/security/keystore/cert"
     </userinput>
     <computeroutput>
@@ -531,11 +531,11 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
     </para>
     <screen>
      <userinput>
-$ curl
- --header "X-OpenIDM-Username:openidm-admin"
- --header "X-OpenIDM-Password:openidm-admin"
- --cacert self-signed.crt
- --request GET
+$ curl \
+ --header "X-OpenIDM-Username:openidm-admin" \
+ --header "X-OpenIDM-Password:openidm-admin" \
+ --cacert self-signed.crt \
+ --request GET \
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"
      </userinput>
      <computeroutput>
@@ -597,11 +597,11 @@ $ curl
 
   <screen>
    <userinput>
-$ curl
- --cacert self-signed.crt
- --dump-header /dev/stdout
- --user openidm-admin:openidm-admin
- --header "Content-Type: application/json"
+$ curl \
+ --cacert self-signed.crt \
+ --dump-header /dev/stdout \
+ --user openidm-admin:openidm-admin \
+ --header "Content-Type: application/json" \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
@@ -618,12 +618,12 @@ Server: Jetty(8.y.z-SNAPSHOT)
    </computeroutput>
 
    <userinput>
-$ curl
- --cacert self-signed.crt
- --dump-header /dev/stdout
- --header "Content-Type: application/json"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
+$ curl \
+ --cacert self-signed.crt \
+ --dump-header /dev/stdout \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
@@ -640,12 +640,12 @@ Server: Jetty(8.y.z-SNAPSHOT)
    </computeroutput>
 
    <userinput>
-$ curl
- --dump-header /dev/stdout
- --cacert self-signed.crt
- --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
- --header "X-Requested-With: OpenIDM Plugin"
- --header "Content-Type: application/json"
+$ curl \
+ --dump-header /dev/stdout \
+ --cacert self-signed.crt \
+ --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
+ --header "X-Requested-With: OpenIDM Plugin" \
+ --header "Content-Type: application/json" \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
@@ -670,13 +670,13 @@ Server: Jetty(8.y.z-SNAPSHOT)
 
   <screen>
    <userinput>
-$ curl
- --dump-header /dev/stdout
- --cacert self-signed.crt
- --header "X-OpenIDM-NoSession: true"
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
+$ curl \
+ --dump-header /dev/stdout \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-NoSession: true" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
@@ -696,12 +696,13 @@ Server: Jetty(8.y.z-SNAPSHOT)
 
   <screen>
    <userinput>
-$ curl
- --dump-header /dev/stdout
- --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
- --header "X-Requested-With: OpenIDM Plugin"
- --header "X-OpenIDM-Logout: true"
- "http://localhost:8080/openidm/"
+$ curl \
+ --dump-header /dev/stdout \
+ --cacert self-signed.crt \
+ --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
+ --header "X-Requested-With: OpenIDM Plugin" \
+ --header "X-OpenIDM-Logout: true" \
+ "https://localhost:8443/openidm/"
    </userinput>
    <computeroutput>
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
@@ -919,11 +920,11 @@ $ cli.sh encrypt newpwd
    possible to enable these over HTTP, for example, the following query should
    identify managed users in an OrientDB repository:</para>
 
-  <screen width="91">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
+  <screen width="91">$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
  "https://localhost:8443/openidm/managed/user?_queryExpression=select+*+from+managed_user"</screen>
   
   <para>
@@ -1163,5 +1164,5 @@ password=<replaceable>password</replaceable></programlisting>
   shutdown.</para>
  </section>
 
-     </section>
+ </section>
 </chapter>
