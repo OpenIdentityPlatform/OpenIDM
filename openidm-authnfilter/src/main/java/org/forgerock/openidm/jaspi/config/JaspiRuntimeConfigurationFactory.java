@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.jaspi.config;
 
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.JaspiAuditLogger;
 import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
@@ -37,7 +36,6 @@ import java.util.List;
  * A singleton instance that implements both the Jaspi ModuleConfigurationFactory and JaspiLoggingConfigurator
  * interfaces, that provides all of the configuration information for the Jaspi Runtime to be configured correctly.
  */
-@Service
 public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFactory, JaspiLoggingConfigurator {
 
     /**
@@ -47,7 +45,9 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
 
     private final Logger logger = LoggerFactory.getLogger(JaspiRuntimeConfigurationFactory.class);
 
+    public static final String MODULE_CONFIG_ENABLED = "enabled";
     private static final String CONFIG_AUDIT_LOGGER = "auditLogger";
+
 
     private JsonValue moduleConfiguration;
     private DebugLogger debugLogger;
@@ -140,10 +140,10 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
      */
     private boolean processModuleConfiguration(JsonValue moduleConfig) {
 
-        if (moduleConfig.isDefined("enabled") && !moduleConfig.get("enabled").asBoolean()) {
+        if (moduleConfig.isDefined(MODULE_CONFIG_ENABLED) && !moduleConfig.get(MODULE_CONFIG_ENABLED).asBoolean()) {
             return false;
         }
-        moduleConfig.remove("enabled");
+        moduleConfig.remove(MODULE_CONFIG_ENABLED);
 
         if (moduleConfig.isDefined("name")) {
             String className = resolveAuthModuleClassName(moduleConfig.get("name").asString());

@@ -252,7 +252,7 @@
         <authnfilter.commons.version>1.4.0</authnfilter.commons.version>
 
         <!-- Commons JSON versions -->
-        <commons.forgerock-util.version>1.3.2</commons.forgerock-util.version>
+        <commons.forgerock-util.version>1.3.3</commons.forgerock-util.version>
         <commons.forgerock-rest.version>2.3.1-SNAPSHOT</commons.forgerock-rest.version>
         <commons.forgerock-script.version>1.3.0</commons.forgerock-script.version>
 
@@ -308,7 +308,6 @@
         <module>openidm-repo-orientdb</module>
         <module>openidm-repo</module>
         <module>openidm-authnfilter</module>
-        <module>openidm-filter</module>
         <module>openidm-api-servlet</module>
         <module>openidm-router</module>
         <module>openidm-servlet</module>

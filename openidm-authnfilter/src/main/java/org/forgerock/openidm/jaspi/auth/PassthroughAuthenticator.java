@@ -14,7 +14,7 @@
  * Copyright 2013-2014 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.jaspi.auth;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -22,21 +22,15 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.security.auth.message.AuthException;
 
 /**
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
- * connector.
+ * connector, or an endpoint accepting an "authenticate" action with supplied username and password parameters.
  *
  * @author Phill Cunnington
  * @author brmiller
  */
-public class PassthroughAuthenticator {
-
-    private static final Logger logger = LoggerFactory.getLogger(PassthroughAuthenticator.class);
+public class PassthroughAuthenticator implements Authenticator {
 
     private final ConnectionFactory connectionFactory;
     private final String passThroughAuth;
@@ -61,28 +55,16 @@ public class PassthroughAuthenticator {
      * @param password The user's password.
      * @param context the ServerContext to use when making requests on the router
      * @return <code>true</code> if authentication is successful.
-     * @throws AuthException if there is a problem whilst attempting to authenticate the user.
+     * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
-    public boolean authenticate(String username, String password, ServerContext context) throws AuthException {
+    public boolean authenticate(String username, String password, ServerContext context) throws ResourceException {
 
-        try {
-            final JsonValue result = connectionFactory.getConnection().action(context,
-                    Requests.newActionRequest(passThroughAuth, "authenticate")
-                            .setAdditionalParameter("username", username)
-                            .setAdditionalParameter("password", password));
+        final JsonValue result = connectionFactory.getConnection().action(context,
+                Requests.newActionRequest(passThroughAuth, "authenticate")
+                        .setAdditionalParameter("username", username)
+                        .setAdditionalParameter("password", password));
 
-            // pass-through authentication is successful if _id exists in result
-            return result.isDefined(Resource.FIELD_CONTENT_ID);
-        } catch (ResourceException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed pass-through authentication of {} on {}.", username, passThroughAuth, e);
-            }
-            if (e.isServerError()) { // HTTP server-side error; AuthException sadly does not accept cause
-                throw new AuthException("Failed pass-through authentication of " + username + " on "
-                        + passThroughAuth + ":" + e.getMessage());
-            }
-            // authentication failed
-            return false;
-        }
+        // pass-through authentication is successful if _id exists in result
+        return result.isDefined(Resource.FIELD_CONTENT_ID);
     }
 }

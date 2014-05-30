@@ -14,11 +14,10 @@
  * Copyright 2011-2014 ForgeRock Inc. All rights reserved.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.jaspi.auth;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;
-import org.forgerock.jaspi.exceptions.JaspiAuthException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
@@ -30,14 +29,14 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.message.AuthException;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Authenticator class which performs authentication against managed/internal user tables.
+ * Authenticator class which performs authentication against managed/internal user tables using a queryId to fetch
+ * the complete local user data and validates the password locally.
  */
-public class ResourceQueryAuthenticator {
+public class ResourceQueryAuthenticator implements Authenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceQueryAuthenticator.class);
 
@@ -84,25 +83,20 @@ public class ResourceQueryAuthenticator {
      * @param context the ServerContext to use
      * @return True if authentication is successful, otherwise false.
      */
-    public boolean authenticate(String username, String password, ServerContext context) throws AuthException {
+    public boolean authenticate(String username, String password, ServerContext context) throws ResourceException {
 
         Reject.ifNull(username, "Provided username was null");
         Reject.ifNull(context, "Router context was null");
 
-        try {
-            UserInfo userInfo = getRepoUserInfo(username, context);
-            if (userInfo == null) {
-                return false; // getRepoUserInfo already logged why
-            } else if (userInfo.checkCredential(password)) {
-                logger.debug("Authentication succeeded for {}", username);
-                return true;
-            } else {
-                logger.debug("Authentication failed for {} due to invalid credentials", username);
-                return false;
-            }
-        } catch (ResourceException ex) {
-            logger.debug("Authentication failed to get user info for {} {}", username, ex);
-            throw new JaspiAuthException(ex.getMessage(), ex);
+        final UserInfo userInfo = getRepoUserInfo(username, context);
+        if (userInfo == null) {
+            return false; // getRepoUserInfo already logged why
+        } else if (userInfo.checkCredential(password)) {
+            logger.debug("Authentication succeeded for {}", username);
+            return true;
+        } else {
+            logger.debug("Authentication failed for {} due to invalid credentials", username);
+            return false;
         }
     }
 

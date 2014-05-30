@@ -28,6 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Map;
 
+import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.openidm.jaspi.auth.Authenticator;
+import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +51,20 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.HEADER_A
  * @author Phill Cunnington
  * @author brmiller
  */
-public class PassthroughModule implements ServerAuthModule {
+public class DelegatedAuthModule implements ServerAuthModule {
 
-    private final static Logger logger = LoggerFactory.getLogger(PassthroughModule.class);
+    private final static Logger logger = LoggerFactory.getLogger(DelegatedAuthModule.class);
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
 
-    private PassthroughAuthenticator passthroughAuthenticator;
+    private String queryOnResource;
+    private Authenticator authenticator;
 
     /**
      * Constructor used by the commons Authentication Filter framework to create an instance of this authentication
      * module.
      */
-    public PassthroughModule() throws AuthException {
+    public DelegatedAuthModule() throws AuthException {
         authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
         if (authnFilterHelper == null) {
             throw new AuthException("OSGiAuthnFilterHelper is not ready.");
@@ -71,11 +75,11 @@ public class PassthroughModule implements ServerAuthModule {
      * Constructor used by tests to inject dependencies.
      *
      * @param authnFilterHelper A mock of an OSGiAuthnFilterHelper
-     * @param passthroughAuthenticator A mock of an PassthroughAuthenticator instance.
+     * @param authenticator A mock of an PassthroughAuthenticator instance.
      */
-    PassthroughModule(OSGiAuthnFilterHelper authnFilterHelper, PassthroughAuthenticator passthroughAuthenticator) {
+    DelegatedAuthModule(OSGiAuthnFilterHelper authnFilterHelper, Authenticator authenticator) {
         this.authnFilterHelper = authnFilterHelper;
-        this.passthroughAuthenticator = passthroughAuthenticator;
+        this.authenticator = authenticator;
     }
 
     /**
@@ -97,8 +101,10 @@ public class PassthroughModule implements ServerAuthModule {
     public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
             Map options) throws AuthException {
 
-        final String queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
-        passthroughAuthenticator = new PassthroughAuthenticator(authnFilterHelper.getConnectionFactory(), queryOnResource);
+        queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
+        authenticator = new AuthenticatorFactory(
+                authnFilterHelper.getConnectionFactory(), authnFilterHelper.getCryptoService())
+            .apply(new JsonValue(options));
     }
 
     /**
@@ -114,19 +120,18 @@ public class PassthroughModule implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        logger.debug("PassthroughModule: validateRequest START");
+        logger.debug("DelegatedAuthModule: validateRequest START");
 
         SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(null, messageInfo);
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
-            logger.debug("PassthroughModule: Delegating call to remote authentication");
+            logger.debug("DelegatedAuthModule: Delegating call to remote authentication");
 
             if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)
                     || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)) {
 
-                logger.debug("PassthroughModule: Authentication successful");
-                logger.debug("Found valid session for {}", securityContextMapper.getAuthenticationId());
+                logger.debug("DelegatedAuthModule: Authentication successful");
 
                 final String authcid = securityContextMapper.getAuthenticationId();
                 clientSubject.getPrincipals().add(new Principal() {
@@ -135,14 +140,14 @@ public class PassthroughModule implements ServerAuthModule {
                     }
                 });
 
-                //Auth success will be logged in IDMServerAuthModule super type.
+                // Auth success will be logged in IDMJaspiModuleWrapper
                 return AuthStatus.SUCCESS;
             } else {
-                logger.debug("PassthroughModule: Authentication failed");
+                logger.debug("DelegatedAuthModule: Authentication failed");
                 return AuthStatus.SEND_FAILURE;
             }
         } finally {
-            logger.debug("PassthroughModule: validateRequest END");
+            logger.debug("DelegatedAuthModule: validateRequest END");
         }
     }
 
@@ -155,7 +160,7 @@ public class PassthroughModule implements ServerAuthModule {
         }
 
         try {
-            boolean authenticated = passthroughAuthenticator.authenticate(credential.username, credential.password,
+            boolean authenticated = authenticator.authenticate(credential.username, credential.password,
                     authnFilterHelper.getRouter().createServerContext());
 
             if (authenticated) {
@@ -164,7 +169,13 @@ public class PassthroughModule implements ServerAuthModule {
             }
             return authenticated;
         } catch (ResourceException e) {
-            throw new AuthException(e.getMessage());
+            logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
+            if (e.isServerError()) { // HTTP server-side error
+                throw new JaspiAuthException(
+                        "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
+            }
+            // authentication failed
+            return false;
         }
     }
 
