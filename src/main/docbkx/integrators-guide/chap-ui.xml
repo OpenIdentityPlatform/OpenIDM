@@ -629,6 +629,13 @@
    files added to the <literal>extension</literal> directory must be manually
    copied between every node in a cluster.
   </para>
+  <para>
+   If you want to update the view logic of the UI, you cannot simply add files
+   to the extensions folder. It is assumed that if your deployment requires that
+   level of control of the user interface, you are no longer going to want to be
+   automatically upgraded with subsequent releases. As such, you need to take on
+   the task of maintaining a fork of the UI.
+  </para>
 
   <section xml:id="ui-style">
    <title>Changing the Default Stylesheet</title>
