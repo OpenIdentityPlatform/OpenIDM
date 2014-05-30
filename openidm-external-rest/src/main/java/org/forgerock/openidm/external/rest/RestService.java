@@ -269,6 +269,7 @@ public class RestService implements SingletonResourceProvider {
                         exception.setDetail(detail);
                     }
                     handler.handleError(exception);
+                    return;
                 }
 
                 String text = representation.getText();
