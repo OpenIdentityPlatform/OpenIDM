@@ -1194,7 +1194,7 @@ $ ./startup.sh -p samples/sample5</screen>
 },
 "onSync" : {
    "type" : "text/javascript",
-   "file" " "compensate.js"
+   "file" : "compensate.js"
 },
   </programlisting>
 
