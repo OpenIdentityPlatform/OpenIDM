@@ -498,8 +498,9 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/script/</filename></term>
    <listitem>
-    <para>OpenIDM location for JavaScript files referenced in the
-    configuration</para>
+    <para>
+     OpenIDM location for script files referenced in the configuration
+    </para>
    </listitem>
   </varlistentry>
   <varlistentry>
