@@ -264,7 +264,7 @@
   </para>
 
   <para>
-   Pass-through authentication is not configured by default It can be
+   Pass-through authentication is not configured by default. It can be
    configured by adding the pass-through authentication module to the
    authentication configuration file
    (<filename>conf/authentication.json</filename>). The following excerpt from
@@ -279,7 +279,7 @@
       "properties" : {
          "augmentSecurityContext": {
             "type" : "text/javascript",
-            "file" : "auth/passthroughAuthnPopulateContext.js"
+            "file" : "auth/populateAsManagedUser.js"
          },
          "queryOnResource" : "system/ldap/account",
          "propertyMapping" : {
@@ -337,7 +337,7 @@
       This parameter points to a script that can be executed after a successful
       authentication request to provide additional information for the expected
       security context. For pass-through authentication, the
-      <filename>passthroughAuthnPopulateContext.js</filename> script is provided
+      <filename>populateAsManagedUser.js</filename> script is provided
       by default. This sample script uses the authentication details that are
       returned from the pass-through authentication module to find a linked
       managed user record. If a linked record is found, the script adjusts the
