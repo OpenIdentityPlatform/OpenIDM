@@ -38,7 +38,7 @@ Make sure MySQL is running.
 $ mysql -u root -p < /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
 Enter password:
 
-You will also need to install the MySQL Connector/J iinto the openidm/bundle directory:
+You will also need to install the MySQL Connector/J into the openidm/bundle directory:
 
 $ cp mysql-connector-java-<version>-bin.jar /path/to/openidm/bundle/
 
