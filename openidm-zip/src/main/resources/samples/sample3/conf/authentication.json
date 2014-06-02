@@ -56,7 +56,7 @@
                 "properties" : {
                     "augmentSecurityContext": {
                         "type" : "text/javascript",
-                        "file" : "auth/passthroughAuthnPopulateContext.js"
+                        "file" : "auth/populateAsManagedUser.js"
                     },
                     "queryOnResource" : "system/scriptedsql/account",
                     "propertyMapping" : {
