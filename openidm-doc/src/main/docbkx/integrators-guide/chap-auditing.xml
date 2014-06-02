@@ -727,8 +727,8 @@
    <para>
     The <literal>exceptionFormatter</literal> property specifies the name and
     type of file that handles the formatting and display of exceptions thrown by
-    the audit logger. Currently, <literal>"text/javascript"</literal> is the
-    only supported type.
+    the audit logger. Supported types include <literal>"text/javascript"</literal> and
+    <literal>"groovy"</literal>.
    </para>
    <para>
     The <literal>"file"</literal> property provides the path to the script file

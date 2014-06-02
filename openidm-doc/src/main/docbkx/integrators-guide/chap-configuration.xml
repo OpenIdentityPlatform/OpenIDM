@@ -941,8 +941,10 @@ tables).</para></listitem>
       <varlistentry>
         <term><literal>"type"</literal></term>
         <listitem>
-          <para>The type of implementation. Currently only 
-          <literal>"text/javascript"</literal> is supported.</para>
+          <para>
+           The type of implementation. Supported types are
+           <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>

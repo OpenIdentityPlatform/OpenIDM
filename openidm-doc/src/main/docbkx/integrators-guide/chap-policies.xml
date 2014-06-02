@@ -266,11 +266,13 @@ function required(fullObject, value, params, propName) {
       <para>The configuration file includes the following properties:</para>
       
       <itemizedlist>
-        <listitem>
-          <para><literal>"type"</literal> - specifies the type of policy 
-          service. Currently, only <literal>"text/javascript"</literal> is 
-          supported.</para>
-        </listitem>
+       <listitem>
+        <para>
+         <literal>"type"</literal> - specifies the type of policy service.
+         Supported types include <literal>"text/javascript"</literal> and
+         <literal>"groovy"</literal>.
+        </para>
+       </listitem>
         <listitem>
           <para><literal>"file"</literal> - provides the path to the policy 
           script file, relative to the OpenIDM installation directory.</para>
