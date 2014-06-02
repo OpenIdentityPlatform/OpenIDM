@@ -352,8 +352,10 @@
       <term>type</term>
       <listitem>
        <para>string, required</para>
-       <para>Specifies the type of script to be executed. Currently, OpenIDM
-        supports only <literal>"text/javascript"</literal>.</para>
+       <para>Specifies the type of script to be executed. Supported types
+        include <literal>"text/javascript"</literal> and
+        <literal>"groovy"</literal>.
+       </para>
       </listitem>
      </varlistentry>
       <varlistentry>
