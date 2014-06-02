@@ -59,11 +59,11 @@
    used to identify the target object for an operation depends on the object
    type. For an explanation of object types, see the
    <link xlink:href="integrators-guide#appendix-obects"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Data Models and
    Objects Reference</citetitle></link>. For more information about scripts and
    the objects available to scripts, see the
    <link xlink:href="integrators-guide#appendix-scripting"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
    Reference</citetitle></link>.
   </para>
 
@@ -77,10 +77,11 @@ val = openidm.read("config/custom/mylookuptable")
 val = openidm.read("repo/custom/mylookuptable")
   </programlisting>
 
-  <para>For information about constructing an object ID, see <link
-  xlink:href="integrators-guide#rest-uri-scheme"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>URI
-   Scheme</citetitle></link> in the <citetitle>REST API Reference</citetitle>.
+  <para>
+   For information about constructing an object ID, see <link
+   xlink:href="integrators-guide#rest-uri-scheme"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>URI Scheme</citetitle></link>
+   in the <citetitle>REST API Reference</citetitle>.
   </para>
 
   <para>
