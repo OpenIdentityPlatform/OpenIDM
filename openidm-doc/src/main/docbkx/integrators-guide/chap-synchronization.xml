@@ -595,16 +595,17 @@ if (syncResults.success) {
        <primary>Synchronization</primary>
        <secondary>Filtering</secondary>
       </indexterm>
-      <para>By default, OpenIDM synchronizes all objects that match those
-      defined in the connector configuration for the resource. Many connectors
-      allow you to limit the scope of objects that the connector accesses. For
-      example, the LDAP connector allows you to specify base DNs and LDAP
-      filters so that you do not need to access every entry in the directory.
-      OpenIDM also allows you to filter what is considered a valid source or
-      valid target for synchronization by using JavaScript code. To apply these
-      filters, use the <literal>validSource</literal>, and
-      <literal>validTarget</literal> properties in your mapping.</para>
-
+      <para>
+       By default, OpenIDM synchronizes all objects that match those defined in
+       the connector configuration for the resource. Many connectors allow you
+       to limit the scope of objects that the connector accesses. For example,
+       the LDAP connector allows you to specify base DNs and LDAP filters so
+       that you do not need to access every entry in the directory. OpenIDM also
+       allows you to filter what is considered a valid source or valid target
+       for synchronization by using scripts. To apply these filters, use the
+       <literal>validSource</literal>, and <literal>validTarget</literal>
+       properties in your mapping.
+      </para>
       <varlistentry>
        <term>validSource</term>
        <listitem>
@@ -2449,7 +2450,7 @@ if (syncResults.success) {
        <para>
         To access these fields, include
         <literal>syncFailure.<replaceable>fieldname</replaceable></literal> in
-        your JavaScript.
+        your script.
        </para>
       </listitem>
       <listitem>
@@ -2471,7 +2472,8 @@ if (syncResults.success) {
         <literal>deadLetterQueue</literal> indicates that the failed record
         should be written to a specific table in the repository, where further
         action can be taken. To invoke one of the internal failure handlers from
-        your JavaScript, use a call similar to the following:
+        your script, use a call similar to the following (shown here for
+        JavaScript):
        </para>
        <screen>failureHandlers.deadLetterQueue.invoke(syncFailure, failureCause);</screen>
       </listitem>

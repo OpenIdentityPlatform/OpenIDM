@@ -263,39 +263,49 @@ Stopping OpenIDM (454)</screen>
  <section xml:id="info-service">
   <title>Obtaining Information About an OpenIDM Instance</title>
   
-  <para>OpenIDM includes a customizable information service that provides 
-  detailed information about a running OpenIDM instance. The information can 
-  be accessed over the REST interface, under the context  
-  <literal>https://localhost:8443/openidm/info</literal>.</para>
+  <para>
+   OpenIDM includes a customizable information service that provides detailed
+   information about a running OpenIDM instance. The information can be accessed
+   over the REST interface, under the context
+   <literal>https://localhost:8443/openidm/info</literal>.
+  </para>
   
   <para>By default, OpenIDM provides the following information:</para>
   
   <itemizedlist>
-    <listitem>
-      <para>Basic information about the health of the system.</para>
-      <para>This information can be accessed over REST at 
-      <literal>https://localhost:8443/openidm/info/ping</literal>. For example:
-      </para>
-      <screen><?dbfo pgwide="1"?>
- $ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+   <listitem>
+    <para>
+     Basic information about the health of the system.
+    </para>
+    <para>
+     This information can be accessed over REST at
+     <literal>https://localhost:8443/openidm/info/ping</literal>. For example:
+    </para>
+    <screen><?dbfo pgwide="1"?>
+ $ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/info/ping"</userinput>
 
    <computeroutput>
  {"state":"ACTIVE_READY","shortDesc":"OpenIDM ready"}
-   </computeroutput></screen>
-      <para>The information is provided by the script 
-      <filename>openidm/bin/defaults/script/info/ping.js</filename>.</para>
-    </listitem>
-    <listitem>
-      <para>Information about the current OpenIDM session.</para>
-      <para>This information can be accessed over REST at 
-      <literal>https://localhost:8443/openidm/info/login</literal>. For example:
-      </para>
-      <screen width="91"><?dbfo pgwide="1"?>
+    </computeroutput></screen>
+    <para>
+     The information is provided by the script
+     <filename>openidm/bin/defaults/script/info/ping.js</filename>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Information about the current OpenIDM session.
+    </para>
+    <para>
+     This information can be accessed over REST at
+     <literal>https://localhost:8443/openidm/info/login</literal>. For example:
+    </para>
+    <screen width="91"><?dbfo pgwide="1"?>
  $ <userinput>curl
  --cacert self-signed.crt
  --header "X-OpenIDM-Username: openidm-admin"
@@ -321,22 +331,28 @@ Stopping OpenIDM (454)</screen>
     "id": "openidm-admin"
   }
 }</computeroutput></screen>
-        <para>The information is provided by the script 
-      <filename>openidm/bin/defaults/script/info/login.js</filename>.</para>
-    </listitem>
+    <para>
+     The information is provided by the script
+     <filename>openidm/bin/defaults/script/info/login.js</filename>.
+    </para>
+   </listitem>
   </itemizedlist>
   
-  <para>You can extend or override the default information that is provided by 
-  creating your own script file and its corresponding configuration file in 
-  <filename>openidm/conf/info-<replaceable>name</replaceable>.json</filename>. 
-  Custom script files can be located anywhere, although a best practice is to 
-  place them in <filename>openidm/script/info</filename>. A sample customized 
-  script file for extending the default ping service is provided in 
-  <filename>openidm/samples/infoservice/script/info/customping.js</filename>. 
-  The corresponding configuration file is provided in 
-  <filename>openidm/samples/infoservice/conf/info-customping.json</filename>.</para>
+  <para>
+   You can extend or override the default information that is provided by
+   creating your own script file and its corresponding configuration file in
+   <filename>openidm/conf/info-<replaceable>name</replaceable>.json</filename>.
+   Custom script files can be located anywhere, although a best practice is to
+   place them in <filename>openidm/script/info</filename>. A sample customized
+   script file for extending the default ping service is provided in
+   <filename>openidm/samples/infoservice/script/info/customping.js</filename>.
+   The corresponding configuration file is provided in
+   <filename>openidm/samples/infoservice/conf/info-customping.json</filename>.
+  </para>
   
-  <para>The configuration file has the following syntax:</para>
+  <para>
+   The configuration file has the following syntax:
+  </para>
   <programlisting>
 {
     "infocontext" : "ping",
@@ -345,39 +361,51 @@ Stopping OpenIDM (454)</screen>
 } 
   </programlisting>
   
-  <para>The parameters in the configuration file are as follows:</para>
+  <para>
+   The parameters in the configuration file are as follows:
+  </para>
   <itemizedlist>
-    <listitem>
-      <para><literal>"infocontext"</literal> specifies the relative name of 
-      the info endpoint under the info context. The information can be accessed 
-      over REST at this endpoint, for example, setting 
-      <literal>"infocontext"</literal> to <literal>"mycontext/myendpoint"</literal> 
-      would make the information accessible over REST at 
-      <literal>https://localhost:8443/openidm/info/mycontext/myendpoint</literal>.
-      </para>
-    </listitem>
-    <listitem>
-      <para><literal>"type"</literal> specifies the type of the information 
-      source. Currently, only Javascript is supported, so the type must be 
-      <literal>"text/javascript"</literal>.</para>
-    </listitem>
-    <listitem>
-      <para><literal>"file"</literal> specifies the path to the Javascript 
-      file, if you do not provide a <literal>"source"</literal> parameter.</para>
-    </listitem>
-    <listitem>
-      <para><literal>"source"</literal> specifies the actual Javascript, if 
-      you have not provided a <literal>"file"</literal> parameter.</para>
-    </listitem>   
+   <listitem>
+    <para>
+     <literal>"infocontext"</literal> specifies the relative name of the info
+     endpoint under the info context. The information can be accessed over REST
+     at this endpoint, for example, setting <literal>"infocontext"</literal> to
+     <literal>"mycontext/myendpoint"</literal> would make the information
+     accessible over REST at
+     <literal>https://localhost:8443/openidm/info/mycontext/myendpoint</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>"type"</literal> specifies the type of the information source.
+     Javascript (<literal>"type" : "text/javascript"</literal>) and Groovy
+     (<literal>"type" : "groovy"</literal>) are supported.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>"file"</literal> specifies the path to the Javascript or Groovy
+     file, if you do not provide a <literal>"source"</literal> parameter.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <literal>"source"</literal> specifies the actual Javascript or Groovy
+     script, if you have not provided a <literal>"file"</literal> parameter.
+    </para>
+   </listitem>
   </itemizedlist>
   
-  <para>Additional properties can be passed to the script as depicted in this
-  configuration file (
-  <filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>).
+  <para>
+   Additional properties can be passed to the script as depicted in this
+   configuration file
+   (<filename>openidm/samples/infoservice/conf/info-<replaceable>name</replaceable>.json</filename>).
   </para>
 
-  <para>Script files in <filename>openidm/samples/infoservice/script/info/</filename> 
-  have access to the following objects:</para>
+  <para>
+   Script files in <filename>openidm/samples/infoservice/script/info/</filename>
+   have access to the following objects:
+  </para>
   
   <itemizedlist>
     <listitem>

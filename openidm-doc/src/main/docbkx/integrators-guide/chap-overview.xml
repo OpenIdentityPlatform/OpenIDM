@@ -127,9 +127,11 @@
      <varlistentry>
       <term>Script Engine</term>
       <listitem>
-       <para>The script engine is a pluggable module that provides the triggers
-       and plugin points for OpenIDM. OpenIDM currently implements a JavaScript
-       engine.</para>
+       <para>
+        The script engine is a pluggable module that provides the triggers and
+        plugin points for OpenIDM. OpenIDM currently supports JavaScript and
+        Groovy.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -190,11 +192,13 @@
        <literal>List</literal>, <literal>String</literal>,
        <literal>Number</literal>, <literal>Boolean</literal>, and
        <literal>null</literal>.</para>
-       <para>OpenIDM can serialize and deserialize these structures to and from
-       JSON as required. OpenIDM also exposes a set of triggers and functions
-       that system administrators can define in JavaScript which can natively
-       read and modify these JSON-based object model structures. OpenIDM is
-       designed to support other scripting and programming languages.</para>
+       <para>
+        OpenIDM can serialize and deserialize these structures to and from JSON
+        as required. OpenIDM also exposes a set of triggers and functions that
+        system administrators can define, in either JavaScript or Groovy, which
+        can natively read and modify these JSON-based object model structures.
+        OpenIDM is designed to support other scripting and programming languages.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
