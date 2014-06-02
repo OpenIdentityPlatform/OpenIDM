@@ -178,14 +178,16 @@
  <section xml:id="registering-servlet-filters">
   <title>Registering Additional Servlet Filters</title>
 
-  <para>You can register generic servlet filters in the embedded Jetty 
-  server to perform additional filtering tasks on requests to or responses 
-  from OpenIDM. For example, you might want to use a servlet filter to protect 
-  access to OpenIDM with an access management product such. Servlet 
-  filters are configured in files named 
-  <filename>openidm/conf/servletfilter-<replaceable>name</replaceable>.json</filename>. 
-  These servlet filter configuration files define the filter class, required 
-  libraries, and other settings.</para>
+  <para>
+   You can register generic servlet filters in the embedded Jetty server to
+   perform additional filtering tasks on requests to or responses from OpenIDM.
+   For example, you might want to use a servlet filter to protect access to
+   OpenIDM with an access management product. Servlet filters are configured in
+   files named
+   <filename>openidm/conf/servletfilter-<replaceable>name</replaceable>.json</filename>.
+   These servlet filter configuration files define the filter class, required
+   libraries, and other settings.
+  </para>
   
   <para>
    A sample servlet filter configuration is provided in the
