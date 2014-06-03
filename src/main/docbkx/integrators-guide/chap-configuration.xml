@@ -896,202 +896,466 @@ tables).</para></listitem>
   <section xml:id="adding-custom-endpoints">
     <title>Adding Custom Endpoints</title>
     
-    <para>You can customize OpenIDM to meet the specific requirements of your 
-    deployment by adding your own RESTful endpoints. Endpoints are configured 
-    in files named <filename>conf/endpoint-<replaceable>name</replaceable>.json</filename>,
-    where <replaceable>name</replaceable> generally describes the purpose of the 
-    endpoint.</para>
+    <para>
+     You can customize OpenIDM to meet the specific requirements of your
+     deployment by adding your own RESTful endpoints. Endpoints are configured
+     in files named
+     <filename>conf/endpoint-<replaceable>name</replaceable>.json</filename>,
+     where <replaceable>name</replaceable> generally describes the purpose of the
+     endpoint.
+    </para>
     
-    <para>A sample custom endpoint configuration is provided at 
-    <filename>openidm/samples/customendpoint</filename>. The sample includes 
-    two files:</para>
-    
-    <simplelist>
-      <member><filename>conf/endpoint-echo.json</filename>, which provides the 
-      configuration for the endpoint.</member>
-      <member><filename>script/echo.js</filename>, which is launched when the 
-      endpoint is accessed.</member>      
-    </simplelist>
-
-
-    
-    <para>The structure of an endpoint configuration file is as follows:</para>
-    
-    <programlisting language="javascript">
-{ 
-  "context" : "endpoint/echo", 
-  "type" : "text/javascript", 
-  "file" : "script/echo.js" 
-}    
-    </programlisting>
+    <para>
+     A sample custom endpoint configuration is provided in the
+     <filename>openidm/samples/customendpoint</filename> directory. Custom
+     endpoints in OpenIDM can be written either in JavaScript or Groovy.
+     The sample includes three files:
+    </para>
 
     <variablelist>
-      <varlistentry>
-        <term><literal>"context"</literal></term>
-        <listitem>
-          <para>The URL context path under which the endpoint is registered.
-          Currently this <emphasis>must</emphasis> be under 
-          <literal>endpoint/</literal>. An endpoint registered under the 
-          context path <literal>endpoint/echo</literal> is addressable over REST at
-          <literal>http://localhost:8080/openidm/endpoint/echo</literal> and 
-          with the internal resource API, for example 
-          <literal>openidm.read("endpoint/echo")</literal>.</para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal>"type"</literal></term>
-        <listitem>
-          <para>
-           The type of implementation. Supported types are
-           <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal>"source"</literal> or <literal>"file</literal></term>
-        <listitem>
-          <para>The actual script, inline, or a pointer to the file that 
-          contains the script. The sample script, 
-          (<filename>samples/customendpoint/script/echo.js</filename>) simply 
-          returns the HTTP request when a request is made on that endpoint.
-          </para>
-        </listitem>
-      </varlistentry>
+     <varlistentry>
+      <term>conf/endpoint-echo.json</term>
+      <listitem>
+       <para>
+        Provides the configuration for the endpoint.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>script/echo.js</term>
+      <listitem>
+       <para>
+        Supports an endpoint configured in JavaScript.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>script/echo.groovy</term>
+      <listitem>
+       <para>
+        Supports a script written in Groovy.
+       </para>
+      </listitem>
+     </varlistentry>
     </variablelist>
-    
-    <para>The endpoint script has a <literal>request</literal> variable 
-    available in its scope.</para>
 
     <para>
-     Depending on the request type, the associated structure may vary in
-     the following properties:</para>
-    
-    <variablelist>
-     <varlistentry>
-      <term><literal>method</literal></term>
-      <listitem>
-       <para>The requested operation, that is, <literal>create</literal>,
-        <literal>read</literal>, <literal>update</literal>,
-        <literal>delete</literal>, <literal>patch</literal>,
-        <literal>query</literal> or <literal>action</literal>.</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>resourceName</literal></term>
-      <listitem>
-        <para>The local identifier, without the <literal>endpoint/</literal>
-        prefix, such as <literal>echo</literal>.</para>
-      </listitem>
-     </varlistentry>
+     Endpoint configuration files have a certain structure, with defined
+     <literal>request</literal> and <literal>context</literal> global
+     variables:
+    </para>
 
-     <!-- Check carefully; these are best guesses. I haven't included
-     all options listed in the tested version of echo.js, but think these
-     are the more important ones. -->
+    <section xml:id="adding-custom-endpoints-structure">
+     <title>The Components of an Endpoint Configuration File</title>
 
-     <varlistentry>
-      <term><literal>newResourceID</literal></term>
-      <listitem>
-       <para>
-        An identifier associated with a new resource, associated with
-        the <literal>create</literal> method.
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>revision</literal></term>
-      <listitem>
-       <para>
-        The revision level associated with the method used, relative to
-        a <literal>newResourceId</literal>.
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>content</literal></term>
-      <listitem>
-       <para>
-        Content based on the latest version of the object, using
-        <literal>getObject</literal>.
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term><literal>context</literal></term>
-      <listitem>
-       <para>
-        A JSON object, which contains a set of members which define the context of a request
-       </para>
-      </listitem>
-     </varlistentry>
+     <para>
+      The <filename>conf/endpoint-echo.json</filename> configuration file
+      depicts one typical endpoint, configured to use a Groovy script
+      as specified in the <filename>script/echo.groovy</filename> file.
+     </para>
+    
+     <programlisting language="javascript">
+{
+  "file" : "echo.groovy",
+  "type" : "groovy",
+  "_file" : "echo.js",
+  "_type" : "text/javascript"
+}    
+     </programlisting>
 
-     <!-- parameters may be deleted or renamed; may be related to OPENIDM-1671
-      <varlistentry>
-        <term><literal>parameters</literal></term>
-        <listitem>
-         <para>The parameters that are passed in. For example, for an HTTP GET 
-         with <literal>?param=x</literal>, the request contains 
-         <literal>"params":{"param":"x"}</literal>.</para>
-        </listitem>
-      </varlistentry>                              -->
-    </variablelist>
-    
-    <para>A script implementation should check and reject requests for methods 
-    that it does not support. For example, the following implementation 
-    supports only the <literal>read</literal> method:</para>
-    
-    <programlisting language="javascript">
-if (request.method == "read") {
-    ...
-} else {
-    throw "Unsupported operation: " + request.method;
+     <para>
+      The <literal>"_file"</literal> and <literal>"_type"</literal> properties
+      are comments, which you can change to accommodate an endpoint written in
+      JavaScript.
+     </para>
+
+     <para>
+      If appropriate, you can also include a <literal>context</literal> property
+      in this file:
+     </para>
+
+     <programlisting language="javascript">
+  "context" : "endpoint/echo",
+     </programlisting>
+
+     <para>
+      Wildcards may also be supported in endpoint contexts. One example with
+      wildcards is <filename>endpoint-linkedView.json</filename>, available in
+      the <filename>openidm/conf</filename> directory:
+     </para>
+
+     <programlisting language="javascript">
+{
+  "context": "endpoint/linkedView/*",
+  "type" : "text/javascript",
+  "source" : "require('linkedView').fetch(request.resourceName);"
 }
-    </programlisting>
+     </programlisting>
+
+     <para>
+      The following list describes each property in the custom endpoint
+      configuration file:
+     </para>
+
+     <variablelist>
+       <varlistentry>
+         <term><literal>"type"</literal></term>
+         <listitem>
+           <para>
+            string, required
+           </para>
+           <para>
+            Specifies the type of script to be executed. Supported types include
+            <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
+           </para>
+         </listitem>
+       </varlistentry>
+       <varlistentry>
+         <term><literal>"file"</literal> or <literal>"source"</literal></term>
+         <listitem>
+           <para>
+            The actual script, inline, or a path to the file that
+            contains the script. The script files associated with this sample,
+            <filename>echo.js</filename> and <filename>echo.groovy</filename>,
+            support requests using all ForgeRock RESTful CRUD operations
+            (including PATCH, ACTION, and QUERY).
+           </para>
+         </listitem>
+       </varlistentry>
+       <varlistentry>
+        <term><literal>context</literal></term>
+        <listitem>
+         <para>
+          Notes the URI of the endpoint.
+         </para>
+        </listitem>
+       </varlistentry>
+     </variablelist>
+
+    </section>
+
+    <section xml:id="adding-custom-endpoints-request">
+     <title>Custom Endpoints and <literal>request</literal> Objects</title>
+
+     <para>The endpoint configuration file should point to a script. That
+      should have a global <literal>request</literal> variable in its scope.
+     </para>
+
+     <para>
+      Depending on the type of <literal>request</literal> type,
+      the associated <literal>content</literal> may include the following
+      properties:
+     </para>
     
-    <para>The final statement in the script is the return value. Unlike for 
-    functions, at this global scope there is no <literal>return</literal> 
-    keyword. In the following example, the value of the last statement 
-    (<literal>x</literal>) is returned.</para>
+     <variablelist>
+      <varlistentry>
+       <term><literal>method</literal></term>
+       <listitem>
+        <para>The requested operation, which may be <literal>create</literal>,
+         <literal>read</literal>, <literal>update</literal>,
+         <literal>delete</literal>, <literal>patch</literal>,
+         <literal>query</literal> or <literal>action</literal>.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>resourceName</literal></term>
+       <listitem>
+         <para>The local identifier, without the <literal>endpoint/</literal>
+         prefix, such as <literal>echo</literal>.</para>
+       </listitem>
+      </varlistentry>
+
+      <varlistentry>
+       <term><literal>newResourceID</literal></term>
+       <listitem>
+        <para>
+         An identifier associated with a new resource, associated with
+         the <literal>create</literal> method.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>additionalParameters</literal></term>
+       <listitem>
+        <para>string, required</para>
+        <para>The sample code returns request parameters from an HTTP GET
+         with <literal>?param=x</literal>, as
+         <literal>"params":{"param":"x"}</literal>.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>revision</literal></term>
+       <listitem>
+        <para>
+         The revision level associated with the method used, relative to
+         a <literal>newResourceId</literal>.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>content</literal></term>
+       <listitem>
+        <para>
+         Content based on the latest version of the object, using
+         <literal>getObject</literal>.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context</literal></term>
+       <listitem>
+        <para>
+         Based on a JSON object that contains nested attributes. The object
+         with the attributes, defines the request, based on ForgeRock REST
+         <link xlink:show="new"
+         xlink:href="integrators-guide#rest-supported-operations"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
+         Supported Operations</citetitle></link>.
+        </para>
+       </listitem>
+      </varlistentry>
+
+     </variablelist>
+
+    </section>
+
+    <section xml:id="adding-custom-endpoints-context">
+     <title>Custom Endpoints, JavaScript and Groovy Contexts</title>
+
+     <para>
+      The <literal>context</literal> property, like <literal>request</literal>,
+      is also a global variable used in endpoint scripts. It has different
+      sub-contexts for JavaScript and Groovy scripts.
+     </para>
+
+     <variablelist>
+      <para>JavaScript <literal>context</literal> properties</para>
+      <varlistentry>
+       <term>
+        <literal>context.current</literal>
+       </term>
+       <listitem>
+        <para>
+         The current context is the resource name. The associated JavaScript is
+         run in that resource.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context.http</literal></term>
+       <listitem>
+        <para>
+         The URI associated with the JavaScript context.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context.security</literal></term>
+       <listitem>
+        <para>
+         Map of JavaScript security context details.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+     <variablelist>
+      <para>
+       Groovy contexts:
+      </para>
+      <varlistentry>
+       <term><literal>context</literal></term>
+       <listitem>
+        <para>
+         The current URI. Similar to the JavaScript
+         <literal>context.current</literal> property.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context.asContext("security")</literal></term>
+       <listitem>
+        <para>
+         Groovy context associated with authentication information.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context.asContext("http")</literal></term>
+       <listitem>
+        <para>
+         Groovy context associated with HTTP request information.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+    </section>
+
+    <section xml:id="adding-custom-endpoints-more">
+     <title>Additional Custom Endpoint Parameters</title>
+
+     <para>
+      A couple of additional parameters are shown with the
+      <literal>query</literal> request method. You can review how this works
+      in the following section of the OpenIDM Installation Guide:
+      <link xlink:show="new"
+      xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="install-guide#more-sample2c"><citetitle>Sample 2c -
+      Synchronizing LDAP Group Membership</citetitle></link>.
+     </para>
     
-    <programlisting language="javascript">
-var x = "Sample return"
+     <para>The final statement in the script is the return value. Unlike for
+      functions, at this global scope there is no <literal>return</literal>
+      keyword. In the following example, the value of the last statement
+      (<literal>x</literal>) is returned.</para>
+    
+     <programlisting language="javascript">var x = "Sample return";
 functioncall();
-x
-    </programlisting>
-    
-    <para>The following example uses the sample provided in 
-    <literal>openidm/samples/customendpoint</literal> and shows the complete 
-    request structure, which is returned by the query.</para>
+x   </programlisting>
 
-    <!-- May need to revise -->
+    </section>
 
-    <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids"
+    <section xml:id="adding-custom-endpoints-chains">
+     <title>Custom Endpoints, Contexts, and Chains</title>
 
+     <para>
+      Custom endpoints include contexts that may be "wrapped" in various layers,
+      analogous to the way network packets can be wrapped at ascending network
+      levels.
+     </para>
 
- {
-   "remainingPagedResults": -1,
-   "pagedResultsCookie": null,
-   "resultCount": 1,
-   "result": [
-     {
-       "resourceName": "",
-       "queryId": "query-all-ids",
-       "parameters": null,
-       "content": null,
-       "queryExpression": null,
-       "queryFilter": null,
-       "context": null,
-       "pageSize": 0,
-       "pagedResultsOffset": 0,
-       "method": "query",
-       "pagedResultsCookie": null
+     <para>
+      As an example, start with a request such as the following:
+     </para>
+
+     <screen>
+GET http://localhost:8080/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
+     </screen>
+
+     <para>
+      A request at an endpoint starts with a root context, associated with a
+      specific context ID, and the
+      <literal>org.forgerock.json.resource.RootContext</literal>.
+     </para>
+
+     <para>
+      The root context is "wrapped" in the security context that holds the
+      authentication and authorization detail for the request. The associated
+      class is <literal>org.forgerock.json.resource.SecurityContext</literal>,
+      with an <literal>authenticationId</literal> user name such as
+      <literal>openidm-admin</literal>, and associated roles such as
+      <literal>openidm-authorized</literal>.
+     </para>
+
+     <para>
+      That security context is further "wrapped" by the HTTP context, with the
+      target URI. The class is
+      <literal>org.forgerock.json.resource.ServerContext</literal>, and it is
+      associated with the normal parameters of a REST call, including a user
+      agent, authorization token, and method.
+     </para>
+
+     <para>
+      The HTTP context is then further "wrapped" by the server / router context.
+      That class is <literal>org.forgerock.json.resource.RouterContext</literal>,
+      with an endpoint URI. You may see several layers of server and router
+      contexts.
+     </para>
+
+    </section>
+
+   <section xml:id="adding-custom-endpoints-example">
+     <title>Custom Endpoint Example</title>
+
+     <para>The following example uses the sample provided in the
+      <filename>openidm/samples/customendpoint</filename> directory, copied to
+      the <filename>openidm/conf</filename> and
+      <filename>openidm/script</filename> directories. The output from the query
+      shows the complete request structure.
+     </para>
+
+     <screen width="90">$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids&amp;_prettyPrint=true"
+     </userinput>
+     <computeroutput>{
+ "result" : [ {
+     "method" : "query",
+     "resourceName" : "",
+     "pagedResultsCookie" : null,
+     "pagedResultsOffset" : 0,
+     "pageSize" : 0,
+     "queryExpression" : null,
+     "queryId" : "query-all-ids",
+     "queryFilter" : "null",
+     "parameters" : { },
+     "context" : {
+       "parent" : {
+         "parent" : {
+           "parent" : {
+             "parent" : {
+               "parent" : {
+                 "parent" : null,
+                 "contextName" : "root",
+                 "rootContext" : true,
+                 "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
+               },
+               "contextName" : "security",
+               "authenticationId" : "openidm-admin",
+               "authorizationId" : {
+                 "id" : "openidm-admin",
+                 "component" : "repo/internal/user",
+                 "roles" : [ "openidm-admin", "openidm-authorized" ]
+               },
+               "rootContext" : false,
+               "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
+             },
+             "headers" : {
+               "X-OpenIDM-Username" : [ "openidm-admin" ],
+               "Host" : [ "localhost:8443" ],
+               "Accept" : [ "*/*" ],
+               "X-OpenIDM-Password" : [ "openidm-admin" ],
+               "User-Agent" : [ "curl/7.19.7 (x86_64-redhat-linux-gnu)
+                 libcurl/7.19.7 NSS/3.14.0.0 zlib/1.2.3 libidn/1.18
+                 libssh2/1.4.2" ]
+             },
+             "parameters" : {
+               "_queryId" : [ "query-all-ids" ],
+               "_prettyPrint" : [ "true" ]
+             },
+             "external" : true,
+             "contextName" : "http",
+             "method" : "GET",
+             "path" : "https://localhost:8443/openidm/endpoint/echo",
+             "rootContext" : false,
+             "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
+           },
+           "contextName" : "apiInfo",
+           "apiVersion" : "2.3.1-SNAPSHOT",
+           "apiName" : "org.forgerock.commons.json-resource-servlet",
+           "rootContext" : false,
+           "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
+         },
+         "contextName" : "server",
+         "rootContext" : false,
+         "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
+       },
+       "uriTemplateVariables" : { },
+       "contextName" : "router",
+       "matchedUri" : "endpoint/echo",
+       "baseUri" : "endpoint/echo",
+       "rootContext" : false,
+       "id" : "43576021-fe54-4468-8d10-09b14af2a36d"
      }
-   ]
- }</screen>
+ } ],
+ "resultCount" : 1,
+ "pagedResultsCookie" : null,
+ "remainingPagedResults" : -1
+} </computeroutput> </screen>
     
     <para>You must protect access to any custom endpoints by configuring the 
     appropriate authorization for those contexts. For more information, see 
@@ -1099,6 +1363,7 @@ x
     xlink:role="http://docbook.org/xlink/role/olink">
     <citetitle>Authorization</citetitle></link> section.</para>
 
+   </section>
   </section>
 
   <section xml:id="config-default-directories">
