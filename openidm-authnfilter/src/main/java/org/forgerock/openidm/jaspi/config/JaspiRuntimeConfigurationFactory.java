@@ -151,12 +151,18 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
             moduleConfig.add("className", className);
         }
 
+        // set the classname config so the actual auth module gets wrapped in a IDMJaspiModuleWrapper:
+        // replace the resolved auth module classname with IDMJaspiModuleWrapper's classname
+        // and put the resolved auth module classname as a property unless we've already done this;
+        // this check is necessary for OPENIDM-1848
         String className = moduleConfig.get("className").asString();
-        moduleConfig.put("className", IDMJaspiModuleWrapper.class.getName());
-        if (!moduleConfig.isDefined("properties")) {
-            moduleConfig.put("properties", new HashMap<String, Object>());
+        if (!IDMJaspiModuleWrapper.class.getName().equals(className)) {
+            moduleConfig.put("className", IDMJaspiModuleWrapper.class.getName());
+            if (!moduleConfig.isDefined("properties")) {
+                moduleConfig.put("properties", new HashMap<String, Object>());
+            }
+            moduleConfig.get("properties").put("authModuleClassName", className);
         }
-        moduleConfig.get("properties").put("authModuleClassName", className);
 
         return true;
     }
