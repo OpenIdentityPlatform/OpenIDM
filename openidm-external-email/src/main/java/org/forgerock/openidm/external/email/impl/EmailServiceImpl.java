@@ -74,9 +74,9 @@ public class EmailServiceImpl implements SingletonResourceProvider {
             ResultHandler<JsonValue> handler) {
         Map<String, Object> result = new HashMap<String, Object>();
         logger.debug("External Email service action called for {} with {}", request
-                .getResourceName(), request.getAdditionalParameters());
+                .getResourceName(), request.getContent());
         try {
-            emailClient.send(request.getAdditionalParameters());
+            emailClient.send(request.getContent());
         } catch (ResourceException e) {
            handler.handleError(e);
         }

@@ -96,26 +96,35 @@ public class EmailClient {
         session = Session.getInstance(props);
     }
 
-    public void send(Map<String, String> params) throws BadRequestException {
-        // _from : the From: address
-        // _to : The To: recipients - a comma separated email address strings 
-        // _cc: The Cc: recipients - a comma separated email address strings 
-        // _bcc: The Bcc: recipients - a comma separated email address strings 
-        // _subject: The subject
-        // _body : the message body
+    /**
+     * Send the email according to the parameters in <em>params</em>:
+     *
+     * from : the From: address
+     * to : The To: recipients - a comma separated email address strings
+     * cc: The Cc: recipients - a comma separated email address strings
+     * bcc: The Bcc: recipients - a comma separated email address strings
+     * subject: The subject
+     * body : the message body
+     *
+     * @param params a JsonValue containing the from, to, cc, bcc, subject, and body parameters
+     * @throws BadRequestException
+     */
+    public void send(JsonValue params) throws BadRequestException {
         InternetAddress from = null;
         InternetAddress[] to = null;
         InternetAddress[] cc = null;
         InternetAddress[] bcc = null;
 
-        String subject = (String) params.get("_subject");
-        if (subject == null) {
-            subject = "<no subject>";
-        }
+        String subject = params.get("subject")
+                .defaultTo(params.get("_subject"))
+                .defaultTo("<no subject>")
+                .asString();
 
         try {
-            if (params.get("_from") != null) {
-                from = new InternetAddress((String) params.get("_from"));
+            if (!params.get("from").isNull()) {
+                from = new InternetAddress(params.get("from").asString());
+            } else if (!params.get("_from").isNull()) {
+                from = new InternetAddress(params.get("_from").asString());
             } else if (fromAddr != null) {
                 from = new InternetAddress(fromAddr);
             } else { // we don't have a from, need to throw
@@ -126,22 +135,26 @@ public class EmailClient {
         }
 
         try {
-            to = InternetAddress.parse((String) params.get("_to"));
+            to = InternetAddress.parse(params.get("to").defaultTo(params.get("_to")).asString());
         } catch (AddressException ae) {
             throw new BadRequestException("Bad To: email address");
         }
 
         try {
-            if (params.get("_cc") != null) {
-                cc = InternetAddress.parse((String) params.get("_cc"));
+            if (!params.get("cc").isNull()) {
+                cc = InternetAddress.parse(params.get("cc").asString());
+            } else if (!params.get("cc").isNull()) {
+                cc = InternetAddress.parse(params.get("_cc").asString());
             }
         } catch (AddressException ae) {
             throw new BadRequestException("Bad Cc: email address");
         }
 
         try {
-            if (params.get("_bcc") != null) {
-                bcc = InternetAddress.parse((String) params.get("_bcc"));
+            if (!params.get("bcc").isNull()) {
+                bcc = InternetAddress.parse(params.get("bcc").asString());
+            } else if (!params.get("_bcc").isNull()) {
+                bcc = InternetAddress.parse(params.get("_bcc").asString());
             }
         } catch (AddressException ae) {
             throw new BadRequestException("Bad Bcc: email address");
@@ -159,11 +172,13 @@ public class EmailClient {
             }
             message.setSubject(subject);
 
-            String type = (String) params.get("_type");
-            if (type == null) {
-                type = "text/plain";
-            }
-            Object body = params.get("_body");
+            String type = params.get("type")
+                    .defaultTo(params.get("_type"))
+                    .defaultTo("text/plain")
+                    .asString();
+            Object body = params.get("body")
+                    .defaultTo(params.get("_body"))
+                    .getObject();
 
             if (type.equalsIgnoreCase("text/plain") || type.equalsIgnoreCase("text/html") || type.equalsIgnoreCase("text/xml")) {
                 if (body != null && body instanceof String) {
