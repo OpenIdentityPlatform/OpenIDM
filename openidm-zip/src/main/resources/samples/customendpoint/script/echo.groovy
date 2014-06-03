@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,7 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-
 import org.forgerock.json.resource.ActionRequest
 import org.forgerock.json.resource.CreateRequest
 import org.forgerock.json.resource.DeleteRequest
@@ -37,6 +36,7 @@ if (request instanceof CreateRequest) {
             method: "create",
             resourceName: request.resourceName,
             newResourceId: request.newResourceId,
+            parameters: request.additionalParameters,
             content: request.content.getObject(),
             context: context
     ]
@@ -44,6 +44,7 @@ if (request instanceof CreateRequest) {
     return [
             method: "read",
             resourceName: request.resourceName,
+            parameters: request.additionalParameters,
             context: context
     ]
 } else if (request instanceof UpdateRequest) {
@@ -51,6 +52,7 @@ if (request instanceof CreateRequest) {
             method: "update",
             resourceName: request.resourceName,
             revision: request.revision,
+            parameters: request.additionalParameters,
             content: request.content.getObject(),
             context: context
     ]
@@ -59,28 +61,32 @@ if (request instanceof CreateRequest) {
             method: "action",
             resourceName: request.resourceName,
             revision: request.revision,
-            patch: null/*request.patch*/,
+            patch: request.patchOperations,
+            parameters: request.additionalParameters,
             context: context
     ]
 } else if (request instanceof QueryRequest) {
+    // query results must be returned as a list of maps
     return [
-            method: "query",
-            resourceName: request.resourceName,
-            parameters: request.additionalQueryParameters,
-            pagedResultsCookie: request.pagedResultsCookie,
-            pagedResultsOffset: request.pagedResultsOffset,
-            pageSize: request.pageSize,
-            queryExpression: request.queryExpression,
-            queryId: request.queryId,
-            queryFilter: request.queryFilter.toString(),
-            content: request.content.getObject(),
-            context: context
+            [
+                    method: "query",
+                    resourceName: request.resourceName,
+                    pagedResultsCookie: request.pagedResultsCookie,
+                    pagedResultsOffset: request.pagedResultsOffset,
+                    pageSize: request.pageSize,
+                    queryExpression: request.queryExpression,
+                    queryId: request.queryId,
+                    queryFilter: request.queryFilter.toString(),
+                    parameters: request.additionalParameters,
+                    context: context
+            ]
     ]
 } else if (request instanceof DeleteRequest) {
     return [
             method: "delete",
             resourceName: request.resourceName,
             revision: request.revision,
+            parameters: request.additionalParameters,
             context: context
     ]
 } else if (request instanceof ActionRequest) {
@@ -88,9 +94,9 @@ if (request instanceof CreateRequest) {
             method: "action",
             actionId: request.actionId,
             content: request.content.getObject(),
-            parameters: request.additionalActionParameters,
+            parameters: request.additionalParameters,
             context: context
     ]
 } else {
-    throw new NotSupportedException(request.getClass());
+    throw new NotSupportedException(request.getClass().getName());
 }
