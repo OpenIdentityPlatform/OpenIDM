@@ -2135,15 +2135,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
             }
         } catch (ResourceException e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to get OperationHelper", e);
-            }
+            logger.debug("Failed to get OperationHelper", e);
             throw new RuntimeException(e);
-        } catch (Exception e) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Failed to get OperationOptionsBuilder", e);
-            }
-
+        }  catch (UnsupportedOperationException e) {
+            logger.debug("Failed to get OperationOptionsBuilder", e);
+            throw new NotFoundException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+        }  catch (Exception e) {
+            logger.debug("Failed to get OperationOptionsBuilder", e);
             throw new InternalServerErrorException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
         }
         return stage;
