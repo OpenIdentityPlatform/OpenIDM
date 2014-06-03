@@ -603,7 +603,7 @@ $ curl \
    
    <screen>"ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"]</screen>
    
-   <para>Now change the user on the OpdenIDM side with the following REST
+   <para>Now change the user on the OpenIDM side with the following REST
    call (on UNIX):</para>
    
    <screen width="100"><?dbfo pgwide="1"?>$ curl \
