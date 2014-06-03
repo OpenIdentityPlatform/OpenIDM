@@ -409,7 +409,7 @@ public class TaskScannerJob {
                     // If the object changed since we queried, get the latest
                     // and check if it's still in a state we want to process the task.
                     _input = retrieveObject(resourceID, id);
-                    String currentStartDateStr = _input.get(startField).asString();
+                    String currentStartDateStr = (_input.get(startField) == null)  ? null : _input.get(startField).asString();
                     String currentCompletedDateStr = (_input.get(completedField) == null)  ? null : _input.get(completedField).asString();
                     if (currentCompletedDateStr == null && (currentStartDateStr == null || currentStartDateStr.equals(expectedStartDateStr))) {
                         retryClaimTask = true;
