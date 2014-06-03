@@ -277,8 +277,13 @@
                 openidm.create("repo/ui/notification/", null, newContractorNotification)
                 
                 if (new Boolean(emailEnabled)) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
-                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The requested user ' + userName + ' was successfully created']
+                    emailParams = [
+                        from : 'usecasetest@forgerock.com', 
+                        to : 'notification@example.com', 
+                        subject : 'Use Case Test Notification', 
+                        type : 'text/plain', 
+                        body : 'The requested user ' + userName + ' was successfully created'
+                    ]
                     openidm.action("external/email", 'sendEmail',  emailParams);
                     emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
                     openidm.action("external/email", 'sendEmail', emailParams);
@@ -310,8 +315,13 @@
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
                 
                 if (new Boolean(emailEnabled)) {
-                    emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
-                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'Your request to create user ' + userName + ' was denied.']
+                    emailParams = [
+                        from : 'usecasetest@forgerock.com', 
+                        to : 'notification@example.com', 
+                        subject : 'Use Case Test Notification', 
+                        type : 'text/plain', 
+                        body : 'Your request to create user ' + userName + ' was denied.'
+                    ]
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
                 
