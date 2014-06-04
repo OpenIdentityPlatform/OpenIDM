@@ -925,7 +925,7 @@ tables).</para></listitem>
       <term>script/echo.js</term>
       <listitem>
        <para>
-        Supports an endpoint configured in JavaScript.
+        Supports an endpoint written in JavaScript.
        </para>
       </listitem>
      </varlistentry>
@@ -940,9 +940,13 @@ tables).</para></listitem>
     </variablelist>
 
     <para>
-     Endpoint configuration files have a certain structure, with defined
-     <literal>request</literal> and <literal>context</literal> global
-     variables:
+     Endpoint configuration files have a certain structure. They may cite
+     scripts written in JavaScript or Groovy.
+    </para>
+
+    <para>
+     The cited scripts include defined <literal>request</literal> and
+     <literal>context</literal> global variables.
     </para>
 
     <section xml:id="adding-custom-endpoints-structure">
@@ -979,9 +983,11 @@ tables).</para></listitem>
      </programlisting>
 
      <para>
-      Wildcards may also be supported in endpoint contexts. One example with
-      wildcards is <filename>endpoint-linkedView.json</filename>, available in
-      the <filename>openidm/conf</filename> directory:
+      The endpoint configuration can specify the route on which the endpoint is
+      available. For an example, look at the
+      <filename>conf/endpoint-linkedView.json</filename> file. The code shown
+      is not really a wildcard. It declares the route on which the endpoint is
+      available.
      </para>
 
      <programlisting language="javascript">
@@ -1026,7 +1032,8 @@ tables).</para></listitem>
         <term><literal>context</literal></term>
         <listitem>
          <para>
-          Notes the URI of the endpoint.
+          Requests are dispatched, routed, handled, processed, and more, in a
+          <literal>context</literal>.
          </para>
         </listitem>
        </varlistentry>
@@ -1034,15 +1041,127 @@ tables).</para></listitem>
 
     </section>
 
+    <section xml:id="adding-custom-endpoints-context-components">
+     <title>Context Component Access Methods</title>
+
+     <para>
+      For both JavaScript and Groovy, the context consists of a chain of
+      structures that provide different levels of detail. The detail varies
+      depending on the context type:
+     </para>
+
+     <variablelist>
+      <varlistentry>
+       <term><literal>security</literal></term>
+       <listitem>
+        <para>
+         Provides authentication / authorization data.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>http</literal></term>
+       <listitem>
+        <para>
+         Provides data from the HTTP request.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>
+        <literal>router</literal>
+       </term>
+       <listitem>
+        <para>
+         Provides data on where the information is sent.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+     <para>
+      JavaScript and Groovy access these context structures in different ways.
+      The term shown is the JavaScript access method; the definition includes
+      the Groovy access method.
+     </para>
+
+     <variablelist>
+      <varlistentry>
+       <term><literal>context.current</literal></term>
+       <listitem>
+        <para>
+         In Groovy, known simply as <literal>context</literal>
+        </para>
+        <para>
+         The current context in which the request is handled by a script or a
+         script-hook.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>
+        <literal>context.http</literal>
+       </term>
+       <listitem>
+        <para>
+         In Groovy, known as one of the following:
+         <simplelist>
+          <member>
+           <literal>
+            context.asContext(org.forgerock.json.resource.servlet.HttpContext.class)
+           </literal>
+          </member>
+          <member>
+           <literal>
+            context.getContext("http")
+           </literal>
+          </member>
+         </simplelist>
+        </para>
+        <para>
+         The HTTP context.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>context.security</literal></term>
+       <listitem>
+        <para>
+         In Groovy, known as one of the following:
+         <simplelist>
+          <member>
+           <literal>
+            context.asContext(org.forgerock.json.resource.SecurityContext.class)
+           </literal>
+          </member>
+          <member>
+           <literal>
+            context.getContext("security")
+           </literal>
+          </member>
+         </simplelist>
+        </para>
+        <para>
+         The security context.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+    </section>
+
     <section xml:id="adding-custom-endpoints-request">
      <title>Custom Endpoints and <literal>request</literal> Objects</title>
 
-     <para>The endpoint configuration file should point to a script. That
-      should have a global <literal>request</literal> variable in its scope.
+     <para>The endpoint configuration file does not just point to a script. It
+      should specify a script <literal>source</literal> or a script
+      <literal>file</literal> as described in
+      <xref linkend="adding-custom-endpoints-structure" /> The script will be
+      invoked with a global <literal>request</literal> variable in its scope.
      </para>
 
      <para>
-      Depending on the type of <literal>request</literal> type,
+      Depending on the type of <literal>request</literal>,
       the associated <literal>content</literal> may include the following
       properties:
      </para>
@@ -1066,7 +1185,7 @@ tables).</para></listitem>
       </varlistentry>
 
       <varlistentry>
-       <term><literal>newResourceID</literal></term>
+       <term><literal>newResourceId</literal></term>
        <listitem>
         <para>
          An identifier associated with a new resource, associated with
@@ -1077,7 +1196,7 @@ tables).</para></listitem>
       <varlistentry>
        <term><literal>additionalParameters</literal></term>
        <listitem>
-        <para>string, required</para>
+        <para>string, not required</para>
         <para>The sample code returns request parameters from an HTTP GET
          with <literal>?param=x</literal>, as
          <literal>"params":{"param":"x"}</literal>.</para>
@@ -1119,78 +1238,55 @@ tables).</para></listitem>
 
     </section>
 
-    <section xml:id="adding-custom-endpoints-context">
-     <title>Custom Endpoints, JavaScript and Groovy Contexts</title>
+   <section xml:id="adding-custom-endpoints-chains">
+    <title>Custom Endpoints, Contexts, and Chains</title>
 
-     <para>
-      The <literal>context</literal> property, like <literal>request</literal>,
-      is also a global variable used in endpoint scripts. It has different
-      sub-contexts for JavaScript and Groovy scripts.
-     </para>
+    <para>
+     Custom endpoints include contexts that may be "wrapped" in various layers,
+     analogous to the way network packets can be wrapped at ascending network
+     levels.
+    </para>
 
-     <variablelist>
-      <para>JavaScript <literal>context</literal> properties</para>
-      <varlistentry>
-       <term>
-        <literal>context.current</literal>
-       </term>
-       <listitem>
-        <para>
-         The current context is the resource name. The associated JavaScript is
-         run in that resource.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>context.http</literal></term>
-       <listitem>
-        <para>
-         The URI associated with the JavaScript context.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>context.security</literal></term>
-       <listitem>
-        <para>
-         Map of JavaScript security context details.
-        </para>
-       </listitem>
-      </varlistentry>
-     </variablelist>
+    <para>
+     As an example, start with a request such as the following:
+    </para>
 
-     <variablelist>
-      <para>
-       Groovy contexts:
-      </para>
-      <varlistentry>
-       <term><literal>context</literal></term>
-       <listitem>
-        <para>
-         The current URI. Similar to the JavaScript
-         <literal>context.current</literal> property.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>context.asContext("security")</literal></term>
-       <listitem>
-        <para>
-         Groovy context associated with authentication information.
-        </para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><literal>context.asContext("http")</literal></term>
-       <listitem>
-        <para>
-         Groovy context associated with HTTP request information.
-        </para>
-       </listitem>
-      </varlistentry>
-     </variablelist>
+    <screen width="90">
+     GET http://localhost:8080/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
+    </screen>
 
-    </section>
+    <para>
+     A request at an endpoint starts with a root context, associated with a
+     specific context ID, and the
+     <literal>org.forgerock.json.resource.RootContext</literal> context.
+    </para>
+
+    <para>
+     The root context is "wrapped" in the security context that holds the
+     authentication and authorization detail for the request. The associated
+     class is <literal>org.forgerock.json.resource.SecurityContext</literal>,
+     with an <literal>authenticationId</literal> user name such as
+     <literal>openidm-admin</literal>, and associated roles such as
+     <literal>openidm-authorized</literal>.
+    </para>
+
+    <para>
+     That security context is further "wrapped" by the HTTP context, with the
+     target URI. The class is
+     <literal>org.forgerock.json.resource.HttpContext</literal>, and it is
+     associated with the normal parameters of a REST call, including a user
+     agent, authorization token, and method.
+    </para>
+
+    <para>
+     The HTTP context is then further "wrapped" by one or more server / router
+     context(s). That class is
+     <literal>org.forgerock.json.resource.RouterContext</literal>,
+     with an endpoint URI. You may see several layers of server and router
+     contexts.
+    </para>
+
+   </section>
 
     <section xml:id="adding-custom-endpoints-more">
      <title>Additional Custom Endpoint Parameters</title>
@@ -1205,63 +1301,14 @@ tables).</para></listitem>
       Synchronizing LDAP Group Membership</citetitle></link>.
      </para>
     
-     <para>The final statement in the script is the return value. Unlike for
-      functions, at this global scope there is no <literal>return</literal>
-      keyword. In the following example, the value of the last statement
+     <para>The final statement in the script is the return value. In the
+      following example, there is no <literal>return</literal> keyword, and
+      the value of the last statement
       (<literal>x</literal>) is returned.</para>
     
      <programlisting language="javascript">var x = "Sample return";
 functioncall();
 x   </programlisting>
-
-    </section>
-
-    <section xml:id="adding-custom-endpoints-chains">
-     <title>Custom Endpoints, Contexts, and Chains</title>
-
-     <para>
-      Custom endpoints include contexts that may be "wrapped" in various layers,
-      analogous to the way network packets can be wrapped at ascending network
-      levels.
-     </para>
-
-     <para>
-      As an example, start with a request such as the following:
-     </para>
-
-     <screen>
-GET http://localhost:8080/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
-     </screen>
-
-     <para>
-      A request at an endpoint starts with a root context, associated with a
-      specific context ID, and the
-      <literal>org.forgerock.json.resource.RootContext</literal>.
-     </para>
-
-     <para>
-      The root context is "wrapped" in the security context that holds the
-      authentication and authorization detail for the request. The associated
-      class is <literal>org.forgerock.json.resource.SecurityContext</literal>,
-      with an <literal>authenticationId</literal> user name such as
-      <literal>openidm-admin</literal>, and associated roles such as
-      <literal>openidm-authorized</literal>.
-     </para>
-
-     <para>
-      That security context is further "wrapped" by the HTTP context, with the
-      target URI. The class is
-      <literal>org.forgerock.json.resource.ServerContext</literal>, and it is
-      associated with the normal parameters of a REST call, including a user
-      agent, authorization token, and method.
-     </para>
-
-     <para>
-      The HTTP context is then further "wrapped" by the server / router context.
-      That class is <literal>org.forgerock.json.resource.RouterContext</literal>,
-      with an endpoint URI. You may see several layers of server and router
-      contexts.
-     </para>
 
     </section>
 
