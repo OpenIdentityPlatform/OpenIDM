@@ -2237,15 +2237,15 @@ $ more samples/usecase/usecase2/conf/external.email.json
      <screen><?dbfo pgwide="1"?><userinput>$ cd /path/to/openidm/samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml
 $ grep emailParams newUserCreate.bpmn20.xml</userinput>
      <computeroutput>
-emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com',
+emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
 openidm.action("external/email", 'sendEmail',  emailParams);
-emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
+emailParams.body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
 openidm.action("external/email", 'sendEmail', emailParams);
-emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com',
+emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
 openidm.action("external/email", 'sendEmail', emailParams);</computeroutput>
      </screen>
      <para>
-      Change the <literal>_from</literal> and <literal>_to</literal> parameters
+      Change the <literal>from</literal> and <literal>to</literal> parameters
       to reflect valid email addresses.
      </para>
     </step>
