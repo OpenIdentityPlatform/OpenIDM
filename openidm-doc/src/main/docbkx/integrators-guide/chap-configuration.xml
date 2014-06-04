@@ -324,11 +324,12 @@
   example shows excerpts of the default configuration for an OpenIDM instance
   started with Sample 1.</para>
   <screen>
- $ <userinput>curl --request GET
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --cacert self-signed.crt
- https://localhost:8443/openidm/config  </userinput>
+ $ <userinput>curl \
+ --request GET \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --cacert self-signed.crt \
+ https://localhost:8443/openidm/config</userinput>
    <computeroutput>
 {
    "configurations": [
@@ -376,13 +377,13 @@
   The following example shows the default <literal>audit</literal>
   configuration.</para>
 
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- https://localhost:8443/openidm/config/audit
-
+  <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/config/audit"</userinput>
+<computeroutput>
 {
    "eventTypes": {
      "recon": {},
@@ -417,7 +418,8 @@
        "logType": "repository"
      }
    ]
-}</screen>
+} </computeroutput>
+  </screen>
 
   <para>Multiple instance configuration objects are found under
   <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable
@@ -430,14 +432,13 @@
           xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
     First IDM Sample</citetitle></link> of the OpenIDM Installation Guide.</para>
 
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- https://localhost:8443/openidm/config/provisioner.openicf/xml
-
-
+  <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/config/provisioner.openicf/xml"</userinput>
+<computeroutput>
   {
     "operationTimeout": {
       "SCRIPT_ON_CONNECTOR": -1,
@@ -548,19 +549,22 @@
       "minIdle": 1,
       "maxWait": 150000
     }
-  }</screen>
+  }
+</computeroutput>
+  </screen>
 
   <para>You can change the configuration over REST by using an HTTP PUT request 
   to modify the required configuration object. The following example modifies 
   the <filename>router.json</filename> file to remove all filters, effectively 
   bypassing any policy validation.</para>
   
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request PUT
+  <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
  --data '{
    "filters" : [
      {
@@ -570,10 +574,9 @@
        }
      }
    ]
-   }'
- "https://localhost:8443/openidm/config/router"
-
-
+   }' \
+ "https://localhost:8443/openidm/config/router"</userinput>
+<computeroutput>
 {
   "filters": [
     {
@@ -583,7 +586,8 @@
       }
     }
   ]
-}</screen>
+} </computeroutput>
+  </screen>
 
   <para>See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
@@ -1322,12 +1326,13 @@ x   </programlisting>
       shows the complete request structure.
      </para>
 
-     <screen width="90">$ <userinput>curl \
+     <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/endpoint/echo?_queryId=query-all-ids"
      </userinput>
      <computeroutput>{
  "result" : [ {
