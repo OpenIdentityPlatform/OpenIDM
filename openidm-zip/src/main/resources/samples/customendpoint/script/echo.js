@@ -57,6 +57,7 @@
                 context: context.current
                 };
     } else if (request.method === "query") {
+        // query results must be returned as a list of maps
         return [ {
                 method: "query",
                 resourceName: request.resourceName,
