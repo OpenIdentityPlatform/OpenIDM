@@ -25,7 +25,9 @@
 package org.forgerock.openidm.servlet.internal;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
@@ -81,6 +83,11 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
         }
 
         if (isSecurityContextPopulated(securityContext)) {
+            JsonValue roles = new JsonValue(securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES));
+            if (roles.isNull() || roles.size() == 0) {
+                throw new ForbiddenException("No roles assigned");
+            }
+
             return securityContext;
         }
 
@@ -93,8 +100,7 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
         try {
             return !StringUtils.isEmpty(context.getAuthenticationId())
                 && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_ID).toString())
-                && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString())
-                && context.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES) != null;
+                && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString());
         } catch (NullPointerException e) {
             return false;
         }
