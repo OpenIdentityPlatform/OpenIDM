@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.script.ScriptException;
+
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -53,16 +55,16 @@ import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
-import org.forgerock.openidm.sync.TriggerContext;
-import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.sync.TriggerContext;
+import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.script.exception.ScriptThrownException;
+import org.forgerock.script.source.SourceUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.script.ScriptException;
 
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
@@ -240,10 +242,10 @@ class ObjectMapping {
         for (JsonValue jv : config.get("policies").expect(List.class)) {
             policies.add(new Policy(service, jv));
         }
-        JsonValue defaultMappingConfig = config.get("defaultMapping");
-        if (!defaultMappingConfig.isNull()) {
-            defaultMapping = Scripts.newInstance("ObjectMapping", defaultMappingConfig);
-        }
+        defaultMapping = Scripts.newInstance("ObjectMapping", config.get("defaultMapping").defaultTo(
+                new JsonValue(new HashMap<String, Object>())
+                    .put(SourceUnit.ATTR_TYPE, "text/javascript")
+                    .put(SourceUnit.ATTR_NAME, "roles/defaultMapping.js")));
         onCreateScript = Scripts.newInstance("ObjectMapping", config.get("onCreate"));
         onUpdateScript = Scripts.newInstance("ObjectMapping", config.get("onUpdate"));
         onDeleteScript = Scripts.newInstance("ObjectMapping", config.get("onDelete"));

@@ -23,8 +23,9 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
@@ -33,6 +34,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
+import org.forgerock.script.ScriptRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -50,6 +52,7 @@ public class ObjectMappingTest {
         Assert.assertNotNull(config, "sync configuration is not found");
         JsonValue syncConfig = new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
         JsonValue mappingConfig = syncConfig.get("mappings").get(0);
+        Scripts.init(mock(ScriptRegistry.class));
         testMapping = new TestObjectMapping(null, mappingConfig);
     }
 
