@@ -5,17 +5,7 @@
         "driverClass" : "org.h2.Driver",
         "jdbcUrl" : "jdbc:h2:&{launcher.working.location}/db/openidm;MODE=MySQL;INIT=RUNSCRIPT FROM '&{launcher.working.location}/db/scripts/h2/openidm.sql'",
         "username" : "sa",
-        "password" : {
-            "$crypto" : {
-                "value" : {
-                    "iv" : "9Y8yXfkc55eeNtRcl/c6BA==",
-                    "data" : "58IoH2/US0AMpsJTCGEb/Q==",
-                    "cipher" : "AES/CBC/PKCS5Padding",
-                    "key" : "openidm-sym-default"
-                },
-                "type" : "x-simple-encryption"
-            }
-        },
+        "password" :  "",
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
         "defaultCatalog" : "openidm",
@@ -26,14 +16,18 @@
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
             "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey=CONCAT('/', ${field}) AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
-            "get-users-of-direct-role" : "select 'userName' as propkey, propvalue from ${_dbSchema}.${_propTable} where ${_mainTable}_id IN (SELECT prop.${_mainTable}_id from ${_dbSchema}.${_propTable} prop WHERE prop.propkey='/roles' AND prop.propvalue regexp concat('^(.*,)?',${role},'(,.*)?$')) and propkey = '/username'",
+            "get-users-of-direct-role" : "select obj.fullobject from ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id  INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id where objtype.objecttype = ${_resource} AND prop.propKey LIKE '/roles/%' AND prop.propValue = ${role}",
             "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "query-all-sorted-asc" : "select obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id INNER JOIN ${_dbSchema}.${_propTable} prop on obj.id = prop.managedobjects_id where prop.propkey = ${sortfield} ORDER BY propvalue ASC",
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
-            "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )",
-            "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))"
+            "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id LEFT OUTER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id AND complete.propkey=${taskState.completed} INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propvalue is NULL )",
+            "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
+            "get-managed-users" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "get-managed-users-filtered" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} orderby on obj.id = orderby.managedobjects_id and orderby.propkey = CONCAT('/',${orderBy}) INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN orderby.propvalue END asc, CASE WHEN ${orderByDir} = 'desc' THEN orderby.propvalue END desc  LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "get-managed-users-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource}",
+            "get-managed-users-filtered-count" : "SELECT concat('{ \"total\":',COUNT(*),'}') as fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objTypes ON obj.objecttypes_id = objTypes.id and objTypes.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} userName on obj.id = userName.${_mainTable}_id and userName.propkey = '/userName' INNER JOIN ${_dbSchema}.${_propTable} givenName on obj.id = givenName.${_mainTable}_id and givenName.propkey = '/givenName' INNER JOIN ${_dbSchema}.${_propTable} sn on obj.id = sn.${_mainTable}_id and sn.propkey = '/sn' INNER JOIN ${_dbSchema}.${_propTable} mail on obj.id = mail.${_mainTable}_id and mail.propkey = '/mail' INNER JOIN ${_dbSchema}.${_propTable} accountStatus on obj.id = accountStatus.${_mainTable}_id and accountStatus.propkey = '/accountStatus' WHERE userName.propvalue LIKE concat(${userName},'%') AND mail.propvalue LIKE concat(${mail},'%') AND givenName.propvalue LIKE concat(${givenName},'%') AND sn.propvalue LIKE concat(${sn},'%') AND accountStatus.propvalue LIKE concat(${accountStatus},'%')"
         },
         "explicitTables" : {
             "get-users-of-direct-role" : "select objectid from ${_dbSchema}.${_table} where roles regexp concat('^(.*,)?',${role},'(,.*)?$')",
@@ -66,6 +60,34 @@
                 "mainTable" : "managedobjects",
                 "propertiesTable" : "managedobjectproperties",
                 "searchableDefault" : true
+            },
+            "managed/user" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : false,
+                "properties" : {
+                    "/userName" : {
+                        "searchable" : true
+                    },
+                    "/givenName" : {
+                        "searchable" : true
+                    },
+                    "/sn" : {
+                        "searchable" : true
+                    },
+                    "/mail" : {
+                        "searchable" : true
+                    },
+                    "/accountStatus" : {
+                        "searchable" : true
+                    },
+                    "/roles" : {
+                        "searchable" : true
+                    },
+                    "/sunset" : {
+                        "searchable" : true
+                    }
+                } 
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
@@ -148,7 +170,11 @@
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
                     "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
-                    "timestamp" : "activitydate"
+                    "timestamp" : "activitydate",
+                    "actionId" : "actionid",
+                    "exception" : "exceptiondetail",
+                    "mapping" : "mapping",
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
                 }
             },
             "audit/access" : {
