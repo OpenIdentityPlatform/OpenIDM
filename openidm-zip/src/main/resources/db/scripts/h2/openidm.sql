@@ -121,7 +121,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   PRIMARY KEY (`objectid`) );
   
   
-CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
+CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
   `rootactionid` VARCHAR(511) NULL ,
@@ -135,7 +135,20 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `activity` VARCHAR(24) NULL ,
   `status` VARCHAR(7) NULL ,
   `message` TEXT NULL ,
+  `actionid` VARCHAR(255) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL,
   PRIMARY KEY (`objectid`) );
+
+
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_reconid` ON `openidm`.`auditrecon`(`reconid` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_targetobjectid` ON `openidm`.`auditrecon`(`targetobjectid` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_sourceobjectid` ON `openidm`.`auditrecon`(`sourceobjectid` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_activitydate` ON `openidm`.`auditrecon`(`activitydate` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_entrytype` ON `openidm`.`auditrecon`(`entrytype` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_situation` ON `openidm`.`auditrecon`(`situation` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_status` ON `openidm`.`auditrecon`(`status` ASC);
   
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
@@ -192,23 +205,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_schedulerobjects_objectypes` ON  `openidm`.`schedulerobjects` (`objecttypes_id` ASC);
-
-CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
-  `objectid` VARCHAR(255) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `fullobject` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `idx-schedulerobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
-  CONSTRAINT `fk_schedulerobjects_objectypes`
-    FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objecttypes` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION);
-
-CREATE INDEX IF NOT EXISTS `openidm`.`fk_schedulerobjects_objectypes` ON  `openidm`.`schedulerobjects`(`objecttypes_id` ASC);
-
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
   `schedulerobjects_id` BIGINT UNSIGNED NOT NULL ,
@@ -269,7 +265,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   PRIMARY KEY (`objectid`) );
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) 
-SELECT 'openidm-admin', '0', '{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}', 'openidm-admin,openidm-authorized'
+SELECT 'openidm-admin', '0', 'openidm-admin', 'openidm-admin,openidm-authorized'
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'openidm-admin');
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) 
