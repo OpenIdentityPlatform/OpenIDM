@@ -593,8 +593,8 @@ $</screen>
     </para>
 
     <para>
-     Without a bit of help, the JSON output is formatted all on one line.
-     One example is shown below, and it is difficult to read:
+     Without a bit of help, the JSON output is formatted all on one line. One
+     example is shown below, and it is difficult to read:
     </para>
 
     <screen>
@@ -635,10 +635,10 @@ $</screen>
     <para>
      The ForgeRock REST API includes an optional <literal>_prettyPrint</literal>
      request parameter. The default value is <literal>false.</literal>. To
-     use the ForgeRock REST API to format output, you would add a parameter such
-     as <literal>?_prettyPrint=true</literal> or
-     <literal>&amp;_prettyPrint=true</literal>, depending on whether its added to
-     the end of an existing request parameter. In this case, the following
+     use the ForgeRock REST API to format output, add a parameter such as
+     <literal>?_prettyPrint=true</literal> or
+     <literal>&amp;_prettyPrint=true</literal>, depending on whether it is added
+     to the end of an existing request parameter. In this case, the following
      command would return formatted output:
     </para>
 
@@ -650,6 +650,11 @@ $</screen>
 "https://localhost:8443/openidm/managed/user/joe?_prettyPrint=true"
     </userinput>
     </screen>
+
+    <para>
+     Note that most command-line examples in this guide do not show this
+     parameter, although the output is formatted for readability.
+    </para>
 
    </section>
 

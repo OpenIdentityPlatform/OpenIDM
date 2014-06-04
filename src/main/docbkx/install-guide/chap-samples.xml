@@ -264,14 +264,15 @@ $ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
 
-   <para>If you do not include the <literal>_prettyPrint=true</literal>
-    request parameter or pipe the output to a JSON parser such as
-    <command>jq</command>, the resulting JSON object would appear all on one
-    line.</para>
+   <para>
+    If you want the output to be formatted, include the
+    <literal>_prettyPrint=true</literal> request parameter or pipe the output to
+    a JSON parser such as <command>jq</command>, otherwise the resulting JSON
+    object appears all on one line.
+   </para>
 
    <programlisting language="javascript">
 {
@@ -380,7 +381,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should include content similar to the
@@ -564,7 +565,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should appear similar to the following:</para>
@@ -743,11 +744,11 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET
- "https://localhost:8443/openidm/managed/group?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/group?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should include content similar to the
-    following, but all on one line.</para>
+    following.</para>
 
    <programlisting language="javascript">
 {
@@ -950,11 +951,11 @@ Database changed
    </para>
 
    <screen>$ curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET
-"https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
 
    <para>
     The result should resemble the following JSON object.
@@ -1001,11 +1002,11 @@ Database changed
     the value of the <literal>_id</literal>.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET \
-"https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd?_prettyPrint=true"</screen>
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
 
   </section>
 
@@ -1322,11 +1323,11 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
 
    <screen width="100">$ <userinput>curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET
-"https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids&amp;prettyPrint=true"
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/ad/account?_queryId=query-all-ids"
    </userinput>
    <computeroutput>{
   "result" : [ {
@@ -1347,11 +1348,11 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
 
    <screen width="110">$ <userinput>curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET
-"https://localhost:8443/openidm/system/ad/account/8dad9df3-820d-41ea-a3ab-a80c241bbc98?_prettyPrint=true"
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/ad/account/8dad9df3-820d-41ea-a3ab-a80c241bbc98"
    </userinput>
    <computeroutput>{
   "email" : [ "mail1@example.com" ],
@@ -1773,7 +1774,7 @@ $ ./startup.sh -p samples/sample6</screen>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&amp;_prettyPrint=true"</screen>
+ "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids"</screen>
 
     <para>The result should resemble the following JSON object.</para>
 
@@ -2007,7 +2008,7 @@ $ ./startup.sh -p samples/sample7</screen>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user/DDOE1?_prettyPrint=true"</screen>
+ "https://localhost:8443/openidm/managed/user/DDOE1"</screen>
 
    <para>The user object has the following JSON representation.</para>
 
@@ -2226,9 +2227,8 @@ $ ./startup.sh -p samples/sample9</screen>
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
- "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
          </screen>
 
          <para>
@@ -2346,9 +2346,8 @@ $ ./startup.sh -p samples/sample9</screen>
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
          </screen>
 
          <para>One user is returned.</para>

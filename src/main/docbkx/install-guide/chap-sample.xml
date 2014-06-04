@@ -481,12 +481,12 @@ $ ./startup.sh -p samples/sample1
    command to get the JSON response.
   </para>
 
-  <screen>$ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
    <computeroutput>
 {
@@ -519,14 +519,14 @@ $ ./startup.sh -p samples/sample1
   <literal>bjensen</literal> by appending the user ID to the managed user URL 
   (<literal>https://localhost:8443/openidm/managed/user/</literal>).</para>
 
-  <screen>$ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/user/bjensen?_prettyPrint=true"
-   </userinput>
-   <computeroutput>{
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/bjensen"</userinput>
+   <computeroutput>
+{
     "_id" : "bjensen",
     "_rev" : "1",
     "mail" : "bjensen@example.com",
@@ -640,13 +640,14 @@ access.csv activity.csv recon.csv
   local repository to see the new user appear in the list of all users under
   <literal>https://localhost:8443/openidm/managed/user?_queryId=query-all-ids</literal>.</para>
 
-  <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"
-
+  <screen><userinput>
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
+<computeroutput>
 {
    "result": [ {
       "_id": "bjensen"
@@ -664,13 +665,15 @@ access.csv activity.csv recon.csv
    "resultCount": 4,
    "pagedResultsCookie": null,
    "remainingPagedResults": -1,
-}
+}</computeroutput>
 </screen>
 
-  <para>Also look at the reconciliation audit log,
-  <filename>openidm/audit/recon.csv</filename> to see what took place during
-  reconciliation. This formatted excerpt from the log covers the two
-  reconciliation runs done in this sample.</para>
+  <para>
+   Also look at the reconciliation audit log,
+   <filename>openidm/audit/recon.csv</filename> to see what took place during
+   reconciliation. This formatted excerpt from the log covers the two
+   reconciliation runs done in this sample.
+  </para>
 
   <programlisting language="csv" width="110"><?dbfo pgwide="1"?>
 "_id",  "action",...,"reconId","situation","sourceObjectId",                "targetObjectId","timestamp";
@@ -738,12 +741,12 @@ access.csv activity.csv recon.csv
   REST interface. The following example adds a user named James Berg.</para>
 
   <para>Create <literal>james</literal> (UNIX).</para>
-  <screen>$ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  --data '{
   "_id":"jberg",
   "userName":"jberg",
@@ -753,8 +756,8 @@ access.csv activity.csv recon.csv
   "telephoneNumber":"5556787",
   "description":"Created by OpenIDM REST.",
   "password":"MyPassw0rd"
- }'
- "https://localhost:8443/openidm/managed/user?_action=create&amp;_prettyPrint=true"
+ }' \
+ "https://localhost:8443/openidm/managed/user?_action=create"
    </userinput>
    <computeroutput>{
     "mail" : "jberg@example.com",
@@ -809,7 +812,7 @@ access.csv activity.csv recon.csv
  \"description\":\"Created by OpenIDM REST.\",
  \"password\":\"MyPassw0rd\"
  }"
- "https://localhost:8443/openidm/managed/user?_action=create&amp;_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/managed/user?_action=create"</userinput>
 </screen>
 
   <para>The output is essentially identical to that for UNIX.</para>
