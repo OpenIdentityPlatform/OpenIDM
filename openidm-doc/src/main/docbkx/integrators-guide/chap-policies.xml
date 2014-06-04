@@ -128,23 +128,6 @@ policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, pro
   }
 
   return [];
-};
-
-policyFunctions.atLeastXCapitalLetters = function (fullObject, value, params, property) {
-  var isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
-      return fpr.policyRequirement === "REQUIRED";
-    }),
-    isNonEmptyString = (typeof(value) === "string" &amp;&amp; value.length),
-    valuePassesRegexp = (function (v) {
-      var test = isNonEmptyString ? v.match(/\d/g) : null;
-      return test !== null &amp;&amp; test.length >= params.numNums;
-    }(value));
-
-  if ((isRequired || isNonEmptyString) &amp;&amp; !valuePassesRegexp) {
-    return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
-  }
-
-  return [];
 }     
 ...     
       </programlisting>
@@ -165,7 +148,7 @@ policyFunctions.atLeastXCapitalLetters = function (fullObject, value, params, pr
 {   "policyId" : "minimum-length",
     "policyExec" : "propertyMinLength",
     "clientValidation": true,
-    "validateOnlyIfPresent":true,
+    "validateOnlyIfPresent": true,
     "policyRequirements" : ["MIN_LENGTH"]
 }
       </programlisting>
@@ -173,14 +156,16 @@ policyFunctions.atLeastXCapitalLetters = function (fullObject, value, params, pr
       <simplelist>
         <member><literal>"policyId"</literal> - a unique ID that enables the 
         policy to be referenced by component objects.</member>
-        <member><literal>"clientValidation"</literal> - indicates whether the 
+       <member><literal>"policyExec"</literal> - the name of the function that
+        contains the policy implementation. For more information, see
+        <xref linkend="policy-function" />.</member>
+        <member><literal>"clientValidation"</literal> - indicates whether the
         policy decision can be made on the client. When 
         <literal>"clientValidation": true</literal>, the source code for the 
         policy decision function is returned when the client requests the 
         requirements for a property.</member>
-        <member><literal>"policyExec"</literal> - the name of the function that 
-        contains the policy implementation. For more information, see 
-        <xref linkend="policy-function" />.</member>
+        <member><literal>"validateOnlyIfPresent"</literal> - notes that the
+        policy is to be validated only if it exists.</member>
         <member><literal>"policyRequirements"</literal> - an array containing 
         the policy requirement ID of each requirement that is associated with 
         the policy. Typically, a policy will validate only one requirement, 
@@ -309,7 +294,7 @@ function required(fullObject, value, params, propName) {
             <simplelist>
               <member><literal>"name"</literal> - the name of the property to 
               which the policy is applied.</member>
-              <member><literal>"policyID"</literal> - the ID of the policy that 
+              <member><literal>"policyId"</literal> - the ID of the policy that
               is applied to that property.</member>
               <member><literal>"params"</literal> - any specific parameters 
               that apply to that policy ID.</member>
