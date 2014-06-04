@@ -72,7 +72,7 @@
         "passwordHashAlgorithm" : null,
         "usePagedResultControl" : false,
         "blockSize" : 100,
-        "uidAttribute" : "entryUUID",
+        "uidAttribute" : "uid",
         "maintainLdapGroupMembership" : false,
         "respectResourcePasswordPolicyChangeAfterReset" : false
     },
