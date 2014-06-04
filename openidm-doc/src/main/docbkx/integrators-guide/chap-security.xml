@@ -92,7 +92,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/security/keystore?_prettyPrint=true"
+ "https://localhost:8443/openidm/security/keystore"
     </userinput>
     <computeroutput>
 {
@@ -176,7 +176,7 @@ $ curl \
  "C"  : "US",
  "returnPrivateKey" : true,
  "alias" : "openidm-localhost"}' \
- "https://localhost:8443/openidm/security/keystore?_action=generateCSR&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/security/keystore?_action=generateCSR"
     </userinput>
     <computeroutput>
 {
@@ -536,7 +536,7 @@ $ curl \
  --header "X-OpenIDM-Password:openidm-admin" \
  --cacert self-signed.crt \
  --request GET \
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids&amp;_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
      </userinput>
      <computeroutput>
 {
