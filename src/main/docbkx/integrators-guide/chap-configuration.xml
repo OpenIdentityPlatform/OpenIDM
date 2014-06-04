@@ -911,7 +911,9 @@ tables).</para></listitem>
     
     <para>
      A sample custom endpoint configuration is provided in the
-     <filename>openidm/samples/customendpoint</filename> directory. Custom
+     <filename>openidm/samples/customendpoint</filename> directory. The use
+     of this sample is described in
+     <xref linkend="adding-custom-endpoints-example" /> Custom
      endpoints in OpenIDM can be written either in JavaScript or Groovy.
      The sample includes three files:
     </para>
@@ -957,9 +959,12 @@ tables).</para></listitem>
      <title>The Components of an Endpoint Configuration File</title>
 
      <para>
-      The <filename>conf/endpoint-echo.json</filename> configuration file
-      depicts one typical endpoint, configured to use a Groovy script
-      as specified in the <filename>script/echo.groovy</filename> file.
+      You can find sample components in the
+      <filename>/path/to/openidm/sample/customendpoint</filename> directory.
+      In that the directory, the <filename>conf/endpoint-echo.json</filename>
+      configuration file depicts one typical endpoint, configured to use a
+      Groovy script specified in the <filename>script/echo.groovy</filename>
+      file.
      </para>
     
      <programlisting language="javascript">
@@ -979,7 +984,8 @@ tables).</para></listitem>
 
      <para>
       If appropriate, you can also include a <literal>context</literal> property
-      in this file:
+      in this file. The following example shows how the
+      <literal>context</literal> is used to display routing to an endpoint.
      </para>
 
      <programlisting language="javascript">
@@ -990,8 +996,7 @@ tables).</para></listitem>
       The endpoint configuration can specify the route on which the endpoint is
       available. For an example, look at the
       <filename>conf/endpoint-linkedView.json</filename> file. The code shown
-      is not really a wildcard. It declares the route on which the endpoint is
-      available.
+      declares the route on which the endpoint is available.
      </para>
 
      <programlisting language="javascript">
@@ -1166,7 +1171,7 @@ tables).</para></listitem>
 
      <para>
       Depending on the type of <literal>request</literal>,
-      the associated <literal>content</literal> may include the following
+      the associated content may include the following
       properties:
      </para>
     
@@ -1200,7 +1205,6 @@ tables).</para></listitem>
       <varlistentry>
        <term><literal>additionalParameters</literal></term>
        <listitem>
-        <para>string, not required</para>
         <para>The sample code returns request parameters from an HTTP GET
          with <literal>?param=x</literal>, as
          <literal>"params":{"param":"x"}</literal>.</para>
@@ -1246,7 +1250,7 @@ tables).</para></listitem>
     <title>Custom Endpoints, Contexts, and Chains</title>
 
     <para>
-     Custom endpoints include contexts that may be "wrapped" in various layers,
+     Custom endpoints include contexts that may be wrapped in various layers,
      analogous to the way network packets can be wrapped at ascending network
      levels.
     </para>
@@ -1266,7 +1270,7 @@ tables).</para></listitem>
     </para>
 
     <para>
-     The root context is "wrapped" in the security context that holds the
+     The root context is wrapped in the security context that holds the
      authentication and authorization detail for the request. The associated
      class is <literal>org.forgerock.json.resource.SecurityContext</literal>,
      with an <literal>authenticationId</literal> user name such as
@@ -1275,7 +1279,7 @@ tables).</para></listitem>
     </para>
 
     <para>
-     That security context is further "wrapped" by the HTTP context, with the
+     That security context is further wrapped by the HTTP context, with the
      target URI. The class is
      <literal>org.forgerock.json.resource.HttpContext</literal>, and it is
      associated with the normal parameters of a REST call, including a user
@@ -1283,7 +1287,7 @@ tables).</para></listitem>
     </para>
 
     <para>
-     The HTTP context is then further "wrapped" by one or more server / router
+     The HTTP context is then further wrapped by one or more server / router
      context(s). That class is
      <literal>org.forgerock.json.resource.RouterContext</literal>,
      with an endpoint URI. You may see several layers of server and router
