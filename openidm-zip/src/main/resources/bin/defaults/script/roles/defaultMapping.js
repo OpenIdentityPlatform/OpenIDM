@@ -35,7 +35,7 @@
 // The result map
 var map = { "result" : true };
 // The "assignments" configured for this mapping
-var assignments = config.assignments;
+var assignments = config.assignmentsToMap;
 
 // Default operations
 var defaultAssignmentOperation = "replaceTarget";
