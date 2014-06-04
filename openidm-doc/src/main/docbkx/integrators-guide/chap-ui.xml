@@ -601,6 +601,55 @@
     ]
 }  
   </programlisting>
+  <variablelist>
+   <varlistentry>
+    <term><literal>"property"</literal></term>
+    <listitem>
+     <para>
+      Specifies the property used to identify the process definition. By default,
+      process definitions are identified by their <literal>_id</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"matches"</literal></term>
+    <listitem>
+     <para>
+      A regular expression match is performed on the process definitions,
+      according to the specified property. The default
+      (<literal>"matches" : ".*"</literal>) implies that all process definition
+      IDs match.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"requiresRole"</literal></term>
+    <listitem>
+     <para>
+      Specifies the OpenIDM role that is required for users to have access to
+      the matched process definition IDs. In the default file, users with the
+      role <literal>openidm-authorized</literal> or
+      <literal>openidm-admin</literal> have access.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  <para>
+   To extend the process action definition file, identify the processes to which
+   users should have access, and specify the qualifying user roles. For example,
+   if you wanted to restrict access to a process definition whose ID was
+   <literal>567</literal>, to users with the role <literal>ldap</literal> you
+   would add the following to the <filename>process-access.json</filename> file:
+  </para>
+  <programlisting>
+{
+    "propertiesCheck" : {
+        "property" : "_id",
+        "matches" : "567",
+        "requiresRole" : "ldap"
+    }
+}
+  </programlisting>
  </section>
 
  <section xml:id="ui-customizing">
