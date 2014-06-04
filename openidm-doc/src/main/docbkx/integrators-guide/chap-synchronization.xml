@@ -691,6 +691,12 @@ if (syncResults.success) {
              ....
 }
    </programlisting>
+   <para>
+    Note that if <literal>enableSync</literal> is set to <literal>false</literal>
+    for a system to managed user mapping (for example
+    <literal>"systemLdapAccounts_managedUser"</literal>), LiveSync is disabled
+    for that mapping.
+   </para>
 
    <para>
     If a source resource is empty, the default behavior is for a reconciliation
