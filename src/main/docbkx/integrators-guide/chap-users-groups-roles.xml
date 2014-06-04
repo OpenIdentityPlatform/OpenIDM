@@ -154,7 +154,7 @@
  --header "If-None-Match: *" \
  --request PUT \
  --data '{"name":"ldap"}' \
- "https://localhost:8443/openidm/managed/role/ldap?_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/managed/role/ldap"</userinput>
       <computeroutput>
 {
   "name": "ldap",
@@ -181,7 +181,7 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/role/?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/managed/role/?_queryId=query-all-ids"</userinput>
      <computeroutput>
 {
   "remainingPagedResults": -1,
@@ -222,7 +222,7 @@ $ curl \
 
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/bjensen?_prettyPrint=true"
+ "https://localhost:8443/openidm/managed/user/bjensen"
     </userinput>
     <computeroutput>
 {
@@ -331,28 +331,28 @@ $ curl \
    <section xml:id="delete-role-definition">
     <title>To Delete a Managed Role Definition</title>
     <para>
-      Note that when you delete a role definition, that role is not
-      automatically removed from the <literal>"roles"</literal> attribute of any
-      users to whom the role was assigned.
-     </para>
-     <para>
-      The following sample command deletes the <literal>ldap</literal> role,
-      created previously.
-     </para>
-     <screen><userinput>$ curl \
+     When a role definition is removed, an "unassignment" operation is triggered
+     for any attributes that have been assigned to a user indirectly through
+     that role.
+    </para>
+    <para>
+     The following sample command deletes the <literal>ldap</literal> role,
+     created previously.
+    </para>
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request DELETE \
  "https://localhost:8443/openidm/managed/role/ldap"</userinput>
-      <computeroutput>
+     <computeroutput>
 {
   "name": "ldap",
   "_id": "ldap",
   "_rev": "1"
-}     </computeroutput>
-     </screen>
+}    </computeroutput>
+    </screen>
    </section>
 
   </section>

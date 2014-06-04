@@ -249,6 +249,10 @@
  "remainingPagedResults" : -1
 }</computeroutput>
      </screen>
+     <para>
+      Note that most command-line examples in this guide do not show this
+      parameter, although the output is formatted for readability.
+     </para>
 
     </listitem>
    </varlistentry>
