@@ -607,26 +607,40 @@ $ curl \
    <para>Now change the user on the OpenIDM side with the following REST
    call (on UNIX):</para>
    
-   <screen width="100"><?dbfo pgwide="1"?>$ curl \
+   <screen width="96"><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- --data '[{"operation":"replace","field":"ldapGroups","value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]}]' \
+ --data '[
+    {
+      "operation":"replace",
+      "field":"ldapGroups",
+      "value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]
+    }
+ ]' \
  "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
    </screen>
    
-   <para>On Windows, you might need to escape certain characters, so your REST 
-   call will look like this:</para>
+   <para>
+    On Windows, you might need to escape certain characters, so your REST call
+    would look like this:
+   </para>
 
-   <screen width="100"><?dbfo pgwide="1"?>$ curl ^
+   <screen width="96"><?dbfo pgwide="1"?>$ curl ^
  --cacert self-signed.crt ^
  --header "X-OpenIDM-Username: openidm-admin" ^
  --header "X-OpenIDM-Password: openidm-admin" ^
  --header "Content-Type: application/json" ^
  --request POST ^
- --data "[{\"operation\":\"replace\",\"field\":\"ldapGroups\",\"value\": [\"cn=openidm2,ou=Groups,dc=example,dc=com\"]}]" ^
+ --data "[
+    {
+    \"operation\":\"replace\",
+    \"field\":\"ldapGroups\",
+    \"value\": [\"cn=openidm2,ou=Groups,dc=example,dc=com\"]
+    }
+ ]" ^
  "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
   </screen>
    
