@@ -2709,7 +2709,8 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    <variablelist>
     <para>
      Based on the values assigned to objects during source reconciliation,
-     OpenIDM assigns situations, listed here with their default actions.
+     OpenIDM assigns situations, listed here with default and appropriate
+     alternative actions.
     </para>
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
@@ -2717,8 +2718,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source object qualifies for a target object, and a link to an
        existing target object was found. This situation is detected during
-       change events and during reconciliation. Default action: "UPDATE" the
-       target object.
+       change events and during reconciliation.
+      </para>
+
+      <para>
+       Default action: <literal>UPDATE</literal> the target object.
+      </para>
+
+      <para>
+       Other valid actions: <literal>IGNORE, REPORT, NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2730,7 +2738,16 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        an existing target object. There is a single target object, that
        correlates with this source object, according to the logic in the
        correlation query. This situation is detected during change events and
-       reconciliation. Default action: "UPDATE" the target object.
+       reconciliation.
+      </para>
+
+      <para>
+       Default action: <literal>UPDATE</literal> the target object.
+      </para>
+
+      <para>
+       Other valid actions: <literal>EXCEPTION, IGNORE, REPORT,
+       NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2743,7 +2760,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        object, that correlates with this source object, according to the logic
        in the correlation query, but that target object is already linked to a
        different source object. This situation is detected during change events
-       and reconciliation. Default action: log an "EXCEPTION".
+       and reconciliation.
+      </para>
+
+      <para>
+       Default action: log an <literal>EXCEPTION</literal>.
+      </para>
+
+      <para>
+       Other valid actions: <literal>IGNORE, REPORT, NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2754,7 +2779,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        The source object qualifies for a target object, there is no link to an
        existing target object, and there is no correlated target object found.
        This situation is detected during change events and reconciliation.
-       Default action: "CREATE" a target object.
+      </para>
+
+      <para>
+       Default action: <literal>CREATE</literal> a target object.
+      </para>
+
+      <para>
+       Other valid actions: <literal>EXCEPTION, IGNORE, REPORT, NOREPORT, ASYNC
+      </literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2766,7 +2799,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        existing target object, but there is more than one correlated target
        object (that is, more than one possible match on the target system). This
        situation is detected during source object changes and reconciliation.
-       Default action: log an "EXCEPTION".
+      </para>
+      <para>
+       Default action: log an <literal>EXCEPTION</literal>.
+      </para>
+
+      <para>
+       Other valid actions: <literal>IGNORE, REPORT, NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2776,8 +2815,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source object qualifies for a target object, and there is a link to a
        target object, but the target object is missing. This situation is
-       detected during reconciliation operations and during source object
-       changes. Default action: log an "EXCEPTION".
+       detected during reconciliation operations and during source object changes.
+      </para>
+      <para>
+       Default action: log an <literal>EXCEPTION</literal>.
+      </para>
+      <para>
+       Other valid actions: <literal>CREATE, UNLINK, IGNORE, REPORT, NOREPORT.
+      ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2787,8 +2832,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source object is unqualified (by the "validSource" script). One or
        more target objects are found through the correlation logic. This
-       situation is detected during change events and reconciliation. Default
-       action: "DELETE" the target object or objects.
+       situation is detected during change events and reconciliation.
+      </para>
+      <para>
+       Default action: <literal>DELETE</literal> the target object or objects.
+      </para>
+      <para>
+       Other valid actions: <literal>EXCEPTION, IGNORE, REPORT, NOREPORT,
+      ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2798,8 +2849,20 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source object is unqualified (by the "validSource" script). One or
        more target objects are found through the correlation logic. This
-       situation is detected only during source object changes. Default action:
-       "IGNORE" the target object until the next full reconciliation operation.
+       situation is detected only during source object changes.
+      </para>
+      <para>
+       It is different from "UNQUALIFIED", based on the status of the link and
+       target. If there is a link, the target is not valid. If there is no link
+       and exactly one target, that target is not valid.
+      </para>
+      <para>
+       Default action: <literal>IGNORE</literal> the target object until the
+       next full reconciliation operation.
+      </para>
+      <para>
+       Other valid actions: <literal>DELETE, UNLINK, EXCEPTION, REPORT,
+       NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2809,8 +2872,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source object is unqualified (by the "validSource" script), no link
        is found, and no correlated target exists. This situation is detected
-       during source object changes and reconciliation. Default action: "IGNORE"
-       the source object.
+       during source object changes and reconciliation.
+      </para>
+      <para>
+       Default action: <literal>IGNORE</literal> the source object.
+      </para>
+      <para>
+       Other valid actions: <literal>EXCEPTION, REPORT, NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2820,7 +2888,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The source may or may not be qualified, a link is found, but no target
        object is found. This situation is detected only during source object
-       changes. Default action: Log an "EXCEPTION".
+       changes.
+      </para>
+      <para>
+       Default action: Log an <literal>EXCEPTION</literal>.
+      </para>
+      <para>
+       Other valid actions: <literal>UNLINK, IGNORE, REPORT, NOREPORT,
+       ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2850,7 +2925,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        </listitem>
       </itemizedlist>
       <para>This situation is detected only during source object changes.
+      </para>
+      <para>
        Default action: "IGNORE" the source object.
+      </para>
+      <para>
+       Other valid actions: <literal>EXCEPTION, REPORT, NOREPORT,
+      ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2907,7 +2988,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        During target reconciliation, the target becomes unqualified by the
       "validTarget" script. This situation is detected only during
-       reconciliation operations. Default action: "IGNORE" the target object.
+       reconciliation operations.
+      </para>
+      <para>
+       Default action: <literal>IGNORE</literal> the target object.
+      </para>
+      <para>
+       Other valid actions: <literal>DELETE, UNLINK, REPORT, NOREPORT,
+      ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2916,8 +3004,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <listitem>
       <para>
        A valid target object exists, for which there is no link. This situation
-       is detected only during reconciliation operations. Default action:
-       log an "EXCEPTION".
+       is detected only during reconciliation operations.
+      </para>
+      <para>
+       Default action: log an <literal>EXCEPTION</literal>.
+      </para>
+      <para>
+       Other valid actions: <literal>IGNORE, REPORT, NOREPORT, ASYNC</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2926,8 +3019,13 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      <listitem>
       <para>
        The target object qualifies, and a link to a source object exists. This
-       situation is detected only during reconciliation operations. Default
-       action: "UPDATE" the target object.
+       situation is detected only during reconciliation operations.
+      </para>
+      <para>
+       Default action: <literal>UPDATE</literal> the target object.
+      </para>
+      <para>
+       Other valid actions: <literal>IGNORE, REPORT, NOREPORT</literal>
       </para>
      </listitem>
     </varlistentry>
@@ -2939,7 +3037,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        The target object is unqualified, (by the "validTarget" script), but
        there is a link to an existing source object, which is also unqualified.
        This situation is detected during change events and reconciliation.
-       Default action: "DELETE" the target object.</para>
+      </para>
+      <para>
+       Default action: <literal>DELETE</literal> the target object.
+      </para>
+      <para>
+       Other valid actions: <literal>UNLINK, EXCEPTION, IGNORE, REPORT,
+       NOREPORT, ASYNC</literal>
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -2948,7 +3053,15 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
       <para>
        The target object qualifies and a link is found. But the source object is
        missing. This situation is detected during change events and
-       reconciliation. Default action: log an "EXCEPTION".</para>
+       reconciliation.
+      </para>
+      <para>
+       Default action: log an "EXCEPTION".
+      </para>
+      <para>
+       Other valid actions: <literal>DELETE, UNLINK, IGNORE, REPORT,
+       NOREPORT, ASYNC</literal>
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -3863,9 +3976,10 @@ map;</programlisting>
                 "type": "text/javascript",
                 "file": "script/isValid.js"
             },
-            "correlationQuery": {
-                "type": "text/javascript",
-                "file": "script/ldapCorrelationQuery.js"
+            "correlationQuery" : {
+                "type" : "text/javascript"
+                "source" : "var map = {'_queryFilter': 'uid eq \"' +
+                     source.userName + '\"'}; map;",
             },
             "properties": [
                 {
