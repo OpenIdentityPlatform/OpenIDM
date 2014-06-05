@@ -68,7 +68,10 @@ if (effectiveRoles != null)  {
                         // Only merge "attributes"
                         if (existingProp != null && assignmentPropName == "attributes") {
                             logger.trace("Merge assignment {}: {}", assignmentPropName, assignmentProp);
-                            effectiveAssignments[assignmentName][assignmentPropName] = effectiveAssignments[assignmentName][assignmentPropName].concat(assignmentProp);
+                            for (var j = 0; j < assignmentProp.length; j++) {
+                                effectiveAssignments[assignmentName][assignmentPropName] = 
+                                    effectiveAssignments[assignmentName][assignmentPropName].concat(assignmentProp[j]);
+                            }
                         } else {
                             logger.trace("Set assignment {}: {}", assignmentPropName, assignmentProp);
                             effectiveAssignments[assignmentName][assignmentPropName] = assignmentProp;
