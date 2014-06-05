@@ -2080,10 +2080,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                 }
                                                 case DELETE:
                                                     // TODO Pass along the old deltaObject - do we have it?
+                                                    content.put("oldValue", null);
                                                     // TODO import SynchronizationService.Action.notifyDelete and ACTION_PARAM_ constants
                                                     ActionRequest onDeleteRequest = Requests.newActionRequest("sync", "notifyDelete")
                                                             .setAdditionalParameter("resourceContainer", resourceContainer)
-                                                            .setAdditionalParameter("resourceId", resourceId);
+                                                            .setAdditionalParameter("resourceId", resourceId)
+                                                            .setContent(content);
                                                     connectionFactory.getConnection().action(routerContext, onDeleteRequest);
 
                                                     activityLogger.log(routerContext, RequestType.ACTION,
