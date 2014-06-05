@@ -1212,96 +1212,125 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
    </procedure>
 
    <procedure>
-       <title>Configuring the .NET Connector Server</title>
-       <para>After you have installed the .NET Connector Server, as described
-       in the previous section, follow these steps to configure the Connector
-       Server.</para>
-
-       <step>
-           <para>Make sure that the Connector Server is not currently running.
-           If it is running, use the Services console to stop it.</para>
-       </step>
-       <step>
-           <para>At the command prompt, change to the directory where the
-           Connector Server was installed.</para>
-           <screen>c:\> cd "c:\Program Files (x86)\Identity Connectors\Connector Server"</screen>
-       </step>
-       <step xml:id="key-step">
-           <para>Set the key for the Connector Server by using the
-           <command>setkey</command> command, substituting any string value for
-           the <literal>secret</literal>. For example:</para>
-           <screen>ConnectorServer.exe /setkey <replaceable>secret</replaceable>
-Key Updated.</screen>
-           <para>This key is used by clients connecting to the Connector Server.
-           Whatever key you set here must also be set in the OpenIDM connector
-           info provider configuration file
-           (<literal>provisioner.openicf.connectorinfoprovider.json</literal>).</para>
-     </step>
-     <step>
-         <para>Edit the Connector Server connection settings.</para>
-         <para>The Connector Server configuration is saved in a file named
-         <filename>ConnectorServer.exe.config</filename> (in the directory in
-         which the Connector Server is installed).</para>
-         <para>Check and edit this file, as necessary, to reflect your
-         installation. In particular, check the connection settings, under the
-         <literal>AppSettings</literal> item.</para>
-     
-         <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
+    <title>Configuring the .NET Connector Server</title>
+    <para>
+     After you have installed the .NET Connector Server, as described in the
+     previous section, follow these steps to configure the Connector Server.
+    </para>
+    <step>
+     <para>
+      Make sure that the Connector Server is not currently running. If it is
+      running, use the Services console to stop it.
+     </para>
+    </step>
+    <step>
+     <para>
+      At the command prompt, change to the directory where the Connector Server
+      was installed.
+     </para>
+     <screen>c:\> cd "c:\Program Files (x86)\Identity Connectors\Connector Server"</screen>
+    </step>
+    <step xml:id="key-step">
+     <para>
+      Set the key for the Connector Server by using the
+      <command>setkey</command> command, substituting any string value for the
+      <literal>secret</literal>. For example:
+     </para>
+     <screen><userinput>ConnectorServer.exe /setkey secret</userinput>
+<computeroutput>Key Updated.</computeroutput>
+     </screen>
+     <para>
+      This key is used by clients connecting to the Connector Server. Whatever
+      key you set here must also be set in the OpenIDM connector info provider
+      configuration file
+      (<literal>provisioner.openicf.connectorinfoprovider.json</literal>).
+     </para>
+    </step>
+    <step>
+     <para>
+      Edit the Connector Server connection settings.
+     </para>
+     <para>
+      The Connector Server configuration is saved in a file named
+      <filename>ConnectorServer.exe.config</filename> (in the directory in which
+      the Connector Server is installed).
+     </para>
+     <para>
+      Check and edit this file, as necessary, to reflect your installation. In
+      particular, check the connection settings, under the
+      <literal>AppSettings</literal> item.
+     </para>
+     <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
 &lt;add key="connectorserver.usessl" value="false" /&gt;
 &lt;add key="connectorserver.certificatestorename" value="ConnectorServerSSLCertificate" /&gt;
 &lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;</screen>
-
-         <variablelist>
-             <varlistentry>
-                 <term><literal>connectorserver.port</literal></term>
-                 <listitem>
-                     <para>Specifies the port on which the Connector Server
-                     listens.</para>
-                     <note>
-                     <para>If Windows firewall is enabled, you must create an
-                     inbound port rule to open the TCP port for the connector
-                     server (8759 by default). If you do not open the TCP port,
-                     OpenIDM will be unable to contact the Connector Server.
-                     For more information, see the Microsoft documentation on
-                     <link xlink:show="new" xlink:href="http://technet.microsoft.com/en-us/library/cc947814(v=ws.10).aspx"
-                     >creating an inbound port rule</link>.</para>
-                     </note>
-                 </listitem>
-             </varlistentry>
-             <varlistentry>
-                 <term><literal>connectorserver.usessl</literal></term>
-                 <listitem>
-                     <para>Indicates whether client connections to the
-                     Connector Server should be over SSL. This property is set
-                     to <literal>false</literal> by default.</para>
-                     <para>To secure connections to the Connector Server, set
-                     this property to <literal>true</literal> and install the
-                     server certificate into your certificate store, using the
-                     following command:</para>
-                     <screen>ConnectorServer.exe /installCert <replaceable>certificate-store</replaceable></screen>
-                 </listitem>
-             </varlistentry>
-             <varlistentry>
-                 <term><literal>connectorserver.certificatestorename</literal></term>
-                 <listitem><para>Specifies the name of the certificate store,
-                 into which your server certificate has been installed.</para></listitem>
-             </varlistentry>
-             <varlistentry>
-                 <term><literal>connectorserver.ifaddress</literal></term>
-                 <listitem>
-                     <para>Specifies a single IP address from which connections
-                     will be accepted.</para>
-                     <para>If you set a value here (other than the default
-                     <literal>0.0.0.0</literal>) connections from all IP
-                     addresses other than the one specified are denied.</para>
-                 </listitem>
-             </varlistentry>
-         </variablelist>
-     </step>
-     <step>
-      <para>Check the trace settings, in the same configuration file, under
-      the <literal>system.diagnostics</literal> item.</para>
-      <screen>&lt;system.diagnostics&gt;
+     <variablelist>
+      <varlistentry>
+       <term><literal>connectorserver.port</literal></term>
+       <listitem>
+        <para>
+         Specifies the port on which the Connector Server listens.
+        </para>
+        <note>
+         <para>
+          If Windows firewall is enabled, you must create an inbound port rule
+          to open the TCP port for the connector server (8759 by default). If
+          you do not open the TCP port, OpenIDM will be unable to contact the
+          Connector Server. For more information, see the Microsoft
+          documentation on
+          <link xlink:show="new"
+          xlink:href="http://technet.microsoft.com/en-us/library/cc947814(v=ws.10).aspx"
+          >creating an inbound port rule</link>.
+         </para>
+        </note>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>connectorserver.usessl</literal></term>
+       <listitem>
+        <para>
+         Indicates whether client connections to the Connector Server should be
+         over SSL. This property is set to <literal>false</literal> by default.
+        </para>
+        <para>
+         To secure connections to the Connector Server, set this property to
+         <literal>true</literal> and store the server certificate into your
+         certificate store, using the following command:
+        </para>
+        <screen width="105">
+ConnectorServer.exe /storeCertificate /storeName &lt;certificate-store-name&gt; /certificateFile &lt;certificate&gt;</screen>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>connectorserver.certificatestorename</literal></term>
+       <listitem>
+        <para>
+         Specifies the name of the certificate store, into which your server
+         certificate has been installed.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>connectorserver.ifaddress</literal></term>
+       <listitem>
+        <para>
+         Specifies a single IP address from which connections will be accepted.
+        </para>
+        <para>
+         If you set a value here (other than the default
+         <literal>0.0.0.0</literal>) connections from all IP addresses other
+         than the one specified are denied.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </step>
+    <step>
+     <para>
+      Check the trace settings, in the same configuration file, under the
+      <literal>system.diagnostics</literal> item.
+     </para>
+     <screen>&lt;system.diagnostics&gt;
   &lt;trace autoflush="true" indentsize="4"&gt;
     &lt;listeners&gt;
       &lt;remove name="Default" /&gt;
@@ -1316,19 +1345,23 @@ Key Updated.</screen>
       &lt;/add&gt;
     &lt;/listeners&gt;
   &lt;/trace&gt;
-&lt;/system.diagnostics&gt;</screen>
-      <para>The Connector Server uses the standard .NET trace mechanism. 
-      For more information about tracing options, see <link xlink:show="new"
+&lt;/system.diagnostics&gt;
+     </screen>
+     <para>
+      The Connector Server uses the standard .NET trace mechanism. For more
+      information about tracing options, see <link xlink:show="new"
       xlink:href="http://msdn.microsoft.com/en-us/library/15t15zda(v=vs.71).aspx"
       >Microsoft's .NET documentation</link> for <literal>System.Diagnostics</literal>.
-      </para>
-       <para>The default trace settings are a good starting point. For less
-       tracing, you can change the EventTypeFilter's initializeData to "Warning"
-       or "Error".
-       For very verbose logging you can set the value to "Verbose" or "All". The 
-       level of logging performed has a direct effect on the performance of the
-       Connector Servers, so take care when setting this level.</para>
-     </step>
+     </para>
+     <para>
+      The default trace settings are a good starting point. For less tracing,
+      you can change the EventTypeFilter's initializeData to "Warning" or
+      "Error". For very verbose logging you can set the value to "Verbose" or
+      "All". The level of logging performed has a direct effect on the
+      performance of the Connector Servers, so take care when setting this
+      level.
+     </para>
+    </step>
   </procedure>
 
   <procedure>
