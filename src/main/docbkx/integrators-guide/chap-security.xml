@@ -81,19 +81,17 @@
 
    <para>
     OpenIDM generates a symmetric key and a private key the first time the
-    server is started. After startup, you can display the contents of the
-    keystore over REST, as follows:
+    server is started. After startup, display the contents of the keystore over
+    REST, as follows:
    </para>
 
    <screen>
-    <userinput>
-$ curl \
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/security/keystore"
-    </userinput>
+ "https://localhost:8443/openidm/security/keystore"</userinput>
     <computeroutput>
 {
   "type" : "JCEKS",
@@ -157,14 +155,12 @@ $ curl \
     the URL. The following example, uses the default alias
     (<literal>openidm-localhost</literal>). If you have created your own private
     key for this request, specify its alias instead of
-    <literal>openidm-localhost</literal>. Specify
-    <literal> "returnPrivateKey" : true</literal> to return the private key
-    along with the request.
+    <literal>openidm-localhost</literal>. Set <literal> "returnPrivateKey" : true</literal>
+    to return the private key along with the request.
    </para>
 
-   <screen width="90">
-    <userinput>
-$ curl \
+   <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -176,12 +172,12 @@ $ curl \
  "C"  : "US",
  "returnPrivateKey" : true,
  "alias" : "openidm-localhost"}' \
- "https://localhost:8443/openidm/security/keystore?_action=generateCSR"
-    </userinput>
+ "https://localhost:8443/openidm/security/keystore?_action=generateCSR"</userinput>
     <computeroutput>
 {
   "_id": "openidm-localhost",
-  "csr": "-----BEGIN CERTIFICATE REQUEST-----\nMIICmzCCAYMCAQAwWDEZMBcGA1UEAwwQd3d3MS5
+  "csr": "-----BEGIN CERTIFICATE REQUEST-----\n
+MIICmzCCAYMCAQAwWDEZMBcGA1UEAwwQd3d3MS5
 leGFtcGxlLmNvbTELMAkGA1UE\nCwwCSFIxDTALBgNVBAoMBE5vbmUxEjAQBgNVBAcMCUN1cGVyd
 GlubzELMAkGA1UE\nBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDAjCjTt1b
 o0WKH\nP/4PR/Td3A1ElTo4/J/7o7eWflOqs8vW5d76SMcJFKOQ6FhoOcOHRNewch+a0DBK\njKF
@@ -193,20 +189,24 @@ yInfo2d7/12jUrOjL4Bqt\nStuQS/HkO2KAsc/zUnlpJyd3RPI7Gs1C6FxIRVCzi4Via5QzE06n2
 F8HHkinqc6m\nBWhIcf5Omk6fSqG0aw7fqn20XWDkRm+I4vtm8P8CuWftUj5qv5kmyUtrcQ3+YPD
 O\nL+cK4cfuCkjLQ3h4GIgBJP+gfWX8fTmCHyaHEFjLTMj1hZYEx+3f8awOVFoNmr3/\nB8LIJNH
 UiFHO6EED7LDOwa/z32mTRET0nK5DVO60H80JSWxzdWYZQV/IzHzm8ST4\n6j6vuheBZiG5gZR2V
-F0x5XoudQrSg7lpVslXBHNeiM85+H08RMQh8Am2bp+Xstw=\n",-----END CERTIFICATE REQUEST-----\n",
+F0x5XoudQrSg7lpVslXBHNeiM85+H08RMQh8Am2bp+Xstw=\n",
+     -----END CERTIFICATE REQUEST-----\n",
   "publicKey": {
      "format": "X.509",
-     "encoded": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr
+     "encoded": "-----BEGIN PUBLIC KEY-----\n
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr
 ALtYU662bNbQZG7JZ3M\noOUmVP9cPP3+DhQ5H0V0qB+9YjE4XUtuwUGqaUmuT+mrXHwGpLAqvUm
 NsVyXJj9s\nJhX6PCyXzO3RdKBVC8pphMfKXodjBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpk\
 ncc/A1RmLZdPmcuKmN5vQl4E3Z6F4YyG7M0g7TE54dhqPvGNS9cO4r0Vom9373MDh\n+8QSfmLCC
 94Ro+VUAF9Q6nk2j0PgTi+QZ0i93jbKAWWX57w6S5i7CpEptKyeP9iG\ncFnJddSICPHkbQJ73gu
-lyZYkbcBblNUxIhODZV5bJ0oxn9qgYvzlxJupldYsYkBo\ncwIDAQAB\n-----END PUBLIC KEY-----\n",
+lyZYkbcBblNUxIhODZV5bJ0oxn9qgYvzlxJupldYsYkBo\ncwIDAQAB\n
+     -----END PUBLIC KEY-----\n",
      "algorithm": "RSA"
   },
   "privateKey": {
      "format": "PKCS#8",
-     "encoded": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOU
+     "encoded": "-----BEGIN RSA PRIVATE KEY-----\n
+MIIEpAIBAAKCAQEArALtYU662bNbQZG7JZ3MoOU
 VP9cPP3+DhQ5H0V0qB+9YjE4\nXUtuwUGqaUmuT+mrXHwGpLAqvUmNsVyXJj9sJhX6PCyXzO3RdK
 BVC8pphMfKXodj\nBC57ef0OkWjO5ZRAqCRwS3BXkoCfu6/ZXRpkcc/A1RmLZdPmcuKmN5vQl4E3
 Z0i93jbKAWWX57w6S5i7CpEptKyeP9iGcFnJddSICPHkbQJ73gulyZYkbcBb\nlNUxIhODZV5bJ0
@@ -272,9 +272,8 @@ lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
    <!-- Since I don't have a CRT from a CSR, I did not check this. But
     I did make cREST appropriate changes, e.g. application/json and
     "alias": "openidm-localhost" -->
-   <screen width="90">
-    <userinput>
-$ curl \
+   <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -487,9 +486,7 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     <para>
      Extract the certificate that is generated when OpenIDM starts up.
     </para>
-    <screen>
-     $ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null
-    </screen>
+<screen>$ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null</screen>
     <para>
      This command outputs the entire certificate to the terminal.
     </para>
@@ -504,11 +501,8 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
      the following:
     </para>
     <screen>
-     <userinput>
-      $ more self-signed.crt
-     </userinput>
-     <computeroutput>
------BEGIN CERTIFICATE-----
+$ <userinput>more self-signed.crt</userinput>
+<computeroutput>-----BEGIN CERTIFICATE-----
 MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
 cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
 c3QwHhcNMTEwODE3MTMzNTEwWhcNMjEwODE3MTMzNTEwWjA+MSgwJgYDVQQKEx9P
@@ -520,8 +514,7 @@ wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
 m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
 UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
 s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
------END CERTIFICATE-----
-     </computeroutput>
+-----END CERTIFICATE-----</computeroutput>
     </screen>
    </step>
    <step>
@@ -530,14 +523,12 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
      in the command. For example:
     </para>
     <screen>
-     <userinput>
-$ curl \
+$ <userinput>curl \
  --header "X-OpenIDM-Username:openidm-admin" \
  --header "X-OpenIDM-Password:openidm-admin" \
  --cacert self-signed.crt \
  --request GET \
- "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"
-     </userinput>
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
      <computeroutput>
 {
     "result": [],
@@ -596,14 +587,11 @@ $ curl \
   <para>The following examples show successful authentications.</para>
 
   <screen>
-   <userinput>
-$ curl \
+$ <userinput>curl \
  --cacert self-signed.crt \
  --dump-header /dev/stdout \
  --user openidm-admin:openidm-admin \
- --header "Content-Type: application/json" \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-   </userinput>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
    <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
@@ -617,15 +605,12 @@ Server: Jetty(8.y.z-SNAPSHOT)
 {"result":[],"resultCount":"0","pagedResultsCookie":null,"remainingPagedResults":-1}
    </computeroutput>
 
-   <userinput>
-$ curl \
+$ <userinput>curl \
  --cacert self-signed.crt \
  --dump-header /dev/stdout \
- --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-   </userinput>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
    <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
@@ -639,15 +624,12 @@ Server: Jetty(8.y.z-SNAPSHOT)
 {"result":[],"resultCount":"0","pagedResultsCookie":null,"remainingPagedResults":-1}
    </computeroutput>
 
-   <userinput>
-$ curl \
+$ <userinput>curl \
  --dump-header /dev/stdout \
  --cacert self-signed.crt \
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
  --header "X-Requested-With: OpenIDM Plugin" \
- --header "Content-Type: application/json" \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-   </userinput>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
    <computeroutput>
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Content-Type: application/json; charset=UTF-8
@@ -669,16 +651,13 @@ Server: Jetty(8.y.z-SNAPSHOT)
   <para>You can also request one-time authentication without a session.</para>
 
   <screen>
-   <userinput>
-$ curl \
+$ <userinput>curl \
  --dump-header /dev/stdout \
  --cacert self-signed.crt \
  --header "X-OpenIDM-NoSession: true" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
-   </userinput>
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
    <computeroutput>
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
@@ -695,15 +674,13 @@ Server: Jetty(8.y.z-SNAPSHOT)
   header.</para>
 
   <screen>
-   <userinput>
-$ curl \
+$ <userinput>curl \
  --dump-header /dev/stdout \
  --cacert self-signed.crt \
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
  --header "X-Requested-With: OpenIDM Plugin" \
  --header "X-OpenIDM-Logout: true" \
- "https://localhost:8443/openidm/"
-   </userinput>
+ "https://localhost:8443/openidm/"</userinput>
    <computeroutput>
 Expires: Thu, 01 Jan 1970 00:00:00 GMT
 Content-Type: application/json; charset=UTF-8
@@ -723,9 +700,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
   <citetitle>To Set Up OpenIDM with MySQL</citetitle></link>.</para>
 
   <screen>
-   <userinput>
-mysql&gt; select objectid,roles from internaluser;
-   </userinput>
+   <userinput>mysql&gt; select objectid,roles from internaluser;</userinput>
    <computeroutput>
 +---------------+----------------------------------+
 | objectid      | roles                            |
@@ -826,10 +801,8 @@ Re-enter new password:
     <para>Use the <command>encrypt</command> command to obtain the encrypted 
     version of the new password.</para>
     <screen>
-     <userinput>
-$ cd /path/to/openidm/
-$ cli.sh encrypt newpwd
-     </userinput>
+$ <userinput>cd /path/to/openidm/</userinput>
+$ <userinput>cli.sh encrypt newpwd</userinput>
      <computeroutput>
 ...
 -----BEGIN ENCRYPTED VALUE-----
@@ -920,12 +893,12 @@ $ cli.sh encrypt newpwd
    possible to enable these over HTTP, for example, the following query should
    identify managed users in an OrientDB repository:</para>
 
-  <screen width="91">$ curl \
+  <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- "https://localhost:8443/openidm/managed/user?_queryExpression=select+*+from+managed_user"</screen>
+ "https://localhost:8443/openidm/managed/user?_queryExpression=select+*+from+managed_user"</userinput></screen>
   
   <para>
    By default, direct HTTP access to native queries is disallowed, and should
@@ -1069,9 +1042,7 @@ CRYPT:a8b5a01ba48a306f300b62a1541734c7
      contain the obfuscated password and the cryptographic key:
     </para>
     <screen>
-     <userinput>
-$ more conf/boot/boot.properties
-     </userinput>
+$ <userinput>more conf/boot/boot.properties</userinput>
      <computeroutput>
 ...
 # Keystore password, adjust to match your keystore and protect this file
@@ -1081,8 +1052,7 @@ openidm.truststore.password=changeit
 # optionally use the cli encrypt to obfuscate the password and set
 openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
 openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
-...
-     </computeroutput>
+...  </computeroutput>
     </screen>
    </listitem>
    <listitem>

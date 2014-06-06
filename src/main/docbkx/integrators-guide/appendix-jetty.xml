@@ -197,8 +197,7 @@
   
   <para>The sample servlet filter configuration file is shown below:</para>
   
-  <programlisting language="javascript">
-{
+<programlisting language="javascript">{
     "classPathURLs" : [ ],
     "systemProperties" : { },
     "requestAttributes" : { },
@@ -206,7 +205,9 @@
     "initParams" : {
        "allowedOrigins" : "https://localhost:8443",
        "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
-       "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with",
+       "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,
+                           x-openidm-username,content-type,origin,
+                           x-requested-with",
        "allowCredentials" : "true",
        "chainPreflight" : "false"
     },
@@ -214,8 +215,7 @@
        "/*"
     ],
     "filterClass" : "org.eclipse.jetty.servlets.CrossOriginFilter"
-}  
-  </programlisting>
+}</programlisting>
   
   <para>The sample configuration includes the following properties:</para>
   

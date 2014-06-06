@@ -227,12 +227,12 @@
       a <literal>query-all-ids</literal> request formats the output in the
       following manner:
      </para>
-     <screen width="100">$ <userinput>curl \
---cacert self-signed.crt
---header "X-OpenIDM-Username: openidm-admin"
---header "X-OpenIDM-Password: openidm-admin"
---request GET "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true
-</userinput>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput>
 <computeroutput>{
  "result" : [ {
    "_id" : "bjensen",
@@ -858,13 +858,12 @@ Content-Length: 89
         following example displays configuration information on the
         <literal>sync</literal> object, based on OpenIDM using Sample 1.</para>
 
-        <screen>
- $ <userinput>curl \
+        <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/config/sync?_prettyPrint=true"</userinput>
+ "https://localhost:8443/openidm/config/sync"</userinput>
          <computeroutput>
 {
   "mappings": [ {
@@ -980,14 +979,12 @@ $ <userinput>curl \
           user.
          </para>
 
-         <screen>
-$<userinput> curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET \
-"httpS://localhost:8443/openidm/managed/user/<replaceable>user_id</replaceable>"
-         </userinput></screen>
+         <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user/<replaceable>user_id</replaceable>"</userinput></screen>
 
          <para>To add a user without a specified ID, see the Installation Guide
           section on <link xlink:show="new"
@@ -998,42 +995,38 @@ $<userinput> curl \
 
          <para>The following example adds a user with a specific user ID.</para>
 
-          <screen>
-$ <userinput>curl \
---cacert self-signed.crt \
---header "Content-Type: application/json" \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request PUT \
---data '{ \
-"userName":"james", \
-"sn":"Berg", \
-"givenName":"James", \
-"mail": "james@example.com", \
-"telephoneNumber": "082082082", \
-"password":"password" \
-}' \
-"https://localhost:8443/openidm/managed/user/james"
-          </userinput></screen>
+          <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PUT \
+ --data '{
+    "userName":"james",
+    "sn":"Berg",
+    "givenName":"James",
+    "mail": "james@example.com",
+    "telephoneNumber": "082082082",
+    "password":"password"
+  }' \
+"https://localhost:8443/openidm/managed/user/james"</userinput></screen>
 
           <para>The following example checks whether a user exists, then updates the
            user entry. The command replaces the telephone number with the new data
            provided in the request body.</para>
 
-          <screen width="90">
-$ <userinput>curl \
---cacert self-signed.crt \
---header "Content-Type: application/json" \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request POST \
---data '[{
+          <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '[{
   "operation":"replace",
   "field":"telephoneNumber",
   "value":"1234567"
-  }]'
-  "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=<replaceable>id</replaceable>"
-          </userinput>
+  }]' \
+  "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=<replaceable>id</replaceable>"</userinput>
           </screen>
   </section>
 
@@ -1092,15 +1085,13 @@ $ <userinput>curl \
      <para>The following example returns a list of the available connector
       configurations.</para>
 
-     <screen>
- $ <userinput>curl \
---cacert self-signed.crt \
---header "Content-Type: application/json" \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request POST \
-"https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"
-     </userinput></screen>
+     <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</userinput></screen>
 
   </section>
 
@@ -1210,18 +1201,17 @@ $ <userinput>curl \
      appear in this list, the corresponding workflow definition must be in the
      <literal>openidm/workflow</literal> directory.</para>
 
-    <screen width="100">
-$ <userinput>curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET \
-"https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids&amp;_prettyPrint=true"</userinput></screen>
+    <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"</userinput></screen>
 
     <para>Depending on the defined workflows, the output will be something like
      the following:</para>
 
-    <screen width="100"><?dbfo pgwide="1"?>{
+    <screen>{
 "result":[ {
      "tenantId" : "",
      "candidateStarterGroupIdExpressions" : [ ],
@@ -1238,16 +1228,17 @@ $ <userinput>curl \
      <literal>foo</literal> parameter is given the value <literal>bar</literal>
      in the workflow invokation.</para>
 
-     <screen width="91"><?dbfo pgwide="1"?>
- $ <userinput>curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create" \
- --data '{"key":"contractorOnboarding","foo":"bar"}' </userinput>
-     </screen>
+ --data '{
+      "key":"contractorOnboarding",
+      "foo":"bar"
+  }' \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput></screen>
 
   </section>
 
@@ -1427,15 +1418,13 @@ $ <userinput>curl \
      </filename> file.
     </para>
 
-    <screen>
-$ <userinput>curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"
-    </userinput></screen>
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</userinput></screen>
   </section>
 
  </section>

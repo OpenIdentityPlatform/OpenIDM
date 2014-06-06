@@ -892,8 +892,7 @@ openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
      <para>The API supports patch by query, so the caller does not need to 
      know the identifier of the object to change.</para>
 
-     <screen width="90"><?dbfo pgwide="1"?>
- $ curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -904,7 +903,7 @@ openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
   "field":"/password",
   "value":"Passw0rd"
   }]' \
- "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE"</screen>
+ "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE"</userinput></screen>
 
       <para>For the syntax on how to formulate the query
       <literal>_queryId=for-userName&amp;uid=DDOE</literal> see

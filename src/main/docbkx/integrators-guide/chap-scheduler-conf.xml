@@ -754,13 +754,14 @@
     The task itself is defined in a file named 
     <filename>openidm/conf/schedule-taskscan_sunset.json</filename>.</para>
  
-    <screen width="91"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset"
+    <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset"</userinput>
    </screen>
    
    <para>By default, a scanning task ID is returned immediately when the task 
@@ -778,13 +779,14 @@
     You can also set the property directly over the REST interface when the task is 
     initiated. For example:</para>
 
-    <screen width="100"><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset&amp;waitForCompletion=true"
+    <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset&amp;waitForCompletion=true"</userinput>
     </screen>       
    
    </section>
@@ -796,19 +798,20 @@
     following call cancels the scanning task initiated in the previous section.
     </para>
     
-    <screen width="91"><?dbfo pgwide="1"?>$curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "https://localhost:8443/openidm/taskscanner/edfaf59c-aad1-442a-adf6-3620b24f8385?_action=cancel"
+    <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/taskscanner/edfaf59c-aad1-442a-adf6-3620b24f8385?_action=cancel"</userinput>
     </screen>
     
     <para>The output for a scanning task cancellation request is similar to the
-    following, but on a single line:</para>
+    following:</para>
     
-    <screen width="91">
+    <screen>
     {"_id":"edfaf59c-aad1-442a-adf6-3620b24f8385",
      "action":"cancel",
      "status":"SUCCESS"}
@@ -817,27 +820,26 @@
    </section>
    
    <section xml:id="listing-task-scanner">
-   <title>Listing Scanning Tasks</title>
+    <title>Listing Scanning Tasks</title>
+    <para>
+     You can display a list of scanning tasks that have completed, and
+    those that are in progress, by running a RESTful GET on the
+    <literal>openidm/taskscanner"</literal> context. The following example
+     displays all scanning tasks.</para>
     
-    <para>You can display a list of scanning tasks that have completed, and 
-    those that are in progress, by running a RESTful GET on 
-    <literal>"http://localhost:8080/openidm/taskscanner"</literal>. The following 
-    example displays all scanning tasks.</para>
-    
-    <screen>$curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request GET
- "https://localhost:8443/openidm/taskscanner"
+    <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/taskscanner"</userinput>
     </screen>
     
     <para>The output of such a request is similar to the following, with one 
-    item for each scanning task. The output appears on a single line, but
-    has been indented here, for legibility.</para>
+    item for each scanning task.</para>
     
-    <screen width="91">{
+    <screen>{
  "tasks": [
     {
       "ended": 1352455546182
