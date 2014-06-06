@@ -40,17 +40,14 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
     obj.data.hasAddressDetails = true;
     
     obj.render = function(args, callback) {
-        if(conf.globalData.userComponent && conf.globalData.userComponent === "internal/user"){
+        if(conf.globalData.userComponent && conf.globalData.userComponent === "repo/internal/user"){
             obj.data.adminUser = true;
         } else {
             obj.data.adminUser = false;
         }
         this.parentRender(function() {
             var self = this,
-                baseEntity = this.delegate.baseEntity + "/" + conf.loggedUser._id;
-            if (conf.globalData.userComponent === "internal/user") {
-                baseEntity = "repo/internal/user/" + conf.loggedUser._id;
-            }
+                baseEntity = this.delegate.getUserResourceName(conf.loggedUser);
 
             validatorsManager.bindValidators(this.$el, baseEntity, _.bind(function () {
                 
