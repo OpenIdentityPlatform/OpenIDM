@@ -101,7 +101,7 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
             this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
             
-            this.delegate = conf.globalData.userComponent === "internal/user" ? internalUserDelegate : userDelegate;
+            this.delegate = conf.globalData.userComponent === "repo/internal/user" ? internalUserDelegate : userDelegate;
                         
             $("#dialogs").hide();
             this.show(_.bind(function() {

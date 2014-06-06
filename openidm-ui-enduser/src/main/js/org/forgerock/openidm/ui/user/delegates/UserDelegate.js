@@ -37,7 +37,7 @@ define("UserDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/managed/user");
 
     obj.getUserResourceName = function (user) {
-        return (user.component === "internal/user" ? "repo/internal/user": user.component) + "/" + user._id;
+        return user.component + "/" + user._id;
     };
 
     obj.usersCallback = null;
@@ -76,10 +76,6 @@ define("UserDelegate", [
     };
     
     obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
-    
-        if (component === "internal/user") {
-            component = "repo/internal/user"; 
-        }
 
         return this.serviceCall({
             serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
