@@ -307,7 +307,7 @@ $ curl \
      <literal>bjensen</literal>.
     </para>
 
-    <screen width="104"><userinput>$ curl
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -833,7 +833,7 @@ $ curl \
       Copy the default effective roles script to your project's
       <literal>script/roles</literal> directory.
      </para>
-     <screen width="92">
+     <screen>
 $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>project-dir</replaceable>/script/roles/
      </screen>
      <para>

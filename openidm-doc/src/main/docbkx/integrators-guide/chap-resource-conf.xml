@@ -1260,7 +1260,7 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
       particular, check the connection settings, under the
       <literal>AppSettings</literal> item.
      </para>
-     <screen width="88">&lt;add key="connectorserver.port" value="8759" /&gt;
+     <screen>&lt;add key="connectorserver.port" value="8759" /&gt;
 &lt;add key="connectorserver.usessl" value="false" /&gt;
 &lt;add key="connectorserver.certificatestorename" value="ConnectorServerSSLCertificate" /&gt;
 &lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;</screen>
@@ -1526,41 +1526,51 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/</
 $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
         </step>
         <step>
-            <para>Edit the Active Directory connector configuration.</para>
-            <para>Specifically, edit the <literal>"configurationProperties"</literal>
-            according to your Active Directory deployment</para>
-            <para>Also, check that the <literal>bundleVersion</literal> of the
-            connector is the same as the version of the
-            <filename>ActiveDirectory.Connector.dll</filename> in the Connector
-            Server directory. To check the .dll version, right click on the
-            <literal>ActiveDirectory.Connector.dll</literal> file and select
-            <literal>Properties</literal>. Click on <literal>Tab Details</literal>,
-            and select <literal>Product Version</literal>.</para>
-            <para>The following configuration extract shows sample values for
-            the <literal>"configurationProperties"</literal>:</para>
-      <screen>...
-   "connectorRef" :
-      {
-         "connectorHostRef" : "dotnet",
-         "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
-         "bundleName" : "ActiveDirectory.Connector",
-         "bundleVersion" : "1.1.0.0"
-      },          ...
-   "configurationProperties" :
-      {
-         "DirectoryAdminName" : "EXAMPLE\\Administrator",
-         "DirectoryAdminPassword" : "MyPassw0rd",
-         "ObjectClass" : "User",
-         "Container" : "dc=ad,dc=example,dc=com",
-         "CreateHomeDirectory" : true,
-         "LDAPHostName" : "192.0.2.0",
-         "SearchChildDomains" : false,
-         "DomainName" : "example",
-         "SyncGlobalCatalogServer" : null,
-         "SyncDomainController" : null,
-         "SearchContext" : ""
-      },</screen>
-            <para>The <literal>"DirectoryAdminName"</literal> and
+         <para>
+          Edit the Active Directory connector configuration.
+         </para>
+         <para>
+          Specifically, edit the <literal>"configurationProperties"</literal>
+          according to your Active Directory deployment.
+         </para>
+         <para>
+          Also, check that the <literal>bundleVersion</literal> of the connector
+          is the same as the version of the
+          <filename>ActiveDirectory.Connector.dll</filename> in the Connector
+          Server directory. To check the .dll version, right click on the
+          <literal>ActiveDirectory.Connector.dll</literal> file and select
+          <literal>Properties</literal>. Click on <literal>Tab Details</literal>,
+          and select <literal>Product Version</literal>.
+         </para>
+         <para>
+          The following configuration extract shows sample values for the
+          <literal>"configurationProperties"</literal>:
+         </para>
+         <programlisting>
+...
+"connectorRef" :
+   {
+      "connectorHostRef" : "dotnet",
+      "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+      "bundleName" : "ActiveDirectory.Connector",
+      "bundleVersion" : "1.1.0.0"
+   },          ...
+"configurationProperties" :
+   {
+      "DirectoryAdminName" : "EXAMPLE\\Administrator",
+      "DirectoryAdminPassword" : "MyPassw0rd",
+      "ObjectClass" : "User",
+      "Container" : "dc=ad,dc=example,dc=com",
+      "CreateHomeDirectory" : true,
+      "LDAPHostName" : "192.0.2.0",
+      "SearchChildDomains" : false,
+      "DomainName" : "example",
+      "SyncGlobalCatalogServer" : null,
+      "SyncDomainController" : null,
+      "SearchContext" : ""
+   },
+         </programlisting>
+         <para>The <literal>"DirectoryAdminName"</literal> and
             <literal>"DirectoryAdminPassword"</literal> must specify the
             credentials of an administrator account in Active Directory, that
             the connector will use to bind to the server.</para>
@@ -2801,9 +2811,10 @@ return id;
  
   <screen>$ curl \
  --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <itemizedlist>

@@ -852,14 +852,21 @@ if (syncResults.success) {
    <para>For example, to update the <literal>givenName</literal> of user jdoe,
     you could run the following command:</para>
 
-   <screen><?dbfo pgwide="1"?>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- --data '[{"operation":"replace","field":"givenName","value":"Jon"}]'
- "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
+   <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '[
+    {
+    "operation":"replace",
+    "field":"givenName",
+    "value":"Jon"
+    }
+ ]' \
+ "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"</userinput>
    </screen>
 
    <note>
@@ -1615,7 +1622,7 @@ if (syncResults.success) {
    a reconciliation operation is required to copy changes made in the repository
    to the LDAP system.
   </para>
-  <screen><?dbfo pgwide="1"?>$ curl \
+  <screen width="102">$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1654,13 +1661,13 @@ if (syncResults.success) {
      RESTful GET on the <literal>audit/recon</literal> endpoint. For example:
     </para>
 
-    <screen>$ curl \
+    <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon"</screen>
+ "https://localhost:8443/openidm/audit/recon"</userinput></screen>
 
     <para>
      The following code sample shows an extract of the audit log after the first
@@ -1972,12 +1979,14 @@ if (syncResults.success) {
      reconciliation operation:
     </para>
 
-    <screen><?dbfo pgwide="1"?>$ curl \
+    <screen width="102">
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</screen>
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</userinput>
+    </screen>
 
     <para>
      Output similar to the following is returned, with one entry for each record
@@ -2212,12 +2221,14 @@ if (syncResults.success) {
      <literal>parentActionId</literal> in the query. For example:
     </para>
 
-    <screen><?dbfo pgwide="1"?>$ curl \
+    <screen width="102">
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</screen>
+ "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</userinput>
+    </screen>
 
     <para>
      The following sample output shows the result of a query that requests
@@ -3621,15 +3632,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        calls the <literal>managedUserApproval</literal> workflow if the
        situation is assessed as <literal>ABSENT</literal>:</para>
        <programlisting language="javascript">
-                {
-                    "situation" : "ABSENT",
-                    "action" : {
-                        "workflowName" : "managedUserApproval",
-                        "type" : "text/javascript",
-                        "file" : "bin/defaults/script/workflow/workflow.js"
-                    }
-                },
-       </programlisting>
+{
+    "situation" : "ABSENT",
+    "action" : {
+        "workflowName" : "managedUserApproval",
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/workflow/workflow.js"
+    }
+},    </programlisting>
      </listitem>
      <listitem>
       <para>
@@ -3665,13 +3675,14 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        Note that the <literal>_id</literal> must be URL-encoded in the REST
        call.
       </para>
-      <screen><?dbfo pgwide="1"?>$ <userinput>curl \
+      <screen width="110">$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
+ "https://localhost:8443/openidm/sync?_action=performAction&amp;sourceId=uid%3Dbjensen%2Cou%3DPeople%2Cdc%3Dexample%2Cdc%3Dcom&amp;mapping=
+ systemLdapAccounts_ManagedUser&amp;action=DELETE"</userinput>
 <computeroutput>{}</computeroutput></screen>
      </listitem>
    </orderedlist>
@@ -3965,8 +3976,7 @@ map;</programlisting>
   nevertheless execute a script.) The following example shows a more advanced
   mapping configuration.</para>
 
-  <programlisting linenumbering="numbered" language="javascript">
-{
+<programlisting linenumbering="numbered" language="javascript">{
     "mappings": [
         {
             "name": "systemLdapAccount_managedUser",

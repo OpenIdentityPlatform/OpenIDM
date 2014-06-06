@@ -1259,7 +1259,7 @@ tables).</para></listitem>
      As an example, start with a request such as the following:
     </para>
 
-    <screen width="90">
+    <screen>
      GET http://localhost:8080/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
     </screen>
 

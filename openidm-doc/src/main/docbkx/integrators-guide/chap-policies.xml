@@ -508,20 +508,19 @@ function notNull(fullObject, value, params, property) {
       <title>Listing the Defined Policies</title>
       
       <para>The following REST call displays a list of all the defined 
-      policies:
+      policies. The policy objects are returned in JSON format, with one object
+      for each defined policy ID.
       </para>
       
-      <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/policy"</screen>
-      
-      <para>The policy objects are returned in JSON format, with one object 
-      for each defined policy ID, for example:</para>
-
-<screen width="88">{
+      <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/policy"</userinput>
+<computeroutput>
+{
   "resources": [
     {
       "properties": [
@@ -530,21 +529,22 @@ function notNull(fullObject, value, params, property) {
         "policies": [
           {
             "policyFunction":
-...</screen>
+...</computeroutput>
+      </screen>
 
       <para>To display the policies that apply to a specific component, include 
       the component name in the URL. For example, the following REST call 
       displays the policies that apply to managed users.
       </para>
       
-      <screen>$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "https://localhost:8443/openidm/policy/managed/user/*"</screen>
-      
       <screen>
+$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/policy/managed/user/*"</userinput>
+<computeroutput>
 {
    "properties": [
      {
@@ -556,7 +556,7 @@ function notNull(fullObject, value, params, property) {
                \n    var i, join = function (arr, d) {
 
 ...
-}</screen>
+}</computeroutput></screen>
     </section>
     
     <section xml:id="policy-validate">
@@ -568,21 +568,23 @@ function notNull(fullObject, value, params, property) {
       <para>The following example verifies that a new managed user object is 
       acceptable in terms of the policy requirements.</para>
       
-      <screen width="83">$ <userinput>curl \
+      <screen>
+$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- --data '{"sn":"Jones", \
-  "givenName":"Bob", \
-  "_id":"bjones", \
-  "telephoneNumber":"0827878921", \
-  "passPhrase":null, \
-  "mail":"bjones@example.com", \
-  "accountStatus":"active", \
-  "roles":"admin", \
-  "userName":"bjones@example.com", \
+ --data '{
+  "sn":"Jones",
+  "givenName":"Bob",
+  "_id":"bjones",
+  "telephoneNumber":"0827878921",
+  "passPhrase":null,
+  "mail":"bjones@example.com",
+  "accountStatus":"active",
+  "roles":"admin",
+  "userName":"bjones@example.com",
   "password":"123"}' \
  "https://localhost:8443/openidm/policy/managed/user/bjones?_action=validateObject"
        </userinput>
@@ -623,8 +625,9 @@ function notNull(fullObject, value, params, property) {
        ]
      }
    ],
-   "result": false    </computeroutput>
- }</screen>
+   "result": false
+ }</computeroutput>
+      </screen>
       
       <para>The result (<literal>false</literal>) indicates that the object 
       is not valid. The unfulfilled policy requirements are provided as part 
