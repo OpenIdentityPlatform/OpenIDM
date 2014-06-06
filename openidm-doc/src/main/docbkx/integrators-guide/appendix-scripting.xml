@@ -408,7 +408,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
             </para>
 
             <screen>
-                org.forgerock.openidm.script.ScriptException: missing name after . operator
+org.forgerock.openidm.script.ScriptException: missing name after . operator
             </screen>
 
         </section>
@@ -1124,7 +1124,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
          <para>
           Uncomment and edit the following line.
          </para>
-         <programlisting language="none" width="84">
+         <programlisting>
 #openidm.script.javascript.debug=transport=socket,suspend=y,address=9888,trace=true
          </programlisting>
          <para>
@@ -1137,7 +1137,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
          <para>
           Uncomment and edit the following line.
          </para>
-         <programlisting language="none" width="81">
+         <programlisting>
 #openidm.script.javascript.sources=/Eclipse/workspace/External JavaScript Source/
          </programlisting>
          <para>

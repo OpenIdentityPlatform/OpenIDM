@@ -175,15 +175,14 @@ $ cp samples/misc/example.bpmn20.xml workflow/</screen>
   </literal> workflow with the following REST call:
   </para>
   
-  <screen width="100"><?dbfo pgwide="1"?>$ <userinput>curl \
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
  --data '{"_key":"osgiProcess"}' \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"
-</userinput></screen>
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput></screen>
   
   <para>
    The workflow prints the list of workflow definitions to the OpenIDM console.
@@ -1088,7 +1087,7 @@ Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</com
      Query a task definition based on the process definition ID and the task
      name (<literal>taskDefinitionKey</literal>). For example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen width="100"><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1449,14 +1448,18 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
     You can also invoke the workflow over the REST interface with the following
     REST command:
    </para>
-   <screen><?dbfo pgwide="1"?>$ curl \
+   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --data '{"_key":"EmailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}' \
+ --data '{
+    "_key":"EmailNotification",
+    "fromSender":"noreply@openidm",
+    "toEmail":"jdoe@example.com"
+ }' \
  --request POST \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"</screen>
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput></screen>
 
    <para>
     To schedule the workflow to be invoked regularly, create a schedule
