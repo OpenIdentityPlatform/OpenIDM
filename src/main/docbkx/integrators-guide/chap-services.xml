@@ -305,12 +305,12 @@ Stopping OpenIDM (454)</screen>
      This information can be accessed over REST at
      <literal>https://localhost:8443/openidm/info/login</literal>. For example:
     </para>
-    <screen width="91"><?dbfo pgwide="1"?>
- $ <userinput>curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+    <screen>
+ $ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
  "https://localhost:8443/openidm/info/login" </userinput>
 
     <computeroutput>
@@ -645,39 +645,50 @@ Properties:
  </section>
 
  <section xml:id="starting-in-debug-mode">
-     <title>Starting OpenIDM in Debug Mode</title>
-     <para>To debug custom libraries, you can start OpenIDM with the option to
-     use the Java Platform Debugger Architecture (JPDA).</para>
-
-     <itemizedlist>
-         <listitem>
-             <para>Start OpenIDM with the <literal>jpda</literal> option:</para>
-             <screen>$ cd /path/to/openidm
-$ ./startup.sh jpda
-
+  <title>Starting OpenIDM in Debug Mode</title>
+  <para>
+   To debug custom libraries, you can start OpenIDM with the option to use the
+   Java Platform Debugger Architecture (JPDA).
+  </para>
+  <itemizedlist>
+   <listitem>
+    <para>
+     Start OpenIDM with the <literal>jpda</literal> option:
+    </para>
+    <screen>
+$ <userinput>cd /path/to/openidm
+$ ./startup.sh jpda</userinput>
+<computeroutput>
 Executing ./startup.sh...
 Using OPENIDM_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Denvironment=PROD -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=n
-Using LOGGING_CONFIG: -Djava.util.logging.config.file=/home/11MarCREST/openidm/conf/logging.properties
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Denvironment=PROD -Djava.compiler=NONE
+   -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,address=5005,server=y,suspend=n
+Using LOGGING_CONFIG:
+   -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Listening for transport dt_socket at address: 5005
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 -> OpenIDM version "<?eval ${openidm.version}?>" (revision: xxxx)
-OpenIDM ready</screen>
-             <para>The relevant JPDA options are outlined in the startup script
-             (<literal>startup.sh</literal>).</para>
-         </listitem>
-         <listitem>
-             <para>In your IDE, attach a Java debugger to the JVM via socket,
-             on port 5005.</para>
-         </listitem>
-     </itemizedlist>
+OpenIDM ready
+</computeroutput>
+    </screen>
+    <para>
+     The relevant JPDA options are outlined in the startup script
+     (<literal>startup.sh</literal>).
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     In your IDE, attach a Java debugger to the JVM via socket, on port 5005.
+    </para>
+   </listitem>
+  </itemizedlist>
 
-     <caution>
-         <para>This interface is internal and subject to change. If you depend
-         on this interface, contact ForgeRock support.</para>
-     </caution>
+  <caution>
+   <para>
+    This interface is internal and subject to change. If you depend on this
+    interface, contact ForgeRock support.
+   </para>
+  </caution>
  </section>
-
-
 
 </chapter>
