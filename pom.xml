@@ -285,7 +285,7 @@
         -->
         <releaseDate/>
         <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
-        <frDocPluginVersion>2.1.0</frDocPluginVersion>
+        <frDocPluginVersion>2.1.2</frDocPluginVersion>
 
 	<!-- Doc Branding -->
 	<brandingGroupId>org.forgerock.commons</brandingGroupId>
