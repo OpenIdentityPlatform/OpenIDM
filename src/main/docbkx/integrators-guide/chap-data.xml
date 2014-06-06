@@ -234,7 +234,7 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
     <literal>_queryExpression</literal> keyword. For example:
    </para>
 
-   <screen width="92">$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
