@@ -720,6 +720,16 @@
       </listitem>
     </varlistentry>
     </variablelist>
+
+   <para>
+    You can specify a <literal>logTo</literal> location to the directory of your
+    choice. The example shown in <link xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#custom-audit-log-location"><citetitle>Custom
+    Audit Log Locations</citetitle></link> shows how you can configure
+    <literal>logTo</literal> to direct audit logs to a user home directory.
+   </para>
+
   </section>
 
   <section xml:id="audit-exception-formatter">
