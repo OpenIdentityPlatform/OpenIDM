@@ -674,7 +674,9 @@ $ <userinput>curl \
   properties, to modify the configuration according to the system on which 
   the OpenIDM instance runs.</para>
   
-  <example>
+  <example xml:id="custom-audit-log-location">
+   <title>Custom Audit Log Location</title>
+
    <para>The following example modifies the <literal>audit.json</literal> file so 
    that the log file is written to the user's directory. The 
    <literal>user.home</literal> property is a default Java System property.</para>
