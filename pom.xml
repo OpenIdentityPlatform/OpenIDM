@@ -711,6 +711,13 @@
                 <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
                 <version>1.7R4_1</version>
             </dependency>
+            <!-- Alternate bundle instead of servicemix
+            <dependency>
+            <groupId>de.matrixweb.osgi.wrapped</groupId>
+            <artifactId>osgi-wrapped-rhino</artifactId>
+            <version>1.7R4</version>
+            </dependency-->
+
 
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
