@@ -122,7 +122,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
 
         logger.debug("DelegatedAuthModule: validateRequest START");
 
-        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(null, messageInfo);
+        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo);
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
 
         try {
@@ -159,15 +159,12 @@ public class DelegatedAuthModule implements ServerAuthModule {
             return false;
         }
 
-        try {
-            boolean authenticated = authenticator.authenticate(credential.username, credential.password,
-                    authnFilterHelper.getRouter().createServerContext());
+        // set the authenticationId of the user that is trying to authenticate
+        securityContextMapper.setAuthenticationId(credential.username);
 
-            if (authenticated) {
-                // user is authenticated; partially populate security context, rest is done by the role calculation wrapper.
-                securityContextMapper.setAuthenticationId(credential.username);
-            }
-            return authenticated;
+        try {
+            return authenticator.authenticate(credential.username, credential.password,
+                    authnFilterHelper.getRouter().createServerContext());
         } catch (ResourceException e) {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
             if (e.isServerError()) { // HTTP server-side error

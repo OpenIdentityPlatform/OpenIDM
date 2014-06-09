@@ -18,8 +18,6 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.resource.Resource;
 
-import javax.security.auth.message.MessageInfo;
-
 /**
  * Provides automatic role calculation based from the authentication configuration to provide support for common
  * auth modules out of the box.
@@ -32,9 +30,8 @@ interface RoleCalculator {
      * Performs the calculation of roles based on the provided configuration.
      *
      * @param principal The principal.
-     * @param messageInfo The message info instance.
+     * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
-     * @return A SecurityContextMapper instance containing the authentication context information.
      */
-    SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource);
+    void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource);
 }

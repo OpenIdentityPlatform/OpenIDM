@@ -22,9 +22,6 @@ import java.util.Map;
 
 import org.forgerock.json.resource.Resource;
 
-import javax.security.auth.message.MessageInfo;
-
-
 /**
  * Factory class for creating PropertyRoleCalculator instances.
  *
@@ -65,19 +62,14 @@ class RoleCalculatorFactory {
                     // use group membership and role-mapping role calculator
                     calculators.add(new MappingRoleCalculator(groupMembership, roleMapping, groupComparison));
                 }
-            };
+            }
 
             @Override
-            public SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource) {
-
-                SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(principal, messageInfo);
-
+            public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
                 // set roles
                 for (RoleCalculator calculator : calculators) {
-                    calculator.calculateRoles(principal, messageInfo, resource);
+                    calculator.calculateRoles(principal, securityContextMapper, resource);
                 }
-
-                return securityContextMapper;
             }
         };
     }

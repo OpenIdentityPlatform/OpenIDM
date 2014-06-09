@@ -18,7 +18,6 @@ package org.forgerock.openidm.jaspi.modules;
 
 import org.forgerock.json.resource.Resource;
 
-import javax.security.auth.message.MessageInfo;
 import java.util.List;
 
 /**
@@ -32,16 +31,14 @@ class DefaultRoleCalculator implements RoleCalculator {
         this.defaultRoles = defaultRoles;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource) {
-
-        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(principal, messageInfo);
-
+    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
         if (defaultRoles != null && !defaultRoles.isEmpty()) {
             securityContextMapper.setRoles(defaultRoles);
         }
-
-        return securityContextMapper;
     }
 
 }

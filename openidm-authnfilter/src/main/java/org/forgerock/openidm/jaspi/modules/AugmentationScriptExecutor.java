@@ -57,31 +57,33 @@ class AugmentationScriptExecutor {
     void executeAugmentationScript(ScriptEntry augmentScript, JsonValue properties,
             SecurityContextMapper securityContextMapper) throws AuthException {
 
-        if (augmentScript != null) {
-            try {
-                if (!augmentScript.isActive()) {
-                    throw new ServiceUnavailableException("Failed to execute inactive script: "
-                            + augmentScript.getName().toString());
-                }
+        if (augmentScript == null) {
+            return;
+        }
 
-                // Create internal ServerContext chain for script-call
-                ServerContext context = authnFilterHelper.getRouter().createServerContext();
-                final Script script = augmentScript.getScript(context);
-                // Pass auth module properties and SecurityContextWrapper details to augmentation script
-                script.put("properties", properties);
-                script.put("security", securityContextMapper.asJsonValue());
-                script.eval();
-            } catch (ScriptThrownException e) {
-                final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
-                logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
-                throw new JaspiAuthException(re.getMessage(), re);
-            } catch (ScriptException e) {
-                logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
-                throw new JaspiAuthException(e.getMessage(), e);
-            } catch (ResourceException e) {
-                logger.error("{} when attempting to create server context", e.toString(), e);
-                throw new JaspiAuthException(e.getMessage(), e);
+        try {
+            if (!augmentScript.isActive()) {
+                throw new ServiceUnavailableException("Failed to execute inactive script: "
+                        + augmentScript.getName().toString());
             }
+
+            // Create internal ServerContext chain for script-call
+            ServerContext context = authnFilterHelper.getRouter().createServerContext();
+            final Script script = augmentScript.getScript(context);
+            // Pass auth module properties and SecurityContextWrapper details to augmentation script
+            script.put("properties", properties);
+            script.put("security", securityContextMapper.asJsonValue());
+            script.eval();
+        } catch (ScriptThrownException e) {
+            final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
+            logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
+            throw new JaspiAuthException(re.getMessage(), re);
+        } catch (ScriptException e) {
+            logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
+            throw new JaspiAuthException(e.getMessage(), e);
+        } catch (ResourceException e) {
+            logger.error("{} when attempting to create server context", e.toString(), e);
+            throw new JaspiAuthException(e.getMessage(), e);
         }
     }
 }

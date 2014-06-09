@@ -19,7 +19,6 @@ package org.forgerock.openidm.jaspi.modules;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
@@ -27,7 +26,6 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.script.ScriptEntry;
@@ -48,7 +46,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -291,8 +288,11 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             // Attempt to read the user object; will return null if any of the pieces are null
             final Resource resource = queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
 
-            final SecurityContextMapper securityContextMapper =
-                    roleCalculator.calculateRoles(principalName, messageInfo, resource);
+            final SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo)
+                    .setAuthenticationId(principalName);
+
+            // Calculate (and set) roles
+            roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
 
             // set "resource" (component) if not already set
             if (securityContextMapper.getResource() == null) {
@@ -313,18 +313,8 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
                 }
             }
 
-            if (augmentScript != null) {
-                augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties, securityContextMapper);
-
-                Map<String, Object> contextMap =
-                        (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
-                if (contextMap == null) {
-                    contextMap = new HashMap<String, Object>();
-                }
-                contextMap.putAll(securityContextMapper.getAuthorizationId());
-            }
-
-            messageInfoParams.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, securityContextMapper.getAuthenticationId());
+            // run the augmentation script, if configured (will no-op if none specified)
+            augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties, securityContextMapper);
 
         } catch (ResourceException e) {
             if (logger.isDebugEnabled()) {
