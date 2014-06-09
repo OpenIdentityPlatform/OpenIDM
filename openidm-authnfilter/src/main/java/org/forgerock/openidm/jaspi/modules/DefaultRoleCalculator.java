@@ -36,7 +36,7 @@ class DefaultRoleCalculator implements RoleCalculator {
      */
     @Override
     public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
-        if (defaultRoles != null && !defaultRoles.isEmpty()) {
+        if (defaultRoles != null) {
             securityContextMapper.setRoles(defaultRoles);
         }
     }

@@ -48,7 +48,7 @@ class RoleCalculatorFactory {
             final List<RoleCalculator> calculators = new ArrayList<RoleCalculator>();
 
             {
-                if (defaultRoles != null && !defaultRoles.isEmpty()) {
+                if (defaultRoles != null) {
                     // assign default roles
                     calculators.add(new DefaultRoleCalculator(defaultRoles));
                 }
