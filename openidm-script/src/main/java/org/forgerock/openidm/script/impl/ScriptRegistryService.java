@@ -249,6 +249,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             throw e;
         }
 
+        // OPENIDM-1746 Set the script registry class loader to this class, so that any libraries
+        // bundled as an OSGI-Fragment attached to this bundle will be "seen" by scripts.
+        setRegistryLevelScriptClassLoader(this.getClass().getClassLoader());
+
         /*
          * manifestWatcher = new BundleWatcher<ManifestEntry>(context, new
          * ScriptEngineManifestScanner(), null); manifestWatcher.start();
