@@ -122,7 +122,7 @@ public class RouterActivityLogger implements ActivityLogger {
             rev = before.get(Resource.FIELD_CONTENT_REVISION).asString();
         }
 
-        String method = requestType.name();
+        String method = requestType.name().toLowerCase();
 
         // TODO: make configurable
         if (method != null
