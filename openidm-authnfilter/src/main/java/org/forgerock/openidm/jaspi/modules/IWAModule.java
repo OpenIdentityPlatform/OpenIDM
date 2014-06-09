@@ -133,7 +133,9 @@ public class IWAModule implements ServerAuthModule {
             final String principal = username;
             // Need to set as much information as possible so it can be put in both the request and JWT for IDM
             // and later use
-            SecurityContextMapper.fromMessageInfo(principal, messageInfo).setResource("system/AD/account");//TODO shouldn't this be configurable?...
+            SecurityContextMapper.fromMessageInfo(messageInfo)
+                    .setAuthenticationId(principal)
+                    .setResource("system/AD/account");//TODO shouldn't this be configurable?...
 
             LOGGER.debug("IWAModule: Successful log in with user, {}", username);
 

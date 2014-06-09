@@ -103,7 +103,7 @@ public class ClientCertAuthModule implements ServerAuthModule {
     @Override
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) {
 
-        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(null, messageInfo);
+        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo);
 
         HttpServletRequest req = (HttpServletRequest) messageInfo.getRequestMessage();
 
@@ -161,12 +161,12 @@ public class ClientCertAuthModule implements ServerAuthModule {
 
         // Q: is it possible to pass multiple client certs?
         String username = certs[0].getSubjectDN().getName();
+        securityContextMapper.setAuthenticationId(username);
 
         if (!usernameMatchesPatterns(username)) {
             logger.debug("Client certificate subject {} did not match allowed patterns", username);
             return false;
         }
-        securityContextMapper.setAuthenticationId(username);
 
         logger.debug("Authentication client certificate subject {}", username);
         return true;

@@ -18,14 +18,11 @@ package org.forgerock.openidm.jaspi.modules;
 
 import java.util.List;
 import java.util.Map;
-import javax.security.auth.message.MessageInfo;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.resource.Resource.FIELD_CONTENT_ID;
 
 /**
  * Provides automatic role calculation based from the authentication configuration to provide support for common
@@ -58,13 +55,10 @@ class MappingRoleCalculator implements RoleCalculator {
      * Performs the calculation of roles based on the provided configuration.
      *
      * @param principal The principal.
-     * @param messageInfo The message info instance.
+     * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
-     * @return A SecurityContextMapper instance containing the authentication context information.
      */
-    public SecurityContextMapper calculateRoles(String principal, MessageInfo messageInfo, Resource resource) {
-
-        SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(principal, messageInfo);
+    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper, Resource resource) {
 
         // Apply role mapping if available:
         if (resource != null) {
@@ -93,8 +87,6 @@ class MappingRoleCalculator implements RoleCalculator {
                     securityContextMapper.getUserId(),
                     securityContextMapper.getRoles());
         }
-
-        return securityContextMapper;
     }
 
     private boolean isMemberOfRoleGroups(List<String> groups, List<String> groupMembership) {

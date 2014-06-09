@@ -33,78 +33,90 @@ import javax.security.auth.message.MessageInfo;
 
 import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.servlet.SecurityContextFactory;
 
 /**
- * A JsonValue-wrapper to contain the security context information before the
- * SecurityContext proper is built.
+ * A JsonValue-wrapper to contain the security context information before the SecurityContext proper is built.
  * <br/>
- * The authorizationId is backed by the Jaspi MessageInfo, resulting in any attribute set on the authorizationId is
- * automatically added to the MessageInfo authentication context map which will be added to the request automatically
- * without any further action required.
+ * The authenticationId and authorizationId are backed by the Jaspi MessageInfo; setting the authenticationId
+ * or any attribute on the authorizationId results in those properties being automatically set in the MessageInfo
+ * authentication context map.  This map is added to the request automatically without any further action required.
  */
 class SecurityContextMapper {
 
     private static final String AUTHENTICATION_ID = "authenticationId";
     private static final String AUTHORIZATION_ID = "authorizationId";
 
+    /** the MessageInfo auth context-backing map */
+    private Map messageInfoMap;
+
+    /** a JsonValue view of the auth context data */
     private final JsonValue authData;
 
-    private SecurityContextMapper(String authenticationId, MessageInfo messageInfo) {
-        authData = json(object(field(AUTHENTICATION_ID, authenticationId)));
-        authData.put(AUTHORIZATION_ID, getContextMap(messageInfo));
-    }
-
-    private Map<String, Object> getContextMap(MessageInfo messageInfo) {
-        Map<String, Object> contextMap =
-                (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
+    private SecurityContextMapper(MessageInfo messageInfo) {
+        messageInfoMap = messageInfo.getMap();
+        Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
         if (contextMap == null) {
             contextMap = new HashMap<String, Object>();
-            messageInfo.getMap().put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
+            messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, contextMap);
         }
-
-        return contextMap;
+        // create the JsonValue auth-data wrapper around the AUTHCID value
+        authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID))));
+        // and the auth context map
+        authData.put(AUTHORIZATION_ID, contextMap);
     }
 
     /**
      * Creates a new SecurityContextMapper instance backed by the provided MessageInfo.
      *
-     * @param authenticationId The authenticationId, i.e. principal.
      * @param messageInfo The MessageInfo instance.
      * @return A new SecurityContextMapper.
      */
-    static SecurityContextMapper fromMessageInfo(String authenticationId, MessageInfo messageInfo)  {
-        return new SecurityContextMapper(authenticationId, messageInfo);
+    static SecurityContextMapper fromMessageInfo(MessageInfo messageInfo) {
+        return new SecurityContextMapper(messageInfo);
+
     }
 
-    void setAuthenticationId(String authcId) {
+    SecurityContextMapper setAuthenticationId(String authcId) {
         authData.put(AUTHENTICATION_ID, authcId);
+        // when setting the authenticationId, make sure to update it in the MessageInfo backing-map as well
+        messageInfoMap.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcId);
+        return this;
     }
 
-    void setUserId(String userId) {
+    // since the other fields are authorization data, they will already be persisted in MessageInfo
+    // automatically since the map at authData.get(AUTHORIZATION_ID) is already backed by
+    // MessageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT)
+
+    SecurityContextMapper setUserId(String userId) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_ID, userId);
+        return this;
     }
 
     String getUserId() {
         return authData.get(AUTHORIZATION_ID).get(AUTHZID_ID).asString();
     }
 
-    void setResource(String resource) {
+    SecurityContextMapper setResource(String resource) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_COMPONENT, resource);
+        return this;
     }
 
     String getResource() {
         return authData.get(AUTHORIZATION_ID).get(AUTHZID_COMPONENT).asString();
     }
 
-    void setRoles(List<String> roles) {
+    SecurityContextMapper setRoles(List<String> roles) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>(roles));
+        return this;
     }
 
-    void addRole(String role) {
+    SecurityContextMapper addRole(String role) {
         if (authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).isNull()) {
             authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>());
         }
         authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).add(role);
+        return this;
     }
 
     List<String> getRoles() {
