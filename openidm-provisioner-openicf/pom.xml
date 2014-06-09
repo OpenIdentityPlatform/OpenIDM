@@ -36,7 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
-        <openicf.framework.version>1.4.0.0-RC1</openicf.framework.version>
+        <openicf.framework.version>1.4.0.0-RC2</openicf.framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -135,7 +135,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>groovy-connector</artifactId>
-            <version>1.4.0.0-RC1</version>
+            <version>1.4.0.0-RC2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -212,7 +212,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0-RC1</version>
+                                    <version>1.4.0.0-RC2</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
@@ -233,7 +233,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0-RC1</version>
+                                    <version>1.4.0.0-RC2</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                 </artifactItem>
