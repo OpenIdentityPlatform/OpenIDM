@@ -83,11 +83,6 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
         }
 
         if (isSecurityContextPopulated(securityContext)) {
-            JsonValue roles = new JsonValue(securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES));
-            if (roles.isNull() || roles.size() == 0) {
-                throw new ForbiddenException("No roles assigned");
-            }
-
             return securityContext;
         }
 
@@ -98,9 +93,11 @@ public class IDMSecurityContextFactory implements HttpServletContextFactory {
 
     private boolean isSecurityContextPopulated(SecurityContext context) {
         try {
+            final JsonValue authorziationId = new JsonValue(context.getAuthorizationId());
             return !StringUtils.isEmpty(context.getAuthenticationId())
-                && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_ID).toString())
-                && !StringUtils.isEmpty(context.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT).toString());
+                    && !StringUtils.isEmpty(authorziationId.get(SecurityContext.AUTHZID_ID).asString())
+                    && !StringUtils.isEmpty(authorziationId.get(SecurityContext.AUTHZID_COMPONENT).asString())
+                    && authorziationId.get(SecurityContext.AUTHZID_ROLES).isList();
         } catch (NullPointerException e) {
             return false;
         }
