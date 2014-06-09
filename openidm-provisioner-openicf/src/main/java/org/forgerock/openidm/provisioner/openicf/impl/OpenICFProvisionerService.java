@@ -166,7 +166,6 @@ import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-import org.identityconnectors.framework.common.objects.filter.FilterVisitor;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.remote.RemoteWrappedException;
 import org.osgi.framework.Constants;
@@ -1322,7 +1321,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
                                 AttributeUtil.filterUid(createAttributes), operationOptions);
 
-                        returnResource(request, handler, facade, uid);
+                        Resource resource = getCurrentResource(facade, uid, null);
+                        activityLogger.log(context, RequestType.CREATE, "message", getSource(objectClass, uid.getUidValue()), null, resource.getContent(), Status.SUCCESS);
+                        handler.handleResult(resource);
                     } else {
                         // If the __NAME__ attribute is not mapped then fail
                         final ResourceException e =
@@ -1358,13 +1359,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     return;
                 }
 
+                final Uid uid = request.getRevision() != null
+                        ? new Uid(resourceId, request.getRevision())
+                        : new Uid(resourceId);
+
+                // do a read first (largely for logging)
+                Resource before = getCurrentResource(facade, uid, null);
+
                 OperationOptions operationOptions = operations.get(DeleteApiOp.class)
                         .build(jsonConfiguration, objectClassInfoHelper)
                         .build();
 
-                Uid uid =
-                        null != request.getRevision() ? new Uid(resourceId, request
-                                .getRevision()) : new Uid(resourceId);
                 facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
                 JsonValue result = new JsonValue(new HashMap<String, Object>());
@@ -1372,7 +1377,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 if (null != uid.getRevision()) {
                     result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
                 }
-
+                activityLogger.log(context, RequestType.DELETE, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
                 handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
             } catch (ResourceException e) {
                 handler.handleError(e);
@@ -1486,22 +1491,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     return;
                 }
 
-                OperationOptions operationOptions = null;
-                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-                if (null == request.getFields() || request.getFields().isEmpty()) {
-                    operationOptions = operations.get(GetApiOp.class)
-                            .build(jsonConfiguration, objectClassInfoHelper)
-                            .build();
-                } else {
-                    objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
-                    operationOptions = operationOptionsBuilder.build();
-                }
                 Uid uid = new Uid(resourceId);
-                ConnectorObject connectorObject =
-                        facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
+                ConnectorObject connectorObject = getConnectorObject(facade, uid, request.getFields());
 
                 if (null != connectorObject) {
-                    handler.handleResult(objectClassInfoHelper.build(connectorObject, cryptoService));
+                    Resource resource = objectClassInfoHelper.build(connectorObject, cryptoService);
+                    activityLogger.log(context, RequestType.READ, "message", getSource(objectClass, uid.getUidValue()), resource.getContent(), resource.getContent(), Status.SUCCESS);
+                    handler.handleResult(resource);
                 } else {
                     handler.handleError(new NotFoundException(request.getResourceName()));
                 }
@@ -1526,63 +1522,48 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     return;
                 }
 
+                final Uid _uid = request.getRevision() != null
+                        ? new Uid(resourceId, request.getRevision())
+                        : new Uid(resourceId);
+
+                // read resource before update for logging
+                Resource before = getCurrentResource(facade, _uid, null);
+
                 // TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
                 final Name newName = null;
                 final Set<Attribute> replaceAttributes =
                         objectClassInfoHelper.getUpdateAttributes(request, newName,
                                 cryptoService);
 
-                String oldPassword = null;
-                try {
-                    // get reauth password
-                    HttpContext httpContext =  context.asContext(HttpContext.class);
-                    oldPassword = httpContext.getHeaderAsString(REAUTH_HEADER);
-                } catch (Exception e) {
-                    // there will not always be a HttpContext and this is acceptable so catch exception to
-                    // prevent the exception from  stopping the remaining update
-                }
-
-                // check if updating an attribute that requires user credentials
-                final JsonValue properties = objectClassInfoHelper.getProperties();
-                Predicate<String> attributes = new Predicate<String>() {
-                    @Override
-                    public boolean apply(String attribute) {
-                        return properties.get(attribute).isNull()
-                                ? false
-                                : properties.get(attribute).get(RUN_AS_USER).defaultTo(false).asBoolean().booleanValue();
-                    }
-                };
-
-                final boolean runAsUser = StringUtils.isNotEmpty(oldPassword)
-                        && filter(request.getContent().asMap().keySet(), attributes).iterator().hasNext();
-
                 OperationOptions operationOptions;
                 OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
                         .build(jsonConfiguration, objectClassInfoHelper);
 
+                final String reauthPassword = getReauthPassword(context);
+
                 // if reauth and updating attribute requiring user credentials
-                if (runAsUser) {
+                if (runAsUser(request, reauthPassword)) {
                     // get username attribute
-                    final List<String> usernameAttrs = jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
-                            .get(ACCOUNT_USERNAME_ATTRIBUTES).asList(String.class);
+                    final List<String> usernameAttrs =
+                            jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
+                                    .get(ACCOUNT_USERNAME_ATTRIBUTES)
+                                    .asList(String.class);
                     final String username = request.getContent().get(usernameAttrs.get(0)).asString();
 
                     if (StringUtils.isNotBlank(username)) {
                         operationOptionsBuilder.setRunAsUser(username)
-                            .setRunWithPassword(new GuardedString(oldPassword.toCharArray()));
+                                .setRunWithPassword(new GuardedString(reauthPassword.toCharArray()));
                     }
                 }
 
                 operationOptions = operationOptionsBuilder.build();
 
-                Uid _uid = null != request.getRevision()
-                    ? new Uid(resourceId, request.getRevision())
-                    : new Uid(resourceId);
-
                 Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
                         AttributeUtil.filterUid(replaceAttributes), operationOptions);
 
-                returnResource(request, handler, facade, uid);
+                Resource resource = getCurrentResource(facade, uid, null);
+                activityLogger.log(context, RequestType.UPDATE, "message", getSource(objectClass, uid.getUidValue()), before.getContent(), resource.getContent(), Status.SUCCESS);
+                handler.handleResult(resource);
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
@@ -1594,30 +1575,64 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
         }
 
-        private void returnResource(final Request request, final ResultHandler<Resource> handler,
-                final ConnectorFacade facade, final Uid uid)
-            throws IOException, JsonCryptoException {
-
-            OperationOptionsBuilder _getOOBuilder = new OperationOptionsBuilder();
-            ConnectorObject co = null;
-            if (objectClassInfoHelper.setAttributesToGet(_getOOBuilder, request.getFields())) {
-                try {
-                    co = facade.getObject(objectClassInfoHelper.getObjectClass(), uid, _getOOBuilder.build());
-                } catch (Exception e) {
-                    logger.error("Failed to read back the user", e);
-                }
+        // see if there is a reauth password provided
+        private String getReauthPassword(ServerContext context) {
+            try {
+                // get reauth password
+                return  context.asContext(HttpContext.class).getHeaderAsString(REAUTH_HEADER);
+            } catch (Exception e) {
+                // there will not always be a HttpContext and this is acceptable so catch exception to
+                // prevent the exception from  stopping the remaining update
+                return null;
             }
+        }
+
+        // check if updating an attribute that requires user credentials
+        private boolean runAsUser(UpdateRequest request, String reauthPassword) {
+            final JsonValue properties = objectClassInfoHelper.getProperties();
+            final Predicate<String> attributesToRunAsUser = new Predicate<String>() {
+                @Override
+                public boolean apply(String attribute) {
+                    return !properties.get(attribute).isNull()
+                            && properties.get(attribute).get(RUN_AS_USER).defaultTo(false).asBoolean();
+                }
+            };
+
+            return StringUtils.isNotEmpty(reauthPassword)
+                    && filter(request.getContent().asMap().keySet(), attributesToRunAsUser).iterator().hasNext();
+        }
+
+        private Resource getCurrentResource(final ConnectorFacade facade, final Uid uid, final List<JsonPointer> fields)
+            throws IOException, JsonCryptoException, ResourceException {
+
+            final ConnectorObject co = getConnectorObject(facade, uid, fields);
             if (null != co) {
-                handler.handleResult(objectClassInfoHelper.build(co, cryptoService));
+                return objectClassInfoHelper.build(co, cryptoService);
             } else {
                 JsonValue result = new JsonValue(new HashMap<String, Object>());
                 result.put(Resource.FIELD_CONTENT_ID, uid.getUidValue());
                 if (null != uid.getRevision()) {
                     result.put(Resource.FIELD_CONTENT_REVISION, uid.getRevision());
                 }
-
-                handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
+                return new Resource(uid.getUidValue(), uid.getRevision(), result);
             }
+        }
+
+        private ConnectorObject getConnectorObject(final ConnectorFacade facade, final Uid uid, final List<JsonPointer> fields)
+            throws IOException, JsonCryptoException, ResourceException {
+
+            final OperationOptions operationOptions;
+            if (fields == null || fields.isEmpty()) {
+                operationOptions = operations.get(GetApiOp.class)
+                        .build(jsonConfiguration, objectClassInfoHelper)
+                        .build();
+            } else {
+                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+                objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, fields);
+                operationOptions = operationOptionsBuilder.build();
+            }
+
+            return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
         }
 
         /*

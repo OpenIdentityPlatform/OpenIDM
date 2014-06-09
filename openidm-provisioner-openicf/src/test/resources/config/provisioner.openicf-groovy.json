@@ -442,7 +442,7 @@
                     "nativeType": "JAVA_TYPE_BYTE"
                 },
                 "attributeByteArray": {
-                    "type": "string",
+                    "type": "array",
                     "nativeName": "attributeByteArray",
                     "nativeType": "JAVA_TYPE_BYTE_ARRAY"
                 },
