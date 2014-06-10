@@ -216,10 +216,16 @@
   <varlistentry>
    <term>persisted (optional)</term>
    <listitem>
-    <para>Specifies whether the schedule state should be persisted or stored 
-    in RAM. Boolean (<literal>true</literal> or <literal>false</literal>), 
-    <literal>false</literal> by default. For more information, see 
-    <xref linkend="persistent-schedules"/>.</para>
+    <para>
+     Specifies whether the schedule state should be persisted or stored in RAM.
+     Boolean (<literal>true</literal> or <literal>false</literal>),
+     <literal>false</literal> by default.
+    </para>
+    <para>
+     In a clustered environment, this property must be set to <literal>true</literal>
+     to have the schedule fire only once across the cluster. For more
+     information, see <xref linkend="persistent-schedules"/>.
+    </para>
    </listitem>
   </varlistentry>
   <varlistentry>
