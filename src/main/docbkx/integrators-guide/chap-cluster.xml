@@ -63,7 +63,7 @@
     are described in this chapter.</para>
 
     <section xml:id="cluster-config">
-        <title>Configuring an OpenIDM Instance as Part of a Cluster</title>
+     <title>Configuring an OpenIDM Instance as Part of a Cluster</title>
 
         <para>Before you configure an instance to work in a cluster, make sure
         that the instance is not running. If the instance was previously started,
@@ -96,6 +96,16 @@
             <listitem>
                 <para><xref linkend="cluster-config-file" /></para>
             </listitem>
+         <listitem>
+          <para>
+           If you are using scheduled tasks, make sure that schedules are
+           persisted to ensure that they fire only once across the cluster. For
+           more information, see the section on <link xlink:show="new"
+           xlink:href="integrators-guide#persistent-schedules"
+           xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Persisted
+           Schedules</citetitle></link>.
+          </para>
+         </listitem>
         </orderedlist>
 
         <section xml:id="cluster-boot-config">
