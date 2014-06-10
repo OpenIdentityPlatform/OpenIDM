@@ -120,7 +120,7 @@ function areAttributesEqual(attr1, attr2) {
 }
 
 // Check for any assignments that have been removed or modified
-if (typeof oldSource !== "undefined") {
+if (typeof oldSource !== "undefined" && oldSource !== null) {
     var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
     var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
     var unassigned = [];
