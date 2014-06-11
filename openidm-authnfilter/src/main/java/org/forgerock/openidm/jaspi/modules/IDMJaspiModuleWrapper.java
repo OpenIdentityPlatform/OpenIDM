@@ -291,9 +291,11 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
             final SecurityContextMapper securityContextMapper = SecurityContextMapper.fromMessageInfo(messageInfo)
                     .setAuthenticationId(principalName);
 
-            // Calculate (and set) roles
-            roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
-
+            // Calculate (and set) roles if not already set
+            if (securityContextMapper.getRoles() == null || securityContextMapper.getRoles().isEmpty()) {
+                roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
+            }
+            
             // set "resource" (component) if not already set
             if (securityContextMapper.getResource() == null) {
                 securityContextMapper.setResource(queryOnResource);
