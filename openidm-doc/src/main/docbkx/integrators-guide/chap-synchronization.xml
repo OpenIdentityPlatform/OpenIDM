@@ -3953,10 +3953,10 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
      search filter is <literal>source.userName</literal>.</para>
     </listitem>
    </itemizedlist>
-
    <programlisting language="javascript">
-var map={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
-map;</programlisting>
+var map = {"_queryFilter": 'uid eq "' + source.userName + '"'};
+map;
+   </programlisting>
   </section>
  </section>
 
@@ -3987,9 +3987,9 @@ map;</programlisting>
                 "file": "script/isValid.js"
             },
             "correlationQuery" : {
-                "type" : "text/javascript"
+                "type" : "text/javascript",
                 "source" : "var map = {'_queryFilter': 'uid eq \"' +
-                     source.userName + '\"'}; map;",
+                     source.userName + '\"'}; map;"
             },
             "properties": [
                 {
