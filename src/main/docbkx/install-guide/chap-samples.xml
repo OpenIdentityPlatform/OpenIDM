@@ -1507,6 +1507,10 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
        synchronization between an OpenDJ Directory Server and an active AD
        deployment.
       </para>
+      <para>
+       As this sample demonstrates reconciliations from the AD server to
+       OpenDJ, information on the AD server will not be changed.
+      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -1518,6 +1522,10 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
       <filename>conf/</filename> subdirectory. You can then configure
       synchronization between an OpenDJ Directory server and a simulated
       AD server.
+     </para>
+     <para>
+      The instructions for this sample simulates an AD server on the
+      same instance of OpenDJ, using a different base DN.
      </para>
     </listitem>
    </varlistentry>
@@ -1532,9 +1540,21 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    <title>Sample 6 with an Active AD Deployment</title>
 
    <para>
-    By default, Active Directory servers communicate over the standard LDAP
-    port of 389. If you have an active AD server, configure your instance
-    of OpenDJ to communicate over the same port.
+    If you have an active instance of AD, you can set up a regular instance of
+    OpenDJ, as described in the <link xlink:show="new"
+    xlink:href="http://opendj.forgerock.org/opendj-server/doc/install-guide/">
+    <citetitle>OpenDJ Installation Guide</citetitle></link>.
+   </para>
+
+   <para>
+    For this purpose, populate OpenDJ with the <filename>Example.ldif</filename>
+    file available in the <filename>/path/to/sample6/data</filename> directory.
+    Any changes run in this section should write information from the AD server
+    to the OpenDJ server that you create.
+   </para>
+
+   <para>
+    The actions run in this sample should not change any data on the AD server.
    </para>
 
   </section>
@@ -1544,20 +1564,21 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
 
    <para>
     To minimize the risk of conflict with another LDAP server, the simulated
-    AD deployment assumes that you use port 1389.
+    AD deployment uses a non-standard base DN,
+    <literal>dc=fakead,dc=com</literal>.
    </para>
 
    <para>
-    The following instructions allow you to configure LiveSync between two
-    OpenDJ servers, configured to communicate on different ports. One of the
-    servers will include an LDIF file, <filename>AD.ldif</filename>, that
-    simulates a deployment of AD. The second server includes a different LDIF
-    file, <filename>Example.ldif</filename>, that supports a conventional
+    The following instructions make it possible for you to configure LiveSync
+    between two OpenDJ servers, configured to communicate on different ports.
+    One of the servers will include an LDIF file, <filename>AD.ldif</filename>,
+    that simulates a deployment of AD. The second server includes a different
+    LDIF file, <filename>Example.ldif</filename>, that supports a conventional
     deployment of OpenDJ.
    </para>
 
    <para>
-    You do not even need a separate OpenDJ server. The
+    For this sample, two separate OpenDJ servers are not required. The
     <filename>AD.ldif</filename> and <filename>Example.ldif</filename> LDIF
     files are associated with two separate base DNs. Once configured, LiveSync
     should work automatically with the data on both base DNs as if they were
@@ -1591,7 +1612,7 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      </para>
 
      <para>
-      To activate the OpenDJ ECL, enable replication as described in the the
+      To activate the OpenDJ ECL, enable replication as described in the
       <link xlink:show="new"
       xlink:href="http://opendj.forgerock.org/opendj-server/doc/admin-guide/index.html#chap-replication">
       <citetitle>OpenDJ Administration Guide chapter on Managing Data
@@ -1708,9 +1729,9 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      </para>
 
      <para>
-      To minimize the risk of conflict, use port 1389. Open the
-      <filename>provisioner.openicf-fakead.json</filename> file. Make sure the
-      <literal>port</literal> directive in that file matches that port.
+      Open the <filename>provisioner.openicf-fakead.json</filename> file. The
+      default <literal>port</literal> directive cited in that file is 1389,
+      different from the default LDAP port of 389.
      </para>
 
      <para>
@@ -1758,9 +1779,32 @@ $ ./startup.sh -p samples/sample6</screen>
    <section xml:id="run-sample6-reconciliation">
     <title>Using Reconciliation</title>
 
-    <para>Start OpenIDM, and then run reconciliation over the REST interface.</para>
+    <para>
+     Now that OpenIDM is in operation, review the entries in the OpenDJ
+     data store. When you run reconciliation, any entries that share the same
+     <literal>uid</literal> with the AD data store will be overwritten.
+    </para>
 
-    <screen width="91"><?dbfo pgwide="1"?>$ curl \
+    <para>
+     If you have set up the simulated AD data store as described in
+     <xref linkend="external-resource-sample6-simulated" />, compare the
+     entries for <literal>uid=jdoe</literal> as shown in the
+     <filename>AD.ldif</filename> and <filename>Example.ldif</filename> files.
+     Note the different values of <literal>givenName</literal> for
+     <literal>uid=jdoe</literal>.
+    </para>
+
+    <para>
+     Run reconciliation over the REST interface. If you have followed the
+     instructions for the simulated AD data store, the following command
+     takes the information for user <literal>jdoe</literal> imported from the
+     <filename>AD.ldif</filename> file, with a <literal>givenName</literal> of
+     Johnny, and synchronizes that information to the LDAP database, overwriting
+     the <literal>givenName</literal> of John for that same user
+     <literal>jdoe</literal>.
+    </para>
+
+    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1773,17 +1817,19 @@ $ ./startup.sh -p samples/sample6</screen>
 
     <screen>{"_id":"9ece3807-08c3-4ec6-87fb-a6a2d0c71cee"}</screen>
 
-    <para>With the configuration for sample 6, OpenIDM takes the information
-     from the AD deployment, and includes it in the internal repository.
-     That information is then automatically synchronized, as described in
+    <para>
+     OpenIDM takes the information from the AD deployment, and includes it in
+     the internal OpenIDM repository. That information is then automatically
+     synchronized to the OpenDJ server, as described in
      <link xlink:show="new" xlink:href="integrators-guide#handling-sync"
            xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Synchronization Situations and Actions</citetitle></link>.
     </para>
 
-    <para>After reconciliation, list all users in the repository.</para>
+    <para>After reconciliation, list all users in the OpenDJ server data
+     store.</para>
 
-    <screen width="100"><?dbfo pgwide="1"?>$ curl \
+    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1805,6 +1851,23 @@ $ ./startup.sh -p samples/sample6</screen>
   "pagedResultsCookie": null,
   "remainingPagedResults": -1,
 }</programlisting>
+
+    <para>
+     You see only two entries, as the <literal>uid=jdoe</literal> entry from
+     <literal>dc=fakead,dc=com</literal> overwrites the original LDAP entry for
+     <literal>uid=jdoe</literal> in the reconciled LDAP data store.
+    </para>
+
+    <para>
+     To confirm the current status of a user, run the
+     <command>ldapsearch</command> command. The following example confirms the
+     current status of <literal>uid=jdoe</literal> in the OpenDJ datastore:
+    </para>
+
+    <screen>$ ./ldapsearch \
+     --port 1389 \
+     --baseDN dc=example,dc=com \
+     "(uid=jdoe)"</screen>
 
     <!--
 
@@ -1835,33 +1898,6 @@ $ ./startup.sh -p samples/sample6</screen>
 }</programlisting>
 -->
 
-    <para>You can view users created in the AD suffix with the following
-    <literal>ldapsearch</literal> command. The port number may vary, depending
-     on how you configured the directory server:</para>
-
-    <screen>$ <userinput>/path/to/OpenDJ/bin/ldapsearch \
- --bindDN "cn=Directory Manager" \
- --bindPassword password \
- --hostname `hostname` \
- --port 1389 \
- --baseDN dc=fakead,dc=com
- "(uid=bjensen)"</userinput>
-
-<computeroutput>
-dn: uid=bjensen,ou=people,dc=example,dc=com
-objectClass: person
-objectClass: inetOrgPerson
-objectClass: organizationalPerson
-objectClass: top
-userPassword: {SSHA}sbDz8isx5vu92UOuV2a/lyWpN4IrxMMJyPoFMw==
-mail: bjensen@example.com
-givenName: Barbara
-uid: bjensen
-description: Created for OpenIDM
-cn: Barbara Jensen
-telephoneNumber: 1-503-334-2546
-sn: Jensen</computeroutput>
-    </screen>
    </section>
 
    <section xml:id="run-sample6-live-sync">
@@ -1872,6 +1908,11 @@ sn: Jensen</computeroutput>
      you need to configure a schedule. When LiveSync is active, the default
      schedule in the <filename>schedule-activeSynchroniser_systemAdAccount.json
      </filename> configuration file runs LiveSync every 15 seconds.
+    </para>
+
+    <para>
+     This particular action, pushes changes made in the AD
+     data store to the OpenIDM repository, automatically.
     </para>
 
     <para>
@@ -1888,14 +1929,10 @@ sn: Jensen</computeroutput>
     "invokeService" : "provisioner",
     "invokeContext" : {
         "action" : "liveSync",
-        "source" : "system/ldap/account"
+        "source" : "system/ad/account"
     },
     "invokeLogLevel" : "debug"
 }</programlisting>
-
-    <para>
-     When LiveSync is enabled, it synchronizes changes from LDAP users to the
-     OpenIDM repository, dynamically.</para>
 
     <procedure xml:id="test-live-sync">
      <title>Testing LiveSync</title>
@@ -1907,15 +1944,14 @@ sn: Jensen</computeroutput>
 
      <step>
       <para>
-       Create an LDIF file. In OpenDJ, the standard location for such files is
-       the <filename>/path/to/opendj/ldif</filename> directory.
+       Create an LDIF file.
       </para>
      </step>
      <step>
       <para>
        The following is the contents of a sample
        <filename>bsmith.ldif</filename> file for demonstration purposes:
-       <screen>dn: uid=bsmith,ou=People,dc=example,dc=com
+       <screen>dn: uid=bsmith,ou=People,dc=fakead,dc=com
 objectClass: person
 objectClass: inetOrgPerson
 objectClass: organizationalPerson
@@ -1942,7 +1978,7 @@ userPassword: password
        <filename>bsmith.ldif</filename> file to the directory. Be aware that
        the port number may vary.
       </para>
-       <screen>$ ./ldifmodify
+       <screen>$ ./ldapmodify
  --port 1389
  --defaultAdd
  --bindDN "cn=Directory Manager"
@@ -1951,24 +1987,33 @@ userPassword: password
      </step>
      <step>
       <para>
-       If LiveSync is enabled, the following command should display information
-       for all configured users:
+       Now you can test synchronization. You should be able to log
+       into the OpenIDM UI with any AD account.
       </para>
-      <screen>$ ./ldapsearch --port 1389 --baseDN ou=people,o=ad "(uid=*)"</screen>
+
+      <para>
+       Be aware: changes made from the OpenIDM UI directly change the local
+       managed/user database. Changes are not reconciled to the AD database.
+      </para>
+     </step>
+     <step>
+      <para>
+       The following command should display the updated information in the
+       OpenDJ data store for all configured users:
+      </para>
+      <screen>$ ./ldapsearch \
+--port 1389 \
+--baseDN ou=people,dc=example,dc=com \
+"(uid=*)"</screen>
      </step>
     </procedure>
 
-    <!-- TODO: LiveSync does not currently work, see OPENIDM-1815
-
-    <para>Now you can test synchronization. You should be able to log
-    into the OpenIDM UI with any AD account.</para>
-
     <para>
-     However, changes made with in the OpenIDM UI will be reconciled only
-     within the local managed/user and OpenDJ databases, as there is no
-     mapping that reconciles users to the AD database.
+     If LiveSync works, the final step in the procedure should include
+     information for the user newly added from the
+     <filename>bsmith.ldif</filename> file.
     </para>
-         -->
+
    </section>
   </section>
  </section>
