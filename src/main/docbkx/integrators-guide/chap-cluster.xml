@@ -254,6 +254,91 @@ openidm.instance.type=clustered-additional
   </section>
  </section>
 
+ <section xml:id="clustering-scheduled-tasks">
+  <title>Managing Scheduled Tasks Across a Cluster</title>
+  <itemizedlist>
+   <para>
+    In a clustered environment, the scheduler service looks for pending jobs and
+    handles them as follows:
+   </para>
+   <listitem>
+    <para>
+     Non-persistent (in-memory) jobs will fire on each node in the cluster.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Persistent scheduled jobs are picked up and executed by a single node in
+     the cluster.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Jobs that are configured as persistent but <emphasis>not concurrent</emphasis>
+     will fire only once across the cluster and will not fire again at the
+     scheduled time, on the same node, or on a different node, until the current
+     job has completed.
+    </para>
+    <para>
+     For example, a reconciliation operation that runs for longer than the time
+     between scheduled intervals will not trigger a duplicate job while it is
+     still running.
+    </para>
+   </listitem>
+  </itemizedlist>
+  <para>
+   The order in which nodes in a cluster claim jobs is random. The cluster
+   manager will automatically fail over jobs that were claimed by a node, if
+   that node goes down. Note that this behavior is different to the cluster
+   behavior in OpenIDM 2.1.0, in which an unavailable node would need to come up
+   again to free a job that it had already claimed.
+  </para>
+  <para>
+   If a number of changes are made as a result of a LiveSync action, a single
+   instance will claim the action, and will process all the changes related to
+   that action.
+  </para>
+  <para>
+   To prevent a specific instance from claiming pending jobs,
+   <literal>"executePersistentSchedules"</literal> should be set to
+   <literal>false</literal> in the scheduler configuration for that instance.
+   Because all nodes in a cluster generally read their configuration from a
+   single repository you must use token substitution, via the
+   <filename>boot.properties</filename> file, to define a specific scheduler
+   configuration for each node.
+  </para>
+  <para>
+   So, if you want certain nodes to participate in processing clustered
+   schedules (such as LiveSync) and other nodes not to participate, you can
+   specify this information in the <filename>conf/boot/boot.properties</filename>
+   file of each node. For example, to prevent a node from participating, add the
+   following line to the <filename>boot.properties</filename> file of that node:
+  </para>
+  <programlisting>
+execute.clustered.schedules=false
+  </programlisting>
+  <para>
+   The initial scheduler configuration that is loaded into the repository must
+   point to the relevant property in <filename>boot.properties</filename>. So,
+   the initial <filename>scheduler.json</filename> file would include a token
+   such as the following:
+  </para>
+  <programlisting>
+{
+    "executePersistentSchedules" : "&amp;{execute.clustered.schedules}",
+}
+  </programlisting>
+  <para>
+   To prevent changes to configuration files from overwriting the global
+   configuration in the repository, you should disable the file-based
+   configuration view in a clustered deployment. For more information, see
+   <link xlink:show="new"
+   xlink:href="integrators-guide#disabling-file-based-config"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Disabling the
+    File-Based Configuration View</citetitle></link>.
+  </para>
+ </section>
+
  <section xml:id="cluster-over-REST">
   <title>Managing Nodes Over REST</title>
   <para>
