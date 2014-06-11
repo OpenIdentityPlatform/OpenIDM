@@ -2156,7 +2156,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             throw new RuntimeException(e);
         }  catch (UnsupportedOperationException e) {
             logger.debug("Failed to get OperationOptionsBuilder", e);
-            throw new NotFoundException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+            throw new NotFoundException("Failed to get latest sync token", e).setDetail(new JsonValue(e.getMessage()));
         }  catch (Exception e) {
             logger.debug("Failed to get OperationOptionsBuilder", e);
             throw new InternalServerErrorException("Failed to get OperationOptionsBuilder: " + e.getMessage(), e);

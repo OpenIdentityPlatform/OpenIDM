@@ -115,19 +115,20 @@
    access.js</citetitle></link> file.
   </para>
 
-     <para>The URI scheme for accessing a system object follows this
-         convention:</para>
+  <para>
+   The URI scheme for accessing a system object follows this convention:
+  </para>
 
   <literallayout class="monospaced">/openidm/system/<replaceable
-  >resource-name</replaceable>/<replaceable>connector-name</replaceable
-   ><replaceable>id</replaceable></literallayout>
+  >resource-name</replaceable>/<replaceable>type</replaceable>/<replaceable
+  >id</replaceable></literallayout>
 
   <para>
-   One example of a system object (account) object using an LDAP connector is:
+   An example of a system object in an LDAP repository might be:
   </para>
 
   <literallayout class="monospaced">
-   /openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com
+/openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com
   </literallayout>
 
  </section>
@@ -215,7 +216,7 @@
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>_prettyPrint=[true,false]</term>
+    <term><literal>_prettyPrint=[true,false]</literal></term>
     <listitem>
      <para>
       If <literal>_prettyPrint=true</literal>, the <literal>HttpServlet</literal>

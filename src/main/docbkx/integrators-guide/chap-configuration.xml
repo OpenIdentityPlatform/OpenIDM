@@ -1474,16 +1474,16 @@ $ <userinput>curl \
     For example, if you start OpenIDM from the <filename>/path/to/openidm</filename>
     directory with the following command:
    </para>
-   <screen>$ ./startup..sh -p /path/to/openidm/customconfig
+   <screen>$ ./startup.sh -p /path/to/openidm/customconfig
    </screen>
    <para>
     The <literal>launcher.project.location</literal> directory would be
     <filename>/path/to/openidm/customconfig</filename>.
    </para>
    <para>
-    In contrast, the <filename>script.json</filename> file also refers to a
+    The <filename>script.json</filename> file also refers to a
     <literal>launcher.install.location</literal> directory, which is
-    <filename>/path/to/openidm</filename>
+    <filename>/path/to/openidm</filename>.
    </para>
 
    <para>Thus, based on the way the <filename>script.json</filename> file
