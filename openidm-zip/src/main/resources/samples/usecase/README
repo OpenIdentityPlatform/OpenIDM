@@ -1,5 +1,5 @@
 In the usecase folder there are a set of files which together tell a user story based on some common examples.
-After building the openidm-zip project these files are copied and organized in an appropriate folder structure,
+These files are copied and organized in an appropriate folder structure,
 each usecase folder contains the files that are needed for that certain use case sample.
 
 All the samples assume a certain initial setup of managed users in OpenIDM.
@@ -351,3 +351,19 @@ Usecase6 - Password change reminder
     - sends a notification to the user 
     - five minutes later sends an other notification to the user (if password was not changed yet)
     - two minutes later changes the user's 'accountStatus' to 'inactive' and sends notification to the user (if password was not changed yet)
+
+    1. Start OpenIDM with the configuration for usecase6.
+
+    $ cd /path/to/openidm
+    $ ./startup.sh -p samples/usecase/usecase6
+
+    2. Activate the password change task scanner (it's inactive by default):
+            samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json
+            Change: "enabled" : false
+            to "enabled" : true
+
+    3. Log in to the UI as one of the sample users, e.g. user.0 (default password is 'Passw0rd').
+        Once the task scanner was triggered a notification is visible for the user on the OpenIDM UI.
+
+    4. To test the workflow the user can change the password either on the UI or using the following REST call:
+        curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/managed/user/user.0?_action=patch" -H "Content-Type: application/json"  --data '[{"operation":"replace", "field":"password", "value":"newPassw0rd"}]'
