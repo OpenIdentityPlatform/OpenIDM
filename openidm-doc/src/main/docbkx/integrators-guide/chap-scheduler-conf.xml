@@ -512,38 +512,45 @@
  
  <section xml:id="task-scanner">
   <title>Scanning Data to Trigger Tasks</title>
-  <para>In addition to the fine-grained scheduling facility described 
-  previously, OpenIDM provides a task scanning mechanism. The task scanner 
-  enables you to perform a batch scan for a specified date in OpenIDM data, 
-  on a scheduled interval, and then to execute a task when this date is 
-  reached. When the task scanner identifies a condition that should trigger the
-  task, it can invoke a script created specifically to handle the task.</para>
- 
-  <para>For example, the task scanner can scan all <literal>managed/user</literal> 
-  objects for a  "sunset date" and can invoke a script that executes a sunset 
-  task on the user object when this date is reached.</para>
+  <para>
+   In addition to the fine-grained scheduling facility described previously,
+   OpenIDM provides a task scanning mechanism. The task scanner enables you to
+   perform a batch scan on a specified property in OpenIDM, at a scheduled
+   interval, and then to execute a task when the value of that property matches
+   a specified value.
+  </para>
+  <para>
+   When the task scanner identifies a condition that should trigger the task, it
+   can invoke a script created specifically to handle the task.
+  </para>
+  <para>
+   For example, the task scanner can scan all <literal>managed/user</literal>
+   objects for a "sunset date" and can invoke a script that executes a "sunset
+   task" on the user object when this date is reached.
+  </para>
   
   <section xml:id="task-scanner-config">
   <title>Configuring the Task Scanner</title>
- 
-  <para>The task scanner is essentially a scheduled task that queries a span of 
-  managed users. The task scanner is configured in the same way as a regular 
-  scheduled task, in a schedule configuration file named 
-  (<filename>schedule-<replaceable>task-name</replaceable>.json)</filename>, 
-  with the <literal>"invokeService"</literal> parameter set to 
-  <literal>"taskscanner</literal>. The <literal>"invokeContext"</literal> 
-  parameter defines the details of the scan, and the task that should be 
-  executed when the specified condition is triggered.</para>
-  
-  <para>The following example defines a scheduled scanning task that triggers 
-  a sunset script. This sample configuration file is provided in the OpenIDM 
-  delivery as 
-  <filename>openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json</filename>. 
-  To use this sample file, you must copy it to the <filename>openidm/conf</filename> 
-  directory. Since that file calls for a <filename>script/sunset.js</filename>
-  file, you will also need to copy that script file from
-  <filename>openidm/samples/taskscanner/script/sunset.js</filename> to the
-  <filename>openidm/script</filename> directory</para>
+  <para>
+   The task scanner is essentially a scheduled task that queries a set of
+   managed users. The task scanner is configured in the same way as a regular
+   scheduled task, in a schedule configuration file named
+   (<filename>schedule-<replaceable>task-name</replaceable>.json)</filename>,
+   with the <literal>"invokeService"</literal> parameter set to
+   <literal>"taskscanner</literal>. The <literal>"invokeContext"</literal>
+   parameter defines the details of the scan, and the task that should be
+   executed when the specified condition is triggered.
+  </para>
+  <para>
+   The following example defines a scheduled scanning task that triggers a
+   sunset script. This sample configuration file is provided in the OpenIDM
+   delivery as
+   <filename>openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json</filename>.
+   To use this sample file, copy it to the <filename>openidm/conf</filename>
+   directory. The sample file calls a script (<filename>script/sunset.js</filename>)
+   which must be copied from <filename>openidm/samples/taskscanner/script/sunset.js</filename>
+   to the <filename>openidm/script</filename> directory.
+  </para>
   
   <programlisting language="javascript">
 {
@@ -580,69 +587,87 @@
 }</programlisting>
 
  <variablelist>
-  <para>The <literal>"invokeContext"</literal> parameter takes the following 
-  properties:
+  <para>
+   The <literal>"invokeContext"</literal> parameter takes the following
+   properties:
   </para>
   <varlistentry>
    <term><literal>"waitForCompletion"</literal> (optional)</term>
    <listitem>
-    <para>This property specifies whether the task should be performed 
-    synchronously. Tasks are performed asynchronously by default (with 
-    <literal>waitForCompletion</literal> set to false). A task ID (such as 
-    <literal>{"_id":"354ec41f-c781-4b61-85ac-93c28c180e46"}</literal>) is 
-    returned immediately. If this property is set to true, tasks are performed 
-    synchronously and the ID is not returned until all tasks have completed.
+    <para>
+     This property specifies whether the task should be performed synchronously.
+     Tasks are performed asynchronously by default (with
+     <literal>waitForCompletion</literal> set to false). A task ID (such as
+     <literal>{"_id":"354ec41f-c781-4b61-85ac-93c28c180e46"}</literal>) is
+     returned immediately. If this property is set to true, tasks are performed
+     synchronously and the ID is not returned until all tasks have completed.
     </para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><literal>"maxRecords"</literal> (optional)</term>
    <listitem>
-    <para>The maximum number of records that can be processed. This property 
-    is not set by default so the number of records is unlimited. If a maximum 
-    number of records is specified, that number will be spread evenly over the 
-    number of threads.
+    <para>
+     The maximum number of records that can be processed. This property is not
+     set by default so the number of records is unlimited. If a maximum number
+     of records is specified, that number will be spread evenly over the number
+     of threads.
     </para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><literal>"numberOfThreads"</literal> (optional)</term>
    <listitem>
-    <para>By default, the task scanner runs in a multi-threaded manner, that 
-    is, numerous threads are dedicated to the same scanning task run. 
-    Multithreading generally improves the performance of the task scanner. The 
-    default number of threads for a single scanning task is ten. To change this 
-    default, set the <literal>"numberOfThreads"</literal> property.
+    <para>
+     By default, the task scanner runs in a multi-threaded manner, that is,
+     numerous threads are dedicated to the same scanning task run.
+     Multithreading generally improves the performance of the task scanner. The
+     default number of threads for a single scanning task is ten. To change this
+     default, set the <literal>"numberOfThreads"</literal> property.
     </para>
    </listitem>
   </varlistentry>  
   <varlistentry>
    <term><literal>"scan"</literal></term>
    <listitem>
-    <para>Defines the details of the scan. The following properties are 
-    defined:</para>
+    <para>
+     Defines the details of the scan. The following properties are defined:
+    </para>
     <variablelist>
      <varlistentry>
       <term><literal>"object"</literal></term>
       <listitem>
-       <para>Defines the object type against which the query should be 
-       performed.</para>
+       <para>
+        Defines the object type against which the query should be performed.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term><literal>"_queryId"</literal></term>
       <listitem>
-       <para>Specifies the query that is performed. The queries that can be 
-       set here are defined in the database configuration file (either 
-       <filename>conf/repo.orientdb.json</filename> or 
-       <filename>conf/repo.jdbc.json</filename>).</para>
+       <para>
+        Specifies the query that is performed. The queries that can be set here
+        are defined in the database configuration file (either
+        <filename>conf/repo.orientdb.json</filename> or
+        <filename>conf/repo.jdbc.json</filename>).
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term><literal>"property"</literal></term>
       <listitem>
-       <para>Defines the object property against which the range query is 
-       performed.</para>
+       <para>
+        Defines the property against which the query is performed.
+       </para>
+       <para>
+        If you are using a JDBC repository, with a generic mapping, you must
+        explicitly set this property as searchable so that it can be queried by
+        the task scanner. For more information, see <link xlink:show="new"
+        xlink:href="install-guide#generic-mappings"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using
+        Generic Mappings</citetitle></link> in the <citetitle>Installation
+        Guide</citetitle>.
+       </para>
       </listitem>
      </varlistentry>
      <varlistentry>
