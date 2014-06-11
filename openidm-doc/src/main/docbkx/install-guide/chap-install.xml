@@ -619,7 +619,7 @@ $</screen>
     <para>
      The standard way to format JSON output is with a JSON parser such as
      <link xlink:href="http://stedolan.github.com/jq/">jq</link>. You would
-     "pipe" the output of a REST call to the <command>jq</command>, as follows:
+     "pipe" the output of a REST call to <command>jq</command>, as follows:
     </para>
 
     <screen>$<userinput> curl \
@@ -634,7 +634,7 @@ $</screen>
 
     <para>
      The ForgeRock REST API includes an optional <literal>_prettyPrint</literal>
-     request parameter. The default value is <literal>false.</literal>. To
+     request parameter. The default value is <literal>false</literal>. To
      use the ForgeRock REST API to format output, add a parameter such as
      <literal>?_prettyPrint=true</literal> or
      <literal>&amp;_prettyPrint=true</literal>, depending on whether it is added
