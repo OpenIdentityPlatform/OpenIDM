@@ -20,37 +20,40 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-logs'
- xmlns='http://docbook.org/ns/docbook'
- version='5.0' xml:lang='en'
- xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Configuring Server Logs</title>
  <indexterm>
   <primary>Server logs</primary>
  </indexterm>
 
- <para>This chapter briefly describes server logging. For audit information,
- see the chapter on <link xlink:href="integrators-guide#chap-auditing"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
- Logs</citetitle></link>.</para>
-
- <para>You can configure logging by editing the
- <filename>openidm/conf/logging.properties</filename> file in
- OpenIDM.</para>
-
- <para>The default configuration writes log messages in simple format to
- <filename>openidm/logs/openidm*.log</filename> files, rotating files when
- the size reaches 5 MB, and retaining up to 5 files. Also by default,
- OpenIDM writes all system and custom log messages to the files.</para>
-
- <para>You can update the configuration to attach loggers to individual
- packages, setting the log level to one of the following values.</para>
+ <para>
+  This chapter briefly describes server logging. For audit information, see the
+  chapter on <link xlink:href="integrators-guide#chap-auditing"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
+  Logs</citetitle></link>.
+ </para>
+ <para>
+  To configure logging, edit the
+  <filename>openidm/conf/logging.properties</filename> file.
+ </para>
+ <para>
+  The default configuration writes log messages in simple format to
+  <filename>openidm/logs/openidm*.log</filename> files, rotating files when the
+  size reaches 5 MB, and retaining up to 5 files. Also by default, OpenIDM
+  writes all system and custom log messages to the files.
+ </para>
+ <para>
+  You can update the configuration to attach loggers to individual packages,
+  setting the log level to one of the following values.
+ </para>
  <programlisting language="none">
 SEVERE (highest value)
 WARNING
@@ -66,11 +69,13 @@ FINEST (lowest value)</programlisting>
  </para>
 
  <literallayout class="monospaced"
->org.forgerock.openidm.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
+>org.forgerock.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
 
  <para>
   You can override the log level settings per script by using
- <literal>org.forgerock.openidm.script.javascript.JavaScript.<replaceable
- >script-name</replaceable>.level</literal>.
  </para>
+
+ <literallayout class="monospaced"
+>org.forgerock.script.javascript.JavaScript.<replaceable>script-name</replaceable>.level</literallayout>
+
 </chapter>
