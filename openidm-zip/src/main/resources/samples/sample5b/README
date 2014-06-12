@@ -86,7 +86,7 @@ To try the sample, follow these steps.
     $ cd /path/to/openidm
     $ ./startup.sh -p samples/sample5b
     When you start OpenIDM, it creates data in the new external resource file
-    that represents an AD directory, samples/sample5/data/xml_AD_Data.xml.
+    that represents an AD directory, samples/sample5b/data/xml_AD_Data.xml.
     The new file is empty until you run reconciliation.
 
     4. Run reconciliation.
