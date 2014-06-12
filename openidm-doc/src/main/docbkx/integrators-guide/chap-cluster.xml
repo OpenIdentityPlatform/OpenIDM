@@ -302,8 +302,8 @@ openidm.instance.type=clustered-additional
    To prevent a specific instance from claiming pending jobs,
    <literal>"executePersistentSchedules"</literal> should be set to
    <literal>false</literal> in the scheduler configuration for that instance.
-   Because all nodes in a cluster generally read their configuration from a
-   single repository you must use token substitution, via the
+   Because all nodes in a cluster read their configuration from a single
+   repository you must use token substitution, via the
    <filename>boot.properties</filename> file, to define a specific scheduler
    configuration for each node.
   </para>
