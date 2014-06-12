@@ -95,22 +95,35 @@ define("org/forgerock/openidm/ui/user/UserRegistrationView", [
         render: function(args, callback) {
             conf.setProperty("gotoURL", null);
             
-            this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity + "/*");
-                this.unlock();
-                
-                if (conf.globalData.securityQuestions) {
-                    securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
-                        uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
-                    });
+            this.parentRender(_.bind(function() {
+
+                if (conf.globalData.siteIdentification) {
+                    this.siteImageCounter = 0;
+                    $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
                 }
-                this.siteImageCounter = 0;
-                $("#siteImageFlow img").load(_.bind(this.refreshFlow, this));
-                                
-                if(callback) {
-                    callback();
-                }
-            });            
+
+                validatorsManager.bindValidators(this.$el,this.delegate.baseEntity + "/*", _.bind(function () {
+
+                    validatorsManager.validateAllFields(this.$el);
+                    if (this.$el.find("[name='terms']").is(":checked")) {
+                        this.$el.find("[name='terms']").prop("checked", false);
+                    }
+
+                    this.unlock();
+                    
+                    if (conf.globalData.securityQuestions) {
+                        securityQuestionDelegate.getAllSecurityQuestions(function(secquestions) {
+                            uiUtils.loadSelectOptions(secquestions, $("select[name='securityQuestion']"));
+                        });
+                    }
+                                    
+                    if(callback) {
+                        callback();
+                    }
+
+                }, this));
+
+            }, this));
         },
         
         refreshFlow: function() {
