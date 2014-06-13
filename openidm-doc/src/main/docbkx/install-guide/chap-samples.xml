@@ -1425,7 +1425,7 @@ $ ./startup.sh -p samples/sample5b</screen>
    <title>Demonstrate onSync</title>
 
    <para>
-    To demonstrate integration of the samples withe the OpenIDM UI, this sample
+    To demonstrate integration of the samples with the OpenIDM UI, this sample
     uses the UI to view and make changes to user objects in the repository.
     However, you can also use the REST interface to make these changes, as shown
     in the previous section.
