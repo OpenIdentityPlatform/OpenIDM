@@ -1113,136 +1113,29 @@ $ ./startup.sh -p samples/sample4</screen>
    <secondary>Sample 5 - Synchronization of two resources</secondary>
   </indexterm>
 
-  <para>Sample 5 demonstrates the flow of data from one external resource to
+  <para>
+   Sample 5 demonstrates the flow of data from one external resource to
   another. The resources are called LDAP and AD, but in the sample both
-  directory-like resources are simulated with XML files.</para>
-
-  <section xml:id="install-sample5">
-   <title>Install the Sample</title>
-
-   <para>No external configuration is required for this sample. Prepare 
-   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
-   OpenIDM with the configuration of sample 5.</para>
-
-   <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/sample5</screen>
-
-   <para>The XML files that are used are located in the
-    <filename>openidm/samples/sample5/data/</filename> folder. When you start
-    OpenIDM with the sample 5 configuration, it creates
-    <filename>xml_AD_Data.xml</filename>, which does not contain users in this
-    sample until you run reconciliation.
-   </para>
-  </section>
-
-  <section xml:id="run-sample5">
-   <title>Run the Sample</title>
-
-   <para>Run reconciliation between OpenIDM and the pseudo-LDAP resource.</para>
-
-   <screen width="91"><?dbfo pgwide="1"?>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
- --request POST \
- "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
-
-   <para>This command creates a user in the repository and also in the simulated
-   Active Directory (AD) resource, represented by the
-   <filename>samples/sample5/data/xml_AD_Data.xml</filename> file.</para>
-  </section>
- </section>
-
- <section xml:id="more-sample5b">
-  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
-
-  <indexterm>
-   <primary>Samples</primary>
-   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
-    script hook</secondary>
-  </indexterm>
-
+  directory-like resources are simulated with XML files.
+  </para>
   <para>
-   The automatic synchronization depicted in this sample can help manage
-   the risks associated with synchronizing large amounts of data. It uses
-   an <literal>onSync</literal> hook configured with a
-   <filename>compensate.js</filename> script.
+   You can optionally configure an outbound email service, if you want to
+   receive emailed reconciliation summaries, as described in the following
+   section.
   </para>
 
-  <para>
-   Sample 5b is similar to sample 5. Like sample 5, this sample supports
-   automatic synchronization from managed objects to external data sources.
-   Like sample 5, this sample simulates two external data sources with XML files
-   in the <filename>/path/to/samples/sample5*/data</filename> directory. The
-   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
-   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
-   OpenIDM with the sample.
-  </para>
-
-  <para>
-   In both samples, reconciliations are taken from the simulated
-   LDAP XML data source and/or the internal OpenIDM repository, and are
-   synchronized to the simulated Active Directory (AD) data source.
-  </para>
-
-  <para>
-   Sample 5b adds an <literal>onSync</literal> script hook to the process.
-   That hook is configured from the <filename>managed.json</filename> file in the
-   <filename>/path/to/sample5b/conf</filename> directory.
-  </para>
-
-  <para>
-   The <literal>onSync</literal> hook uses a <filename>compensate.js</filename>
-   script.
-  </para>
-
-  <para>
-   The following excerpt of the <filename>managed.json</filename> file shows
-   the <literal>onSync</literal> hook linked to the
-   <filename>compensate.js</filename> file, available in the
-   <filename>/path/to/openidm/bin/defaults/script</filename> directory.
-  </para>
-
-  <programlisting language="javascript">
-...
-},
-"onSync" : {
-   "type" : "text/javascript",
-   "file" : "compensate.js"
-},
-  </programlisting>
-
-  <para>
-   For a detailed analysis of how OpenIDM automatic synchronization, works with
-   the onSync hook, see the Integrator's Guide section on <link xlink:show="new"
-   xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#sync-types-automatic"><citetitle>More on
-   Automatic Sync and <literal>onSync</literal></citetitle></link>
-  </para>
-
-  <para>
-   The <literal>onSync</literal> script hook is designed to ensure that either
-   all entries are synchronized from managed resources to external data stores,
-   or no changes are made.
-  </para>
-
-  <section xml:id="email-sample5b">
+  <section xml:id="email-sample5">
    <title>Configure Email for the Sample</title>
-
    <para>
-    You can configure sample5b with a service to email summary information.
-    If you skip these steps, that does not change the functionality of the
-    sample. However, it may lead to the following message at the OpenIDM console
-    when running a reconciliation:
+    If you do not configure the email service, the functionality of the sample
+    does not change. However, you might see the following message at the
+    OpenIDM console when you run a reconciliation operation:
    </para>
-
    <screen>Email service not configured; report not generated.</screen>
 
    <procedure>
-
     <para>
-     To configure an email summary, take the following steps:
+     To configure an email summary, follow these steps:
     </para>
 
     <step>
@@ -1251,28 +1144,25 @@ $ ./startup.sh -p samples/sample5</screen>
       the <filename>/path/to/openidm/samples/misc</filename> directory:
      </para>
      <screen>$ cd /path/to/openidm
-      $ cp samples/misc/external.email.json samples/sample5b/conf
+$ cp samples/misc/external.email.json samples/sample5/conf
      </screen>
     </step>
-
     <step>
      <para>
-      Edit the <filename>external.email.json</filename> file in the noted
-      sample5b directory for outbound email, as noted in the chapter on
+      Edit the <filename>external.email.json</filename> file for outbound email,
+      as described in the chapter on
       <link xlink:show="new" xlink:href="integrators-guide#chap-email"
-            xlink:role="http://docbook.org/xlink/role/olink">
-       <citetitle>Sending Email</citetitle></link>.
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sending
+      Email</citetitle></link>.
      </para>
     </step>
-
     <step>
      <para>
       Edit the <filename>reconStats.js</filename> file from the
-      <filename>/path/to/openidm/samples/sample5b/script</filename> directory.
+      <filename>/path/to/openidm/samples/sample5/script</filename> directory.
       Near the start of the file, configure the OpenIDM email service to send
       statistics to the email addresses of your choice:
      </para>
-
      <programlisting language="javascript">
 var params = {
       //UPDATE THESE VALUES
@@ -1286,8 +1176,125 @@ template,
      </programlisting>
     </step>
    </procedure>
-
   </section>
+
+  <section xml:id="install-sample5">
+   <title>Install the Sample</title>
+
+   <para>No external configuration is required for this sample. Prepare 
+   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
+   OpenIDM with the configuration of sample 5.</para>
+
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample5</screen>
+
+   <para>The XML files that are used are located in the
+    <filename>openidm/samples/sample5/data/</filename> folder. When you start
+    OpenIDM with the sample 5 configuration, it creates the
+    <filename>xml_AD_Data.xml</filename> file, which does not contain users
+    until you run reconciliation.
+   </para>
+  </section>
+
+  <section xml:id="run-sample5">
+   <title>Run the Sample</title>
+
+   <para>Run reconciliation between the pseudo-LDAP resource and OpenIDM.</para>
+
+   <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
+   <para>This command creates a user in the repository. Automatic
+    synchronization from OpenIDM creates the same user in the simulated Active
+    Directory (AD) resource, represented by the
+    <filename>samples/sample5/data/xml_AD_Data.xml</filename> file.</para>
+  </section>
+ </section>
+
+ <section xml:id="more-sample5b">
+  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
+
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
+    script hook</secondary>
+  </indexterm>
+
+  <para>
+   The compensated synchronization mechanism depicted in this sample can help
+   manage the risks associated with synchronizing data across multiple
+   resources.
+  </para>
+  <para>
+   Typically, when a managed/user object is changed, automatic synchronization
+   replays that change to all configured external resources. If synchronization
+   fails for one target resource (for example, due to a policy validation
+   failure on the target, or the target being unavailable), the synchronization
+   operation stops at that point. The effect is that a record might be changed
+   in the repository, and in the targets on which synchronization was successful,
+   but not on the failed target, or any targets that would have been
+   synchronized after the failure. This situation can result in disparate data
+   sets across resources. While a reconciliation operation would eventually
+   bring all targets back in sync, reconciliation can be an expensive operation
+   with large data sets.
+  </para>
+  <para>
+   The compensated synchronization mechanism ensures that either all resources
+   are synchronized successfully, or that the original change is rolled back.
+   This mechanism uses an <literal>onSync</literal> script hook configured with
+   a <filename>compensate.js</filename> script that can be used to "revert" the
+   partial change to managed/user and to the corresponding external resources.
+  </para>
+
+  <para>
+   Sample 5b is similar to sample 5 in that it simulates two external resources
+   with XML files (located in the
+   <filename>/path/to/samples/sample5b/data</filename> directory). The
+   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
+   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
+   OpenIDM with the sample. Sample 5b adds the <literal>onSync</literal> script
+   hook to the process, configured in the
+   <filename>sample5b/conf/managed.json</filename> file.
+  </para>
+
+  <para>
+   The following excerpt of the <filename>managed.json</filename> file shows
+   the <literal>onSync</literal> hook, which calls the
+   <filename>compensate.js</filename> script, provided in the
+   <filename>/path/to/openidm/bin/defaults/script</filename> directory.
+  </para>
+
+  <programlisting language="javascript">
+...
+},
+"onSync" : {
+   "type" : "text/javascript",
+   "file" : "compensate.js"
+},
+  </programlisting>
+
+  <para>
+   You can use the <literal>onSync</literal> script hook to ensure that changes
+   made in the repository are synchronized to all external resources, or that
+   no changes are made. For more information about how automatic synchronization
+   uses the <literal>onSync</literal> script hook, see <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#sync-types-automatic"><citetitle>How Automatic
+   Sync works with onSync</citetitle></link> in the <citetitle>Integrator's
+   Guide</citetitle>.
+  </para>
+
+  <para>
+   You can optionally configure an outbound email service for this sample, if
+   you want to receive emailed reconciliation summaries. The email service
+   configuration is identical to that of sample 5
+   (<xref linkend="email-sample5" />).
+  </para>
 
   <section xml:id="install-sample5b">
    <title>Install the Sample</title>
@@ -1299,19 +1306,19 @@ template,
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample5b</screen>
 
-   <para>You can now find XML files that simulate an external LDAP and AD
-    resource in the <filename>openidm/samples/sample5b/data/</filename>
-    directory. The simulated AD data store file,
-    <filename>xml_AD_Data.xml</filename>, does not contain users
-    until you run reconciliation or automatic synchronization runs.
+   <para>
+    The XML files that simulate an external LDAP and AD resource are now located
+    in the <filename>openidm/samples/sample5b/data/</filename> directory. The
+    simulated AD data store file, <filename>xml_AD_Data.xml</filename>, does not
+    contain users until you run reconciliation.
    </para>
 
    <para>
     Run reconciliation, to synchronize the contents of the simulated LDAP
-    resource to the simulated AD resource.
+    resource to the OpenIDM repository.
    </para>
 
-   <screen width="100">$ curl \
+   <screen>$ curl \
 --cacert self-signed.crt \
 --header "X-OpenIDM-Username: openidm-admin" \
 --header "X-OpenIDM-Password: openidm-admin" \
@@ -1320,23 +1327,23 @@ $ ./startup.sh -p samples/sample5b</screen>
 "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>
-    You do not have to run reconciliation. With automatic synchronization, any
-    change in the OpenIDM managed user database propagates changes to the
-    simulated AD resource.
+    It is not necessary to run a second reconciliation operation to synchronize
+    the AD resource. Automatic synchronization propagates any change made to
+    managed users in the OpenIDM repository to the simulated AD resource.
    </para>
 
    <para>
     Review the contents of <filename>xml_AD_Data.xml</filename>. It should now
-    contain information for the same user as is shown in the startup version of
-    the <filename>xml_LDAP_Data.xml</filename> file.
+    contain information for the same user that was present in the startup
+    version of the <filename>xml_LDAP_Data.xml</filename> file.
    </para>
 
    <para>
-    Alternatively, you can list users in the AD repository with the following
+    Alternatively, you can list users in the AD resource with the following
     command:
    </para>
 
-   <screen width="100">$ <userinput>curl \
+   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1356,12 +1363,11 @@ $ ./startup.sh -p samples/sample5b</screen>
    </screen>
 
    <para>
-    You should be able to use the <literal>_id</literal> of the user to read
-    information from the simulated AD database. In this case, you can display
-    that information with the following command:
+    You can use the <literal>_id</literal> of the user to read the user
+    information from the AD resource, for example:
    </para>
 
-   <screen width="110">$ <userinput>curl \
+   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1379,9 +1385,10 @@ $ ./startup.sh -p samples/sample5b</screen>
    </screen>
 
    <para>
-    To verify, repeat the process. Set up a second user in the
-    <filename>xml_LDAP_Data.xml</filename> file. One example of how that file
-    might appear with a second user is shown here:
+    To verify that the sample is working, repeat the process. Set up a second
+    user in the <filename>xml_LDAP_Data.xml</filename> file. An example of how
+    that file might appear with a second user (<literal>GDOE1</literal>) is
+    shown here:
    </para>
 
    <programlisting language="xml" width="120">
@@ -1416,11 +1423,10 @@ $ ./startup.sh -p samples/sample5b</screen>
     </programlisting>
 
    <para>
-    Rerun the reconciliation and query REST command calls shown earlier.
-    Substitute for the UID if it has changed. The reconciliation and query
-    commands would take the data from the simulated LDAP resource, and then
-    reconcile them to the OpenIDM managed user database. With automatic sync,
-    those users are then synchronized to the simulated AD resource.
+    Rerun the reconciliation and query REST commands shown previously. The
+    reconciliation operation creates the new user from the simulated LDAP
+    resource in the OpenIDM repository. Automatic synchronization then creates
+    that user in the AD resource.
    </para>
 
   </section>
@@ -1435,18 +1441,19 @@ $ ./startup.sh -p samples/sample5b</screen>
    </para>
 
    <para>
-    Make a change to the data of an existing user. With automatic sync,
-    that change is reflected almost immediately on the external resources.
-    For sample 5b, you would see the changes in both XML files in the
-    <filename>/path/to/openidm/sample5b/data</filename> directory. Alternatively,
-    you could run the REST command calls described earlier.
+    Make a change to the data of an existing user (<literal>DDOE1</literal>).
+    With automatic synchronization, that change is reflected almost immediately
+    on the external resources. For sample 5b, you should see the changes in both
+    XML files in the <filename>/path/to/openidm/sample5b/data</filename>
+    directory. Alternatively, you can query the external resources over REST, as
+    described previously.
    </para>
 
    <para>
-    Automatic sync works when both external resources are
-    connected. The next step is to simulate a problem connecting to the LDAP
-    resource. One simple way to do so on the local system is to make the LDAP
-    data file unreadable. On a Linux system, the following command, as an
+    The synchronization is successful, across all configured external resources.
+    The next step is to simulate a problem connecting to the LDAP resource. One
+    way to do so on the local system is to rename the LDAP data file so that it
+    is unreadable. On a Linux system, the following command, as an
     administrative user, would serve that purpose:
    </para>
 
@@ -1454,29 +1461,39 @@ $ ./startup.sh -p samples/sample5b</screen>
 $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
 
    <para>
-    In the UI, now try another update to an existing user. You may see the
-    change reflected in only the simulated AD resource. With the change to the
-    filename of the simulated LDAP resource, automatic sync has nothing to write
-    to, and you may see the following error in the standard OpenIDM log file,
-    <filename>openidm0.log.0</filename>:
+    In the UI, now try another update to user <literal>DDOE1</literal>. With the
+    modified filename of the simulated LDAP resource, automatic synchronization
+    cannot write to this resource. An error similar to the following is
+    displayed in the log file, <filename>openidm0.log.0</filename>:
    </para>
 
    <screen>Data file does not exist:
 /path/to/openidm/samples/sample5b/data/xml_LDAP_Data.xml</screen>
 
    <para>
-    With <literal>onSync</literal>, OpenIDM invokes the
-    <filename>compensate.js</filename> script. If an error such as a bad
-    connection to a remote data store occurs, that script should revert the
-    most recent change.
+    Although the AD resource is available, automatic synchronization will not
+    reach this resource, because the mapping is specified
+    <emphasis>after</emphasis> the managed/user to LDAP mapping in the
+    <filename>sync.json</filename> file.
    </para>
-
    <para>
-    As an administrator, you might try to make the same change a second time.
-    In that case, the OpenIDM UI should display an error. The user data in the
-    XML files should remain unchanged.
+    When the automatic synchronization fails for the LDAP resource, the
+    <literal>onSync</literal> hook invokes the
+    <filename>compensate.js</filename> script. This script attempts to revert
+    the original change by performing another update to DDOE1 in the repository
+    (managed/user). This change, in turn, triggers another automatic
+    synchronization to the AD and LDAP resources.
    </para>
-
+   <para>
+    Because the LDAP resource is still unreadable, the synchronization to LDAP
+    fails again, which triggers the <literal>compensate.js</literal> script
+    again. This time, however, the script recognizes that the change was
+    originally called as a result of a compensation and aborts.
+   </para>
+   <para>
+    The original synchronization error from the first update is thrown from the
+    script and the UI should display that error.
+   </para>
   </section>
  </section>
  
@@ -1488,12 +1505,14 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
   </indexterm>
 
   <para>
-   Sample 6 resembles sample 5, but sample 6 includes files for two scenarios,
-   depending on whether you have an actual Active Directory (AD) service, or if
-   you need to simulate an AD database. Each scenario is associated with a
-   file in the <filename>/path/to/sample6/alternatives</filename> directory.
-   The file you select should be copied to the
-   <filename>/path/to/sample6/conf</filename> directory.
+   Sample 6 resembles sample 5, but demonstrates LiveSync from an external
+   resource. Sample 6 includes configuration files for two scenarios, depending
+   on whether you have a live Active Directory (AD) service, or whether you
+   need to simulate an AD service with an OpenDJ server. Each scenario is
+   associated with a file in the
+   <filename>/path/to/sample6/alternatives</filename> directory. The file you
+   select should be copied to the <filename>/path/to/sample6/conf</filename>
+   directory.
   </para>
 
   <variablelist>
@@ -1508,8 +1527,9 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
        deployment.
       </para>
       <para>
-       As this sample demonstrates reconciliations from the AD server to
-       OpenDJ, information on the AD server will not be changed.
+       As this sample demonstrates synchronization <emphasis>from</emphasis> the
+       AD server <emphasis>to</emphasis> OpenDJ, data on the AD server is not
+       changed.
       </para>
     </listitem>
    </varlistentry>
@@ -1524,33 +1544,32 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
       AD server.
      </para>
      <para>
-      The instructions for this sample simulates an AD server on the
-      same instance of OpenDJ, using a different base DN.
+      This sample simulates an AD server on the same instance of OpenDJ, using a
+      different base DN.
      </para>
     </listitem>
    </varlistentry>
   </variablelist>
 
   <para>
-   The options shown in associated configuration files can be easily modified
-   to work with any standard LDAP server.
+   The options shown in the associated configuration files can be easily
+   modified to work with any standard LDAP server.
   </para>
 
   <section xml:id="more-sample6-realad">
    <title>Sample 6 with an Active AD Deployment</title>
 
    <para>
-    If you have an active instance of AD, you can set up a regular instance of
-    OpenDJ, as described in the <link xlink:show="new"
+    If you have an existing, active instance of AD, set up OpenDJ, as described
+    in the <link xlink:show="new"
     xlink:href="http://opendj.forgerock.org/opendj-server/doc/install-guide/">
     <citetitle>OpenDJ Installation Guide</citetitle></link>.
    </para>
 
    <para>
-    For this purpose, populate OpenDJ with the <filename>Example.ldif</filename>
-    file available in the <filename>/path/to/sample6/data</filename> directory.
-    Any changes run in this section should write information from the AD server
-    to the OpenDJ server that you create.
+    During installation, populate OpenDJ with the data in the
+    <filename>Example.ldif</filename> file, available in the
+    <filename>/path/to/sample6/data</filename> directory.
    </para>
 
    <para>
@@ -1563,26 +1582,13 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    <title>Sample 6 with a Simulated AD Deployment</title>
 
    <para>
-    To minimize the risk of conflict with another LDAP server, the simulated
-    AD deployment uses a non-standard base DN,
-    <literal>dc=fakead,dc=com</literal>.
-   </para>
-
-   <para>
-    The following instructions make it possible for you to configure LiveSync
-    between two OpenDJ servers, configured to communicate on different ports.
-    One of the servers will include an LDIF file, <filename>AD.ldif</filename>,
-    that simulates a deployment of AD. The second server includes a different
-    LDIF file, <filename>Example.ldif</filename>, that supports a conventional
-    deployment of OpenDJ.
-   </para>
-
-   <para>
-    For this sample, two separate OpenDJ servers are not required. The
-    <filename>AD.ldif</filename> and <filename>Example.ldif</filename> LDIF
-    files are associated with two separate base DNs. Once configured, LiveSync
-    should work automatically with the data on both base DNs as if they were
-    two separate directory servers.
+    In this sample, an AD deployment is simulated with a different baseDN
+    (<literal>dc=fakead,dc=com</literal>) on the same OpenDJ server instance.
+    You can also simulate the AD server with a separate OpenDJ instance, running
+    on the same host, as long as the two instances communicate on different
+    ports. The data for the simulated AD instance is contained in the file
+    <filename>AD.ldif</filename>. The data for the OpenDJ instance is contained
+    in the file <filename>Example.ldif</filename>.
    </para>
 
   </section>
@@ -1590,25 +1596,13 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    <section xml:id="external-resource-sample6">
     <title>External Configuration</title>
 
-    <para>
-     Now that you know the files and port numbers to use, it is time to
-     configure your instance of OpenDJ. Download and start installing OpenDJ as
-     described in the OpenDJ Installation Guide chapter on <link xlink:show="new"
-     xlink:href="http://opendj.forgerock.org/opendj-server/doc/install-guide/index.html#chap-install-gui">
-     <citetitle>Installing OpenDJ With the Quick Setup Wizard</citetitle>.</link>
-    </para>
-
     <section xml:id="prepare-livesync-sample6">
      <title>Prepare OpenDJ For LiveSync</title>
 
      <para>
       This sample assumes a replicated OpenDJ server. When configured,
-      OpenDJ replication includes an External Change Log (ECL),
-      required to support LiveSync.
-     </para>
-
-     <para>
-      When enabled, LiveSync detects changes in OpenDJ by reading the ECL.
+      OpenDJ replication includes an External Change Log (ECL), required to
+      support LiveSync. LiveSync detects changes in OpenDJ by reading the ECL.
      </para>
 
      <para>
@@ -1620,8 +1614,8 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      </para>
 
      <para>
-      Once configured, you can proceed with either an
-      active or simulated AD deployment.
+      Once configured, you can proceed with either an active or simulated AD
+      deployment.
      </para>
 
     </section>
@@ -1672,7 +1666,7 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
         <row>
          <entry>credentials</entry>
          <entry>If a password is used, replace null with that password.
-          Once OpenIDM starts, it encrypts that password in the
+          When OpenIDM starts, it encrypts that password in the
           <filename>provisioner.openicf-realad.conf</filename> file.</entry>
         </row>
         <row>
@@ -1723,34 +1717,41 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
      </para>
 
      <para>
-      While you can use a separate deployment of OpenDJ to simulate an instance
-      of AD, the following instructions include both databases on the same
-      OpenDJ server.
+      As previously mentioned, you can use a separate OpenDJ instance to
+      simulate  the AD server. However, the following instructions assume that
+      the simulated AD server runs on the same OpenDJ instance.
      </para>
 
      <para>
-      Open the <filename>provisioner.openicf-fakead.json</filename> file. The
-      default <literal>port</literal> directive cited in that file is 1389,
-      different from the default LDAP port of 389.
+      Open the <filename>provisioner.openicf-fakead.json</filename> file and
+      note the following:
      </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        OpenDJ directory server uses port 1389 by default for users who cannot
+        use privileged ports, so this is the port that is specified in the
+        provisioner file. Adjust the port if your OpenDJ server is listening on
+        a different port.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The simulated AD server uses the base DN
+        <literal>dc=fakead,dc=com</literal>.
+       </para>
+      </listitem>
+     </itemizedlist>
 
      <para>
-      That JSON file uses a different base DN,
-      <literal>dc=fakead,dc=com</literal>.
+      To load the data for the simulated AD instance, launch the OpenDJ control
+      panel, add the simulated AD baseDN (<literal>dc=fakead,dc=com</literal>),
+      and then import the <filename>/path/to/sample6/data/AD.ldif</filename>
+      file. When you import the <filename>AD.ldif</filename> file, select
+      "Append to Existing Data", not "Overwrite Existing Data". Otherwise, the
+      data in the <literal>dc=example,dc=com</literal> baseDN will be
+      overwritten.
      </para>
-
-     <para>
-      In the the OpenDJ control panel, first add the
-      simulated AD <literal>baseDN</literal>, and then import the
-      <filename>/path/to/sample6/data/AD.ldif</filename> file.
-     </para>
-
-     <para>
-      When you import the <filename>AD.ldif</filename> file, do not overwrite
-      existing data. Otherwise, you may overwrite information from
-      the <filename>Example.ldif</filename> file.
-     </para>
-
     </section>
 
    </section>
@@ -1782,7 +1783,8 @@ $ ./startup.sh -p samples/sample6</screen>
     <para>
      Now that OpenIDM is in operation, review the entries in the OpenDJ
      data store. When you run reconciliation, any entries that share the same
-     <literal>uid</literal> with the AD data store will be overwritten.
+     <literal>uid</literal> with the AD data store will be updated with the
+     contents from AD.
     </para>
 
     <para>
@@ -1818,9 +1820,9 @@ $ ./startup.sh -p samples/sample6</screen>
     <screen>{"_id":"9ece3807-08c3-4ec6-87fb-a6a2d0c71cee"}</screen>
 
     <para>
-     OpenIDM takes the information from the AD deployment, and includes it in
-     the internal OpenIDM repository. That information is then automatically
-     synchronized to the OpenDJ server, as described in
+     The reconciliation operation synchronizes the data in the AD deployment
+     with OpenIDM repository (managed/user). That information is then
+     automatically synchronized to the OpenDJ server, as described in
      <link xlink:show="new" xlink:href="integrators-guide#handling-sync"
            xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Synchronization Situations and Actions</citetitle></link>.
@@ -1859,9 +1861,9 @@ $ ./startup.sh -p samples/sample6</screen>
     </para>
 
     <para>
-     To confirm the current status of a user, run the
-     <command>ldapsearch</command> command. The following example confirms the
-     current status of <literal>uid=jdoe</literal> in the OpenDJ datastore:
+     To read the user object in the OpenDJ server, run the
+     <command>ldapsearch</command> command. The following example returns the
+     entry for user <literal>uid=jdoe</literal>:
     </para>
 
     <screen>$ ./ldapsearch \
@@ -1904,15 +1906,15 @@ $ ./startup.sh -p samples/sample6</screen>
     <title>Using LiveSync</title>
 
     <para>You can start reconciliation by using a scheduled configuration or
-     by using the REST interface directly. However, if you want to use LiveSync,
-     you need to configure a schedule. When LiveSync is active, the default
-     schedule in the <filename>schedule-activeSynchroniser_systemAdAccount.json
-     </filename> configuration file runs LiveSync every 15 seconds.
+     by using the REST interface directly. However, to use LiveSync, you must
+     configure a schedule. When LiveSync is active, the default schedule in the
+     <filename>schedule-activeSynchroniser_systemAdAccount.json</filename>
+     configuration file runs LiveSync every 15 seconds.
     </para>
 
     <para>
-     This particular action, pushes changes made in the AD
-     data store to the OpenIDM repository, automatically.
+     LiveSync pushes changes made in the AD data store to the OpenIDM repository,
+     automatically.
     </para>
 
     <para>
@@ -1944,7 +1946,8 @@ $ ./startup.sh -p samples/sample6</screen>
 
      <step>
       <para>
-       Create an LDIF file.
+       Create an LDIF file with a new user entry (<literal>uid=bsmith</literal>)
+       that will be added to the simulated AD data store.
       </para>
      </step>
      <step>
@@ -1963,7 +1966,7 @@ cn: Barry
 sn: Smith
 mail: bsmith@example.com
 telephoneNumber: 1-415-523-0772
-userPassword: password
+userPassword: passw0rd
        </screen>
       </para>
      </step>
@@ -1975,8 +1978,7 @@ userPassword: password
      <step>
       <para>
        Use the <command>ldapmodify</command> command to add the
-       <filename>bsmith.ldif</filename> file to the directory. Be aware that
-       the port number may vary.
+       <filename>bsmith.ldif</filename> file to the directory.
       </para>
        <screen>$ ./ldapmodify
  --port 1389
@@ -1987,33 +1989,27 @@ userPassword: password
      </step>
      <step>
       <para>
-       Now you can test synchronization. You should be able to log
-       into the OpenIDM UI with any AD account.
-      </para>
-
-      <para>
-       Be aware: changes made from the OpenIDM UI directly change the local
-       managed/user database. Changes are not reconciled to the AD database.
+       Now you can test synchronization by viewing the new user in the OpenIDM
+       repository. The easiest way to do this, is through OpenIDM UI. You should
+       be able to log into the UI with any of the accounts in the AD data store.
+       For this example, log into the UI as user <literal>bsmith</literal>, with
+       password <literal>passw0rd</literal>. The fact that you can log into the
+       UI as this new user indicates that LiveSync has synchronized the user
+       from the AD data store to the managed/user repository.
       </para>
      </step>
      <step>
       <para>
-       The following command should display the updated information in the
-       OpenDJ data store for all configured users:
+       Automatic synchronization pushes this change out to the OpenDJ data store.
+       To test this synchronization operation, search the OpenDJ baseDN for the
+       new user entry.
       </para>
       <screen>$ ./ldapsearch \
 --port 1389 \
 --baseDN ou=people,dc=example,dc=com \
-"(uid=*)"</screen>
+"(uid=bsmith)"</screen>
      </step>
     </procedure>
-
-    <para>
-     If LiveSync works, the final step in the procedure should include
-     information for the user newly added from the
-     <filename>bsmith.ldif</filename> file.
-    </para>
-
    </section>
   </section>
  </section>
