@@ -1115,8 +1115,9 @@ $ ./startup.sh -p samples/sample4</screen>
 
   <para>
    Sample 5 demonstrates the flow of data from one external resource to
-  another. The resources are called LDAP and AD, but in the sample both
-  directory-like resources are simulated with XML files.
+   another. The resources are named <literal>LDAP</literal> and
+   <literal>AD</literal> but in the sample, both directory-like resources are
+   simulated with XML files.
   </para>
   <para>
    You can optionally configure an outbound email service, if you want to
@@ -1181,16 +1182,19 @@ template,
   <section xml:id="install-sample5">
    <title>Install the Sample</title>
 
-   <para>No external configuration is required for this sample. Prepare 
-   OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
-   OpenIDM with the configuration of sample 5.</para>
+   <para>
+    No external configuration is required for this sample. Prepare OpenIDM as
+    described in <xref linkend="preparing-openidm"/>, then start OpenIDM with
+    the configuration of sample 5.
+   </para>
 
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample5</screen>
 
-   <para>The XML files that are used are located in the
+   <para>
+    The XML files that simulate the resources are located in the
     <filename>openidm/samples/sample5/data/</filename> folder. When you start
-    OpenIDM with the sample 5 configuration, it creates the
+    OpenIDM with the sample 5 configuration, OpenIDM creates the
     <filename>xml_AD_Data.xml</filename> file, which does not contain users
     until you run reconciliation.
    </para>
@@ -1199,7 +1203,10 @@ $ ./startup.sh -p samples/sample5</screen>
   <section xml:id="run-sample5">
    <title>Run the Sample</title>
 
-   <para>Run reconciliation between the pseudo-LDAP resource and OpenIDM.</para>
+   <para>
+    Run a reconciliation operation, to synchronize the contents of the simulated
+    LDAP resource to the OpenIDM repository.
+   </para>
 
    <screen>$ curl \
  --cacert self-signed.crt \
@@ -1209,127 +1216,11 @@ $ ./startup.sh -p samples/sample5</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>This command creates a user in the repository. Automatic
-    synchronization from OpenIDM creates the same user in the simulated Active
-    Directory (AD) resource, represented by the
-    <filename>samples/sample5/data/xml_AD_Data.xml</filename> file.</para>
-  </section>
- </section>
-
- <section xml:id="more-sample5b">
-  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
-
-  <indexterm>
-   <primary>Samples</primary>
-   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
-    script hook</secondary>
-  </indexterm>
-
-  <para>
-   The compensated synchronization mechanism depicted in this sample can help
-   manage the risks associated with synchronizing data across multiple
-   resources.
-  </para>
-  <para>
-   Typically, when a managed/user object is changed, automatic synchronization
-   replays that change to all configured external resources. If synchronization
-   fails for one target resource (for example, due to a policy validation
-   failure on the target, or the target being unavailable), the synchronization
-   operation stops at that point. The effect is that a record might be changed
-   in the repository, and in the targets on which synchronization was successful,
-   but not on the failed target, or any targets that would have been
-   synchronized after the failure. This situation can result in disparate data
-   sets across resources. While a reconciliation operation would eventually
-   bring all targets back in sync, reconciliation can be an expensive operation
-   with large data sets.
-  </para>
-  <para>
-   The compensated synchronization mechanism ensures that either all resources
-   are synchronized successfully, or that the original change is rolled back.
-   This mechanism uses an <literal>onSync</literal> script hook configured with
-   a <filename>compensate.js</filename> script that can be used to "revert" the
-   partial change to managed/user and to the corresponding external resources.
-  </para>
-
-  <para>
-   Sample 5b is similar to sample 5 in that it simulates two external resources
-   with XML files (located in the
-   <filename>/path/to/samples/sample5b/data</filename> directory). The
-   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
-   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
-   OpenIDM with the sample. Sample 5b adds the <literal>onSync</literal> script
-   hook to the process, configured in the
-   <filename>sample5b/conf/managed.json</filename> file.
-  </para>
-
-  <para>
-   The following excerpt of the <filename>managed.json</filename> file shows
-   the <literal>onSync</literal> hook, which calls the
-   <filename>compensate.js</filename> script, provided in the
-   <filename>/path/to/openidm/bin/defaults/script</filename> directory.
-  </para>
-
-  <programlisting language="javascript">
-...
-},
-"onSync" : {
-   "type" : "text/javascript",
-   "file" : "compensate.js"
-},
-  </programlisting>
-
-  <para>
-   You can use the <literal>onSync</literal> script hook to ensure that changes
-   made in the repository are synchronized to all external resources, or that
-   no changes are made. For more information about how automatic synchronization
-   uses the <literal>onSync</literal> script hook, see <link xlink:show="new"
-   xlink:role="http://docbook.org/xlink/role/olink"
-   xlink:href="integrators-guide#sync-types-automatic"><citetitle>How Automatic
-   Sync works with onSync</citetitle></link> in the <citetitle>Integrator's
-   Guide</citetitle>.
-  </para>
-
-  <para>
-   You can optionally configure an outbound email service for this sample, if
-   you want to receive emailed reconciliation summaries. The email service
-   configuration is identical to that of sample 5
-   (<xref linkend="email-sample5" />).
-  </para>
-
-  <section xml:id="install-sample5b">
-   <title>Install the Sample</title>
-
-   <para>No external configuration is required for this sample. Prepare
-    OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
-    OpenIDM with the configuration of sample 5b.</para>
-
-   <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/sample5b</screen>
-
    <para>
-    The XML files that simulate an external LDAP and AD resource are now located
-    in the <filename>openidm/samples/sample5b/data/</filename> directory. The
-    simulated AD data store file, <filename>xml_AD_Data.xml</filename>, does not
-    contain users until you run reconciliation.
-   </para>
-
-   <para>
-    Run reconciliation, to synchronize the contents of the simulated LDAP
-    resource to the OpenIDM repository.
-   </para>
-
-   <screen>$ curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---header "Content-Type: application/json" \
---request POST \
-"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
-
-   <para>
-    It is not necessary to run a second reconciliation operation to synchronize
-    the AD resource. Automatic synchronization propagates any change made to
-    managed users in the OpenIDM repository to the simulated AD resource.
+    This command creates a user in the repository. It is not necessary to run a
+    second reconciliation operation to synchronize the AD resource. Automatic
+    synchronization propagates any change made to managed users in the OpenIDM
+    repository to the simulated AD resource.
    </para>
 
    <para>
@@ -1428,18 +1319,122 @@ $ ./startup.sh -p samples/sample5b</screen>
     resource in the OpenIDM repository. Automatic synchronization then creates
     that user in the AD resource.
    </para>
+  </section>
+ </section>
 
+ <section xml:id="more-sample5b">
+  <title>Sample 5b - Compensated Synchronization with <literal>onSync</literal></title>
+
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 5b - Synchronization with the <literal>onSync</literal>
+    script hook</secondary>
+  </indexterm>
+
+  <para>
+   The compensated synchronization mechanism depicted in this sample can help
+   manage the risks associated with synchronizing data across multiple
+   resources.
+  </para>
+  <para>
+   Typically, when a managed/user object is changed, automatic synchronization
+   replays that change to all configured external resources. If synchronization
+   fails for one target resource (for example, due to a policy validation
+   failure on the target, or the target being unavailable), the synchronization
+   operation stops at that point. The effect is that a record might be changed
+   in the repository, and in the targets on which synchronization was successful,
+   but not on the failed target, or any targets that would have been
+   synchronized after the failure. This situation can result in disparate data
+   sets across resources. While a reconciliation operation would eventually
+   bring all targets back in sync, reconciliation can be an expensive operation
+   with large data sets.
+  </para>
+  <para>
+   The compensated synchronization mechanism ensures that either all resources
+   are synchronized successfully, or that the original change is rolled back.
+   This mechanism uses an <literal>onSync</literal> script hook configured with
+   a <filename>compensate.js</filename> script that can be used to "revert" the
+   partial change to managed/user and to the corresponding external resources.
+  </para>
+
+  <para>
+   Sample 5b is similar to sample 5 in that it simulates two external resources
+   with XML files (located in the
+   <filename>/path/to/samples/sample5b/data</filename> directory). The
+   <filename>xml_LDAP_Data.xml</filename> file simulates an LDAP data source.
+   OpenIDM creates the <filename>xml_AD_Data.xml</filename> file when you start
+   OpenIDM with the sample. Sample 5b adds the <literal>onSync</literal> script
+   hook to the process, configured in the
+   <filename>sample5b/conf/managed.json</filename> file.
+  </para>
+
+  <para>
+   The following excerpt of the <filename>managed.json</filename> file shows
+   the <literal>onSync</literal> hook, which calls the
+   <filename>compensate.js</filename> script, provided in the
+   <filename>/path/to/openidm/bin/defaults/script</filename> directory.
+  </para>
+
+  <programlisting language="javascript">
+...
+},
+"onSync" : {
+   "type" : "text/javascript",
+   "file" : "compensate.js"
+},
+  </programlisting>
+
+  <para>
+   You can use the <literal>onSync</literal> script hook to ensure that changes
+   made in the repository are synchronized to all external resources, or that
+   no changes are made. For more information about how automatic synchronization
+   uses the <literal>onSync</literal> script hook, see <link xlink:show="new"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#sync-types-automatic"><citetitle>How Automatic
+   Sync works with onSync</citetitle></link> in the <citetitle>Integrator's
+   Guide</citetitle>.
+  </para>
+
+  <para>
+   You can optionally configure an outbound email service for this sample, if
+   you want to receive emailed reconciliation summaries. The email service
+   configuration is identical to that of sample 5
+   (<xref linkend="email-sample5" />).
+  </para>
+
+  <section xml:id="install-sample5b">
+   <title>Install the Sample</title>
+   <para>No external configuration is required for this sample. Prepare
+    OpenIDM as described in <xref linkend="preparing-openidm"/>, then start
+    OpenIDM with the configuration of sample 5b.</para>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample5b</screen>
+   <para>
+    The XML files that simulate an external LDAP and AD resource are now located
+    in the <filename>openidm/samples/sample5b/data/</filename> directory. The
+    simulated AD data store file, <filename>xml_AD_Data.xml</filename>, does not
+    contain users until you run reconciliation.
+   </para>
+   <para>
+    Run the sample in exactly the same way that you did for Sample 5, following
+    the steps in <xref linkend="run-sample5" />.
+   </para>
   </section>
 
   <section xml:id="onsync-sample5b">
    <title>Demonstrate onSync</title>
 
    <para>
+    To demonstrate integration of the samples withe the OpenIDM UI, this sample
+    uses the UI to view and make changes to user objects in the repository.
+    However, you can also use the REST interface to make these changes, as shown
+    in the previous section.
+   </para>
+   <para>
     Log into the OpenIDM UI as the administrative user. On a local system,
     navigate to <literal>https://localhost:8443/openidmui</literal>. The default
     administrative account and password are both <literal>openidm-admin</literal>.
    </para>
-
    <para>
     Make a change to the data of an existing user (<literal>DDOE1</literal>).
     With automatic synchronization, that change is reflected almost immediately
@@ -1448,9 +1443,13 @@ $ ./startup.sh -p samples/sample5b</screen>
     directory. Alternatively, you can query the external resources over REST, as
     described previously.
    </para>
-
    <para>
-    The synchronization is successful, across all configured external resources.
+    The synchronization is successful, across all configured external resources,
+    so the updated user record can be seen in both the
+    <filename>xml_LDAP_Data.xml</filename> and
+    <filename>xml_AD_Data.xml</filename> files.
+   </para>
+   <para>
     The next step is to simulate a problem connecting to the LDAP resource. One
     way to do so on the local system is to rename the LDAP data file so that it
     is unreadable. On a Linux system, the following command, as an
@@ -1492,7 +1491,17 @@ $ sudo mv xml_LDAP_Data.xml xml_LDAP_Data.xml.bak</screen>
    </para>
    <para>
     The original synchronization error from the first update is thrown from the
-    script and the UI should display that error.
+    script and the UI should display that error. If you refresh the UI, and view
+    that user entry again, you will notice that the change to the entry has been
+    reverted.
+   </para>
+   <para>
+    Note that if you change the name of the AD resource file (to make it
+    unavailable), a change to a managed/user entry will be synchronized
+    successfully with the LDAP resource (because that mapping appears first in
+    <filename>sync.json</filename>). The synchronization will fail for the AD
+    resource. In this case, the change will be reverted on both the managed/user
+    entry, and the LDAP resource.
    </para>
   </section>
  </section>
