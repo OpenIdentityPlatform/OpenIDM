@@ -851,7 +851,7 @@
 
      <para>The following script example creates an object type.</para>
      <programlisting language="javascript">
-openidm.create("managed/foobar/myidentifier", mymap)</programlisting>
+openidm.create("managed/foobar", "myidentifier", mymap)</programlisting>
     </section>
 
     <section xml:id="managed-objects-programmatic-update">
@@ -1120,7 +1120,7 @@ val = openidm.query("managed/foobar", params);</programlisting>
 
     <para>The following script example creates an object type.</para>
     <programlisting language="javascript">
-openidm.create("config/custom/myconfig", mymap)</programlisting>
+openidm.create("config/custom", "myconfig", mymap)</programlisting>
    </section>
 
    <section xml:id="configuration-objects-programmatic-update">
