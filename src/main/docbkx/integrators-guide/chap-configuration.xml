@@ -193,61 +193,66 @@
      </itemizedlist>
  </section>
 
-    <section xml:id="configuring-for-production">
-        <title>Configuring an OpenIDM System for Production</title>
+ <section xml:id="configuring-for-production">
+  <title>Configuring an OpenIDM System for Production</title>
+  <para>
+   Out of the box, OpenIDM is configured to make it easy to install and
+   evaluate. Specific configuration changes are required before you deploy
+   OpenIDM in a production environment.
+  </para>
 
-        <para>Out of the box, OpenIDM is configured to make it easy to install and
-            evaluate. Specific configuration changes are required before you deploy
-            OpenIDM in a production environment.</para>
+  <section xml:id="configuring-production-repo">
+   <title>Configuring a Production Repository</title>
+   <para>
+    By default, OpenIDM uses OrientDB for its internal repository so that you do
+    not have to install a database in order to evaluate OpenIDM. Before you use
+    OpenIDM in production, you must replace OrientDB with a supported
+    repository.
+   </para>
+   <para>
+    For more information, see <link xlink:href="install-guide#chap-repository"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
+    Repository for Production</citetitle></link> in the <citetitle>Installation
+    Guide</citetitle>.
+   </para>
+  </section>
 
-        <section xml:id="configuring-production-repo">
-            <title>Configuring a Production Repository</title>
+  <section xml:id="disabling-auto-config-updates">
+   <title>Disabling Automatic Configuration Updates</title>
+   <para>
+    By default, OpenIDM polls the JSON files in the <literal>conf</literal>
+    directory periodically for any changes to the configuration. In a production
+    system, it is recommended that you disable automatic polling for updates to
+    prevent untested configuration changes from disrupting your identity service.
+   </para>
+   <para>
+    To disable automatic polling for configuration changes, edit the
+    <filename>conf/system.properties</filename> file by uncommenting the
+    following line:
+   </para>
+   <programlisting># openidm.fileinstall.enabled=false</programlisting>
+   <para>
+    Before you disable automatic polling, you must have started the OpenIDM
+    instance at least once to ensure that the configuration has been loaded into
+    the repository.
+   </para>
+   <para>
+    Note if automatic polling is enabled, changes to scripts that are  called
+    from a JSON configuration file are taken into account immediately.
+   </para>
+  </section>
 
-            <para>By default, OpenIDM uses OrientDB for its internal repository
-                so that you do not have to install a database in order to evaluate
-                OpenIDM. Before you use OpenIDM in production, you must replace
-                OrientDB with a supported repository.</para>
-            <para>For more information, see <link
-                    xlink:href="install-guide#chap-repository"
-                    xlink:role="http://docbook.org/xlink/role/olink"><citetitle
-                    >Installing a Repository for Production</citetitle></link> in
-                the <citetitle>Installation Guide</citetitle>.</para>
-        </section>
-
-        <section xml:id="disabling-auto-config-updates">
-            <title>Disabling Automatic Configuration Updates</title>
-
-            <para>By default, OpenIDM polls the JSON files in the
-                <literal>conf</literal> directory periodically for any changes to
-                the configuration. In a production system, it is recommended that
-                you disable automatic polling for updates to prevent untested
-                configuration changes from disrupting your identity service.</para>
-            <para>To disable automatic polling for configuration changes, edit the
-                <filename>conf/system.properties</filename> file by uncommenting the
-                following line:</para>
-            <programlisting># openidm.fileinstall.enabled=false</programlisting>
-            <para>Before you disable automatic polling, you must have started the
-                OpenIDM instance at least once to ensure that the configuration has
-                been loaded into the database.
-            </para>
-            <para>Note that scripts are loaded each time the configuration calls the
-                script. Modifications to scripts are therefore not applied
-                dynamically. If you modify a script, you must either modify the
-                configuration that calls the script, or restart the component that
-                uses the modified script. You do not need to restart OpenIDM for
-                script modifications to take effect.
-            </para>
-        </section>
-
-        <section xml:id="disabling-file-based-config">
-            <title>Disabling the File-Based Configuration View</title>
-            <para>To control configuration changes to the OpenIDM system, you
-            disable the file-based configuration view and have OpenIDM read its
-            configuration only from the repository. To disable the file-based
-            configuration view, edit the <filename>conf/system.properties</filename>
-            file to uncomment the following line:
-            <literal># openidm.fileinstall.enabled=false</literal>. </para>
-        </section>
+  <section xml:id="disabling-file-based-config">
+   <title>Disabling the File-Based Configuration View</title>
+   <para>
+    To control configuration changes to the OpenIDM system, you disable the
+    file-based configuration view and have OpenIDM read its configuration only
+    from the repository. To disable the file-based configuration view, edit the
+    <filename>conf/system.properties</filename> file to uncomment the following
+    line:
+   </para>
+   <programlisting># openidm.fileinstall.enabled=false</programlisting>
+  </section>
 
         <!-- Section still in progress
         <section xml:id="bootstrapping-config">

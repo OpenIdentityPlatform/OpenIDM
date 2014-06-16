@@ -20,127 +20,127 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2013 ForgeRock AS
+  !      Copyright 2011-2014 ForgeRock AS
   !    
 -->
 <appendix xml:id="appendix-scripting"
-          version="5.0"
-          xml:lang="en"
-          xmlns="http://docbook.org/ns/docbook"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-          xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>Scripting Reference</title>
-    <indexterm>
-        <primary>Scripting</primary>
-    </indexterm>
+  version="5.0"
+  xml:lang="en"
+  xmlns="http://docbook.org/ns/docbook"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+ <title>Scripting Reference</title>
+  <indexterm>
+   <primary>Scripting</primary>
+  </indexterm>
 
-    <para>Scripting allows you to customize various aspects of OpenIDM
-        functionality, for example, by providing custom logic between source
-        and target mappings, defining correlation rules, filters, and triggers,
-        and so on.
-    </para>
+  <para>
+   Scripting allows you to customize various aspects of OpenIDM functionality,
+   for example, by providing custom logic between source and target mappings,
+   defining correlation rules, filters, and triggers, and so on.
+  </para>
 
-    <section xml:id="scripting-configuration">
-        <title>Scripting Configuration</title>
+  <section xml:id="scripting-configuration">
+   <title>Scripting Configuration</title>
 
-        <para>You define scripts using script objects, which can either include the
-            code directly in the configuration, or call an external file that contains
-            the script.
-        </para>
-        <para>
-            Custom scripts should be placed in the <literal>script/</literal> folder
-            for your project, for example <literal>path/to/openidm/script/</literal>.
-            Do not modify or remove the script files located in
-            <literal>path/to/openidm/bin/defaults/script/</literal>. This folder
-            contains the default scripts that are required to run specific services.
-            Scripts in this folder are not guaranteed to remain constant between
-            product releases.
-        </para>
+   <para>
+    You define scripts using script objects, which can either include the code
+    directly in the configuration, or call an external file that contains the
+    script.
+   </para>
+   <para>
+    Custom scripts should be placed in the <literal>script/</literal> folder for
+    your project, for example <literal>path/to/openidm/script/</literal>. Do not
+    modify or remove the script files located in
+    <literal>path/to/openidm/bin/defaults/script/</literal>. This folder
+    contains the default scripts that are required to run specific services.
+    Scripts in this folder are not guaranteed to remain constant between product
+    releases.
+   </para>
 
-        <programlisting language="javascript">
+   <programlisting language="javascript">
 {
   "type" : "text/javascript",
   "source": <replaceable>string</replaceable>
-}
-        </programlisting>
+}  </programlisting>
 
-        <para>or</para>
+   <para>or</para>
 
-        <programlisting language="javascript">
+   <programlisting language="javascript">
 {
   "type" : "text/javascript",
   "file" : <replaceable>file location</replaceable>
-}
-        </programlisting>
+}  </programlisting>
 
-        <variablelist>
-         <varlistentry>
-          <term>type</term>
-          <listitem>
-           <para>string, required</para>
-           <para>
-            Specifies the type of script to be executed. Supported types include
-            <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
-           </para>
-          </listitem>
-         </varlistentry>
-            <varlistentry>
-                <term>source</term>
-                <listitem>
-                    <para>string, required if file is not specified</para>
-                    <para>Specifies the source code of the script to be executed.</para>
-                </listitem>
-            </varlistentry>
-            <varlistentry>
-                <term>file</term>
-                <listitem>
-                    <para>string, required if source is not specified</para>
-                    <para>Specifies the file containing the source code of the script to
-                        execute.
-                    </para>
-                </listitem>
-            </varlistentry>
-        </variablelist>
-    </section>
+   <variablelist>
+    <varlistentry>
+     <term>type</term>
+     <listitem>
+      <para>string, required</para>
+      <para>
+       Specifies the type of script to be executed. Supported types include
+       <literal>"text/javascript"</literal> and <literal>"groovy"</literal>.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>source</term>
+     <listitem>
+      <para>string, required if file is not specified</para>
+      <para>
+       Specifies the source code of the script to be executed.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>file</term>
+     <listitem>
+      <para>string, required if source is not specified</para>
+      <para>
+       Specifies the file containing the source code of the script to execute.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
 
-    <section xml:id="scripting-example">
-        <title>Examples</title>
-
-        <para>The following example (included in the <filename>sync.json</filename>
-            file) returns <literal>true</literal> if the <literal>employeeType</literal>
-            is equal to <literal>external</literal>, otherwise returns
-            <literal>false</literal>. This script can be useful during reconciliation to
-            establish whether the source object should be a part of the reconciliation,
-            or ignored.
-        </para>
-
-        <programlisting language="javascript">
+  <section xml:id="scripting-example">
+   <title>Examples</title>
+   <para>
+    The following example (included in the <filename>sync.json</filename> file)
+    returns <literal>true</literal> if the <literal>employeeType</literal> is
+    equal to <literal>external</literal>, otherwise returns
+    <literal>false</literal>. This script can be useful during reconciliation to
+    establish whether the source object should be a part of the reconciliation,
+    or ignored.
+   </para>
+   <programlisting language="javascript">
 "validTarget": {
    "type" : "text/javascript",
    "source": "target.employeeType == 'external'"
-}
-        </programlisting>
+}  </programlisting>
 
-        <para>The following example (included in the <filename>sync.json</filename>
-            file) sets the <literal>__PASSWORD__</literal> attribute to
-            <literal>defaultpwd</literal> when OpenIDM creates a target object.
-        </para>
+   <para>
+    The following example (included in the <filename>sync.json</filename> file)
+    sets the <literal>__PASSWORD__</literal> attribute to
+    <literal>defaultpwd</literal> when OpenIDM creates a target object.
+   </para>
 
-        <programlisting language="javascript">
+   <programlisting language="javascript">
 "onCreate" : {
   "type" : "text/javascript",
   "source": "target.__PASSWORD__ = 'defaultpwd'"
-}
-        </programlisting>
+}  </programlisting>
 
-        <para>The following example (included in the <filename>router.json</filename>
-            file) shows a trigger to create Solaris home directories using a script.
-            The script is located in a file,
-            <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.
-        </para>
+   <para>
+    The following example (included in the <filename>router.json</filename>
+    file) shows a trigger to create Solaris home directories using a script. The
+    script is located in a file,
+    <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.
+   </para>
 
-        <programlisting language="javascript">
+   <programlisting language="javascript">
 {
   "filters" : [ {
     "pattern" : "^system/solaris/account$",
@@ -150,30 +150,29 @@
       "file" : "script/createUnixHomeDir.js"
     }
   } ]
-}
-        </programlisting>
-    </section>
+}   </programlisting>
+   </section>
 
-    <section xml:id="function-ref">
-        <title>Function Reference</title>
-        <indexterm>
-            <primary>Objects</primary>
-            <secondary>Script access</secondary>
-        </indexterm>
-        <indexterm>
-            <primary>Scripting</primary>
-            <secondary>Functions</secondary>
-        </indexterm>
-
-        <para>Functions (access to managed objects, system objects, and
-            configuration objects) within OpenIDM are accessible to scripts
-            via the <literal>openidm</literal> object, which is included in
-            the top-level scope provided to each script.
-        </para>
-
-        <para>OpenIDM also provides a <literal>logger</literal> object to
-            access SLF4J facilities. The following code shows an example:
-        </para>
+   <section xml:id="function-ref">
+    <title>Function Reference</title>
+    <indexterm>
+     <primary>Objects</primary>
+     <secondary>Script access</secondary>
+    </indexterm>
+    <indexterm>
+     <primary>Scripting</primary>
+     <secondary>Functions</secondary>
+    </indexterm>
+    <para>
+     Functions (access to managed objects, system objects, and configuration
+     objects) within OpenIDM are accessible to scripts via the
+     <literal>openidm</literal> object, which is included in the top-level scope
+     provided to each script.
+    </para>
+    <para>
+     OpenIDM also provides a <literal>logger</literal> object to access SLF4J
+     facilities. The following code shows an example:
+    </para>
 
         <programlisting language="javascript">
 logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
@@ -185,17 +184,31 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
         </para>
 
         <section xml:id="function-create">
-            <title>openidm.create(id, value)</title>
+            <title>openidm.create(container, id, value)</title>
 
             <para>This function creates a new resource object.</para>
 
             <variablelist>
                 <title>Parameters</title>
                 <varlistentry>
+                    <term>container</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>
+                         The resource container in which the object will be
+                         created, for example, <literal>managed/user</literal>.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>id</term>
                     <listitem>
                         <para>string</para>
-                        <para>The identifier of the object to be created.</para>
+                        <para>
+                         The identifier of the object to be created, if the
+                         client is supplying the ID. If the server should
+                         generate an ID, pass null here.
+                         </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>

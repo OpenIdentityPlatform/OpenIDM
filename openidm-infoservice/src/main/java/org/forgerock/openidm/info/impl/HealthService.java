@@ -129,52 +129,71 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
 
     /**
      * Bundles and bundle fragments required to be started or resolved
-     * respectively for the system to consider itself READY
+     * respectively for the system to consider itself READY. Required bundles
+     * may be expressed as a regex, for example:
+     * 
+     * "org.forgerock.openidm.repo-(orientdb|jdbc)"
      */
     private List<String> requiredBundles = new ArrayList<String>();
 
     /* @formatter:off */
-    private String[] defaultRequiredBundles = new String[] {
+    private final String[] defaultRequiredBundles = new String[] {
+        //ICF Bundles
         "org.forgerock.openicf.framework.connector-framework",
         "org.forgerock.openicf.framework.connector-framework-internal",
         "org.forgerock.openicf.framework.connector-framework-osgi",
+        
+        // ForgeRock Commons Bundles
+        "org.forgerock.commons.forgerock-util",
+        "org.forgerock.commons.forgerock-jaspi-runtime",
+        "org.forgerock.commons.forgerock-auth-filter-common",
+        "org.forgerock.commons.forgerock-jaspi-.*-module",
+        "org.forgerock.commons.i18n-core",
+        "org.forgerock.commons.i18n-slf4j",
+        "org.forgerock.commons.json-crypto",
+        "org.forgerock.commons.json-fluent",
+        "org.forgerock.commons.json-patch",
+        "org.forgerock.commons.json-resource",
+        "org.forgerock.commons.json-resource-servlet",
+        "org.forgerock.commons.json-schema",
+        "org.forgerock.commons.json-web-token",
+        "org.forgerock.commons.script-common",
+        "org.forgerock.commons.script-javascript",
+        
+        // OpenIDM Bundles
+        "org.forgerock.openidm.api-servlet",
         "org.forgerock.openidm.audit",
+        "org.forgerock.openidm.authnfilter",
+        "org.forgerock.openidm.cluster",
+        "org.forgerock.openidm.config",
         "org.forgerock.openidm.core",
+        "org.forgerock.openidm.crypto",
+        "org.forgerock.openidm.customendpoint",
         "org.forgerock.openidm.enhanced-config",
         "org.forgerock.openidm.external-email",
         "org.forgerock.openidm.external-rest",
-        "org.forgerock.openidm.authnfilter",
-        "org.forgerock.openidm.filter",
         "org.forgerock.openidm.httpcontext",
         "org.forgerock.openidm.infoservice",
+        "org.forgerock.openidm.jetty-fragment",
         "org.forgerock.openidm.policy",
         "org.forgerock.openidm.provisioner",
         "org.forgerock.openidm.provisioner-openicf",
-        "org.forgerock.openidm.repo",
-        "org.forgerock.openidm.restlet",
-        "org.forgerock.openidm.smartevent",
-        "org.forgerock.openidm.system",
-        "org.forgerock.openidm.ui",
-        "org.forgerock.openidm.util",
-        "org.forgerock.commons.org.forgerock.json.resource",
-        "org.forgerock.commons.org.forgerock.json.resource.restlet",
-        "org.forgerock.commons.org.forgerock.restlet",
-        "org.forgerock.commons.org.forgerock.util",
-        "org.forgerock.openidm.security-jetty",
-        "org.forgerock.openidm.jetty-fragment",
         "org.forgerock.openidm.quartz-fragment",
+        "org.forgerock.openidm.repo",
+        "org.forgerock.openidm.repo-(orientdb|jdbc)",
+        "org.forgerock.openidm.router",
         "org.forgerock.openidm.scheduler",
-        "org.ops4j.pax.web.pax-web-jetty-bundle",
-        "org.forgerock.openidm.repo-jdbc",
-        "org.forgerock.openidm.repo-orientdb",
-        "org.forgerock.openidm.config.enhanced",
-        "org.forgerock.openidm.crypto",
-        "org.forgerock.openidm.cluster"
-        // For now, default to not check for the workflow engine
-        //"org.activiti.engine",
-        //"org.activiti.osgi",
-        //"org.forgerock.openidm.workflow-activiti",
-        //"UserApplicationAcceptance.bar"
+        "org.forgerock.openidm.security",
+        "org.forgerock.openidm.security-jetty",
+        "org.forgerock.openidm.servlet",
+        "org.forgerock.openidm.servlet-registrator",
+        "org.forgerock.openidm.smartevent",
+        "org.forgerock.openidm.script",
+        "org.forgerock.openidm.system",
+        "org.forgerock.openidm.util",
+        
+        // 3rd Party Bundles
+        "org.ops4j.pax.web.pax-web-jetty-bundle"
     };
     /* @formatter:on */
 
@@ -185,33 +204,35 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
     private long serviceStartMax = 10000;
     /**
      * Services required to be registered for the system to consider itself
-     * READY
+     * READY. Required services may be expressed as a regex, for example:
+     * 
+     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
      */
     private List<String> requiredServices = new ArrayList<String>();
     /* @formatter:off */
-    private String[] defaultRequiredServices = new String[] {
-            //"org.forgerock.openidm.config.enhanced",
+    private final String[] defaultRequiredServices = new String[] {
+            "org.forgerock.openidm.api-servlet",
+            "org.forgerock.openidm.audit",
+            "org.forgerock.openidm.authentication",
+            "org.forgerock.openidm.bootrepo.(orientdb|jdbc)",
+            "org.forgerock.openidm.cluster",
+            "org.forgerock.openidm.config.enhanced",
+            "org.forgerock.openidm.crypto",
+            "org.forgerock.openidm.external.rest",
+            "org.forgerock.openidm.internal",
+            "org.forgerock.openidm.managed",
+            "org.forgerock.openidm.policy",            
             "org.forgerock.openidm.provisioner",
             "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
-            "org.forgerock.openidm.external.rest",
-            "org.forgerock.openidm.audit",
-            "org.forgerock.openidm.policy",
-            "org.forgerock.openidm.managed",
-            "org.forgerock.openidm.script",
-            "org.forgerock.openidm.crypto",
-            //"org.forgerock.openidm.recon",
-//TODO: add once committed "org.forgerock.openidm.info",
+            "org.forgerock.openidm.repo.(orientdb|jdbc)",
             "org.forgerock.openidm.router",
-            "org.forgerock.openidm.scheduler",
-            //"org.forgerock.openidm.taskscanner",
-            "org.forgerock.openidm.cluster"
-            //"org.forgerock.openidm.bootrepo.orientdb",
-            //"org.forgerock.openidm.bootrepo.jdbc",
-            //"org.forgerock.openidm.workflow.activiti.engine",
-            //"org.forgerock.openidm.workflow"
+            "org.forgerock.openidm.scheduler",            
+            "org.forgerock.openidm.script",
+            "org.forgerock.openidm.security",
+            "org.forgerock.openidm.servletfilter.registrator"
     };
     /* @formatter:on */
-
+    
     @Activate
     protected void activate(final ComponentContext context) {
         this.context = context;
@@ -449,23 +470,28 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         // Check if the required bundles are started or bundle fragments
         // resolved
         Bundle[] bundles = context.getBundleContext().getBundles();
+        List<String> missingBundles = new ArrayList<String>(requiredBundles);
         List<String> bundleFailures = new ArrayList<String>();
         List<String> fragmentFailures = new ArrayList<String>();
-        for (Bundle bundle : bundles) {
-            if (requiredBundles.contains(bundle.getSymbolicName())) {
-                if (isFragment(bundle)) {
-                    if (bundle.getState() != Bundle.RESOLVED) {
-                        fragmentFailures.add(bundle.getSymbolicName());
+        for (String req : requiredBundles) {
+            for (Bundle bundle : bundles) {
+                String symbolicName = bundle.getSymbolicName();
+                if (symbolicName != null && symbolicName.matches(req)) {
+                    if (isFragment(bundle)) {
+                        if (bundle.getState() != Bundle.RESOLVED) {
+                            fragmentFailures.add(bundle.getSymbolicName());
+                        }
+                    } else {
+                        if (bundle.getState() != Bundle.ACTIVE) {
+                            bundleFailures.add(bundle.getSymbolicName());
+                        }
                     }
-                } else {
-                    if (bundle.getState() != Bundle.ACTIVE) {
-                        bundleFailures.add(bundle.getSymbolicName());
-                    }
+                    missingBundles.remove(req);
                 }
             }
         }
 
-        // Check if the required services are present
+        // Get currently registered services
         ServiceReference[] refs = null;
         try {
             refs = context.getBundleContext().getAllServiceReferences(null, null);
@@ -473,26 +499,27 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             // Since we are not passing a filter this should not happen
             logger.debug("Unexpected failure in getting service references", e);
         }
-        Map<String, ServiceReference> pidToRef = new HashMap<String, ServiceReference>();
-        for (ServiceReference ref : refs) {
-            String pid = (String) ref.getProperty(Constants.SERVICE_PID);
-            if (pid != null) {
-                pidToRef.put(pid, ref);
-            }
-        }
-        List<String> missingServices = new ArrayList<String>();
+
+        // Scan the registered services for matches to our list of
+        // required services.  Required services can be expressed as a regex,
+        // for example: "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+        List<String> missingServices = new ArrayList<String>(requiredServices);
         for (String req : requiredServices) {
-            if (!pidToRef.containsKey(req)) {
-                missingServices.add(req);
+            for (ServiceReference ref : refs){
+                String pid = (String)ref.getProperty(Constants.SERVICE_PID);
+                if (pid !=null && pid.matches(req)) {
+                    missingServices.remove(req);
+                    break;
+                }
             }
         }
 
         // Ensure state is up to date
         AppState updatedAppState = null;
         String updatedShortDesc = null;
-        if (bundleFailures.size() > 0 || fragmentFailures.size() > 0) {
+        if (missingBundles.size() > 0 || bundleFailures.size() > 0 || fragmentFailures.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
-            updatedShortDesc = "Not all modules started " + bundleFailures + " " + fragmentFailures;
+            updatedShortDesc = "Not all modules started " + missingBundles + " " + bundleFailures + " " + fragmentFailures;
         } else if (missingServices.size() > 0) {
             updatedAppState = AppState.ACTIVE_NOT_READY;
             updatedShortDesc = "Required services not all started " + missingServices;
@@ -561,7 +588,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             }
         }
     }
-
+ 
     /**
      * @param bundle
      *            the bundle / bundle fragment to check
@@ -691,5 +718,5 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         }
         return true;
     }
-
-}
+    
+        }

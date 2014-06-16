@@ -58,7 +58,7 @@ public class OpenIDMResolverFactory implements ResolverFactory {
         ScriptRegistry scriptRegistry = session.getOpenIDMScriptRegistry();
         JsonValue openidmContext = (JsonValue) variableScope.getVariable(ActivitiConstants.OPENIDM_CONTEXT);
         Bindings bindings = null;
-        ScriptTaskActivityBehavior behaviour = (ScriptTaskActivityBehavior) ((ExecutionEntity) variableScope).getProcessInstance().getActivity().getActivityBehavior();
+        ScriptTaskActivityBehavior behaviour = (ScriptTaskActivityBehavior) ((ExecutionEntity) variableScope).getActivity().getActivityBehavior();
         try {
             Class cls;
             String language;

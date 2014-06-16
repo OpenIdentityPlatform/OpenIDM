@@ -75,18 +75,18 @@ To try the sample, follow these steps.
 
     var params = {
         //UPDATE THESE VALUES
-        _from : "openidm@example.com",
-        _to : "idmadmin1@example.com",
-        _cc : "idmadmin2@example.com,idmadmin3@example.com",
-        _subject : "Recon stats for " + global.reconName,
-        _type : "text/html"
+        from : "openidm@example.com",
+        to : "idmadmin1@example.com",
+        cc : "idmadmin2@example.com,idmadmin3@example.com",
+        subject : "Recon stats for " + global.reconName,
+        type : "text/html"
     }
 
     3. Start OpenIDM with the configuration for sample 5b.
     $ cd /path/to/openidm
     $ ./startup.sh -p samples/sample5b
     When you start OpenIDM, it creates data in the new external resource file
-    that represents an AD directory, samples/sample5/data/xml_AD_Data.xml.
+    that represents an AD directory, samples/sample5b/data/xml_AD_Data.xml.
     The new file is empty until you run reconciliation.
 
     4. Run reconciliation.

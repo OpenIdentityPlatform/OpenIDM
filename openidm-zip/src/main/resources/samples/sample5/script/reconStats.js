@@ -23,11 +23,11 @@
 
 var params = {
         //UPDATE THESE VALUES
-        _from : "openidm@example.com",
-        _to : "idmadmin1@example.com",
-        _cc : "idmadmin2@example.com,idmadmin3@example.com",
-        _subject : "Recon stats for " + global.reconName,
-        _type : "text/html"
+        from : "openidm@example.com",
+        to : "idmadmin1@example.com",
+        cc : "idmadmin2@example.com,idmadmin3@example.com",
+        subject : "Recon stats for " + global.reconName,
+        type : "text/html"
     },
     template,
     Handlebars;

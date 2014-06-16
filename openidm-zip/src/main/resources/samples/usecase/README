@@ -61,10 +61,10 @@ Usecase 2 - New user onboarding
         samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml
 
         Original:
-        emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
-                    _subject : 'Use Case Test Notification', _type : 'text/plain', 
-                    _body : 'The requested user ' + userName + ' was successfully created']
-        Change the _from and _to fields to contain valid email addresses.
+        emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com', 
+                    subject : 'Use Case Test Notification', type : 'text/plain', 
+                    body : 'The requested user ' + userName + ' was successfully created']
+        Change the from and to fields to contain valid email addresses.
     
     1. Start OpenIDM with the configuration for usecase2.
 
@@ -166,9 +166,9 @@ Usecase 3 - User access request
         samples/usecase/usecase3/workflow/accessRequest.bpmn20.xml
 
         Original:
-        emailParams = [_from : 'usecasetest@forgerock.com', _to : 'notification@example.com', 
-                    _subject : 'Use Case Test Notification', _type : 'text/plain', _body : 'The access request was accepted']
-        Change the _from and _to fields to contain valid email addresses.
+        emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com', 
+                    subject : 'Use Case Test Notification', type : 'text/plain', body : 'The access request was accepted']
+        Change the from and to fields to contain valid email addresses.
         Note that there are 2 occurences of the emailParams, change both.
     
     1. Start OpenIDM with the configuration for usecase3.
