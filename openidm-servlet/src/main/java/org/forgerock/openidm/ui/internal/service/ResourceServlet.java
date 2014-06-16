@@ -36,6 +36,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Reference;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -58,12 +59,12 @@ import org.slf4j.LoggerFactory;
  * @author laszlo
  * @author aegloff
  * @author brmiller
+ * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.ui.context", 
         immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
-public final class ResourceServlet
-        extends HttpServlet {
+public final class ResourceServlet extends HttpServlet {
     final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
 
     /** config parameter keys */
@@ -88,93 +89,20 @@ public final class ResourceServlet
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         logger.info("Activating resource servlet with configuration {}", context.getProperties());
-        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);
-
-        if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
-            logger.info("UI is disabled - not registering UI servlet");
-            return;
-        }
-        else if (config.get(CONFIG_CONTEXT_ROOT) == null || config.get(CONFIG_CONTEXT_ROOT).isNull()) {
-            logger.info("UI does not specify contextRoot - unable to register servlet");
-            return;
-        }
-        else if (config.get(CONFIG_BUNDLE) == null
-                || config.get(CONFIG_BUNDLE).isNull()
-                || !config.get(CONFIG_BUNDLE).isMap()
-                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME) == null
-                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME).isNull()) {
-            logger.info("UI does not specify bundle name - unable to register servlet");
-            return;
-        }
-        else if (config.get(CONFIG_BUNDLE) == null
-                || config.get(CONFIG_BUNDLE).isNull()
-                || !config.get(CONFIG_BUNDLE).isMap()
-                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
-                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
-            logger.info("UI does not specify bundle resourceDir - unable to register servlet");
-            return;
-        }
-
-        bundleName = config.get(CONFIG_BUNDLE).get(CONFIG_NAME).asString();
-        resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
-        contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
-
-        if (bundleName != null) {
-            for (Bundle aBundle : context.getBundleContext().getBundles()) {
-                if (bundleName.equals(aBundle.getSymbolicName())) {
-                    this.bundle = aBundle;
-                    break;
-                }
-            }
-        }
-
-        if (bundle == null) {
-            logger.info("Could not find bundle " + bundleName+ " (not loaded yet?) - will wait for bundle-start");
-        }
-
-        // handle bundle-start events to associate bundle to this ResourceServlet instance;
-        // Felix's filesystem-installer may load the filesystem bundles after this servlet
-        // instance is activated
-        bundleListener = new BundleListener() {
-            public void bundleChanged(BundleEvent event) {
-                if (event == null) {
-                    logger.debug("BundleEvent is null for bundle {}", bundleName);
-                    return;
-                }
-                Bundle bundle = event.getBundle();
-                if (bundle != null && bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(bundleName)) {
-                    if (event.getType() == BundleEvent.STARTED) {
-                        ResourceServlet.this.bundle = bundle;
-                        logger.info("Bundle " + bundleName + " associated with servlet instance");
-                    } else if (event.getType() == BundleEvent.STOPPED) {
-                        ResourceServlet.this.bundle = null;
-                        logger.info("Bundle " + bundleName + " stopped; disassociated with servlet instance");
-                    }
-                }
-            }
-        };
-
-        context.getBundleContext().addBundleListener(bundleListener);
-
-        // TODO rework this into an extension config when we support serving extensions from other locations
-        extFolders = new ArrayList<String>();
-        extFolders.add("/css/");
-        extFolders.add("/images/");
-        extFolders.add("/locales/");
-        extFolders.add("/templates/");
-
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
-        logger.debug("Registered UI servlet at {}", contextRoot);
+        init(context);
+    }
+    
+    @Modified
+    protected void modified(ComponentContext context) throws ServletException, NamespaceException {
+        logger.info("Modifying resource servlet with configuration {}", context.getProperties());
+        clear();
+        init(context);
     }
     
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        if (bundleListener != null) {
-            bundle.getBundleContext().removeBundleListener(bundleListener);
-        }
-        webContainer.unregister(contextRoot);
-        logger.debug("Unregistered UI servlet at {}", contextRoot);
+        logger.info("Deactivating resource servlet with configuration {}", context.getProperties());
+        clear();
     }
 
     @Override
@@ -227,6 +155,104 @@ public final class ResourceServlet
         }
     }
 
+    /**
+     * Initializes the servlet and registers it with the WebContainer.
+     * 
+     * @param context the ComponentContext containing the configuration
+     * @throws ServletException
+     * @throws NamespaceException
+     */
+    private void init(ComponentContext context) throws ServletException, NamespaceException {
+        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);
+        
+        if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
+            logger.info("UI is disabled - not registering UI servlet");
+            return;
+        }
+        else if (config.get(CONFIG_CONTEXT_ROOT) == null || config.get(CONFIG_CONTEXT_ROOT).isNull()) {
+            logger.info("UI does not specify contextRoot - unable to register servlet");
+            return;
+        }
+        else if (config.get(CONFIG_BUNDLE) == null
+                || config.get(CONFIG_BUNDLE).isNull()
+                || !config.get(CONFIG_BUNDLE).isMap()
+                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME) == null
+                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME).isNull()) {
+            logger.info("UI does not specify bundle name - unable to register servlet");
+            return;
+        }
+        else if (config.get(CONFIG_BUNDLE) == null
+                || config.get(CONFIG_BUNDLE).isNull()
+                || !config.get(CONFIG_BUNDLE).isMap()
+                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
+                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
+            logger.info("UI does not specify bundle resourceDir - unable to register servlet");
+            return;
+        }
+
+        bundleName = config.get(CONFIG_BUNDLE).get(CONFIG_NAME).asString();
+        resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
+        contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
+
+        if (bundleName != null) {
+            for (Bundle aBundle : context.getBundleContext().getBundles()) {
+                if (bundleName.equals(aBundle.getSymbolicName())) {
+                    this.bundle = aBundle;
+                    break;
+                }
+            }
+        }
+        
+        if (bundle == null) {
+            logger.info("Could not find bundle " + bundleName+ " (not loaded yet?) - will wait for bundle-start");
+        }
+
+        // handle bundle-start events to associate bundle to this ResourceServlet instance;
+        // Felix's filesystem-installer may load the filesystem bundles after this servlet
+        // instance is activated
+        bundleListener = new BundleListener() {
+            public void bundleChanged(BundleEvent event) {
+                if (event == null) {
+                    logger.debug("BundleEvent is null for bundle {}", bundleName);
+                    return;
+                }
+                Bundle bundle = event.getBundle();
+                if (bundle != null && bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(bundleName)) {
+                    if (event.getType() == BundleEvent.STARTED) {
+                        ResourceServlet.this.bundle = bundle;
+                        logger.info("Bundle " + bundleName + " associated with servlet instance");
+                    } else if (event.getType() == BundleEvent.STOPPED) {
+                        ResourceServlet.this.bundle = null;
+                        logger.info("Bundle " + bundleName + " stopped; disassociated with servlet instance");
+                    }
+                }
+            }
+        };
+
+        context.getBundleContext().addBundleListener(bundleListener);
+
+        extFolders = new ArrayList<String>();
+        extFolders.add("/css/");
+        extFolders.add("/images/");
+        extFolders.add("/locales/");
+        extFolders.add("/templates/");
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
+        logger.debug("Registered UI servlet at {}", contextRoot);
+    }
+    
+    /**
+     * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
+     */
+    private void clear() {
+        if (bundleListener != null) {
+            bundle.getBundleContext().removeBundleListener(bundleListener);
+        }
+        webContainer.unregister(contextRoot);
+        logger.debug("Unregistered UI servlet at {}", contextRoot);
+    }
+    
     private void handle(HttpServletRequest req, HttpServletResponse res, URL url, String resName)
             throws IOException {
         String contentType = getServletContext().getMimeType(resName);

@@ -172,20 +172,37 @@ public class ObjectClassInfoHelper {
        return null;
     }
 
-    public Set<Attribute> getCreateAttributes(final CreateRequest request,
-            final CryptoService cryptoService) throws ResourceException {
-        JsonValue content = request.getContent().required().expect(Map.class);
+    /**
+     * Get the resourceId from a CreateRequest
+     * @param request CreateRequest
+     * @return resourceId to be used for creating the object
+     */
+    public String getCreateNameValue(final CreateRequest request) {
         String nameValue = request.getNewResourceId();
 
         if (null == nameValue) {
-            JsonValue o = content.get(nameAttribute);
+            JsonValue o = request.getContent().get(nameAttribute);
             if (o.isNull()) {
-                o = content.get(Resource.FIELD_CONTENT_ID);
+                o = request.getContent().get(Resource.FIELD_CONTENT_ID);
             }
             if (o.isString()) {
                 nameValue = o.asString();
             }
         }
+        return nameValue;
+    }
+
+    /**
+     * Get the attributes are that are writable on a create
+     * @param request CreateRequest
+     * @param cryptoService encryption and decryption service
+     * @return Set of attributes to that are writable on create
+     * @throws BadRequestException when attribute is missing or has a null value
+     */
+    public Set<Attribute> getCreateAttributes(final CreateRequest request,
+            final CryptoService cryptoService) throws ResourceException {
+        JsonValue content = request.getContent().required().expect(Map.class);
+        String nameValue = getCreateNameValue(request);
 
         if (StringUtils.isBlank(nameValue)) {
             throw new BadRequestException("Required '_id' or '" + nameAttribute

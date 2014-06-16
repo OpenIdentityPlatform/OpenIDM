@@ -523,7 +523,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             throw exception;
         } catch (AlreadyExistsException e) {
-            message = MessageFormat.format("System object {0} already exists", request.getResourceName());
+            message = MessageFormat.format("System object {0} already exists", resourceId);
             handler.handleError(new ConflictException(message, exception));
         } catch (ConfigurationException e) {
             message = MessageFormat.format("Operation {0} failed with ConfigurationException on system object: {1}",
@@ -572,7 +572,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     request.getRequestType().toString(), resourceId);
             handler.handleError(new InternalServerErrorException(message, exception));
         } catch (InvalidAttributeValueException e) {
-            message = MessageFormat.format("Attribute value conflicts with the attribute's schema definition on " +
+            message = MessageFormat.format("Attribute value conflicts with the attribute''s schema definition on " +
                     "operation {0} for system object: {1}",
                     request.getRequestType().toString(), resourceId);
             handler.handleError(new BadRequestException(message, exception));
@@ -1341,7 +1341,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, request.getNewResourceId(), request.getContent(), null, handler, activityLogger);
+                handleConnectorException(context, request, e, objectClassInfoHelper.getCreateNameValue(request), request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
