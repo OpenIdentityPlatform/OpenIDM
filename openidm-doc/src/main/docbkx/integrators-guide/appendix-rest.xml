@@ -1024,7 +1024,7 @@ $ <userinput>curl \
  --request POST \
  --data '[{
   "operation":"replace",
-  "field":"telephoneNumber",
+  "field":"\telephoneNumber",
   "value":"1234567"
   }]' \
   "https://localhost:8443/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=<replaceable>id</replaceable>"</userinput>
