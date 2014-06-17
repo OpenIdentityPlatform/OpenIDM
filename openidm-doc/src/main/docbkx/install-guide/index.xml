@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book [
+<!ENTITY bookname "install-guide">
+]>
 <!--
   ! CCPL HEADER START
   !
@@ -93,15 +96,14 @@
  </info>
 
  <toc />
- 
+
  <xinclude:include href="preface.xml" />
- 
  <xinclude:include href='chap-install.xml' />
  <xinclude:include href='chap-sample.xml' />
  <xinclude:include href='chap-samples.xml' />
  <xinclude:include href='chap-repository.xml' />
  <xinclude:include href='chap-uninstall.xml' />
- <!--<xinclude:include href='chap-upgrade.xml' /> -->
+ <xinclude:include href='chap-upgrade.xml' />
  <xinclude:include href='../shared/glossary.xml' />
 
  <index />

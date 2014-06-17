@@ -233,7 +233,7 @@ $ ./startup.sh -p samples/sample2</screen>
 
    <para>Run reconciliation over the REST interface.</para>
 
-   <screen width="91"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -241,7 +241,7 @@ $ ./startup.sh -p samples/sample2</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns an "_id" object.</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
    <note>
     <para>
@@ -259,8 +259,7 @@ $ ./startup.sh -p samples/sample2</screen>
    <para>With the configuration of sample 2, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
    objects by ID, run a query over the REST interface.</para>
-   <screen>
-$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -278,12 +277,12 @@ $ curl \
 {
     "result": [
       {
-        "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d"
-        "_rev": "0",
+        "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d",
+        "_rev": "0"
       },
       {
-        "_id": "ae0aed26-2a9c-43e3-a6f0-ca707c9c6455"
-        "_rev": "0",
+        "_id": "ae0aed26-2a9c-43e3-a6f0-ca707c9c6455",
+        "_rev": "0"
       }
     ],
     "resultCount": 2,
@@ -292,10 +291,11 @@ $ curl \
  }</programlisting>
 
    <para>
-    You should now be able to review reconciled users in the UI. Connect to
-    an appropriate URI such as <literal>https://localhost:8443/openidmui</literal>,
-    log in as the <literal>openidm-admin</literal> user, and navigate to the
-    Users tab. Select the desired user for current profile information as shown.
+    You should now be able to review reconciled users in the UI. Point your
+    browser to <literal>https://localhost:8443/openidmui</literal>, log in as
+    the <literal>openidm-admin</literal> user (with password
+    <literal>openidm-admin</literal>), and navigate to the Users tab. Select the
+    user whose profile information you want to see.
    </para>
 
    <mediaobject>
@@ -305,19 +305,15 @@ $ curl \
     </imageobject>
    </mediaobject>
 
-   <para>Alternatively, you can still retrieve individual user objects by ID, as
-    shown here.</para>
+   <para>Alternatively, you can retrieve individual user objects by ID, as shown
+    here.</para>
 
-   <screen width="83"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/managed/user/53fbf0c5-aa37-4845-a4b3-92a21810a36d"</screen>
-
-   <para>Read <filename>openidm/samples/sample2/conf/sync.json</filename> and
-   <filename>openidm/samples/sample2/conf/provisioner.openicf-ldap.json</filename> 
-   to understand the layout of the user object in the repository.</para>
   </section>
  </section>
  
@@ -362,7 +358,7 @@ $ ./startup.sh -p samples/sample2b</screen>
 
    <para>Run reconciliation over the REST interface.</para>
 
-   <screen width="96"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -370,7 +366,7 @@ $ ./startup.sh -p samples/sample2b</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns an "_id" object.</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
    <para>With the configuration of sample 2b, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -413,7 +409,7 @@ $ curl \
     Alternatively, you can make a commons REST call to get a specific user
     object by ID.</para>
 
-   <screen width="83"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -423,30 +419,40 @@ $ curl \
    <para>Test the second mapping by creating a user in the OpenIDM
    repository. On UNIX:</para>
  
-   <screen width="100">$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
- --data '{"mail":"fdoe@example.com","sn":"Doe","telephoneNumber","555-1234",
- "userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe",
- "displayName":"fdoe"}' \
  --request POST \
- "http://localhost:8443/openidm/managed/user?_action=create"</screen>
+ --data '{
+    "mail":"fdoe@example.com",
+    "sn":"Doe",
+    "telephoneNumber",
+    "555-1234",
+    "userName":"fdoe",
+    "givenName":"Felicitas",
+    "description":"Felicitas Doe",
+    "displayName":"fdoe"}' \
+ "https://localhost:8443/openidm/managed/user?_action=create"</screen>
  
  <para>On Windows:</para>
  
- <screen width="100">$ curl ^
+ <screen>$ curl ^
  --cacert self-signed.crt ^
  --header "X-OpenIDM-Username: openidm-admin" ^
  --header "X-OpenIDM-Password: openidm-admin" ^
  --header "Content-Type: application/json" ^
  --request POST ^
- --data "{\"mail\":\"fdoe@example.com\",\"sn\":\"Doe\",
- \"telephoneNumber"\:\"555-1234\",
- \"userName\":\"fdoe\", \"givenName\":\"Felicitas\",
- \"description\":\"Felicitas Doe\",\"displayName\":\"fdoe\"}" ^
- "http://localhost:8443/openidm/managed/user?_action=create"</screen>
+ --data "{
+  \"mail\":\"fdoe@example.com\",
+  \"sn\":\"Doe\",
+  \"telephoneNumber"\:\"555-1234\",
+  \"userName\":\"fdoe\",
+  \"givenName\":\"Felicitas\",
+  \"description\":\"Felicitas Doe\",
+  \"displayName\":\"fdoe\"}" ^
+ "https://localhost:8443/openidm/managed/user?_action=create"</screen>
 
    <para>By default, automatic synchronization is enabled. This means that
     when you update a managed object, any mappings defined in the
@@ -554,7 +560,7 @@ $ ./startup.sh -p samples/sample2c</screen>
   "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
    </userinput></screen>
 
-   <para>Successful reconciliation returns an "_id" object.</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
    <para>With the configuration of sample 2c, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -587,11 +593,12 @@ $ curl \
     "remainingPagedResults": -1,
  }</programlisting>
 
-   <para>You should now be able to retrieve John Doe's user object in the UI,
+   <para>
+    You should now be able to retrieve John Doe's user object in the UI,
     navigating to the domain for OpenIDM such as
-    <literal>https://localhost:8443/openidmui</literal>. Alternatively, with a
-    bit of trial and error, you can retrieve John Doe's user object at the
-    command line by his ID.</para>
+    <literal>https://localhost:8443/openidmui</literal>. Alternatively, you can
+    retrieve John Doe's user object at the command line by his ID.
+   </para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
@@ -607,7 +614,7 @@ $ curl \
    <para>Now change the user on the OpenIDM side with the following REST
    call (on UNIX):</para>
    
-   <screen width="96"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -616,7 +623,7 @@ $ curl \
  --data '[
     {
       "operation":"replace",
-      "field":"ldapGroups",
+      "field":"/ldapGroups",
       "value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]
     }
  ]' \
@@ -628,7 +635,7 @@ $ curl \
     would look like this:
    </para>
 
-   <screen width="96"><?dbfo pgwide="1"?>$ curl ^
+   <screen>$ curl ^
  --cacert self-signed.crt ^
  --header "X-OpenIDM-Username: openidm-admin" ^
  --header "X-OpenIDM-Password: openidm-admin" ^
@@ -637,7 +644,7 @@ $ curl \
  --data "[
     {
     \"operation\":\"replace\",
-    \"field\":\"ldapGroups\",
+    \"field\":\"\/ldapGroups\",
     \"value\": [\"cn=openidm2,ou=Groups,dc=example,dc=com\"]
     }
  ]" ^
@@ -748,7 +755,7 @@ $ ./startup.sh -p samples/sample2d</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapGroups_managedGroup"</screen>
  
-   <para>Successful reconciliation returns an "_id" object.</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
    <para>With the configuration of sample 2d, OpenIDM creates group objects from
    LDAP in OpenIDM. To list group objects by ID, run a query over the REST interface.</para>
@@ -858,8 +865,7 @@ $ curl \
       <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
       Import the file into MySQL before running the sample.
      </para>
-     <screen width="87"><?dbfo pgwide="1"?>
-      $ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+     <screen>$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
 </userinput>
 Enter password:
 $ </screen>
@@ -871,9 +877,7 @@ $ </screen>
     following command accesses the MySQL prompt:
    </para>
 
-   <screen>
-    $ mysql -u root -p
-   </screen>
+   <screen>$ mysql -u root -p</screen>
 
    <para>
     From the <literal>mysql &gt;</literal> prompt, use the following commands
@@ -881,15 +885,13 @@ $ </screen>
     file:
    </para>
 
-   <screen>
-    mysql &gt; <userinput>use HRDB;</userinput>
+   <screen>mysql &gt; <userinput>use HRDB;</userinput>
     <computeroutput>
 Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
-Database changed
-    </computeroutput>
-    mysql &gt; <userinput>select * from Users</userinput>
+Database changed</computeroutput>
+mysql &gt; <userinput>select * from Users</userinput>
     <computeroutput>
      +----+--------+--------------+-----------+----------+---------------+------...
      | id | uid    | password     | firstname | lastname | fullname      | email...
@@ -936,7 +938,7 @@ Database changed
     <listitem>
      <para>Start OpenIDM with the configuration for sample 3.</para>
      <screen>$ cd /path/to/openidm
-      $ ./startup.sh -p samples/sample3</screen>
+$ ./startup.sh -p samples/sample3</screen>
     </listitem>
    </itemizedlist>
 
@@ -951,7 +953,7 @@ Database changed
     reconciliation with the following command.
    </para>
 
-   <screen width="83"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
 --cacert self-signed.crt \
 --header "X-OpenIDM-Username: openidm-admin" \
 --header "X-OpenIDM-Password: openidm-admin" \
@@ -978,44 +980,44 @@ Database changed
    <programlisting language="javascript">
 {
     "result": [ {
-        "_id": "8366a23d-f6cf-46df-9746-469bf45aafcd"
-        "_rev": "0",
+        "_id": "8366a23d-f6cf-46df-9746-469bf45aafcd",
+        "_rev": "0"
     },
     {
-        "_id": "3f90933b-9397-4897-84d0-03ed8d99f61e"
-        "_rev": "0",
+        "_id": "3f90933b-9397-4897-84d0-03ed8d99f61e",
+        "_rev": "0"
     },
     {
-        "_id": "8fbf759d-bebc-42ed-b321-b69487b4470f"
-        "_rev": "0",
+        "_id": "8fbf759d-bebc-42ed-b321-b69487b4470f",
+        "_rev": "0"
     },
     {
-        "_id": "9592de42-a8ef-4db3-9c6c-7d191e39b084"
-        "_rev": "0",
+        "_id": "9592de42-a8ef-4db3-9c6c-7d191e39b084",
+        "_rev": "0"
     },
     {
-        "_id": "d933441b-684b-446c-a89e-01eca6d21ef3"
-        "_rev": "0",
+        "_id": "d933441b-684b-446c-a89e-01eca6d21ef3",
+        "_rev": "0"
     },
     {
-        "_id": "fd962b71-752a-444b-8492-35bff57bec69"
-        "_rev": "0",
+        "_id": "fd962b71-752a-444b-8492-35bff57bec69",
+        "_rev": "0"
     } ],
     "resultCount": 6,
     "pagedResultsCookie": null,
-    "remainingPagedResults": -1,
+    "remainingPagedResults": -1
 }</programlisting>
 
    <para>
-    Naturally, you can review the users from the UI, navigating to the domain
-    where OpenIDM is installed, with a URI similar to
+    You can review the users from the UI, navigating to the domain where OpenIDM
+    is installed, with a URL similar to
     <literal>https://localhost:8443/openidmui</literal>
    </para>
 
    <para>Alternatively, to view the JSON for one of the users, get the user by
     the value of the <literal>_id</literal>.</para>
 
-   <screen width="83"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1069,9 +1071,7 @@ $ ./startup.sh -p samples/sample4</screen>
     like:
    </para>
 
-   <screen>
-    $ cp /path/to/openidm/samples/sample4/data/xmlConnectorData.xml /tmp/
-   </screen>
+   <screen>$ cp /path/to/openidm/samples/sample4/data/xmlConnectorData.xml /tmp/</screen>
 
    <para>
     The reconciliation command run here uses the information
@@ -1079,7 +1079,7 @@ $ ./startup.sh -p samples/sample4</screen>
     <filename>sample4/data/xmlConnectorData.xml</filename> file.
    </para>
 
-   <screen width="89"><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1823,8 +1823,7 @@ $ ./startup.sh -p samples/sample6</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemAdAccounts_managedUser"</screen>
 
-    <para>The result of a successful reconciliation is an
-    <literal>_id</literal> object, similar to:</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
     <screen>{"_id":"9ece3807-08c3-4ec6-87fb-a6a2d0c71cee"}</screen>
 
@@ -2208,7 +2207,7 @@ $ ./startup.sh -p samples/sample8</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns an "_id" object.</para>
+   <para>Successful reconciliation returns a reconciliation run ID.</para>
 
    <para>Notice the log messages displayed on the OpenIDM (Felix) console.
    The following example omits timestamps and so forth to show only the message
@@ -2279,7 +2278,7 @@ $ ./startup.sh -p samples/sample9</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
          </screen>
-         <para>Successful reconciliation returns an "_id" object.</para>
+         <para>Successful reconciliation returns a reconciliation run ID.</para>
          <para>The reconciliation starts an approval workflow for each ABSENT 
          user. These approval workflows (named <literal>managedUserApproval</literal>) 
          wait for the request to be approved by an administrator.</para>         
