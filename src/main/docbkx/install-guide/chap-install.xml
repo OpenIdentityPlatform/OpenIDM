@@ -425,7 +425,6 @@ $</screen>
      <screen>$ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</screen>
 
      <para>When you first install OpenIDM with an empty repository, no users
@@ -528,7 +527,6 @@ $</screen>
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
- --header "Content-Type: application/json" \
  --request GET \
  https://localhost:8443/openidm/managed/user/joe
      </userinput>
