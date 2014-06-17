@@ -24,6 +24,7 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
@@ -101,12 +102,11 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-            ProcessDefinition processDefinition = processEngine.getRepositoryService().getProcessDefinition(resourceId);
+            ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) processEngine.getRepositoryService().getProcessDefinition(resourceId);
             if (processDefinition != null) {
+                Resource r = convertInstance(processDefinition);
                 processEngine.getRepositoryService().deleteDeployment(processDefinition.getDeploymentId(), false);
-                Map<String, String> result = new HashMap<String, String>(1);
-                result.put("Workflow definition deleted", resourceId);
-                handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
+                handler.handleResult(r);
             } else {
                 handler.handleError(new NotFoundException());
             }
@@ -162,26 +162,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(resourceId);
-            Map value = mapper.convertValue(def, HashMap.class);
-            Resource r = new Resource(def.getId(), null, new JsonValue(value));
-            FormService formService = processEngine.getFormService();
-            StartFormData startFormData = formService.getStartFormData(def.getId());
-            if (def.hasStartFormKey()) {
-                r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
-                ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(def.getDeploymentId(), startFormData.getFormKey());
-                Reader reader = new InputStreamReader(startForm);
-                try {
-                    Scanner s = new Scanner(reader).useDelimiter("\\A");
-                    String formTemplate = s.hasNext() ? s.next() : "";
-                    r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
-                } finally {
-                    reader.close();
-                }
-            }
-            DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) def.getStartFormHandler();
-            List<Map> propertyList = new ArrayList<Map>();
-            addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
-            r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
+            Resource r = convertInstance(def);
             handler.handleResult(r);
         } catch (ActivitiObjectNotFoundException ex) {
             handler.handleError(new NotFoundException(ex.getMessage()));
@@ -253,5 +234,35 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
             entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
             propertyList.add(entry);
         }
+    }
+    
+    /**
+     * Converts a ProcessDefinitionEntity to Resource object
+     * @param processDefinition entity to be converted
+     * @return converted process definition
+     * @throws IOException 
+     */
+    private Resource convertInstance(ProcessDefinitionEntity processDefinition) throws IOException {
+        Map value = mapper.convertValue(processDefinition, HashMap.class);
+        Resource r = new Resource(processDefinition.getId(), null, new JsonValue(value));
+        FormService formService = processEngine.getFormService();
+        StartFormData startFormData = formService.getStartFormData(processDefinition.getId());
+        if (processDefinition.hasStartFormKey()) {
+            r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
+            ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(processDefinition.getDeploymentId(), startFormData.getFormKey());
+            Reader reader = new InputStreamReader(startForm);
+            try {
+                Scanner s = new Scanner(reader).useDelimiter("\\A");
+                String formTemplate = s.hasNext() ? s.next() : "";
+                r.getContent().add(ActivitiConstants.ACTIVITI_FORMGENERATIONTEMPLATE, formTemplate);
+            } finally {
+                reader.close();
+            }
+        }
+        DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) processDefinition.getStartFormHandler();
+        List<Map> propertyList = new ArrayList<Map>();
+        addFormHandlerData(propertyList, startFormHandler.getFormPropertyHandlers());
+        r.getContent().add(ActivitiConstants.FORMPROPERTIES, propertyList);
+        return r;
     }
 }
