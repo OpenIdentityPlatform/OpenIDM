@@ -1,5 +1,0 @@
-{
-    "context": "endpoint/myLinkedAccounts",
-    "type" : "text/javascript",
-    "source" : "require('aggregatedView').fetch(context.security.authorizationId.component + '/' + context.security.authorizationId.id);"
-}
