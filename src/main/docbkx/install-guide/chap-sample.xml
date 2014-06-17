@@ -124,22 +124,21 @@ orientdb&gt; </screen>
   OpenIDM uses <link xlink:href="http://openicf.forgerock.org">OpenICF</link>
   connectors, configured for use with the external resources.</para>
 
-  <para>When objects in one external resource change, OpenIDM determines how
-  the changes affect other objects, and can make the changes as necessary.
-  This sample demonstrates how OpenIDM does this by using
-  <firstterm>reconciliation</firstterm> and
-  <firstterm>synchronization</firstterm>. OpenIDM reconciliation compares
-  objects in one object set to mapped objects in another object set.
-  Reconciliation can work in write mode, where OpenIDM writes changes to
-  affected objects, or in report mode, where OpenIDM reports on what changes
-  would be written without making the changes. OpenIDM synchronization reflects
-  changes in objects to any mapped objects, making changes as necessary to
-  create or remove mapped objects and links to associate them. For a more
-  thorough explanation of reconciliation and synchronization, see the section on
-  <link xlink:href="integrators-guide#sync-types"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Types of
-  Synchronization</citetitle></link> in the <citetitle>Integrator's
-  Guide</citetitle>.</para>
+  <para>
+   When objects in one external resource change, OpenIDM determines how the
+   changes affect other objects, and can make the changes as necessary. This
+   sample demonstrates how OpenIDM does this by using
+   <firstterm>reconciliation</firstterm>. OpenIDM reconciliation compares the
+   objects in one object set to mapped objects in another object set.
+   Reconciliation can work in write mode, where OpenIDM writes changes to
+   affected objects, or in report mode, where OpenIDM reports on what changes
+   would be written without making the changes. For a complete explanation of
+   reconciliation and synchronization, see the section on <link
+   xlink:href="integrators-guide#sync-types"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Types of
+   Synchronization</citetitle></link> in the <citetitle>Integrator's
+   Guide</citetitle>.
+  </para>
 
   <para>
    This sample connects to an XML file that holds sample user data. The
@@ -425,12 +424,13 @@ $ ./startup.sh -p samples/sample1
   REST interface. Note how the following command uses a regular HTTP connection.
   </para>
 
-  <screen width="100"><?dbfo pgwide="1"?>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
- "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+  <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
  
  <para>Successful reconciliation returns a reconciliation run ID, similar
  to the following:</para>
@@ -488,31 +488,36 @@ $ ./startup.sh -p samples/sample1
  --request GET \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
    </userinput>
-   <computeroutput>
-{
- "remainingPagedResults" -1
- "pagedResultsCookie" null
- "resultCount" 3
- "result"
-
-   "_rev"  "0"
-   "_id"  "joe"
-
-   "_rev"  "0"
-   "_id"  "bjensen"
-
-   "_rev"  "0"
-   "_id"  "scarter"
-} </computeroutput>
+   <computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "scarter"
+    },
+    {
+      "_rev": "0",
+      "_id": "bjensen"
+    },
+    {
+      "_rev"  "0",
+      "_id"  "joe"
+    }
+  ]
+}  </computeroutput>
 </screen>
 
-  <para>If you created user <literal>joe</literal> as described in the procedure
-  entitled <link xlink:href="integrators-guide#first-steps-with-rest"
-  xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>To Get Started With the OpenIDM REST Interface</citetitle></link>.
-  you should see the ID for that user somewhere in this list. If
-  you did not include <literal>"_id:joe"</literal> in the command to create
-  user <literal>joe</literal>.
+  <para>
+   If you created user <literal>joe</literal>, as described in the procedure
+   entitled <link xlink:href="integrators-guide#first-steps-with-rest"
+   xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To
+   Get Started With the OpenIDM REST Interface</citetitle></link>, you should
+   see the ID for that user somewhere in this list. If you did not include
+   <literal>"_id:joe"</literal> in the command to create user
+   <literal>joe</literal>, you would see a system-generated UUID in the list
+   instead of the specified ID.
   </para>
 
   <para>Now try a RESTful GET of user
@@ -564,7 +569,7 @@ $ ./startup.sh -p samples/sample1
   <para>To make it easier to view the records, the first
   query only requests three specific fields.</para>
 
-  <screen width="90">&gt; connect remote:localhost/openidm admin admin
+  <screen>&gt; connect remote:localhost/openidm admin admin
 Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 
 &gt; select sn,mail,description from managed_user
@@ -650,21 +655,21 @@ $ curl \
 <computeroutput>
 {
    "result": [ {
-      "_id": "bjensen"
-      "_rev": "0",
+      "_id": "bjensen",
+      "_rev": "0"
    }, {
-      "_id": "scarter"
-      "_rev": "0",
+      "_id": "scarter",
+      "_rev": "0"
    }, {
-      "_id": "joe"
-      "_rev": "0",
+      "_id": "joe",
+      "_rev": "0"
    }, {
-      "_id": "tmorris"
-      "_rev": "0",
-   } ]
+      "_id": "tmorris",
+      "_rev": "0"
+   } ],
    "resultCount": 4,
    "pagedResultsCookie": null,
-   "remainingPagedResults": -1,
+   "remainingPagedResults": -1
 }</computeroutput>
 </screen>
 

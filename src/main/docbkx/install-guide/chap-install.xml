@@ -340,6 +340,16 @@ $</screen>
        <para>This stops the Servlet container as well, and the console is
         no longer accessible.</para>
       </step>
+      <step>
+       <para>
+        On Unix systems, you can stop OpenIDM by using the
+        <command>shutdown.sh</command> script, located in the
+        <filename>/path/to/openidm</filename> directory.
+       </para>
+       <screen><userinput>$ ./shutdown.sh</userinput>
+<computeroutput>./shutdown.sh
+Stopping OpenIDM (31391)</computeroutput></screen>
+      </step>
      </stepalternatives>
     </step>
    </procedure>
@@ -350,18 +360,16 @@ $</screen>
     <indexterm>
      <primary>Getting started</primary>
     </indexterm>
-    <para>OpenIDM provides RESTful access to users in the OpenIDM
-    repository. To access the OpenIDM repository over REST, you can use a 
-    browser-based REST client, such as the 
-    <link xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
-    Simple REST Client</link> for Chrome, or <link xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
-    RESTClient</link> for Firefox. Alternatively you can use the 
-    <command>curl</command> command-line utility that is included with most
-     operating systems. For more information on <command>curl</command>, see 
-     <link xlink:href="http://curl.haxx.se/" />. If
-     you cannot locate the <command>curl</command> command on your system, you 
-     can download it from 
-     <link xlink:href="http://curl.haxx.se/download.html" />.
+    <para>
+     OpenIDM provides RESTful access to users in the OpenIDM repository. To
+     access the OpenIDM repository over REST, you can use a browser-based REST
+     client, such as the
+     <link xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
+     Simple REST Client</link> for Chrome, or <link xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
+     RESTClient</link> for Firefox. Alternatively you can use the
+     <command>curl</command> command-line utility that is included with most
+     operating systems. For more information about <command>curl</command>, see
+     <link xlink:href="https://github.com/bagder/curl" />.
     </para>
 
     <para>
@@ -563,19 +571,18 @@ $</screen>
 
      <para>
       Notice that more attributes are returned for user <literal>joe</literal>
-     than the attributes you added in the previous step. The additional 
-     attributes are added by a script named 
-     <literal>onCreate-user-set-default-fields.js</literal> that is triggered 
-     when a new user is created. For more information, see <link
-     xlink:href="integrators-guide#managed-object-configuration" 
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed Object 
-     Configuration</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+      than the attributes you added in the previous step. The additional
+      attributes are added by a script named
+      <literal>onCreate-user-set-default-fields.js</literal> that is triggered
+      when a new user is created. For more information, see <link
+      xlink:href="integrators-guide#managed-object-configuration"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed Object
+      Configuration</citetitle></link> in the <citetitle>Integrator's
+      Guide</citetitle>.
      </para>
-
      <para>
-      When creating a user, available attributes are listed in the
-      <filename>conf/sync.json</filename> if it exists; some attributes are
-      required, as listed in the associated
+      When you create a user some attributes might be required by the policy
+      associated with that user. These are listed in the
       <filename>conf/policy.json</filename> file.
      </para>
     </step>
