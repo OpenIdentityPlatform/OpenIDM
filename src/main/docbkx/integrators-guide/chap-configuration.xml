@@ -1192,7 +1192,7 @@ $ <userinput>curl \
     </para>
 
     <screen>
-     GET http://localhost:8080/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
+     GET https://localhost:8443/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
     </screen>
 
     <para>
@@ -1241,10 +1241,11 @@ $ <userinput>curl \
       Synchronizing LDAP Group Membership</citetitle></link>.
      </para>
     
-     <para>The final statement in the script is the return value. In the
-      following example, there is no <literal>return</literal> keyword, and
-      the value of the last statement
-      (<literal>x</literal>) is returned.</para>
+     <para>
+      The final statement in the script is the return value. In the following
+      example, there is no <literal>return</literal> keyword, and the value of
+      the last statement (<literal>x</literal>) is returned.
+     </para>
     
      <programlisting language="javascript">var x = "Sample return";
 functioncall();
@@ -1262,8 +1263,7 @@ x   </programlisting>
       shows the complete request structure.
      </para>
 
-     <screen>
-$ <userinput>curl \
+     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
