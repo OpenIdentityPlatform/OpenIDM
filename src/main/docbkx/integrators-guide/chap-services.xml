@@ -188,7 +188,8 @@ Stopping OpenIDM (454)</screen>
        should not modify the default framework configuration. This option is
        therefore described in more detail in the chapter on
        <link xlink:href="integrators-guide#chap-advanced"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Advanced Administration</citetitle></link>.
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Advanced
+       Administration</citetitle></link>.
        </para>
     </listitem>   
   </itemizedlist>
@@ -544,8 +545,19 @@ Stopping OpenIDM (454)</screen>
     
   <screen>openidm.healthservice.servicestartmax=5000</screen>
   
-  <para>The health check service works in tandem with the scriptable information 
-  service. For more information see <xref linkend="info-service" />.</para>
+  <para>
+   The health check service works in tandem with the scriptable information
+   service. For more information see <xref linkend="info-service" />.
+  </para>
+
+  <para>
+   Do not use the health check service to monitor the status of external
+   resources, such as LDAP servers, or external databases. Rather, monitor these
+   resources over the REST interface, as described in <link
+   xlink:href="integrators-guide#systems-over-rest"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Checking the
+   Status of External Systems Over REST</citetitle></link>.
+  </para>
   
  </section>
 
