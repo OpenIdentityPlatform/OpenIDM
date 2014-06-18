@@ -26,7 +26,7 @@
 
 
 /* 
-    triggerWorkflowFromSync.js.js - A script designed to start asynchronous actions via workflows. Asynchronous actions
+    triggerWorkflowFromSync.js - A script designed to start asynchronous actions via workflows. Asynchronous actions
     differ from the more typical synchronous actions defined in sync.json mappings in that they may involve 
     waiting for some external trigger (such as a user interaction) before they continue performing their 
     action.
@@ -39,7 +39,7 @@
             "action" : {
                 "workflowName" : "managedUserApproval",
                 "type" : "text/javascript",
-                "file" : "workflow/triggerWorkflowFromSync.js.js"
+                "file" : "workflow/triggerWorkflowFromSync.js"
             }
         },    
 
@@ -83,18 +83,18 @@
     var queryParams = {
             "_queryId" : "filtered-query",
             "processDefinitionKey": workflowName,
-            "_var-mapping":recon.actionParam.mapping,
-            "_var-situation":recon.actionParam.situation,
-            "_var-action":recon.actionParam.action
+            "var-mapping":recon.actionParam.mapping,
+            "var-situation":recon.actionParam.situation,
+            "var-action":recon.actionParam.action
         },
         process,
         businessKey = "sourceId: " + recon.actionParam.sourceId + ", targetId: " + recon.actionParam.targetId + ", reconId: " + recon.actionParam.reconId;
     
     if (typeof recon.actionParam.sourceId !== "undefined" && null !== recon.actionParam.sourceId) {
-        queryParams["_var-sourceId"] = recon.actionParam.sourceId;
+        queryParams["var-sourceId"] = recon.actionParam.sourceId;
     }
     if (typeof recon.actionParam.targetId !== "undefined" && null !== recon.actionParam.targetId) {
-        queryParams["_var-targetId"] = recon.actionParam.targetId;
+        queryParams["var-targetId"] = recon.actionParam.targetId;
     }
 
 

@@ -39,7 +39,7 @@
                     params.put('action', 'link')
                     params.put('sourceId', sourceId)
                     params.put('targetId', target)
-                    openidm.action('sync', 'performAction', params)
+                    openidm.action('sync', 'performAction', [:], params)
                 }
             </script>
         </scriptTask>
