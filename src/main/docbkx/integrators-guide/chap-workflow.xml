@@ -875,7 +875,7 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
     </userinput>
     </screen>
     <para>
-     A delete request returns the contents of deleted workflow definition.
+     The delete request returns the contents of the deleted workflow definition.
     </para>
    </listitem>
   </itemizedlist>
