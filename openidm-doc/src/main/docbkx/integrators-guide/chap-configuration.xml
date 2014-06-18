@@ -750,7 +750,7 @@ $ <userinput>curl \
  <listitem><para>Substitution of encrypted property values is currently not 
  supported.</para></listitem>
  <!--  TO DO
- For now, encypted property substitution is not supported. Check and 
+ For now, encrypted property substitution is not supported. Check and
  replace with this chunk when it is
  
  <listitem><para>Encryption is performed before the property value substitution. 
@@ -799,189 +799,82 @@ $ <userinput>curl \
  </section>
  
  </section>
- <!-- Add this section when you have been able to test the example
- </section>
- <section xml:id="optimizing-the-openidm-object-model">
- <title>Optimizing the OpenIDM Object Model</title>
- <para>You can improve performance in specific deployment scenarios by 
- customizing the way in which OpenIDM objects are mapped to the relational 
- database. This section assumes that you are using MySQL as an internal 
- repository (for more information, see 
- <link xlink:href="install-guide#chap-repository"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Installing a Repository For Production</citetitle></link>).</para>
-  <itemizedlist>
-  <para>There are two ways in which OpenIDM objects can be mapped to the 
-  relational database tables:</para>
-  <listitem><para><emphasis>Using a generic mapping</emphasis>, which allows 
-  arbitrary objects to be stored without specific setup or administration.</para>
-  <para>The generic mapping facilitates rapid development, and makes system 
-  evolution and maintenance simpler by providing a more stable database structure. 
-  However, the generic mapping incurs a performance cost because it does not 
-  take full advantage of the benefits of a relational database. The object model 
-  is not normalized in the traditional sense and there is less flexibility in 
-  indexing.</para></listitem>
-  <listitem><para><emphasis>Using an explicit mapping</emphasis>, which allows you 
-  to optimize storage and queries by explicitly mapping a specific object type to 
-  the database.</para>
-  <para>The explicit mapping provides a traditional object-relational mapping 
-  and can therefore take greater advantage of relational database capabilities. 
-  However, an explicit mapping implies that, as an administrator, you must 
-  ensure that the mapping and objects remain synchronized at all times, and 
-  must manage any migration or upgrade procedures carefully when objects are 
-  added or changed. There are currently some limitations to an explicit table 
-  mapping, and it has not been extensively tested for managed objects.</para>
-  </listitem>
-  </itemizedlist>
- <para>Out of the box, OpenIDM uses an explicit mapping for a few specific tables 
- whose structure will remain stable, tables for which easy external queries are 
- required, or tables for which performance is particularly important. Tables for 
- managed objects (such as "managed/user") use a generic mapping by default.</para>
- <para>The generic mapping provided out of the box indexes every property to 
- make it searchable, as shown in the following <literal>repo.jdbc.json</literal> 
- extract:</para>
- <programlisting language="javascript">"credentials" : {
- "genericMapping" : {
-            "managed/*" : {
-                "mainTable" : "managedobjects", 
-                "propertiesTable" : "managedobjectproperties",
-                "searchableDefault" : true            
-            }
-        },
-  </programlisting>
- <para>In certain deployments, such a configuration might not 
- meet your performance requirements. You can optimize the performance of the 
- generic mapping by restricting the properties that are indexed (searchable). 
- To do this, change the <literal>searchableDefault</literal> property to 
- <literal>false</literal> and explicitly specify the properties that can be 
- searched by using the <literal>searchable</literal> setting.</para>
- <para>Alternatively, leave the <literal>searchableDefault</literal> property 
- set to <literal>true</literal> and specify which properties should 
- <emphasis>not</emphasis> be indexed by setting the 
- <literal>searchableDefault</literal> property to <literal>false</literal> for 
- those properties.</para>
- <para>The following example creates a separate generic table for managed/user 
- objects and indexes only two properties, <literal>_id</literal> and 
- <literal>username</literal>:</para>
- <programlisting language="javascript">
-   "genericMapping" : {
-            "managed/user" : {
-                "mainTable" : "manageduserobjects", 
-                "propertiesTable" : "manageduserobjectproperties",
-                "searchableDefault" : false,
-                "properties" : {
-                    "/_id" : {
-                        "searchable" : true
-                    },
-                    "/username" : {
-                        "searchable" : true
-                    }
-                }            
-            }
-        },
- </programlisting>
- <para>Another way to optimize performance is to change the mapping 
- configuration to use a different mapping table type. For example, you can 
- change the configuration for a managed object such as "managed/user" to an 
- explicit table mapping, in which you specifically define the columns and 
- indexes. For example:</para>
- <programlisting language="javascript">
-  "explicitMapping" : {
-            "managed/user" : {
-            ...
- </programlisting>
- <orderedlist>
- <para>In general, you should assess the following performance improvement 
- strategies, in order:</para>
- <listitem><para>Optimize the generic mapping by explicitly defining which 
- properties should be searchable.</para></listitem>
- <listitem><para>Place different managed object types in different generic 
- tables (by default, all managed object types are mapped to the 
-<literal>managedobjects</literal> and <literal>managedobjectproperties</literal> 
-tables).</para></listitem>
-<listitem><para>Finally, consider explicit mappings where appropriate.</para></listitem>
-</orderedlist>
- </section>
- -->
   
   <section xml:id="adding-custom-endpoints">
-    <title>Adding Custom Endpoints</title>
+   <title>Adding Custom Endpoints</title>
     
+   <para>
+    You can customize OpenIDM to meet the specific requirements of your
+    deployment by adding your own RESTful endpoints. Endpoints are configured
+    in files named
+    <filename>conf/endpoint-<replaceable>name</replaceable>.json</filename>,
+    where <replaceable>name</replaceable> generally describes the purpose of the
+    endpoint.
+   </para>
+    
+   <para>
+    A sample custom endpoint configuration is provided in the
+    <filename>openidm/samples/customendpoint</filename> directory. The use
+    of this sample is described in
+    <xref linkend="adding-custom-endpoints-example" />. Custom endpoints in
+    OpenIDM can be written either in JavaScript or Groovy. The sample includes
+    three files:
+   </para>
+
+   <variablelist>
+    <varlistentry>
+     <term>conf/endpoint-echo.json</term>
+     <listitem>
+      <para>
+       Provides the configuration for the endpoint.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>script/echo.js</term>
+     <listitem>
+      <para>
+       Supports an endpoint script written in JavaScript.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>script/echo.groovy</term>
+     <listitem>
+      <para>
+       Supports an endpoint script written in Groovy.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>
+    Endpoint configuration files have a certain structure. They may cite scripts
+    written in JavaScript or Groovy.
+   </para>
+
+   <para>
+    The cited scripts include defined <literal>request</literal> and
+    <literal>context</literal> global variables.
+   </para>
+
+   <section xml:id="adding-custom-endpoints-structure">
+    <title>The Components of an Endpoint Configuration File</title>
+
     <para>
-     You can customize OpenIDM to meet the specific requirements of your
-     deployment by adding your own RESTful endpoints. Endpoints are configured
-     in files named
-     <filename>conf/endpoint-<replaceable>name</replaceable>.json</filename>,
-     where <replaceable>name</replaceable> generally describes the purpose of the
-     endpoint.
+     The sample custom endpoint configuration
+     (<filename>/path/to/openidm/samples/customendpoint/conf/endpoint-echo.json</filename>)
+     depicts a typical endpoint, configured to use a Groovy script that is
+     specified in the <filename>script/echo.groovy</filename> file. The
+     structure of the sample configuration is as follows:
     </para>
     
-    <para>
-     A sample custom endpoint configuration is provided in the
-     <filename>openidm/samples/customendpoint</filename> directory. The use
-     of this sample is described in
-     <xref linkend="adding-custom-endpoints-example" /> Custom
-     endpoints in OpenIDM can be written either in JavaScript or Groovy.
-     The sample includes three files:
-    </para>
-
-    <variablelist>
-     <varlistentry>
-      <term>conf/endpoint-echo.json</term>
-      <listitem>
-       <para>
-        Provides the configuration for the endpoint.
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>script/echo.js</term>
-      <listitem>
-       <para>
-        Supports an endpoint written in JavaScript.
-       </para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>script/echo.groovy</term>
-      <listitem>
-       <para>
-        Supports a script written in Groovy.
-       </para>
-      </listitem>
-     </varlistentry>
-    </variablelist>
-
-    <para>
-     Endpoint configuration files have a certain structure. They may cite
-     scripts written in JavaScript or Groovy.
-    </para>
-
-    <para>
-     The cited scripts include defined <literal>request</literal> and
-     <literal>context</literal> global variables.
-    </para>
-
-    <section xml:id="adding-custom-endpoints-structure">
-     <title>The Components of an Endpoint Configuration File</title>
-
-     <para>
-      You can find sample components in the
-      <filename>/path/to/openidm/sample/customendpoint</filename> directory.
-      In that the directory, the <filename>conf/endpoint-echo.json</filename>
-      configuration file depicts one typical endpoint, configured to use a
-      Groovy script specified in the <filename>script/echo.groovy</filename>
-      file.
-     </para>
-    
-     <programlisting language="javascript">
-{
+     <programlisting language="javascript">{
   "file" : "echo.groovy",
   "type" : "groovy",
   "_file" : "echo.js",
   "_type" : "text/javascript"
-}    
-     </programlisting>
+}    </programlisting>
 
      <para>
       The <literal>"_file"</literal> and <literal>"_type"</literal> properties
@@ -1163,25 +1056,57 @@ tables).</para></listitem>
        </listitem>
       </varlistentry>
      </variablelist>
-
     </section>
 
     <section xml:id="adding-custom-endpoints-request">
      <title>Custom Endpoints and <literal>request</literal> Objects</title>
-
-     <para>The endpoint configuration file does not just point to a script. It
-      should specify a script <literal>source</literal> or a script
-      <literal>file</literal> as described in
-      <xref linkend="adding-custom-endpoints-structure" /> The script will be
-      invoked with a global <literal>request</literal> variable in its scope.
+     <para>
+      The endpoint configuration file specifies a script (either inline with the
+      <literal>"source"</literal> property, or in a referenced file with the
+      <literal>"file"</literal> property. The script is invoked with a global
+      <literal>request</literal> variable in its scope.
      </para>
-
+     <para>
+      All processes within OpenIDM are initiated with a request. Requests can
+      come either from the REST API, (see
+      http://openidm.forgerock.org/doc/integrators-guide/index.html#appendix-rest)
+      or internally, from a script, using the <literal>openidm</literal> router
+      object, (see http://openidm.forgerock.org/doc/integrators-guide/index.html#function-ref).
+      Regardless of how the process is initiated, the details of the request are
+      represented in the same way - within an object named <literal>request</literal>.
+     </para>
+     <para>
+      Most request types include a complex object that stores the details
+      required for that particular request. For example, when you start an
+      <literal>action</literal> process over the REST interface, you might want
+      to include certain detailed information for that action. You include this
+      information as a JSON string in the POST body. The HTTP request header
+      <literal>Content-type</literal> describes this string as
+      <literal>application/json</literal>.
+     </para>
+     <para>
+      Consider the following REST request:
+     </para>
+     <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data { "name": "bob"} \
+ "https://localhost:8443/openidm/endpoint/test?_action=myAction"
+     </screen>
+     <para>
+      This request includes the string <literal>'{ "name": "bob"}'</literal>
+      as the HTTP post body. OpenIDM expects this to be a JSON string, and will
+      deserialize it into an object. The object is accessed using
+      <literal>request.content</literal>.
+     </para>
      <para>
       Depending on the type of <literal>request</literal>,
       the associated content may include the following
       properties:
      </para>
-    
      <variablelist>
       <varlistentry>
        <term><literal>method</literal></term>
