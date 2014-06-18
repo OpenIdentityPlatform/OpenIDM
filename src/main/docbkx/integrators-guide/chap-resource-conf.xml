@@ -49,33 +49,71 @@
   operations, and also reconciliation and LiveSync.
  </para>
 
- <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
- databases, directory servers, and other sources of identity data to be managed
- and audited by the identity management system. OpenIDM connects to resources
- through the identity connector framework, <link xlink:show="new"
- xlink:href="http://openicf.forgerock.org/">OpenICF</link>. OpenICF aims to
- avoid the need to install agents to access resources, instead using the
- resources' native protocols. For example, OpenICF connects to database
- resources using the database's Java connection libraries or JDBC driver.
- It connects to directory servers over JNDI. It connects to UNIX systems
- by using <command>ssh</command>.</para>
- 
- <para>Connectors are configured through files named
- <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
- where <replaceable>name</replaceable> corresponds to the name of the
- connector.  A number of sample connectors are available in the
- <filename>openidm/samples/provisioners</filename> directory. To use these
- connectors, edit the configuration files as required, and copy them to the
- <filename>openidm/conf</filename> directory. If you create your own connector
- configurations, <emphasis>do not include dash characters ( <literal>-</literal> )
- in the connector <replaceable>name</replaceable>.</emphasis></para>
+ <para>
+  In OpenIDM, <firstterm>resources</firstterm> are external systems, databases,
+  directory servers, and other sources of identity data to be managed and
+  audited by the identity management system. OpenIDM connects to resources
+  through the Identity Connector Framework, <link xlink:show="new"
+  xlink:href="http://openicf.forgerock.org/">OpenICF</link>. OpenICF aims to
+  avoid the need to install agents to access resources, instead using the
+  resources' native protocols. For example, OpenICF connects to database
+  resources using the database's Java connection libraries or JDBC driver. It
+  connects to directory servers over JNDI. It connects to UNIX systems by using
+  <command>ssh</command>.
+ </para>
 
  <section xml:id="openidm-openicf">
   <title>About OpenIDM and OpenICF</title>
-
-  <para>The following figure shows how OpenIDM can connect to resources
-  through an OpenICF server. In most cases, the OpenICF server runs as part
-  of OpenIDM.</para>
+  <para>
+   OpenICF provides a common interface to allow identity services access to the
+   resources that contain user information. OpenIDM loads the OpenICF API as one
+   of its OSGi modules. OpenICF uses <firstterm>connectors</firstterm> to
+   separate the OpenIDM implementation from the dependencies of the resource to
+   which OpenIDM is connecting. A specific connector is required for each remote
+   resource. Connectors can run either locally or remotely.
+  </para>
+  <para>
+   <firstterm>Local</firstterm> connectors are loaded by OpenICF as regular
+   bundles in the OSGi container. Remote connectors must be executed on a remote
+   <firstterm>connector server</firstterm>. Most connectors can be run locally.
+   However, a remote connector server is required when access libraries that
+   cannot be included as part of the OpenIDM process are needed. If a resource,
+   such as Microsoft Active Directory, does not provide a connection library
+   that can be included inside the Java Virtual Machine, OpenICF can use the
+   native .dll with a remote .NET connector server. In other words, OpenICF
+   connects to Active Directory through a remote connector server that is
+   implemented as a .NET service.
+  </para>
+  <para>
+   Connections to remote connector servers are configured in a single
+   <firstterm>connector info provider</firstterm> configuration file, located in
+   <filename>/path/to/openidm/conf</filename>.
+  </para>
+  <para>
+   Connectors themselves are configured through
+   <firstterm>provisioner</firstterm> files. One provisioner file must exist for
+   each connector. Provisioner files are named
+   <filename>provisioner.openicf-<replaceable>name</replaceable></filename> where
+   <replaceable>name</replaceable> corresponds to the name of the connector,
+   and are also located in the <filename>/path/to/openidm/conf</filename>
+   directory.
+  </para>
+  <para>
+   A number of sample connector configurations are available in the
+   <filename>openidm/samples/provisioners</filename> directory. To use these
+   connectors, edit the configuration files as required, and copy them to the
+   <filename>openidm/conf</filename> directory. If you create your own connector
+   configurations, <emphasis>do not include dash characters
+   ( <literal>-</literal> ) in the connector
+   <replaceable>name</replaceable></emphasis>.
+  </para>
+  <para>
+   The following figure shows how OpenIDM connects to resources by using
+   connectors and remote connector servers. The figure shows one local connector
+   (LDAP) and two remote connectors (Scripted SQL and PowerShell). The remote
+   Scripted SQL connector requires a remote Java connector server. The remote
+   PowerShell connector requires a remote .NET connector server.
+  </para>
 
   <mediaobject xml:id="figure-openicfarch">
    <alt>OpenICF architecture</alt>
@@ -83,32 +121,21 @@
     <imagedata fileref="images/OpenICFArch.png" format="PNG" />
    </imageobject>
    <textobject>
-    <para>The figure shows the basic architecture of OpenIDM with three
-    connector servers, one built-in local Java connector server, and two
-    remote, Java and .NET connector servers.</para>
+    <para>
+     The figure shows the basic architecture of OpenICF with local and remote
+     connectors.
+    </para>
    </textobject>
   </mediaobject>
 
-  <para>OpenICF provides a common service provider interface to allow identity
-  services access to the resources that contain user information. OpenICF uses
-  a connection server that can run as a local connector server inside OpenIDM,
-  or as a remote connector server that is a standalone process.</para>
-
-  <para>A remote connector server is required when access libraries that cannot 
-  be included as part of the OpenIDM process are needed. If a resource, such as 
-  Microsoft ADSI, does not provide a connection library that can be included 
-  inside the Java Virtual Machine, then OpenICF can use the native .dll with a 
-  remote .NET connector server. (OpenICF connects to ADSI through a remote 
-  connector server implemented as a .NET service.)</para>
-
   <tip>
-   <para>Not only .NET connector servers but also Java connector servers can be 
-   run as standalone, remote services. Run them as remote services for 
-   scalability, or to have the service run in the cloud.</para>
-
-   <para>By default, and for convenience, OpenIDM includes a Java connector
-   server that runs as a <literal>"#LOCAL"</literal> service.</para>
+   <para>
+    Connectors that use the .NET framework <emphasis>must</emphasis> run
+    remotely. Java connectors can be run locally or remotely. Run them as remote
+    services for scalability, or to have the service run in the cloud.
+   </para>
   </tip>
+
  </section>
 
  <section xml:id="connector-info-provider-conf">
@@ -118,15 +145,19 @@
    <secondary>Remote</secondary>
   </indexterm>
 
-  <para>When you configure remote connectors, you must use the connector info 
-  provider service to connect through remote connector servers. The configuration is
-  stored in the configuration file,
-  <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
-  A sample can be found under <filename>openidm/samples/provisioners/</filename>. 
-  To use the file, edit it as required, and then copy it to the 
-  <filename>openidm/conf</filename> directory.</para>
-
-  <para>The connector info provider service takes the following configuration:</para>
+  <para>
+   When you configure a remote connector, you use the <firstterm>connector info
+   provider service</firstterm> to connect through a remote connector server.
+   The connector info provider service configuration is stored in the file
+   <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
+   A sample configuration file is provided in the
+   <filename>openidm/samples/provisioners/</filename> directory. To use this
+   sample configuration, edit the file as required, and copy it to the
+   <filename>openidm/conf</filename> directory.
+  </para>
+  <para>
+   The connector info provider service takes the following configuration:
+  </para>
 <programlisting language="javascript">
 {
   "connectorsLocation"     : <replaceable>string</replaceable>,
@@ -138,8 +169,10 @@
     <term>connectorsLocation</term>
     <listitem>
      <para>string, optional</para>
-     <para>Specifies the directory where the OpenICF connectors are located. The
-     default location is <filename>openidm/connectors</filename>.
+     <para>
+      Specifies the directory in which the OpenICF connectors are located,
+      relative to the OpenIDM installation directory. The default location is
+      <filename>openidm/connectors</filename>.
      </para>
     </listitem>
    </varlistentry>
@@ -147,7 +180,9 @@
     <term><link linkend="remote-connector-server-object-properties">remoteConnectorServers</link></term>
     <listitem>
      <para>array of RemoteConnectorServer objects, optional</para>
-     <para>A list of remote connector servers managed by this service.</para>
+     <para>
+      An array of remote connector servers that are managed by this service.
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -155,8 +190,10 @@
  <variablelist xml:id="remote-connector-server-object-properties">
   <title>Remote Connector Server Properties</title>
   
-  <para>The following example shows a <literal>remoteConnectorServer</literal>
-  object configuration.</para>
+  <para>
+   The following example shows a <literal>remoteConnectorServer</literal> object
+   configuration.
+  </para>
 
   <programlisting language="javascript">
 {
@@ -174,21 +211,26 @@
     ]
 }</programlisting>
 
-  <para>OpenIDM supports the following remote connector server object
-  properties.</para>
+  <para>
+   OpenIDM supports the following remote connector server object properties.
+  </para>
   <varlistentry>
    <term>name</term>
    <listitem>
     <para>string, required</para>
-    <para>The name of the remote connector server object. Used to identify the
-    remote connector server in connector reference objects.</para>
+    <para>
+     The name of the remote connector server object. This name is used to
+     identify the remote connector server in the list of connector reference
+     objects.
+    </para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term>host</term>
    <listitem>
     <para>string, required</para>
-    <para>Remote host to connect to.</para>
+    <para>
+     The remote host host to connect to.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
