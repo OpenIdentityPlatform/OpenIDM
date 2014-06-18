@@ -1911,10 +1911,13 @@ $ cat samples/workflow/data/xmlConnectorData.xml </userinput>
     </para>
     <listitem>
      <para>
-      Download and install OpenDJ with the QuickSetup utility, as described in
-      <link xlink:show="new"
+      Download and install OpenDJ, as described in <link xlink:show="new"
       xlink:href="http://docs.forgerock.org/en/opendj/2.6.0/install-guide/index.html#chap-install-gui">Installing
       OpenDJ With the QuickSetup Wizard</link>.
+     </para>
+     <para>
+      This sample assumes that OpenDJ is listening on port 1389, the standard
+      LDAP port for users who cannot use privileged ports.
      </para>
     </listitem>
     <listitem>
