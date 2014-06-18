@@ -31,79 +31,402 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Compatibility</title>
 
- <para>This chapter covers both major changes to existing functionality, and
- also deprecated and removed functionality.</para>
+ <para>
+  This chapter covers major and minor changes to existing functionality, as well
+  as deprecated and removed functionality in this release of OpenIDM.
+ </para>
 
  <section xml:id="major-changes">
   <title>Major Changes to Existing Functionality</title>
   
-  <para>The following changes will have an impact on existing deployments. 
-  Read these changes carefully and adjust existing scripts and clients 
-  accordingly.</para>
+  <para>
+   The following changes will have an impact on existing deployments. Read these
+   changes carefully and adjust existing scripts and clients accordingly.
+  </para>
   
   <variablelist>
-    <varlistentry>
-      <term>TBD</term>
+   <varlistentry>
+    <term>Changes to the REST Interface</term>
+    <listitem>
+     <itemizedlist>
+      <para>
+       A number of changes have been made to the REST API in this release. Major
+       changes include the following:
+      </para>
       <listitem>
-        <para>TBD</para>
+       <para>
+        In OpenIDM ${serverDocTargetVersion}, the request header
+        <literal>"Content-type: application/json"</literal> is required for all
+        REST calls that include a request body (POST, PUT, and PATCH). This
+        header was optional in OpenIDM 2.1.
+       </para>
       </listitem>
-    </varlistentry>
-    
+      <listitem>
+       <para>
+        For REST calls to the <literal>external/rest</literal> endpoint, an
+        action name is now mandatory. In addition, the attribute names in the
+        request content are camel cased, rather than separated by dashes, and
+        there are no leading underscores.
+       </para>
+       <para>
+        For example:
+       </para>
+       <screen>
+"https://localhost:8443/openidm/external/rest?_action=proxy&amp;_url=http://example.com/&amp;_method=GET&amp;_content-type=application/xml"
+       </screen>
+      </listitem>
+     </itemizedlist>
+     <para>
+      For details of the new interface, including examples, see the <link
+      xlink:show="new" xlink:href="integrators-guide#appendix-rest"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
+      Reference</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Changes to the authentication service</term>
+    <listitem>
+     <para>
+      The authentication service now uses the ForgeRock commons authentication
+      framework. Authentication modules are specified in
+      <literal>conf/authentication.json</literal> and are applied in the order
+      in which they are specified.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Change to patch action data syntax</term>
+    <listitem>
+     <para>
+      In OpenIDM 2.1.0, the syntax to patch a data object was as follows:
+     </para>
+     <programlisting>
+--data '[
+      {
+        "replace": "/email",
+        "value": "new-mail-address@example.com"
+      }
+    ]'
+     </programlisting>
+     <para>
+      In OpenIDM ${serverDocTargetVersion}, the syntax is as follows:
+     </para>
+     <programlisting>
+--data '[
+      {
+        "operation":"replace",
+        "field":"/email",
+        "value":"new-mail-address@example.com"
+      }
+    ]'
+     </programlisting>
+     <para>
+      The value of the <literal>"operation"</literal> field now specifies the
+      patch action (for example, <literal>"add"</literal>, <literal>"replace"</literal>,
+      or <literal>"remove"</literal>). For more information, see <link
+      xlink:show="new" xlink:href="integrators-guide#rest-supported-patch"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Patch
+      Resource</citetitle></link> in the <citetitle>Integrators Guide</citetitle>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Changes to the logging service</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        The name of the <literal>parentActionid</literal> column in the activity
+        log has changed to <literal>parentActionId</literal>, for consistency
+        across the product.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Scripting changes</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Managed object property scripts (<literal>onRetrieve</literal> and
+        <literal>onStore</literal>) must now return the modified property values
+        from the script, instead of changing the <literal>property</literal>
+        member in the scope itself.
+       </para>
+       <para>
+        <literal>propertyName</literal> is now available in managed object
+        property scripts.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The format of script exceptions has changed, replacing
+        <literal>openidmCode</literal> with <literal>code</literal>. For
+        example, in OpenIDM 2.1.0:
+       </para>
+       <programlisting>
+throw {
+        "openidmCode" : 403,
+        "message" : "Access denied"
+      }
+       </programlisting>
+       <para>
+        In OpenIDM ${serverDocTargetVersion}:
+       </para>
+       <programlisting>
+throw {
+        "code" : 403,
+        "message" : "Access denied"
+      }
+       </programlisting>
+      </listitem>
+      <listitem>
+       <para>
+        Global script properties, as well as default and custom script file
+        locations, are now defined in the file
+        <literal>conf/script.json</literal>.
+       </para>
+       <para>
+       For more information, see <link xlink:show="new"
+       xlink:href="integrators-guide#config-default-directories"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Default and
+       Custom Configuration Directories</citetitle></link> in the
+       <citetitle>Integrators Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The method signature for <literal>openidm.create</literal> has changed.
+        The ID provided in the create has been separated into two parts - a
+        resource container name and an (optional) client-supplied resource ID.
+       </para>
+       <para>
+        This change makes it easier to determine whether the client is supplying
+        an ID, or whether the server should generate an ID.
+       </para>
+       <para>
+        Scripts using this function must now use the following format if
+        the client is providing the ID:
+       </para>
+       <programlisting>
+openidm.create('managed/user", "userName", <replaceable>user-object</replaceable>
+       </programlisting>
+       <para>
+        and the following format if the server should generate the ID:
+       </para>
+       <programlisting>
+openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
+       </programlisting>
+      </listitem>
+      <listitem>
+       <para>
+        The way in which a request object is accessed has changed from
+        <literal>request.value</literal> to <literal>request.content</literal>.
+        For example, to obtain the ID of a process definition in 2.1.0, the
+        script extract would have been:
+       </para>
+       <programlisting>var processDefinitionId = request.value._processDefinitionId;</programlisting>
+       <para>
+        In OpenIDM ${serverDocTargetVersion}, the corresponding script would be:
+       </para>
+       <programlisting>var processDefinitionId = request.content._processDefinitionId;</programlisting>
+       <para>
+        In addition, parameters are now added to a request using
+        <literal>request.additionalParameters</literal> instead of the 2.1.0
+        construct <literal>request.params</literal>.
+       </para>
+       <para>
+        For more information about request objects, see <link xlink:show="new"
+        xlink:href="integrators-guide#adding-custom-endpoints-request"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Custom
+        Endpoints and request Objects</citetitle></link> in the
+        <citetitle>Integrators Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The way in which the log level is set for JavaScripts has changed.
+        Previously, the log level was set as follows:
+       </para>
+       <literallayout class="monospaced"
+>org.forgerock.openidm.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
+       <para>
+        In OpenIDM ${serverDocTargetVersion}, the log level is set as follows:
+       </para>
+       <literallayout class="monospaced"
+>org.forgerock.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Changes to query support</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Token substitution from user parameters is no longer supported for lists,
+        and is only supported for strings.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The way in which queries are constructed has changed. Queries that
+        followed the OpenICF format are no longer supported and query filters
+        must now be specified in common filter notation.
+       </para>
+       <para>
+        For example, the following query in OpenIDM 2.1.0:
+       </para>
+<programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent']	}	}</programlisting>
+       <para>
+        would be constructed as follows in OpenIDM ${serverDocTargetVersion}:
+       </para>
+<programlisting>"_queryFilter" : "employeeType eq \"Permanent\""</programlisting>
+       <para>
+        The new query format allows parameterized queries to be performed over
+        REST (which was not possible in OpenIDM 2.1.0).
+       </para>
+       <para>
+        For information
+        about the supported query format, see <link xlink:show="new"
+        xlink:href="integrators-guide#constructing-queries"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+        Queries</citetitle></link> in the <citetitle>Integrators
+        Guide</citetitle>.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Security Module Changes</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        The way in which the security context is addressed has changed
+        from <literal>request.parent.security</literal> in OpenIDM 2.1.0 to
+        <literal>context.security</literal> in OpenIDM ${serverDocTargetVersion}.
+       </para>
+       <para>
+        A sample object showing the security context in OpenIDM 2.1.0 follows:
+       </para>
+       <programlisting>
+"parent": {
+    ...
+    "security": {
+        "username": "openidm-admin",
+        "openidm-roles": [
+            "openidm-admin",
+            "openidm-authorized"
+        ],
+    "userid": {
+        "id": "openidm-admin",
+        "component": "internal/user"
+    }
+}</programlisting>
+       <para>
+        A corresponding sample security context in OpenIDM
+        ${serverDocTargetVersion} would be:
+       </para>
+        <programlisting>
+"security": {
+    "context": {
+        "authenticationId": "openidm-admin",
+        "class": "org.forgerock.json.resource.SecurityContext",
+        "parent": {
+            "class": "org.forgerock.json.resource.RootContext",
+            "parent": null,
+            "id": "0a8d43c2-1c54-487f-bec4-564b944fa835"
+        },
+        "authorizationId": {
+            "roles": [
+                "openidm-admin",
+                "openidm-authorized"
+            ],
+        "component": "repo/internal/user",
+        "id": "openidm-admin"
+    }
+}</programlisting>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Changes to the workflow module</term>
+    <listitem>
+     <para>
+      The action used to start a workflow process instance has changed. In
+      OpenIDM 2.1.0, you would start a process instance with a POST request to
+      the following URL:
+     </para>
+     <screen>"https://localhost:8443/openidm/workflow/processinstance?_action=createProcessInstance"</screen>
+     <para>
+      In OpenIDM ${serverDocTargetVersion}, you would send a similar POST
+      request to:
+     </para>
+     <screen>"https://localhost:8443/openidm/workflow/processinstance?_action=create"</screen>
+    </listitem>
+   </varlistentry>
   </variablelist>
  </section> 
   
  <section xml:id="minor-changes">
-   <title>Minor Changes to Existing Functionality</title>
+  <title>Minor Changes to Existing Functionality</title>
    
-   <para>The following changes should not have an impact on existing deployment 
-   configurations.</para>
-   
-   <variablelist>
-     <varlistentry>
-      <term>Change to how multiple roles are specified</term>
-       <listitem>
-        <para>
-         In OpenIDM 2.1.0, multiple roles were specified as a CSV list. For
-         example:
-        </para>
-        <programlisting>
+  <para>
+   The following changes should not have an impact on existing deployment
+   configurations.
+  </para>
+  <variablelist>
+   <varlistentry>
+    <term>Change to how roles are stored</term>
+     <listitem>
+      <para>
+       In OpenIDM 2.1.0, roles were stored as a CSV list. For example:
+      </para>
+      <programlisting>
 "roles":""openidm-authorized,contractor",
-        </programlisting>
-        <para>
-         In OpenIDM ${serverDocTargetVersion}, multiple roles are specified as an
-         array. For example:
-        </para>
-        <programlisting>
+      </programlisting>
+      <para>
+       In OpenIDM ${serverDocTargetVersion}, roles are stored in an array. For
+       example:
+      </para>
+      <programlisting>
 "roles": [
     "openidm-authorized","contractor"
 ],
-        </programlisting>
-       </listitem>
-     </varlistentry>
+      </programlisting>
+     </listitem>
+    </varlistentry>
+
    </variablelist>
  </section>
  
  <section xml:id="deprecation">
   <title>Deprecated Functionality</title>
-  
-  <itemizedlist>
-    <para>The following functionality is deprecated in 
-    OpenIDM <?eval ${serverDocTargetVersion}?>.</para>
-    <listitem>
-      <para>TBD</para>
-    </listitem>
-  </itemizedlist>
-  
-  <para>No additional functionality is planned to be deprecated at this 
-  time.</para>
+  <para>
+   Apart from the support for OpenICF-style queries, noted previously, no
+   functionality has been deprecated in OpenIDM ${serverDocTargetVersion}.
+  </para>
+  <para>
+   No additional functionality is planned to be deprecated at this time.
+  </para>
  </section>
 
  <section xml:id="removed-functionality">
   <title>Removed Functionality</title>
   
-  <para>No functionality has been removed in OpenIDM ${serverDocTargetVersion}.</para>
-  
-  <para>No functionality is planned to be removed at this time.</para>
+  <para>
+   No functionality has been removed in OpenIDM ${serverDocTargetVersion}.
+  </para>
+  <para>
+   No functionality is planned to be removed at this time.
+  </para>
  </section>
  
  <section xml:id="changing-functionality">
@@ -114,8 +437,8 @@
    <para>The way you generate connector configurations for access to external
    resources, described in
    <link xlink:href="integrators-guide#connector-wiz"
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
-           Connector Configurations</citetitle></link>.</para>
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
+   Connector Configurations</citetitle></link>.</para>
   </listitem>
  </itemizedlist> 
  </section>
