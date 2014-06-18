@@ -873,9 +873,10 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
  --request DELETE \
  "http://localhost:8080/openidm/workflow/processdefinition/managedUserApproval:1:3"
     </userinput>
-    <computeroutput>
-Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</computeroutput>
     </screen>
+    <para>
+     A delete request returns the contents of deleted workflow definition.
+    </para>
    </listitem>
   </itemizedlist>
 
@@ -885,15 +886,14 @@ Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</com
     <para>
      Start a workflow process instance. For example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --data '{"_key":"managedUserApproval"}' \
  --request POST \
- "https://localhost:8443/openidm/workflow/processinstance?_action=create"
-     </userinput>
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"</userinput>
      <computeroutput>
 {
   "_id" : "4",
@@ -991,18 +991,33 @@ Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</com
     <para>
      Stop the specified process instance. For example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
- "https://localhost:8443/openidm/workflow/processinstance/4"
-     </userinput>
-     <computeroutput>{
-  "Process instance deleted" : "4"
-}</computeroutput>
-    </screen>
+ "https://localhost:8443/openidm/workflow/processinstance/4"</userinput>
+    <computeroutput>{
+  "deleteReason": null,
+  "processDefinitionId": "managedUserApproval:1:3",
+  "processInstanceId": "4",
+  "endActivityId": null,
+  "_id": "4",
+  "startUserId": "openidm-admin",
+  "startTime": "2014-06-18T10:33:40.955+02:00",
+  "tenantId": "",
+  "businessKey": null,
+  "queryVariables": null,
+  "durationInMillis": null,
+  "processVariables": {},
+  "endTime": null,
+  "superProcessInstanceId": null,
+  "startActivityId": "start"
+}</computeroutput></screen>
+    <para>
+     The delete request returns the contents of the deleted process instance.
+    </para>
    </listitem>
   </itemizedlist>
 
@@ -1013,13 +1028,12 @@ Response Content: {"Workflow definition deleted":"managedUserApproval:1:3"}</com
      Query the list of tasks defined for a specific process definition. For
      example:
     </para>
-    <screen><?dbfo pgwide="1"?><userinput>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition?_queryId=query-all-ids"
-     </userinput>
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition?_queryId=query-all-ids"</userinput>
      <computeroutput>
 {
   "result" : [ {
