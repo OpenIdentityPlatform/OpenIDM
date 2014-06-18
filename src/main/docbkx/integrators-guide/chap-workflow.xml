@@ -993,7 +993,6 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
     </para>
     <screen><userinput>$ curl \
  --cacert self-signed.crt \
- --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
