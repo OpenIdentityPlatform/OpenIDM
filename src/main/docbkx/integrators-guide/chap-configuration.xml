@@ -1063,7 +1063,7 @@ $ <userinput>curl \
      <para>
       The endpoint configuration file specifies a script (either inline with the
       <literal>"source"</literal> property, or in a referenced file with the
-      <literal>"file"</literal> property. The script is invoked with a global
+      <literal>"file"</literal> property). The script is invoked with a global
       <literal>request</literal> variable in its scope.
      </para>
      <para>
