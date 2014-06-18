@@ -960,20 +960,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private void handleLiveSyncAction(final ServerContext context, final ActionRequest request, final ResultHandler<JsonValue> handler)
             throws ResourceException {
 
-        // find the object class with __ALL__ object class
-        final Predicate<Entry<String, ObjectClassInfoHelper>> onlyAll = new Predicate<Entry<String, ObjectClassInfoHelper>>() {
-            public boolean apply(Entry<String, ObjectClassInfoHelper> entry) {
-                return ObjectClass.ALL.equals(entry.getValue().getObjectClass());
-            }
-        };
+        final String objectTypeName = getObjectTypeName(ObjectClass.ALL);
 
-        final Iterable<Entry<String, ObjectClassInfoHelper>> iter = filter(objectTypes.entrySet(), onlyAll);
-
-        if (!iter.iterator().hasNext()) {
+        if (objectTypeName == null) {
             throw new BadRequestException("__ALL__ object class is not configured");
         }
 
-        ActionRequest forwardRequest = Requests.newActionRequest(getSource(iter.iterator().next().getKey()),request.getAction());
+        final ActionRequest forwardRequest = Requests.newActionRequest(getSource(objectTypeName), request.getAction());
 
         // forward request to be handled in ObjectClassResourceProvider#actionCollection
         handler.handleResult(connectionFactory.getConnection().action(context, forwardRequest));
@@ -1341,7 +1334,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, objectClassInfoHelper.getCreateNameValue(request), request.getContent(), null, handler, activityLogger);
+                handleConnectorException(context, request, e, objectClassInfoHelper.getCreateResourceId(request), request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1951,6 +1944,23 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     /**
+     * Get the corresponding object type name from provisioner config
+     * @param objectClass the objectClass to get the name of
+     * @return the name of the objectClass or null if not found
+     */
+    protected String getObjectTypeName(final ObjectClass objectClass) {
+        final Predicate<Entry<String, ObjectClassInfoHelper>> objectClassFilter = new Predicate<Entry<String, ObjectClassInfoHelper>>() {
+            public boolean apply(Entry<String, ObjectClassInfoHelper> entry) {
+                return objectClass.equals(entry.getValue().getObjectClass());
+            }
+        };
+
+        final Iterable<Entry<String, ObjectClassInfoHelper>> objectClasses = filter(objectTypes.entrySet(), objectClassFilter);
+
+        return objectClasses.iterator().hasNext() ? objectClasses.iterator().next().getKey() : null;
+    }
+
+    /**
      * This newBuilder and this method can not be scheduled. The call MUST go
      * through the {@code org.forgerock.openidm.provisioner}
      * <p/>
@@ -2054,7 +2064,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         try {
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
-                                            final String resourceContainer = getSource(objectType);
+                                            final String objectTypeName = getObjectTypeName(syncDelta.getObjectClass());
+                                            final String resourceContainer = getSource(objectTypeName);
                                             final JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE: {
