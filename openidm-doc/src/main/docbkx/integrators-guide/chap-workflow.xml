@@ -2315,10 +2315,6 @@ $ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json</u
        <imagedata fileref="images/workflow-notifications.png" format="PNG" />
       </imageobject>
      </mediaobject>
-     <para>
-      Note that, although the sunrise process appears in the UI under the list
-      of processes, it cannot be started directly from the UI.
-     </para>
     </step>
    </procedure>
 
