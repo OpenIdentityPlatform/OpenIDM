@@ -588,9 +588,9 @@ openidm.action('workflow/processinstance', {"_action" : "create"}, params);
   <para>
    You can also query process instances based on the value of any process
    instance variable, by prefixing the variable name with
-   <literal>_var-</literal>. For example:
+   <literal>var-</literal>. For example:
   </para>
-  <screen>_var-processvariablename=processvariablevalue</screen>
+  <screen>var-processvariablename=processvariablevalue</screen>
   </section>
  </section>
 
