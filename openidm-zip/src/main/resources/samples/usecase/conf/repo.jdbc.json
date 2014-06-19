@@ -112,7 +112,10 @@
                     },
                     "/sunset" : {
                         "searchable" : true
-                    }    
+                    },
+                    "/lastPasswordSet" : {
+                        "searchable" : true
+                    }
                 }
             },
             "scheduler" : {
