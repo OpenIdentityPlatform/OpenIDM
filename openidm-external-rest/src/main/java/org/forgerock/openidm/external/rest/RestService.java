@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -204,13 +205,12 @@ public class RestService implements SingletonResourceProvider {
                 if (auth != null) {
                     String type = auth.get("type").defaultTo("basic").asString();
                     if ("basic".equalsIgnoreCase(type)) {
-                        String identifier = auth.get("user").asString();
-                        String secret = auth.get("password").asString();
+                        String identifier = auth.get("user").required().asString();
+                        String secret = auth.get("password").required().asString();
                         logger.debug("Using basic authentication for {} secret supplied: {}",
-                                identifier, (secret != null));
+                                identifier, !StringUtils.isBlank(secret));
                         ChallengeResponse challengeResponse =
-                                new ChallengeResponse(ChallengeScheme.HTTP_BASIC, identifier,
-                                        secret);
+                                new ChallengeResponse(ChallengeScheme.HTTP_BASIC, identifier, secret);
                         cr.setChallengeResponse(challengeResponse);
                     } else {
                         handler.handleError(new BadRequestException("Invalid auth type \"" + type + "\" on "
