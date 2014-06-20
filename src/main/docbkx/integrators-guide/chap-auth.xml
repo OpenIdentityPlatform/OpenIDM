@@ -54,17 +54,20 @@
    <secondary>Managed users</secondary>
   </indexterm>
 
-  <para>Beyond users connected with the <literal>PASSTHROUGH</literal> module,
-   OpenIDM distinguishes between internal users and managed users.</para>
-  
+  <para>
+   While OpenIDM authenticates internal and managed users with the
+   <literal>DELEGATED</literal> module, there are differences between these
+   two types of users.
+  </para>
+
   <section xml:id="internal-users">
    <title>Internal Users</title>
    
    <para>
-    OpenIDM creates two internal users by default - <literal>anonymous</literal> and
-    <literal>openidm-admin</literal>. These accounts are separated from other
-    user accounts to protect them from any reconciliation or synchronization
-    processes.
+    OpenIDM creates two internal users by default: <literal>anonymous</literal>
+    and <literal>openidm-admin</literal>. These accounts are separated from
+    other user accounts to protect them from any reconciliation or
+    synchronization processes.
    </para>
    
    <para>
@@ -237,8 +240,9 @@
   <para>
    The <filename>openidm/conf/authentication.json</filename> file defines
    the active query with the <literal>queryId</literal> property. In the
-   following example, <literal>credential-query</literal> represents the
-   current request.
+   following example, <literal>credential-query</literal> is the
+   <literal>queryId</literal> identifier used in a <literal>queryRequest</literal>
+   to validate credentials.
   </para>
 
    <programlisting language="javascript">
@@ -268,14 +272,23 @@
  </section>
 
  <section xml:id="passthrough-auth">
-  <title>Using Pass-Through Authentication</title>
+  <title>Using Delegated Authentication</title>
 
   <para>
    In addition to the internal and managed user authentication modules, OpenIDM
-   ${serverDocTargetVersion} supports a pass-through authentication mechanism.
-   With pass-through authentication, the username and password included with the
+   ${serverDocTargetVersion} supports a delegated authentication mechanism.
+   With delegated authentication, the username and password included with the
    REST request are validated against those stored in a remote system, such as
    an LDAP server.
+  </para>
+
+  <para>
+   Delegated authentication for OpenIDM ${serverDocTargetVersion} includes the
+   functionality previously associated with the <literal>PASSTHROUGH</literal>,
+   <literal>MANAGED_USER</literal>, and <literal>INTERNAL_USER</literal>
+   modules. For legacy purposes, OpenIDM ${serverDocTargetVersion} still
+   includes those modules as aliases for the <literal>DELEGATED</literal>
+   module.
   </para>
 
   <para>
@@ -286,16 +299,16 @@
   </para>
 
   <para>
-   You can add the pass-through authentication module to the
+   You can add the delegated authentication module to the
    <filename>conf/authentication.json</filename> file. For example, the
    following excerpt illustrates one way to implement the
-   <literal>PASSTHROUGH</literal> configuration object.
+   <literal>DELEGATED</literal> configuration object.
   </para>
 
   <programlisting language="javascript">
 "authModules" : [
    {
-      "name" : "PASSTHROUGH",
+      "name" : "DELEGATED",
       "properties" : {
          "augmentSecurityContext": {
             "type" : "text/javascript",
@@ -326,7 +339,7 @@
   </para>
 
   <para>
-   The content of the pass-through authentication object varies. Samples
+   The content of the delegated authentication object varies. Samples
    2/2b/2c/2d, 3, 5, and 6 include slightly different versions of the
    <filename>conf/authentication.json</filename> file.
   </para>
@@ -402,10 +415,8 @@
    <para>
     OpenIDM supports a variety of modules, including those available from the
     Common Authentication Framework. OpenIDM also provides
-    three additional authentication modules by default -
-    <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
-    <literal>CLIENT_CERT</literal>. These are among the modules defined in this
-    section.
+    two additional authentication modules, <literal>DELEGATED</literal> and
+    <literal>CLIENT_CERT</literal>.
    </para>
 
    <varlistentry>
@@ -421,29 +432,6 @@
    </varlistentry>
 
    <varlistentry>
-    <term>IWA</term>
-    <listitem>
-     <para>
-      Uses the Integrated Windows Authentication Module. For more information on
-      this common authentication module, see the
-      <link xlink:show="new"
-            xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter-parent/forgerock-jaspi-modules/forgerock-jaspi-iwa-module/apidocs/index.html?index-all.html">
-       <citetitle>Class JwtSessionModule</citetitle></link> Javadoc.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>OPENAM_SESSION</term>
-    <listitem>
-     <para>
-      The common OPENAM session module uses an instance of <link xlink:show="new"
-      xlink:href="http://openam.forgerock.org/">
-      <citetitle>OpenAM</citetitle></link> to validate SSO tokens.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
     <term>CLIENT_CERT</term>
     <listitem>
      <para>
@@ -456,35 +444,9 @@
     <listitem>
      <para>
       Module that validates client requests by passing through to an OpenICF
-      connector.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>MANAGED_USER</term>
-    <listitem>
-     <para>
-      As noted in <xref linkend="managed-users" />, this module normally applies
-      to external users managed by OpenIDM.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>INTERNAL_USER</term>
-    <listitem>
-     <para>
-      As suggested by <xref linkend="internal-users" />, this authentication
-      module applies only to OpenIDM internal users, including
-      <literal>anonymous</literal> and <literal>openidm-admin</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>PASSTHROUGH</term>
-    <listitem>
-     <para>
-      Validates client requests by passing them through an OpenICF connector
-      to an external resource.
+      connector. For OpenIDM ${serverDocTargetVersion}, this is an alias for
+      <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
+      <literal>PASSTHROUGH</literal>.
      </para>
     </listitem>
    </varlistentry>
@@ -556,10 +518,8 @@
   </variablelist>
 
   <para>
-   OpenIDM begins the process of defining the roles of a user with the
-   <literal>roles</literal> property. If that property is defined with the
-   <literal>propertyMapping</literal> object in the
-   <filename>authentication.json</filename> file, OpenIDM proceeds in the
+   OpenIDM begins the process of assigning the roles of a user with the
+   <literal>roles</literal> property. OpenIDM then proceeds in the
    following sequence to define user roles:
   </para>
 
@@ -568,22 +528,21 @@
     <para>
      If the <literal>defaultRoles</literal> property is set, OpenIDM assigns
      those roles to the given user. The <literal>defaultRoles</literal> property
-     may be configured in an array.
+     must be configured in an array.
     </para>
    </listitem>
    <listitem>
     <para>
-     If the <literal>userRoles</literal> property is defined, OpenIDM takes the
-     roles listed in that attribute, and assigns them to the user. The
-     <literal>userRoles</literal> are listed as a comma-delimited string or a
-     list of strings. You can identify the list with a REST call to a
-     <literal>queryOnResource</literal> endpoint such as
+     The <literal>userRoles</literal> property is a string that defines the
+     attribute. The value of the attribute may be either a comma-delimited
+     string or a list of strings. You can identify the list with a REST call to
+     a <literal>queryOnResource</literal> endpoint such as
      <literal>system/ldap/account</literal>
     </para>
    </listitem>
    <listitem>
     <para>
-     If the <literal>gropuRoleMapping</literal> and/or
+     If the <literal>gropuRoleMapping</literal> and
      <literal>groupMembership</literal> properties are defined, OpenIDM
      assigns additional roles to users depending on any existing group
      membership.
@@ -594,8 +553,10 @@
   <para>
    The roles calculated in sequence are cumulative. In other words, if all of
    the above properties are defined, OpenIDM would assign roles from
-   <literal>defaultRoles</literal>, <literal>userRoles</literal>,
-   <literal>groupRoleMapping</literal>, and <literal>groupMembership</literal>.
+   <literal>defaultRoles</literal> and <literal>userRoles</literal>. It would
+   also use a <literal>MappingRoleCalculator</literal> to define roles from the
+   <literal>groupRoleMapping</literal> and <literal>groupMembership</literal>
+   properties.
   </para>
 
   <para>
