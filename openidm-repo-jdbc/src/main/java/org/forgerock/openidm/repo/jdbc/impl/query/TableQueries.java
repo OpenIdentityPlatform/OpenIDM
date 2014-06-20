@@ -24,6 +24,11 @@
 
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
+import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
+import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +44,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
@@ -48,11 +54,6 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
-import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
-import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 
 /**
  * Configured and add-hoc query support on tables in generic (non-object
@@ -187,7 +188,7 @@ public class TableQueries {
      *             configuration or DB issues
      */
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con)
-            throws BadRequestException, InternalServerErrorException {
+            throws ResourceException {
 
         List<Map<String, Object>> result = null;
         params.put(ServerConstants.RESOURCE_NAME, type);
@@ -293,7 +294,7 @@ public class TableQueries {
      * @return A resolved statement
      */
     PreparedStatement resolveInlineQuery(Connection con, String queryExpression,
-            Map<String, Object> params) throws SQLException {
+            Map<String, Object> params) throws SQLException, ResourceException {
         // No token replacement on expressions for now
         List<String> tokenNames = new ArrayList<String>();
         QueryInfo info = new QueryInfo(queryExpression, tokenNames);
@@ -319,7 +320,7 @@ public class TableQueries {
      *             if no query is defined for the given identifier
      */
     PreparedStatement getQuery(Connection con, String queryId, String type,
-            Map<String, Object> params) throws SQLException, BadRequestException {
+            Map<String, Object> params) throws SQLException, ResourceException {
 
         QueryInfo info = queries.get(queryId);
         if (info == null) {
@@ -355,7 +356,7 @@ public class TableQueries {
      *             if resolving the query failed
      */
     PreparedStatement resolveQuery(QueryInfo info, Connection con, Map<String, Object> params)
-            throws SQLException {
+            throws SQLException, ResourceException {
         String queryStr = info.getQueryString();
         List<String> tokenNames = info.getTokenNames();
 
@@ -383,12 +384,19 @@ public class TableQueries {
                 String value = null;
                 if (objValue != null) {
                     value = objValue.toString();
+                } else {
+                    // fail with an exception if token not found
+                    throw new BadRequestException("Missing entry in params passed to query for token " + tokenName);
                 }
                 statement.setString(count, value);
                 count++;
             }
             else {
                 Object objValue =  params.get(tokenParts[1]);
+                if (objValue == null) {
+                    // fail with an exception if token not found
+                    throw new BadRequestException("Missing entry in params passed to query for token " + tokenName);
+                }
                 if (PREFIX_INT.equals(tokenParts[0])) {
                     // handle single integer value
                     Integer int_value = null;
