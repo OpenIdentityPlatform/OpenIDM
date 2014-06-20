@@ -19,7 +19,6 @@ package org.forgerock.openidm.jaspi.modules;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
@@ -47,7 +46,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -319,14 +317,6 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
 
             // run the augmentation script, if configured (will no-op if none specified)
             augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties, securityContextMapper);
-
-            Map<String, Object> contextMap =
-                    (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
-            if (contextMap == null) {
-                contextMap = new HashMap<String, Object>();
-            }
-            contextMap.putAll(securityContextMapper.getAuthorizationId());
-
 
         } catch (ResourceException e) {
             if (logger.isDebugEnabled()) {
