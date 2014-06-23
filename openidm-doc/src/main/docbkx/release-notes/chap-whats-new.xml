@@ -29,135 +29,300 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>What's New in OpenIDM <?eval ${serverDocTargetVersion}?></title>
- 
-  <important>
-    <para>OpenIDM <?eval ${serverDocTargetVersion}?> is a milestone release from the
-    main development branch of the product. This release contains selected key
-    features and all current fixed issues. The release has undergone important
-    functional testing but not the complete testing cycle that is done for a
-    full enterprise release. Many of the interfaces provided in this release
-    are still evolving and are not guaranteed to be supported in the enterprise
-    release.</para>
+ <title>What's New in OpenIDM ${serverDocTargetVersion}</title>
 
-    <para>This release is supported through a ForgeRock subscription. Its goal
-    is to enable you to start build phases earlier, with the most recent features,
-    instead of having to wait for the full release date. Fixes to issues that are
-    discovered in this release will be delivered as patches to ForgeRock customers,
-    and are guaranteed to be delivered in the full release that follows. This
-    release will be supported for a grace period after the full version has
-    been released.</para>
-    
-    <para>With the exception of these Release Notes, the official 
-    documentation for this release is still in progress, and is accessible at 
-    <link xlink:href="http://openidm.forgerock.org/docs.html" />.
-    The complete, validated documentation set will be available with the 
-    full release.</para>
-  </important> 
+  <para>
+   OpenIDM ${serverDocTargetVersion} provides many new features and product
+   enhancements. The following list describes the main new features affecting an
+   end user.
+  </para>
 
- <itemizedlist>
-  <para>OpenIDM <?eval ${serverDocTargetVersion}?> provides many new features,
-  including the following:</para>
-  <listitem>
-    <para>Browser-based user interface</para>
-    <para>Includes self service capabilities, a generic platform to expose and 
-    invoke workflows, and a notification service for tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-ui"
-    xlink:role="http://docbook.org/xlink/role/olink">
-    <citetitle>OpenIDM User Interface</citetitle></link> in the
-    <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-  <listitem>
-    <para>BPMN 2.0 workflow engine, embedded as an OSGi bundle and accessible 
-    over REST.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-workflow"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Integrating Business Processes and Workflows</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-  <listitem>
-    <para>Configurable task scheduling service, including support for 
-    clustered schedules and scanning tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-scheduler-conf"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Scheduling Tasks and Events</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Configurable policy service.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-policies"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Using Policies to Validate Data</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Ability to perform batch scans to execute tasks</para>
-    <para>For more information, see <link xlink:href="integrators-guide#task-scanner"
-                                          xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Scanning Data to Trigger Tasks</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Ability to create custom RESTful endpoints.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#adding-custom-endpoints"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Adding Custom Endpoints</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Support for MS SQL JDBC as an internal repository.</para>
-    <para>For more information, see
-    <link xlink:href="http://openidm.forgerock.org/doc/install-guide#repository-mssql">
-    <citetitle>To Set Up OpenIDM With MS SQL</citetitle></link>
-    in the <citetitle>Installation Guide</citetitle>.</para>
-  </listitem>  
-  <listitem>
-    <para>Enhanced, multi-threaded reconciliation service, accessible over REST.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#chap-synchronization"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Configuring Synchronization</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Support for Powershell scripts on the Active Directory connector.
-    </para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#ad-powershell"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Using PowerShell Scripts With the Active Directory Connector</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>     
-  </listitem>
-  <listitem>
-    <para>Reusable server configuration and property value substitution in the 
-    configuration.</para>
-    <para>For more information, see
-        <link xlink:href="integrators-guide#using-property-substitution"
-              xlink:role="http://docbook.org/xlink/role/olink">
-            <citetitle>Using Property Value Substitution in the Configuration</citetitle></link>
-    in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-      <para>Support for calling LiveSync operations over REST, or using the
-      resource API.</para>
-      <para>For more information, see
-          <link xlink:href="integrators-guide#livesync-over-rest"
-                xlink:role="http://docbook.org/xlink/role/olink">
-              <citetitle>Triggering LiveSync Over REST</citetitle></link>
-      in the <citetitle>Integrator's Guide</citetitle>.</para>
-  </listitem>
-      
- </itemizedlist>
+  <variablelist>
+   <varlistentry>
+    <term>Role-based Provisioning</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} provides the ability to create and
+      manage roles that can be assigned to users. Roles provides an abstraction
+      layer in the way entitlements and attributes are set on target resources.
+      The roles functionality makes the assignment and removal of entitlements
+      and resources more consistent and easier to manage.
+     </para>
+     <para>
+      Support for a new <literal>managed/role</literal> object allows easy
+      assignment of roles to user objects, implicitly, via business logic, or
+      explicitly, over the REST interface.
+     </para>
+    </listitem>
+   </varlistentry>
 
- <para>For installation instructions and several samples to familiarize you 
- with the features, see the <link xlink:href="install-guide#chap-install"
-                                  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
-         Guide</citetitle></link>.</para>
+   <varlistentry>
+    <term>High Availability Support</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} supports cluster configuration and high
+      availability "out of the box".
+     </para>
+     <para>
+      Specific nodes can be configured to deal only with certain types of tasks,
+      for example, reconciliations. Nodes can also be configured to share load
+      and to act as a backup in the event of another node becoming unavailable.
+     </para>
+     <para>
+      For more information, see <link xlink:show="new"
+      xlink:href="integrators-guide#chap-cluster"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+      OpenIDM to Work in a Cluster</citetitle></link> in the
+      <citetitle>Integrator's Guide</citetitle>.
+     </para>
+    </listitem>
+   </varlistentry>
 
- <para>For an architectural overview and high-level presentation of OpenIDM,
- see the <link xlink:href="integrators-guide#chap-overview"
-               xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
-         Overview</citetitle></link> chapter in the <citetitle>Integrator's
- Guide</citetitle>.</para>
+   <varlistentry>
+    <term>Scripting Enhancements</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} supports product-wide scripting in
+      Groovy.
+     </para>
+     <para>
+      Previous releases supported only JavaScript, with the exception of
+      Workflow definitions and certain generic scripted connectors. With
+      product-wide Groovy scripting, the language can now be used throughout to
+      define business logic and customizations.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Synchronization Delivery Guarantees</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} provides a new <literal>onSync</literal>
+      hook that enables clients to assess whether an overall synchronization
+      operation was successful on all remote systems, with the ability to roll
+      back synchronized changes in the event of one or more remote systems being
+      unavailable.
+     </para>
+     <para>
+      For more information, see <link xlink:show="new"
+      xlink:href="integrators-guide#sync-types-automatic"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>How
+      Automatic Sync works with onSync </citetitle></link> in the
+      <citetitle>Integrator's Guide</citetitle>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>User Interface Improvements</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Expanded folder structure
+       </para>
+       <para>
+        Previously, the static files making up the UI were packaged into a jar,
+        which made customization of the UI difficult. In this version, UI files
+        are expanded into the directory
+        <filename>path/to/openidm/ui/default/enduser/public</filename>, and can
+        be edited in this location. Changes made to files in this directory will
+        after a browser refresh.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Project-specific UI customization
+       </para>
+       <para>
+        A new mechanism in the servlet that hosts the UI searches for
+        installation-specific overrides for many of the default UI files.
+        Customized files can be placed in the corresponding location in the
+        <filename>path/to/openidm/ui/extension</filename> directory. As long as
+        the files placed here have the same name as the default UI files, the
+        UI displays the customized files instead of the defaults. This facility
+        allows you to customize the UI without having to make changes to any
+        default files, which in turn makes upgrading easier.
+       </para>
+       <para>
+        For more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#ui-customizing"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Customizing
+        the UI Theme</citetitle></link> in the <citetitle>Integrator's
+        Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Configuration-based customization
+       </para>
+       <para>
+        A new UI theme configuration file
+        (<filename>/path/to/openidm/conf/ui-themeconfig.json</filename>) stores
+        detailed color values, background image paths, and a number of other
+        common styling options. Because the UI theme configuration file is part
+        of the configuration store, it is shared by all nodes in a cluster.
+        Changes made to this file do therefore not have to be replicated
+        manually across nodes.
+       </para>
+       <para>
+        For more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#ui-customizing"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Customizing
+        the UI Theme</citetitle></link> in the <citetitle>Integrator's
+        Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Sample OpenIDM configurations that work with the UI
+       </para>
+       <para>
+        All the documented sample configurations now work with the UI. For more
+        information, see <link xlink:show="new"
+        xlink:href="install-guide/#chap-samples"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+        Samples</citetitle></link> in the <citetitle>Installation Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Pass-Through Authentication
+       </para>
+       <para>
+        In previous OpenIDM releases, the only way in which an end user could
+        log into the UI for self-service requests was when a password had been
+        set in the end user's <literal>managed/user</literal> record. This
+        situation presented problems for organizations in which user records
+        originated in an external resource (such as an LDAP directory). In this
+        case, OpenIDM would generally be unable to read the clear text password
+        from the system resource (because such passwords are usually stored in
+        encrypted form).
+       </para>
+       <para>
+        OpenIDM ${serverDocTargetVersion} supports pass-through authentication
+        to most external data sources. This means that users are able to log
+        into the UI based on, for example, their LDAP credentials. After they
+        have logged in, they are able to perform the full range of
+        end-user-oriented tasks.
+       </para>
+       <para>
+        For more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#passthrough-auth"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using
+        Pass-Through Authentication</citetitle></link> in the
+        <citetitle>Integrator's Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        JWT Sessions
+       </para>
+       <para>
+        In previous releases, user sessions existed in the memory of the
+        OpenIDM server that performed the initial authentication. This was
+        acceptable in single-node environments, but in a clustered environment,
+        this meant that the user had to remain on the node they first
+        encountered. The solution provided no high-availability or failover.
+       </para>
+       <para>
+        In OpenIDM ${serverDocTargetVersion}, user sessions are created as
+        encrypted Java Web Token (JWT) cookies. All the details of the user are
+        stored on the client, rather than on the server. Requests can therefore
+        be sent to any node in a cluster, enabling high-availability and
+        failover server configurations.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Scalable managed/user administration
+       </para>
+       <para>
+        OpenIDM ${serverDocTargetVersion} supports server-side paging, searching
+        and sorting for managed/user records. This improvement enables supports
+        for the administration of millions of records in the managed/user table
+        with little noticeable performance degradation, assuming correct database
+        tuning.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        External website integration
+       </para>
+       <para>
+        In previous releases, it was particularly complex to use any of the
+        end-user oriented REST endpoints provided by OpenIDM from another
+        website within the organization.
+       </para>
+       <para>
+        OpenIDM ${serverDocTargetVersion} supports Cross Origin Resource
+        Sharing (CORS), which allows a "white list" of domains to make REST
+        calls to OpenIDM directly from within their own webpage context.
+        Authenticated users are now able to interact with OpenIDM services
+        (workflows, profile management, custom endpoints, and so forth) from
+        within their existing applications.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Workflow improvements</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        External Activiti workflow templates
+       </para>
+       <para>
+        In previous OpenIDM releases, if you needed to define a custom template
+        for a workflow, you had to embed the HTML template within the workflow
+        definition. This was often cumbersome and difficult to maintain.
+       </para>
+       <para>
+        In this release, you can define an external HTML template and refer to
+        that template from within the workflow definition.
+       </para>
+       <para>
+        For more information, see <link xlink:show="new"
+        xlink:href="integrators-guide#activiti-custom-templates"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Custom
+        Templates for Activiti Workflows</citetitle></link> in the
+        <citetitle>Integrator's Guide</citetitle>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Documented workflow use cases
+       </para>
+       <para>
+        OpenIDM ${serverDocTargetVersion} provides a number of sample workflows,
+        that demonstrate typical use cases for OpenIDM. Each of these sample
+        workflows is integrated with the default UI. For more information see
+        <link xlink:show="new" xlink:href="integrators-guide#workflow-use-cases"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Workflow Use
+        Cases</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+ <para>
+  For installation instructions and several samples to familiarize you with the
+  OpenIDM features, see the <link xlink:href="install-guide#chap-install"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+  Guide</citetitle></link>.
+ </para>
+ <para>
+  For an architectural overview and high-level presentation of OpenIDM, see the
+  <link xlink:href="integrators-guide#chap-overview"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
+  Overview</citetitle></link> chapter in the <citetitle>Integrator's
+ Guide</citetitle>.
+ </para>
+
 </chapter>
