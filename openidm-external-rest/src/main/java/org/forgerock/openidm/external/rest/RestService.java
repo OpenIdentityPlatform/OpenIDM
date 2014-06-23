@@ -202,7 +202,7 @@ public class RestService implements SingletonResourceProvider {
 
                 setAttributes(cr.getRequest(), attrs, headers);
 
-                if (auth != null) {
+                if (!auth.isNull()) {
                     String type = auth.get("type").defaultTo("basic").asString();
                     if ("basic".equalsIgnoreCase(type)) {
                         String identifier = auth.get("user").required().asString();
