@@ -1949,6 +1949,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @return the name of the objectClass or null if not found
      */
     protected String getObjectTypeName(final ObjectClass objectClass) {
+        if (objectClass == null) {
+            return null;
+        }
         final Predicate<Entry<String, ObjectClassInfoHelper>> objectClassFilter = new Predicate<Entry<String, ObjectClassInfoHelper>>() {
             public boolean apply(Entry<String, ObjectClassInfoHelper> entry) {
                 return objectClass.equals(entry.getValue().getObjectClass());
@@ -2065,7 +2068,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
                                             final String objectTypeName = getObjectTypeName(syncDelta.getObjectClass());
-                                            final String resourceContainer = getSource(objectTypeName);
+                                            final String resourceContainer = getSource(objectTypeName == null ? objectType : objectTypeName);
                                             final JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE: {
