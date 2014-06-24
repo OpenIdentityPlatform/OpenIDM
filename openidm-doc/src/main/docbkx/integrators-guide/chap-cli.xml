@@ -122,8 +122,7 @@ remote:configimport         Imports the configuration set from local file/direct
        The URL of the OpenIDM REST service. The default URL is
        <literal>http://localhost:8080/openidm/</literal>. This can
        be used to import configuration files from a remote running
-       instance of OpenIDM. This option is used with the
-       <command>configimport</command> and <command>configexport</command>
+       instance of OpenIDM. This option is used by all three subcommands.
        commands.
       </para>
      </listitem>
@@ -135,8 +134,7 @@ remote:configimport         Imports the configuration set from local file/direct
        The port number associated with the OpenIDM REST service. If specified,
        this option overrides any port number specified with the
        <command>--url</command> option. The default port is 8080. This option is
-       used with the <command>configimport</command> and
-       <command>configexport</command> commands.
+       used by all three subcommands.
       </para>
      </listitem>
     </varlistentry>
