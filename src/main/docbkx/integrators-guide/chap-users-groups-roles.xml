@@ -68,16 +68,32 @@
  <section xml:id="working-with-groups">
   <title>Working With Managed Groups</title>
   <para>
-   The managed object model includes a <literal>"group"</literal> object by
-   default. For a JDBC repository, OpenIDM stores managed groups with all other
-   managed objects, in the<literal>managedobjects</literal> table, and uses the
+   OpenIDM provides support for a managed <literal>"group"</literal> object. For
+   a JDBC repository, OpenIDM stores managed groups with all other managed
+   objects, in the<literal>managedobjects</literal> table, and uses the
    <literal>managedobjectproperties</literal> for indexing. For an OrientDB
    repository, managed groups are stored in the <literal>managed_group</literal>
    table.
   </para>
   <para>
-   OpenIDM provides RESTful access to managed groups, at the context path
-   <literal>/openidm/managed/group</literal>.
+   The managed group object is not provided by default. To use managed groups,
+   add an object similar to the following to your
+   <filename>conf/managed.json</filename> file:
+  </para>
+  <programlisting>{
+    "name" : "group"
+},
+  </programlisting>
+  <para>
+   With this addition, OpenIDM provides RESTful access to managed groups, at the
+   context path <literal>/openidm/managed/group</literal>.
+  </para>
+  <para>
+   For an example of a deployment that uses managed groups, see <link
+   xlink:show="new" xlink:href="install-guide##more-sample2d"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample 2d -
+   Synchronizing LDAP Groups</citetitle></link> in the <citetitle>Installation
+   Guide</citetitle>.
   </para>
  </section>
 
