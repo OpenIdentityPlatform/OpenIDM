@@ -96,7 +96,7 @@ public final class JsonUtil {
         // TODO: delegate the sanity check if String is a candidate for parsing
         // to the crypto lib
         boolean candidate =
-                value != null && value.startsWith("{\"$crypto\":{") && value.endsWith("\"}}");
+                value != null && value.startsWith("{\"$crypto\":{") && value.endsWith("}}");
         if (candidate) {
             try {
                 JsonValue jsonValue = parseStringified(value);
