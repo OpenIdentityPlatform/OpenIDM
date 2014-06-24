@@ -1073,10 +1073,14 @@ $ <userinput>curl \
      </para>
      <para>
       All processes within OpenIDM are initiated with a request. Requests can
-      come either from the REST API, (see
-      http://openidm.forgerock.org/doc/integrators-guide/index.html#appendix-rest)
-      or internally, from a script, using the <literal>openidm</literal> router
-      object, (see http://openidm.forgerock.org/doc/integrators-guide/index.html#function-ref).
+      come either from the REST API, as shown in the <link xlink:show="new"
+      xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="integrators-guide#appendix-rest"><citetitle>REST API
+      Reference</citetitle></link>) or internally, from a script, using the
+      <literal>openidm</literal> router object, as defined in the
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:href="integrators-guide#appendix-router"><citetitle>Router Service
+      Reference</citetitle></link>.
       Regardless of how the process is initiated, the details of the request are
       represented in the same way - within an object named <literal>request</literal>.
      </para>
