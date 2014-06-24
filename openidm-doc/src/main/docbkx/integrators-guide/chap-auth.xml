@@ -284,11 +284,10 @@
 
   <para>
    Delegated authentication for OpenIDM ${serverDocTargetVersion} includes the
-   functionality previously associated with the <literal>PASSTHROUGH</literal>,
+   functionality associated with the <literal>PASSTHROUGH</literal>,
    <literal>MANAGED_USER</literal>, and <literal>INTERNAL_USER</literal>
-   modules. For legacy purposes, OpenIDM ${serverDocTargetVersion} still
-   includes those modules as aliases for the <literal>DELEGATED</literal>
-   module.
+   modules. OpenIDM ${serverDocTargetVersion} includes those modules as aliases
+   for the <literal>DELEGATED</literal> module.
   </para>
 
   <para>
@@ -302,7 +301,9 @@
    You can add the delegated authentication module to the
    <filename>conf/authentication.json</filename> file. For example, the
    following excerpt illustrates one way to implement the
-   <literal>DELEGATED</literal> configuration object.
+   <literal>DELEGATED</literal> configuration object. For descriptive purposes,
+   you can substitute the <literal>MANAGED_USER</literal> alias for
+   <literal>DELEGATED</literal>.
   </para>
 
   <programlisting language="javascript">
@@ -360,13 +361,6 @@
       <literal>system/ldap/account</literal>. The
       <literal>managedUserLink</literal> is
       <literal>systemLdapAccounts_managedUser</literal>.
-     </para>
-     <para>
-      Since the authoritative data store is the external LDAP server, the
-      <literal>MANAGED_USER</literal> auth module is disabled in the
-      default <filename>authentication.json</filename> file. Synchronization
-      for these samples relies on the <literal>PASSTHROUGH</literal> auth
-      module.
      </para>
     </listitem>
    </varlistentry>
