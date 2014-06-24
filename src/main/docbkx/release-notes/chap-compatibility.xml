@@ -274,12 +274,12 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
       </listitem>
       <listitem>
        <para>
-        The way in which queries are constructed has changed. Queries that
-        followed the OpenICF format are no longer supported and query filters
-        must now be specified in common filter notation.
+        The way in which system object queries are constructed has changed.
+        Queries that followed the OpenICF format are no longer supported and
+        query filters must now be specified in common filter notation.
        </para>
        <para>
-        For example, the following query in OpenIDM 2.1.0:
+        For example, the following query in OpenIDM ${serverDocTargetVersion}:
        </para>
 <programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent']	}	}</programlisting>
        <para>
@@ -291,9 +291,8 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
         REST (which was not possible in OpenIDM 2.1.0).
        </para>
        <para>
-        For information
-        about the supported query format, see <link xlink:show="new"
-        xlink:href="integrators-guide#constructing-queries"
+        For information about the supported query format, see <link
+        xlink:show="new" xlink:href="integrators-guide#constructing-queries"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
         Queries</citetitle></link> in the <citetitle>Integrators
         Guide</citetitle>.

@@ -421,8 +421,8 @@
   </simplelist>
 
   <para>
-   A <literal>_queryFilter</literal> must be configured with valid QueryFilter
-   syntax:
+   A <literal>_queryFilter</literal> is supported only for system objects and
+   must be configured with valid QueryFilter syntax:
   </para>
 
   <variablelist>
