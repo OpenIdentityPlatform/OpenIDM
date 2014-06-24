@@ -146,7 +146,7 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 for (AttributeInfoHelper attribute : attributes) {
-                    if (attribute.getName().equals(field.leaf())) {
+                    if (attribute.getName().equals(field.leaf()) && attribute.getAttributeInfo().isReadable()) {
                         builder.setAttributesToGet(attribute.getAttributeInfo().getName());
                         break;
                     }
@@ -361,7 +361,7 @@ public class ObjectClassInfoHelper {
         JsonValue result = new JsonValue(new LinkedHashMap<String, Object>(source.getAttributes().size()));
         for (AttributeInfoHelper attributeInfo : attributes) {
             Attribute attribute = source.getAttributeByName(attributeInfo.getAttributeInfo().getName());
-            if (null != attribute) {
+            if (null != attribute && attributeInfo.getAttributeInfo().isReadable()) {
                 result.put(attributeInfo.getName(), attributeInfo.build(attribute, cryptoService));
             }
         }
