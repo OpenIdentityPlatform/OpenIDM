@@ -201,17 +201,34 @@
         encrypted form).
        </para>
        <para>
-        OpenIDM ${serverDocTargetVersion} supports pass-through authentication
+        OpenIDM ${serverDocTargetVersion} supports delegated authentication
         to most external data sources. This means that users are able to log
         into the UI based on, for example, their LDAP credentials. After they
         have logged in, they are able to perform the full range of
         end-user-oriented tasks.
        </para>
        <para>
+        The <literal>DELEGATED</literal> module can now authenticate against
+        multiple targets, using either a named <literal>queryId</literal> or an
+        <literal>authenticate</literal> action, as appropriate. These targets
+        are described by the <literal>queryOnResource</literal> property.
+       </para>
+       <para>
+        Furthermore, to describe the authentication target, you may see
+        <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, or
+        <literal>PASSTHROGH</literal> used as aliases for
+        <literal>DELEGATED</literal>.
+       </para>
+       <para>
+        If <literal>queryId</literal> is not defined, the
+        <literal>DelegatedAuthModule</literal> proceeds with an authentication
+        action, requiring username and password parameters.
+       </para>
+       <para>
         For more information, see <link xlink:show="new"
         xlink:href="integrators-guide#passthrough-auth"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using
-        Pass-Through Authentication</citetitle></link> in the
+        Delegated Authentication</citetitle></link> in the
         <citetitle>Integrator's Guide</citetitle>.
        </para>
       </listitem>
