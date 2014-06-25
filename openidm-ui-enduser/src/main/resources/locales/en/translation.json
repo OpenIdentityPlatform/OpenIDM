@@ -181,6 +181,7 @@
                 "CANNOT_CONTAIN_CHARACTERS" : "Cannot contain characters: __forbiddenChars__",
                 "MIN_LENGTH" : "At least __minLength__ characters",
                 "REQUIRED" : "Cannot be blank",
+                "VALID_DATE" : "Must be a valid date",
                 "UNIQUE" : "Already exists",
                 "REAUTH_REQUIRED" : "",
                 "formContainsErrors" : "Form contains validation errors",
