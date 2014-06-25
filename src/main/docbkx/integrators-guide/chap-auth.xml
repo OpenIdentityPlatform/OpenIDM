@@ -302,7 +302,7 @@
    <filename>conf/authentication.json</filename> file. For example, the
    following excerpt illustrates one way to implement the
    <literal>DELEGATED</literal> configuration object. For descriptive purposes,
-   you can substitute the <literal>MANAGED_USER</literal> alias for
+   you can substitute the <literal>PASSTHROUGH</literal> alias for
    <literal>DELEGATED</literal>.
   </para>
 
@@ -871,7 +871,7 @@ return isProcessOnUsersList(processDefinitionId);
        security context.
       </para>
       <para>
-       For pass-through authentication, OpenIDM uses the
+       For delegated (pass-through authentication), OpenIDM uses the
        <filename>populateAsManagedUser.js</filename> script. This script uses
        authentication details returned from the pass-through authentication
        module. Those details can point to a linked managed user record.
