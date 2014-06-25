@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -405,8 +404,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
      */
     private ServiceTracker initServiceTracker(BundleContext context) {
         ServiceTracker tracker =
-                new ServiceTrackerNotifier(context, ClusterManagementService.class.getName(), null,
-                        this);
+                new ServiceTrackerNotifier(context, ClusterManagementService.class.getName(), null, this);
         tracker.open();
         return tracker;
     }
@@ -426,6 +424,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         if (cluster != null) {
             cluster.unregister(LISTENER_ID);
             cluster = null;
+            clusterUp = false;
         }
     }
 
@@ -440,27 +439,6 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
             clusterService.register(LISTENER_ID, this);
             cluster = clusterService;
         }
-    }
-
-    private void bindClusterManagementService(final ClusterManagementService service) {
-        service.register(LISTENER_ID, this);
-        cluster = service;
-
-    }
-
-    private void updatedClusterManagementService(final ClusterManagementService service) {
-        if (cluster != null) {
-            cluster.unregister(LISTENER_ID);
-            cluster = null;
-        }
-        if (service != null) {
-            service.register(LISTENER_ID, this);
-            cluster = service;
-        }
-    }
-
-    private void unbindClusterManagementService(final ClusterManagementService service) {
-        service.unregister(LISTENER_ID);
     }
 
     /**
@@ -718,5 +696,5 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
         }
         return true;
     }
-    
-        }
+
+}
