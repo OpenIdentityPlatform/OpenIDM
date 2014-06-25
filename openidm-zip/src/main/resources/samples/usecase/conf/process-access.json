@@ -3,15 +3,15 @@
         {
             "propertiesCheck" : {
                 "property" : "_id",
-                "matches" : ".*",
+                "matches" : "accessRequest",
                 "requiresRole" : "openidm-authorized"
             }
         },
         {
             "propertiesCheck" : {
                 "property" : "_id",
-                "matches" : ".*",
-                "requiresRole" : "openidm-admin"
+                "matches" : "newUserCreate",
+                "requiresRole" : "openidm-authorized"
             }
         }
     ]
