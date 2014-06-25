@@ -274,7 +274,7 @@
         <serverDocTargetVersion>${project.version}</serverDocTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
-        <openicfBundleVersion>1.1.1.0</openicfBundleVersion>
+        <openicfBundleVersion>[1.1,1.5]</openicfBundleVersion>
         <orientdbVersion>${orientdb.version}</orientdbVersion>
         <gaId>UA-23412190-9</gaId>
         <!--
@@ -285,10 +285,10 @@
         -->
         <releaseDate/>
         <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
-        <frDocPluginVersion>2.1.2</frDocPluginVersion>
+        <frDocPluginVersion>2.1.3</frDocPluginVersion>
 
-	<!-- Doc Branding -->
-	<brandingGroupId>org.forgerock.commons</brandingGroupId>
+	       <!-- Doc Branding -->
+	       <brandingGroupId>org.forgerock.commons</brandingGroupId>
         <brandingArtifactId>forgerock-doc-default-branding</brandingArtifactId>
         <brandingVersion>3.0.0-SNAPSHOT</brandingVersion>
 
