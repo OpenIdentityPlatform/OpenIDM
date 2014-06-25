@@ -630,6 +630,7 @@
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
+                <include>conf/external.email.json</include>
                 <include>conf/managed.json</include>
                 <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>

@@ -337,11 +337,11 @@ Usecase6 - Password change reminder
     - By default it sends the default OpenIDM notifications to the user (visible on the UI).
 
     - It can send email notification to the user if configured. 
-        External email service of OpenIDM has to be configured using the following file:
-        samples/usecase/conf/external.email.json
-        Update the smtp settings of this file and copy it to samples/usecase/usecase6/conf/ folder.
-        Note that if you want to use this option you have to make sure that the 'mail' attribute of the
-        managed user(s) used for this test case are valid email addresses.
+        - External email service of OpenIDM has to be configured using the following file:
+            samples/usecase/usecase6/conf/external.email.json
+            Update the smtp settings in this file before starting the workflow.
+            Note that if you want to use this option you have to make sure that the 'mail' attribute of the
+            managed user(s) used for this test case are valid email addresses.
 
         To enable email notifications change the following parameter of passwordchange.js:
         change "emailEnabled" : "false", 

@@ -166,6 +166,22 @@
                     ]
                 },
                 {
+                    "name" : "startDate",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
+                        }
+                    ]
+                },
+                {
+                    "name" : "endDate",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
+                        }
+                    ]
+                },
+                {
                     "name" : "securityQuestion",
                     "policies" : [
                         {
