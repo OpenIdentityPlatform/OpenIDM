@@ -1384,28 +1384,16 @@ x   </programlisting>
    <programlisting>...
 "sources" : {
   "default" : {
-    "directory" : "&amp;{launcher.install.location}/bin/defaults/script",
-    "subdirectories" : "true",
-    "visibility" : "public",
-    "type" : "auto-detect"
+    "directory" : "&amp;{launcher.install.location}/bin/defaults/script"
   },
   "install" : {
-    "directory" : "&amp;{launcher.install.location}",
-    "subdirectories" : "true",
-    "visibility" : "public",
-    "type" : "auto-detect"
+    "directory" : "&amp;{launcher.install.location}"
   },
   "project" : {
-    "directory" : "&amp;{launcher.project.location}",
-    "subdirectories" : "true",
-    "visibility" : "public",
-    "type" : "auto-detect"
+    "directory" : "&amp;{launcher.project.location}"
   },
   "project-script" : {
-    "directory" : "&amp;{launcher.project.location}/script",
-    "subdirectories" : "true",
-    "visibility" : "public",
-    "type" : "auto-detect"
+    "directory" : "&amp;{launcher.project.location}/script"
   }
 ...</programlisting>
 

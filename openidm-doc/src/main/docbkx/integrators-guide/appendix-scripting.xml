@@ -41,25 +41,211 @@
    defining correlation rules, filters, and triggers, and so on.
   </para>
 
+  <para>
+   OpenIDM ${serverDocTargetVersion} supports scripts written in JavaScript and
+   Groovy. OpenIDM configures script options in the
+   <filename>conf/script.json</filename> file.
+  </para>
+
   <section xml:id="scripting-configuration">
    <title>Scripting Configuration</title>
 
    <para>
-    You define scripts using script objects, which can either include the code
-    directly in the configuration, or call an external file that contains the
-    script.
-   </para>
-   <para>
-    Custom scripts should be placed in the <literal>script/</literal> folder for
-    your project, for example <literal>path/to/openidm/script/</literal>. Do not
-    modify or remove the script files located in
-    <literal>path/to/openidm/bin/defaults/script/</literal>. This folder
-    contains the default scripts that are required to run specific services.
-    Scripts in this folder are not guaranteed to remain constant between product
-    releases.
+    OpenIDM includes several default scripts in the following directory:
+    <filename>path/to/openidm/bin/defaults/script/</filename>. Do not modify
+    or remove any of the scripts in this directory, as OpenIDM needs these
+    scripts to run specific services. Scripts in this folder are not guaranteed
+    to remain constant between product releases.
    </para>
 
+   <para>
+    If you develop custom scripts, copy them to the <literal>script/</literal>
+    directory for your project, such as
+    <literal>path/to/openidm/script/</literal>.
+   </para>
+
+   <section xml:id="script-json">
+    <title>Script Configuration File</title>
+
+     <para>
+      OpenIDM ${serverDocTargetVersion} includes a script configuration file
+      in the <filename>conf/</filename> directory,
+      <filename>script.json</filename>. OpenIDM uses this file to set up
+      <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"
+            xlink:href="integrators-guide#config-default-directories">
+       <citetitle>Default and Custom Configuration Directories</citetitle>
+      </link>.
+     </para>
+
+     <para>
+      The properties shown in the default version of the
+      <filename>script.json</filename> file are described here:
+     </para>
+
+     <variablelist>
+      <varlistentry>
+       <term>properties</term>
+       <listitem>
+        <para>
+         Additional custom properties.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>ECMAScript</term>
+       <listitem>
+        <para>
+         JavaScript is an ECMAScript language.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>javascript.debug</term>
+       <listitem>
+        <para>
+         See <xref linkend="debugging-scripts" />
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>javascript.recompile.minimumInterval</term>
+       <listitem>
+        <para>
+         Minimum time after which a script can be recompiled.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.warnings</term>
+       <listitem>
+        <para>
+         Specifies a log level for Groovy scripts.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.source.encoding</term>
+       <listitem>
+        <para>
+         Defines the encoding format for Groovy scripts.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.target.directory</term>
+       <listitem>
+        <para>
+         Specifies the output directory.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.target.bytecode</term>
+       <listitem>
+        <para>
+         Specifies the output bytecode.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.classpath</term>
+       <listitem>
+        <para>
+         Defines directories with Groovy class files.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.output.verbose</term>
+       <listitem>
+        <para>
+         Specifies the verbosity of stack traces.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.output.debug</term>
+       <listitem>
+        <para>
+         Sets debugging status.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.errors.tolerance</term>
+       <listitem>
+        <para>
+         Sets number of non-fatal errors before aborting a compilation.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.script.extension</term>
+       <listitem>
+        <para>
+         Defines the file extension for a Groovy script.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.script.base</term>
+       <listitem>
+        <para>
+         Defines the base class for the script.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.recompile</term>
+       <listitem>
+        <para>
+         Allows a script to be recompiled.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.recompile.minimumInterval</term>
+       <listitem>
+        <para>
+         Minimum time between when Groovy scripts can be compiled.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.target.indy</term>
+       <listitem>
+        <para>
+         Defines whether a Groovy indy test can be used.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>groovy.disabled.global.ast.transformations</term>
+       <listitem>
+        <para>
+         Notes whether Groovy Abstract Syntax Transformations (AST)s are 
+         disabled.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+    <para>
+     The remaining options in the <filename>script.json</filename> file are
+     discussed in the section on <link xlink:show="new"
+     xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#config-default-directories">
+     <citetitle>Default and Custom Configuration Directories</citetitle></link>.
+    </para>
+
+   </section>
+
+   <section xml:id="script-call">
+    <title>Calling A Script From Another Configuration File</title>
+
+
    <programlisting language="javascript">
+
 {
   "type" : "text/javascript",
   "source": <replaceable>string</replaceable>
@@ -103,6 +289,9 @@
      </listitem>
     </varlistentry>
    </variablelist>
+
+   </section>
+
   </section>
 
   <section xml:id="scripting-example">
@@ -1003,12 +1192,20 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
                     <para>object (when called from either an object or a
                      property storage trigger); property (only when
                      called from a property storage trigger)</para>
+                 <para>
+                  As a property, returns the modified property values from the
+                  script.
+                 </para>
                 </listitem>
             </varlistentry>
             <varlistentry>
                 <term>onStore</term>
                 <listitem>
                     <para>object, property</para>
+                 <para>
+                  As a property, returns the modified property values from the
+                  script.
+                 </para>
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -1028,6 +1225,14 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
                 <listitem>
                     <para>object, property</para>
                 </listitem>
+            </varlistentry>
+            <varlistentry>
+             <term>propertyName</term>
+             <listitem>
+              <para>
+               Name of the property that is changed.
+              </para>
+             </listitem>
             </varlistentry>
             <varlistentry>
                 <term>result</term>
