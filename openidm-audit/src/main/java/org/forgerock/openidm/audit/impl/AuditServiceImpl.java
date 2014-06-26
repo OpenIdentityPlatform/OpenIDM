@@ -274,7 +274,13 @@ public class AuditServiceImpl implements AuditService {
 
             Map<String, Object> obj = request.getContent().asMap();
 
-            // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin, ip=127.0.0.1}  
+            // Don't audit the audit log
+            if (context.containsContext(AuditContext.class)) {
+                handler.handleResult(new Resource(null, null, new JsonValue(obj)));
+                return;
+            }
+
+            // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin, status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin, ip=127.0.0.1}
             logger.debug("Audit create called for {} with {}", request.getResourceName(), obj);
 
             String type = request.getResourceNameObject().head(1).toString();
