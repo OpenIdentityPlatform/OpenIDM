@@ -830,6 +830,8 @@ public class ConnectorUtil {
                     return (T) source;
                 } else if (List.class.isAssignableFrom(sourceClass)) {
                     return (T) source;
+                } else if (byte[].class.isAssignableFrom(sourceClass) || Byte[].class.isAssignableFrom(sourceClass) || byte[].class == clazz) {
+                    return (T) source;
                 } else if (sourceClass == QualifiedUid.class) {
                     //@TODO: Not null safe!!!
                     Map<String, Object> v = new HashMap<String, Object>(2);
@@ -1099,7 +1101,7 @@ public class ConnectorUtil {
                 }
             } else if (targetClazz.equals(String.class)) {
                 if (sourceClass == byte[].class) {
-                    result = (T) new String((byte[]) source);
+                    result = (T) Base64.encode((byte[])source);
                     coerced = true;
                 } else if (sourceClass == char.class) {
                     result = (T) new String((char[]) source);
