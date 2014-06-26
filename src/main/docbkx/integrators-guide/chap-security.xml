@@ -584,6 +584,9 @@ $ <userinput>curl \
   Forbidden, depending on the situation. If you use a session cookie, you must
   include an additional header that indicates the origin of the request.</para>
 
+  <section xml:id="security-messages-auth">
+   <title>Message Level Security with Logins</title>
+
   <para>The following examples show successful authentications.</para>
 
   <screen>
@@ -627,7 +630,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
 $ <userinput>curl \
  --dump-header /dev/stdout \
  --cacert self-signed.crt \
- --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
+ --header "Cookie: session-jwt=2l0zobpuk6st1b2m7gvhg5zas ..." \
  --header "X-Requested-With: OpenIDM Plugin" \
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</userinput>
    <computeroutput>
@@ -647,6 +650,15 @@ Server: Jetty(8.y.z-SNAPSHOT)
   for logging purposes. If you do not include the
   <literal>X-Requested-With</literal> header, OpenIDM returns HTTP 403
   Forbidden.</para>
+
+   <note>
+    <para>
+     The careful readers among you may notice that the expiration date of the
+     JWT cookie, January 1, 1970, corresponds to the start of UNIX time. Since
+     that time is in the past, browsers will not store that cookie after the
+     browser is closed.
+    </para>
+   </note>
 
   <para>You can also request one-time authentication without a session.</para>
 
@@ -670,64 +682,26 @@ Server: Jetty(8.y.z-SNAPSHOT)
    </computeroutput>
   </screen>
 
-  <para>To log out and destroy the session, use the specific X-OpenIDM-Logout
-  header.</para>
+  </section>
 
-  <screen>
-$ <userinput>curl \
- --dump-header /dev/stdout \
- --cacert self-signed.crt \
- --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8" \
- --header "X-Requested-With: OpenIDM Plugin" \
- --header "X-OpenIDM-Logout: true" \
- "https://localhost:8443/openidm/"</userinput>
-   <computeroutput>
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
-Content-Type: application/json; charset=UTF-8
-Cache-Control: no-cache
-Vary: Accept-Encoding, User-Agent
-Content-Length: 82
-Server: Jetty(8.y.z-SNAPSHOT)
-   </computeroutput>
-  </screen>
+  <section xml:id="security-messages-logout">
+   <title>Logout By Removing the JWT Cookie</title>
 
-  <para>OpenIDM creates the <literal>openidm-admin</literal> user with password
-  <literal>openidm-admin</literal> by default. This internal user is stored in
-  OpenIDM's repository. To set up OpenIDM for MySQL, see the OpenIDM Installation
-  Guide section entitled
-  <link xlink:href="install-guide#repository-mysql" xlink:show="new"
-         xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>To Set Up OpenIDM with MySQL</citetitle></link>.</para>
+  <para>
+   OpenIDM maintains sessions with a JWT session cookie, stored in a client
+   browser. To log out and destroy the session, you would access and remove that
+   cookie from the client browser.
+  </para>
 
-  <screen>
-   <userinput>mysql&gt; select objectid,roles from internaluser;</userinput>
-   <computeroutput>
-+---------------+----------------------------------+
-| objectid      | roles                            |
-+---------------+----------------------------------+
-| anonymous     | openidm-reg                      |
-| openidm-admin | openidm-admin,openidm-authorized |
-+---------------+----------------------------------+
-2 rows in set (0.00 sec)
-   </computeroutput>
-  </screen>
+  <para>
+   The JWT session cookie is based on the <literal>JWT_SESSION</literal> module
+   documented in <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:href="integrators-guide#supported-auth-modules" xlink:show="new">
+   <citetitle>Supported Authentication Modules</citetitle></link>.
+  </para>
 
-  <indexterm>
-   <primary>Authentication</primary>
-   <secondary>Internal users</secondary>
-  </indexterm>
+  </section>
 
-  <para>OpenIDM uses the internal table for authentication, and also to set
-  the roles for RBAC authorization of an authenticated user. The router
-  service, described in the <link
-  xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#appendix-router"><citetitle>Router
-  Service Reference</citetitle></link> appendix, enables you to apply filters
-  as shown in <filename>openidm/conf/router.json</filename> and the associated
-  script, <filename>openidm/script/router-authz.js</filename>. See the chapter
-  on <link xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-auth"><citetitle>Managing Authentication,
-  Authorization &amp; RBAC</citetitle></link> for details.</para>
  </section>
 
  <section xml:id="security-replace-defaults">
