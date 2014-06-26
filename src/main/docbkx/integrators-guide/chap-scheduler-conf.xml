@@ -76,7 +76,13 @@
  
  <itemizedlist>
   <para>Schedules are configured through JSON objects. The schedule 
-  configuration involves two types of files:</para>
+  configuration involves three types of files:</para>
+  <listitem>
+   <para>
+    The <filename>openidm/conf/boot/boot.properties</filename> file, where you
+    can enable the execution of persistent schedulers
+   </para>
+  </listitem>
   <listitem>
     <para>The <filename>openidm/conf/scheduler.json</filename> file, that 
     configures the overall scheduler service</para>
@@ -86,6 +92,21 @@
     file for each configured schedule</para>
   </listitem>
  </itemizedlist>
+
+  <para>
+   The boot properties configuration file,
+   (<filename>openidm/conf/boot/boot.properties</filename>) includes properties
+   the instance type is standalone and persistent schedulers are enabled by
+   default:
+  </para>
+
+  <programlisting>
+# valid instance types for node include standalone, clustered-first, and clustered-additional
+openidm.instance.type=standalone
+
+# enables the execution of persistent schedulers
+openidm.scheduler.execute.persistent.schedules=true
+  </programlisting>
 
   <para>The scheduler service configuration file 
   (<filename>openidm/conf/scheduler.json</filename>) governs the configuration
@@ -98,15 +119,7 @@
      "threadCount" : "10"
  },
  "scheduler" : {
-     "executePersistentSchedules" : "true",
-     "instanceTimeout" : "60000",
-     "instanceRecoveryTimeout" : "60000",
-     "instanceCheckInInterval" : "10000",
-     "instanceCheckInOffset" : "0",
-     "instanceId" : { }
- },
- "advancedProperties" : {
-     "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
+     "executePersistentSchedules" : "&amp;{openidm.scheduler.execute.persistent.schedules}"
  }
 }
   </programlisting>
