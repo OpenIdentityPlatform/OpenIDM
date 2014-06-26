@@ -94,8 +94,8 @@
  </itemizedlist>
 
   <para>
-   The boot properties configuration file,
-   (<filename>openidm/conf/boot/boot.properties</filename>) includes properties
+   In the boot properties configuration file,
+   (<filename>openidm/conf/boot/boot.properties</filename>).
    the instance type is standalone and persistent schedulers are enabled by
    default:
   </para>
