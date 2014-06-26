@@ -1868,7 +1868,7 @@ org.identityconnectors.framework.server.Main -run -properties
          </step>
          <step>
           <para>Unpack the <filename>MySQL JDBC Driver</filename> and copy the 
-          <filename>mysql-connector-java-5.1.22-bin.jar</filename> to the
+          <filename>mysql-connector-java-5.1.*-bin.jar</filename> to the
           <literal>openicf/lib</literal> directory.
           </para>
          </step>
