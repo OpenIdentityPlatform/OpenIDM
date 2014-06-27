@@ -513,7 +513,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @param connectorExceptionActivityLogger the ActivityLogger to use to log the exception
      */
     private void handleConnectorException(ServerContext context, Request request, ConnectorException exception,
-            String resourceId, JsonValue before, JsonValue after, ResultHandler<?> handler,
+            String resourceContainer, String resourceId, JsonValue before, JsonValue after, ResultHandler<?> handler,
             ActivityLogger connectorExceptionActivityLogger) {
 
         // default message
@@ -555,7 +555,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             handler.handleError(ResourceException.getException(UNAUTHORIZED_ERROR_CODE, message, exception));
         } catch (UnknownUidException e) {
             message = MessageFormat.format("Operation {0} could not find resource {1} on system object: {2}",
-                    request.getRequestType().toString(), request.getResourceName(), resourceId);
+                    request.getRequestType().toString(), resourceId, resourceContainer);
             handler.handleError(
                     new NotFoundException(message, exception)
                             .setDetail(new JsonValue(new HashMap<String, Object>())));
@@ -579,11 +579,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (PreconditionFailedException e) {
             message = MessageFormat.format("The resource version for {0} does not match the version provided on " +
                     "operation {1} for system object: {2}",
-                    request.getResourceName(), request.getRequestType().toString(), resourceId);
+                    resourceId, request.getRequestType().toString(), resourceContainer);
             handler.handleError(new org.forgerock.json.resource.PreconditionFailedException(message, exception));
         } catch (PreconditionRequiredException e) {
             message = MessageFormat.format("No resource version for resource {0} has been provided on operation {1} for system object: {2}",
-                    request.getResourceName(), request.getRequestType().toString(), resourceId);
+                    resourceId , request.getRequestType().toString(), resourceContainer);
             handler.handleError(new org.forgerock.json.resource.PreconditionRequiredException(message, exception));
         } catch (RetryableException e) {
             message = MessageFormat.format("Request temporarily unavailable on operation {0} for system object: {1}",
@@ -598,7 +598,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     request.getRequestType().toString(), resourceId);
             handler.handleError(new InternalServerErrorException(message, e));
         } catch (RemoteWrappedException e) {
-            handleRemoteWrappedException(context, request, exception, resourceId,
+            handleRemoteWrappedException(context, request, exception, resourceContainer, resourceId,
                     before, after, handler, connectorExceptionActivityLogger);
         } catch (ConnectorException e) {
             message = MessageFormat.format("Operation {0} failed with ConnectorException on system object: {1}",
@@ -687,6 +687,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private void handleRemoteWrappedException(ServerContext context,
                                               Request request,
                                               ConnectorException exception,
+                                              String resourceContainer,
                                               String resourceId,
                                               JsonValue before,
                                               JsonValue after,
@@ -699,58 +700,58 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         if (remoteWrappedException.is(AlreadyExistsException.class)) {
             handleConnectorException(context, request, new AlreadyExistsException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(ConfigurationException.class)) {
             handleConnectorException(context, request, new ConfigurationException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(ConnectionBrokenException.class)) {
             handleConnectorException(context, request, new ConnectionBrokenException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(ConnectionFailedException.class)) {
             handleConnectorException(context, request, new ConnectionFailedException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(ConnectorIOException.class)) {
             handleConnectorException(context, request, new ConnectorIOException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(InvalidAttributeValueException.class)) {
             handleConnectorException(context, request, new InvalidAttributeValueException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(InvalidCredentialException.class)) {
             handleConnectorException(context, request, new InvalidCredentialException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(InvalidPasswordException.class)) {
             handleConnectorException(context, request, new InvalidPasswordException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(OperationTimeoutException.class)) {
             handleConnectorException(context, request, new OperationTimeoutException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(PasswordExpiredException.class)) {
             handleConnectorException(context, request, new PasswordExpiredException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(PermissionDeniedException.class)) {
             handleConnectorException(context, request, new PermissionDeniedException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(PreconditionFailedException.class)) {
             handleConnectorException(context, request, new PreconditionFailedException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(PreconditionRequiredException.class)) {
             handleConnectorException(context, request, new PreconditionRequiredException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(RetryableException.class)) {
             handleConnectorException(context, request, RetryableException.wrap(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(UnknownUidException.class)) {
             handleConnectorException(context, request, new UnknownUidException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else if (remoteWrappedException.is(ConnectorException.class)) {
             handleConnectorException(context, request, new ConnectorException(message, cause),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         } else {
             // handle .NET exceptions
             handleConnectorException(context, request,
                     DotNetExceptionHelper.fromExceptionClass(remoteWrappedException.getExceptionClass())
                             .getConnectorException(remoteWrappedException),
-                    resourceId, before, after, handler, connectorExceptionActivityLogger);
+                    resourceContainer, resourceId, before, after, handler, connectorExceptionActivityLogger);
         }
     }
     /**
@@ -803,7 +804,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (ConnectorException e) {
-            handleConnectorException(context, request, e, request.getResourceName(), null, null, handler, activityLogger);
+            handleConnectorException(context, request, e, null, request.getResourceName(), null, null, handler, activityLogger);
         } catch (JsonValueException e) {
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
@@ -1270,7 +1271,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // handle ConnectorException from facade.authenticate:
                 // log to activity log only if this is an external request
                 // (let internal requests do their own logging upon the handleError...)
-                handleConnectorException(context, request, e, null, null, null, handler,
+                handleConnectorException(context, request, e, null, null, null, null, handler,
                         ContextUtil.isExternal(context) ? activityLogger : NullActivityLogger.INSTANCE);
             }
         }
@@ -1334,7 +1335,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, objectClassInfoHelper.getCreateResourceId(request), request.getContent(), null, handler, activityLogger);
+                handleConnectorException(context, request, e, getSource(objectClass), objectClassInfoHelper.getCreateResourceId(request), request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1375,7 +1376,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
+                handleConnectorException(context, request, e, getSource(objectClass), resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1464,7 +1465,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, null, null, null, handler, activityLogger);
+                handleConnectorException(context, request, e, null, null, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1497,7 +1498,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, resourceId, null, null, handler, activityLogger);
+                handleConnectorException(context, request, e, getSource(objectClass), resourceId, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
@@ -1560,7 +1561,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleConnectorException(context, request, e, resourceId, request.getContent(), null, handler, activityLogger);
+                handleConnectorException(context, request, e, getSource(objectClass), resourceId, request.getContent(), null, handler, activityLogger);
             } catch (JsonValueException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
