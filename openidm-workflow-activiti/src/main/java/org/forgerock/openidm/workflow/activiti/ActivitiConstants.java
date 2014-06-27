@@ -47,7 +47,7 @@ public class ActivitiConstants {
     public static final String QUERY_ALL_IDS = ServerConstants.QUERY_ALL_IDS;
     public static final String QUERY_FILTERED = "filtered-query";
     public static final String QUERY_TASKDEF = "query-taskdefinition";
-    public static final String VARIABLE_QUERY_PREFIX = "_var-";
+    public static final String VARIABLE_QUERY_PREFIX = "var-";
     public static final String OPENIDM_CONTEXT = "openidmcontext";
     public static final String ACTIVITI_PROCESSDEFINITIONID = "processDefinitionId";
     public static final String ACTIVITI_PROCESSDEFINITIONKEY = "processDefinitionKey";

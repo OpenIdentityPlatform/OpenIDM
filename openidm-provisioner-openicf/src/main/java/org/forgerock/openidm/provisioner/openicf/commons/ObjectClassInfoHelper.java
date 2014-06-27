@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -146,7 +146,7 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 for (AttributeInfoHelper attribute : attributes) {
-                    if (attribute.getName().equals(field.leaf())) {
+                    if (attribute.getName().equals(field.leaf()) && attribute.getAttributeInfo().isReadable()) {
                         builder.setAttributesToGet(attribute.getAttributeInfo().getName());
                         break;
                     }
@@ -177,7 +177,7 @@ public class ObjectClassInfoHelper {
      * @param request CreateRequest
      * @return resourceId to be used for creating the object
      */
-    public String getCreateNameValue(final CreateRequest request) {
+    public String getCreateResourceId(final CreateRequest request) {
         String nameValue = request.getNewResourceId();
 
         if (null == nameValue) {
@@ -202,7 +202,7 @@ public class ObjectClassInfoHelper {
     public Set<Attribute> getCreateAttributes(final CreateRequest request,
             final CryptoService cryptoService) throws ResourceException {
         JsonValue content = request.getContent().required().expect(Map.class);
-        String nameValue = getCreateNameValue(request);
+        String nameValue = getCreateResourceId(request);
 
         if (StringUtils.isBlank(nameValue)) {
             throw new BadRequestException("Required '_id' or '" + nameAttribute
@@ -361,7 +361,7 @@ public class ObjectClassInfoHelper {
         JsonValue result = new JsonValue(new LinkedHashMap<String, Object>(source.getAttributes().size()));
         for (AttributeInfoHelper attributeInfo : attributes) {
             Attribute attribute = source.getAttributeByName(attributeInfo.getAttributeInfo().getName());
-            if (null != attribute) {
+            if (null != attribute && attributeInfo.getAttributeInfo().isReadable()) {
                 result.put(attributeInfo.getName(), attributeInfo.build(attribute, cryptoService));
             }
         }

@@ -44,8 +44,8 @@ import org.forgerock.json.resource.servlet.SecurityContextFactory;
  */
 class SecurityContextMapper {
 
-    private static final String AUTHENTICATION_ID = "authenticationId";
-    private static final String AUTHORIZATION_ID = "authorizationId";
+    public static final String AUTHENTICATION_ID = "authenticationId";
+    public static final String AUTHORIZATION_ID = "authorizationId";
 
     /** the MessageInfo auth context-backing map */
     private Map messageInfoMap;
@@ -77,10 +77,28 @@ class SecurityContextMapper {
 
     }
 
+    /**
+     * Set/update the authenticationId.  Persist it in the MessageInfo backing-map.
+     *
+     * @param authcId the authenticationId
+     * @return the SecurityContextMapper
+     */
     SecurityContextMapper setAuthenticationId(String authcId) {
         authData.put(AUTHENTICATION_ID, authcId);
         // when setting the authenticationId, make sure to update it in the MessageInfo backing-map as well
         messageInfoMap.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcId);
+        return this;
+    }
+
+    /**
+     * Set/update the authorizationId.  Persist it in the MessageInfo backing-map.
+     *
+     * @param authorizationId the authorization context data
+     * @return the SecurityContextMapper
+     */
+    SecurityContextMapper setAuthorizationId(Map<String, Object> authorizationId) {
+        authData.put(AUTHORIZATION_ID, authorizationId);
+        messageInfoMap.put(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT, authorizationId);
         return this;
     }
 

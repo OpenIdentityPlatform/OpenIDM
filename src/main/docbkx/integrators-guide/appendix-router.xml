@@ -274,7 +274,7 @@ responseFilter 1
 
    <programlisting language="javascript">
 {
-  "error": integer,
+  "code": integer,
   "reason": string,
   "message": string,
   "detail": string
@@ -282,10 +282,10 @@ responseFilter 1
 
    <variablelist>
     <varlistentry>
-     <term>"error"</term>
+     <term>"code"</term>
      <listitem>
       <para>integer</para>
-      <para>The numeric code of the exception.</para>
+      <para>The numeric HTTP code of the exception.</para>
      </listitem>
     </varlistentry>
     <varlistentry>

@@ -166,35 +166,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         this.loadHelper = loadHelper;
         // Set the number of retries for failed writes to the repository
         this.writeRetries = Integer.parseInt(IdentityServer.getInstance().getProperty("openidm.scheduler.repo.retry", "-1"));
-        synchronized (lock) {
-            // If it is not clustered, or if clustered and not recovering, do cleanup
-            if (!isClustered()) {
-                try {
-                    // Make sure all available triggers are "waiting"
-                    logger.trace("Getting Acquired Triggers");
-                    AcquiredTriggers at = getAcquiredTriggers(instanceId);
-                    List<Trigger> acquiredTriggers = at.getTriggers();
-                    //for (Trigger t : acquiredTriggers) {
-                    for (Iterator<Trigger> it = acquiredTriggers.iterator(); it.hasNext();) {
-                        Trigger t = it.next();
-                        if (hasTriggerMisfired(t)) {
-                            logger.trace("Trigger {} has misfired", t.getName());
-                            processTriggerMisfired(getTriggerWrapper(t.getGroup(), t.getName()));
-                            if (t.getNextFireTime() != null) {
-                                // Add the trigger to the "waiting" triggers tree
-                                addWaitingTrigger(t);
-                                // Remove the trigger from the "acquired" triggers list
-                                removeAcquiredTrigger(t, instanceId);
-                            }
-                        } else {
-                            releaseAcquiredTrigger(null, t);
-                        }
-                    }
-
-                } catch (JobPersistenceException e) {
-                    logger.warn("Error initializing RepoJobStore", e);
-                }
-            }
+        if (!isClustered()) {
+            cleanUpInstance();
         }
     }
 
@@ -2242,6 +2215,38 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         return new StringBuilder(jobDetail.getGroup()).append(UNIQUE_ID_SEPARATOR)
                 .append(jobDetail.getName()).toString();
     }
+    
+    /**
+     * Cleans up any triggers previously acquired by this instance and processes any misfires.
+     */
+    private void cleanUpInstance() {
+        synchronized (lock) {
+            try {
+                // Make sure all available triggers are "waiting"
+                logger.trace("Getting Acquired Triggers");
+                AcquiredTriggers at = getAcquiredTriggers(instanceId);
+                List<Trigger> acquiredTriggers = at.getTriggers();
+                // Clean up any previously acquired triggers
+                for (Iterator<Trigger> it = acquiredTriggers.iterator(); it.hasNext();) {
+                    Trigger t = it.next();
+                    if (hasTriggerMisfired(t)) {
+                        logger.trace("Trigger {} has misfired", t.getName());
+                        processTriggerMisfired(getTriggerWrapper(t.getGroup(), t.getName()));
+                        if (t.getNextFireTime() != null) {
+                            // Add the trigger to the "waiting" triggers tree
+                            addWaitingTrigger(t);
+                            // Remove the trigger from the "acquired" triggers list
+                            removeAcquiredTrigger(t, instanceId);
+                        }
+                    } else {
+                        releaseAcquiredTrigger(null, t);
+                    }
+                }
+            } catch (JobPersistenceException e) {
+                logger.warn("Error initializing RepoJobStore", e);
+            }
+        }
+    }
 
     /**
      * A Comparator used to compare two Triggers
@@ -2339,18 +2344,19 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
     @Override
     public boolean handleEvent(ClusterEvent event) {
+        String eventInstanceId = event.getInstanceId();
         switch (event.getType()) {
         case RECOVERY_INITIATED:
             try {
                 // Free acquired triggers
-                AcquiredTriggers triggers = getAcquiredTriggers(instanceId);
+                AcquiredTriggers triggers = getAcquiredTriggers(eventInstanceId);
                 for (Trigger trigger : triggers.getTriggers()) {
                     boolean removed = false;
                     int retry = 0;
                     // Remove the acquired trigger
                     while (writeRetries == -1 || retry <= writeRetries) {
                         try {
-                            removed = removeAcquiredTrigger(trigger, instanceId);
+                            removed = removeAcquiredTrigger(trigger, eventInstanceId);
                             break;
                         } catch (JobPersistenceException e) {
                             logger.debug("Failed to remove acquired trigger", e);
@@ -2371,20 +2377,23 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                             }
                         }
                     }
-                    logger.info("Recovered trigger {} from failed instance {}", trigger.getName(), instanceId);
+                    logger.info("Recovered trigger {} from failed instance {}", trigger.getName(), eventInstanceId);
 
                     // Update the recovery timestamp
-                    clusterManager.renewRecoveryLease(instanceId);
+                    clusterManager.renewRecoveryLease(eventInstanceId);
                 }
 
                 // send notification
                 schedulerSignaler.signalSchedulingChange(0L);
             } catch (JobPersistenceException e) {
-                logger.warn("Error freeing acquired triggers of instance {}:  {}", instanceId, e.getMessage());
+                logger.warn("Error freeing acquired triggers of instance {}:  {}", eventInstanceId, e.getMessage());
                 return false;
             }
             break;
         case INSTANCE_FAILED:
+            break;
+        case INSTANCE_RUNNING:
+            cleanUpInstance();
             break;
         }
         return true;

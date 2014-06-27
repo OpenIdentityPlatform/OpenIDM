@@ -862,7 +862,7 @@ $ <userinput>curl \
  --data '[
     {
     "operation":"replace",
-    "field":"givenName",
+    "field":"/givenName",
     "value":"Jon"
     }
  ]' \

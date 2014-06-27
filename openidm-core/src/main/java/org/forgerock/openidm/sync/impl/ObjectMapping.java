@@ -890,9 +890,10 @@ class ObjectMapping {
             }
 
             reconContext.getStatistics().reconEnd();
-            logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
+            reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
+            logReconEnd(reconContext, rootContext, context);
         } catch (InterruptedException ex) {
             reconContext.checkCanceled();
             throw new SynchronizationException("Interrupted execution of reconciliation", ex);

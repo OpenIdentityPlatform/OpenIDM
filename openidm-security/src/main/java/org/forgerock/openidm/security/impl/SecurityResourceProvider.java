@@ -65,6 +65,7 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.DateUtil;
@@ -99,29 +100,23 @@ public class SecurityResourceProvider {
     /**
      * The KeyStoreManager used for reloading the stores. 
      */
-    protected KeyStoreManager manager = null;    
-    
-    /**
-     * The Repository Service Accessor
-     */
-    protected ServerContext accessor = null;
+    protected KeyStoreManager manager = null;
 
     /**
-     * The Connection Factory
+     * The RepositoryService
      */
-    protected ConnectionFactory connectionFactory;
+    protected RepositoryService repoService;
 
     /**
      * The resource name, "truststore" or "keystore".
      */
     protected String resourceName = null;
 
-    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
+    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
         this.store = store;
         this.resourceName = resourceName;
         this.manager = manager;
-        this.accessor = accessor;
-        this.connectionFactory = connectionFactory;
+        this.repoService = repoService;
     }
     /**
      * Returns a PEM String representation of a object.
@@ -423,11 +418,8 @@ public class SecurityResourceProvider {
      * @throws JsonResourceException
      */
     protected void storeKeyPair(String alias, KeyPair keyPair) throws ResourceException {
-        if (accessor == null) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
-        }
         try {
-            String container = "/repo/security/keys";
+            String container = "security/keys";
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
             storeInRepo(container, alias, keyMap);
         } catch (Exception e) {
@@ -443,10 +435,7 @@ public class SecurityResourceProvider {
      * @throws JsonResourceException
      */
     protected JsonValue readFromRepo(String id) throws ResourceException {
-        if (accessor == null) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
-        }
-        JsonValue keyMap = new JsonValue(connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id)).getContent());
+        JsonValue keyMap = new JsonValue(repoService.read(Requests.newReadRequest(id)).getContent());
         return keyMap;
     }
     
@@ -457,20 +446,17 @@ public class SecurityResourceProvider {
      * @throws JsonResourceException
      */
     protected void storeInRepo(String container, String id, JsonValue value) throws ResourceException {
-        if (accessor == null) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
-        }
         Resource oldResource;
         try {
-            oldResource = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id));
+            oldResource = repoService.read(Requests.newReadRequest(container, id));
         } catch (NotFoundException e) {
             logger.debug("creating object " + id);
-            connectionFactory.getConnection().create(accessor, Requests.newCreateRequest(container, id, value));
+            repoService.create(Requests.newCreateRequest(container, id, value));
             return;
         }
         UpdateRequest updateRequest = Requests.newUpdateRequest(container, id, value);
         updateRequest.setRevision(oldResource.getRevision());
-        connectionFactory.getConnection().update(accessor, updateRequest);
+        repoService.update(updateRequest);
     }
     
     /**
@@ -481,12 +467,9 @@ public class SecurityResourceProvider {
      * @throws JsonResourceException
      */
     protected KeyPair getKeyPair(String alias) throws ResourceException {
-        if (accessor == null) {
-            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Repo router is null");
-        }
-        String container = "/repo/security/keys";
+        String container = "security/keys";
         String id = container + "/" + alias;
-        Resource keyResource = connectionFactory.getConnection().read(accessor, Requests.newReadRequest(id));
+        Resource keyResource = repoService.read(Requests.newReadRequest(id));
         if (keyResource.getContent().isNull()) {
             throw ResourceException.getException(ResourceException.NOT_FOUND, 
                     "Cannot find stored key for alias " + alias);

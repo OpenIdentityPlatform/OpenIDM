@@ -376,7 +376,6 @@ public class ReconciliationService
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
             throw ex;
         }
-        reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
     }
 
     /**

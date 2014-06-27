@@ -54,6 +54,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.jetty.Param;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -74,8 +75,8 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
      */
     private final static Logger logger = LoggerFactory.getLogger(KeystoreResourceProvider.class);
 
-    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
-        super(resourceName, store, manager, accessor, connectionFactory);
+    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
+        super(resourceName, store, manager, repoService);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
      * Loads the keystore from the repository and stores it locally
      */
     public void loadKeystoreFromRepo() throws ResourceException {
-        JsonValue keystoreValue = readFromRepo("/repo/security/keystore");
+        JsonValue keystoreValue = readFromRepo("security/keystore");
         String keystoreString = keystoreValue.get("keystoreString").asString();
         byte [] keystoreBytes = Base64.decode(keystoreString.getBytes());
         ByteArrayInputStream bais = new ByteArrayInputStream(keystoreBytes);
@@ -219,6 +220,6 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
         String keystoreString = new String(Base64.encode(keystoreBytes));
         JsonValue value = new JsonValue(new HashMap<String, Object>());
         value.add("keystoreString", keystoreString);
-        storeInRepo("/repo/security", "keystore", value);
+        storeInRepo("security", "keystore", value);
     }
 }

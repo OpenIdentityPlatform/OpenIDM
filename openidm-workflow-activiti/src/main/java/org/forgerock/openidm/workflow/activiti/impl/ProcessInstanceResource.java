@@ -117,11 +117,12 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request, ResultHandler<Resource> handler) {
         try {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
-            if (processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult() != null) {
+            HistoricProcessInstance process = processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
+            if (process != null) {
+                Map value = mapper.convertValue(process, HashMap.class);
+                Resource r = new Resource(process.getId(), null, new JsonValue(value));
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
-                Map<String, String> result = new HashMap<String, String>(1);
-                result.put("Process instance deleted", resourceId);
-                handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
+                handler.handleResult(r);
             } else {
                 handler.handleError(new NotFoundException());
             }

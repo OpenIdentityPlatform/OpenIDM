@@ -78,6 +78,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 
                 this.parentRender(function() {
                     validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/*", _.bind(function () {
+                        this.$el.find(':input[name=roles][value=openidm-authorized]').prop("checked", true);
                         validatorsManager.validateAllFields(this.$el);
                         this.unlock();
                     }, this));

@@ -747,7 +747,6 @@
   </section>
 
   <section xml:id="ui-locale">
-   <!--TODO this is not working for me -->
    <title>Changing the Language of the UI</title>
    <para>
     Currently, the UI is provided only in US English. You can translate the UI
@@ -757,27 +756,22 @@
    <procedure>
     <step>
      <para>
-      Copy the default locale to <filename>openidm/ui/extension/locales</filename>:
+      Copy the default locale to a new folder in the same location
+      (<filename>openidm/ui/default/enduser/public/locales</filename>):
      </para>
-     <screen>$ cd /path/to/openidm/ui/default/enduser/public/
-$ cp -r locales/ ../../../extension/locales</screen>
+     <screen>$ cd /path/to/openidm/ui/default/enduser/public/locales
+$ cp -R en/ fr/</screen>
      <para>
-      The <filename>extension/locales</filename> folder now contains one locale,
-      <literal>en</literal>.
+      The new locale (<literal>fr</literal>) now contains the default
+      <filename>translation.json</filename> file.
      </para>
-    </step>
-    <step>
-     <para>
-      Create a copy of the <literal>en</literal> locale, in a new folder named
-      <literal>fr-FR</literal>.
-     </para>
-     <screen>$ cd /path/to/openidm/ui/extension/locales
-$ cp -r en fr-FR </screen>
+     <screen><userinput>$ ls fr/</userinput>
+<computeroutput>translation.json</computeroutput></screen>
     </step>
     <step>
      <para>
       Translate the values of the properties in the
-      <filename>fr-FR/translate.json</filename> file. Do <emphasis>not</emphasis>
+      <filename>fr/translate.json</filename> file. Do <emphasis>not</emphasis>
       translate the property names. For example:
      </para>
      <programlisting language="javascript">...
@@ -795,7 +789,7 @@ $ cp -r en fr-FR </screen>
       <filename>/path/to/openidm/conf/ui-configuration.json</filename> file, as
       follows:
      </para>
-     <screen>"lang" : "fr-FR",</screen>
+     <screen>"lang" : "fr",</screen>
     </step>
     <step>
      <para>

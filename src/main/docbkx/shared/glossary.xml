@@ -27,8 +27,7 @@
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'>
 <title>OpenIDM Glossary</title>
 
 <glossentry>
@@ -37,6 +36,20 @@
   <para>JavaScript Object Notation, a lightweight data interchange format 
   based on a subset of JavaScript syntax. For more information, see the 
   <link xlink:show="new" xlink:href="http://www.json.org">JSON</link> site.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>JWT</glossterm>
+ <glossdef>
+  <para>
+   JSON Web Token. As noted in the <link xlink:show="new"
+   xlink:href="http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html">
+   <citetitle>JSON Web Token draft IETF Memo</citetitle></link>,
+   "JSON Web Token (JWT) is a compact URL-safe means of representing claims to
+   be transferred between two parties." For OpenIDM, the JWT is associated
+   with the <literal>JWT_SESSION</literal> authentication module.
+  </para>
  </glossdef>
 </glossentry>
 

@@ -71,7 +71,7 @@
                 if (targetId!=null){
                     params.put('targetId', targetId)
                 }
-                openidm.action('sync', 'performAction', params)
+                openidm.action('sync', 'performAction', [:], params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="deleteAccount" targetRef="end"/>
@@ -89,7 +89,7 @@
                 params.put('action', 'link')
                 params.put('sourceId', linkTo)
                 params.put('targetId', targetId)
-                openidm.action('sync', 'performAction', params)
+                openidm.action('sync', 'performAction', [:], params)
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="linkAccount" targetRef="end"/>

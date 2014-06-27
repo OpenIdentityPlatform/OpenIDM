@@ -23,28 +23,16 @@
     },
     "sources": {
         "default": {
-            "directory": "&{launcher.install.location}/bin/defaults/script",
-            "subdirectories": "true",
-            "visibility": "public",
-            "type": "auto-detect"
+            "directory": "&{launcher.install.location}/bin/defaults/script"
         },
         "install": {
-            "directory": "&{launcher.install.location}",
-            "subdirectories": "true",
-            "visibility": "public",
-            "type": "auto-detect"
+            "directory": "&{launcher.install.location}"
         },
         "project": {
-            "directory": "&{launcher.project.location}",
-            "subdirectories": "true",
-            "visibility": "public",
-            "type": "auto-detect"
+            "directory": "&{launcher.project.location}"
         },
         "project-script": {
-            "directory": "&{launcher.project.location}/script",
-            "subdirectories": "true",
-            "visibility": "public",
-            "type": "auto-detect"
+            "directory": "&{launcher.project.location}/script"
         }
     }
 }

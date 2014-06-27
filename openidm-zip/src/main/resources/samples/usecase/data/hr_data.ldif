@@ -590,6 +590,7 @@ objectClass: organizationalperson
 objectClass: top
 postalAddress: 01251 Chestnut Street
 postalCode: 50369
+title: manager
 description: This is the description for HR Admin
 uid: hradmin
 userPassword: Passw0rd
