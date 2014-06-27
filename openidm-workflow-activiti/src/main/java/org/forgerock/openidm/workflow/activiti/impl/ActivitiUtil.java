@@ -108,7 +108,7 @@ public class ActivitiUtil {
     }
     /**
      * Process the query parameters if they are workflow/task specific
-     * (prefixed: _var-...)
+     * (prefixed: var-...)
      *
      * @param request incoming request
      * @return map of the workflow/task parameters
@@ -119,7 +119,7 @@ public class ActivitiUtil {
         while (itAll.hasNext()) {
             Map.Entry<String, String> e = itAll.next();
             if ((e.getKey().startsWith(ActivitiConstants.VARIABLE_QUERY_PREFIX))) {
-                wfParams.put(e.getKey().substring(5), e.getValue());
+                wfParams.put(e.getKey().substring(4), e.getValue());
             }
         }
         return wfParams;

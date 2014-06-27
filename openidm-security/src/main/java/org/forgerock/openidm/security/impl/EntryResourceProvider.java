@@ -43,6 +43,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.ResourceUtil;
@@ -54,8 +55,8 @@ import org.forgerock.openidm.util.ResourceUtil;
  */
 public abstract class EntryResourceProvider extends SecurityResourceProvider implements CollectionResourceProvider {
 
-    public EntryResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
-        super(resourceName, store, manager, accessor, connectionFactory);
+    public EntryResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
+        super(resourceName, store, manager, repoService);
     }
 
     @Override

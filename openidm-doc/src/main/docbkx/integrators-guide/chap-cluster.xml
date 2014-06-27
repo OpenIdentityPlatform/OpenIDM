@@ -218,12 +218,26 @@ openidm.instance.type=clustered-additional
       milliseconds) that an instance can be "down" before the instance is
       considered to be in recovery mode.
      </para>
+     <para>
+      <emphasis>Recovery mode</emphasis> implies that the
+      <literal>instanceTimeout</literal> of an instance has expired, and that
+      the expiry has been detected by another instance in the cluster, which is
+      attempting to <emphasis>recover</emphasis> the instance.  The logic behind
+      the recovery mechanism differs, depending on the component within OpenIDM.
+      The scheduler component has well-defined recovery logic, and attempts to
+      move any jobs that had been acquired by the unavailable instance back into
+      the pool of waiting jobs.
+     </para>
     </listitem>
     <listitem>
      <para>
       <literal>instanceRecoveryTimeout</literal> specifies the length of time (in
       milliseconds) that an instance can be in recovery mode before that instance
       is considered to be offline.
+     </para>
+     <para>
+      The purpose of the recovery timeout is to prevent an instance from
+      attempting to recover an unavailable instance indefinitely.
      </para>
     </listitem>
     <listitem>

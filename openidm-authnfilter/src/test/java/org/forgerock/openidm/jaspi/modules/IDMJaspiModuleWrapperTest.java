@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
@@ -71,11 +73,201 @@ public class IDMJaspiModuleWrapperTest {
             authModuleConstructor = mock(IDMJaspiModuleWrapper.AuthModuleConstructor.class);
             when(authModuleConstructor.construct(anyString())).thenReturn(authModule);
             roleCalculatorFactory = mock(RoleCalculatorFactory.class);
+            when(roleCalculatorFactory.create(anyList(), anyString(), anyString(), anyMap(), Matchers.<MappingRoleCalculator.GroupComparison>anyObject()))
+                    .thenReturn(mock(RoleCalculator.class));
             scriptExecutor = mock(AugmentationScriptExecutor.class);
             options.put("queryOnResource", "foo/user");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void shouldValidateRequestWhenAuthModuleReturnsSendContinue() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject clientSubject = new Subject();
+        Subject serviceSubject = new Subject();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
+
+        given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
+                .willReturn(AuthStatus.SEND_CONTINUE);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
+        assertEquals(authStatus, AuthStatus.SEND_CONTINUE);
+    }
+
+    @Test
+    public void shouldValidateRequestWhenAuthModuleReturnsSendSuccess() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject clientSubject = new Subject();
+        Subject serviceSubject = new Subject();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
+
+        given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
+                .willReturn(AuthStatus.SEND_SUCCESS);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
+        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
+    }
+
+    @Test
+    public void shouldValidateRequestWhenAuthModuleReturnsSendFailure() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject clientSubject = new Subject();
+        Subject serviceSubject = new Subject();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
+
+        given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
+                .willReturn(AuthStatus.SEND_FAILURE);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
+        assertEquals(authStatus, AuthStatus.SEND_FAILURE);
+    }
+
+    @Test
+    public void shouldValidateRequestWhenAuthModuleReturnsSuccess() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject clientSubject = new Subject();
+        Subject serviceSubject = new Subject();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        Principal principalOne = mock(Principal.class);
+        Principal principalTwo = mock(Principal.class);
+        Principal principalThree = mock(Principal.class);
+        given(principalOne.getName()).willReturn(null);
+        given(principalTwo.getName()).willReturn("");
+        given(principalThree.getName()).willReturn("USERNAME");
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
+        clientSubject.getPrincipals().add(principalOne);
+        clientSubject.getPrincipals().add(principalTwo);
+        clientSubject.getPrincipals().add(principalThree);
+
+        given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
+                .willReturn(AuthStatus.SUCCESS);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
+        assertEquals(authStatus, AuthStatus.SUCCESS);
+    }
+
+    @Test(expectedExceptions = AuthException.class)
+    public void shouldValidateRequestWhenAuthModuleReturnsSuccessWithNoUsername() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject clientSubject = new Subject();
+        Subject serviceSubject = new Subject();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        Principal principalOne = mock(Principal.class);
+        Principal principalTwo = mock(Principal.class);
+        given(principalOne.getName()).willReturn(null);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(request.getRequestURL()).willReturn(new StringBuffer("REQUEST_URL"));
+        clientSubject.getPrincipals().add(principalOne);
+        clientSubject.getPrincipals().add(principalTwo);
+
+        given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
+                .willReturn(AuthStatus.SUCCESS);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject);
+
+        //Then
+        verify(authModule).validateRequest(messageInfo, clientSubject, serviceSubject);
+    }
+
+    @Test
+    public void shouldSecureResponse() throws AuthException {
+
+        //Given
+        MessagePolicy messagePolicy = mock(MessagePolicy.class);
+        CallbackHandler handler = mock(CallbackHandler.class);
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject serviceSubject = new Subject();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(messageInfo.getRequestMessage()).willReturn(request);
+
+        given(authModule.secureResponse(Matchers.<MessageInfo>anyObject(), Matchers.<Subject>anyObject()))
+                .willReturn(AuthStatus.SEND_SUCCESS);
+
+        //When
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModuleConstructor, roleCalculatorFactory, scriptExecutor);
+        wrapper.initialize(messagePolicy, messagePolicy, handler, options);
+        AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject);
+
+        //Then
+        assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
     }
 
     @Test(enabled = true)

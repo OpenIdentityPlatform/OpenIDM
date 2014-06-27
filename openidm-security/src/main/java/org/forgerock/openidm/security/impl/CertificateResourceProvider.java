@@ -32,6 +32,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.slf4j.Logger;
@@ -46,8 +47,8 @@ public class CertificateResourceProvider extends EntryResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(CertificateResourceProvider.class);
     
-    public CertificateResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, ServerContext accessor, ConnectionFactory connectionFactory) {
-        super(resourceName, store, manager, accessor, connectionFactory);
+    public CertificateResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
+        super(resourceName, store, manager, repoService);
     }
 
     @Override

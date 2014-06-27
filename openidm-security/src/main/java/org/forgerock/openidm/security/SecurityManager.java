@@ -39,12 +39,10 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -53,7 +51,6 @@ import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
@@ -64,7 +61,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.jetty.Config;
 import org.forgerock.openidm.jetty.Param;
-import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.impl.CertificateResourceProvider;
 import org.forgerock.openidm.security.impl.EntryResourceProvider;
 import org.forgerock.openidm.security.impl.JcaKeyStoreHandler;
@@ -97,29 +94,8 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
      */
     private final static Logger logger = LoggerFactory.getLogger(SecurityManager.class);
     
-    /**
-     * The Repository Service Accessor
-     */
-    private static ServerContext accessor;
-    
-    /** Internal object set router service. */
-    @Reference(name = "ref_SecurityManager_RepositoryService", bind = "bindRepo",
-            unbind = "unbindRepo", target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo*)")
-    protected RouteService repo;
-
-    protected void bindRepo(final RouteService service) throws ResourceException {
-        logger.debug("binding RepositoryService");
-        accessor = service.createServerContext();
-    }
-
-    protected void unbindRepo(final RouteService service) {
-        logger.debug("unbinding RepositoryService");
-        accessor = null;
-    }
-
-    /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference
+    protected RepositoryService repoService;
 
     @Reference
     private CryptoUpdateService cryptoUpdateService;
@@ -156,17 +132,17 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         }
         
         keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
-        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
-        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
-        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, accessor, connectionFactory);
+        KeystoreResourceProvider keystoreProvider = new KeystoreResourceProvider("keystore", keyStoreHandler, this, repoService);
+        EntryResourceProvider keystoreCertProvider = new CertificateResourceProvider("keystore", keyStoreHandler, this, repoService);
+        EntryResourceProvider privateKeyProvider = new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, repoService);
 
         router.addRoute("/keystore", keystoreProvider);
         router.addRoute("/keystore/cert", keystoreCertProvider);
         router.addRoute("/keystore/privatekey", privateKeyProvider);
 
         trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
-        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, accessor, connectionFactory);
-        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, accessor, connectionFactory);
+        KeystoreResourceProvider truststoreProvider = new KeystoreResourceProvider("truststore", trustStoreHandler, this, repoService);
+        EntryResourceProvider truststoreCertProvider = new CertificateResourceProvider("truststore", trustStoreHandler, this, repoService);
 
         router.addRoute("/truststore", truststoreProvider);
         router.addRoute("/truststore/cert", truststoreCertProvider);

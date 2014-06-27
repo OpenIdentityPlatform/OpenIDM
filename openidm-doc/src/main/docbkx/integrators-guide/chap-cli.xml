@@ -122,8 +122,7 @@ remote:configimport         Imports the configuration set from local file/direct
        The URL of the OpenIDM REST service. The default URL is
        <literal>http://localhost:8080/openidm/</literal>. This can
        be used to import configuration files from a remote running
-       instance of OpenIDM. This option is used with the
-       <command>configimport</command> and <command>configexport</command>
+       instance of OpenIDM. This option is used by all three subcommands.
        commands.
       </para>
      </listitem>
@@ -135,8 +134,7 @@ remote:configimport         Imports the configuration set from local file/direct
        The port number associated with the OpenIDM REST service. If specified,
        this option overrides any port number specified with the
        <command>--url</command> option. The default port is 8080. This option is
-       used with the <command>configimport</command> and
-       <command>configexport</command> commands.
+       used by all three subcommands.
       </para>
      </listitem>
     </varlistentry>
@@ -319,11 +317,8 @@ $ ./cli.sh configimport --user openidm-admin:openidm-admin --replaceAll /tmp/con
   the version numbers shown in command output. If there is a future mismatch
    in version numbers, I do not know if that's a "big deal". -->
 
-  <screen>
-$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector
-   </userinput>
-   <computeroutput>
-Starting shell in /path/to/openidm
+  <screen>$ <userinput>./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
+ <computeroutput>Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 0. Scripted SQL Connector version 1.1.0.1
 1. XML Connector version 1.1.0.1
@@ -331,10 +326,9 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 3. CSV File Connector version 1.1.0.1
 4. LDAP Connector version 1.1.1.2
 5. Exit
-Select [0..5]: 0
+Select [0..5]: 1
 Edit the configuration file and run the command again. The configuration was 
-  saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput>
-  </screen>
+saved to /openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput></screen>
   
   <para>The basic configuration is saved in a file named 
   <filename>/openidm/temp/provisioner.openicf-<replaceable>connector-name</replaceable>.json</filename>.

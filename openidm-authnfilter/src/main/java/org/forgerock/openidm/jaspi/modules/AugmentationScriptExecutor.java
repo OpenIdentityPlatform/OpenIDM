@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import javax.security.auth.message.AuthException;
+import java.util.HashMap;
 
 /**
  * Responsible for executing any augment security context and providing the required parameters to the scripts.
@@ -72,8 +73,24 @@ class AugmentationScriptExecutor {
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
             script.put("properties", properties);
-            script.put("security", securityContextMapper.asJsonValue());
-            script.eval();
+            JsonValue security = new JsonValue(new HashMap<String, Object>(2));
+            security.put(SecurityContextMapper.AUTHENTICATION_ID, securityContextMapper.getAuthenticationId());
+            security.put(SecurityContextMapper.AUTHORIZATION_ID, securityContextMapper.getAuthorizationId());
+            script.put("security", security);
+
+            // expect updated security context
+            JsonValue updatedSecurityContext = new JsonValue(script.eval());
+
+            // if security context is updated; update the SecurityContextMapper backing store
+            if (updatedSecurityContext != null) {
+                if (!updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).isNull()) {
+                    securityContextMapper.setAuthenticationId(updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).asString());
+                }
+                if (!updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).isNull()) {
+                    securityContextMapper.setAuthorizationId((updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).asMap()));
+                }
+            }
+
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
             logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);

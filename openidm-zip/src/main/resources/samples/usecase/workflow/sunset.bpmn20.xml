@@ -74,7 +74,10 @@
         
         <scriptTask id="deactivateManagedUser" scriptFormat="groovy">
             <script>
-                params = [[operation: 'replace', field:'accountStatus',value:'inactive']]
+                params = [[operation:'replace', field:'accountStatus', value :'inactive'],
+                [operation:'add', field:'sunset/dateProcessed', value:endDate],
+                [operation:'remove', field:'sunset/date']]
+                
                 openidm.patch(userId, null, params)
                 
             </script>

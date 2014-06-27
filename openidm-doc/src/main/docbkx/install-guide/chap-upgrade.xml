@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter [
+<!ENTITY bookname "install-guide">
+]>
 <!--
   ! CCPL HEADER START!
 ! This work is licensed under the Creative Commons
@@ -22,21 +25,92 @@
 !      Copyright 2011-2014 ForgeRock AS
 !
 -->
-<chapter xml:id='chap-install'
-         xmlns='http://docbook.org/ns/docbook'
-         version='5.0' xml:lang='en'
-         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-         xsi:schemaLocation='http://docbook.org/ns/docbook
-         http://docbook.org/xml/5.0/xsd/docbook.xsd'>
- <title>Upgrading from OpenIDM 2.1.0</title>
-
- <!--
- This content is based on the compatibility document, maintained here:
-  https://docs.google.com/a/forgerock.com/document/d/1THMUVDEqIkhKf88o-FwIM9PQLR4JVuGaC_VNx-FwTNw/edit#heading=h.huh16e970ysd
- -->
+<chapter xml:id='chap-upgrade'
+  xmlns='http://docbook.org/ns/docbook'
+  version='5.0' xml:lang='en'
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:schemaLocation='http://docbook.org/ns/docbook
+  http://docbook.org/xml/5.0/xsd/docbook.xsd'
+  xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Upgrading to OpenIDM ${serverDocTargetVersion}</title>
 
  <para>
-  This chapter describes how to upgrade from OpenIDM 2.1.0 to OpenIDM 3.0.0.
+  The upgrade process is largely dependent on your particular deployment and on
+  the extent to which you have customized OpenIDM. It is recommended that you
+  engage ForgeRock services for help in migrating an existing deployment.
  </para>
+ <para>
+  The steps outlined in this section indicate how to preserve customizations,
+  where possible, and take advantage of the new functionality offered in this
+  release. However, you must be aware of the changes made in
+  OpenIDM ${serverDocTargetVersion} that might effect your existing deployment.
+  Therefore, before starting this process, see the <link xlink:show="new"
+  xlink:href="release-notes#chap-compatibility"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Compatibility
+  chapter</citetitle></link> in the <citetitle>Release Notes</citetitle>, and
+  adjust your scripts and clients accordingly.
+ </para>
+
+ <procedure>
+  <para>
+   To perform a basic upgrade to OpenIDM ${serverDocTargetVersion}, follow these
+   steps:
+  </para>
+  <step>
+   <para>
+    Stop OpenIDM, if it is running.
+   </para>
+   <screen>
+$ cd /path/to/openidm
+$ ./shutdown.sh
+Stopping OpenIDM (81491)
+   </screen>
+  </step>
+  <step>
+   <para>
+    Back up your existing deployment by zipping up the entire
+    <filename>openidm</filename> directory.
+   </para>
+  </step>
+  <step>
+   <para>
+    Place any customized configuration and script files in their own project
+    location (for example, <literal>/path/to/myproject</literal>). If you have
+    installed custom items into the key or truststores, maintain a copy of the
+    <literal>security</literal> folder.
+   </para>
+  </step>
+  <step>
+   <para>
+    Install OpenIDM ${serverDocTargetVersion}, as described in the
+    <link xlink:show="new" xlink:href="install-guide#chap-install"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+     chapter</citetitle></link>.
+   </para>
+  </step>
+  <step>
+   <para>
+    Copy the contents of your original <literal>security/</literal> folder to
+    the new installation.
+   </para>
+   <screen>$ cd /path/to/openidm
+$ cp -r /path/to/myproject/security .
+   </screen>
+  </step>
+  <step>
+   <para>
+    Start up OpenIDM ${serverDocTargetVersion} with the configuration of your
+    existing project.
+   </para>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p /path/to/myproject
+   </screen>
+  </step>
+  <step>
+   <para>
+    Test that your existing clients and scripts are working as intended.
+   </para>
+  </step>
+ </procedure>
 
 </chapter>

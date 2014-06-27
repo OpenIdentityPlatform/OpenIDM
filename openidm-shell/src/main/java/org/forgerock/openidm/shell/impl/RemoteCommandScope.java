@@ -381,9 +381,22 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Parameter( names = { "-u", "--user" }, absentValue = USER_PASS_DEFAULT)
             final String userPass,
 
+            @Descriptor(IDM_URL_DESC)
+            @MetaVar(IDM_URL_METAVAR)
+            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            final String idmUrl,
+
+            @Descriptor(IDM_PORT_DESC)
+            @MetaVar(IDM_PORT_METAVAR)
+            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            final String port,
+
             @Descriptor("Name of the new connector configuration.")
+            @MetaVar("CONNECTOR")
             String name)
     {
+        processOptions(userPass, idmUrl, port);
+
         try {
             // Prepare temp folder and file
             File temp = IdentityServer.getFileForPath("temp");
@@ -449,8 +462,8 @@ public class RemoteCommandScope extends CustomCommandScope {
                     session.getConsole().println("There is no available connector!");
                 }
             } else {
-                session.getConsole().append("Configuration was found and picked up from: ").println(finalConfig.getAbsolutePath());
                 configuration = mapper.readValue(finalConfig, Map.class);
+                session.getConsole().append("Configuration was found and read from: ").println(finalConfig.getAbsolutePath());
             }
 
             if (null == configuration) {

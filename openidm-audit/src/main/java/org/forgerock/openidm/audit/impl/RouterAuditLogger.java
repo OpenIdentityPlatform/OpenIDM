@@ -99,6 +99,18 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
     }
 
     /**
+     * If we're logging on the router, wrap the current ServerContext with an AuditContext to
+     * indicate this is an audit log operation.  Necessary to avoid logging audit log events
+     * if the configured router endpoint also logs CRUD operations (such as OpenICFProvisioner).
+     *
+     * @param context the ServerContext
+     * @return a ServerContext indicating auditing
+     */
+    private ServerContext createAuditContext(ServerContext context) {
+        return new AuditContext(context);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -115,7 +127,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             request.setQueryId("query-all-ids");
             request.getAdditionalParameters().putAll(params);
             Set<Resource> results = new HashSet<Resource>();
-            connectionFactory.getConnection().query(context, request, results);
+            connectionFactory.getConnection().query(createAuditContext(context), request, results);
 
             List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
             for (Resource entry : results) {
@@ -126,7 +138,8 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             result.put("entries", entries);
         } else {
             ReadRequest request = Requests.newReadRequest(getRouterLocation(type), id);
-            Map<String, Object> entry = connectionFactory.getConnection().read(context, request).getContent().asMap();
+            Map<String, Object> entry = connectionFactory.getConnection().read(createAuditContext(context), request)
+                    .getContent().asMap();
             result = AuditServiceImpl.formatLogEntry(unflattenActivityEntry(entry), type);
         }
 
@@ -151,7 +164,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             request.setQueryId(params.get("_queryId"));
             request.getAdditionalParameters().putAll(params);
             final List<Map<String, Object>> queryResults = new ArrayList<Map<String, Object>>();
-            connectionFactory.getConnection().query(context, request,
+            connectionFactory.getConnection().query(createAuditContext(context), request,
                     new QueryResultHandler() {
                         @Override
                         public void handleError(ResourceException error) {
@@ -196,7 +209,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
             AuditServiceImpl.preformatLogEntry(type, object);
             Map<String, Object> sanitized = sanitizeObject(object);
             CreateRequest request = Requests.newCreateRequest(getRouterLocation(type), new JsonValue(sanitized));
-            connectionFactory.getConnection().create(context, request);
+            connectionFactory.getConnection().create(createAuditContext(context), request);
         } catch (IOException e) {
             throw new InternalServerErrorException("Unable to stringify object to be logged", e);
         } finally {
