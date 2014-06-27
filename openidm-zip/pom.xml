@@ -391,12 +391,12 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>1.4.0.0-RC2</version>
+            <version>1.4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>icfl-over-slf4j</artifactId>
-            <version>1.4.0.0-RC2</version>
+            <version>1.4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -421,14 +421,18 @@
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>scriptedsql-connector</artifactId>
-            <version>1.1.1.0-RC1</version>
+            <version>1.1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>databasetable-connector</artifactId>
             <version>1.1.0.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>groovy-connector</artifactId>
+            <version>1.4.0.0</version>
+        </dependency>
         <!-- Restlet -->
         <dependency>
             <groupId>org.restlet.osgi</groupId>
