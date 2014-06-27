@@ -6,6 +6,6 @@
     "invokeService" : "sync",
     "invokeContext" : {
         "action" : "reconcile",
-        "mapping" : "systemHrAccounts_managedUser"
+        "mapping" : "csv_xmlfile"
     }
 }
