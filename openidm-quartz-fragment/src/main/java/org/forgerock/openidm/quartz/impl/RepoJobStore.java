@@ -166,9 +166,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         this.loadHelper = loadHelper;
         // Set the number of retries for failed writes to the repository
         this.writeRetries = Integer.parseInt(IdentityServer.getInstance().getProperty("openidm.scheduler.repo.retry", "-1"));
-        if (!isClustered()) {
-            cleanUpInstance();
-        }
+        cleanUpInstance();
     }
 
     /**
@@ -629,6 +627,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     public Trigger acquireNextTrigger(SchedulingContext context, long noLaterThan)
             throws JobPersistenceException {
         synchronized (lock) {
+            logger.debug("acquiring next trigger");
             Trigger trigger = null;
             WaitingTriggers waitingTriggers = null;
             while (trigger == null) {
@@ -691,7 +690,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                 addAcquiredTrigger(trigger, instanceId);
 
-                logger.debug("Acquiring next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
+                logger.debug("Acquired next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
                 return (Trigger)trigger.clone();
             }
             logger.debug("No waiting triggers to acquire");
@@ -1792,6 +1791,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private void addAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
             try {
+                logger.debug("Adding acquired trigger {} for instance {}", new Object[]{trigger.getName(), instanceId});
                 int retries = 0;
                 while (writeRetries == -1 || retries <= writeRetries) {
                     try {
@@ -1820,6 +1820,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private boolean removeAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
             try {
+                logger.debug("Removing acquired trigger {} for instance {}", new Object[]{trigger.getName(), instanceId});
                 boolean result = false;
                 int retries = 0;
                 while (writeRetries == -1 || retries <= writeRetries) {
@@ -2223,7 +2224,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized (lock) {
             try {
                 // Make sure all available triggers are "waiting"
-                logger.trace("Getting Acquired Triggers");
+                logger.trace("Cleaning up instance");
                 AcquiredTriggers at = getAcquiredTriggers(instanceId);
                 List<Trigger> acquiredTriggers = at.getTriggers();
                 // Clean up any previously acquired triggers
@@ -2393,7 +2394,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         case INSTANCE_FAILED:
             break;
         case INSTANCE_RUNNING:
-            cleanUpInstance();
             break;
         }
         return true;
