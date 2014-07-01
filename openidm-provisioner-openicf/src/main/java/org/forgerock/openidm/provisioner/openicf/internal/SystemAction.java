@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,6 +27,7 @@ package org.forgerock.openidm.provisioner.openicf.internal;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -43,9 +44,11 @@ import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
  */
 public class SystemAction {
 
-    public static final String SCRIPT_EXECUTE_MODE = "_scriptExecuteMode";
-    public static final String SCRIPT_VARIABLE_PREFIX = "_scriptVariablePrefix";
-    public static final String SCRIPT_ID = "_scriptId";
+    public static final String SCRIPT_EXECUTE_MODE = "scriptExecuteMode";
+    public static final String SCRIPT_VARIABLE_PREFIX = "scriptVariablePrefix";
+    public static final String SCRIPT_ID = "scriptId";
+
+    public static final List<String> SCRIPT_PARAMS = Arrays.asList(SCRIPT_EXECUTE_MODE, SCRIPT_VARIABLE_PREFIX, SCRIPT_ID);
 
     private final String name;
     private final List<SystemTypeAction> actions;

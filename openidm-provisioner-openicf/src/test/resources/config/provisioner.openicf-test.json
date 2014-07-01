@@ -35,7 +35,7 @@
     "systemActions" :
       [
           {
-              "_scriptId" : "ConnectorScript#1",
+              "scriptId" : "ConnectorScript#1",
               "actions" :
                       [
                           {
@@ -46,7 +46,7 @@
                       ]
           },
           {
-              "_scriptId" : "ConnectorScript#2",
+              "scriptId" : "ConnectorScript#2",
               "actions" :
                       [
                           {
@@ -57,18 +57,18 @@
                       ]
           },
           {
-              "_scriptId" : "ConnectorScript#3",
+              "scriptId" : "ConnectorScript#3",
               "actions" :
                       [
                           {
                               "systemType" : ".*TestConnector",
                               "actionType" : "Groovy",
-                              "actionSource" : "return testArgument.length"
+                              "actionSource" : "return testArgument.size()"
                           }
                       ]
           },
           {
-              "_scriptId" : "ConnectorScript#4",
+              "scriptId" : "ConnectorScript#4",
               "actions" :
                       [
                           {
@@ -79,7 +79,7 @@
                       ]
           },
           {
-              "_scriptId" : "ConnectorScript#5",
+              "scriptId" : "ConnectorScript#5",
               "actions" :
                       [
                           {
