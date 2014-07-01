@@ -359,10 +359,14 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
 <computeroutput>Using boot properties at /openidm/conf/boot/boot.properties
 Configuration was found and picked up from:
       /openidm/temp/provisioner.openicf-myXmlConnector.json
-Dec 11, 2012 10:55:28 AM org.restlet.ext.httpclient.HttpClientHelper start
-INFO: Starting the HTTP client
 ...</computeroutput>
-  </screen>  
+  </screen>
+
+  <para>
+   You can now copy the new
+   <filename>provisioner.openicf-myXmlConnector.json</filename> file
+   to the <filename>conf/</filename> subdirectory.
+  </para>
   
   <para>You can also configure connectors over the REST interface. For more 
   information, see <link xlink:href="integrators-guide#connector-wiz"

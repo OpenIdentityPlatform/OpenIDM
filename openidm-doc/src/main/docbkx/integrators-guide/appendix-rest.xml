@@ -109,7 +109,7 @@
 
   <para>
    Similar schemes exist for URIs associated with all but system objects.
-   For more information, see the reference on the <link xlink:show="new"
+   For more information, see the reference on the <link
    xlink:href="integrators-guide#access-js"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
    access.js</citetitle></link> file.
@@ -350,10 +350,10 @@
    </para>
 
    <para>
-    One example of a delete is shown in the section on
-    <link xlink:show="new" xlink:role="http//docbook.org/xlink/role/olink"
-          xlink:href="integrators-guide#workflows-REST">
-     <citetitle>Managing Workflows Over the REST Interface</citetitle></link>.
+    One example of a delete is shown in the section on <link
+    xlink:href="integrators-guide#workflows-REST"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
+    Workflows Over the REST Interface</citetitle></link>.
    </para>
 
    <screen>
@@ -368,10 +368,10 @@
   <para>
    A patch is performed against a field within a resource. A patch operation
    can add, remove, replace, or increment. In OpenIDM, a patch operation is
-   performed against a list. One example is shown in the section on
-   <link xlink:show="new" xlink:role="http//docbook.org/xlink/role/olink"
-         xlink:href="integrators-guide#remove-role-assignment">
-    <citetitle>To Remove A Role Assignment</citetitle></link>.
+   performed against a list. One example is shown in the section on <link
+   xlink:href="integrators-guide#policy-validate"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Remove A Role
+   Assignment</citetitle></link>.
   </para>
 
   <para>
@@ -393,7 +393,7 @@
   <para>
    An action request shares the same POST method used for create, but is
    associated with some other pre-defined action. For an example on how
-   action is used to validate objects, see <link xlink:show="new"
+   action is used to validate objects, see <link
    xlink:href="integrators-guide#policy-validate"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Validating
   Objects and Properties over REST</citetitle></link>.
@@ -504,7 +504,7 @@
   </para>
 
   <para>
-   For additional information on queries, see the section on <link xlink:show="new"
+   For additional information on queries, see the section on <link
    xlink:href="integrators-guide#constructing-queries"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
    Queries</citetitle></link>.
@@ -846,8 +846,7 @@ Content-Length: 89
        <para>For an example that displays the current configuration, the current
         logging configuration, the configuration with an XML connector
         provisioner, and how the configuration can be modified over the router,
-        see the section on <link xlink:show="new"
-                         xlink:href="integrators-guide#configuring-over-rest"
+        see the section on <link xlink:href="integrators-guide#configuring-over-rest"
                          xlink:role="http://docbook.org/xlink/role/olink">
          <citetitle>Configuring OpenIDM Over REST</citetitle></link>.
        </para>
@@ -896,7 +895,7 @@ Content-Length: 89
       are constructs unique to OpenIDM. If desired, you can call the username
       and password with the following option:
       <command>--user openidm-admin:openidm-admin</command>. For more
-      information, see the section on <link xlink:show="new"
+      information, see the section on <link
       xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#openidm-authentication">
       <citetitle>Authentication</citetitle></link>.
@@ -988,8 +987,7 @@ $ <userinput>curl \
  "https://localhost:8443/openidm/managed/user/<replaceable>user_id</replaceable>"</userinput></screen>
 
          <para>To add a user without a specified ID, see the Installation Guide
-          section on <link xlink:show="new"
-                           xlink:role="http://docbook.org/xlink/role/olink"
+          section on <link xlink:role="http://docbook.org/xlink/role/olink"
            xlink:href="install-guide#sample-adding-users-rest"><citetitle>
            Adding Users Through REST</citetitle></link>.
          </para>
@@ -1098,7 +1096,7 @@ $ <userinput>curl \
 
   <!-- Probable changes, based on OPENIDM-1745 / OPENIDM-1758 -->
 
-  <section xml:id="managing-workflows-REST">
+  <section xml:id="managing-workflows-over-REST">
    <title>Managing Workflows Over Rest</title>
 
     <para>
