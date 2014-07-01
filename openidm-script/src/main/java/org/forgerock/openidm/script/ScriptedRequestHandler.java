@@ -409,9 +409,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             convertedError.setDetail(new JsonValue(new HashMap<String, Object>()));
         }
         final JsonValue detail = convertedError.getDetail();
-        detail.put("fileName", scriptException.getFileName());
-        detail.put("lineNumber", scriptException.getLineNumber());
-        detail.put("columnNumber", scriptException.getColumnNumber());
+        if (detail.get("fileName").isNull()
+                && detail.get("lineNumber").isNull()
+                && detail.get("columnNumber").isNull()) {
+            detail.put("fileName", scriptException.getFileName());
+            detail.put("lineNumber", scriptException.getLineNumber());
+            detail.put("columnNumber", scriptException.getColumnNumber());
+        }
 
         handler.handleError(convertedError);
     }
@@ -424,8 +428,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         } else if (result instanceof JsonValue) {
             handler.handleResult(new Resource(request.getResourceName(), null, (JsonValue) result));
         } else if (result instanceof Map) {
-            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(
-                    (result))));
+            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(result)));
         } else {
             JsonValue resource = new JsonValue(result);
             handler.handleResult(new Resource(request.getResourceName(), null, resource));
