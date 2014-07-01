@@ -846,7 +846,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             JsonValue result = new JsonValue(new HashMap<String, Object>());
 
             boolean onConnector = !"resource".equalsIgnoreCase(
-                    request.getAdditionalParameters().get(SystemAction.SCRIPT_EXECUTE_MODE));
+                    request.getAdditionalParameter(SystemAction.SCRIPT_EXECUTE_MODE));
 
             final ConnectorFacade facade = getConnectorFacade0(handler,
                     onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
@@ -855,7 +855,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 return;
             }
 
-            String variablePrefix = request.getAdditionalParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+            String variablePrefix = request.getAdditionalParameter(SystemAction.SCRIPT_VARIABLE_PREFIX);
 
             List<Map<String, Object>> resultList =
                     new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
@@ -864,35 +864,36 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
                 boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
                 for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
-                    if (entry.getKey().startsWith("_")) {
+                    final String key = entry.getKey();
+                    if (SystemAction.SCRIPT_PARAMS.contains(key)) {
                         continue;
                     }
                     Object value = entry.getValue();
                     Object newValue = value;
                     if (isShell) {
-                        if ("password".equalsIgnoreCase(entry.getKey())) {
+                        if ("password".equalsIgnoreCase(key)) {
                             if (value instanceof String) {
                                 newValue = new GuardedString(((String) value).toCharArray());
                             } else {
                                 throw new BadRequestException("Invalid type for password.");
                             }
                         }
-                        if ("username".equalsIgnoreCase(entry.getKey())) {
+                        if ("username".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
                                 throw new BadRequestException("Invalid type for username.");
                             }
                         }
-                        if ("workingdir".equalsIgnoreCase(entry.getKey())) {
+                        if ("workingdir".equalsIgnoreCase(key)) {
                             if (value instanceof String == false) {
                                 throw new BadRequestException("Invalid type for workingdir.");
                             }
                         }
-                        if ("timeout".equalsIgnoreCase(entry.getKey())) {
+                        if ("timeout".equalsIgnoreCase(key)) {
                             if (!(value instanceof String) && !(value instanceof Number)) {
                                 throw new BadRequestException("Invalid type for timeout.");
                             }
                         }
-                        contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                        contextBuilder.addScriptArgument(key, newValue);
                         continue;
                     }
 
@@ -920,9 +921,19 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             newValue = value instanceof Serializable ? value : value.toString();
                         }
                     }
-                    contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                    contextBuilder.addScriptArgument(key, newValue);
                 }
-                // contextBuilder.addScriptArgument("openidm_id", id.toString());
+
+                JsonValue content = request.getContent();
+                // if there is no content(content.isNull()), skip adding content to script arguments
+                if (content.isMap()) {
+                    for (Map.Entry<String, Object> entry : content.asMap().entrySet()) {
+                        contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
+                    }
+                } else if (!content.isNull()) {
+                    handler.handleError(new BadRequestException("Content is not of type Map"));
+                    return;
+                }
 
                 // ScriptContext scriptContext = script.getScriptContextBuilder().build();
                 OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
@@ -944,13 +955,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     }
                     actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
                 } catch (Throwable t) {
-                    if (logger.isDebugEnabled()) {
-                        logger.error("Script execution error.", t);
-                    }
+                    logger.error("Script execution error.", t);
                     actionResult.put("error", t.getMessage());
                 }
                 resultList.add(actionResult);
             }
+            handler.handleResult(result);
         }
     }
 

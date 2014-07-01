@@ -588,7 +588,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         Assert.assertEquals(resultSet.size(), 100);
     }
 
-    @Test(dataProvider = "dp", enabled = false)
+    @Test(dataProvider = "dp", enabled = true)
     public void testHelloWorldAction(String systemName) throws Exception {
         if ("Test".equals(systemName)) {
 
