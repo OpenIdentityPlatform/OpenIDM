@@ -759,6 +759,15 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/ui/default/config</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-config</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/samples/openam/ui/openam</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-enduser</include>
