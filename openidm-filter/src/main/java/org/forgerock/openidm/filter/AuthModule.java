@@ -57,11 +57,13 @@ public class AuthModule {
     String userIdProperty;
     String userCredentialProperty;
     String userRolesProperty;
+    int sessionTimeout;
     List<String> defaultRoles;
 
     // configuration conf/authentication.json
 
     public AuthModule(JsonValue config) {
+        sessionTimeout = config.get("sessionTimeout").defaultTo(300).asInteger();
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();

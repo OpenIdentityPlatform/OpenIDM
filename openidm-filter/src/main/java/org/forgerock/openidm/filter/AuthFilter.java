@@ -285,6 +285,7 @@ public class AuthFilter
             sess.setAttribute(USERID_ATTRIBUTE, ad.userId);
             sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
             sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
+            sess.setMaxInactiveInterval(authModule.sessionTimeout);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Created session for: {} with id {}, roles {} and resource: {}",
