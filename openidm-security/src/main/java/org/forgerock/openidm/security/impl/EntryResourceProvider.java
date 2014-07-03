@@ -29,7 +29,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -72,6 +71,8 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                     String resourceId = request.getNewResourceId();
                     storeEntry(request.getContent(), resourceId);
                     manager.reload();
+                    // Save the store to the repo (if clustered)
+                    saveStore();
                     handler.handleResult(new Resource(resourceId, null, request.getContent()));
                 }
             } else {
@@ -104,6 +105,8 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         try {
             storeEntry(request.getContent(), resourceId);
             manager.reload();
+            // Save the store to the repo (if clustered)
+            saveStore();
             handler.handleResult(new Resource(resourceId, null, request.getContent()));
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
@@ -120,6 +123,8 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 store.getStore().deleteEntry(resourceId);
                 store.store();
                 manager.reload();
+                // Save the store to the repo (if clustered)
+                saveStore();
                 handler.handleResult(new Resource(resourceId, null, new JsonValue(null)));
             }
         } catch (Throwable t) {

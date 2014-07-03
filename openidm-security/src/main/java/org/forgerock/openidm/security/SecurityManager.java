@@ -152,8 +152,9 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         String privateKeyAlias = Param.getProperty("openidm.https.keystore.cert.alias");
         try {
             if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
-                // Load keystore from repository
-                keystoreProvider.loadKeystoreFromRepo();
+                // Load keystore and truststore from the repository
+                keystoreProvider.loadStoreFromRepo();
+                truststoreProvider.loadStoreFromRepo();
                 // Reload the SSL context
                 reload();
                 // Update CryptoService
@@ -173,8 +174,10 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
                         e.printStackTrace();
                     }
                 }
+                // If this is the first/primary node in a cluster, then save the keystore and truststore to the repository
                 if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
-                    keystoreProvider.saveKeystoreToRepo();
+                    keystoreProvider.saveStoreToRepo();
+                    truststoreProvider.saveStoreToRepo();
                 }
             }
         } catch (Exception e) {
@@ -186,7 +189,6 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Security Management Service {}", compContext);
         router.removeAllRoutes();
-        //TODO: Release the KeyStore
     }
     
     // ----- Implementation of KeyStoreManager interface
