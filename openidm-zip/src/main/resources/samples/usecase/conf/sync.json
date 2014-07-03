@@ -58,6 +58,14 @@
                     "target" : "title"
                 },
                 {
+                    "source" : "title",
+                    "target" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/defineRoles.js"
+                    }
+                },
+                {
                     "source" : "uid",
                     "target" : "userName"
                 },
