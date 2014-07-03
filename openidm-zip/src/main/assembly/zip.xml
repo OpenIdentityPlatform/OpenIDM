@@ -64,7 +64,7 @@
         </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
-        	<directory>${project.build.directory}</directory>
+        <directory>${project.build.directory}</directory>
             <excludes>
              <exclude>**/*</exclude>
             </excludes>
@@ -460,6 +460,7 @@
                 <include>conf/provisioner.openicf-HRldap.json</include>
                 <include>script/on*.js</include>
                 <include>script/transform*.js</include>
+                <include>script/defineRoles.js</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
         </fileSet>
