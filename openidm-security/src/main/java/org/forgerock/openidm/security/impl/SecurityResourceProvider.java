@@ -24,12 +24,16 @@
 
 package org.forgerock.openidm.security.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -57,18 +61,22 @@ import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.util.encode.Base64;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +99,8 @@ public class SecurityResourceProvider {
     public static final String DEFAULT_ALGORITHM = "RSA";
     public static final String DEFAULT_CERTIFICATE_TYPE = "X509";
     public static final int DEFAULT_KEY_SIZE = 2048;
+    
+    public static final String KEYS_CONTAINER = "security/keys";
 
     /**
      * The Keystore handler which handles access to actual Keystore instance
@@ -111,12 +121,24 @@ public class SecurityResourceProvider {
      * The resource name, "truststore" or "keystore".
      */
     protected String resourceName = null;
+    
+    /**
+     * The instance type (standalone, clustered-first, clustered-additional)
+     */
+    private String instanceType;
+    
+    private String cryptoAlias;
+    
+    private String cryptoCipher;
 
     public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
         this.store = store;
         this.resourceName = resourceName;
         this.manager = manager;
         this.repoService = repoService;
+        this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
+        this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
+        this.instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
     }
     /**
      * Returns a PEM String representation of a object.
@@ -419,9 +441,9 @@ public class SecurityResourceProvider {
      */
     protected void storeKeyPair(String alias, KeyPair keyPair) throws ResourceException {
         try {
-            String container = "security/keys";
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
-            storeInRepo(container, alias, keyMap);
+            JsonValue encrypted = getCryptoService().encrypt(keyMap, cryptoCipher, cryptoAlias);
+            storeInRepo(KEYS_CONTAINER, alias, encrypted);
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
         }
@@ -467,15 +489,18 @@ public class SecurityResourceProvider {
      * @throws JsonResourceException
      */
     protected KeyPair getKeyPair(String alias) throws ResourceException {
-        String container = "security/keys";
-        String id = container + "/" + alias;
+        String id = KEYS_CONTAINER + "/" + alias;
         Resource keyResource = repoService.read(Requests.newReadRequest(id));
         if (keyResource.getContent().isNull()) {
             throw ResourceException.getException(ResourceException.NOT_FOUND, 
                     "Cannot find stored key for alias " + alias);
         }
         try {
-            JsonValue key = keyResource.getContent().get("encoded");
+            JsonValue content = keyResource.getContent();
+            if (getCryptoService().isEncrypted(content)) {
+                content = getCryptoService().decrypt(content);
+            }
+            JsonValue key = content.get("encoded");
             String pemString = key.asString();
             return fromPem(pemString);
         } catch (Exception e) {
@@ -511,5 +536,77 @@ public class SecurityResourceProvider {
             throw ResourceException.getException(ResourceException.BAD_REQUEST, 
                     "Private key does not match signed certificate");
         }
+    }
+    
+    /**
+     * Saves the local store only if in a clustered environment.
+     * 
+     * @throws ResourceException
+     */
+    protected void saveStore() throws ResourceException {
+        if (!instanceType.equals(ClusterUtils.TYPE_STANDALONE)) {
+            saveStoreToRepo();
+        }
+    }
+    
+    /**
+     * Loads the store from the repository and stores it locally
+     * 
+     * @throws ResourceException
+     */
+    public void loadStoreFromRepo() throws ResourceException {
+        JsonValue keystoreValue = readFromRepo("security/" + resourceName);
+        String keystoreString = keystoreValue.get("storeString").asString();
+        byte [] keystoreBytes = Base64.decode(keystoreString.getBytes());
+        ByteArrayInputStream bais = new ByteArrayInputStream(keystoreBytes);
+        try {
+            KeyStore keystore = null;
+            try {
+                keystore = KeyStore.getInstance(store.getType());     
+                keystore.load(bais, store.getPassword().toCharArray());
+            } finally {
+                bais.close();
+            }
+            store.setStore(keystore);
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, "Error creating keystore from store bytes", e);
+        }
+    }
+    
+    /**
+     * Saves the local store to the repository
+     * 
+     * @throws ResourceException
+     */
+    public void saveStoreToRepo() throws ResourceException {
+        byte [] keystoreBytes = null;
+        FileInputStream fin = null;
+        File file = new File(store.getLocation());
+
+        try {
+            try {
+                fin = new FileInputStream(file);
+                keystoreBytes = new byte[(int) file.length()];
+                fin.read(keystoreBytes);
+            } finally {
+                fin.close();
+            }
+        } catch (Exception e) {
+            throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
+        }
+        
+        String keystoreString = new String(Base64.encode(keystoreBytes));
+        JsonValue value = new JsonValue(new HashMap<String, Object>());
+        value.add("storeString", keystoreString);
+        storeInRepo("security", resourceName, value);
+    }
+    
+    /**
+     * Returns and instance of the CryptoService.
+     * 
+     * @return CryptoService instance.
+     */
+    private CryptoService getCryptoService() {
+        return CryptoServiceFactory.getInstance();
     }
 }
