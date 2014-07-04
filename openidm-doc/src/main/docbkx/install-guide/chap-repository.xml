@@ -94,8 +94,10 @@ OpenIDM is not running, not stopping.
 $ rm repo.orientdb.json</screen>
   </step>
   <step>
-   <para>Copy <filename>openidm/samples/misc/repo.jdbc.json</filename> to the
-   <filename>openidm/conf</filename> directory.</para>
+   <para>
+    Copy <filename>openidm/samples/misc/repo.jdbc.json</filename> to the
+    <filename>openidm/conf</filename> directory.
+   </para>
    <screen>$ cd /path/to/openidm/conf
 $ cp ../samples/misc/repo.jdbc.json .</screen>
   </step>
@@ -104,28 +106,30 @@ $ cp ../samples/misc/repo.jdbc.json .</screen>
     <primary>Repository database</primary>
     <secondary>Table names</secondary>
    </indexterm>
-   <para>Import the data definition language script for OpenIDM into
-   MySQL.</para>
-   <screen>$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/scripts/mysql/openidm.sql
-Enter password:
-$ </screen>
+   <para>
+    Import the data definition language script for OpenIDM into MySQL.
+   </para>
+   <screen><userinput>$ cd /path/to/mysql
+$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/scripts/mysql/openidm.sql</userinput>
+<computeroutput>Enter password:
+$ </computeroutput></screen>
    <para>This step creates an <literal>openidm</literal> database for use
    as the internal repository, and a user <literal>openidm</literal> with 
    password <literal>openidm</literal> who has all the required privileges to 
    update the database.</para>
-   <screen>$ cd /path/to/mysql
-$ ./bin/mysql -u root -p 
-Enter password: 
+   <screen><userinput>$ ./bin/mysql -u root -p</userinput>
+<computeroutput>Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 18
 Server version: 5.5.19 MySQL Community Server (GPL)
 ...
-mysql&gt; use openidm;
-Reading table information for completion of table and column names
+mysql&gt; </computeroutput><userinput>use openidm;</userinput>
+<computeroutput>Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed
-mysql&gt; show tables;
+mysql&gt; </computeroutput><userinput>show tables;</userinput>
+<computeroutput>
 +---------------------------+
 | Tables_in_openidm         |
 +---------------------------+
@@ -147,24 +151,26 @@ mysql&gt; show tables;
 | schedulerobjects          |
 | uinotification            |
 +---------------------------+
-17 rows in set (0.00 sec)</screen>
+17 rows in set (0.00 sec)</computeroutput></screen>
    <para>The table names are similar to those used with OrientDB.</para>
   </step>
   <step>
-   <para>Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary,
-   to reflect your MySQL deployment.</para>
-   <programlisting language="javascript">
-"connection" : {
+   <para>
+    Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary, to
+    reflect your MySQL deployment.
+   </para>
+   <programlisting language="javascript">"connection" : {
     "dbType" : "MYSQL",
     "jndiName" : "",
     "driverClass" : "com.mysql.jdbc.Driver",
-    <emphasis role="strong">"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
+    "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
     "username" : "openidm",
-    "password" : "openidm",</emphasis>
+    "password" : "openidm",
     "defaultCatalog" : "openidm",
     "maxBatchSize" : 100,
     "maxTxRetry" : 5,
-    "enableConnectionPool" : true 
+    "enableConnectionPool" : true,
+    "connectionTimeoutInMs" : 30000
 },</programlisting>
   </step>
  </procedure>
@@ -177,49 +183,41 @@ mysql&gt; show tables;
      <literal>unsatisfied</literal>.
     </para>
 
-    <screen>
-     <userinput>
+    <screen><userinput>
 $ cd /path/to/openidm
-$ ./startup.sh
-     </userinput>
-     <computeroutput>
-Using OPENIDM_HOME:   /path/to/openidm
+$ ./startup.sh</userinput>
+<computeroutput>Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m
 Using LOGGING_CONFIG:
 -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
-Using boot properties at /path/to/openidm/conf/boot/boot.properties
-     </computeroutput>
-     <userinput>
--&gt; scr list
-     </userinput>
-     <computeroutput>
+Using boot properties at /path/to/openidm/conf/boot/boot.properties</computeroutput>
+<userinput>-&gt; scr list</userinput>
+<computeroutput>
 Id   State          Name
 [  19] [active       ] org.forgerock.openidm.config.starter
-        [  23] [active       ] org.forgerock.openidm.taskscanner
-        [   8] [active       ] org.forgerock.openidm.external.rest
-        [  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-        [  15] [active       ] org.forgerock.openidm.ui.simple
-        [   1] [active       ] org.forgerock.openidm.router
-        [  22] [active       ] org.forgerock.openidm.scheduler
-        [  14] [active       ] org.forgerock.openidm.restlet
-        [   7] [unsatisfied  ] org.forgerock.openidm.external.email
-        [  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
-        [   6] [active       ] org.forgerock.openidm.sync
-        [   3] [active       ] org.forgerock.openidm.script
-        [   5] [active       ] org.forgerock.openidm.recon
-        [   2] [active       ] org.forgerock.openidm.scope
-        [  10] [active       ] org.forgerock.openidm.http.contextregistrator
-        [  20] [active       ] org.forgerock.openidm.config
-        [   0] [active       ] org.forgerock.openidm.audit
-        [  21] [active       ] org.forgerock.openidm.schedule
-        [  17] [active       ] org.forgerock.openidm.repo.jdbc
-        [  16] [active       ] org.forgerock.openidm.workflow
-        [  13] [active       ] org.forgerock.openidm.provisioner.openicf
-        [   4] [active       ] org.forgerock.openidm.managed
-        [   9] [active       ] org.forgerock.openidm.authentication
-        [  11] [active       ] org.forgerock.openidm.provisioner
-     </computeroutput>
-    </screen>
+[  23] [active       ] org.forgerock.openidm.taskscanner
+[   8] [active       ] org.forgerock.openidm.external.rest
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  15] [active       ] org.forgerock.openidm.ui.simple
+[   1] [active       ] org.forgerock.openidm.router
+[  22] [active       ] org.forgerock.openidm.scheduler
+[  14] [active       ] org.forgerock.openidm.restlet
+[   7] [unsatisfied  ] org.forgerock.openidm.external.email
+[  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+[   6] [active       ] org.forgerock.openidm.sync
+[   3] [active       ] org.forgerock.openidm.script
+[   5] [active       ] org.forgerock.openidm.recon
+[   2] [active       ] org.forgerock.openidm.scope
+[  10] [active       ] org.forgerock.openidm.http.contextregistrator
+[  20] [active       ] org.forgerock.openidm.config
+[   0] [active       ] org.forgerock.openidm.audit
+[  21] [active       ] org.forgerock.openidm.schedule
+[  17] [active       ] org.forgerock.openidm.repo.jdbc
+[  16] [active       ] org.forgerock.openidm.workflow
+[  13] [active       ] org.forgerock.openidm.provisioner.openicf
+[   4] [active       ] org.forgerock.openidm.managed
+[   9] [active       ] org.forgerock.openidm.authentication
+[  11] [active       ] org.forgerock.openidm.provisioner</computeroutput></screen>
  </section>
 
  <section xml:id="repository-mssql">
