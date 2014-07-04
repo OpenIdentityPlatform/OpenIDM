@@ -447,7 +447,7 @@ script task using expression resolver: [
    You can invoke workflows and business processes from any trigger point within
    OpenIDM, including reacting to situations discovered during reconciliation.
    Workflows can be invoked from script files, using the
-   <literal>openidm.action()</literal> function, or directly from the REST
+   <literal>openidm.create()</literal> function, or directly from the REST
    interface.
   </para>
   <para>
@@ -463,9 +463,15 @@ var params = {
  "_key": "myWorkflow"
 };
 
-openidm.action('workflow/processinstance', {"_action" : "create"}, params);
+openidm.create('workflow/processinstance', null, params);
   </programlisting>
-
+  <para>
+   The <literal>null</literal> in this example indicates that you do not want to
+   specify an ID as part of the create call. For more information, see the
+   <link xlink:show="new" xlink:href="integrators-guide#function-create"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Function
+   Reference</citetitle></link>.
+  </para>
   <para>
    You can invoke the same workflow from the REST interface by sending the
    following REST call to OpenIDM:
