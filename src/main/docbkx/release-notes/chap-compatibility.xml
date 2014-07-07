@@ -45,6 +45,56 @@
   </para>
   
   <variablelist>
+   <varlistentry xml:id="compatibility-idm3-icf4">
+    <term>Integration of OpenICF 1.4.0.0</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} is not compatible with the previous
+      version of the OpenICF framework. If your deployment uses remote connector
+      servers (either .NET or Java) you must upgrade them to the new connector
+      server versions (1.4.0.0). With the exception of the Active Directory
+      connector, the new connector framework <emphasis>is</emphasis> compatible
+      with the older connectors, however, so you can use the older connectors
+      with an OpenIDM ${serverDocTargetVersion} deployment. Only version 1.4.0.0
+      of the Active Directory connector is supported with OpenIDM
+      ${serverDocTargetVersion}. The following compatibility matrix indicates
+      the supported connector and OpenICF framework versions.
+     </para>
+     <table xml:id="idm-icf-compatibility">
+      <title>OpenIDM ${serverDocTargetVersion} / OpenICF Compatibility Matrix</title>
+      <tgroup cols="4">
+       <thead>
+        <row>
+         <entry>OpenIDM Version</entry>
+         <entry>OpenICF Framework</entry>
+         <entry>Supported Java Connectors</entry>
+         <entry>Supported .NET Connectors</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>2.1</entry>
+         <entry>1.1</entry>
+         <entry>1.1</entry>
+         <entry>1.1</entry>
+        </row>
+        <row>
+         <entry>3.0.0</entry>
+         <entry>1.4</entry>
+         <entry>
+          <para>Previously supported Java connectors (1.1)</para>
+          <para>Groovy Connector (1.4)</para>
+         </entry>
+         <entry>
+          <para>Active Directory Connector (1.4)</para>
+          <para>PowerShell Connector (1.4)</para>
+         </entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </table>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Changes to the REST Interface</term>
     <listitem>
