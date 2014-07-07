@@ -1874,7 +1874,7 @@ org.identityconnectors.framework.server.Main -run -properties
          </step>
          <step>
           <para>Go to the <literal>/tools</literal> directory. The groovy scripts in the folder
-         run on the JCS side. Copy them from <literal>path/to/openidm/sample/sample3/tools</literal>
+         run on the JCS side. Copy them from <literal>path/to/openidm/samples/sample3/tools</literal>
          folder to <literal>openicf/</literal>.
           </para>
          </step>
