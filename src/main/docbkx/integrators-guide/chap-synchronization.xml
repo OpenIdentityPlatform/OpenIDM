@@ -2221,14 +2221,12 @@ $ <userinput>curl \
      <literal>parentActionId</literal> in the query. For example:
     </para>
 
-    <screen width="102">
-$ <userinput>curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</userinput>
-    </screen>
+ "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</userinput></screen>
 
     <para>
      The following sample output shows the result of a query that requests
@@ -3675,7 +3673,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
        Note that the <literal>_id</literal> must be URL-encoded in the REST
        call.
       </para>
-      <screen width="110">$ <userinput>curl \
+      <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \

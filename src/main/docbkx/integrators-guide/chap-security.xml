@@ -522,22 +522,18 @@ s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
      Test REST access on the HTTPS port, referencing the self-signed certificate
      in the command. For example:
     </para>
-    <screen>
-$ <userinput>curl \
+    <screen><userinput>$ curl \
  --header "X-OpenIDM-Username:openidm-admin" \
  --header "X-OpenIDM-Password:openidm-admin" \
  --cacert self-signed.crt \
  --request GET \
  "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids"</userinput>
-     <computeroutput>
-{
+     <computeroutput>{
     "result": [],
     "resultCount": 0,
     "pagedResultsCooke": null,
     "remainingPagedResuts": -1
-}
-     </computeroutput>
-    </screen>
+}    </computeroutput></screen>
 
    </step>
   </procedure>
@@ -738,24 +734,18 @@ Server: Jetty(8.y.z-SNAPSHOT)
 
    <step>
     <para>Add the new key to the key store.</para>
-    <screen>
-
-$ <userinput>cd /path/to/openidm/</userinput>
-$ <userinput>keytool \
+    <screen><userinput>$ cd /path/to/openidm/
+$ keytool \
  -genseckey \
  -alias new-sym-key \
  -keyalg AES \
  -keysize 128 \
  -keystore security/keystore.jceks \
- -storetype JCEKS
-     </userinput>
-     <computeroutput>
-Enter keystore password:
+ -storetype JCEKS</userinput>
+    <computeroutput>Enter keystore password:
 Enter key password for &lt;new-sym-key&gt;
   (RETURN if same as keystore password):
-Re-enter new password:
-     </computeroutput>
-    </screen>
+Re-enter new password:</computeroutput></screen>
     <para>Additional options associated with the <command>keytool</command>
      command in OpenIDM are shown in the following file:
     <filename>openidm/samples/security/keystore_readme.txt</filename>.</para>

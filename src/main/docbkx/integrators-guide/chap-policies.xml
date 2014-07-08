@@ -87,14 +87,22 @@
     <section xml:id="policy-script-file">
       <title>Policy Script File</title>
       
-      <para>The policy script file defines policy configuration in two parts:
+      <para>
+       The policy script file defines policy configuration in two parts:
       </para>
       
       <itemizedlist>
-        <listitem><para>A policy configuration object, which defines each 
-        element of the policy.</para></listitem>
-        <listitem><para>A policy implementation function, which describes the 
-        requirements that are enforced by that policy.</para></listitem>
+       <listitem>
+        <para>
+         A policy configuration object, which defines each element of the policy.
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         A policy implementation function, which describes the requirements that
+         are enforced by that policy.
+        </para>
+       </listitem>
       </itemizedlist>
       
       <para>Together, the configuration object and the implementation function 
@@ -103,14 +111,13 @@
       that the value of a property must contain a certain number of capital 
       letters.</para>
       
-      <programlisting width="120" language="javascript">
-...
-            {   "policyId" : "at-least-X-capitals",
-                "policyExec" : "atLeastXCapitalLetters",
-                "clientValidation": true,
-                "validateOnlyIfPresent":true,
-                "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
-            },
+      <programlisting width="110" language="javascript">...
+{   "policyId" : "at-least-X-capitals",
+    "policyExec" : "atLeastXCapitalLetters",
+    "clientValidation": true,
+    "validateOnlyIfPresent":true,
+    "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
+},
 ...
 
 policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, property) {
