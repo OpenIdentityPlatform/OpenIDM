@@ -884,10 +884,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
-        } catch (IllegalArgumentException e) {
-            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ResourceException e) {
             handler.handleError(e);
+        } catch (IllegalArgumentException e) { // from getActionAsEnum
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         }
     }
 
@@ -913,10 +913,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
-        } catch (IllegalArgumentException e) {
-            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ResourceException e) {
             handler.handleError(e);
+        } catch (IllegalArgumentException e) { // from getActionAsEnum
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         }
     }
 

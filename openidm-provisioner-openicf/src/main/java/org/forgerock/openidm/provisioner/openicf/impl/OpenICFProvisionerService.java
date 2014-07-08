@@ -799,13 +799,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     break;
 
                 default:
-                    handler.handleError(new BadRequestException("Unsupported action: " + request.getAction()));
+                    throw new BadRequestException("Unsupported action: " + request.getAction());
             }
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (ConnectorException e) {
             handleConnectorException(context, request, e, null, request.getResourceName(), null, null, handler, activityLogger);
         } catch (JsonValueException e) {
+            handler.handleError(new BadRequestException(e.getMessage(), e));
+        } catch (IllegalArgumentException e) { // from request.getActionAsEnum
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
@@ -1245,6 +1247,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (JsonValueException e) {
+                handler.handleError(new BadRequestException(e.getMessage(), e));
+            } catch (IllegalArgumentException e) { // from request.getActionAsEnum
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e.getMessage(), e));
