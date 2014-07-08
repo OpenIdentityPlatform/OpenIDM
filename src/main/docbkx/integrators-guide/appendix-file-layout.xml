@@ -328,7 +328,16 @@
     <para>Bundle cache directory created when the Felix framework is 
     started</para>
    </listitem>
-  </varlistentry>  
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/lib</filename></term>
+   <listitem>
+    <para>
+     Location in which third-party libraries (required, for example, by custom
+     connectors) should be placed.
+    </para>
+   </listitem>
+  </varlistentry>
   <varlistentry>
    <term><filename>openidm/logs/</filename></term>
    <listitem>
