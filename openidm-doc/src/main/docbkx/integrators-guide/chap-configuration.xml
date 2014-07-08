@@ -328,15 +328,13 @@
   <literal>https://localhost:8443/openidm/config</literal>. The following
   example shows excerpts of the default configuration for an OpenIDM instance
   started with Sample 1.</para>
-  <screen>
- $ <userinput>curl \
+  <screen><userinput>$ curl \
  --request GET \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --cacert self-signed.crt \
  https://localhost:8443/openidm/config</userinput>
-   <computeroutput>
-{
+   <computeroutput>{
    "configurations": [
       {
          "factoryPid": "servletfilter",
@@ -374,22 +372,20 @@
          "pid": "process.9863529c-60e0-42e3-b5d5-c5c704016e95",
          "_id": "process/access"
       }
-   ]    </computeroutput>
-}</screen>
+   ]
+}</computeroutput></screen>
 
   <para>Single instance configuration objects are located under
   <literal>openidm/config/<replaceable>object-name</replaceable></literal>.
   The following example shows the default <literal>audit</literal>
   configuration.</para>
 
-  <screen>
-$ <userinput>curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/config/audit"</userinput>
-<computeroutput>
-{
+<computeroutput>{
    "eventTypes": {
      "recon": {},
      "activity": {
@@ -423,8 +419,7 @@ $ <userinput>curl \
        "logType": "repository"
      }
    ]
-} </computeroutput>
-  </screen>
+} </computeroutput>  </screen>
 
   <para>Multiple instance configuration objects are found under
   <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable
@@ -437,14 +432,12 @@ $ <userinput>curl \
           xlink:role="http://docbook.org/xlink/role/olink"><citetitle>
     First IDM Sample</citetitle></link> of the OpenIDM Installation Guide.</para>
 
-  <screen>
-$ <userinput>curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  "https://localhost:8443/openidm/config/provisioner.openicf/xml"</userinput>
-<computeroutput>
-  {
+<computeroutput>{
     "operationTimeout": {
       "SCRIPT_ON_CONNECTOR": -1,
       "VALIDATE": -1,
@@ -568,7 +561,7 @@ $ <userinput>curl \
    remove all filters, effectively bypassing any policy validation.
   </para>
   
-  <screen>$ <userinput>curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -594,8 +587,7 @@ $ <userinput>curl \
       }
     }
   ]
-} </computeroutput>
-  </screen>
+} </computeroutput></screen>
 
   <para>
    For more information about using the REST API to update objects, see the
@@ -607,33 +599,51 @@ $ <userinput>curl \
  
   <section xml:id="using-property-substitution">
   <title>Using Property Value Substitution in the Configuration</title>
-  <para>In an environment where you have more than one OpenIDM instance, you 
-  might require a configuration that is similar, but not identical, across the 
-  different OpenIDM hosts. OpenIDM supports variable replacement in its 
-  configuration which means that you can modify the effective configuration 
-  according to the requirements of a specific environment or OpenIDM instance.</para>
-  <itemizedlist><para>Property substitution enables you to achieve the following:</para>
-   <listitem><para>Define a configuration that is specific to a single OpenIDM 
-   instance, for example, setting the location of the keystore on a particular 
-   host.</para></listitem>
-   <listitem><para>Define a configuration whose parameters vary between different 
-   environments, for example, the URLs and passwords for test, development, 
-   and production environments.</para></listitem>
-   <listitem><para>Disable certain capabilities on specific nodes. For example, 
-   you might want to disable the workflow engine on specific instances.</para>
+  <para>
+   In an environment where you have more than one OpenIDM instance, you might
+   require a configuration that is similar, but not identical, across the
+   different OpenIDM hosts. OpenIDM supports variable replacement in its
+   configuration which means that you can modify the effective configuration
+   according to the requirements of a specific environment or OpenIDM instance.
+  </para>
+  <itemizedlist>
+   <para>
+    Property substitution enables you to achieve the following:
+   </para>
+   <listitem>
+    <para>
+     Define a configuration that is specific to a single OpenIDM instance, for
+     example, setting the location of the keystore on a particular host.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Define a configuration whose parameters vary between different
+     environments, for example, the URLs and passwords for test, development,
+     and production environments.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     Disable certain capabilities on specific nodes. For example, you might want
+     to disable the workflow engine on specific instances.
+    </para>
    </listitem>
   </itemizedlist>
-  <para>When OpenIDM starts up, it combines the system configuration, which 
-  might contain specific environment variables, with the defined OpenIDM 
-  configuration properties. This combination makes up the effective configuration 
-  for that OpenIDM instance. By varying the environment properties, you can 
-  change specific configuration items that vary between OpenIDM instances or 
-  environments.</para>
-  
-  <para>Property references are contained within the construct 
-  <literal>&amp;{ }</literal>. When such references are found, OpenIDM replaces 
-  them with the appropriate property value, defined in the 
-  <filename>boot.properties</filename> file.</para>
+  <para>
+   When OpenIDM starts up, it combines the system configuration, which might
+   contain specific environment variables, with the defined OpenIDM
+   configuration properties. This combination makes up the effective
+   configuration for that OpenIDM instance. By varying the environment
+   properties, you can change specific configuration items that vary between
+   OpenIDM instances or environments.
+  </para>
+  <para>
+   Property references are contained within the construct
+   <literal>&amp;{ }</literal>. When such references are found, OpenIDM replaces
+   them with the appropriate property value, defined in the
+   <filename>boot.properties</filename> file.
+  </para>
   
   <example>
    <para>The following example defines two separate OpenIDM environments - 
@@ -644,36 +654,34 @@ $ <userinput>curl \
    <para>The environments are defined by adding the following lines to the 
    <filename>conf/boot.properties</filename> file:</para>
    
-   <programlisting language="javascript">
-   PROD.location=production
-   DEV.location=development
-   </programlisting>
+   <programlisting language="javascript">PROD.location=production
+DEV.location=development</programlisting>
    
-   <para>The database URL is then specified as follows in the 
-   <filename>repo.orientdb.json</filename> file:</para>
+   <para>
+    The database URL is then specified as follows in the
+    <filename>repo.orientdb.json</filename> file:
+   </para>
    
-   <programlisting language="javascript">
-    {
+   <programlisting language="javascript">{
     "dbUrl" : "plocal:./db/&amp;{&amp;{environment}.location}-openidm",
     ...
-    }
-   </programlisting>
+}   </programlisting>
    
-   <para>The effective database URL is determined by setting the 
-   <literal>OPENIDM_OPTS</literal> environment variable when you start OpenIDM. 
-   To use the production environment, start OpenIDM as follows:</para>
+   <para>
+    The effective database URL is determined by setting the
+    <literal>OPENIDM_OPTS</literal> environment variable when you start OpenIDM.
+    To use the production environment, start OpenIDM as follows:
+   </para>
    
-   <screen>
-   $ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=PROD"
-   $ ./startup.sh
-   </screen>
+   <screen>$ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=PROD"
+$ ./startup.sh</screen>
    
-   <para>To use the development environment, start OpenIDM as follows:</para>
+   <para>
+    To use the development environment, start OpenIDM as follows:
+   </para>
    
-   <screen>
-   $ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=DEV"
-   $ ./startup.sh
-   </screen>
+   <screen>$ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=DEV"
+$ ./startup.sh</screen>
    
   </example>
   
@@ -707,23 +715,27 @@ $ <userinput>curl \
  properties and boot properties.</para>
  
  <example>
-   <para>The following example uses the <literal>user.country</literal> property, 
-   a default Java System property. The example defines specific LDAP ports, 
+  <para>
+   The following example uses the <literal>user.country</literal> property, a
+   default Java System property. The example defines specific LDAP ports,
    depending on the country (identified by the country code) in the 
    <literal>boot.properties</literal> file. The value of the LDAP port (set in 
    the <literal>provisioner.openicf-ldap.json</literal> file) depends on the 
-   value of the <literal>user.country</literal> System property.</para>
-   <para>The port numbers are defined in the <literal>boot.properties</literal> 
-   file as follows:</para>
-   <programlisting language="javascript">
-   openidm.NO.ldap.port=2389
-   openidm.EN.ldap.port=3389
-   openidm.US.ldap.port=1389</programlisting>
-   <para>The following extract from the 
-   <literal>provisioner.openicf-ldap.json</literal> file shows how the value of 
-   the LDAP port is eventually determined, based on the System property:</para>
-   <programlisting language="javascript">
-   "configurationProperties" :
+   value of the <literal>user.country</literal> System property.
+  </para>
+  <para>
+   The port numbers are defined in the <literal>boot.properties</literal>
+   file as follows:
+  </para>
+  <programlisting language="javascript">openidm.NO.ldap.port=2389
+openidm.EN.ldap.port=3389
+openidm.US.ldap.port=1389</programlisting>
+  <para>
+   The following extract from the <literal>provisioner.openicf-ldap.json</literal>
+   file shows how the value of the LDAP port is eventually determined, based on
+   the System property:
+  </para>
+  <programlisting language="javascript">"configurationProperties" :
    {
       "credentials" : "Passw0rd",
       "port" : "&amp;{openidm.&amp;{user.country}.ldap.port}",
@@ -733,8 +745,7 @@ $ <userinput>curl \
             "dc=example,dc=com"
          ],
       "host" : "localhost"
-   }
-   </programlisting>
+   }</programlisting>
  </example>
  
  </section>
@@ -742,19 +753,28 @@ $ <userinput>curl \
   <section xml:id="property-substitution-limitations">
    <title>Limitations of Property Value Substitution</title>
    <itemizedlist>
-   <para>Note the following limitations when you use property value 
-   substitution:</para>
- <listitem><para>You cannot reference complex objects or properties with syntaxes 
- other than String. Property values are resolved from the 
- <literal>boot.properties</literal> file or from the System properties and the 
- value of these properties is always in String format.</para>
- <para>Property substitution of boolean values is currently only supported in 
- stringified format, that is, resulting in <literal>"true"</literal> or 
- <literal>"false"</literal>.
- </para></listitem>
- <listitem><para>Substitution of encrypted property values is currently not 
- supported.</para></listitem>
- <!--  TO DO
+    <para>
+     Note the following limitations when you use property value substitution:
+    </para>
+    <listitem>
+     <para>
+      You cannot reference complex objects or properties with syntaxes other
+      than String. Property values are resolved from the
+      <literal>boot.properties</literal> file or from the System properties and
+      the value of these properties is always in String format.
+     </para>
+     <para>
+      Property substitution of boolean values is currently only supported in
+      stringified format, that is, resulting in <literal>"true"</literal> or
+      <literal>"false"</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Substitution of encrypted property values is currently not supported.
+     </para>
+    </listitem>
+ <!--TODO
  For now, encrypted property substitution is not supported. Check and
  replace with this chunk when it is
  
@@ -1096,15 +1116,14 @@ $ <userinput>curl \
      <para>
       Consider the following REST request:
      </para>
-     <screen>$ curl \
+     <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
  --data { "name": "bob"} \
- "https://localhost:8443/openidm/endpoint/test?_action=myAction"
-     </screen>
+ "https://localhost:8443/openidm/endpoint/test?_action=myAction"</userinput></screen>
      <para>
       This request includes the string <literal>'{ "name": "bob"}'</literal>
       as the HTTP post body. OpenIDM expects this to be a JSON string, and will
@@ -1200,9 +1219,7 @@ $ <userinput>curl \
      As an example, start with a request such as the following:
     </para>
 
-    <screen>
-     GET https://localhost:8443/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo
-    </screen>
+    <screen>GET https://localhost:8443/openidm/endpoint/echo?queryId=query-all-ids&amp;_para=foo</screen>
 
     <para>
      A request at an endpoint starts with a root context, associated with a
