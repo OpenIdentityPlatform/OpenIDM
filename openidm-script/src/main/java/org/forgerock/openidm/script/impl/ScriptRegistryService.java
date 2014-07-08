@@ -58,6 +58,7 @@ import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -568,10 +569,12 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     }
                     break;
                 default:
-                    throw new NotSupportedException("Unrecognized action ID " + request.getAction());
+                    throw new BadRequestException("Unrecognized action ID " + request.getAction());
             }
-        } catch (final ResourceException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
+        } catch (IllegalArgumentException e) { // from getActionAsEnum
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
