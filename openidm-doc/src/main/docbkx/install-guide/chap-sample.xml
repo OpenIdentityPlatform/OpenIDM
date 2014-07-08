@@ -267,12 +267,12 @@ orientdb&gt; </screen>
      <para>Apart from the scheduled reconciliation run, you can also start 
      the reconciliation run through the REST interface. The call to the REST 
      interface is an HTTP POST such as the following.</para>
-     <screen width="100">$ curl
- --cacert self-signed.crt
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --header "Content-Type: application/json"
- --request POST
+     <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
      <note>
