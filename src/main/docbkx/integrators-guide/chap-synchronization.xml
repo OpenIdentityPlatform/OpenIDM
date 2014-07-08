@@ -3882,7 +3882,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   </para>
 
   <section xml:id="correlation-query-managed-object">
-   <title>Managed Object as Correlation Query Target</title>
+   <title>Managed Objects as Correlation Query Targets</title>
 
    <para>Queries on managed objects in the repository must be defined in the
    configuration file for the repository, which is either
@@ -3929,26 +3929,34 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
   </section>
 
   <section xml:id="correlation-query-system-object">
-   <title>System Object as Correlation Query Target</title>
-
-   <para>Correlation queries on system objects access the connector. The
-   connector then executes the query on the external resource.</para>
-
-   <para>Your correlation query JavaScript must return a map holding a generic
-   query with the following elements.</para>
+   <title>System Objects as Correlation Query Targets</title>
+   <para>
+    Correlation queries on system objects access the connector. The connector
+    then executes the query on the external resource.
+   </para>
+   <para>
+    Your correlation query JavaScript must return a map that holds a generic
+    query with the following elements:
+   </para>
    <itemizedlist>
     <listitem>
-     <para>A condition such as "Equals"</para>
+     <para>
+      A condition, such as "Equals"
+     </para>
     </listitem>
     <listitem>
-     <para>The naming attribute to compare on the system object. In the example
-     that follows, the naming attribute is <literal>uid</literal>.</para>
+     <para>
+      The naming attribute to compare on the system object. In the example that
+      follows, the naming attribute is <literal>uid</literal>.
+     </para>
     </listitem>
     <listitem>
-     <para>The value from the source object to use in the search filter. You
-     set this as the value of the <literal>value</literal> property, which
-     takes an array. In the example that follows, the value to use in the
-     search filter is <literal>source.userName</literal>.</para>
+     <para>
+      The value from the source object to use in the search filter. You set this
+      as the value of the <literal>value</literal> property, which takes an
+      array. In the example that follows, the value to use in the search filter
+      is <literal>source.userName</literal>.
+     </para>
     </listitem>
    </itemizedlist>
    <programlisting language="javascript">
