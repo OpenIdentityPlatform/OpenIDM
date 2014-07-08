@@ -510,13 +510,10 @@ C:\> cd \path\to\openidm\conf\
    <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.
   </para>
 
-  <screen>
-   <userinput>
+  <screen><userinput>
 C:> cd \path\to\openidm
-./> startup.bat
-   </userinput>
-   <computeroutput>
-"Using OPENIDM_HOME:   \path\to\openidm"
+./> startup.bat</userinput>
+   <computeroutput>"Using OPENIDM_HOME:   \path\to\openidm"
 "Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m"
 "Using LOGGING_CONFIG:
 -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
@@ -547,8 +544,7 @@ Id   State          Name
 [  4] [active      ] org.forgerock.openidm.managed
 [  9] [active      ] org.forgerock.openidm.authentication
 [ 11] [active      ] org.forgerock.openidm.provisioner
-   </computeroutput>
-  </screen>
+   </computeroutput></screen>
  </section>
 
  <section xml:id="repository-oracledb">
@@ -735,8 +731,7 @@ $ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
    to reflect your OracleDB deployment. Specifically, edit the <literal>jdbcUrl</literal>,
    <literal>username</literal>, and <literal>password</literal> properties. For
    example:</para>
-   <programlisting language="javascript">{
-    "connection" : {
+   <programlisting language="javascript">"connection" : {
         "dbType" : "ORACLE",
         "jndiName" : "",
         "driverClass" : "oracle.jdbc.OracleDriver",
@@ -759,21 +754,21 @@ $ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
     <literal>unsatisfied</literal>.
     </para>
 
-    <screen>$ cd /path/to/openidm
-$ ./startup.sh
-Using OPENIDM_HOME:   /path/to/openidm
+    <screen><userinput>$ cd /path/to/openidm
+$ ./startup.sh        </userinput>
+<computeroutput>Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG:
 -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-....
--&gt; scr list
-   Id   State          Name
+....</computeroutput>
+<userinput>-&gt; scr list</userinput>
+<computeroutput>   Id   State          Name
 ...
 [   2] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
 ...
 [   3] [active       ] org.forgerock.openidm.repo.jdbc
-...</screen>
+...</computeroutput></screen>
   </section>
 
  <!-- TODO Include this section when we support PostGreSQL - This information is
