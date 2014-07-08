@@ -66,13 +66,15 @@ public class SystemAction {
         return name;
     }
 
+    /**
+     * Gets the ScriptContextBuilders for the system type
+     * @param systemType name of system type
+     * @return List of ScriptContextBuilder for system type or empty List if there are none
+     */
     public List<ScriptContextBuilder> getScriptContextBuilders(String systemType) {
-        List<ScriptContextBuilder> result = null;
+        List<ScriptContextBuilder> result = new ArrayList<ScriptContextBuilder>(actions.size());
         for (SystemTypeAction action : actions) {
             if (action.match(systemType)) {
-                if (null == result) {
-                    result = new ArrayList<ScriptContextBuilder>(actions.size());
-                }
                 result.add(action.getScriptContextBuilder());
             }
         }
