@@ -836,6 +836,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             handler.handleError(new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID));
             return;
         }
+
+        if (!localSystemActionCache.containsKey(scriptId)) {
+            handler.handleError(new BadRequestException("Script ID: " + scriptId + " is not defined."));
+            return;
+        }
+
         SystemAction action = localSystemActionCache.get(scriptId);
 
         String systemType = connectorReference.getConnectorKey().getConnectorName();
