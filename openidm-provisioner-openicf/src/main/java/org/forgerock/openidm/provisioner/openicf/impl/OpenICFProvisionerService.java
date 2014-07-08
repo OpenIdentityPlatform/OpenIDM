@@ -838,130 +838,131 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         String systemType = connectorReference.getConnectorKey().getConnectorName();
         List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
-        if (null != scriptContextBuilderList) {
-            // OperationHelper helper = operationHelperBuilder
-            // .build(id.getObjectType(),
-            // params, cryptoService);
 
-            JsonValue result = new JsonValue(new HashMap<String, Object>());
+        if (scriptContextBuilderList.isEmpty()) {
+            handler.handleError(new BadRequestException("Script ID: " + scriptId +
+                    " for systemType " + systemType + " is not defined."));
+            return;
+        }
 
-            boolean onConnector = !"resource".equalsIgnoreCase(
-                    request.getAdditionalParameter(SystemAction.SCRIPT_EXECUTE_MODE));
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
 
-            final ConnectorFacade facade = getConnectorFacade0(handler,
-                    onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
-            if (null == facade) {
-                // getConnectorFacade0 already handles error when returning null
-                return;
-            }
+        boolean onConnector = !"resource".equalsIgnoreCase(
+                request.getAdditionalParameter(SystemAction.SCRIPT_EXECUTE_MODE));
 
-            String variablePrefix = request.getAdditionalParameter(SystemAction.SCRIPT_VARIABLE_PREFIX);
+        final ConnectorFacade facade = getConnectorFacade0(handler,
+                onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
+        if (null == facade) {
+            // getConnectorFacade0 already handles error when returning null
+            return;
+        }
 
-            List<Map<String, Object>> resultList =
-                    new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
-            result.put("actions", resultList);
+        String variablePrefix = request.getAdditionalParameter(SystemAction.SCRIPT_VARIABLE_PREFIX);
 
-            for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
-                boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
-                for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
-                    final String key = entry.getKey();
-                    if (SystemAction.SCRIPT_PARAMS.contains(key)) {
-                        continue;
+        List<Map<String, Object>> resultList =
+                new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
+        result.put("actions", resultList);
+
+        for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
+            boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
+            for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
+                final String key = entry.getKey();
+                if (SystemAction.SCRIPT_PARAMS.contains(key)) {
+                    continue;
+                }
+                Object value = entry.getValue();
+                Object newValue = value;
+                if (isShell) {
+                    if ("password".equalsIgnoreCase(key)) {
+                        if (value instanceof String) {
+                            newValue = new GuardedString(((String) value).toCharArray());
+                        } else {
+                            throw new BadRequestException("Invalid type for password.");
+                        }
                     }
-                    Object value = entry.getValue();
-                    Object newValue = value;
-                    if (isShell) {
-                        if ("password".equalsIgnoreCase(key)) {
-                            if (value instanceof String) {
-                                newValue = new GuardedString(((String) value).toCharArray());
-                            } else {
-                                throw new BadRequestException("Invalid type for password.");
-                            }
+                    if ("username".equalsIgnoreCase(key)) {
+                        if (value instanceof String == false) {
+                            throw new BadRequestException("Invalid type for username.");
                         }
-                        if ("username".equalsIgnoreCase(key)) {
-                            if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for username.");
-                            }
-                        }
-                        if ("workingdir".equalsIgnoreCase(key)) {
-                            if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for workingdir.");
-                            }
-                        }
-                        if ("timeout".equalsIgnoreCase(key)) {
-                            if (!(value instanceof String) && !(value instanceof Number)) {
-                                throw new BadRequestException("Invalid type for timeout.");
-                            }
-                        }
-                        contextBuilder.addScriptArgument(key, newValue);
-                        continue;
                     }
-
-                    if (null != value) {
-                        if (value instanceof Collection) {
-                            newValue =
-                                    Array.newInstance(Object.class,
-                                            ((Collection) value).size());
-                            int i = 0;
-                            for (Object v : (Collection) value) {
-                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                    Array.set(newValue, i, v);
-                                } else {
-                                    // Serializable may not be
-                                    // acceptable
-                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
-                                }
-                                i++;
-                            }
-
-                        } else if (value.getClass().isArray()) {
-                            // TODO implement the array support later
-                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                            // Serializable may not be acceptable
-                            newValue = value instanceof Serializable ? value : value.toString();
+                    if ("workingdir".equalsIgnoreCase(key)) {
+                        if (value instanceof String == false) {
+                            throw new BadRequestException("Invalid type for workingdir.");
+                        }
+                    }
+                    if ("timeout".equalsIgnoreCase(key)) {
+                        if (!(value instanceof String) && !(value instanceof Number)) {
+                            throw new BadRequestException("Invalid type for timeout.");
                         }
                     }
                     contextBuilder.addScriptArgument(key, newValue);
+                    continue;
                 }
 
-                JsonValue content = request.getContent();
-                // if there is no content(content.isNull()), skip adding content to script arguments
-                if (content.isMap()) {
-                    for (Map.Entry<String, Object> entry : content.asMap().entrySet()) {
-                        contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
+                if (null != value) {
+                    if (value instanceof Collection) {
+                        newValue =
+                                Array.newInstance(Object.class,
+                                        ((Collection) value).size());
+                        int i = 0;
+                        for (Object v : (Collection) value) {
+                            if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                Array.set(newValue, i, v);
+                            } else {
+                                // Serializable may not be
+                                // acceptable
+                                Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                            }
+                            i++;
+                        }
+
+                    } else if (value.getClass().isArray()) {
+                        // TODO implement the array support later
+                    } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                        // Serializable may not be acceptable
+                        newValue = value instanceof Serializable ? value : value.toString();
                     }
-                } else if (!content.isNull()) {
-                    handler.handleError(new BadRequestException("Content is not of type Map"));
-                    return;
                 }
-
-                // ScriptContext scriptContext = script.getScriptContextBuilder().build();
-                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-
-                // It's necessary to keep the backward compatibility with Waveset IDM
-                if (null != variablePrefix && isShell) {
-                    operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
-                }
-
-                Map<String, Object> actionResult = new HashMap<String, Object>(2);
-                try {
-                    Object scriptResult = null;
-                    if (onConnector) {
-                        scriptResult = facade.runScriptOnConnector(
-                                contextBuilder.build(), operationOptionsBuilder.build());
-                    } else {
-                        scriptResult = facade.runScriptOnResource(
-                                contextBuilder.build(), operationOptionsBuilder.build());
-                    }
-                    actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-                } catch (Throwable t) {
-                    logger.error("Script execution error.", t);
-                    actionResult.put("error", t.getMessage());
-                }
-                resultList.add(actionResult);
+                contextBuilder.addScriptArgument(key, newValue);
             }
-            handler.handleResult(result);
+
+            JsonValue content = request.getContent();
+            // if there is no content(content.isNull()), skip adding content to script arguments
+            if (content.isMap()) {
+                for (Map.Entry<String, Object> entry : content.asMap().entrySet()) {
+                    contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
+                }
+            } else if (!content.isNull()) {
+                handler.handleError(new BadRequestException("Content is not of type Map"));
+                return;
+            }
+
+            // ScriptContext scriptContext = script.getScriptContextBuilder().build();
+            OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+
+            // It's necessary to keep the backward compatibility with Waveset IDM
+            if (null != variablePrefix && isShell) {
+                operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+            }
+
+            Map<String, Object> actionResult = new HashMap<String, Object>(2);
+            try {
+                Object scriptResult = null;
+                if (onConnector) {
+                    scriptResult = facade.runScriptOnConnector(
+                            contextBuilder.build(), operationOptionsBuilder.build());
+                } else {
+                    scriptResult = facade.runScriptOnResource(
+                            contextBuilder.build(), operationOptionsBuilder.build());
+                }
+                actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+            } catch (Throwable t) {
+                logger.error("Script execution error.", t);
+                actionResult.put("error", t.getMessage());
+            }
+            resultList.add(actionResult);
         }
+        handler.handleResult(result);
     }
 
     private void handleTestAction(ActionRequest request, ResultHandler<JsonValue> handler) {
