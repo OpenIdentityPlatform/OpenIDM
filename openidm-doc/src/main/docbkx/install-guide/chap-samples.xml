@@ -820,9 +820,27 @@ $ ./startup.sh -p samples/sample2d</screen>
   </indexterm>
   <para>
    Sample 3 shows an example configuration for the Scripted SQL connector. The
-   Scripted SQL connector communicates with the database through configurable
-   SQL scripts. Each operation, like create or delete, is represented by its own
-   script.
+   Scripted SQL connector allows OpenIDM to communicate with the database
+   through configurable SQL scripts. Each operation, like create or delete, is
+   represented by its own script.
+  </para>
+
+  <para>
+   In this sample, you will see how OpenIDM uses a scripted connection to a
+   MySQL server. Do configure MySQL first, before starting OpenIDM.
+  </para>
+
+  <para>
+   After reconciliation with the existing MySQL database, you will be able to
+   review users in the internal repository of OpenIDM.
+  </para>
+
+  <para>
+   Sample 3 uses the following file in the <filename>conf/</filename> directory
+   for the Scripted SQL connector:
+   <filename>conf/provisioner.openicf-scriptedsql.json</filename>. It cites
+   customizable Groovy scripts in the
+   <filename>/path/to/openidm/samples/sample3/tools</filename> directory.
   </para>
 
   <para>
@@ -837,6 +855,22 @@ $ ./startup.sh -p samples/sample2d</screen>
    <para>
     Make sure MySQL is running.
    </para>
+
+   <note>
+    <para>
+     If you want to test this sample on an existing MySQL database, examine the
+     <literal>configurationProperties</literal> section of the
+     <filename>provisioner.openicf-scriptedsql.json</filename> file. Change
+     parameters such as <literal>host</literal>, <literal>database</literal>,
+     <literal>password</literal>, and <literal>jdbcConnectionUrl</literal> to
+     match your configuration.
+    </para>
+    <para>
+     The remainder of the Sample 3 documentation is based on the database
+     schema that exists in the <filename>openidm/samples/sample3/data</filename>
+     directory.
+    </para>
+   </note>
 
    <itemizedlist>
     <para>The sample expects the following configuration for MySQL:</para>
@@ -925,13 +959,14 @@ mysql &gt; <userinput>select * from Users</userinput>
     <listitem><para>Prepare OpenIDM as described in <xref
     linkend="preparing-openidm"/>.</para></listitem>
     <listitem>
-     <para>OpenIDM requires a MySQL driver, the MySQL Connector/J. Download
-      MySQL Connector/J, version 5.1 or later. Unpack the delivery and
-      copy the .jar into the <filename>openidm/bundle</filename> directory.</para>
+     <para>Set up the MySQL driver for OpenIDM. Download MySQL Connector/J,
+      version 5.1 or later. Unpack the download and copy the .jar into the
+      <filename>openidm/bundle</filename> directory.</para>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
     </listitem>
     <listitem>
-     <para>Start OpenIDM with the configuration for sample 3.</para>
+     <para>Once the MySQL driver is in place, start OpenIDM with the
+      configuration for sample 3.</para>
      <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample3</screen>
     </listitem>
@@ -969,7 +1004,7 @@ $ ./startup.sh -p samples/sample3</screen>
  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
 
    <para>
-    The result should resemble the following JSON object.
+    The output includes the identifier <literal>_id</literal> for each user.
    </para>
 
    <programlisting language="javascript">
@@ -1004,13 +1039,18 @@ $ ./startup.sh -p samples/sample3</screen>
 }</programlisting>
 
    <para>
+    You can get more information about users with any of the following three
+    methods:
+   </para>
+
+   <para>
     You can review the users from the UI, navigating to the domain where OpenIDM
     is installed, with a URL similar to
     <literal>https://localhost:8443/openidmui</literal>
    </para>
 
-   <para>Alternatively, to view the JSON for one of the users, get the user by
-    the value of the <literal>_id</literal>.</para>
+   <para>Alternatively, to view all fields for a single user, based on its
+    <literal>_id</literal>, run the following command:</para>
 
    <screen>$ curl \
  --cacert self-signed.crt \
@@ -1018,6 +1058,21 @@ $ ./startup.sh -p samples/sample3</screen>
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
+
+   <para>
+    You can query specific fields with a REST call, with the desired
+    <literal>target</literal> attributes in <filename>sync.json</filename>.
+    For example, the following command lists the <literal>givenName</literal> of
+    all users in the OpenIDM internal repository:
+   </para>
+
+   <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all&amp;fields=_openidm_id,givenName"
+</screen>
 
   </section>
 
