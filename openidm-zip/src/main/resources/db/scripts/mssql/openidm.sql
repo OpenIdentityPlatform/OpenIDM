@@ -433,7 +433,7 @@ END
 -- Data for table `openidm`.`internaluser`
 -- -----------------------------------------------------
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'openidm-admin'))
-INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES (N'openidm-admin', '0', '{"$crypto":{"value":{"iv":"fIevcJYS4TMxClqcK7covg==","data":"Tu9o/S+j+rhOIgdp9uYc5Q==","cipher":"AES/CBC/PKCS5Padding","key":"openidm-sym-default"},"type":"x-simple-encryption"}}', 'openidm-admin,openidm-authorized');
+INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES (N'openidm-admin', '0', '{"$crypto":{"value":{"iv":"JxzIijWYsI+cN7ud+m1aHg==","data":"LL3hQj7z16TQvR11faqeTA==","cipher":"AES/CBC/PKCS5Padding","key":"openidm-sym-default"},"type":"x-simple-encryption"}}', 'openidm-admin,openidm-authorized');
 
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'anonymous'))
 INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');
