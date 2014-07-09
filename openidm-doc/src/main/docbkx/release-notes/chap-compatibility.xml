@@ -135,10 +135,6 @@
       </listitem>
      </itemizedlist>
      <para>
-      If your method is PUT or POST, parameters are provided as part of the
-      post body.
-     </para>
-     <para>
       For details of the new interface, including examples, see the <link
       xlink:show="new" xlink:href="integrators-guide#appendix-rest"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
