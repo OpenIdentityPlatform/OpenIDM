@@ -114,18 +114,30 @@
       <listitem>
        <para>
         For REST calls to the <literal>external/rest</literal> endpoint, an
-        action name is now mandatory. In addition, the attribute names in the
-        request content are camel cased, rather than separated by dashes, and
-        there are no leading underscores.
+        action name is now mandatory. In addition, there are no leading
+        underscores in attribute names.
        </para>
        <para>
         For example:
        </para>
-       <screen>
-"https://localhost:8443/openidm/external/rest?_action=proxy&amp;_url=http://example.com/&amp;_method=GET&amp;_content-type=application/xml"
-       </screen>
+       <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --data '{
+          "url" : "http://example.com/",
+          "method" : "GET",
+          "content-type" : "application/xml"
+       }' \
+ --request POST \
+ "https://localhost:8443/openidm/external/rest?_action=proxy"</userinput></screen>
       </listitem>
      </itemizedlist>
+     <para>
+      If your method is PUT or POST, parameters are provided as part of the
+      post body.
+     </para>
      <para>
       For details of the new interface, including examples, see the <link
       xlink:show="new" xlink:href="integrators-guide#appendix-rest"
