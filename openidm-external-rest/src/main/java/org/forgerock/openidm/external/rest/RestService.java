@@ -318,10 +318,9 @@ public class RestService implements SingletonResourceProvider {
     private void setAttributes(Request request, Map<String, Object> attributes, Map<String, Object> headers) {
 
         if (headers != null) {
-            org.restlet.data.Form extraHeaders =
-                    (org.restlet.data.Form) attributes.get("org.restlet.http.headers");
+            Series<Header> extraHeaders = (Series<Header>) attributes.get("org.restlet.http.headers");
             if (extraHeaders == null) {
-                extraHeaders = new org.restlet.data.Form();
+                extraHeaders = new Series<Header>(Header.class);
                 attributes.put("org.restlet.http.headers", extraHeaders);
             }
             for (Map.Entry<String, Object> entry : headers.entrySet()) {
@@ -639,9 +638,8 @@ public class RestService implements SingletonResourceProvider {
                     }
                     list.add(headerValue);
                 } else {
-                    // Unsupported Header
-                    logger.debug("Unsupported header");
-                    extraHeaders.add(httpHeader, headerValue);
+                    // Custom headers
+                    extraHeaders.set(httpHeader, headerValue);
                 }
             }
         }
