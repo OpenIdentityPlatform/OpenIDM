@@ -31,6 +31,7 @@ import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.forgerock.util.encode.Base64;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -210,6 +211,12 @@ public class ConnectorUtilTest {
         // byte -> Byte
         Byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.class);
         Assert.assertEquals(byteValueFromPrimitiveByte.byteValue(), 10);
+        // Byte -> String
+        String stringFromBoxedByte = ConnectorUtil.coercedTypeCasting(new Byte("10"), String.class);
+        Assert.assertEquals(stringFromBoxedByte, Base64.encode(new byte[] {new Byte("10")}));
+        // byte -> String
+        String stringFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, String.class);
+        Assert.assertEquals(stringFromPrimitiveByte, Base64.encode(new byte[] {(byte)10}));
     }
 
     @Test void testCoercedTypeCastingForByteType() {
