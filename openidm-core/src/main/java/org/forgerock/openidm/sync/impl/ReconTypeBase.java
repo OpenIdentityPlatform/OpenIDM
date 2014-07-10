@@ -24,6 +24,7 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,6 +56,12 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     ReconciliationContext reconContext;
     final boolean runTargetPhase;
     final boolean allowEmptySourceSet;
+    /**
+     * If configured, sets if the defined source query returns full object data (true) or only ids (false)
+     * If not set in configuration, it will try to auto-detect this based on query results.
+     * Note that auto detection has limitations, described in {@link ReconTypeBase#hasFullSourceEntry}
+     */
+    final Boolean sourceQueryFullEntry;
 
     public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
         this.reconContext = reconContext;
@@ -62,6 +69,9 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         logger.debug("allowEmptySourceSet: {}", allowEmptySourceSet);
         this.runTargetPhase = calcEffectiveConfig("runTargetPhase").defaultTo(defaultRunTargetPhase).asBoolean();
         logger.debug("runTargetPhase: {}", runTargetPhase);
+        this.sourceQueryFullEntry = calcEffectiveConfig("sourceQueryFullEntry").asBoolean();
+        logger.debug("sourceQueryFullEntry: {}", sourceQueryFullEntry);
+        
     }
 
     public boolean isRunTargetPhase() {
@@ -162,10 +172,10 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * @return the collection of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
      */
-    protected Collection<String> query(final String objectSet, JsonValue query, final ReconciliationContext reconContext,
-            Collection<String> collectionToPopulate, final boolean caseSensitive) throws SynchronizationException {
+    protected ResultIterable query(final String objectSet, final JsonValue query, final ReconciliationContext reconContext, 
+            final Collection<String> collectionToPopulate, final boolean caseSensitive) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
-
+        final JsonValue objList = new JsonValue(new ArrayList());
         try {
             QueryRequest r = Requests.newQueryRequest(objectSet);
             r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
@@ -179,6 +189,8 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             }
             reconContext.getService().getConnectionFactory().getConnection().query(reconContext.getService().getRouter(), r,
                     new QueryResultHandler() {
+                        private boolean fullEntriesDetected = false;
+                
                         @Override
                         public void handleError(ResourceException error) {
                             // ignore
@@ -188,9 +200,16 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
                         public boolean handleResource(Resource resource) {
                             if (resource.getId() == null) {
                                 // do not add null values to collection
-                                logger.warn("Resource {0} id is null!", resource.toString());
+                                logger.warn("Resource {0} id is null!", resource);
                             }
                             else {
+                                if (fullEntriesDetected == false && hasFullSourceEntry(resource.getContent())) {
+                                    fullEntriesDetected = true;
+                                    logger.debug("Detected full entries in query");
+                                }
+                                if (fullEntriesDetected) {
+                                    objList.add(resource.getContent());
+                                }
                                 ids.add(
                                     caseSensitive
                                     ? resource.getId()
@@ -211,17 +230,62 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         }
 
         reconContext.checkCanceled(); // Throws an exception if reconciliation was canceled
-        return ids;
+
+        return new ResultIterable(ids, objList.size() > 0 ? objList : null);
+    }
+    
+    /**
+     * Whether the source query returns full entry data, or just ids
+     * 
+     * If explicitly configured, returns that setting. If not, tries to 
+     * auto-detect if a given entry contains just id info, 
+     * or contains full data
+     * 
+     * The detection has limitations, such as requiring at least two
+     * data fields aside from fields it expects in id queries. 
+     * This may not be case for all custom connectors, in which case 
+     * explicit config is required instead of using auto detect.
+     * 
+     * @return Whether the given source entry contains data 
+     * besides just id or rev of the object
+     */
+    private boolean hasFullSourceEntry(JsonValue sourceEntry) {
+       
+        // If explicitly configured what it is meant to contain, do not try to auto detect
+        if (sourceQueryFullEntry != null) {
+            return sourceQueryFullEntry;
+        }
+        
+        if (sourceEntry != null) {
+
+            short ignoreFields = 0;
+            if (sourceEntry.isDefined("_id")) {
+                ignoreFields++;
+            }
+            if (sourceEntry.isDefined("_rev")) {
+                ignoreFields++;
+            }
+            
+            // OpenICF specific filter: those connectors may return field 
+            // marked as name too in ids query 
+            // This implies that to be considered "full" result, it must
+            // include at least 2 additional fields besides id and rev
+            ignoreFields++;
+            
+            return sourceEntry.size() > ignoreFields;
+        } else {
+            return false;
+        }
     }
 
     /**
      * @inheritDoc
      */
-    public abstract List<String> querySourceIds() throws SynchronizationException;
+    public abstract ResultIterable querySource() throws SynchronizationException;
 
     /**
      * @inheritDoc
      */
-    public abstract List<String> queryTargetIds() throws SynchronizationException;
+    public abstract ResultIterable queryTarget() throws SynchronizationException;
 
 }

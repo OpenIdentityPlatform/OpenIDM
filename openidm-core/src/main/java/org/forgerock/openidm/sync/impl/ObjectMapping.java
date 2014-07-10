@@ -836,9 +836,9 @@ class ObjectMapping {
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
             reconContext.getStatistics().sourceQueryStart();
-            Iterator<String> sourceIdsIter = reconContext.querySourceIdsIter();
+            Iterator<ResultEntry> sourceIter = reconContext.querySourceIter();
             reconContext.getStatistics().sourceQueryEnd();
-            if (!sourceIdsIter.hasNext()) {
+            if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
                     LOGGER.warn("Cannot perform reconciliation with an empty source object set, unless explicitly configured to allow it.");
                     reconContext.getStatistics().reconEnd();
@@ -851,7 +851,7 @@ class ObjectMapping {
             Collection<String> remainingTargetIds = null;
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 reconContext.getStatistics().targetQueryStart();
-                remainingTargetIds = reconContext.getReconHandler().queryTargetIds();
+                remainingTargetIds = reconContext.getReconHandler().queryTarget().getAllIds();
                 reconContext.setTargetIds(new ArrayList(remainingTargetIds));
                 reconContext.getStatistics().targetQueryEnd();
             } else {
@@ -872,7 +872,7 @@ class ObjectMapping {
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
 
-            ReconPhase sourcePhase = new ReconPhase(sourceIdsIter, reconContext, context,
+            ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context,
                     rootContext, allLinks, remainingTargetIds, sourceRecon);
             sourcePhase.execute();
             measureSource.end();
@@ -881,9 +881,9 @@ class ObjectMapping {
 
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);              
-
-                ReconPhase targetPhase = new ReconPhase(remainingTargetIds.iterator(), reconContext, context, 
+                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);         
+                ResultIterable remainingTargets = new ResultIterable(remainingTargetIds, null);
+                ReconPhase targetPhase = new ReconPhase(remainingTargets.iterator(), reconContext, context, 
                         rootContext, allLinks, null, targetRecon);
                 targetPhase.execute();
                 measureTarget.end();
@@ -905,62 +905,6 @@ class ObjectMapping {
         }
 
 // TODO: cleanup orphan link objects (no matching source or target) here
-    }
-
-    /**
-     * Reconcile a given source ID
-     * @param sourceId the id to reconcile
-     * @param reconContext reconciliation context
-     * @param rootContext json resource root ctx
-     * @param allLinks all links if pre-queried, or null for on-demand link querying
-     * @param remainingTargetIds The set to update/remove any targets that were matched
-     * @throws SynchronizationException if there is a failure reported in reconciling this id
-     */
-    void reconSourceById(String sourceId, ReconciliationContext reconContext, Context rootContext,
-            Map<String, Link> allLinks, Collection<String> remainingTargetIds) throws SynchronizationException {
-        SourceSyncOperation op = new SourceSyncOperation();
-        op.reconContext = reconContext;
-        ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-        op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceId);
-        if (allLinks != null) {
-            String normalizedSourceId = linkType.normalizeSourceId(sourceId);
-            op.initializeLink(allLinks.get(normalizedSourceId));
-        }
-        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sourceId);
-        op.reconId = reconContext.getReconId();
-        try {
-            op.sync();
-        } catch (SynchronizationException se) {
-            if (op.action != Action.EXCEPTION) {
-                entry.status = Status.FAILURE; // exception was not intentional
-                LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
-            }
-            setReconEntryMessage(entry, se);
-        }
-        String[] targetIds = op.getTargetIds();
-        for (String handledId : targetIds) {
-            // If target system has case insensitive IDs, remove without regard to case
-            String normalizedHandledId = linkType.normalizeTargetId(handledId);
-            remainingTargetIds.remove(normalizedHandledId);
-            LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
-        }
-        if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
-            entry.timestamp = new Date();
-            entry.reconciling = "source";
-            try {
-                if (op.hasTargetObject()) {
-                    entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
-                }
-            } catch (SynchronizationException ex) {
-                entry.message = "Failure in preparing recon entry " + ex.getMessage()
-                        + " for target: " + op.getTargetObjectId() + " original status: " + entry.status
-                        + " message: "  + entry.message;
-                entry.status = Status.FAILURE;
-            }
-            entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
-            entry.actionId = op.actionId;
-            logReconEntry(entry);
-        }
     }
 
     public void setReconEntryMessage(ReconEntry entry, Exception syncException) {
@@ -991,6 +935,7 @@ class ObjectMapping {
         /**
          * Reconcile a given source ID
          * @param id the id to reconcile
+         * @param objectEntry the optional full object entry, or null if on demand read should be used
          * @param reconContext reconciliation context
          * @param rootContext json resource root ctx
          * @param allLinks all links if pre-queried, or null for on-demand link querying
@@ -998,12 +943,18 @@ class ObjectMapping {
          * @throws SynchronizationException if there is a failure reported in reconciling this id
          */
         @Override
-        public void recon(String id, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)
+        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)
                 throws SynchronizationException {
             SourceSyncOperation op = new SourceSyncOperation();
             op.reconContext = reconContext;
             ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-            op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
+            if (objectEntry == null) {
+                // Load source detail on demand
+                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
+            } else {
+                // Pre-queried source detail
+                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id, objectEntry);
+            }
             if (allLinks != null) {
                 String normalizedSourceId = linkType.normalizeSourceId(id);
                 op.initializeLink(allLinks.get(normalizedSourceId));
@@ -1050,21 +1001,28 @@ class ObjectMapping {
         /**
         * Reconcile a given target ID
         * @param id the id to reconcile
+        * @param objectEntry the optional full object entry, or null if on demand read should be used
         * @param reconContext reconciliation context
         * @param rootContext json resource root ctx
         * @param allLinks all links if pre-queried, or null for on-demand link querying
         * @throws SynchronizationException if there is a failure reported in reconciling this id
         */
         @Override
-        public void recon(String id, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
+        public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
             TargetSyncOperation op = new TargetSyncOperation();
             op.reconContext = reconContext;
-            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);            
+            if (objectEntry == null) {
+                // Load target detail on demand
+                op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
+            } else {
+                // Pre-queried target detail
+                op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id, objectEntry);
+            }
             entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
             op.reconId = reconContext.getReconId();
             try {
-                op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
                 op.sync();
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
@@ -1091,6 +1049,7 @@ class ObjectMapping {
      */
     class ReconTask implements Callable<Void> {
         String id;
+        JsonValue objectEntry;
         ReconciliationContext reconContext;
         ServerContext parentContext;
         Context rootContext;
@@ -1098,10 +1057,14 @@ class ObjectMapping {
         Collection<String> remainingIds;
         ReconAction reconById;
 
-        public ReconTask(String id, ReconciliationContext reconContext,
+        public ReconTask(ResultEntry resultEntry, ReconciliationContext reconContext,
                                ServerContext parentContext, Context rootContext,
                 Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
-            this.id = id;
+            this.id = resultEntry.getId();
+            // This value is null if it wasn't pre-queried
+            this.objectEntry = resultEntry.getValue();
+            LOGGER.debug("Recon task on {} {}", id, objectEntry);
+            
             this.reconContext = reconContext;
             this.parentContext = parentContext;
             this.rootContext = rootContext;
@@ -1114,7 +1077,7 @@ class ObjectMapping {
             //TODO I miss the Request Context
             ObjectSetContext.push(new ServerContext(parentContext));
             try {
-                reconById.recon(id, reconContext, rootContext, allLinks, remainingIds);
+                reconById.recon(id, objectEntry, reconContext, rootContext, allLinks, remainingIds);
             } finally {
                 ObjectSetContext.pop();
             }
@@ -1133,10 +1096,10 @@ class ObjectMapping {
         Collection<String> remainingIds;
         ReconAction reconById;
 
-        public ReconPhase(Iterator<String> idsIter, ReconciliationContext reconContext,
+        public ReconPhase(Iterator<ResultEntry> resultIter, ReconciliationContext reconContext,
                 ServerContext parentContext, Context rootContext,
                 Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
-            super(idsIter, reconContext, reconById);
+            super(resultIter, reconContext, reconById);
             this.parentContext = parentContext;
             this.rootContext = rootContext;
             this.allLinks = allLinks;
@@ -1144,8 +1107,8 @@ class ObjectMapping {
             this.reconById = reconById;
         }
         @Override
-        Callable createTask(String id) throws SynchronizationException {
-            return new ReconTask(id, reconContext, parentContext, rootContext,
+        Callable createTask(ResultEntry objectEntry) throws SynchronizationException {
+            return new ReconTask(objectEntry, reconContext, parentContext, rootContext,
                     allLinks, remainingIds, reconById);
         }
     }
