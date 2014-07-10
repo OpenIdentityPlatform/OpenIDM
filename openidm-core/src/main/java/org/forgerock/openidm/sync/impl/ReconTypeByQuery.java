@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -27,12 +27,8 @@ package org.forgerock.openidm.sync.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,15 +56,13 @@ public class ReconTypeByQuery extends ReconTypeBase {
                 reconContext.getObjectMapping().getTargetObjectSet());
     }
 
-    public List<String> querySourceIds() throws SynchronizationException {
-        List<String> sourceIds = (List<String>) query(sourceQuery.get("resourceName").asString(), sourceQuery, reconContext,
+    public ResultIterable querySource() throws SynchronizationException {
+        return query(sourceQuery.get("resourceName").asString(), sourceQuery, reconContext, 
                 ((Collection<String>) Collections.synchronizedList(new ArrayList<String>())), true);
-        return sourceIds;
     }
 
-    public List<String> queryTargetIds() throws SynchronizationException {
-        List<String> targetIds = (List<String>) query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
-                Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());
-        return targetIds;
+    public ResultIterable queryTarget() throws SynchronizationException {
+        return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
+                Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());                
     }
 }

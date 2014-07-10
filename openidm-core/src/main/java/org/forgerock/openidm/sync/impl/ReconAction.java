@@ -26,6 +26,8 @@ package org.forgerock.openidm.sync.impl;
 
 import java.util.Collection;
 import java.util.Map;
+
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
 
 /**
@@ -38,11 +40,12 @@ public interface ReconAction {
     /**
      * Reconcile a given object ID
      * @param id the object id to reconcile
+     * @param entry an optional value if the given entry was pre-loaded, or null if not
      * @param reconContext reconciliation context
      * @param rootContext json resource root ctx
      * @param allLinks all links if pre-queried, or null for on-demand link querying
      * @param remainingTargetIds The set to update/remove any targets that were matched
      * @throws SynchronizationException if there is a failure reported in reconciling this id
      */
-    public void recon(String id, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException;
+    public void recon(String id, JsonValue entry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException;
 }

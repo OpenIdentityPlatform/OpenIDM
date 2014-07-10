@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -47,11 +47,11 @@ public abstract class ReconFeeder {
     int feedSize = 1000;
     int submitted = 0;
 
-    Iterator<String> idsIter;
+    Iterator<ResultEntry> entriesIter;
     ReconciliationContext reconContext;
 
-    protected ReconFeeder(Iterator<String> idsIter, ReconciliationContext reconContext, ReconAction reconById) {
-        this.idsIter = idsIter;
+    protected ReconFeeder(Iterator<ResultEntry> entriesIter, ReconciliationContext reconContext, ReconAction reconById) {
+        this.entriesIter = entriesIter;
         this.reconContext = reconContext;
     }
 
@@ -63,10 +63,10 @@ public abstract class ReconFeeder {
         Executor executor = reconContext.getExcecutor();
         if (executor == null) {
             // Execute single threaded
-            while (idsIter.hasNext()) {
-                String id = idsIter.next();
+            while (entriesIter.hasNext()) {
+                ResultEntry entry = entriesIter.next();
                 try {
-                    createTask(id).call();
+                    createTask(entry).call();
                 } catch (Exception ex) {
                     translateTaskThrowable(ex);
                 }
@@ -98,9 +98,9 @@ public abstract class ReconFeeder {
 
     void submitNextIfPresent() throws SynchronizationException {
         reconContext.checkCanceled();
-        if (idsIter.hasNext()) {
-            String id = idsIter.next();
-            completionService.submit(createTask(id));
+        if (entriesIter.hasNext()) {
+            ResultEntry entry = entriesIter.next();
+            completionService.submit(createTask(entry));
             ++submitted;
         }
     }
@@ -120,7 +120,7 @@ public abstract class ReconFeeder {
      * @return the task to reconcile the given id
      * @throws SynchronizationException if processing fails
      */
-
-    abstract Callable createTask(String id) throws SynchronizationException;
+    
+    abstract Callable createTask(ResultEntry entry) throws SynchronizationException;
 
 }

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -24,32 +24,36 @@
 */
 package org.forgerock.openidm.sync.impl;
 
-/**
- * interface for handling different recon types
- * @author aegloff
- */
-public interface ReconTypeHandler {
-    /**
-     * @return the source identifiers and optional values to reconcile. 
-     * Can be a sub-set of source identifiers.
-     * @throws SynchronizationException
-     */
-    ResultIterable querySource() throws SynchronizationException;
+import org.forgerock.json.fluent.JsonValue;
 
-    /**
-     * @return the target identifiers and optional values to reconcile. 
-     * Can be a sub-set of target identifiers.
-     * @throws SynchronizationException
+/**
+ * Holder of a query result entry
+ */
+public class ResultEntry {
+    private final String id;
+    private final JsonValue value;
+    
+    /** 
+     * @param The normalized identifier
+     * @param optional pre-queried value, or null if value not pre-queried
      */
-    ResultIterable queryTarget() throws SynchronizationException;
+    public ResultEntry(String id, JsonValue value) {
+        this.id = id;
+        this.value = value;
+    }
     
     /**
-     * @return true if the target phase should be executed for this recon, false if not
+     * @return The normalized identifier
      */
-    boolean isRunTargetPhase();
+    public String getId() {
+        return id;
+    }
     
     /**
-     * @return true if the the recon should allow an empty source set, false otherwise.
+     * @return The pre-queried value if available, or null if
+     * value not pre-queried
      */
-    boolean allowEmptySourceSet();
+    public JsonValue getValue() {
+        return value;
+    }
 }
