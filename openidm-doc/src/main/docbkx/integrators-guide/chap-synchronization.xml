@@ -287,7 +287,9 @@ if (syncResults.success) {
     <para>
      With the <filename>compensate.js</filename> script, any such errors will
      result in each data store using the information it had before
-     automatic synchronization started.
+     automatic synchronization started. OpenIDM stores that information,
+     temporarily, in properties such as <literal>oldObject</literal> and
+     <literal>oldTarget</literal>.
     </para>
 
     <para>
