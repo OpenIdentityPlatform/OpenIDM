@@ -147,6 +147,17 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`security`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`security` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `storestring` LONGTEXT NOT NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `openidm`.`auditrecon`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (

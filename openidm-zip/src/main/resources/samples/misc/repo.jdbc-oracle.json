@@ -153,6 +153,14 @@
                     "status" : "status",
                     "timestamp" : "activitydate"
                 }
+            },
+            "security" : {
+                "table" : "security",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "storeString" : "storestring"
+                }
             }
         }
     }
