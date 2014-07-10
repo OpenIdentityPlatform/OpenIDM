@@ -1103,6 +1103,9 @@ public class ConnectorUtil {
                 if (sourceClass == byte[].class) {
                     result = (T) Base64.encode((byte[])source);
                     coerced = true;
+                } else if (sourceClass == Byte.class) {
+                    result = (T) Base64.encode(new byte[] {((Byte)source).byteValue()});
+                    coerced = true;
                 } else if (sourceClass == char.class) {
                     result = (T) new String((char[]) source);
                     coerced = true;
