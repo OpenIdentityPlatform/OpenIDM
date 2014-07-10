@@ -134,6 +134,17 @@ CREATE INDEX idx_links_second ON openidm.links (linktype, secondid);
 
 
 -- -----------------------------------------------------
+-- Table openidm.security
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.security (
+  objectid VARCHAR(38) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  storestring TEXT,
+  PRIMARY KEY (objectid)
+);
+
+-- -----------------------------------------------------
 -- Table openidm.auditaccess
 -- -----------------------------------------------------
 
