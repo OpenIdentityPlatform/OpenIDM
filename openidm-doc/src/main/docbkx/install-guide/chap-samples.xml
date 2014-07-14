@@ -920,7 +920,7 @@ Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed</computeroutput>
-mysql &gt; <userinput>select * from Users</userinput>
+mysql &gt; <userinput>select * from Users;</userinput>
     <computeroutput>
      +----+--------+--------------+-----------+----------+---------------+------...
      | id | uid    | password     | firstname | lastname | fullname      | email...
