@@ -136,6 +136,7 @@ if (typeof oldSource !== "undefined" && oldSource !== null) {
                 var onUnassignment = oldAssignment.onUnassignment;
                 // Check if an onUnassignment script is configured
                 if (onUnassignment != "undefined" && onUnassignment != null) {
+                    onUnassignment.attributes = oldAssignment.attributes;
                     execOnScript(onUnassignment);
                 }
                 assignmentRemoved = true;
@@ -198,6 +199,7 @@ if (assignments != null) {
                 var onAssignment = assignment.onAssignment;
                 // Check if an onAssignment script is configured
                 if (onAssignment != "undefined" && onAssignment != null) {
+                    onAssignment.attributes = attributes;
                     execOnScript(onAssignment);
                 }
 
