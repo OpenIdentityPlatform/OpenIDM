@@ -1262,7 +1262,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/</
             "port" : 8759,
             "useSSL" : false,
             "timeout" : 0,
-            "key" : "secret"
+            "key" : "Passw0rd"
         }
     ]
 </programlisting>
