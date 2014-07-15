@@ -80,7 +80,7 @@
   <listitem>
    <para>
     The <filename>openidm/conf/boot/boot.properties</filename> file, where you
-    can enable the execution of persistent schedulers
+    can enable the execution of persistent schedules
    </para>
   </listitem>
   <listitem>
@@ -94,8 +94,8 @@
  </itemizedlist>
 
   <para>
-   In the boot properties configuration file,
-   (<filename>openidm/conf/boot/boot.properties</filename>).
+   In the boot properties configuration file
+   (<filename>openidm/conf/boot/boot.properties</filename>),
    the instance type is standalone and persistent schedulers are enabled by
    default:
   </para>
