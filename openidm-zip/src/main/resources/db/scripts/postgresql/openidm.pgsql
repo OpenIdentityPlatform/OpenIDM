@@ -144,6 +144,18 @@ CREATE TABLE openidm.security (
   PRIMARY KEY (objectid)
 );
 
+
+-- -----------------------------------------------------
+-- Table openidm.securitykeys
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.securitykeys (
+  objectid VARCHAR(38) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  keypair TEXT,
+  PRIMARY KEY (objectid)
+);
+
 -- -----------------------------------------------------
 -- Table openidm.auditaccess
 -- -----------------------------------------------------

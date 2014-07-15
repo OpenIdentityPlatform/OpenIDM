@@ -237,6 +237,21 @@ END
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`securitykeys`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='securitykeys' AND xtype='U')
+BEGIN
+CREATE  TABLE  [openidm].[securitykeys] 
+(
+  objectid NVARCHAR(38) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  keypair NTEXT NOT NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
+);
+END
+
+
+-- -----------------------------------------------------
 -- Table `openidm`.`auditrecon`
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditrecon' AND xtype='U')
