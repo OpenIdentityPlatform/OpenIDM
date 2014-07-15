@@ -441,9 +441,12 @@ public class SecurityResourceProvider {
      */
     protected void storeKeyPair(String alias, KeyPair keyPair) throws ResourceException {
         try {
+            JsonValue keyPairValue = new JsonValue(new HashMap<String, Object>());
+            keyPairValue.put("value" , toPem(keyPair));
+            JsonValue encrypted = getCryptoService().encrypt(keyPairValue, cryptoCipher, cryptoAlias);
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
-            JsonValue encrypted = getCryptoService().encrypt(keyMap, cryptoCipher, cryptoAlias);
-            storeInRepo(KEYS_CONTAINER, alias, encrypted);
+            keyMap.put("keyPair", encrypted);
+            storeInRepo(KEYS_CONTAINER, alias, keyMap);
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
         }
@@ -496,13 +499,9 @@ public class SecurityResourceProvider {
                     "Cannot find stored key for alias " + alias);
         }
         try {
-            JsonValue content = keyResource.getContent();
-            if (getCryptoService().isEncrypted(content)) {
-                content = getCryptoService().decrypt(content);
-            }
-            JsonValue key = content.get("encoded");
-            String pemString = key.asString();
-            return fromPem(pemString);
+            JsonValue encrypted = keyResource.getContent().get("keyPair");
+            JsonValue keyPairValue = getCryptoService().decrypt(encrypted);
+            return fromPem(keyPairValue.get("value").asString());
         } catch (Exception e) {
             throw ResourceException.getException(ResourceException.INTERNAL_ERROR, e.getMessage(), e);
         }

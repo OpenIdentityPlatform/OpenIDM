@@ -371,6 +371,26 @@ ADD CONSTRAINT PRIMARY_11 PRIMARY KEY
 ENABLE
 ;
 
+-- DROP TABLE securitykeys CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table securitykeys ...
+CREATE TABLE securitykeys (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  keypair CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_12 on table securitykeys ... 
+ALTER TABLE securitykeys
+ADD CONSTRAINT PRIMARY_12 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
 -- DROP TABLE managedobjectproperties CASCADE CONSTRAINTS;
 
 

@@ -127,6 +127,13 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`security` (
   `storestring` TEXT NULL ,
   PRIMARY KEY (`objectid`) );
   
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`securitykeys` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `keypair` TEXT NULL ,
+  PRIMARY KEY (`objectid`) );
+  
    
 CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
