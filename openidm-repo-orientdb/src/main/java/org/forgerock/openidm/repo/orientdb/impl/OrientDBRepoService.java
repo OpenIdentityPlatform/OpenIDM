@@ -108,6 +108,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public static final String CONFIG_DB_URL = "dbUrl";
     public static final String CONFIG_USER = "user";
     public static final String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_POOL_MIN_SIZE = "poolMinSize";
+    public static final String CONFIG_POOL_MAX_SIZE = "poolMaxSize";
     public static final String CONFIG_DB_STRUCTURE = "dbStructure";
     public static final String CONFIG_ORIENTDB_CLASS = "orientdbClass";
     public static final String CONFIG_INDEX = "index";
@@ -122,13 +124,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
-    ODatabaseDocumentPool pool;
+    private ODatabaseDocumentPool pool;
 
-    String dbURL; 
-    String user;
-    String password;
-    int poolMinSize = 5; 
-    int poolMaxSize = 20;
+    private static final int DEFAULT_POOL_MIN_SIZE = 5;
+    private static final int DEFAULT_POOL_MAX_SIZE = 20;
+
+    private String dbURL;
+    private String user;
+    private String password;
+    private int poolMinSize;
+    private int poolMaxSize;
     
     // Used to synchronize operations on the DB that require user/password credentials
     private static Object dbLock = new Object();
@@ -808,7 +813,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
     
     /**
-     * Initialize the instnace with the given configuration.
+     * Initialize the instance with the given configuration.
      * 
      * This can configure managed (DS/SCR) instances, as well as explicitly instantiated
      * (bootstrap) instances.
@@ -820,8 +825,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             dbURL = getDBUrl(config);
             logger.info("Use DB at dbURL: {}", dbURL);
-            user = getUser(config);
-            password = getPassword(config);
+
+            user = config.get(CONFIG_USER).defaultTo("admin").asString();
+            password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
+            poolMinSize = config.get(CONFIG_POOL_MIN_SIZE).defaultTo(DEFAULT_POOL_MIN_SIZE).asInteger();
+            poolMaxSize = config.get(CONFIG_POOL_MAX_SIZE).defaultTo(DEFAULT_POOL_MAX_SIZE).asInteger();
 
             Map map = config.get(CONFIG_QUERIES).asMap();
             Map<String, String> queryMap = (Map<String, String>) map;
@@ -848,14 +856,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
     }
     
-    private String getUser(JsonValue config) {
-        return config.get(CONFIG_USER).defaultTo("admin").asString();
-    }
-    
-    private String getPassword(JsonValue config) {
-        return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
-    }
-
     /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an

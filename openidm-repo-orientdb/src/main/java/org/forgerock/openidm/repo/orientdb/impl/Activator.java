@@ -61,7 +61,9 @@ public class Activator implements BundleActivator {
             bootConfig.put(OrientDBRepoService.CONFIG_DB_URL, repoConfig.get(OrientDBRepoService.CONFIG_DB_URL.toLowerCase()).getObject());
             bootConfig.put(OrientDBRepoService.CONFIG_USER, repoConfig.get(OrientDBRepoService.CONFIG_USER.toLowerCase()).getObject());
             bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()).getObject());
-             
+            bootConfig.put(OrientDBRepoService.CONFIG_POOL_MIN_SIZE, repoConfig.get(OrientDBRepoService.CONFIG_POOL_MIN_SIZE.toLowerCase()).getObject());
+            bootConfig.put(OrientDBRepoService.CONFIG_POOL_MAX_SIZE, repoConfig.get(OrientDBRepoService.CONFIG_POOL_MAX_SIZE.toLowerCase()).getObject());
+
             // Init the bootstrap repo
             bootSvc = OrientDBRepoService.getRepoBootService(bootConfig);
              

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -24,10 +24,10 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -265,16 +265,16 @@ public class ReconciliationContext {
      * @return the source ids to reconcile in this recon scope
      * @throws SynchronizationException if getting the ids to reconcile failed
      */
-    Iterator<String> querySourceIdsIter() throws SynchronizationException {
-        List<String> sourceIds = getReconHandler().querySourceIds();
-        setSourceIds(sourceIds);
-        return sourceIds.iterator();
+    Iterator<ResultEntry> querySourceIter() throws SynchronizationException {
+        ResultIterable result = getReconHandler().querySource();
+        setSourceIds(result.getAllIds());
+        return result.iterator();
     }
 
     /**
      * @param sourceIds the list of all source object ids in the reconciliation scope
      */
-    void setSourceIds(List<String> sourceIds) {
+    void setSourceIds(Collection<String> sourceIds) {
         // Choose a hash based collection as we need fast "contains" handling
         this.sourceIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         this.sourceIds.addAll(sourceIds);
@@ -285,7 +285,7 @@ public class ReconciliationContext {
      * @param targetIds the list of all ids in the target object set
      * If the target system IDs are case insensitive, the ids are kept in normalized (lower case) form
      */
-    void setTargetIds(List<String> targetIds) {
+    void setTargetIds(Collection<String> targetIds) {
         // Choose a hash based collection as we need fast "contains" handling
         this.targetIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         if (targetIds != null) {
