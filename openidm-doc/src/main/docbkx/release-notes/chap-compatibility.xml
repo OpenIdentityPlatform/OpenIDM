@@ -339,7 +339,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        <para>
         For example, the following query in OpenIDM ${serverDocTargetVersion}:
        </para>
-<programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent']	}	}</programlisting>
+<programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent'] } }</programlisting>
        <para>
         would be constructed as follows in OpenIDM ${serverDocTargetVersion}:
        </para>
