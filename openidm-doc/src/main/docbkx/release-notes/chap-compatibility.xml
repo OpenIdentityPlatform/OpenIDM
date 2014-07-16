@@ -347,10 +347,11 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
         would be constructed as follows in OpenIDM ${serverDocTargetVersion}:
        </para>
 <programlisting>"_queryFilter" : "employeeType eq \"Permanent\""</programlisting>
+       <!--  This is currently not working https://bugster.forgerock.org/jira/browse/OPENIDM-1793
        <para>
         The new query format allows parameterized queries to be performed over
         REST (which was not possible in OpenIDM 2.1.0).
-       </para>
+       </para>  -->
        <para>
         For information about the supported query format, see <link
         xlink:show="new" xlink:href="integrators-guide#constructing-queries"
