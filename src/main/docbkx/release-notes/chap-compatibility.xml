@@ -450,7 +450,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        In OpenIDM 2.1.0, roles were stored as a CSV list. For example:
       </para>
       <programlisting>
-"roles":""openidm-authorized,contractor",
+"roles":"openidm-authorized,contractor",
       </programlisting>
       <para>
        In OpenIDM ${serverDocTargetVersion}, roles are stored in an array. For
