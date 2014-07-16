@@ -58,6 +58,7 @@ import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -182,7 +183,16 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private enum Action {
         eval
     }
-    
+
+    public static class OpenIDMRouterBindings {
+        public JsonValue create(Parameter scope, Function<?> callback, Object... arguments)
+                throws ResourceException, NoSuchMethodException {
+            return ResourceFunctions.CREATE.call(scope, callback, arguments);
+        }
+    }
+
+    public static OpenIDMRouterBindings activiti = new OpenIDMRouterBindings() ;
+
     private BundleWatcher<ManifestEntry> manifestWatcher;
 
     @Activate
@@ -210,11 +220,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         put(PROP_IDENTITY_SERVER, identityServer);
         put(PROP_CONSOLE, console);
         put(PROP_OPENIDM, openidm);
+        put("activiti", activiti);
         JsonValue properties = configuration.get("properties");
         if (properties.isMap()) {
             for (Map.Entry<String, Object> entry : properties.asMap().entrySet()) {
                 if (PROP_IDENTITY_SERVER.equals(entry.getKey())
                         || PROP_OPENIDM.equals(entry.getKey())
+                        || "activiti".equals(entry.getKey())
                         || PROP_CONSOLE.equals(entry.getKey())) {
                     continue;
                 }
@@ -272,11 +284,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         keys.remove(PROP_OPENIDM);
         keys.remove(PROP_IDENTITY_SERVER);
         keys.remove(PROP_CONSOLE);
+        keys.remove("activiti");
         JsonValue properties = configuration.get("properties");
         if (properties.isMap()) {
             for (Map.Entry<String, Object> entry : properties.asMap().entrySet()) {
                 if (PROP_IDENTITY_SERVER.equals(entry.getKey())
                         || PROP_OPENIDM.equals(entry.getKey())
+                        || "activiti".equals(entry.getKey())
                         || PROP_CONSOLE.equals(entry.getKey())) {
                     continue;
                 }
@@ -518,7 +532,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         };
         static final long serialVersionUID = 1L;
     }
-    
+
     private boolean isSourceUnit(String name) {
         if (SourceUnit.ATTR_NAME.equals(name) ||
                 SourceUnit.ATTR_REQUEST_BINDING.equals(name) ||
@@ -568,10 +582,12 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     }
                     break;
                 default:
-                    throw new NotSupportedException("Unrecognized action ID " + request.getAction());
+                    throw new BadRequestException("Unrecognized action ID " + request.getAction());
             }
-        } catch (final ResourceException e) {
+        } catch (ResourceException e) {
             handler.handleError(e);
+        } catch (IllegalArgumentException e) { // from getActionAsEnum
+            handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }

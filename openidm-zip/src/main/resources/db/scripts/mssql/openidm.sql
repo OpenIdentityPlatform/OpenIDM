@@ -222,6 +222,36 @@ END
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`security`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='security' AND xtype='U')
+BEGIN
+CREATE  TABLE  [openidm].[security] 
+(
+  objectid NVARCHAR(38) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  storestring NTEXT NOT NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
+);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`securitykeys`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='securitykeys' AND xtype='U')
+BEGIN
+CREATE  TABLE  [openidm].[securitykeys] 
+(
+  objectid NVARCHAR(38) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  keypair NTEXT NOT NULL ,
+  PRIMARY KEY CLUSTERED (objectid)
+);
+END
+
+
+-- -----------------------------------------------------
 -- Table `openidm`.`auditrecon`
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditrecon' AND xtype='U')
@@ -433,7 +463,7 @@ END
 -- Data for table `openidm`.`internaluser`
 -- -----------------------------------------------------
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'openidm-admin'))
-INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES (N'openidm-admin', '0', '{"$crypto":{"value":{"iv":"fIevcJYS4TMxClqcK7covg==","data":"Tu9o/S+j+rhOIgdp9uYc5Q==","cipher":"AES/CBC/PKCS5Padding","key":"openidm-sym-default"},"type":"x-simple-encryption"}}', 'openidm-admin,openidm-authorized');
+INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES (N'openidm-admin', '0', 'openidm-admin', 'openidm-admin,openidm-authorized');
 
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'anonymous'))
 INSERT INTO [openidm].[internaluser] (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');

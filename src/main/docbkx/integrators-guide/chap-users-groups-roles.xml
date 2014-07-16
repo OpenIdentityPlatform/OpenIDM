@@ -70,7 +70,7 @@
   <para>
    OpenIDM provides support for a managed <literal>"group"</literal> object. For
    a JDBC repository, OpenIDM stores managed groups with all other managed
-   objects, in the<literal>managedobjects</literal> table, and uses the
+   objects, in the <literal>managedobjects</literal> table, and uses the
    <literal>managedobjectproperties</literal> for indexing. For an OrientDB
    repository, managed groups are stored in the <literal>managed_group</literal>
    table.
@@ -90,7 +90,7 @@
   </para>
   <para>
    For an example of a deployment that uses managed groups, see <link
-   xlink:show="new" xlink:href="install-guide##more-sample2d"
+   xlink:show="new" xlink:href="install-guide#more-sample2d"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample 2d -
    Synchronizing LDAP Groups</citetitle></link> in the <citetitle>Installation
    Guide</citetitle>.
@@ -154,6 +154,14 @@
     xlink:role="http://docbook.org/xlink/role/olink"
     ><citetitle>Sample 2b - LDAP Two Way</citetitle></link> in the
     <citetitle>Installation Guide</citetitle>.
+   </para>
+
+   <para>
+    When you add or delete a role from a specific user entry, OpenIDM triggers
+    either an <literal>onAssignment</literal> or an
+    <literal>onUnassignment</literal> script. The assignment operation may
+    be an alias such as <literal>mergeWithTarget</literal> or a complete
+    script that defines the roles that OpenIDM applies to a user.
    </para>
 
    <section xml:id="creating-role-definitions">
@@ -274,6 +282,17 @@ $ curl \
      all current values of the <literal>"roles"</literal> attribute are
      overwritten by the request.
     </para>
+
+    <para>
+     If you see a message such as "Object bjensen not found in managed/user",
+     you may need to substitute the <literal>_id</literal>, as output from the
+     <literal>query-all-ids</literal> query described in the
+     <link xlink:show="new" xlink:role="http://docbook.org//xlink/role/olink"
+      xlink:href="install-guide#run-sample2b"><citetitle>Running the Sample
+     </citetitle></link> section associated with Sample 2b. Take care when
+     configuring that sample, as it assumes that you have set up a running
+     instance of OpenDJ with specific data.
+    </para>
    </section>
 
    <section xml:id="remove-role-assignment">
@@ -385,197 +404,225 @@ $ curl \
     assign that role to a user. However, the main functionality of roles is
     provided in the assignments that are specified for that role.
    </para>
-   <para>
-    The following sample role definition shows how assignments are configured
-    for two remote systems - an LDAP server (<literal>ldap</literal>), and an
-    Active Directory Server (<literal>ad</literal>).
-   </para>
-   <programlisting language="java">{
-    "name": "sample-role",
-    "_id": "sample-role",
-    "assignments": {
-        "ad": {
-            "attributes": [
-                {
-                    "name": "cns",
-                    "value": [
-                        "CN=fileshare,O=corp",
-                        "CN=desktop,O=corp",
-                        "CN=terminal,O=corp",
-                        "CN=intranet,O=corp"
-                    ],
-                    "operation": "mergeWithTarget"
-                }
-            ]
-        },
-        "ldap": {
-            "attributes": [
-                {
-                    "name": "cns",
-                    "value": [
-                        "CN=employees,O=corp"
-                    ],
-                    "operation": "mergeWithTarget"
-                },
-                {
-                    "name": "employeeType",
-                    "value": "employee"
-                }
-            ]
-        }
-    }
+
+   <section xml:id="sample-role-definition">
+    <title>A Sample Role Definition for Two Remote Systems</title>
+
+    <para>
+     The following sample role definition shows how assignments are configured
+     for two remote systems - an LDAP server (<literal>ldap</literal>), and an
+     Active Directory Server (<literal>ad</literal>).
+    </para>
+
+    <para>
+     Do remember to include the <literal>assignmentsToMap</literal> field name.
+     OpenIDM uses it to keep assigned roles up to date.
+    </para>
+
+    <!-- change from assignments to assignmentsToMap based on OPENIDM-1625 -->
+    <programlisting language="java">{
+     "name": "sample-role",
+     "_id": "sample-role",
+     "assignmentsToMap": {
+         "ad": {
+             "attributes": [
+                 {
+                     "name": "cns",
+                     "value": [
+                         "CN=fileshare,O=corp",
+                         "CN=desktop,O=corp",
+                         "CN=terminal,O=corp",
+                         "CN=intranet,O=corp"
+                     ],
+                     "operation": "mergeWithTarget"
+                 }
+             ]
+         },
+         "ldap": {
+             "attributes": [
+                 {
+                     "name": "cns",
+                     "value": [
+                         "CN=employees,O=corp"
+                     ],
+                     "operation": "mergeWithTarget"
+                 },
+                 {
+                     "name": "employeeType",
+                     "value": "employee"
+                 }
+             ]
+         }
+     }
 }</programlisting>
-   <itemizedlist>
-    <listitem>
-     <para>
-      <literal>"name"</literal> is the name of the role, and should be unique.
-      Avoid using special characters in the role name.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <literal>"_id"</literal> is the object identifier of the role, by which it
-      is accessed over REST. These examples use a client-assigned ID, for ease
-      of reference, however, in production it is recommended that you use a
-      server-assigned UUID.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <literal>"assignments"</literal> provides the list of assignments (or
-      entitlements) that this role will create on the specified system.
-     </para>
-     <para>
-      Each assignment includes the name of the external system
-      (<literal>ad</literal> and <literal>ldap</literal> in this example), the
-      attribute or attributes whose values will be generated, on the external
-      system, and the value or values that will be applied to each attribute.
-     </para>
-    </listitem>
-    <listitem>
-     <para>
-      <literal>"operation"</literal> specifies the way in which the value will
-      be applied, and can be either <literal>"mergeWithTarget"</literal> or
-      <literal>"replaceTarget"</literal>.
-     </para>
-     <para>
-      The <literal>"mergeWithTarget"</literal> operation first merges the source
-      value with the existing target value, then adds the value or values from
-      the role assignment. In the event that duplicate values are found (for
-      attributes that take a list as a value), each value is included only once
-      in the resulting target value.
-     </para>
-     <para>
-      The <literal>"replaceTarget"</literal> operation replaces the entire
-      target attribute value with whatever is specified in the role definition.
-      When this operation is specified, the source becomes the only
-      authoritative source for the attribute. Existing values on the target are
-      either reported or overwritten, depending on the configuration of the
-      synchronization actions. If no operation type is specified, the assignment
-      has a <literal>"replaceTarget"</literal> operation by default.
-     </para>
-    </listitem>
-   </itemizedlist>
-   <para>
-    Once a role has been defined, and assigned to a user, check that the
-    expected effective roles and effective assignments have been generated for
-    that user.
-    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <literal>"name"</literal> is the name of the role, and should be unique.
+       Avoid using special characters in the role name.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>"_id"</literal> is the object identifier of the role, by which it
+       is accessed over REST. These examples use a client-assigned ID, for ease
+       of reference, however, in production it is recommended that you use a
+       server-assigned UUID.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>"assignmentsToMap"</literal> provides the list of assignments
+       (or entitlements) that this role will create on the specified system.
+      </para>
+      <para>
+       Each assignment includes the name of the external system
+       (<literal>ad</literal> and <literal>ldap</literal> in this example), the
+       attribute or attributes whose values will be generated, on the external
+       system, and the value or values that will be applied to each attribute.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>"operation"</literal> specifies the way in which the value will
+       be applied, and can be either <literal>"mergeWithTarget"</literal> or
+       <literal>"replaceTarget"</literal>.
+      </para>
+      <para>
+       The <literal>"mergeWithTarget"</literal> operation first merges the source
+       value with the existing target value, then adds the value or values from
+       the role assignment. In the event that duplicate values are found (for
+       attributes that take a list as a value), each value is included only once
+       in the resulting target value.
+      </para>
+      <para>
+       The <literal>"replaceTarget"</literal> operation replaces the entire
+       target attribute value with whatever is specified in the role definition.
+       When this operation is specified, the source becomes the only
+       authoritative source for the attribute. Existing values on the target are
+       either reported or overwritten, depending on the configuration of the
+       synchronization actions. If no operation type is specified, the assignment
+       has a <literal>"replaceTarget"</literal> operation by default.
+      </para>
+     </listitem>
+    </itemizedlist>
     <para>
-     Then add a default mapping to your synchronization configuration to apply
-     the effective assignments to the target resource.
-    </para>
-    <para>
-     Any changes to a managed role definition are logged in the audit log.
-    </para>
-    <para>
-     In addition to the functionality provided by the assignments, a managed
-     role object has script hooks that allow you to determine what should happen
-     when a role is created, updated or deleted. The managed role object has the
-     following structure in the managed objects configuration file
-     (<filename>managed.json</filename>):
-    </para>
-    <programlisting language="javascript">{
-    "name" : "role",
-    "postCreate" : {
-        "type" : "text/javascript",
-        "file" : "roles/update-users-of-role.js"
-    },
-    "postUpdate" : {
-        "type" : "text/javascript",
-        "file" : "roles/update-users-of-role.js"
-    },
-    "postDelete" : {
-        "type" : "text/javascript",
-        "file" : "roles/update-users-of-role.js"
-    }
+     Once a role has been defined, and assigned to a user, check that the
+     expected effective roles and effective assignments have been generated for
+     that user.
+     </para>
+     <para>
+      Then add a default mapping to your synchronization configuration to apply
+      the effective assignments to the target resource.
+     </para>
+     <para>
+      Any changes to a managed role definition are logged in the audit log.
+     </para>
+    </section>
+
+    <section xml:id="managed-role-script-hooks">
+     <title>Managed Role Object Script Hooks</title>
+
+     <para>
+      In addition to the functionality provided by the assignments, a managed
+      role object has script hooks that allow you to determine what should happen
+      when a role is created, updated or deleted. The managed role object has the
+      following structure in the managed objects configuration file
+      (<filename>managed.json</filename>):
+     </para>
+     <programlisting language="javascript">{
+     "name" : "role",
+     "postCreate" : {
+         "type" : "text/javascript",
+         "file" : "roles/update-users-of-role.js"
+     },
+     "postUpdate" : {
+         "type" : "text/javascript",
+         "file" : "roles/update-users-of-role.js"
+     },
+     "postDelete" : {
+         "type" : "text/javascript",
+         "file" : "roles/update-users-of-role.js"
+     }
 }</programlisting>
-   <para>
-    The <literal>"postCreate"</literal>, <literal>"postUpdate"</literal>, and
-    <literal>"postDelete"</literal> properties enable you to specify what should
-    happen when a role definition is created, updated, or deleted. By default,
-    the <filename>update-users-of-role.js</filename> script runs in each of
-    these cases.
-   </para>
-   <para>
-    This script iterates over all managed users, locates the users who have been
-    assigned this role, and regenerates their effective assignments on the
-    target resource. So, for example, if the role <literal>"ldap"</literal>
-    gives a user an assignment on the resource "Active Directory", when, that
-    role definition is deleted, a reconciliation operation runs to remove the
-    assignment for that user on the "Active Directory" resource.
-   </para>
-   <para>
-    Based on the set of role definitions that are assigned to a specific user,
-    the roles mechanism generates two virtual attributes on the user entry -
-    <literal>effectiveRoles</literal> and
-    <literal>effectiveAssignments</literal>.
-   </para>
-   <para>
-    The logic that calculates the <literal>effectiveRoles</literal> and
-    <literal>effectiveAssignments</literal> attribute values is located in two
-    scripts:
-    <filename>/path/to/openidm/bin/defaults/script/roles/effectiveRoles.js</filename>
-    and
-    <filename>/path/to/openidm/bin/defaults/script/roles/effectiveAssignments.js</filename>.
-    You should not alter these scripts. If you need to modify how roles and
-    assignments are handled, create your own custom script and reference it in
-    the <filename>conf/managed.json</filename> file. For information about using
-    custom scripts, see the
-    <link xlink:href="integrators-guide#appendix-scripting"
+    <para>
+     The <literal>"postCreate"</literal>, <literal>"postUpdate"</literal>, and
+     <literal>"postDelete"</literal> properties enable you to specify what should
+     happen when a role definition is created, updated, or deleted. By default,
+     the <filename>update-users-of-role.js</filename> script runs in each of
+     these cases.
+    </para>
+    <para>
+     The <filename>update-users-of-role.js</filename> script includes a
+     <literal>triggerSyncCheck</literal> attribute, which reviews the
+     <literal>effectiveRoles</literal> and <literal>effectiveAssignments</literal>
+     virtual attributes, so see whether OpenIDM should run a sync operation on
+     them.
+    </para>
+    <para>
+     This script iterates over all managed users, locates the users who have been
+     assigned this role, and regenerates their effective assignments on the
+     target resource. So, for example, if the role <literal>"ldap"</literal>
+     gives a user an assignment on the resource "Active Directory", when, that
+     role definition is deleted, a reconciliation operation runs to remove the
+     assignment for that user on the "Active Directory" resource.
+    </para>
+   </section>
+
+   <section xml:id="roles-virtual-attributes">
+    <title>Virtual Role Attributes</title>
+
+    <para>
+     Based on the set of role definitions that are assigned to a specific user,
+     the roles mechanism generates two virtual attributes on the user entry -
+     <literal>effectiveRoles</literal> and
+     <literal>effectiveAssignments</literal>.
+    </para>
+    <para>
+     The logic that calculates the <literal>effectiveRoles</literal> and
+     <literal>effectiveAssignments</literal> attribute values is located in two
+     scripts:
+     <filename>/path/to/openidm/bin/defaults/script/roles/effectiveRoles.js</filename>
+     and
+     <filename>/path/to/openidm/bin/defaults/script/roles/effectiveAssignments.js</filename>.
+     You should not alter these scripts. If you need to modify how roles and
+     assignments are handled, create your own custom script and reference it in
+     the <filename>conf/managed.json</filename> file. For information about using
+     custom scripts, see the
+     <link xlink:href="integrators-guide#appendix-scripting"
           xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
-    Reference</citetitle></link>.
-   </para>
-   <para>
-    The <literal>effectiveRoles</literal> attribute lists the specific role
-    definitions that are applied to a user entry. By default, the effective
-    roles script supports direct role assignments only. Dynamic role assignment
-    is not provided out of the box, but can be added with a custom script that
-    overrides the default <filename>effectiveRoles.js</filename> script. For
-    more information, see <xref linkend="dynamic-role-assignments" />.
-   </para>
-   <para>
-    Based on the effective roles, the <literal>effectiveAssignments</literal>
-    attribute provides the calculated resource assignments, that is the
-    amalgamated set of entitlements for a specific user.
-   </para>
-   <para>The value of the <literal>effectiveAssignments</literal> attribute
-    provides the information required for the provisioner to apply the effective
-    assignments, and provides a reference to the source of the assignment. In
-    reading this attribute, it is therefore possible to find and change the root
-    source of an assignment.
-   </para>
-   <para>
-    Effective assignments can merge attribute operations on the same system from
-    multiple roles. For example, role A might add group A to a user's group
-    membership list, and role B might add group B to the same group membership
-    property on the same assigned system.
-   </para>
-   <para>
-    The effective roles and effective assignments attributes are configured in
-   <filename>conf/managed.json</filename> as follows:
-   </para>
-   <programlisting language="java">
+     Reference</citetitle></link>.
+    </para>
+    <para>
+     The <literal>effectiveRoles</literal> attribute lists the specific role
+     definitions that are applied to a user entry. By default, the effective
+     roles script supports direct role assignments only. Dynamic role assignment
+     is not provided out of the box, but can be added with a custom script that
+     overrides the default <filename>effectiveRoles.js</filename> script. For
+     more information, see <xref linkend="dynamic-role-assignments" />.
+    </para>
+    <para>
+     Based on the effective roles, the <literal>effectiveAssignments</literal>
+     attribute provides the calculated resource assignments, that is the
+     amalgamated set of entitlements for a specific user.
+    </para>
+    <para>The value of the <literal>effectiveAssignments</literal> attribute
+     provides the information required for the provisioner to apply the effective
+     assignments, and provides a reference to the source of the assignment. In
+     reading this attribute, it is therefore possible to find and change the root
+     source of an assignment.
+    </para>
+    <para>
+     Effective assignments can merge attribute operations on the same system from
+     multiple roles. For example, role A might add group A to a user's group
+     membership list, and role B might add group B to the same group membership
+     property on the same assigned system.
+    </para>
+    <para>
+     The effective roles and effective assignments attributes are configured in
+    <filename>conf/managed.json</filename> as follows:
+    </para>
+    <programlisting language="java">
  {
      "name" : "effectiveRoles",
      "type" : "virtual",
@@ -596,26 +643,26 @@ $ curl \
  }
    </programlisting>
 
-   <para>
-    By default, the <filename>effectiveRoles.js</filename> script uses the
-    <literal>"roles"</literal> attribute of a user entry to determine the
-    direct roles assigned to the user. The
-    <filename>effectiveAssignments.js</filename> script uses the virtual
-    <literal>"effectiveRoles"</literal> attribute of the user entry to calculate
-    the user's effective assignments. If your deployment uses different
-    attributes to store this information, change the
-    <literal>"rolesPropName"</literal> and the
-    <literal>"effectiveRolesPropName"</literal> properties of the virtual
-    attribute definitions accordingly.
-   </para>
+    <para>
+     By default, the <filename>effectiveRoles.js</filename> script uses the
+     <literal>"roles"</literal> attribute of a user entry to determine the
+     direct roles assigned to the user. The
+     <filename>effectiveAssignments.js</filename> script uses the virtual
+     <literal>"effectiveRoles"</literal> attribute of the user entry to calculate
+     the user's effective assignments. If your deployment uses different
+     attributes to store this information, change the
+     <literal>"rolesPropName"</literal> and the
+     <literal>"effectiveRolesPropName"</literal> properties of the virtual
+     attribute definitions accordingly.
+    </para>
 
-   <para>
-    When a user entry is assigned a role, the <literal>effectiveRoles</literal>
-    and <literal>effectiveAssignments</literal> of that entry are calculated
-    according to the role definition. A managed user entry, whose roles have
-    been generated based on the role definition illustrated previously, might
-    appear as follows:
-   </para>
+    <para>
+     When a user entry is assigned a role, the <literal>effectiveRoles</literal>
+     and <literal>effectiveAssignments</literal> of that entry are calculated
+     according to the role definition. A managed user entry, whose roles have
+     been generated based on the role definition illustrated previously, might
+     appear as follows:
+    </para>
 
    <programlisting language="javascript">
  {
@@ -737,21 +784,22 @@ $ curl \
     </step>
     <step>
     <para>
-     Add the default mapping with the relevant assignment to your
-     <filename>sync.json</filename> file. For this example, the following
-     addition is made to <literal>sync.json</literal>.
+     Add the default mapping to your <filename>sync.json</filename> file. For
+     this example, add the following lines to <literal>sync.json</literal>.
     </para>
     <programlisting language="javascript">
         {
             "defaultMapping": {
                 "type": "text/javascript",
                 "file": "roles/defaultMapping.js"
-            },
-            "assignments": [
-                "ldap"
-            ]
+            }
         }
     </programlisting>
+     <para>
+      OpenIDM addresses any change in role assignments with the
+      <literal>onAssignment</literal> and <literal>onUnassignment</literal>
+      attributes in the <filename>defaultMapping.js</filename> file.
+     </para>
     </step>
     <step>
      <para>
@@ -840,32 +888,32 @@ $ curl \
 
    <procedure xml:id="dynamic-role-assignments">
     <title>To Add Support for Dynamic Assignments</title>
-    <para>
-     Although support for dynamic role assignments is not provided by default,
-     it can easily be added with a custom script, as follows.
-    </para>
-    <step>
      <para>
-      Copy the default effective roles script to your project's
-      <literal>script/roles</literal> directory.
+      Although support for dynamic role assignments is not provided by default,
+      it can easily be added with a custom script, as follows.
      </para>
+     <step>
+      <para>
+       Copy the default effective roles script to your project's
+       <literal>script/roles</literal> directory.
+      </para>
      <screen>
 $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>project-dir</replaceable>/script/roles/
      </screen>
-     <para>
-      The new script will override the default effective roles script.
-     </para>
-    </step>
-    <step>
-     <para>
-      Modify the effective roles script to include the dynamic role assignment
-      logic.
-     </para>
-     <para>
-      For example, to enable dynamic role assignment for the
-      <literal>example</literal> organization, you might add the following
-      extract after the section:
-     </para>
+      <para>
+       The new script will override the default effective roles script.
+      </para>
+     </step>
+     <step>
+      <para>
+       Modify the effective roles script to include the dynamic role assignment
+       logic.
+      </para>
+      <para>
+       For example, to enable dynamic role assignment for the
+       <literal>example</literal> organization, you might add the following
+       extract after the section:
+      </para>
      <programlisting language="java">
  // This is the location to expand to dynamic roles,
  // project role script return values can then be added via
@@ -877,26 +925,27 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
      effectiveRoles = effectiveRoles.concat(['dynamic-role1', 'dynamic-role2']);
  }
      </programlisting>
-    </step>
-    <step performance="optional">
-     <para>
-      To apply changes to the dynamic assignment rules to existing users, run a
-      reconciliation operation on those users.
-     </para>
-    </step>
-   </procedure>
-   <para>
-    Note that changes to dynamic role assignments for existing users require a
-    manual reconciliation of the affected group of users for those changes to
-    take effect. So, if a new dynamic role definition is created, if an existing
-    dynamic role definition is changed, or if changes are made to the dynamic
-    assignment rule, the group of users affected by that assignment rule must be
-    reconciled manually. and changes to the assigned roles.
-   </para>
-   <para>
-    When a user entry is changed or synchronized, however, all dynamic role
-    assignments are reassessed automatically.
-   </para>
+     </step>
+     <step performance="optional">
+      <para>
+       To apply changes to the dynamic assignment rules to existing users, run a
+       reconciliation operation on those users.
+      </para>
+     </step>
+    </procedure>
+    <para>
+     Note that changes to dynamic role assignments for existing users require a
+     manual reconciliation of the affected group of users for those changes to
+     take effect. So, if a new dynamic role definition is created, if an existing
+     dynamic role definition is changed, or if changes are made to the dynamic
+     assignment rule, the group of users affected by that assignment rule must be
+     reconciled manually. and changes to the assigned roles.
+    </para>
+    <para>
+     When a user entry is changed or synchronized, however, all dynamic role
+     assignments are reassessed automatically.
+    </para>
+   </section>
   </section>
 
   <section xml:id="role-mapping">
