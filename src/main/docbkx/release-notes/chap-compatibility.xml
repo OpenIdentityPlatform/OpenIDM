@@ -33,7 +33,9 @@
 
  <para>
   This chapter covers major and minor changes to existing functionality, as well
-  as deprecated and removed functionality in this release of OpenIDM.
+  as deprecated and removed functionality in this release of OpenIDM. You must
+  read this chapter before commencing a migration from a previous OpenIDM
+  release.
  </para>
 
  <section xml:id="major-changes">
@@ -332,9 +334,10 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
       </listitem>
       <listitem>
        <para>
-        The way in which system object queries are constructed has changed.
+        The way in which queries on system object are constructed has changed.
         Queries that followed the OpenICF format are no longer supported and
-        query filters must now be specified in common filter notation.
+        query filters must now be specified in common filter notation. This
+        includes correlation queries on system objects.
        </para>
        <para>
         For example, the following query in OpenIDM ${serverDocTargetVersion}:
