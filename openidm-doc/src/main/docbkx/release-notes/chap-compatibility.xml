@@ -33,7 +33,9 @@
 
  <para>
   This chapter covers major and minor changes to existing functionality, as well
-  as deprecated and removed functionality in this release of OpenIDM.
+  as deprecated and removed functionality in this release of OpenIDM. You must
+  read this chapter before commencing a migration from a previous OpenIDM
+  release.
  </para>
 
  <section xml:id="major-changes">
@@ -45,6 +47,56 @@
   </para>
   
   <variablelist>
+   <varlistentry xml:id="compatibility-idm3-icf4">
+    <term>Integration of OpenICF 1.4.0.0</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} is not compatible with the previous
+      version of the OpenICF framework. If your deployment uses remote connector
+      servers (either .NET or Java) you must upgrade them to the new connector
+      server versions (1.4.0.0). With the exception of the Active Directory
+      connector, the new connector framework <emphasis>is</emphasis> compatible
+      with the older connectors, however, so you can use the older connectors
+      with an OpenIDM ${serverDocTargetVersion} deployment. Only version 1.4.0.0
+      of the Active Directory connector is supported with OpenIDM
+      ${serverDocTargetVersion}. The following compatibility matrix indicates
+      the supported connector and OpenICF framework versions.
+     </para>
+     <table xml:id="idm-icf-compatibility">
+      <title>OpenIDM ${serverDocTargetVersion} / OpenICF Compatibility Matrix</title>
+      <tgroup cols="4">
+       <thead>
+        <row>
+         <entry>OpenIDM Version</entry>
+         <entry>OpenICF Framework</entry>
+         <entry>Supported Java Connectors</entry>
+         <entry>Supported .NET Connectors</entry>
+        </row>
+       </thead>
+       <tbody>
+        <row>
+         <entry>2.1</entry>
+         <entry>1.1</entry>
+         <entry>1.1</entry>
+         <entry>1.1</entry>
+        </row>
+        <row>
+         <entry>3.0.0</entry>
+         <entry>1.4</entry>
+         <entry>
+          <para>Previously supported Java connectors (1.1)</para>
+          <para>Groovy Connector (1.4)</para>
+         </entry>
+         <entry>
+          <para>Active Directory Connector (1.4)</para>
+          <para>PowerShell Connector (1.4)</para>
+         </entry>
+        </row>
+       </tbody>
+      </tgroup>
+     </table>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Changes to the REST Interface</term>
     <listitem>
@@ -64,16 +116,24 @@
       <listitem>
        <para>
         For REST calls to the <literal>external/rest</literal> endpoint, an
-        action name is now mandatory. In addition, the attribute names in the
-        request content are camel cased, rather than separated by dashes, and
-        there are no leading underscores.
+        action name is now mandatory. In addition, there are no leading
+        underscores in attribute names.
        </para>
        <para>
         For example:
        </para>
-       <screen>
-"https://localhost:8443/openidm/external/rest?_action=proxy&amp;_url=http://example.com/&amp;_method=GET&amp;_content-type=application/xml"
-       </screen>
+       <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --data '{
+          "url" : "http://example.com/",
+          "method" : "GET",
+          "content-type" : "application/xml"
+       }' \
+ --request POST \
+ "https://localhost:8443/openidm/external/rest?_action=proxy"</userinput></screen>
       </listitem>
      </itemizedlist>
      <para>
@@ -212,7 +272,7 @@ throw {
         the client is providing the ID:
        </para>
        <programlisting>
-openidm.create('managed/user", "userName", <replaceable>user-object</replaceable>
+openidm.create('managed/user", "userName", <replaceable>user-object</replaceable>)
        </programlisting>
        <para>
         and the following format if the server should generate the ID:
@@ -274,22 +334,24 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
       </listitem>
       <listitem>
        <para>
-        The way in which system object queries are constructed has changed.
+        The way in which queries on system object are constructed has changed.
         Queries that followed the OpenICF format are no longer supported and
-        query filters must now be specified in common filter notation.
+        query filters must now be specified in common filter notation. This
+        includes correlation queries on system objects.
        </para>
        <para>
         For example, the following query in OpenIDM ${serverDocTargetVersion}:
        </para>
-<programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent']	}	}</programlisting>
+<programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent'] } }</programlisting>
        <para>
         would be constructed as follows in OpenIDM ${serverDocTargetVersion}:
        </para>
 <programlisting>"_queryFilter" : "employeeType eq \"Permanent\""</programlisting>
+       <!--  This is currently not working https://bugster.forgerock.org/jira/browse/OPENIDM-1793
        <para>
         The new query format allows parameterized queries to be performed over
         REST (which was not possible in OpenIDM 2.1.0).
-       </para>
+       </para>  -->
        <para>
         For information about the supported query format, see <link
         xlink:show="new" xlink:href="integrators-guide#constructing-queries"
@@ -389,7 +451,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        In OpenIDM 2.1.0, roles were stored as a CSV list. For example:
       </para>
       <programlisting>
-"roles":""openidm-authorized,contractor",
+"roles":"openidm-authorized,contractor",
       </programlisting>
       <para>
        In OpenIDM ${serverDocTargetVersion}, roles are stored in an array. For

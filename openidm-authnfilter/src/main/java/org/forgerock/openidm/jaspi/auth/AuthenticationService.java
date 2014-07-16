@@ -244,12 +244,12 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
             } else {
                 throw new IllegalArgumentException();
             }
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (IllegalArgumentException e) { // from getActionAsEnum
             handler.handleError(
                     new BadRequestException(
                             "Action " + request.getAction() + " on authentication service not supported"));
-        } catch (ResourceException e) {
-            handler.handleError(e);
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }

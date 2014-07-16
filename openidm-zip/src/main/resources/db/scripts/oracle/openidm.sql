@@ -351,6 +351,46 @@ CREATE INDEX idx_links_second ON links
 ) 
 ;
 
+-- DROP TABLE security CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table security ...
+CREATE TABLE security (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  storestring CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_11 on table security ... 
+ALTER TABLE security
+ADD CONSTRAINT PRIMARY_11 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
+-- DROP TABLE securitykeys CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table securitykeys ...
+CREATE TABLE securitykeys (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  keypair CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_12 on table securitykeys ... 
+ALTER TABLE securitykeys
+ADD CONSTRAINT PRIMARY_12 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
 -- DROP TABLE managedobjectproperties CASCADE CONSTRAINTS;
 
 

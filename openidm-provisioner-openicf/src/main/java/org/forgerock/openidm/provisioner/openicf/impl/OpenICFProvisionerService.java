@@ -799,13 +799,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     break;
 
                 default:
-                    handler.handleError(new BadRequestException("Unsupported action: " + request.getAction()));
+                    throw new BadRequestException("Unsupported action: " + request.getAction());
             }
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (ConnectorException e) {
             handleConnectorException(context, request, e, null, request.getResourceName(), null, null, handler, activityLogger);
         } catch (JsonValueException e) {
+            handler.handleError(new BadRequestException(e.getMessage(), e));
+        } catch (IllegalArgumentException e) { // from request.getActionAsEnum
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
@@ -834,124 +836,140 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             handler.handleError(new BadRequestException("Missing required parameter: " + SystemAction.SCRIPT_ID));
             return;
         }
+
+        if (!localSystemActionCache.containsKey(scriptId)) {
+            handler.handleError(new BadRequestException("Script ID: " + scriptId + " is not defined."));
+            return;
+        }
+
         SystemAction action = localSystemActionCache.get(scriptId);
 
         String systemType = connectorReference.getConnectorKey().getConnectorName();
         List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
-        if (null != scriptContextBuilderList) {
-            // OperationHelper helper = operationHelperBuilder
-            // .build(id.getObjectType(),
-            // params, cryptoService);
 
-            JsonValue result = new JsonValue(new HashMap<String, Object>());
+        if (scriptContextBuilderList.isEmpty()) {
+            handler.handleError(new BadRequestException("Script ID: " + scriptId +
+                    " for systemType " + systemType + " is not defined."));
+            return;
+        }
 
-            boolean onConnector = !"resource".equalsIgnoreCase(
-                    request.getAdditionalParameters().get(SystemAction.SCRIPT_EXECUTE_MODE));
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
 
-            final ConnectorFacade facade = getConnectorFacade0(handler,
-                    onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
-            if (null == facade) {
-                // getConnectorFacade0 already handles error when returning null
+        boolean onConnector = !"resource".equalsIgnoreCase(
+                request.getAdditionalParameter(SystemAction.SCRIPT_EXECUTE_MODE));
+
+        final ConnectorFacade facade = getConnectorFacade0(handler,
+                onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class);
+        if (null == facade) {
+            // getConnectorFacade0 already handles error when returning null
+            return;
+        }
+
+        String variablePrefix = request.getAdditionalParameter(SystemAction.SCRIPT_VARIABLE_PREFIX);
+
+        List<Map<String, Object>> resultList =
+                new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
+        result.put("actions", resultList);
+
+        for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
+            boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
+            for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
+                final String key = entry.getKey();
+                if (SystemAction.SCRIPT_PARAMS.contains(key)) {
+                    continue;
+                }
+                Object value = entry.getValue();
+                Object newValue = value;
+                if (isShell) {
+                    if ("password".equalsIgnoreCase(key)) {
+                        if (value instanceof String) {
+                            newValue = new GuardedString(((String) value).toCharArray());
+                        } else {
+                            throw new BadRequestException("Invalid type for password.");
+                        }
+                    }
+                    if ("username".equalsIgnoreCase(key)) {
+                        if (value instanceof String == false) {
+                            throw new BadRequestException("Invalid type for username.");
+                        }
+                    }
+                    if ("workingdir".equalsIgnoreCase(key)) {
+                        if (value instanceof String == false) {
+                            throw new BadRequestException("Invalid type for workingdir.");
+                        }
+                    }
+                    if ("timeout".equalsIgnoreCase(key)) {
+                        if (!(value instanceof String) && !(value instanceof Number)) {
+                            throw new BadRequestException("Invalid type for timeout.");
+                        }
+                    }
+                    contextBuilder.addScriptArgument(key, newValue);
+                    continue;
+                }
+
+                if (null != value) {
+                    if (value instanceof Collection) {
+                        newValue =
+                                Array.newInstance(Object.class,
+                                        ((Collection) value).size());
+                        int i = 0;
+                        for (Object v : (Collection) value) {
+                            if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                Array.set(newValue, i, v);
+                            } else {
+                                // Serializable may not be
+                                // acceptable
+                                Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                            }
+                            i++;
+                        }
+
+                    } else if (value.getClass().isArray()) {
+                        // TODO implement the array support later
+                    } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                        // Serializable may not be acceptable
+                        newValue = value instanceof Serializable ? value : value.toString();
+                    }
+                }
+                contextBuilder.addScriptArgument(key, newValue);
+            }
+            JsonValue content = request.getContent();
+            // if there is no content(content.isNull()), skip adding content to script arguments
+            if (content.isMap()) {
+                for (Map.Entry<String, Object> entry : content.asMap().entrySet()) {
+                    contextBuilder.addScriptArgument(entry.getKey(), entry.getValue());
+                }
+            } else if (!content.isNull()) {
+                handler.handleError(new BadRequestException("Content is not of type Map"));
                 return;
             }
 
-            String variablePrefix = request.getAdditionalParameters().get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+            // ScriptContext scriptContext = script.getScriptContextBuilder().build();
+            OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
 
-            List<Map<String, Object>> resultList =
-                    new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
-            result.put("actions", resultList);
-
-            for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
-                boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
-                for (Map.Entry<String, String> entry : request.getAdditionalParameters().entrySet()) {
-                    if (entry.getKey().startsWith("_")) {
-                        continue;
-                    }
-                    Object value = entry.getValue();
-                    Object newValue = value;
-                    if (isShell) {
-                        if ("password".equalsIgnoreCase(entry.getKey())) {
-                            if (value instanceof String) {
-                                newValue = new GuardedString(((String) value).toCharArray());
-                            } else {
-                                throw new BadRequestException("Invalid type for password.");
-                            }
-                        }
-                        if ("username".equalsIgnoreCase(entry.getKey())) {
-                            if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for username.");
-                            }
-                        }
-                        if ("workingdir".equalsIgnoreCase(entry.getKey())) {
-                            if (value instanceof String == false) {
-                                throw new BadRequestException("Invalid type for workingdir.");
-                            }
-                        }
-                        if ("timeout".equalsIgnoreCase(entry.getKey())) {
-                            if (!(value instanceof String) && !(value instanceof Number)) {
-                                throw new BadRequestException("Invalid type for timeout.");
-                            }
-                        }
-                        contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                        continue;
-                    }
-
-                    if (null != value) {
-                        if (value instanceof Collection) {
-                            newValue =
-                                    Array.newInstance(Object.class,
-                                            ((Collection) value).size());
-                            int i = 0;
-                            for (Object v : (Collection) value) {
-                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                    Array.set(newValue, i, v);
-                                } else {
-                                    // Serializable may not be
-                                    // acceptable
-                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
-                                }
-                                i++;
-                            }
-
-                        } else if (value.getClass().isArray()) {
-                            // TODO implement the array support later
-                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                            // Serializable may not be acceptable
-                            newValue = value instanceof Serializable ? value : value.toString();
-                        }
-                    }
-                    contextBuilder.addScriptArgument(entry.getKey(), newValue);
-                }
-                // contextBuilder.addScriptArgument("openidm_id", id.toString());
-
-                // ScriptContext scriptContext = script.getScriptContextBuilder().build();
-                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-
-                // It's necessary to keep the backward compatibility with Waveset IDM
-                if (null != variablePrefix && isShell) {
-                    operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
-                }
-
-                Map<String, Object> actionResult = new HashMap<String, Object>(2);
-                try {
-                    Object scriptResult = null;
-                    if (onConnector) {
-                        scriptResult = facade.runScriptOnConnector(
-                                contextBuilder.build(), operationOptionsBuilder.build());
-                    } else {
-                        scriptResult = facade.runScriptOnResource(
-                                contextBuilder.build(), operationOptionsBuilder.build());
-                    }
-                    actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-                } catch (Throwable t) {
-                    if (logger.isDebugEnabled()) {
-                        logger.error("Script execution error.", t);
-                    }
-                    actionResult.put("error", t.getMessage());
-                }
-                resultList.add(actionResult);
+            // It's necessary to keep the backward compatibility with Waveset IDM
+            if (null != variablePrefix && isShell) {
+                operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
             }
+
+            Map<String, Object> actionResult = new HashMap<String, Object>(2);
+            try {
+                Object scriptResult = null;
+                if (onConnector) {
+                    scriptResult = facade.runScriptOnConnector(
+                            contextBuilder.build(), operationOptionsBuilder.build());
+                } else {
+                    scriptResult = facade.runScriptOnResource(
+                            contextBuilder.build(), operationOptionsBuilder.build());
+                }
+                actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+            } catch (Throwable t) {
+                logger.error("Script execution error.", t);
+                actionResult.put("error", t.getMessage());
+            }
+            resultList.add(actionResult);
         }
+        handler.handleResult(result);
     }
 
     private void handleTestAction(ActionRequest request, ResultHandler<JsonValue> handler) {
@@ -1234,6 +1252,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (JsonValueException e) {
+                handler.handleError(new BadRequestException(e.getMessage(), e));
+            } catch (IllegalArgumentException e) { // from request.getActionAsEnum
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e.getMessage(), e));

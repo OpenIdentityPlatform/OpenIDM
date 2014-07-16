@@ -94,7 +94,7 @@
                 },
                 {
                     "situation" : "SOURCE_MISSING",
-                    "action" : "EXCEPTION"
+                    "action" : "IGNORE"
                 },
                 {
                     "situation" : "UNQUALIFIED",

@@ -120,7 +120,21 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   UNIQUE INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
   PRIMARY KEY (`objectid`) );
   
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`security` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `storestring` TEXT NULL ,
+  PRIMARY KEY (`objectid`) );
   
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`securitykeys` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `keypair` TEXT NULL ,
+  PRIMARY KEY (`objectid`) );
+  
+   
 CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
