@@ -38,7 +38,11 @@ import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.index.OIndex;
+import com.orientechnologies.orient.core.index.OIndexManager;
+import com.orientechnologies.orient.core.index.OIndexManagerProxy;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.metadata.security.ORole;
@@ -47,6 +51,8 @@ import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.serialization.compression.impl.ONothingCompression;
 import com.orientechnologies.orient.core.storage.OStorage;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * A Helper to interact with the OrientDB
@@ -189,10 +195,8 @@ public class DBHelper {
             if (pool != null) {
                 pool.close();
             }
-            pool = ODatabaseDocumentPool.global();
-            // Moving from 0.9.25 to 1.0 RC had to change this
-            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
-            //pool.setup(minSize, maxSize);
+            pool = new ODatabaseDocumentPool();
+            pool.setup(minSize, maxSize);
             warmUpPool(pool, dbURL, user, password, 1);
             
             boolean finalTry = (retryCount >= maxRetry);
@@ -354,74 +358,17 @@ public class DBHelper {
             orientDBClasses.put("config", cfgIndexes);
                             
             logger.info("Setting up database");
-            if (orientDBClasses != null) {
             for (Object key : orientDBClasses.keys()) {
                 String orientClassName = (String) key;
                 JsonValue orientClassConfig = (JsonValue) orientDBClasses.get(orientClassName);
-                if (schema.existsClass(orientClassName)) {
-                        logger.trace("OrientDB class {} already exists, checking indexes", orientClassName);
-                        createOrienDBClassIndexes(schema, orientClassName, orientClassConfig);
-                } else {
-                    createOrientDBClass(db,schema, orientClassName, orientClassConfig);
-                    if ("internal_user".equals(orientClassName)) {
-                        populateDefaultUsers(orientClassName, db, completeConfig);
-                    }
-                }
-            }
-            }
-            schema.save(); 
-            
-        }
-    }
-    
-    private static void createOrientDBClass(ODatabaseDocumentTx db, OSchema schema,
-            String orientClassName, JsonValue orientClassConfig) {
-        
-        logger.info("Creating OrientDB class {}", orientClassName);
-        OClass orientClass = schema.createClass(orientClassName, 
-                db.addCluster(orientClassName, 
-                OStorage.CLUSTER_TYPE.PHYSICAL));
-        
-        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
-        for (JsonValue index : indexes) {
-            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
-            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
-            
-            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
-            String[] propertyNames = null; 
-            if (propertyName != null) {
-                propertyNames = new String[] {propertyName};
-            } else {
-                List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
-                if (propNamesList == null) {
-                    throw new InvalidException("Invalid index configuration. " 
-                            + "Missing property name(s) on index configuration for property type "
-                            + propertyType + " with index type " + indexType + " on " + orientClassName);
-                }
-                propertyNames = (String[]) propNamesList.toArray(new String[0]);
-            }
 
-            // Check if a single property is being defined and create it if so
-            for (String propName : propertyNames) {
-                if (orientClass.getProperty(propName) != null) {
-                    continue;
+                boolean classAlreadyExists = schema.existsClass(orientClassName);
+                createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
+                if (!classAlreadyExists && "internal_user".equals(orientClassName))
+                {
+                    populateDefaultUsers(orientClassName, db, completeConfig);
                 }
-                logger.info("Creating property {} of type {}", new Object[] {propName, propertyType});
-                OType orientPropertyType = null;
-                try {
-                    // Create property type object
-                    orientPropertyType = OType.valueOf(propertyType.toUpperCase());
-                } catch (IllegalArgumentException ex) {
-                    throw new InvalidException("Invalid property type '"
-                            + propertyType + "' in configuration on properties "
-                            + propertyNames + " with index type " + indexType
-                            + " on " + orientClassName + " valid values: " + OType.values() 
-                            + " failure message: " + ex.getMessage(), ex);
-                }
-                // Create property
-                orientClass.createProperty(propName, orientPropertyType);
             }
-            createIndex(orientClass, indexType, propertyNames, propertyType);
         }
     }
     
@@ -474,7 +421,23 @@ public class DBHelper {
         sb.append("Idx");
         return sb.toString();
     }
-    
+
+    private static void createProperty(OClass orientClass, String propName, String propertyType) {
+        OType orientPropertyType = null;
+        try {
+            // Create property type object
+            orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidException("Invalid property type '"
+                    + propertyType + "' in configuration for property '" 
+                    + propName + " on " +orientClass.getName() 
+                    + " valid values: " + OType.values() 
+                    + " failure message: " + ex.getMessage(), ex);
+        }
+        // Create property
+        orientClass.createProperty((String)propName, orientPropertyType);
+    }    
+
     private static void createIndex(OClass orientClass, String indexType, String[] propertyNames, String propertyType) {
             logger.info("Creating index on properties {} of type {} with index type {} on {} for OrientDB class ", 
                     new Object[] {propertyNames, propertyType, indexType, orientClass.getName()});
@@ -490,42 +453,80 @@ public class DBHelper {
                         + orientClass.getName() + " valid values: " + OClass.INDEX_TYPE.values() 
                         + " failure message: " + ex.getMessage(), ex);
             }
-    }
+        }
 
-    private static void createOrienDBClassIndexes(OSchema schema, String orientClassName, JsonValue orientClassConfig) {
-        logger.info("Checking indexes for OrientDB class {}", orientClassName);
+    private static void createOrUpdateOrientDBClass(ODatabaseDocumentTx db, OSchema schema, 
+            String orientClassName, JsonValue orientClassConfig) {
+        
+        OIndexManager indexManager = db.getMetadata().getIndexManager();
         OClass orientClass = schema.getClass(orientClassName);
         if (orientClass == null) {
-            // Should be impossible
-            throw new InvalidException("Invalid index configuration. " 
-                    + "Index defined for  " + orientClassName + " which does not exist");
-        } else {
-            JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
-            for (JsonValue index : indexes) {
-                String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
-                String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+            logger.info("OrientDB class {} does not exist and is being created.", orientClassName);
+            orientClass = schema.createClass(orientClassName, 
+                    db.addCluster(orientClassName, 
+                    OStorage.CLUSTER_TYPE.PHYSICAL));
+        }
 
-                String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
-                String[] propertyNames = null; 
-                if (propertyName != null) {
-                    propertyNames = new String[] {propertyName};
-                } else {
-                    List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
-                    if (propNamesList == null) {
-                        throw new InvalidException("Invalid index configuration. " 
-                                + "Missing property name(s) on index configuration for property type "
-                                + propertyType + " with index type " + indexType + " on " + orientClassName);
-                    }
-                    propertyNames = (String[]) propNamesList.toArray(new String[0]);
+        List<String> indexProperties = new ArrayList<String>();
+        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+        for (JsonValue index : indexes) {
+            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
+            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
+            ArrayList<String> propNamesList = new ArrayList<String>();
+            if (propertyName != null) { 
+                propNamesList.add(propertyName);
+            } else {
+                propNamesList.addAll(index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList(String.class));
+                if (propNamesList == null) {
+                    throw new InvalidException("Invalid index configuration. " 
+                            + "Missing property name(s) on index configuration for property type "
+                            + propertyType + " with index type " + indexType + " on " + orientClassName);
                 }
-                
+            }
+            
+            // Add new Class properties
+            for (String propName : propNamesList) {
+                if (orientClass.existsProperty(propName) == false) {
+                    logger.info("Creating property {} of type {}", new Object[] {propName, propertyType});
+                    createProperty(orientClass, propName, propertyType);
+                }
+            }
+
+            // Add or re-create indexes. No need to rebuild indexes as automatic
+            // indexes are rebuilt by OrientDB when they are created.
+            String[] propertyNames = (String[]) propNamesList.toArray(new String[0]);
+            if (propertyNames.length > 0) {
                 String indexName = uniqueIndexName(orientClass.getName(), propertyNames);
-                if (orientClass.getClassIndex(indexName) != null) {
-                    logger.trace("Index {} already exists for properties {} of type {} with index type"
-                            + " {} on {} for OrientDB class, skipping",
-                            new Object[] {indexName, propertyNames, propertyType, indexType, orientClass.getName()});
-                } else {
+                OIndex oIndex = orientClass.getClassIndex(indexName);
+                if (oIndex != null && oIndex.getType().equalsIgnoreCase(indexType) == false) {
+                    indexManager.dropIndex(indexName);
+                    oIndex = null;
+                }
+                if (oIndex == null) {
                     createIndex(orientClass, indexType, propertyNames, propertyType);
+                }
+            }
+           // Add to master list of configured class properties
+           indexProperties.addAll(propNamesList);
+        }
+        
+        // Remove obsolete indexes but do not remove the associated
+        // Class properties as we are using a hybrid schema and do not
+        // know who created the Class properties
+        Collection<OProperty> classProperties = orientClass.properties();
+        for (OProperty property : classProperties) {
+            String propName = property.getName();
+            if (!indexProperties.contains(propName))
+            {
+                Set<OIndex<?>> propIndexes = indexManager.getClassInvolvedIndexes(orientClass.getName(), propName);
+                for (OIndex propIndex : propIndexes) {
+                    // Ensure that we only drop indexes which we created and
+                    // match the OpenIDM index naming convention
+                    String indexRegex = uniqueIndexName(orientClass.getName(), new String[]{".*"});
+                    if (propIndex.getName().matches(indexRegex)) {
+                        indexManager.dropIndex(propIndex.getName());
+                    }
                 }
             }
         }

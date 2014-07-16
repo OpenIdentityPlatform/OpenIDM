@@ -426,6 +426,41 @@
             </includes>
             <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
         </fileSet>
+        <!-- Setup openam sample  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/openam</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/sample2c</directory>
+            <includes>
+                <include>conf/sync.json</include>
+                <include>script/ldapBackCorrelationQuery.js</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam</outputDirectory>
+        </fileSet>        
         <!-- Setup use case samples-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
@@ -702,7 +737,7 @@
             <includes>
                 <include>org.forgerock.commons.ui.libs:lodash</include>
             </includes>
-        </dependencySet>        
+        </dependencySet>
         <dependencySet>
             <fileMode>644</fileMode>
             <outputFileNameMapping>handlebars.js</outputFileNameMapping>
@@ -710,7 +745,7 @@
             <includes>
                 <include>org.forgerock.commons.ui.libs:handlebars</include>
             </includes>
-        </dependencySet>        
+        </dependencySet>
         <!-- Explode UI for easy modification -->
         <dependencySet>
             <unpack>true</unpack>
@@ -720,6 +755,31 @@
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-enduser</include>
             </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/ui/default/config</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-config</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/samples/openam/ui/openam</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-enduser</include>
+            </includes>
+            <unpackOptions>
+                <excludes>
+                    <!-- Conflicts between the core UI files and the ones specific to this sample UI -->
+                    <exclude>public/config/AppConfiguration.js</exclude>
+                    <exclude>public/main.js</exclude>
+                </excludes>
+            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

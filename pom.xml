@@ -32,7 +32,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution.
@@ -240,7 +240,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <!-- version management -->
-        <openidm.version>3.0.0-SNAPSHOT</openidm.version>
+        <openidm.version>3.1.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.7.5</slf4j.version>
         <orientdb.version>1.6.6</orientdb.version>
         <orientdb.studio.version>1.6.6</orientdb.studio.version>
@@ -254,7 +254,7 @@
         <!-- Commons JSON versions -->
         <commons.forgerock-util.version>1.3.3</commons.forgerock-util.version>
         <commons.forgerock-rest.version>2.3.1</commons.forgerock-rest.version>
-        <commons.forgerock-script.version>1.3.1</commons.forgerock-script.version>
+        <commons.forgerock-script.version>1.4.0-SNAPSHOT</commons.forgerock-script.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults/>
@@ -291,7 +291,7 @@
 	       <!-- Doc Branding -->
 	       <brandingGroupId>org.forgerock.commons</brandingGroupId>
         <brandingArtifactId>forgerock-doc-default-branding</brandingArtifactId>
-        <brandingVersion>3.0.0-SNAPSHOT</brandingVersion>
+        <brandingVersion>3.1.0-SNAPSHOT</brandingVersion>
 
     </properties>
 
@@ -327,7 +327,7 @@
         <module>openidm-security</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-        <module>openidm-ui-enduser</module>
+        <module>openidm-ui</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <!--module>openidm-workflow-remote</module-->

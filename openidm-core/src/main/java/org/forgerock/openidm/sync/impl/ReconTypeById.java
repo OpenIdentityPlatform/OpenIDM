@@ -67,13 +67,12 @@ public class ReconTypeById extends ReconTypeBase {
         sourceIds.add(rawIds);
     }
 
-    public List<String> querySourceIds() {
-        return sourceIds;
+    public ResultIterable querySource() {
+        return new ResultIterable(sourceIds, null);
     }
 
-    public List<String> queryTargetIds() throws SynchronizationException {
-        List<String> targetIds = (List<String>) query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
+    public ResultIterable queryTarget() throws SynchronizationException {
+        return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
                 Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());
-        return targetIds;
     }
 }
