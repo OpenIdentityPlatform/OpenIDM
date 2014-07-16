@@ -270,7 +270,7 @@ throw {
         the client is providing the ID:
        </para>
        <programlisting>
-openidm.create('managed/user", "userName", <replaceable>user-object</replaceable>
+openidm.create('managed/user", "userName", <replaceable>user-object</replaceable>)
        </programlisting>
        <para>
         and the following format if the server should generate the ID:
