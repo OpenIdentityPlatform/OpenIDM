@@ -735,9 +735,10 @@ $ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
         "dbType" : "ORACLE",
         "jndiName" : "",
         "driverClass" : "oracle.jdbc.OracleDriver",
-        "jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/XE",
+        "jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/openidm",
         "username" : "openidm",
         "password" : "password",
+        "defaultCatalog" : "openidm",
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
         "connectionTimeoutInMs" : 30000
