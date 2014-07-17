@@ -271,9 +271,9 @@ openidm.instance.type=clustered-additional
     </listitem>
     <listitem>
      <para>
-      <literal>instanceRecoveryTimeout</literal> specifies the length of time (in
-      milliseconds) that an instance can be in recovery mode before that instance
-      is considered to be offline.
+      <literal>instanceRecoveryTimeout</literal> specifies the length of time
+      (in milliseconds) that an instance can be in recovery mode before that
+      instance is considered to be offline.
      </para>
      <para>
       The purpose of the recovery timeout is to prevent an instance from
