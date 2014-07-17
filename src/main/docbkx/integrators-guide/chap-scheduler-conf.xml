@@ -73,33 +73,36 @@
    <primary>Scheduler</primary>
    <secondary>Configuration</secondary>
   </indexterm>
- 
- <itemizedlist>
-  <para>Schedules are configured through JSON objects. The schedule 
-  configuration involves three types of files:</para>
-  <listitem>
+  <itemizedlist>
    <para>
-    The <filename>openidm/conf/boot/boot.properties</filename> file, where you
-    can enable the execution of persistent schedules
+    Schedules are configured through JSON objects. The schedule configuration
+    involves three files:
    </para>
-  </listitem>
-  <listitem>
-    <para>The <filename>openidm/conf/scheduler.json</filename> file, that 
-    configures the overall scheduler service</para>
-  </listitem>
-  <listitem>
-    <para>One <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename> 
-    file for each configured schedule</para>
-  </listitem>
- </itemizedlist>
-
+   <listitem>
+    <para>
+     The <filename>openidm/conf/boot/boot.properties</filename> file, where you
+     can enable the execution of persistent schedules
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The <filename>openidm/conf/scheduler.json</filename> file, that configures
+     the overall scheduler service
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     One <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename>
+     file for each configured schedule
+    </para>
+   </listitem>
+  </itemizedlist>
   <para>
    In the boot properties configuration file
    (<filename>openidm/conf/boot/boot.properties</filename>),
-   the instance type is standalone and persistent schedulers are enabled by
+   the instance type is standalone and persistent schedules are enabled by
    default:
   </para>
-
   <programlisting>
 # valid instance types for node include standalone, clustered-first, and clustered-additional
 openidm.instance.type=standalone
@@ -107,12 +110,11 @@ openidm.instance.type=standalone
 # enables the execution of persistent schedulers
 openidm.scheduler.execute.persistent.schedules=true
   </programlisting>
-
-  <para>The scheduler service configuration file 
-  (<filename>openidm/conf/scheduler.json</filename>) governs the configuration
-  for a specific scheduler instance, and has the following format:
+  <para>
+   The scheduler service configuration file
+   (<filename>openidm/conf/scheduler.json</filename>) governs the configuration
+   for a specific scheduler instance, and has the following format:
   </para>
-  
   <programlisting language='javascript'>
 {
  "threadPool" : {
@@ -123,10 +125,6 @@ openidm.scheduler.execute.persistent.schedules=true
  }
 }
   </programlisting>
-  <para>Some of the optional properties are not in the default configuration
-  file and are used with clustered OpenIDM instances.
-  </para>
-  
   <itemizedlist>
    <para>The properties in the <filename>scheduler.json</filename> file relate 
    to the configuration of the Quartz Scheduler.</para>
@@ -134,33 +132,6 @@ openidm.scheduler.execute.persistent.schedules=true
      <para><literal>threadCount</literal> specifies the maximum number of 
      threads that are available for the concurrent execution of scheduled 
      tasks.</para>
-   </listitem>
-   <listitem>
-     <para><literal>instanceTimeout</literal> specifies the number of
-     milliseconds that must elapse with no check-ins from a scheduler instance
-     before it is considered to have timed out or failed. Default: 60000 (60
-     seconds). When this timeout is reached, the instance is considered to be
-     in a "recovery" state.</para>
-   </listitem>
-   <listitem>
-     <para><literal>instanceRecoveryTimeout</literal> specifies the number of
-     milliseconds that must elapse while an instance is in the "recovery" state
-     (meaning that it has failed and another instance is now attempting to
-     recover its acquired triggers) before the scheduler instance recovery is
-     considered to have failed. Default: 60000 (60 seconds).</para>
-   </listitem>
-   <listitem>
-     <para><literal>instanceCheckInInterval</literal> Specifies the period
-     (in milliseconds) after which an instance checks in to indicate that it
-     has not timed out or failed. Default: 10000 (10 seconds).</para>
-   </listitem>
-   <listitem>
-     <para><literal>instanceCheckInOffset</literal> An offset (in milliseconds)
-     that can be used to shift the checkin events of instances to prevent all
-     instances from accessing the repository simultaneously (if the instances
-     are started simultaneously and have the same check-in intervals). This
-     offset can help to minimize MVCC warnings from multiple instances
-     simultaneously trying to recover the same failed instance. Default: 0.</para>
    </listitem>
    <listitem>
      <para><literal>executePersistentSchedules</literal> allows you to disable 
@@ -175,16 +146,19 @@ openidm.scheduler.execute.persistent.schedules=true
      configure additional properties for the Quartz Scheduler.</para>
    </listitem>
   </itemizedlist>
-
-     <note>
-         <para>In clustered environments, the scheduler service obtains an
-         <literal>instanceID</literal> from the cluster management service.
-         This behavior differs from OpenIDM 2.1.0 (in which the scheduler
-         service specified the instance ID). Therefore, if you used the
-         scheduler service in OpenIDM 2.1.0, you will need to migrate any
-         reference to assigned instance IDs, allowing them to be provided by
-         the cluster management service.</para>
-     </note>
+  <note>
+   <para>
+    In clustered environments, the scheduler service obtains an
+    <literal>instanceID</literal> and checkin and timeout settings from the
+    cluster management service (defined in the
+    <filename>openidm/conf/cluster.json</filename> file). This
+    behavior differs from OpenIDM 2.1.0 (in which the scheduler service
+    specified the instance ID and checkin and timeout settings). Therefore, if
+    you used the scheduler service in OpenIDM 2.1.0, you will need to migrate
+    any reference to assigned instance IDs, allowing them to be provided by the
+    cluster management service.
+   </para>
+  </note>
   
   <para>For details of all the configurable properties for the Quartz Scheduler, 
   see the <link xlink:show="new" 
