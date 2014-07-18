@@ -66,6 +66,9 @@
 
             </fieldset>
 
+        <!-- This hidden input is a work around for Chrome's lack of autocomplete functionality.  The field directly preceding a password field may be autopopulated if the user has a saved username and password on the current domain. -->
+        <input style="display:none;" />
+
             <fieldset class="fieldset col0">
 
                 <div class="group-field-block ">
