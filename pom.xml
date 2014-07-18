@@ -271,7 +271,8 @@
 
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <serverDocTargetVersion>${project.version}</serverDocTargetVersion>
+        <!--<serverDocTargetVersion>${project.version}</serverDocTargetVersion>-->
+        <serverDocTargetVersion>3.0.0-SNAPSHOT</serverDocTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <openicfBundleVersion>[1.1,1.5]</openicfBundleVersion>
