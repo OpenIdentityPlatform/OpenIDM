@@ -42,7 +42,7 @@ public class TriggerContext extends ServerContext {
     private static final String CONTEXT_NAME = "trigger";
 
     // persisted attribute namon
-    private static final String ATTR_TRIGGER_SOURCE = "trigger-source";
+    private static final String ATTR_TRIGGER_SOURCE = "triggerSource";
 
     /**
      * Create a new trigger context from an existing (parent) context and the source of the trigger.
