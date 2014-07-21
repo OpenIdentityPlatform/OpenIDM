@@ -151,7 +151,7 @@ class Policy {
                 scope.put("target", target.asMap());
             }
             try {
-                result = Enum.valueOf(Action.class, script.exec(scope).toString());
+                result = Action.valueOf(script.exec(scope).toString());
             } catch (NullPointerException npe) {
                 throw new SynchronizationException("action script returned null value");
             } catch (IllegalArgumentException iae) {
