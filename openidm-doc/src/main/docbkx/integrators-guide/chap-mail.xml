@@ -163,9 +163,6 @@ $ cp samples/misc/external.email.json conf/</screen>
   configuration works. You pass the message parameters as POST parameters,
   URL encoding the content as necessary.</para>
 
-  <!-- I get an 400 error message, varies slightly w/ PUT v. POST. Nothing
-  shows up in the log file.  -->
-
   <para>The following example sends a test email using the REST API.</para>
   <screen>
 $ <userinput>curl \
@@ -190,7 +187,8 @@ $ <userinput>curl \
   xlink:role="http://docbook.org/xlink/role/olink">functions</link> with
   the <literal>external/email</literal> context, as in the following
   example, where <literal>params</literal> is an object that contains the
-  POST parameters.</para>
+  POST parameters.
+  </para>
 
   <programlisting language="javascript">
 var params =  new Object();
@@ -201,7 +199,7 @@ params.subject = "OpenIDM recon report";
 params.type = "text/html";
 params.body = "&lt;html&gt;&lt;body&gt;&lt;p&gt;Recon report follows...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;";
 
-openidm.action("external/email", params);</programlisting>
+openidm.action("external/email", "send", params);</programlisting>
 
   <variablelist>
    <para>OpenIDM supports the following POST parameters.</para>
