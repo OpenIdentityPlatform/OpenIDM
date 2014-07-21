@@ -81,6 +81,13 @@
 
         managedUser = openidm.read("managed/user/" + managedUserId.result[0].secondId);
 
+        if (managedUser === null) {
+            throw {
+                "code" : 401,
+                "message" : "Access denied, linked managed/user entry is MISSING"
+            };        
+        }
+
         if (managedUser.accountStatus === "inactive") {
             throw {
                 "code" : 401,
