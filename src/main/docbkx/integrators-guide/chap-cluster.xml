@@ -347,11 +347,19 @@ openidm.instance.type=clustered-additional
    </listitem>
   </itemizedlist>
   <para>
-   The order in which nodes in a cluster claim jobs is random. The cluster
-   manager will automatically fail over jobs that were claimed by a node, if
-   that node goes down. Note that this behavior is different to the cluster
-   behavior in OpenIDM 2.1.0, in which an unavailable node would need to come up
-   again to free a job that it had already claimed.
+   The order in which nodes in a cluster claim jobs is random. If a node goes
+   down, the cluster manager will automatically fail over jobs that have been
+   claimed by that node, but not yet started. For example, if node A claims a
+   job but does not start it, and then goes down, node B can reclaim that job.
+   If node A claims and job, starts it, and then goes down, the job cannot be
+   reclaimed by another node in the cluster. That specific job will never be
+   completed. Instance B can claim the next iteration (or scheduled occurrence)
+   of the job.
+  </para>
+  <para>
+   Note that this failover behavior is different to the behavior in OpenIDM
+   2.1.0, in which an unavailable node would need to come up again to free a job
+   that it had already claimed.
   </para>
   <para>
    If a number of changes are made as a result of a LiveSync action, a single
