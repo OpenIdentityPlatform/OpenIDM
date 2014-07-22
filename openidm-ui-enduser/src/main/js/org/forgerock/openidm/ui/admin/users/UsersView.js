@@ -115,8 +115,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         {
                             "name": "userName",
                             "label": $.t("common.user.username"),
-                            "key": true,
-                            "formatter": Handlebars.Utils.escapeExpression
+                            "key": true
                         },
                         {
                             "name": "givenName",
@@ -157,7 +156,12 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                 $('#' + grid_id).jqGrid( {
                     jsonReader : {
                         repeatitems: false,
-                        root: function(obj){ return obj.result[0].rows; },
+                        root: function(obj){ 
+                            return _.map(obj.result[0].rows, function (r) {
+                                r.userName = Handlebars.Utils.escapeExpression(r.userName);
+                                return r;
+                            });
+                        },
                         id: "userName",
                         page: function(obj){ return obj.result[0].page; },
                         total: function(obj){ return obj.result[0].total; },
