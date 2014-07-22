@@ -519,11 +519,13 @@
         {
             "logType" : "csv",
             "location" : "audit",
-            "recordDelimiter" : ";"
+            "recordDelimiter" : ";",
+            "ignoreLoggingFailures" : true
         },
         {
             "logType" : "repository",
-            "useForQueries" : true
+            "useForQueries" : true,
+            "ignoreLoggingFailures" : true
         }
     ],
     "exceptionFormatter" : {
@@ -719,7 +721,30 @@
        </itemizedlist>
       </listitem>
     </varlistentry>
-    </variablelist>
+    <varlistentry>
+     <term><literal>ignoreLoggingFailures</literal></term>
+     <listitem>
+      <para>
+       In certain situations, you might want to tolerate the inability to write
+       to an audit log and prevent an exception from being thrown if the logging
+       fails. For example, a request for configuration data might succeed, but
+       fail to write to the activity log. Reasons for logging failures might
+       include full disk (for a CSV logger) or repository unavailable (for a
+       repository logger).
+      </para>
+      <para>
+       For each log type, you can specify that failure to write to the log
+       should be ignored, and should not prevent the successful execution of the
+       underlying request. To ignore logging failures for a specific log type,
+       add the <literal>"ignoreLoggingFailures"</literal> property to the log
+       type configuration, and set its value to <literal>true</literal>. This
+       parameter is not included in the default <literal>audit.json</literal>
+       file, and its value is considered to be <literal>false</literal> by
+       default for all log types.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
 
    <para>
     You can specify a <literal>logTo</literal> location to the directory of your
