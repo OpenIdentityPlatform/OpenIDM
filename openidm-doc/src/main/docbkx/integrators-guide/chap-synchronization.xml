@@ -969,7 +969,7 @@ $ <userinput>curl \
     defined in the file <filename>conf/sync.json</filename>.
    </para>
 
-   <screen><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -997,7 +997,7 @@ $ <userinput>curl \
     <literal>true</literal> when the reconciliation is initiated. For example:
    </para>
 
-   <screen><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
