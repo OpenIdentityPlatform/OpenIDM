@@ -473,8 +473,7 @@ openidm.scheduler.execute.persistent.schedules=true
   server is back online. Subsequent executions are discarded. After this, the 
   normal schedule is resumed.</para>
 
-  <programlisting language="javascript">
-{
+<programlisting language="javascript">{
     "enabled": false,
     "persisted": true,
     "misfirePolicy" : "fireAndProceed",
@@ -488,13 +487,223 @@ openidm.scheduler.execute.persistent.schedules=true
 }</programlisting>
 
  </section>
- 
- <section xml:id="scheduler-service-implementations">
-  <title>Service Implementer Notes</title>
 
-  <para>Services that can be scheduled implement
-  <literal>ScheduledService</literal>. The service PID is used as a basis for
-  the service identifier in schedule definitions.</para>
+ <section xml:id="schedules-over-rest">
+  <title>Managing Schedules Over REST</title>
+  <para>
+   OpenIDM exposes the scheduler service under the
+   <literal>/openidm/scheduler</literal> context path. The following examples
+   show how schedules can be created, read, updated, and deleted, over REST,
+   like any other object.
+  </para>
+
+  <section xml:id="creating-schedules">
+   <title>Creating a Schedule</title>
+   <para>
+    You can create a schedule with a PUT request, which allows you to specify
+    the ID of the schedule, or with a POST request, in which case the server
+    assigns an ID automatically.
+   </para>
+   <para>
+    The following example uses a PUT request to create a schedule that fires a
+    script (<filename>script/testlog.js</filename>) every second. The schedule
+    configuration is as described in <xref linkend="scheduler-configuration-file" />.
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+    "enabled":true,
+    "_id":"testlog-schedule",
+    "type":"cron",
+    "schedule":"0/1 * * * * ?",
+    "persisted":true,
+    "misfirePolicy":"fireAndProceed",
+    "invokeService":"script",
+    "invokeContext": {
+        "script": {
+            "type":"text/javascript",
+            "file":"script/testlog.js"
+        }
+    }
+ }' \
+ "https://localhost:8443/openidm/scheduler/testlog-schedule"</userinput>
+<computeroutput>{
+  "type": "cron",
+  "invokeService": "script",
+  "persisted": true,
+  "_id": "testlog-schedule",
+  "schedule": "0/1 * * * * ?",
+  "misfirePolicy": "fireAndProceed",
+  "enabled": true,
+  "invokeContext": {
+    "script": {
+      "file": "script/testlog.js",
+      "type": "text/javascript"
+    }
+  }
+}</computeroutput></screen>
+   <para>
+    The following example uses a POST request to create an identical schedule to
+    the one created in the previous example, but with a server-assigned ID.
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "enabled":true,
+    "type":"cron",
+    "schedule":"0/1 * * * * ?",
+    "persisted":true,
+    "misfirePolicy":"fireAndProceed",
+    "invokeService":"script",
+    "invokeContext": {
+        "script": {
+            "type":"text/javascript",
+            "file":"script/testlog.js"
+        }
+    }
+ }' \
+ "https://localhost:8443/openidm/scheduler?_action=create"</userinput>
+<computeroutput>{
+  "type": "cron",
+  "invokeService": "script",
+  "persisted": true,
+  "_id": "d6d1b256-7e46-486e-af88-169b4b1ad57a",
+  "schedule": "0/1 * * * * ?",
+  "misfirePolicy": "fireAndProceed",
+  "enabled": true,
+  "invokeContext": {
+    "script": {
+      "file": "script/testlog.js",
+      "type": "text/javascript"
+    }
+  }
+}</computeroutput></screen>
+   <para>
+    The output includes the <literal>_id</literal> of the schedule, in this case
+    <literal>"_id": "d6d1b256-7e46-486e-af88-169b4b1ad57a"</literal>.
+   </para>
+  </section>
+
+  <section xml:id="schedule-details">
+   <title>Obtaining the Details of a Schedule</title>
+   <para>
+    The following example displays the details of the schedule created in the
+    previous section. Specify the schedule ID in the URL.
+   </para>
+
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"</userinput>
+<computeroutput>{
+  "_id": "d6d1b256-7e46-486e-af88-169b4b1ad57a",
+  "schedule": "0/1 * * * * ?",
+  "misfirePolicy": "fireAndProceed",
+  "startTime": null,
+  "invokeContext": {
+    "script": {
+      "file": "script/testlog.js",
+      "type": "text/javascript"
+    }
+  },
+  "enabled": true,
+  "concurrentExecution": false,
+  "persisted": true,
+  "timeZone": null,
+  "type": "cron",
+  "invokeService": "org.forgerock.openidm.script",
+  "endTime": null,
+  "invokeLogLevel": "info"
+}</computeroutput></screen>
+  </section>
+
+  <section xml:id="updating-schedules">
+   <title>Updating a Schedule</title>
+   <para>
+    To update a schedule definition, use a PUT request and update all properties
+    of the object. Note that PATCH requests are currently supported only for
+    managed objects. The following example disables the schedule created in the
+    previous section.
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+    "enabled":false,
+    "type":"cron",
+    "schedule":"0/1 * * * * ?",
+    "persisted":true,
+    "misfirePolicy":"fireAndProceed",
+    "invokeService":"script",
+    "invokeContext": {
+        "script": {
+            "type":"text/javascript",
+            "file":"script/testlog.js"
+        }
+    }
+ }' \
+ "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"</userinput>
+   <computeroutput>null</computeroutput></screen>
+  </section>
+
+  <section xml:id="listing-schedules">
+   <title>Listing Configured Schedules</title>
+   <para>
+    To display a list of all configured schedules, query the
+    <literal>openidm/scheduler</literal> context path as shown in the following
+    example:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/scheduler?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "d6d1b256-7e46-486e-af88-169b4b1ad57a"
+    },
+    {
+      "_id": "recon"
+    }
+  ]
+}</computeroutput></screen>
+  </section>
+
+  <section xml:id="deleting-schedules">
+   <title>Deleting a Schedule</title>
+   <para>
+    To deleted a configured schedule, call a DELETE request on the schedule ID.
+    For example:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"</userinput>
+<computeroutput>null</computeroutput></screen>
+  </section>
+
+
+
  </section>
  
  <section xml:id="task-scanner">
