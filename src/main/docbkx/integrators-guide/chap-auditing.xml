@@ -495,8 +495,8 @@
   <para>OpenIDM exposes the audit logging configuration under
   <literal>http://localhost:8080/openidm/config/audit</literal>
   for the REST API, and in the file <filename>conf/audit.json</filename> where
-  you installed OpenIDM. The default <filename>conf/audit.json</filename> file
-  contains the following object.</para>
+  you installed OpenIDM. A sample <filename>conf/audit.json</filename>
+  configuration file follows:</para>
 
   <programlisting language="javascript">{
     "eventTypes" : {
