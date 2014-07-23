@@ -34,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
@@ -64,7 +62,6 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PersistenceConfig;
@@ -75,7 +72,6 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -87,7 +83,6 @@ import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptName;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.registry.ScriptRegistryImpl;
@@ -522,7 +517,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     
     private boolean isSourceUnit(String name) {
         if (SourceUnit.ATTR_NAME.equals(name) ||
-                SourceUnit.ATTR_REQUEST_BINDING.equals(name) ||
                 SourceUnit.ATTR_REVISION.equals(name) ||
                 SourceUnit.ATTR_SOURCE.equals(name) ||
                 SourceUnit.ATTR_TYPE.equals(name) ||
