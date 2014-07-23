@@ -24,10 +24,8 @@
 
 package org.forgerock.openidm.script;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -49,11 +47,9 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ScriptUtil;
 import org.forgerock.script.Scope;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
@@ -61,8 +57,6 @@ import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.source.SourceUnit;
-import org.forgerock.util.Factory;
-import org.forgerock.util.LazyMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentException;
@@ -324,15 +318,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void handleRequest(final ServerContext context, final Request request,
             final Bindings bindings) {
-        if (ScriptUtil.REQUEST_BINDING_2_1.equals(scriptName.getRequestBinding())) {
-            SecurityContext securityContext = context.asContext(SecurityContext.class);
-            bindings.put("security", securityContext.getAuthorizationId());
-            bindings.put("request", ScriptUtil.getRequestMap(request, context));
-            bindings.put("_context", ScriptUtil.getLazyContext(context));
-            bindings.put("context", context);
-        } else {
-            bindings.put("request", request);
-            bindings.put("context", context);
-        }
+        bindings.put("request", request);
+        bindings.put("context", context);
     }
 }
