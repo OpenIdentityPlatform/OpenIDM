@@ -24,6 +24,18 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.forgerock.util.Iterables.filter;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
+import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.forgerock.json.resource.servlet.HttpContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -88,6 +99,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.servlet.HttpContext;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
@@ -174,19 +186,6 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
-
 /**
  * The OpenICFProvisionerService is the implementation of
  * {@link CollectionResourceProvider} interface with <a
@@ -230,6 +229,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private JsonValue jsonConfiguration = null;
     private ConnectorReference connectorReference = null;
     private SyncFailureHandler syncFailureHandler = null;
+    private String factoryPid = null;
 
     /** use null-object activity logger until/unless ConnectionFactory binder updates it */
     private ActivityLogger activityLogger = NullActivityLogger.INSTANCE;
@@ -325,6 +325,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     @Activate
     protected void activate(ComponentContext context) {
         try {
+            factoryPid = (String)context.getProperties().get("config.factory-pid");
             jsonConfiguration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
 
@@ -1908,6 +1909,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 jv.put("reason", "TEST UnsupportedOperation");
             }
             jv.put("ok", true);
+            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(connectorReference.getConnectorKey()));
+            jv.put("config", "config/provisioner.openicf/" + factoryPid);
         } catch (Throwable e) {
             result.put("error", e.getMessage());
         }
