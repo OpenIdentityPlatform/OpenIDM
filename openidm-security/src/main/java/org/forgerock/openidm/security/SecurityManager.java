@@ -149,7 +149,9 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         
         String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
         
-        String privateKeyAlias = Param.getProperty("openidm.https.keystore.cert.alias");
+        String propValue = Param.getProperty("openidm.https.keystore.cert.alias");
+        String privateKeyAlias = (propValue == null) ? "openidm-localhost" : propValue;
+        
         try {
             if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
                 // Load keystore and truststore from the repository
