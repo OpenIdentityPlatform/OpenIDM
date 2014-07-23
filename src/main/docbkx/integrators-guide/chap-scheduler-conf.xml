@@ -517,7 +517,6 @@ openidm.scheduler.execute.persistent.schedules=true
  --request PUT \
  --data '{
     "enabled":true,
-    "_id":"testlog-schedule",
     "type":"cron",
     "schedule":"0/1 * * * * ?",
     "persisted":true,
