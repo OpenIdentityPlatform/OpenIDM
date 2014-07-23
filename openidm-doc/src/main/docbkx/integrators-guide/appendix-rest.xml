@@ -627,9 +627,9 @@
  <section xml:id="rest-supported-methods">
   <title>Supported Methods</title>
 
-  <para>The managed object API uses standard HTTP methods to access managed
-  objects.</para>
-
+  <para>
+   The managed object API uses standard HTTP methods to access managed objects.
+  </para>
   <variablelist>
    <varlistentry>
     <term>GET</term>
@@ -683,42 +683,61 @@ If-None-Match: *
 ...
 
 [<replaceable>JSON representation of the managed object to create</replaceable>]</programlisting>
-     <para>Example Response: Creating a new object</para>
+     <para>Example Response: Creating a new object (success)</para>
      <programlisting language="http">
-HTTP/1.1 200 Created
+HTTP/1.1 201 Created
 Content-Type: application/json
 Content-Length: 45
 ETag: "0"
 ...
 
 [<replaceable>JSON representation containing metadata (underscore-prefixed) properties</replaceable>]</programlisting>
-     <para>Example Request: Updating an existing object</para>
+     <para>
+      Example Response: Creating a new object without the
+      <literal>If-None-Match</literal> header
+     </para>
+     <programlisting language="http">
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 83
+...
+
+[<replaceable>JSON representation of error</replaceable>]</programlisting>
+
+     <para>
+      Example Request: Updating an existing object
+     </para>
      <programlisting language="http">
 PUT /openidm/managed/user/5752c0fd9509
 Content-Type: application/json
 Content-Length: 123
-If-Match: "0"
+If-Match: "1"
 ...
 
 [<replaceable>JSON representation of managed object to update</replaceable>]</programlisting>
      <para>Example Response: Updating an existing object (success)</para>
      <programlisting language="http">
-HTTP/1.1 201 Created
+HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 45
-ETag: "0"
-....</programlisting>
+ETag: "2"
+...
+
+[<replaceable>JSON representation of updated object</replaceable>]</programlisting>
      <para>Example Response: Updating an existing object when no version is
      supplied</para>
      <programlisting language="http">
-HTTP/1.1 409 Conflict
+HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 89
+ETag: "3"
 ...
 
-[<replaceable>JSON representation of error</replaceable>]</programlisting>
-      <para>Example Response: Updating an existing object when an invalid
-      version is supplied (version conflict)</para>
+[<replaceable>JSON representation of updated object</replaceable>]</programlisting>
+      <para>
+       Example Response: Updating an existing object when an invalid version is
+       supplied
+      </para>
       <programlisting language="http">
 HTTP/1.1 412 Precondition Required
 Content-Type: application/json
@@ -726,6 +745,16 @@ Content-Length: 89
 ...
 
 [<replaceable>JSON representation of error</replaceable>]</programlisting>
+     <para>
+      Example Response: Updating an existing object with
+      <literal>If-Match: *</literal></para>
+     <programlisting language="http">
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+...
+[<replaceable>JSON representation of updated object</replaceable>]</programlisting>
 
     </listitem>
    </varlistentry>
@@ -777,7 +806,7 @@ Content-Length: 123
       <programlisting language="http">
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Cache-Contro: no-cache
+Cache-Control: no-cache
 Set-Cookie: session-jwt=yAiYWxnIjogI;Path=/
 ...</programlisting>
 
@@ -795,18 +824,28 @@ If-Match: "0"
      <para>Example Response (success)</para>
      <programlisting language="http">
 HTTP/1.1 200 OK
-...</programlisting>
-     <para>Deleting an existing object when no version is supplied</para>
-     <programlisting language="http">
-HTTP/1.1 409 Conflict
+Content-Length: 405
 Content-Type: application/json;charset=UTF-8
-Content-Length: 89
+Etag: "4"
 ...
 
-[<replaceable>JSON representation of error</replaceable>]</programlisting>
+[<replaceable>JSON representation of the managed object that was deleted</replaceable>]</programlisting>
+     <para>
+      Example Response: Deleting an existing object when no version is supplied
+     </para>
+     <programlisting language="http">
+HTTP/1.1 200 OK
+Content-Length: 405
+Content-Type: application/json;charset=UTF-8
+Etag: "4"
+...
 
-      <para>Example Response: Deleting an existing object when an invalid
-            version is supplied (version conflict)</para>
+[<replaceable>JSON representation of the managed object that was deleted</replaceable>]</programlisting>
+
+      <para>
+       Example Response: Deleting an existing object when an invalid version is
+       supplied
+      </para>
       <programlisting language="http">
 HTTP/1.1 412 Precondition Required
 Content-Type: application/json;charset=UTF-8
@@ -1214,7 +1253,7 @@ Content-Length: 89
         users, and groups.</entry>
       </row>
       <row>
-       <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>?_queryExpression=</entry>
+       <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>?_queryFilter=<replaceable>filter</replaceable></entry>
        <entry>GET</entry>
        <entry>Lists the item(s) associated with the query filter.</entry>
       </row>
