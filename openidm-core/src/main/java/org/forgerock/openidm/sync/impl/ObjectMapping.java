@@ -2175,7 +2175,7 @@ class ObjectMapping {
 
         public final static String RECON_START = "start";
         public final static String RECON_END = "summary";
-        public final static String RECON_ENTRY = ""; // regular reconciliation entry has an empty entry type
+        public final static String RECON_ENTRY = "entry";
 
         /** Type of the audit log entry. Allows for marking recon start / summary records */
         public String entryType = RECON_ENTRY;
