@@ -135,6 +135,14 @@
  --request POST \
  "https://localhost:8443/openidm/external/rest?_action=proxy"</userinput></screen>
       </listitem>
+      <listitem>
+       <para>
+        Creating objects with a PUT request (specifying a client-assigned ID) is
+        no longer supported for system resources. To create an object on a
+        system resource, you must use a POST request, with the
+        <literal>create</literal> action.
+       </para>
+      </listitem>
      </itemizedlist>
      <para>
       For details of the new interface, including examples, see the <link
