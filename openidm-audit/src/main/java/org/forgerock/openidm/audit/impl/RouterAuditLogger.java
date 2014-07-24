@@ -150,16 +150,10 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params)
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted)
         throws ResourceException {
 
         try {
-            boolean formatted = true;
-            if (params.get("formatted") != null
-                    && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
-                formatted = false;
-            }
-
             QueryRequest request = Requests.newQueryRequest(getRouterLocation(type));
             request.setQueryId(params.get("_queryId"));
             request.getAdditionalParameters().putAll(params);

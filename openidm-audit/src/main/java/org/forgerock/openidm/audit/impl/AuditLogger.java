@@ -87,10 +87,8 @@ public interface AuditLogger {
      * {@code _rev} will be set in the returned object. If optimistic concurrency is not
      * supported, then {@code _rev} must be {@code null} or absent.
      *
-     *
-     *
-     * @param type
-     * @param localId
+     * @param type the type of audit log entry to read
+     * @param localId the id of the object to log
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @return the requested object.
@@ -105,14 +103,13 @@ public interface AuditLogger {
      * The query result is a JSON object structure composed of basic Java types; its overall
      * structure is defined by the implementation.
      *
-     *
-     *
-     * @param type
+     * @param type type of audit log entry for which to query
      * @param params the parameters of the query to perform.
+     * @param formatted
      * @return the query result object.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object or the specified query is forbidden.
      */
-    Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException;
+    Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException;
 
 }

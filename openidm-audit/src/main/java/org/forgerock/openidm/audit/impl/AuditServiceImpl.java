@@ -58,7 +58,6 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -107,8 +106,10 @@ import static org.forgerock.openidm.audit.util.ActivityLogger.STATUS;
 import static org.forgerock.openidm.audit.util.ActivityLogger.TIMESTAMP;
 
 /**
- * Audit module
+ * This audit service is the entry point for audit logging on the router.
+ *
  * @author aegloff
+ * @author brmiller
  */
 @Component(name = "org.forgerock.openidm.audit", immediate=true, policy=ConfigurationPolicy.REQUIRE)
 @Service
@@ -230,10 +231,7 @@ public class AuditServiceImpl implements AuditService {
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency
      *
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws BadRequestException if the passed identifier is invalid
-     * @return the requested object.
+     * {@inheritDoc}
      */
     @Override
     public void handleRead(final ServerContext context, final ReadRequest request, final ResultHandler<Resource> handler) {
@@ -259,10 +257,7 @@ public class AuditServiceImpl implements AuditService {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param obj the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved.
-     * @throws ForbiddenException if access to the object or object set is forbidden.
-     * @throws PreconditionFailedException if an object with the same ID already exists.
+     * {@inheritDoc}
      */
     @Override
     public void handleCreate(final ServerContext context, final CreateRequest request,
@@ -478,11 +473,7 @@ public class AuditServiceImpl implements AuditService {
      *
      * Deletes the specified object from the object set.
      *
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws ConflictException if version is required but is {@code null}.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
+     * {@inheritDoc}
      */
     @Override
     public void handleDelete(ServerContext context, DeleteRequest request,
@@ -492,6 +483,8 @@ public class AuditServiceImpl implements AuditService {
 
     /**
      * Audit service does not support changing audit entries.
+     *
+     * {@inheritDoc}
      */
     @Override
     public void handlePatch(final ServerContext context, final PatchRequest request,
@@ -506,27 +499,25 @@ public class AuditServiceImpl implements AuditService {
      * The query result is a JSON object structure composed of basic Java types.
      *
      * The returned map is structured as follow:
-     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
-     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
+     * <ul>
+     * <li>The top level map contains meta-data about the query, plus an entry with the actual result records.
+     * <li>The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
+     * </ul>
      *
-     * @param params the parameters of the query to perform.
-     * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     * configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException if access to the object or specified query is forbidden.
+     * {@inheritDoc}
      */
     @Override
     public void handleQuery(final ServerContext context, final QueryRequest request,
             final QueryResultHandler handler) {
         try {
             final String type = request.getResourceNameObject().head(1).toString();
+            final boolean formatted = getFormattedValue(request.getAdditionalParameter("formatted"));
             Map<String,String> params = new HashMap<String,String>();
             params.putAll(request.getAdditionalParameters());
             params.put("_queryId", request.getQueryId());
             logger.debug("Audit query called for {} with {}", request.getResourceName(), request.getAdditionalParameters());
             AuditLogger auditLogger = getQueryAuditLogger(type);
-            Map<String, Object> result = auditLogger.query(context, type, params);
+            Map<String, Object> result = auditLogger.query(context, type, params, formatted);
 
             for (Map<String,Object> o: (Iterable<Map<String,Object>>) result.get("result")) {
                 String id = (String) o.get(Resource.FIELD_CONTENT_ID);
@@ -539,6 +530,8 @@ public class AuditServiceImpl implements AuditService {
     }
     /**
      * Audit service does not support actions on audit entries.
+     *
+     * {@inheritDoc}
      */
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
@@ -1014,11 +1007,13 @@ public class AuditServiceImpl implements AuditService {
         return jsonValue;
     }
 
-    protected static boolean getBoolValue(Object bool) {
-        if (bool instanceof String) {
-            return Boolean.valueOf((String)bool);
-        } else if (bool instanceof Boolean) {
-            return Boolean.valueOf((Boolean)bool);
+    private boolean getFormattedValue(Object formatted) {
+        if (formatted == null) {
+            return true;
+        } else if (formatted instanceof String) {
+            return Boolean.valueOf((String)formatted);
+        } else if (formatted instanceof Boolean) {
+            return Boolean.valueOf((Boolean)formatted);
         } else {
             return false;
         }
