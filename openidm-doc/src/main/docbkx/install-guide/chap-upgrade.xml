@@ -262,18 +262,41 @@ $ cp bin/default/script/access.js script/
   <step>
    <para>
     Migrate your internal user data, managed objects, and reconciliation and
-    audit data, if required. Note that the database schema has changed in
-    OpenIDM 3.0.0. Your data migration strategy might vary,
-    depending on your repository.
+    audit data, if required.
    </para>
    <para>
-    The following strategy should work:
+    The database schema has changed slightly in
+    OpenIDM 3.0.0. The following tables have been added:
+    <literal>security</literal>, <literal>securitykeys</literal>,
+    <literal>clusterobjects</literal>, and
+    <literal>clusterobjectproperties</literal>. In addition, the following
+    columns have been added to the <literal>auditrecon</literal> table:
+    <literal>actionid</literal>, <literal>exceptiondetail</literal>,
+    <literal>mapping</literal>, <literal>messagedetail</literal>.</para>
+   <para>
+    Your data migration strategy might vary, depending on your repository.
    </para>
    <itemizedlist>
+    <para>
+     To migrate an existing database:
+    </para>
     <listitem>
      <para>
-      Set up a clean repository, with the data definition language script from
-      the new OpenIDM 3.0.0 instance.
+      Using the appropriate schema script from the new OpenIDM 3.0.0 instance
+      (<filename>/path/to/openidm-3.0/db/scripts/<replaceable>repo</replaceable>/openidm.sql</filename>),
+      take the changes described above and apply them to your existing database.
+     </para>
+    </listitem>
+   </itemizedlist>
+   <itemizedlist>
+    <para>
+     To start with a new database:
+    </para>
+    <listitem>
+     <para>
+      Set up a clean repository, using the appropriate schema script from the
+      new OpenIDM 3.0.0 instance
+      (<filename>/path/to/openidm-3.0/db/scripts/<replaceable>repo</replaceable>/openidm.sql</filename>).
      </para>
     </listitem>
     <listitem>
