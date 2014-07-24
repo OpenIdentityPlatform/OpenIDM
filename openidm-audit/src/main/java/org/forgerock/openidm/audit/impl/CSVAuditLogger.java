@@ -235,14 +235,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException {
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException {
         String queryId = params.get("_queryId");
-        boolean formatted = true;
         try {
-            if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
-                formatted = false;
-            }
-
             List<Map<String, Object>> reconEntryList = getEntryList(type);
             if (reconEntryList == null) {
                 throw new NotFoundException(type + " audit log not found");

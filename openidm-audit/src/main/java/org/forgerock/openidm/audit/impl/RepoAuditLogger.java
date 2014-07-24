@@ -120,13 +120,9 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params) throws ResourceException {
+    public Map<String, Object> query(ServerContext context, String type, Map<String, String> params, boolean formatted) throws ResourceException {
         String queryId = params.get("_queryId");
-        boolean formatted = true;
         try {
-            if (params.get("formatted") != null && !AuditServiceImpl.getBoolValue(params.get("formatted"))) {
-                formatted = false;
-            }
             QueryRequest request = Requests.newQueryRequest(getRepoTarget(type));
             request.setQueryId(queryId);
             request.getAdditionalParameters().putAll(params);
