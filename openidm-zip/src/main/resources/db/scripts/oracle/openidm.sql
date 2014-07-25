@@ -141,6 +141,7 @@ CREATE INDEX idx_auditactivity_rootactionid ON auditactivity
 PROMPT Creating Table auditrecon ...
 CREATE TABLE auditrecon (
   objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
   entrytype VARCHAR2(7 CHAR),
   rootactionid VARCHAR2(511 CHAR),
   reconid VARCHAR2(36 CHAR),
