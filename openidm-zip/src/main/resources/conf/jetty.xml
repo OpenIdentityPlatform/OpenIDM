@@ -44,6 +44,60 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
                 </Arg>
                 <Set name="Port"><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Set>
                 <Set name="maxIdleTime">30000</Set>
+                <Set name="ExcludeCipherSuites">
+                    <Array type="java.lang.String">
+
+                        <!-- EXP-RC4-MD5  -->
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
+                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+
+                        <!-- EXP-DES-CBC-SHA -->
+                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
+
+                        <!-- DES-CBC-SHA -->
+                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
+                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
+
+                        <!--
+                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        -->
+
+                        <!-- RC4-MD5 -->
+                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- RC4-SHA  -->
+                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
+
+                        <!--
+                        ECDHE-RSA-RC4-SHA is excluded above
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        -->
+
+                    </Array>
+                </Set>
             </New>
         </Arg>
     </Call>
@@ -66,6 +120,60 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
                         <Ref id="MutualAuthPort"/>
                     </Arg>
                 </Call>
+                <Set name="ExcludeCipherSuites">
+                    <Array type="java.lang.String">
+
+                        <!-- EXP-RC4-MD5  -->
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- EXP-EDH-RSA-DES-CBC-SHA or EXP-DHE-RSA-DES-CBC-SHA  -->
+                        <Item>SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+
+                        <!-- EXP-DES-CBC-SHA -->
+                        <Item>SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_DES40_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA	</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA</Item>
+
+                        <!-- DES-CBC-SHA -->
+                        <Item>SSL_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DHE_DSS_WITH_DES_CBC_SHA</Item>
+                        <Item>SSL_DH_anon_WITH_DES_CBC_SHA</Item>
+                        <Item>TLS_KRB5_WITH_DES_CBC_SHA</Item>
+
+                        <!--
+                        EDH-RSA-DES-CBC-SHA or DHE-RSA-DES-CBC-SHA is excluded above
+                        <Item>SSL_DHE_RSA_WITH_DES_CBC_SHA</Item>
+                        -->
+
+                        <!-- RC4-MD5 -->
+                        <Item>SSL_RSA_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_RSA_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>SSL_DH_anon_WITH_RC4_128_MD5</Item>
+                        <Item>SSL_DH_anon_EXPORT_WITH_RC4_40_MD5</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_MD5</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_MD5</Item>
+
+                        <!-- RC4-SHA  -->
+                        <Item>SSL_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_ECDSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_ECDH_anon_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_WITH_RC4_128_SHA</Item>
+                        <Item>TLS_KRB5_EXPORT_WITH_RC4_40_SHA</Item>
+
+                        <!--
+                        ECDHE-RSA-RC4-SHA is excluded above
+                        <Item>TLS_ECDHE_RSA_WITH_RC4_128_SHA</Item>
+                        -->
+
+                    </Array>
+                </Set>
             </New>
         </Arg>
     </Call>
