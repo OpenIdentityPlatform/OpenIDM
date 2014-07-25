@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -41,13 +41,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -152,7 +151,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     // Private
     private Map<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>> remoteFrameworkConnectionInfo =
             new HashMap<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>>();
-    private ScheduledExecutorService scheduledExecutorService = null;
+    private Timer timer = null;
     private List<URL> connectorURLs = null;
     private ClassLoader bundleParentClassLoader = null;
     private final MetaDataProviderCallback[] callback = new MetaDataProviderCallback[1];
@@ -314,8 +313,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                     .getUnCheckedRemoteManager(rfi);
                     if (connectorInfoManager instanceof Runnable
                             && connectorInfoManager instanceof ConnectorEventPublisher) {
-                        if (null == scheduledExecutorService) {
-                            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+                        if (null == timer) {
+                            timer = new Timer("OpenIDM Remote Connector Server Timer");
                         }
                         pair.second = new ConnectorEventHandlerImpl(name);
                         ((ConnectorEventPublisher) connectorInfoManager)
@@ -334,11 +333,19 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                          * .get("heartbeatThreshold").defaultTo
                          * (1).expect(Number.class);
                          */
-                        scheduledExecutorService.scheduleWithFixedDelay(
-                                (Runnable) connectorInfoManager,
-                                0,
-                                heartbeatInterval.asLong(),
-                                TimeUnit.SECONDS);
+                        final Runnable task = (Runnable) connectorInfoManager;
+                        try {
+                            task.run();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    task.run();
+                                }
+                            }, heartbeatInterval.asLong());
+                        } catch (IllegalStateException e) {
+                            //The task has been scheduled or the scheduler is cancelled. This is safe to ignore this
+                            logger.debug(e.getMessage(), e);
+                        }
                     }
                 } else {
                     logger.error("RemoteFrameworkConnectionInfo has no name");
@@ -393,9 +400,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public void deactivate(ComponentContext context) {
         logger.trace("Deactivating Component: {}", context.getProperties().get(
                 ComponentConstants.COMPONENT_NAME));
-        if (null != scheduledExecutorService) {
-            scheduledExecutorService.shutdown();
-            scheduledExecutorService = null;
+        if (null != timer) {
+            timer.cancel();
+            timer = null;
         }
         connectorEventHandler.clear();
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
