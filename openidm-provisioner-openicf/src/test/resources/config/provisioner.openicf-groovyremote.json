@@ -92,9 +92,9 @@
                     "nativeType": "string"
                 },
                 "createDate": {
-                    "type": "string",
+                    "type": "integer",
                     "nativeName": "createDate",
-                    "nativeType": "string",
+                    "nativeType": "integer",
                     "flags": ["NOT_CREATABLE", "NOT_UPDATEABLE"]
                 },
                 "sureName": {
