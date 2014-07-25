@@ -977,34 +977,33 @@ Content-Length: 89
           </row>
           <row>
            <entry>/openidm/config/<replaceable>object</replaceable></entry>
-           <entry>PATCH</entry>
-           <entry>Updates the specified configuration object.</entry>
+           <entry>DELETE</entry>
+           <entry>Deletes the specified configuration object.</entry>
           </row>
          </tbody>
         </tgroup>
        </informaltable>
-
        <para>
         OpenIDM supports REST mappings for create, read, update, and
         delete of configuration objects. Currently OpenIDM does not support
-        custom query operations for configuration objects.</para>
-
-       <para>For an example that displays the current configuration, the current
+        custom query operations or patch operations for configuration objects.
+       </para>
+       <para>
+        For an example that displays the current configuration, the current
         logging configuration, the configuration with an XML connector
         provisioner, and how the configuration can be modified over the router,
         see the section on <link xlink:href="integrators-guide#configuring-over-rest"
-                         xlink:role="http://docbook.org/xlink/role/olink">
-         <citetitle>Configuring OpenIDM Over REST</citetitle></link>.
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+        OpenIDM Over REST</citetitle></link>.
        </para>
-
        <para>
         One entry is returned for each configuration object. To obtain
         additional information on the configuration object, include its
         <literal>pid</literal> or <literal>_id</literal> in the URL. The
         following example displays configuration information on the
-        <literal>sync</literal> object, based on OpenIDM using Sample 1.</para>
-
-        <screen>$ <userinput>curl \
+        <literal>sync</literal> object, based on OpenIDM using Sample 1.
+       </para>
+       <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1031,7 +1030,6 @@ Content-Length: 89
       "source" : "email"
     }, {
 ... </computeroutput></screen>
-
     <note>
      <para>
       The <command>--header "X-OpenIDM-Username=openidm-admin</command> and
@@ -1045,7 +1043,6 @@ Content-Length: 89
       <citetitle>Authentication</citetitle></link>.
      </para>
     </note>
-
    </section>
 
    <section xml:id="managing-users-REST">
@@ -1086,14 +1083,14 @@ Content-Length: 89
        <entry>Create a new user</entry>
       </row>
       <row>
-       <entry>/openidm/managed/user?_action=create</entry>
-       <entry>POST</entry>
-       <entry>Create a new user</entry>
-      </row>
-      <row>
        <entry>/openidm/managed/user/<replaceable>userName</replaceable></entry>
        <entry>PUT</entry>
        <entry>Update a user entry (replaces the entire entry)</entry>
+      </row>
+      <row>
+       <entry>/openidm/managed/user?_action=create</entry>
+       <entry>POST</entry>
+       <entry>Create a new user</entry>
       </row>
       <row>
        <entry>/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=
@@ -1101,6 +1098,16 @@ Content-Length: 89
        <entry>POST</entry>
        <entry>Update a user (can be used to replace the value of one or more
        existing attributes)</entry>
+      </row>
+      <row>
+       <entry>/openidm/managed/user/<replaceable>userName</replaceable></entry>
+       <entry>PATCH</entry>
+       <entry>Update specified fields of a user entry</entry>
+      </row>
+      <row>
+       <entry>/openidm/managed/user/<replaceable>userName</replaceable></entry>
+       <entry>DELETE</entry>
+       <entry>Delete a user entry</entry>
       </row>
      </tbody>
     </tgroup>
@@ -1264,6 +1271,16 @@ Content-Length: 89
        <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>?_queryFilter=<replaceable>filter</replaceable></entry>
        <entry>GET</entry>
        <entry>Lists the item(s) associated with the query filter.</entry>
+      </row>
+      <row>
+       <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
+       <entry>PUT</entry>
+       <entry>Updates a system object (replaces the entire object).</entry>
+      </row>
+      <row>
+       <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
+       <entry>DELETE</entry>
+       <entry>Deletes a system object.</entry>
       </row>
      </tbody>
     </tgroup>
