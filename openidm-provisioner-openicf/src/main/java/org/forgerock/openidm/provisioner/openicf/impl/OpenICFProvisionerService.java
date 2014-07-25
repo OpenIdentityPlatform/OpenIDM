@@ -341,51 +341,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
 
+            init(jsonConfiguration);
+
             connectorFacadeCallback = new ConnectorFacadeCallback() {
                 @Override
                 public void addingConnectorInfo(ConnectorInfo connectorInfo,
                         ConnectorFacadeFactory facadeFactory) {
                     try {
                         APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
-                        operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
-                                config);
-                        try {
-                            // TODO Iterate over the supported type and register
-                            boolean allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
-                            if (!allowModification) {
-                                logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier.getName());
-                            }
-
-                            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
-                                    ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
-
-                            objectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
-
-                            for (Map.Entry<String, ObjectClassInfoHelper> entry :
-                                    objectTypes.entrySet()) {
-
-                                objectClassHandlers.put(entry.getKey(),
-                                        Resources.newCollection(
-                                                new ObjectClassResourceProvider(
-                                                        entry.getKey(),
-                                                        entry.getValue(),
-                                                        objectOperations.get(entry.getKey()),
-                                                        allowModification)));
-                            }
-
-                            // TODO Fix this Map
-                            // ValidateApiOp
-                            // TestApiOp
-                            // ScriptOnConnectorApiOp
-                            // ScriptOnResourceApiOp
-                            // SchemaApiOp
-                            systemOperations = Collections.emptyMap();
-                        } catch (Exception e) {
-                            logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier.getName(), e);
-                            throw new ComponentException(
-                                    "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
-                        }
-
                         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, config);
 
                         final ConnectorFacade facade = facadeFactory.newInstance(config);
@@ -450,6 +413,61 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
         }
+    }
+
+    private void init(JsonValue configuration) {
+        ConnectorInfo ci = connectorInfoProvider.findConnectorInfo(connectorReference);
+        if (null != ci) {
+            try {
+                operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), configuration,
+                        ci.createDefaultAPIConfiguration());
+            } catch (Exception e) {
+                logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier, e);
+                throw new ComponentException(
+                        "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
+            }
+        } else {
+            throw new ComponentException(
+                    "Can not find the OpenICF Connector: " + connectorReference);
+        }
+
+        try {
+            // TODO Iterate over the supported type and register
+            boolean allowModification = !configuration.get("readOnly").defaultTo(false).asBoolean();
+            if (!allowModification) {
+                logger.debug("OpenICF Provisioner Service {} is running in read-only mode", systemIdentifier.getName());
+            }
+
+            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
+                    ConnectorUtil.getOperationOptionConfiguration(configuration);
+
+            objectTypes = ConnectorUtil.getObjectTypes(configuration);
+
+            for (Map.Entry<String, ObjectClassInfoHelper> entry :
+                    objectTypes.entrySet()) {
+
+                objectClassHandlers.put(entry.getKey(),
+                        Resources.newCollection(
+                                new ObjectClassResourceProvider(
+                                        entry.getKey(),
+                                        entry.getValue(),
+                                        objectOperations.get(entry.getKey()),
+                                        allowModification)));
+            }
+
+            // TODO Fix this Map
+            // ValidateApiOp
+            // TestApiOp
+            // ScriptOnConnectorApiOp
+            // ScriptOnResourceApiOp
+            // SchemaApiOp
+            systemOperations = Collections.emptyMap();
+        } catch (Exception e) {
+            logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier.getName(), e);
+            throw new ComponentException(
+                    "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
+        }
+        logger.debug("OpenICF connector jsonConfiguration has no errors.");
     }
 
     @Deactivate
