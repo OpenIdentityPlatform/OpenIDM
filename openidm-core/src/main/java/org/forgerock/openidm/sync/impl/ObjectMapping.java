@@ -23,7 +23,10 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-// Java SE
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -65,10 +68,6 @@ import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.source.SourceUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
 
 /**
  * An ObjectMapping defines policies between source and target objects and their attributes
@@ -448,20 +447,20 @@ class ObjectMapping {
         }
     }
 
-// TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
-     * TODO: Description.
+     * Issues a request to create an object on the target.
      *
-     * @param target TODO.
-     * @throws SynchronizationException TODO.
+     * @param context the Context to use for the request
+     * @param target the target object to create.
+     * @throws SynchronizationException
      */
-    private LazyObjectAccessor createTargetObject(JsonValue target) throws SynchronizationException {
+    private LazyObjectAccessor createTargetObject(Context context, JsonValue target) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_CREATE_OBJ, target, null);
         LazyObjectAccessor targetObject = null;
         LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
             CreateRequest cr = Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            Resource r =  service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
+            Resource r =  service.getConnectionFactory().getConnection().create(context, cr);
             targetObject = new LazyObjectAccessor(service, targetObjectSet, r.getId(), target);
             measure.setResult(target);
         } catch (JsonValueException jve) {
@@ -475,14 +474,14 @@ class ObjectMapping {
         return targetObject;
     }
 
-// TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
-     * TODO: Description.
+     * Issues a request to update an object on the target.
      *
-     * @param target TODO.
-     * @throws SynchronizationException TODO.
+     * @param context the Context to use for the request
+     * @param target the target object to create.
+     * @throws SynchronizationException
      */
-    private void updateTargetObject(JsonValue target) throws SynchronizationException {
+    private void updateTargetObject(Context context, JsonValue target) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_UPDATE_TARGET, target, null);
         try {
             String id = LazyObjectAccessor.qualifiedId(targetObjectSet,
@@ -490,7 +489,7 @@ class ObjectMapping {
             LOGGER.trace("Update target object {}", id);
             UpdateRequest ur = Requests.newUpdateRequest(id, target);
             ur.setRevision(target.get("_rev").asString());
-            service.getConnectionFactory().getConnection().update(service.getServerContext(), ur);
+            service.getConnectionFactory().getConnection().update(context, ur);
             measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
@@ -502,21 +501,21 @@ class ObjectMapping {
         }
     }
 
-// TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
-     * TODO: Description.
+     * Issues a request to delete an object on the target.
      *
-     * @param target TODO.
-     * @throws SynchronizationException TODO.
+     * @param context the Context to use for the request
+     * @param target the target object to create.
+     * @throws SynchronizationException
      */
-    private void deleteTargetObject(JsonValue target) throws SynchronizationException {
+    private void deleteTargetObject(Context context, JsonValue target) throws SynchronizationException {
         if (target != null && target.get("_id").isString()) { // forgiving delete
             EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
             try {
                 DeleteRequest ur = Requests.newDeleteRequest(targetObjectSet, target.get("_id").required().asString());
                 ur.setRevision(target.get("_rev").asString());
                 LOGGER.trace("Delete target object {}", ur.getResourceName());
-                service.getConnectionFactory().getConnection().delete(service.getServerContext(), ur);
+                service.getConnectionFactory().getConnection().delete(context, ur);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
             } catch (NotFoundException nfe) {
@@ -1402,6 +1401,7 @@ class ObjectMapping {
                 case UNLINK:
                 case EXCEPTION:
                     try {
+                        Context context = ObjectSetContext.get();
                         actionId = ObjectSetContext.get().getId();
                         switch (getAction()) {
                             case CREATE:
@@ -1413,36 +1413,31 @@ class ObjectMapping {
                                 }
                                 JsonValue createTargetObject = new JsonValue(new HashMap<String, Object>());
                                 applyMappings(getSourceObject(), oldValue, createTargetObject, new JsonValue(null)); // apply property mappings to target
-                                targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet,
-                                        createTargetObject.get("_id").asString(), createTargetObject);
+                                targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
 
                                 // Allow the early link creation as soon as the target identifier is known
                                 String sourceId = getSourceObjectId();
                                 if (isLinkingEnabled()) {
-                                    // Create and populate the PendingLinkContext, replacing the top of the ObjectSetContext stack
-                                    Context oldContext = ObjectSetContext.pop();
-                                    ServerContext newContext = PendingLink.populate(oldContext, ObjectMapping.this.name, sourceId, getSourceObject(), reconId, situation);
-                                    ObjectSetContext.push(newContext);
-                                    
+                                    // Create and populate the PendingActionContext for the LINK action
+                                    context = PendingAction.createPendingActionContext(context, Action.LINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
                                 }
-                                Context context = ObjectSetContext.get();
 
-                                targetObjectAccessor = createTargetObject(createTargetObject);
+                                targetObjectAccessor = createTargetObject(context, createTargetObject);
 
                                 if (!isLinkingEnabled()) {
                                     LOGGER.debug("Linking disabled for {} during {}, skipping additional link processing", sourceId, reconId);
                                     break;
                                 }
 
-                                boolean wasLinked = PendingLink.wasLinked(context);
+                                boolean wasLinked = PendingAction.wasPerformed(context, Action.LINK);
                                 if (wasLinked) {
                                     linkCreated = true;
                                     LOGGER.debug("Pending link for {} during {} has already been created, skipping additional link processing", sourceId, reconId);
                                     break;
                                 } else {
                                     LOGGER.debug("Pending link for {} during {} not yet resolved, proceed to link processing", sourceId, reconId);
-                                    PendingLink.clear(context); // We'll now handle link creation ourselves
+                                    PendingAction.clear(context); // We'll now handle link creation ourselves
                                 }
                                 // falls through to link the newly created target
                             case UPDATE:
@@ -1484,19 +1479,30 @@ class ObjectMapping {
                                 if (getSourceObject() != null && getTargetObject() != null) {
                                     applyMappings(getSourceObject(), oldValue, getTargetObject(), oldTarget);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
-                                    if (JsonPatch.diff(oldTarget, getTargetObject())
-                                            .size() > 0) { // only update if target changes
-                                        updateTargetObject(getTargetObject());
+                                    if (JsonPatch.diff(oldTarget, getTargetObject()).size() > 0) { // only update if target changes
+                                        updateTargetObject(context, getTargetObject());
                                     }
                                 }
                                 break; // terminate UPDATE
                             case DELETE:
+                                if (isLinkingEnabled()) {
+                                    // Create and populate the PendingActionContext for the LINK action
+                                    context = PendingAction.createPendingActionContext(context, Action.UNLINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
+                                }
                                 if (getTargetObjectId() != null && getTargetObject() != null) { // forgiving; does nothing if no target
                                     execScript("onDelete", onDeleteScript);
-                                    deleteTargetObject(getTargetObject());
+                                    deleteTargetObject(context, getTargetObject());
                                     // Represent as not existing anymore so it gets removed from processed targets
                                     targetObjectAccessor = new LazyObjectAccessor(service,
                                             targetObjectSet, getTargetObjectId(), null);
+                                }
+                                boolean wasUnlinked = PendingAction.wasPerformed(context, Action.UNLINK);
+                                if (wasUnlinked) {
+                                    LOGGER.debug("Pending unlink for {} during {} has already been performed, skipping additional unlink processing", getTargetObjectId(), reconId);
+                                    break;
+                                } else {
+                                    LOGGER.debug("Pending unlink for {} during {} not yet performed, proceed to unlink processing", getTargetObjectId(), reconId);
+                                    PendingAction.clear(context); // We'll now handle unlinking
                                 }
                                 // falls through to unlink the deleted target
                             case UNLINK:
@@ -1737,12 +1743,27 @@ class ObjectMapping {
         }
 
         public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId) {
+            String sourceObjectId = (sourceObject != null && !sourceObject.isNull()) ? sourceObject.get("_id").required().asString() : null;
+            String targetObjectId = (targetObject != null && !targetObject.isNull()) ? targetObject.get("_id").required().asString() : null;
+            this.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceObjectId, sourceObject);
+            this.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetObjectId, targetObject);
             this.reconId = reconId;
-            this.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceObject.get("_id").required().asString(), sourceObject);
-            this.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetObject.get("_id").required().asString(), targetObject);
             this.situation = situation;
             this.action = action;
             this.ignorePostAction = true;
+
+            switch (action) {
+            case UNLINK:
+                try {
+                    if (sourceObjectId != null) {
+                        linkObject.getLinkForSource(sourceObjectId);
+                    } else if (targetObjectId != null) {
+                        linkObject.getLinkForTarget(targetObjectId);
+                    }
+                } catch (SynchronizationException e) {
+                    LOGGER.debug("Unable to find link for explicit sync operation UNLINK");
+                }
+            }
         }
 
         @Override
