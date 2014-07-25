@@ -428,7 +428,7 @@ $ curl \
  --data '{
     "mail":"fdoe@example.com",
     "sn":"Doe",
-    "telephoneNumber",
+    "telephoneNumber":
     "555-1234",
     "userName":"fdoe",
     "givenName":"Felicitas",
