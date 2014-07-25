@@ -35,25 +35,28 @@ import org.forgerock.json.resource.ServerContext;
 
 
 /**
- * A ServerContext that stores the pending link information during a sync operation.
+ * A ServerContext that stores a pending action information during a sync operation.
  *
  * @author ckienle
  */
-public class PendingLinkContext extends ServerContext {
+public class PendingActionContext extends ServerContext {
 
-    public static final String CONTEXT_NAME = "pendingLink";
+    public static final String CONTEXT_NAME = "pendingAction";
 
-    private static final String ATTR_PENDING_LINK = "pendingLink";
+    private static final String ATTR_ACTION = "action";
+    private static final String ATTR_ACTION_DATA = "actionData";
     private static final String ATTR_PENDING = "pending";
 
     /**
-     * Create a new PendingLinkContext from an existing (parent) context.
+     * Create a new PendingActionContext from an existing (parent) context.
      *
      * @param parent the parent server context
+     * @param pendingActionMap a Map containing the pending action data
      */
-    public PendingLinkContext(final Context parent, Map<String, Object> pendingLink) {
-        super(checkNotNull(parent, "Cannot instantiate PendingLinkContext with null parent Context"));
-        data.put(ATTR_PENDING_LINK, pendingLink);
+    public PendingActionContext(final Context parent, Map<String, Object> pendingActionData, String action) {
+        super(checkNotNull(parent, "Cannot instantiate PendingActionContext with null parent Context"));
+        data.put(ATTR_ACTION, action);
+        data.put(ATTR_ACTION_DATA, pendingActionData);
         data.put(ATTR_PENDING, true);
     }
 
@@ -68,7 +71,7 @@ public class PendingLinkContext extends ServerContext {
      * @throws ResourceException
      *             If the JSON representation could not be parsed.
      */
-    public PendingLinkContext(final JsonValue savedContext, final PersistenceConfig config)
+    public PendingActionContext(final JsonValue savedContext, final PersistenceConfig config)
             throws ResourceException {
         super(savedContext, config);
     }
@@ -97,17 +100,26 @@ public class PendingLinkContext extends ServerContext {
      * @return this object's name
      */
     public void clear() {
-        data.remove(ATTR_PENDING_LINK);
+        data.remove(ATTR_ACTION_DATA);
         data.put(ATTR_PENDING, false);
     }
 
     /**
-     * Retrieves the pending link data.
+     * Retrieves the pending action data.
      * 
-     * @return the pending link
+     * @return the pending action data
      */
-    public Map<String, Object> getPendingLink() {
-        return data.get(ATTR_PENDING_LINK).asMap();
+    public Map<String, Object> getPendingActionData() {
+        return data.get(ATTR_ACTION_DATA).asMap();
+    }
+
+    /**
+     * Retrieves the pending action.
+     * 
+     * @return the pending action
+     */
+    public String getPendingAction() {
+        return data.get(ATTR_ACTION).asString();
     }
 
 }

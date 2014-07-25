@@ -479,7 +479,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         execScript(context, postUpdate, response.getContent(),
                 prepareScriptBindings(context, request, resourceId, oldValue.getContent(), response.getContent()));
 
-        performSyncAction(context, request, resourceId, SynchronizationService.Action.notifyUpdate,
+        performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 oldValue.getContent(), response.getContent());
 
         return response;
@@ -615,7 +615,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     prepareScriptBindings(context, request, resourceId, new JsonValue(null), _new.getContent()));
 
             // Sync any targets after managed object is created
-            performSyncAction(context, request, _new.getId(),  SynchronizationService.Action.notifyCreate,
+            performSyncAction(context, request, _new.getId(), SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), _new.getContent());
 
             // TODO Check the relative id
@@ -700,7 +700,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     prepareScriptBindings(context, request, resourceId, deletedResource.getContent(), new JsonValue(null)));
 
             // Perform notifyDelete synchronization
-            performSyncAction(context, request, resourceId, SynchronizationService.Action.notifyDelete,
+            performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
             handler.handleResult(deletedResource);
@@ -965,13 +965,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param request the Request being processed
      * @param resourceId the additional resourceId parameter telling the synchronization service which object
      *                   is being synchronized
-     * @param action the {@link org.forgerock.openidm.sync.impl.SynchronizationService.Action}
+     * @param action the {@link org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction}
      * @param oldValue the previous object value before the change (if applicable, or null if not)
      * @param newValue the object value to sync
      * @throws ResourceException in case of a failure that was not handled by the ResultHandler
      */
     private void performSyncAction(final ServerContext context, final Request request, final String resourceId,
-            final SynchronizationService.Action action, final JsonValue oldValue, final JsonValue newValue)
+            final SynchronizationService.SyncServiceAction action, final JsonValue oldValue, final JsonValue newValue)
         throws ResourceException {
 
         // The "sync" route may be down (unconfigured) or in the process of being re-configured;

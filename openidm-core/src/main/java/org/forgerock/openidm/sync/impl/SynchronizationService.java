@@ -24,6 +24,8 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.util.Iterables.filter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,13 +55,12 @@ import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.util.Predicate;
-import static org.forgerock.util.Iterables.filter;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.Predicate;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -89,7 +90,7 @@ import org.slf4j.LoggerFactory;
 public class SynchronizationService implements SingletonResourceProvider, Mappings, ScheduledService {
 
     /** Actions supported by this service. */
-    public enum Action {
+    public enum SyncServiceAction {
         notifyCreate, notifyUpdate, notifyDelete, recon, performAction
     }
 
@@ -288,9 +289,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         return syncDetails;
     }
 
-    private JsonValue notifyCreate(final String resourceContainer, final String resourceId, final JsonValue object)
+    private JsonValue notifyCreate(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue object)
             throws SynchronizationException {
-        PendingLink.handlePendingLinks(mappings, resourceContainer, resourceId, object);
+        // Handle pending link action if present
+        PendingAction.handlePendingActions(context, Action.LINK, mappings, resourceContainer, resourceId, object);
         return syncAllMappings(new SyncAction() {
             @Override
             public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
@@ -299,7 +301,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         }, resourceContainer, resourceId);
     }
 
-    private JsonValue notifyUpdate(final String resourceContainer, final String resourceId, final JsonValue oldValue, final JsonValue newValue)
+    private JsonValue notifyUpdate(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue oldValue, final JsonValue newValue)
             throws SynchronizationException {
         return syncAllMappings(new SyncAction() {
             @Override
@@ -309,8 +311,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         }, resourceContainer, resourceId);
     }
 
-    private JsonValue notifyDelete(final String resourceContainer, final String resourceId, final JsonValue oldValue)
+    private JsonValue notifyDelete(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue oldValue)
             throws SynchronizationException {
+        // Handle pending unlink action if present
+        PendingAction.handlePendingActions(context, Action.UNLINK, mappings, resourceContainer, resourceId, oldValue);
         return syncAllMappings(new SyncAction() {
             @Override
             public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
@@ -364,24 +368,24 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             JsonValue _params = new JsonValue(request.getAdditionalParameters(), new JsonPointer("params"));
             String resourceContainer;
             String resourceId;
-            switch (request.getActionAsEnum(Action.class)) {
+            switch (request.getActionAsEnum(SyncServiceAction.class)) {
                 case notifyCreate:
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyCreate, resourceContainer={}, resourceId={} ", resourceContainer, resourceId);
-                    handler.handleResult(notifyCreate(resourceContainer, resourceId, request.getContent().get("newValue")));
+                    handler.handleResult(notifyCreate(context, resourceContainer, resourceId, request.getContent().get("newValue")));
                     break;
                 case notifyUpdate:
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyUpdate, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    handler.handleResult(notifyUpdate(resourceContainer, resourceId, request.getContent().get("oldValue"), request.getContent().get("newValue")));
+                    handler.handleResult(notifyUpdate(context, resourceContainer, resourceId, request.getContent().get("oldValue"), request.getContent().get("newValue")));
                     break;
                 case notifyDelete:
                     resourceContainer = _params.get(ACTION_PARAM_RESOURCE_CONTAINER).required().asString();
                     resourceId = _params.get(ACTION_PARAM_RESOURCE_ID).required().asString();
                     logger.debug("Synchronization action=notifyDelete, resourceContainer={}, resourceId={}", resourceContainer, resourceId);
-                    handler.handleResult(notifyDelete(resourceContainer, resourceId, request.getContent().get("oldValue")));
+                    handler.handleResult(notifyDelete(context, resourceContainer, resourceId, request.getContent().get("oldValue")));
                     break;
                 case recon:
                     JsonValue result = new JsonValue(new HashMap<String, Object>());
