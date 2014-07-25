@@ -184,6 +184,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                 }
             });
             router.addRoute("repo/synchronisation/pooledSyncStage", new MemoryBackend());
+            router.addRoute("audit/activity", new MemoryBackend());
         } catch (IllegalStateException e) {
             /* ignore */
         }
@@ -540,7 +541,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
     }
 
 
-    @Test(dataProvider = "groovy-only", enabled = false)
+    @Test(dataProvider = "groovy-only", enabled = true)
     public void testPagedSearch(String systemName) throws Exception {
 
         for (int i = 0; i < 100; i++) {
@@ -548,7 +549,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             co.put("sortKey", i);
 
             CreateRequest request = Requests.newCreateRequest("system/" + systemName + "/account", co);
-            connection.create(new RootContext(), request);
+            connection.create(new SecurityContext(new RootContext(), "system", null ), request);
         }
 
         QueryRequest queryRequest = Requests.newQueryRequest("system/" + systemName + "/account");
