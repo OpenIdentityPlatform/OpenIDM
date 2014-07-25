@@ -156,36 +156,68 @@
     <citetitle>Installation Guide</citetitle>.
    </para>
 
-   <para>
-    When you add or delete a role from a specific user entry, OpenIDM triggers
-    either an <literal>onAssignment</literal> or an
-    <literal>onUnassignment</literal> script. The assignment operation may
-    be an alias such as <literal>mergeWithTarget</literal> or a complete
-    script that defines the roles that OpenIDM applies to a user.
-   </para>
-
-   <section xml:id="creating-role-definitions">
+   <section xml:id="create-role-definition">
     <title>To Create a Role Definition</title>
-     <para>
-      The following sample command creates a basic role, named
-      <literal>ldap</literal>.
-     </para>
-     <screen><userinput>$ curl \
+
+    <para>
+     The following REST call creates a relatively complex role:
+    </para>
+
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --header "If-None-Match: *" \
  --request PUT \
- --data '{"name":"ldap"}' \
- "https://localhost:8443/openidm/managed/role/ldap"</userinput>
-      <computeroutput>
-{
-  "name": "ldap",
-  "_id": "ldap",
-  "_rev": "1"
-}      </computeroutput>
-     </screen>
+ --data '{
+ "properties":{"description":"an example role"},
+ "assignments":{"ldap":{"attributes":[
+ {"name":"cns",
+ "assignmentOperation":"mergeWithTarget",
+ "unassignmentOperation":"removeFromTarget",
+ "value":["CN=employees,O=corp"]}],
+ "onAssignment": {"file":"roles/onAssignment_ldap.js","type":"text/javascript"},
+ "onUnassignment":{"file":"roles/onUnassignment_ldap.js",
+ "type":"text/javascript"}}}}' \
+ "https://localhost:8443/openidm/managed/role/newrole"</userinput>
+ <computeroutput>
+ {
+   "assignments": {
+     "ldap": {
+       "attributes": [
+         {
+           "name": "cns",
+           "unassignmentOperation": "removeFromTarget",
+           "assignmentOperation": "mergeWithTarget",
+           "value": [
+             "CN=employees,O=corp"
+           ]
+         }
+       ],
+       "onAssignment": {
+         "file": "roles/onAssignment_ldap.js",
+         "type": "text/javascript"
+       },
+       "onUnassignment": {
+         "file": "roles/onUnassignment_ldap.js",
+         "type": "text/javascript"
+       }
+     }
+   },
+   "_id": "newrole",
+   "properties": {
+     "description": "an example role"
+   },
+   "_rev": "1"
+ }</computeroutput>
+    </screen>
+
+    <para>
+     For the definitions of each of these attributes, see
+     <xref linkend="sample-role-definition" />
+    </para>
+
      <para>
       Most of the examples in this guide use client-assigned IDs when creating
       resources, as it makes the examples easier to read. In general,
@@ -214,7 +246,7 @@
   "result": [
     {
       "_rev": "0",
-      "_id": "ldap"
+      "_id": "newrole"
     }
   ]
 }     </computeroutput>
@@ -242,7 +274,7 @@ $ curl \
     {
         "operation": "add",
         "field": "/roles/-",
-        "value": "managed/role/ldap"
+        "value": "managed/role/newrole"
 
     }
 ]' \
@@ -262,13 +294,29 @@ $ curl \
     "lastPasswordSet": "",
     "postalCode": "",
     "_id": "bjensen",
-    "accountStatus": "active",
     "description": "Created for OpenIDM",
-    "roles": [
-        "openidm-authorized",
-        "managed/role/ldap"
-    ],
+    "accountStatus": "active",
     "telephoneNumber": "1-503-334-2546",
+    "roles": [ "openidm-authorized", "managed/role/newrole" ],
+    "effectiveAssignments" : {
+      "ldap" : {
+        "onUnassignment" : {
+          "type" : "text/javascript",
+          "file" : "roles/onUnassignment_ldap.js"
+        },
+        "onAssignment" : {
+          "type" : "text/javascript",
+          "file" : "roles/onAssignment_ldap.js"
+        },
+        "attributes" : [ {
+          "value" : [ "CN=employees,O=corp" ],
+          "assignedThrough" : "managed/role/newrole",
+          "assignmentOperation" : "mergeWithTarget",
+          "unassignmentOperation" : "removeFromTarget",
+          "name" : "cns"
+        } ]
+      }
+    },
     "postalAddress": "",
     "userName": "bjensen",
     "stateProvince": "",
@@ -276,11 +324,11 @@ $ curl \
 }</computeroutput>
     </screen>
     <para>
-     Note the dash (<literal>-</literal>) character appended to the field name.
-     This character specifies that the role you are adding should be appended to
-     the existing roles for that user. If you do not include the dash character,
-     all current values of the <literal>"roles"</literal> attribute are
-     overwritten by the request.
+     Note the dash (<literal>-</literal>) character appended to the field name,
+     within the <command>-data</command> option. This character specifies that
+     the command appends the role that you add to the existing roles for that
+     user. If you do not include the dash character, the request overwrites all
+     current values of the <literal>"roles"</literal> attribute.
     </para>
 
     <para>
@@ -301,8 +349,8 @@ $ curl \
     <para>
      To remove a role assignment from a user, simply replace that user's
      <literal>"roles"</literal> attribute with the array of roles that the user
-     should have. The following example removes the <literal>ldap</literal> role
-     from user <literal>bjensen</literal>.
+     should have. The following example removes the <literal>newrole</literal>
+     role from user <literal>bjensen</literal>.
     </para>
 
     <screen>$ curl \
@@ -337,7 +385,7 @@ $ curl \
      indirect roles.
     </para>
     <para>
-     The following query returns all members of the <literal>"ldap"</literal>
+     The following query returns all members of the <literal>"newrole"</literal>
      role created previously. Currently that role has only one member,
      <literal>bjensen</literal>.
     </para>
@@ -347,7 +395,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=get-users-of-direct-role&amp;role=managed/role/ldap"
+ "https://localhost:8443/openidm/managed/user?_queryId=get-users-of-direct-role&amp;role=managed/role/newrole"
      </userinput>
      <computeroutput>{
   "remainingPagedResults": -1,
@@ -371,7 +419,7 @@ $ curl \
      that role.
     </para>
     <para>
-     The following sample command deletes the <literal>ldap</literal> role,
+     The following sample command deletes the <literal>newrole</literal> role,
      created previously.
     </para>
     <screen><userinput>$ curl \
@@ -380,13 +428,34 @@ $ curl \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request DELETE \
- "https://localhost:8443/openidm/managed/role/ldap"</userinput>
+ "https://localhost:8443/openidm/managed/role/newrole"</userinput>
      <computeroutput>
-{
-  "name": "ldap",
-  "_id": "ldap",
-  "_rev": "1"
-}    </computeroutput>
+ {
+   "_id" : "newrole",
+   "_rev" : "2",
+   "assignments" : {
+     "ldap" : {
+       "onUnassignment" : {
+         "type" : "text/javascript",
+         "file" : "roles/onUnassignment_ldap.js"
+       },
+       "onAssignment" : {
+         "type" : "text/javascript",
+         "file" : "roles/onAssignment_ldap.js"
+       },
+       "attributes" : [ {
+         "value" : [ "CN=employees,O=corp" ],
+         "assignmentOperation" : "mergeWithTarget",
+         "unassignmentOperation" : "removeFromTarget",
+         "name" : "cns"
+       } ]
+     }
+   },
+   "properties" : {
+     "description" : "an example role"
+   }
+ }
+</computeroutput>
     </screen>
    </section>
 
@@ -421,8 +490,8 @@ $ curl \
 
     <!-- change from assignments to assignmentsToMap based on OPENIDM-1625 -->
     <programlisting language="java">{
-     "name": "sample-role",
-     "_id": "sample-role",
+     "name": "samplerole",
+     "_id": "samplerole",
      "assignmentsToMap": {
          "ad": {
              "attributes": [
@@ -434,7 +503,7 @@ $ curl \
                          "CN=terminal,O=corp",
                          "CN=intranet,O=corp"
                      ],
-                     "operation": "mergeWithTarget"
+                     "assignmentOperation": "mergeWithTarget"
                  }
              ]
          },
@@ -472,21 +541,34 @@ $ curl \
      </listitem>
      <listitem>
       <para>
-       <literal>"assignmentsToMap"</literal> provides the list of assignments
+       <literal>"assignmentsToMap"</literal> provide the list of assignments
        (or entitlements) that this role will create on the specified system.
       </para>
       <para>
-       Each assignment includes the name of the external system
-       (<literal>ad</literal> and <literal>ldap</literal> in this example), the
+       Each assignment includes the name of the external system, such as
+       <literal>ad</literal> and <literal>ldap</literal>, the
        attribute or attributes whose values will be generated, on the external
        system, and the value or values that will be applied to each attribute.
       </para>
      </listitem>
      <listitem>
       <para>
-       <literal>"operation"</literal> specifies the way in which the value will
-       be applied, and can be either <literal>"mergeWithTarget"</literal> or
-       <literal>"replaceTarget"</literal>.
+       The <literal>"assignmentOperation"</literal> and
+       <literal>"unassignmentOperation"</literal> options specify the way in
+       which the value is applied. Either option supports further customization.
+       You can set them to <literal>"mergeWithTarget"</literal>,
+       <literal>"replaceTarget"</literal>, or
+       <literal>"removeFromTarget"</literal>.
+      </para>
+      <para>
+       Both <literal>"assignmentOperation"</literal> and
+       <literal>"unassignmentOperation</literal> are attribute specific.
+      </para>
+      <para>
+       When you update a role that adds or removes an attribute, that action
+       triggers either an <literal>"assignmentOperation"</literal> or an
+       <literal>"unassignmentOperation"</literal>. That is a feature of
+       an assignment-specific operation.
       </para>
       <para>
        The <literal>"mergeWithTarget"</literal> operation first merges the source
@@ -498,14 +580,46 @@ $ curl \
       <para>
        The <literal>"replaceTarget"</literal> operation replaces the entire
        target attribute value with whatever is specified in the role definition.
-       When this operation is specified, the source becomes the only
-       authoritative source for the attribute. Existing values on the target are
-       either reported or overwritten, depending on the configuration of the
-       synchronization actions. If no operation type is specified, the assignment
-       has a <literal>"replaceTarget"</literal> operation by default.
+       When this operation is specified, the value from the role assignments
+       becomes the only authoritative source for the attribute.
+      </para>
+      <para>
+       The <literal>"removeFromTarget"</literal> operation removes the target
+       attribute value, and matches the default
+       <literal>unassignmentOperation</literal>.
+      </para>
+      <para>
+       The default value for <literal>"assignmentOperation"</literal> is
+       <literal>"replaceTarget"</literal>. The defualt value for
+       <literal>"unassignmentOperation"</literal> is
+       <literal>"removeFromTarget"</literal>.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       The <literal>onAssignment</literal> and <literal>onUnassignment</literal>
+       are assignment-specific.
+      </para>
+      <para>
+       Every sync operation triggers an <literal>onAssignment</literal> script.
+       In contrast, an <literal>onUnassignment</literal> script is triggered
+       only when an assignment is removed from a role, or when a role is
+       unassigned from a user.
+      </para>
+      <para>
+       If you customize an <literal>onAssignment</literal> or an
+       <literal>onUnassignment</literal> script, make sure the script returns
+       a <literal>targetObject</literal>. Otherwise, the script operation may
+       fail.
+      </para>
+      <para>
+       In contrast, when you create or delete a role, that action triggers
+       either an <literal>onAssignment</literal> or an
+       <literal>onUnassignment</literal> script.
       </para>
      </listitem>
     </itemizedlist>
+
     <para>
      Once a role has been defined, and assigned to a user, check that the
      expected effective roles and effective assignments have been generated for
@@ -518,7 +632,16 @@ $ curl \
      <para>
       Any changes to a managed role definition are logged in the audit log.
      </para>
-    </section>
+
+    <para>
+     When you add or delete a role from a specific user entry, OpenIDM triggers
+     either an <literal>onAssignment</literal> or an
+     <literal>onUnassignment</literal> script. The assignment operation may
+     be an alias such as <literal>mergeWithTarget</literal> or a complete
+     script that defines the roles that OpenIDM applies to a user.
+    </para>
+
+   </section>
 
     <section xml:id="managed-role-script-hooks">
      <title>Managed Role Object Script Hooks</title>
@@ -784,17 +907,16 @@ $ curl \
     </step>
     <step>
     <para>
-     Add the default mapping to your <filename>sync.json</filename> file. For
-     this example, add the following lines to <literal>sync.json</literal>.
+     Add a mapping for the role to assign to your <filename>sync.json</filename>
+     file. For this example, the following assignment add the following lines to
+     <literal>sync.json</literal>:
     </para>
     <programlisting language="javascript">
-        {
-            "defaultMapping": {
-                "type": "text/javascript",
-                "file": "roles/defaultMapping.js"
-            }
-        }
-    </programlisting>
+    "mappings":[
+        "assignments":[
+            "ldap"
+        ],
+    ]</programlisting>
      <para>
       OpenIDM addresses any change in role assignments with the
       <literal>onAssignment</literal> and <literal>onUnassignment</literal>
@@ -898,7 +1020,8 @@ $ curl \
        <literal>script/roles</literal> directory.
       </para>
      <screen>
-$ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>project-dir</replaceable>/script/roles/
+$ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
+      <replaceable>project-dir</replaceable>/script/roles/
      </screen>
       <para>
        The new script will override the default effective roles script.
@@ -963,23 +1086,21 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
   <section xml:id="roles-default-mapping">
    <title>Creating a Mapping For Effective Assignments</title>
    <para>
-    After the effective assignments have been calculated, these assignments must
-    be applied to the target resources. A mapping script
-    (<filename>/path/to/openidm/bin/defaults/script/roles/defaultMapping.js</filename>)
-    applies the effective assignments as part of the mapping. To enable this
-    default mapping for an assignment, edit the specific synchronization mapping
-    to which the assignment should be applied, by adding the following extract
-    to that mapping in your synchronization configuration
-    (<filename>sync.json</filename>) file.
+    After the effective assignments have been calculated, OpenIDM applies these
+    assignments to the target resources. A mapping script
+    (<filename>defaultMapping.js</filename>) applies the effective assignments.
+   </para>
+   <para>
+    To enable this mapping assignment, edit the <filename>sync.json</filename>
+    file. Add the following extract:
    </para>
    <programlisting language="java">
-"defaultMapping" : {
-    "type" : "text/javascript",
-    "file" : "roles/defaultMapping.js"
+"mappings" : [
+    {
+        "assignmentsToMap" : [
+            "ldap"
+        ],
     },
-    "assignments" : [
-        <replaceable>assignmentName</replaceable>
-    ],
 </programlisting>
    <para>
     You must also set a condition on the mapping so that only user entries with
@@ -993,9 +1114,6 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
     the source.
    </para>
    <programlisting language="java">
-"defaultMapping" : {
-    "type" : "text/javascript",
-    "file" : "roles/defaultMapping.js"
     },
     "assignments" : [
         "ldap", "ad"
@@ -1053,7 +1171,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
                          "CN=terminal,O=corp",
                          "CN=intranet,O=corp"
                      ],
-                     "operation": "replaceTarget"
+                     "assignmentOperation": "replaceTarget"
                  }
              ]
          }
@@ -1080,7 +1198,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js <replaceable>p
 {
     "mappings": [
         {
-            "name": "managedUser_systemLdapAccounts",
+            "name": "managedUser_systemAdAccounts",
             "source": "managed/user",
             "sourceCondition": {
                 "effectiveRoles": "managed/role/ad-role"
