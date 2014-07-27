@@ -484,15 +484,14 @@ $ curl \
     </para>
 
     <para>
-     Do remember to include the <literal>assignmentsToMap</literal> field name.
+     Do remember to include the <literal>assignments</literal> field name.
      OpenIDM uses it to keep assigned roles up to date.
     </para>
 
-    <!-- change from assignments to assignmentsToMap based on OPENIDM-1625 -->
     <programlisting language="java">{
      "name": "samplerole",
      "_id": "samplerole",
-     "assignmentsToMap": {
+     "assignments": {
          "ad": {
              "attributes": [
                  {
@@ -913,7 +912,7 @@ $ curl \
     </para>
     <programlisting language="javascript">
     "mappings":[
-        "assignments":[
+        "assignmentsToMap":[
             "ldap"
         ],
     ]</programlisting>
@@ -1115,7 +1114,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
    </para>
    <programlisting language="java">
     },
-    "assignments" : [
+    "assignmentsToMap" : [
         "ldap", "ad"
     ],
 </programlisting>
