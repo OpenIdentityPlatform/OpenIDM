@@ -623,7 +623,7 @@ Stopping OpenIDM (31391)</computeroutput></screen>
 
     <para>
      The standard way to format JSON output is with a JSON parser such as
-     <link xlink:href="http://stedolan.github.com/jq/">jq</link>. You would
+     <link xlink:href="http://stedolan.github.io/jq/">jq</link>. You would
      "pipe" the output of a REST call to <command>jq</command>, as follows:
     </para>
 
