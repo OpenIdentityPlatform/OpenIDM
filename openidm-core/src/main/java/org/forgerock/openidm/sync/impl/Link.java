@@ -39,12 +39,15 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
 
 // OpenIDM
 
@@ -126,23 +129,20 @@ class Link {
     /**
      * Issues a query on link(s)
      *
-     * @param The query parameters
+     * @param router the ServerContext
+     * @param connectionFactory the connection factory
+     * @param query the query parameters
      * @return The query results
      * @throws SynchronizationException if getting and initializing the link details fail
      */
-    private static JsonValue linkQuery(ServerContext router, ConnectionFactory connectionFactory, JsonValue query) throws SynchronizationException {
+    private static JsonValue linkQuery(ServerContext router, ConnectionFactory connectionFactory, JsonValue query)
+            throws SynchronizationException {
         JsonValue results = null;
         try {
-            QueryRequest r = Requests.newQueryRequest(linkId(null));
-            r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
-            r.setQueryExpression(query.get(QueryRequest.FIELD_QUERY_EXPRESSION).asString());
-            for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
-                r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
-            }
-
             final Collection<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
-            connectionFactory.getConnection().query(router, r, new QueryResultHandler() {
+            QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(linkId(null), query.asMap());
+            connectionFactory.getConnection().query(router, request, new QueryResultHandler() {
                 @Override
                 public void handleError(ResourceException error) {
                     // ignore
@@ -250,7 +250,7 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(QueryRequest.FIELD_QUERY_ID, "links-for-firstId");
+            query.put(PARAM_QUERY_ID, "links-for-firstId");
             query.put("linkType", mapping.getLinkType().getName());
             query.put("firstId", id);
             getLink(query);
@@ -285,7 +285,7 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(QueryRequest.FIELD_QUERY_ID, "links-for-secondId");
+            query.put(PARAM_QUERY_ID, "links-for-secondId");
             query.put("linkType", mapping.getLinkType().getName());
             query.put("secondId", id);
             getLink(query);
@@ -306,7 +306,7 @@ class Link {
         Map<String, Link> sourceIdToLink = new ConcurrentHashMap<String, Link>();
         if (mapping != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(QueryRequest.FIELD_QUERY_ID, "links-for-linkType");
+            query.put(PARAM_QUERY_ID, "links-for-linkType");
             query.put("linkType", mapping.getLinkType().getName());
             JsonValue queryResults = linkQuery(mapping.getService().getServerContext(), mapping.getService().getConnectionFactory(), query);
             for (JsonValue entry : queryResults) {

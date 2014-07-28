@@ -27,23 +27,23 @@ package org.forgerock.openidm.sync.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 
-
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryResultHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
 
 /**
  * A base class for reconciliation type handling
@@ -87,7 +87,6 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * Properties passed with the request body are given precedence, they override the default configuration
      * If not overridden by request body, the static configuration is used
      * @param configPropertyName The name of the configuration property
-     * @param reconContext The reconciliation context
      * @return the effective configuration; may be null if neither an override or static configuration is provided
      */
     protected JsonValue calcEffectiveConfig(String configPropertyName) {
@@ -128,7 +127,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
 
         // If config doesn't explicitly specify the query, default to query all ids
         if (!specifiesQuery(queryCfg)) {
-            queryCfg.put(QueryRequest.FIELD_QUERY_ID, ServerConstants.QUERY_ALL_IDS);
+            queryCfg.put(PARAM_QUERY_ID, ServerConstants.QUERY_ALL_IDS);
             logger.debug("Default {} query to {}", queryConfigPropertyName, ServerConstants.QUERY_ALL_IDS);
         }
         logger.debug("Effective query for {}: {}", queryConfigPropertyName, queryCfg);
@@ -144,11 +143,9 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     protected boolean specifiesQuery(JsonValue queryCfg) {
         // Check if there is a property that defines what query to execute
         boolean specifiesQuery =
-                queryCfg.isDefined(QueryRequest.FIELD_QUERY_ID)
-                || queryCfg.isDefined(QueryRequest.FIELD_QUERY_EXPRESSION)
-                || queryCfg.isDefined(QueryRequest.FIELD_QUERY_FILTER)
-                || queryCfg.isDefined("query");
-        // OpenICF provisioner uses an inconsistent "query" param - to be deprecated
+                queryCfg.isDefined(PARAM_QUERY_ID)
+                || queryCfg.isDefined(PARAM_QUERY_EXPRESSION)
+                || queryCfg.isDefined(PARAM_QUERY_FILTER);
 
         if (logger.isDebugEnabled()) {
             if (specifiesQuery) {
@@ -177,17 +174,9 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         final Collection<String> ids = collectionToPopulate;
         final JsonValue objList = new JsonValue(new ArrayList());
         try {
-            QueryRequest r = Requests.newQueryRequest(objectSet);
-            r.setQueryId(query.get(QueryRequest.FIELD_QUERY_ID).asString());
-            r.setQueryExpression(query.get(QueryRequest.FIELD_QUERY_EXPRESSION).asString());
-            JsonValue queryFilter = query.get(QueryRequest.FIELD_QUERY_FILTER);
-            if (!queryFilter.isNull()) {
-                r.setQueryFilter(QueryFilter.valueOf(queryFilter.asString()));
-            }
-            for (Map.Entry<String, Object> e: query.asMap().entrySet()) {
-                r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
-            }
-            reconContext.getService().getConnectionFactory().getConnection().query(reconContext.getService().getRouter(), r,
+            QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());
+            reconContext.getService().getConnectionFactory().getConnection().query(
+                    reconContext.getService().getRouter(), request,
                     new QueryResultHandler() {
                         private boolean fullEntriesDetected = false;
                 
