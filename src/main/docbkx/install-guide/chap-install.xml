@@ -492,7 +492,7 @@ Stopping OpenIDM (31391)</computeroutput></screen>
   "lastPasswordAttempt": "Tue Feb 25 2014 18:03:40 GMT-0800 (PST)",
   "passwordAttempts": "0",
   "sn": "smith",
-  "mail": "joe4@example.com",
+  "mail": "joe@example.com",
   "country": "",
   "city": "",
   "_rev": "1",
