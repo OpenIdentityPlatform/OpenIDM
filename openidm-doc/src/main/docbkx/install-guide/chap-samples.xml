@@ -1074,7 +1074,7 @@ $ ./startup.sh -p samples/sample3</screen>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;fields=_openidm_id,givenName"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all&amp;fields=_openidm_id,givenName"
 </screen>
 
   </section>
