@@ -50,6 +50,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
@@ -271,13 +272,9 @@ public class TaskScannerJob {
      */
     private JsonValue performQuery(String resourceID, JsonValue params) throws ResourceException {
         final JsonValue queryResults = new JsonValue(new ArrayList<Map<String, Object>>());;
-        QueryRequest queryRequest = Requests.newQueryRequest(resourceID);
-        queryRequest.setQueryId(params.get("_queryId").asString());
-        queryRequest.setQueryExpression(params.get("_queryExpression").asString());
-        for (Map.Entry<String, Object> e: params.asMap().entrySet()){
-            queryRequest.getAdditionalParameters().put(e.getKey(), String.valueOf(e.getValue()));
-        }
-        connectionFactory.getConnection().query(taskScannerContext.getContext(), queryRequest, new QueryResultHandler() {
+
+        QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(resourceID, params.asMap());
+        connectionFactory.getConnection().query(taskScannerContext.getContext(), request, new QueryResultHandler() {
             @Override
             public void handleError(ResourceException error) {
                 // Ignore

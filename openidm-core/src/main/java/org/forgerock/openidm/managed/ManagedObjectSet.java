@@ -51,7 +51,6 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -73,6 +72,7 @@ import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
@@ -81,10 +81,6 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
 
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onCreate;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
@@ -503,19 +499,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     "The request could nto be processed because the provided content is not a JSON array");
         }
 
-        QueryRequest queryRequest = Requests.newQueryRequest(repoId(null));
-        // Go through action parameters and find query parameters
-        for (Map.Entry<String, String> e: request.getAdditionalParameters().entrySet()) {
-            if (PARAM_QUERY_ID.equals(e.getKey())) {
-                queryRequest.setQueryId(e.getValue());
-            } else if (PARAM_QUERY_EXPRESSION.equals(e.getKey())) {
-                queryRequest.setQueryExpression(e.getValue());
-            } else if (PARAM_QUERY_FILTER.equals(e.getKey())) {
-                queryRequest.setQueryFilter(QueryFilter.valueOf(e.getValue()));
-            } else {
-                queryRequest.setAdditionalParameter(e.getKey(), e.getValue());
-            }
-        }
+        // Build query request from action parameters looking for query parameters
+        // use JsonValue to coerce Map<String, String> to Map<String, Object> - blech
+        QueryRequest queryRequest = RequestUtil.buildQueryRequestFromParameterMap(repoId(null),
+                new JsonValue(request.getAdditionalParameters()).asMap());
 
         final JsonValue[] lastError = new JsonValue[1];
         final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());

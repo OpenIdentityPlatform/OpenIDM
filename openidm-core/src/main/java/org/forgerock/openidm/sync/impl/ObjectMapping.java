@@ -23,10 +23,6 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -46,7 +42,6 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -64,6 +59,7 @@ import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.source.SourceUnit;
 import org.slf4j.Logger;
@@ -401,46 +397,36 @@ class ObjectMapping {
     /**
      * TODO: Description.
      *
-     * @param query TODO.
+     * @param queryParameters TODO.
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    private Map<String, Object> queryTargetObjectSet(Map<String, Object> query)
+    private Map<String, Object> queryTargetObjectSet(Map<String, Object> queryParameters)
             throws SynchronizationException {
         try {
             Map<String, Object> result = new HashMap<String, Object>(1);
             final Collection<Object> list = new ArrayList<Object>();
             result.put(QueryResult.FIELD_RESULT, list);
 
-            QueryRequest r = Requests.newQueryRequest(targetObjectSet);
-            for (Map.Entry<String, Object> e: query.entrySet()) {
-                if (PARAM_QUERY_ID.equals(e.getKey())) {
-                    r.setQueryId(String.valueOf(e.getValue()));
-                } else if (PARAM_QUERY_EXPRESSION.equals(e.getKey())) {
-                    r.setQueryExpression(String.valueOf(e.getValue()));
-                } else if (PARAM_QUERY_FILTER.equals(e.getKey())) {
-                    r.setQueryFilter(QueryFilter.valueOf(String.valueOf(e.getValue())));
-                } else {
-                    r.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
-                }
-            }
-            service.getConnectionFactory().getConnection().query(service.getServerContext(), r, new QueryResultHandler() {
-                @Override
-                public void handleError(ResourceException error) {
-                    // ignore
-                }
+            QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(targetObjectSet, queryParameters);
+            service.getConnectionFactory().getConnection().query(service.getServerContext(), request,
+                    new QueryResultHandler() {
+                        @Override
+                        public void handleError(ResourceException error) {
+                            // ignore
+                        }
 
-                @Override
-                public boolean handleResource(Resource resource) {
-                    list.add(resource.getContent().asMap());
-                    return true;
-                }
+                        @Override
+                        public boolean handleResource(Resource resource) {
+                            list.add(resource.getContent().asMap());
+                            return true;
+                        }
 
-                @Override
-                public void handleResult(QueryResult result) {
-                    //ignore
-                }
-            });
+                        @Override
+                        public void handleResult(QueryResult result) {
+                            //ignore
+                        }
+                    });
             return result;
         } catch (ResourceException ose) {
             throw new SynchronizationException(ose);
