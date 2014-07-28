@@ -1086,8 +1086,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
    <title>Creating a Mapping For Effective Assignments</title>
    <para>
     After the effective assignments have been calculated, OpenIDM applies these
-    assignments to the target resources. A mapping script
-    (<filename>defaultMapping.js</filename>) applies the effective assignments.
+    assignments to the target resources.
    </para>
    <para>
     To enable this mapping assignment, edit the <filename>sync.json</filename>
@@ -1102,10 +1101,6 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
     },
 </programlisting>
    <para>
-    You must also set a condition on the mapping so that only user entries with
-    this effective assignment qualify for a target entry.
-   </para>
-   <para>
     The following sample extract of a <filename>sync.json</filename> file
     applies the <literal>ldap</literal> assignment, illustrated in the previous
     section, on the target resource (<literal>system/ldap/account</literal>) for
@@ -1115,7 +1110,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
    <programlisting language="java">
     },
     "assignmentsToMap" : [
-        "ldap", "ad"
+        "ldap"
     ],
 </programlisting>
    <programlisting language="javascript">
@@ -1124,14 +1119,8 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
     "source" : "managed/user",
     "target" : "system/ldap/account",
     "links" : "systemLdapAccounts_managedUser",
-    "sourceCondition" : {
-        "effectiveAssignments" : "ldap"
     },
-    "defaultMapping" : {
-        "type" : "text/javascript",
-        "file" : "roles/defaultMapping.js"
-    },
-    "assignments": [
+    "assignmentsToMap": [
         "ldap"
     ],
     ...
