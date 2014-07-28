@@ -180,8 +180,7 @@ public class AuditServiceImplTest {
                 "filter" : {
                      "triggers" : {
                          "recon" : [
-                             "create",
-                             "update"
+                             "create"
                          ]
                      }
                  },
@@ -221,8 +220,7 @@ public class AuditServiceImplTest {
                 "filter" : {
                      "triggers" : {
                          "recon" : [
-                             "create",
-                             "update"
+                             "skittle"
                          ]
                      }
                  },
