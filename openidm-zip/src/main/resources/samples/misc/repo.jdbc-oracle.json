@@ -60,6 +60,34 @@
                 "propertiesTable" : "managedobjectproperties",
                 "searchableDefault" : true
             },
+            "managed/user" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : false,
+                "properties" : {
+                    "/userName" : {
+                        "searchable" : true
+                    },
+                    "/givenName" : {
+                        "searchable" : true
+                    },
+                    "/sn" : {
+                        "searchable" : true
+                    },
+                    "/mail" : {
+                        "searchable" : true
+                    },
+                    "/accountStatus" : {
+                        "searchable" : true
+                    },
+                    "/roles" : {
+                        "searchable" : true
+                    },
+                    "/sunset" : {
+                        "searchable" : true
+                    }
+                } 
+            },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
                 "propertiesTable" : "schedobjectproperties",
