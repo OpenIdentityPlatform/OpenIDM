@@ -215,7 +215,7 @@
      <para>
       If <literal>_prettyPrint=true</literal>, the <literal>HttpServlet</literal>
       formats the response, in a fashion similar to the JSON parser known
-      as <link xlink:href="http://stedolan.github.com/jq/">jq</link>.
+      as <link xlink:href="http://stedolan.github.io/jq/">jq</link>.
      </para>
      <para>
       For example, adding <literal>_prettyPrint=true</literal> to the end of
