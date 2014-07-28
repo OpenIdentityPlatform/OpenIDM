@@ -733,7 +733,7 @@ $ curl \
   <title>Adding Users Over REST</title>
 
   <para>
-   You can also add users to the local repository over the REST interface. The
+   You can add users to the local repository over the REST interface. The
    following example adds a user named James Berg.
   </para>
 
