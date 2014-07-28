@@ -3570,7 +3570,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     "action" : {
         "workflowName" : "managedUserApproval",
         "type" : "text/javascript",
-        "file" : "bin/defaults/script/workflow/workflow.js"
+        "file" : "workflow/triggerWorkflowFromSync.js"
     }
 }
    </programlisting>
@@ -3637,7 +3637,7 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
     "action" : {
         "workflowName" : "managedUserApproval",
         "type" : "text/javascript",
-        "file" : "bin/defaults/script/workflow/workflow.js"
+        "file" : "workflow/triggerWorkflowFromSync.js"
     }
 },    </programlisting>
      </listitem>
