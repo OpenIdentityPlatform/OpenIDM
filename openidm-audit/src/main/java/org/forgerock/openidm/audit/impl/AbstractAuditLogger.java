@@ -25,6 +25,7 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -50,13 +51,10 @@ public abstract class AbstractAuditLogger implements AuditLogger {
      * Set base configuration for all loggers from config.
      *
      * @param config configuration
-     * @param ctx context
      */
-    public void setConfig(Map config, BundleContext ctx) {
-        useForQueries = config.containsKey(CONFIG_LOG_USE_FOR_QUERIES)
-                && (Boolean) config.get(CONFIG_LOG_USE_FOR_QUERIES);
-        ignoreLoggingFailures = config.containsKey(CONFIG_LOG_IGNORE_LOGGING_FAILURES)
-                && (Boolean) config.get(CONFIG_LOG_IGNORE_LOGGING_FAILURES);
+    public void setConfig(JsonValue config) {
+        useForQueries = config.get(CONFIG_LOG_USE_FOR_QUERIES).defaultTo(false).asBoolean();
+        ignoreLoggingFailures = config.get(CONFIG_LOG_IGNORE_LOGGING_FAILURES).defaultTo(false).asBoolean();
     }
     
     /**

@@ -81,15 +81,15 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
     String recordDelim;
     final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
 
-    public void setConfig(Map config, BundleContext ctx) throws InvalidException {
+    public void setConfig(JsonValue config) throws InvalidException {
         String location = null;
         try {
-            super.setConfig(config, ctx);
-            location = (String) config.get(CONFIG_LOG_LOCATION);
+            super.setConfig(config);
+            location = config.get(CONFIG_LOG_LOCATION).asString();
             auditLogDir = IdentityServer.getFileForWorkingPath(location);
             logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());
             auditLogDir.mkdirs();
-            recordDelim = (String) config.get(CONFIG_LOG_RECORD_DELIM);
+            recordDelim = config.get(CONFIG_LOG_RECORD_DELIM).asString();
             if (recordDelim == null) {
                 recordDelim = "";
             }
@@ -380,9 +380,9 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
 
     private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter)
             throws IOException {
-        Iterator iter = fieldOrder.iterator();
+        Iterator<String> iter = fieldOrder.iterator();
         while (iter.hasNext()) {
-            String key = (String) iter.next();
+            String key = iter.next();
             fileWriter.append("\"");
             String escapedStr = key.replaceAll("\"", "\"\"");
             fileWriter.append(escapedStr);

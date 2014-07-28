@@ -50,7 +50,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -86,6 +85,7 @@ import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.promise.Function;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,59 +170,79 @@ public class AuditServiceImpl implements AuditService {
     public static final String RECON_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String RECON_LOG_TARGET_OBJECT_ID = "targetObjectId";
 
+    // ----- Declarative Service Implementation
+
+    /** The connection factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
+
+    /** Although we may not need the router here,
+     https://issues.apache.org/jira/browse/FELIX-3790
+     if using this with for scr 1.6.2
+     Ensure we do not get bound on router whilst it is activating
+     */
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
+    RouteService routeService;
+
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ScriptRegistry scriptRegistry;
 
-    private void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-    }
 
-    private void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-    }
+    /** the script to execute to format exceptions */
+    private static ScriptEntry exceptionFormatterScript = null;
 
-    private static ScriptEntry script = null;
+    /**
+     * A type-alias factory function to create an AuditLogger from config.
+     */
+    interface AuditLoggerFactory extends Function<JsonValue, AuditLogger, InvalidException> { }
+
+    /** the function used to instantiate AuditLoggers from config */
+    AuditLoggerFactory auditLoggerFactory = new AuditLoggerFactory() {
+        @Override
+        public AuditLogger apply(JsonValue config) throws InvalidException {
+            String logType = config.get(CONFIG_LOG_TYPE).asString();
+
+            // TDDO: make pluggable
+            final AuditLogger auditLogger;
+            if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
+                auditLogger = new CSVAuditLogger();
+            } else if (CONFIG_LOG_TYPE_REPO.equalsIgnoreCase(logType)) {
+                auditLogger = new RepoAuditLogger(connectionFactory);
+            } else if (CONFIG_LOG_TYPE_ROUTER.equalsIgnoreCase(logType)) {
+                auditLogger = new RouterAuditLogger(connectionFactory);
+            } else {
+                throw new InvalidException("Configured audit logType is unknown: " + logType);
+            }
+
+            auditLogger.setConfig(config);
+            logger.info("Audit configured to log to {}", logType);
+            if (auditLogger.isUsedForQueries()) {
+                logger.info("Audit logger used for queries set to " + logType);
+            }
+            return auditLogger;
+        }
+    };
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    Map<String, Set<RequestType>> actionFilters;
-    Map<String, Map<String, Set<RequestType>>> triggerFilters;
-    List<JsonPointer> watchFieldFilters;
-    List<JsonPointer> passwordFieldFilters;
+    Map<String, Set<RequestType>> actionFilters = new HashMap<String, Set<RequestType>>();
+    Map<String, Map<String, Set<RequestType>>> triggerFilters = new HashMap<String, Map<String, Set<RequestType>>>();
+    List<JsonPointer> watchFieldFilters = new ArrayList<JsonPointer>();
+    List<JsonPointer> passwordFieldFilters = new ArrayList<JsonPointer>();
 
-    List<AuditLogger> globalAuditLoggers;
-    Map<String,List<AuditLogger>> eventAuditLoggers;
+    List<AuditLogger> globalAuditLoggers = new ArrayList<AuditLogger>();
+    Map<String,List<AuditLogger>> eventAuditLoggers = new HashMap<String, List<AuditLogger>>();
     JsonValue config; // Existing active configuration
-    DateUtil dateUtil;
+
+    // TODO make dateUtil configurable (needs to be done in all locations)
+    DateUtil dateUtil = DateUtil.getDateUtil("UTC");
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
     }
-
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
-
-    /** Although we may not need the router here,
-         https://issues.apache.org/jira/browse/FELIX-3790
-        if using this with for scr 1.6.2
-        Ensure we do not get bound on router whilst it is activating
-    */
-    // ----- Declarative Service Implementation
-
-    @Reference(target = "("+ServerConstants.ROUTER_PREFIX + "=/*)")
-    RouteService routeService;
-
-    private void bindRouteService(final RouteService service) throws ResourceException {
-        routeService = service;
-    }
-
-    private void unbindRouteService(final RouteService service) {
-        routeService = null;
-    }
-
 
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
@@ -296,8 +316,8 @@ public class AuditServiceImpl implements AuditService {
                         handler.handleResult(new Resource(null, null, new JsonValue(obj)));
                         return;
                     }
-                } catch (JsonValueException e) {
-                    // note this is permissive on an unknown trigger filter action; 
+                } catch (IllegalArgumentException e) {
+                    // note this is permissive on an unknown trigger filter action;
                     // i.e., an action of "money" will not be filtered because it is not a valid RequestType
                     logger.debug("Action {} is not one of supported action types, not filtering", new Object[] { action.toString(), e });
                 }
@@ -311,7 +331,7 @@ public class AuditServiceImpl implements AuditService {
                         handler.handleResult(new Resource(null, null, new JsonValue(obj)));
                         return;
                     }
-                } catch (JsonValueException e) {
+                } catch (IllegalArgumentException e) {
                     // note this is permissive on an unknown filter action; 
                     // i.e., an action of "money" will not be filtered because it is not a valid RequestType
                     logger.debug("Action {} is not one of supported action types, not filtering", new Object[] { action.toString(), e });
@@ -351,7 +371,7 @@ public class AuditServiceImpl implements AuditService {
                 }
             }
             handler.handleResult(new Resource(localId, null, new JsonValue(obj)));
-        } catch (Throwable t){
+        } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
     }
@@ -440,7 +460,10 @@ public class AuditServiceImpl implements AuditService {
     }
 
     /**
-     * Searches ObjectSetContext for the value of "trigger" and return it.
+     * Searches the context chain for a TriggerContext and returns the trigger value if found.
+     *
+     * @param context the context chain
+     * @return the trigger value if the chain contains a trigger context, null if it does not
      */
     private String getTrigger(Context context) {
         /*
@@ -618,9 +641,7 @@ public class AuditServiceImpl implements AuditService {
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         try {
-            // TODO make dateUtil configurable (needs to be done in all locations)
-            dateUtil = DateUtil.getDateUtil("UTC");
-            setConfig(compContext);
+            setConfig(enhancedConfig.getConfigurationAsJson(compContext));
         } catch (Exception ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
@@ -653,17 +674,17 @@ public class AuditServiceImpl implements AuditService {
         return JsonPatch.diff(existingConfig, newConfig).size() > 0;
     }
 
-    private void setConfig(ComponentContext compContext) throws Exception {
-        config = enhancedConfig.getConfigurationAsJson(compContext);
-        globalAuditLoggers = getGlobalAuditLoggers(config, compContext);
-        eventAuditLoggers = getEventAuditLoggers(config, compContext);
-        actionFilters = getActionFilters(config);
-        triggerFilters = getTriggerFilters(config);
-        watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
-        passwordFieldFilters = getEventJsonPointerList(config, "activity", "passwordFields");
+    void setConfig(JsonValue jsonConfig) throws Exception {
+        config = jsonConfig;
+        globalAuditLoggers.addAll(getGlobalAuditLoggers(config));
+        eventAuditLoggers.putAll(getEventAuditLoggers(config));
+        actionFilters.putAll(getActionFilters(config));
+        triggerFilters.putAll(getTriggerFilters(config));
+        watchFieldFilters.addAll(getEventJsonPointerList(config, "activity", "watchedFields"));
+        passwordFieldFilters.addAll(getEventJsonPointerList(config, "activity", "passwordFields"));
         JsonValue efConfig = config.get("exceptionFormatter");
         if (!efConfig.isNull()) {
-            script =  scriptRegistry.takeScript(efConfig);
+            exceptionFormatterScript =  scriptRegistry.takeScript(efConfig);
         }
 
         logger.debug("Audit service filters enabled: {}", actionFilters);
@@ -672,27 +693,27 @@ public class AuditServiceImpl implements AuditService {
     Map<String, Set<RequestType>> getActionFilters(JsonValue config) {
         Map<String, Set<RequestType>> configFilters = new HashMap<String, Set<RequestType>>();
 
-        Map<String, Object> eventTypes = config.get("eventTypes").asMap();
-        if (eventTypes == null) {
+        JsonValue eventTypes = config.get("eventTypes");
+        if (eventTypes.isNull()) {
             return configFilters;
         }
-        for (Map.Entry<String, Object> eventType : eventTypes.entrySet()) {
-            String eventTypeName = eventType.getKey();
-            JsonValue eventTypeValue = new JsonValue(eventType.getValue());
-            JsonValue filterActions = eventTypeValue.get("filter").get("actions");
+
+        for (String eventType : eventTypes.keys()) {
+            JsonValue filterActions = eventTypes.get(eventType).get("filter").get("actions");
             // TODO: proper filter mechanism
             if (!filterActions.isNull()) {
                 Set<RequestType> filter = EnumSet.noneOf(RequestType.class);
                 for (JsonValue action : filterActions) {
                     try {
                         filter.add(action.asEnum(RequestType.class));
-                    } catch (JsonValueException e) {
+                    } catch (IllegalArgumentException e) {
                         logger.warn("Action value {} is not a known filter action", new Object[] { action.toString() });
                     }
                 }
-                configFilters.put(eventTypeName, filter);
+                configFilters.put(eventType, filter);
             }
         }
+
         return configFilters;
     }
 
@@ -700,36 +721,35 @@ public class AuditServiceImpl implements AuditService {
         Map<String, Map<String, Set<RequestType>>> configFilters = new HashMap<String, Map<String, Set<RequestType>>>();
 
         JsonValue eventTypes = config.get("eventTypes");
-        if(!eventTypes.isNull()) {
-            Set<String> eventTypesKeys = eventTypes.keys();
-            // Loop through event types ("activity", "recon", etc..)
-            for (String eventTypeKey : eventTypesKeys) {
-                JsonValue eventType = eventTypes.get(eventTypeKey);
-                JsonValue filterTriggers = eventType.get("filter").get("triggers");
-                if (!filterTriggers.isNull()) {
-                    // Create map of the trigger's actions
-                    Map<String, Set<RequestType>> filter = new HashMap<String, Set<RequestType>>();
-                    Set<String> keys = filterTriggers.keys();
-                    // Loop through individual triggers (that each contain a list of actions)
-                    for (String key : keys) {
-                        JsonValue trigger = filterTriggers.get(key);
-                        // Create a empty set of actions for this trigger
-                        Set<RequestType> triggerActions = EnumSet.noneOf(RequestType.class);
-                        // Loop through the trigger's actions
-                        for (JsonValue triggerAction : trigger) {
-                            // Add action to list
-                            try {
-                                triggerActions.add(triggerAction.asEnum(RequestType.class));
-                            } catch (JsonValueException e) {
-                                logger.warn("Action value {} is not a known filter action", new Object[] { triggerAction.toString() });
-                            }
+        if (eventTypes.isNull()) {
+            return configFilters;
+        }
+
+        // Loop through event types ("activity", "recon", etc..)
+        for (String eventType : eventTypes.keys()) {
+            JsonValue filterTriggers = eventTypes.get(eventType).get("filter").get("triggers");
+            if (!filterTriggers.isNull()) {
+                // Create map of the trigger's actions
+                Map<String, Set<RequestType>> filter = new HashMap<String, Set<RequestType>>();
+                // Loop through individual triggers (that each contain a list of actions)
+                for (String key : filterTriggers.keys()) {
+                    JsonValue trigger = filterTriggers.get(key);
+                    // Create a empty set of actions for this trigger
+                    Set<RequestType> triggerActions = EnumSet.noneOf(RequestType.class);
+                    // Loop through the trigger's actions
+                    for (JsonValue triggerAction : trigger) {
+                        // Add action to list
+                        try {
+                            triggerActions.add(triggerAction.asEnum(RequestType.class));
+                        } catch (IllegalArgumentException e) {
+                            logger.warn("Action value {} is not a known filter action", new Object[] { triggerAction.toString() });
                         }
-                        // Add list of actions to map of trigger's actions
-                        filter.put(key, triggerActions);
                     }
-                    // add filter to map of filters
-                    configFilters.put(eventTypeKey, filter);
+                    // Add list of actions to map of trigger's actions
+                    filter.put(key, triggerActions);
                 }
+                // add filter to map of filters
+                configFilters.put(eventType, filter);
             }
         }
 
@@ -765,7 +785,7 @@ public class AuditServiceImpl implements AuditService {
         return fieldList;
     }
 
-    Map<String, List<AuditLogger>> getEventAuditLoggers(JsonValue config, ComponentContext compContext) {
+    Map<String, List<AuditLogger>> getEventAuditLoggers(JsonValue config) {
         Map<String, List<AuditLogger>> configuredLoggers = new HashMap<String, List<AuditLogger>>();
 
         JsonValue eventTypes = config.get("eventTypes");
@@ -774,41 +794,22 @@ public class AuditServiceImpl implements AuditService {
             // Loop through event types ("activity", "recon", etc..)
             for (String eventTypeKey : eventTypesKeys) {
                 JsonValue eventType = eventTypes.get(eventTypeKey);
-                configuredLoggers.put(eventTypeKey, getAuditLoggers(eventType.get(CONFIG_LOG_TO).asList(), compContext));
+                configuredLoggers.put(eventTypeKey, getAuditLoggers(eventType.get(CONFIG_LOG_TO)));
             }
         }
 
         return configuredLoggers;
     }
 
-    List<AuditLogger> getGlobalAuditLoggers(JsonValue config, ComponentContext compContext) {
-        return getAuditLoggers(config.get(CONFIG_LOG_TO).asList(), compContext);
+    List<AuditLogger> getGlobalAuditLoggers(JsonValue config) {
+        return getAuditLoggers(config.get(CONFIG_LOG_TO));
     }
 
-    List<AuditLogger> getAuditLoggers(List logTo, ComponentContext compContext) {
+    List<AuditLogger> getAuditLoggers(JsonValue logTo) {
         List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
-        if (logTo != null) {
-            for (Map entry : (List<Map>)logTo) {
-                String logType = (String) entry.get(CONFIG_LOG_TYPE);
-                // TDDO: make pluggable
-                AuditLogger auditLogger = null;
-                if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
-                    auditLogger = new CSVAuditLogger();
-                } else if (CONFIG_LOG_TYPE_REPO.equalsIgnoreCase(logType)) {
-                    auditLogger = new RepoAuditLogger(connectionFactory);
-                } else if (CONFIG_LOG_TYPE_ROUTER.equalsIgnoreCase(logType)) {
-                    auditLogger = new RouterAuditLogger(connectionFactory);
-                } else {
-                    throw new InvalidException("Configured audit logType is unknown: " + logType);
-                }
-                if (auditLogger != null) {
-                    auditLogger.setConfig(entry, compContext.getBundleContext());
-                    logger.info("Audit configured to log to {}", logType);
-                    configuredLoggers.add(auditLogger);
-                    if (auditLogger.isUsedForQueries()) {
-                        logger.info("Audit logger used for queries set to " + logType);
-                    }
-                }
+        if (logTo != null && logTo.isList()) {
+            for (AuditLogger auditLogger : logTo.asList(auditLoggerFactory)) {
+                configuredLoggers.add(auditLogger);
             }
         }
         return configuredLoggers;
@@ -833,6 +834,12 @@ public class AuditServiceImpl implements AuditService {
                 }
             }
         }
+        globalAuditLoggers.clear();
+        eventAuditLoggers.clear();
+        actionFilters.clear();
+        triggerFilters.clear();
+        watchFieldFilters.clear();
+        passwordFieldFilters.clear();
         logger.info("Audit service stopped.");
     }
 
@@ -856,8 +863,8 @@ public class AuditServiceImpl implements AuditService {
             return "";
         }
         String result = e.getMessage();
-        if (script != null) {
-            Script s = script.getScript(new RootContext());
+        if (exceptionFormatterScript != null) {
+            Script s = exceptionFormatterScript.getScript(new RootContext());
             s.put("exception", e);
             result = (String) s.eval();
         }
