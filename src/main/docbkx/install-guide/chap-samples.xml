@@ -2252,7 +2252,7 @@ $ ./startup.sh -p samples/sample8</screen>
         "action" : {
             "workflowName" : "managedUserApproval",
             "type" : "text/javascript",
-            "file" : "workflow/workflow.js"
+            "file" : "workflow/triggerWorkflowFromSync.js"
         }
     },
  ...  </programlisting>
