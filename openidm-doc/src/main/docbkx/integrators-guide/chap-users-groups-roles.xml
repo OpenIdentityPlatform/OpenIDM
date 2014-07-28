@@ -156,6 +156,13 @@
     <citetitle>Installation Guide</citetitle>.
    </para>
 
+   <para>
+    When you create, assign, or delete a role from a specific user entry,
+    OpenIDM triggers either an <literal>onAssignment</literal> or an
+    <literal>onUnassignment</literal> script. That operation may be an alias
+    as defined in the <filename>defaultMapping.js</filename> file.
+   </para>
+
    <section xml:id="create-role-definition">
     <title>To Create a Role Definition</title>
 
@@ -540,7 +547,7 @@ $ curl \
      </listitem>
      <listitem>
       <para>
-       <literal>"assignmentsToMap"</literal> provide the list of assignments
+       <literal>"assignments"</literal> provide the list of assignments
        (or entitlements) that this role will create on the specified system.
       </para>
       <para>
@@ -552,23 +559,25 @@ $ curl \
      </listitem>
      <listitem>
       <para>
-       The <literal>"assignmentOperation"</literal> and
-       <literal>"unassignmentOperation"</literal> options specify the way in
-       which the value is applied. Either option supports further customization.
-       You can set them to <literal>"mergeWithTarget"</literal>,
-       <literal>"replaceTarget"</literal>, or
-       <literal>"removeFromTarget"</literal>.
-      </para>
-      <para>
-       Both <literal>"assignmentOperation"</literal> and
-       <literal>"unassignmentOperation</literal> are attribute specific.
-      </para>
-      <para>
        When you update a role that adds or removes an attribute, that action
        triggers either an <literal>"assignmentOperation"</literal> or an
-       <literal>"unassignmentOperation"</literal>. That is a feature of
-       an assignment-specific operation.
+       <literal>"unassignmentOperation"</literal>.
       </para>
+      <para>
+       The <literal>"assignmentOperation"</literal> specifies the way in which
+       the value is applied. You can set this option to
+       <literal>"mergeWithTarget"</literal> or to the default,
+       <literal>"replaceTarget"</literal>.
+      </para>
+     </listitem>
+     <listitem>
+      <para>
+       In contrast, the <literal>"unassignmentOperation"</literal> specifies the
+       way in which the value is removed. You can set this option to
+       <literal>"removeFromTarget"</literal>.
+      </para>
+     </listitem>
+     <listitem>
       <para>
        The <literal>"mergeWithTarget"</literal> operation first merges the source
        value with the existing target value, then adds the value or values from
@@ -582,22 +591,19 @@ $ curl \
        When this operation is specified, the value from the role assignments
        becomes the only authoritative source for the attribute.
       </para>
+     </listitem>
+     <listitem>
       <para>
-       The <literal>"removeFromTarget"</literal> operation removes the target
-       attribute value, and matches the default
-       <literal>unassignmentOperation</literal>.
-      </para>
-      <para>
-       The default value for <literal>"assignmentOperation"</literal> is
-       <literal>"replaceTarget"</literal>. The defualt value for
-       <literal>"unassignmentOperation"</literal> is
-       <literal>"removeFromTarget"</literal>.
+       The <literal>"mergeWithTarget"</literal>, <literal>"replaceTarget"</literal>
+       and <literal>"removeFromTarget"</literal> operations are aliases, as
+       defined in the <filename>defaultMapping.js</filename> file.
       </para>
      </listitem>
      <listitem>
       <para>
        The <literal>onAssignment</literal> and <literal>onUnassignment</literal>
-       are assignment-specific.
+       options are assignment-specific. Either option supports further
+       customization.
       </para>
       <para>
        Every sync operation triggers an <literal>onAssignment</literal> script.
@@ -610,11 +616,6 @@ $ curl \
        <literal>onUnassignment</literal> script, make sure the script returns
        a <literal>targetObject</literal>. Otherwise, the script operation may
        fail.
-      </para>
-      <para>
-       In contrast, when you create or delete a role, that action triggers
-       either an <literal>onAssignment</literal> or an
-       <literal>onUnassignment</literal> script.
       </para>
      </listitem>
     </itemizedlist>
@@ -631,14 +632,6 @@ $ curl \
      <para>
       Any changes to a managed role definition are logged in the audit log.
      </para>
-
-    <para>
-     When you add or delete a role from a specific user entry, OpenIDM triggers
-     either an <literal>onAssignment</literal> or an
-     <literal>onUnassignment</literal> script. The assignment operation may
-     be an alias such as <literal>mergeWithTarget</literal> or a complete
-     script that defines the roles that OpenIDM applies to a user.
-    </para>
 
    </section>
 
