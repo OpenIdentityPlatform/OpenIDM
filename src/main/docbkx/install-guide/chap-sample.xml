@@ -197,7 +197,7 @@ orientdb&gt; </screen>
       xlink:role="http://docbook.org/xlink/role/olink"
       xlink:href="integrators-guide#passthrough-auth">
       <citetitle>Using Delegated Authentication</citetitle></link>.
-      For OpenIDM {$serverDocTargetVersion}, <literal>PASSTHROUGH</literal> is
+      For OpenIDM ${serverDocTargetVersion}, <literal>PASSTHROUGH</literal> is
       an alias for <literal>DELEGATED</literal>.
      </para>
     </listitem>
