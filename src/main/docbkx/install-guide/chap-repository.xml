@@ -149,9 +149,11 @@ mysql&gt; </computeroutput><userinput>show tables;</userinput>
 | objecttypes               |
 | schedulerobjectproperties |
 | schedulerobjects          |
+| security                  |
+| securitykeys              |
 | uinotification            |
 +---------------------------+
-17 rows in set (0.00 sec)</computeroutput></screen>
+19 rows in set (0.00 sec)</computeroutput></screen>
    <para>The table names are similar to those used with OrientDB.</para>
   </step>
   <step>
