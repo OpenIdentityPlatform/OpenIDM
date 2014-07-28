@@ -77,8 +77,8 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
         this.connectionFactory = connectionFactory;
     }
 
-    public void setConfig(Map config, BundleContext ctx) throws InvalidException {
-        super.setConfig(config, ctx);
+    public void setConfig(JsonValue config) throws InvalidException {
+        super.setConfig(config);
     }
 
     public void cleanup() {

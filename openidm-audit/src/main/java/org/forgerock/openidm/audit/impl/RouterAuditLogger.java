@@ -86,9 +86,9 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
         this.connectionFactory = connectionFactory;
     }
 
-    public void setConfig(Map config, BundleContext ctx) throws InvalidException {
-        super.setConfig(config, ctx);
-        location = (String) config.get(CONFIG_LOG_LOCATION);
+    public void setConfig(JsonValue config) throws InvalidException {
+        super.setConfig(config);
+        location = config.get(CONFIG_LOG_LOCATION).asString();
         if (location == null || location.length() == 0) {
             throw new InvalidException("Configured router location must not be empty");
         }

@@ -25,6 +25,7 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ServerContext;
@@ -42,9 +43,8 @@ public interface AuditLogger {
      * Set the audit logger configuration which is a logger specific
      * map
      * @param config the configuration
-     * @param ctx
      */
-    void setConfig(Map config, BundleContext ctx);
+    void setConfig(JsonValue config);
 
     /**
      * Cleanup called when auditlogger no longer needed
