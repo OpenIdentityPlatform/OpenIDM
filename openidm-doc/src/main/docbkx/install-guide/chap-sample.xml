@@ -207,7 +207,7 @@ orientdb&gt; </screen>
     When you start OpenIDM with the
     <command>./startup.sh -p samples/sample1</command>,
     that sets <literal>&amp;{launcher.project.location}</literal> to a value of
-    <literal>to a value of samples/sample1</literal>. As seen shortly, the
+    <literal>samples/sample1</literal>. As seen shortly, the
     configuration files use that variable.
    </para>
 
