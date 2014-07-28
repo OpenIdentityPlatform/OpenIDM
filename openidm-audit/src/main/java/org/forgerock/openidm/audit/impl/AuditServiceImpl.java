@@ -600,7 +600,7 @@ public class AuditServiceImpl implements AuditService {
      * Return the configured <tt>AuditLoggers</tt> for an event type.
      *
      * @param type the event type
-     * @return the confiugred AuditLoggers for this event type
+     * @return the  configured AuditLoggers for this event type
      */
     private List<AuditLogger> getAuditLoggerForEvent(String type) {
         // defer to event-specific audit loggers first if there are any
