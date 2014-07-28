@@ -203,7 +203,7 @@ public class AuditServiceImpl implements AuditService {
         public AuditLogger apply(JsonValue config) throws InvalidException {
             String logType = config.get(CONFIG_LOG_TYPE).asString();
 
-            // TDDO: make pluggable
+            // TODO: make pluggable
             final AuditLogger auditLogger;
             if (CONFIG_LOG_TYPE_CSV.equalsIgnoreCase(logType)) {
                 auditLogger = new CSVAuditLogger();
