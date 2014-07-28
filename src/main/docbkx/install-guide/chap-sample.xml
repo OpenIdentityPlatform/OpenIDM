@@ -453,7 +453,7 @@ $ ./startup.sh -p samples/sample1
   <title>Viewing Users and Logs</title>
 
   <para>
-   After reconciliation, you can use the UI to review confiugred users.
+   After reconciliation, you can use the UI to review configured users.
    Navigate to the URL where OpenIDM is installed. If it is local, navigate to
    <literal>https://localhost:8443/openidmui</literal>. Use the OpenIDM user
    credentials noted, where the default administrative username and password
