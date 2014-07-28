@@ -453,14 +453,17 @@ $ curl \
   \"displayName\":\"fdoe\"}" ^
  "https://localhost:8443/openidm/managed/user?_action=create"</screen>
 
-   <para>By default, automatic synchronization is enabled. This means that
-    when you update a managed object, any mappings defined in the
-    <filename>sync.json</filename> file are automatically executed to update
-    the target system. For more information, see <link
-     xlink:href="integrators-guide#synchronization-mappings-file"
-     xlink:role="http://docbook.org/xlink/role/olink">
-     <citetitle>Synchronization Mappings File</citetitle></link> in the
-    <citetitle>Integrator's Guide</citetitle>.</para>
+   <para>
+    By default, automatic synchronization is enabled. This means that when you
+    update a managed object, any mappings defined in the
+    <filename>sync.json</filename> file that have the managed object as the
+    source are automatically executed to update the target system. For more
+    information, see <link
+    xlink:href="integrators-guide#synchronization-mappings-file"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization
+    Mappings File</citetitle></link> in the <citetitle>Integrator's
+    Guide</citetitle>.
+   </para>
    
    <para>Test that the automatic reconciliation has been successful by
    locating the new user in the LDAP directory.</para>
@@ -663,15 +666,17 @@ $ curl \
  --request GET \
  "https://localhost:8443/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</userinput></screen>
 
-   <para>By default, automatic synchronization is enabled. This means that 
-   when you update a managed object, any mappings defined in the 
-   <filename>sync.json</filename> file are automatically executed to update 
-   the target system. For more information, see <link 
-   xlink:href="integrators-guide#synchronization-mappings-file" 
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Synchronization Mappings File</citetitle></link> in the 
-   <citetitle>Integrator's Guide</citetitle>.</para>
-
+   <para>
+    By default, automatic synchronization is enabled. This means that when you
+    update a managed object, any mappings defined in the
+    <filename>sync.json</filename> file that have the managed object as the
+    source are automatically executed to update the target system. For more
+    information, see <link
+    xlink:href="integrators-guide#synchronization-mappings-file"
+    xlink:role="http://docbook.org/xlink/role/olink"> <citetitle>Synchronization
+    Mappings File</citetitle></link> in the <citetitle>Integrator's
+    Guide</citetitle>.
+   </para>
   </section>
  </section>
   
@@ -1059,10 +1064,9 @@ $ ./startup.sh -p samples/sample3</screen>
  "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
 
    <para>
-    You can query specific fields with a REST call, with the desired
-    <literal>target</literal> attributes in <filename>sync.json</filename>.
-    For example, the following command lists the <literal>givenName</literal> of
-    all users in the OpenIDM internal repository:
+    You can query specific fields with a REST call. For example, the following
+    command displays the unique ID and the <literal>givenName</literal> of all
+    managed users:
    </para>
 
    <screen>$ curl \
@@ -1070,7 +1074,7 @@ $ ./startup.sh -p samples/sample3</screen>
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all&amp;fields=_openidm_id,givenName"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;fields=_openidm_id,givenName"
 </screen>
 
   </section>
