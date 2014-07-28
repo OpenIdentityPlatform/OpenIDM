@@ -360,8 +360,8 @@ Id   State          Name
      Explorer.
     </para>
     <para>
-     Expand Databases > openidm > Tables. You should see the following tables in
-     the openidm database:
+     Expand Databases > openidm > Tables. You should see the OpenIDM tables in
+     the openidm database, as shown in the following example:
     </para>
     <mediaobject>
      <alt>Default tables in the openidm MS SQL database</alt>
