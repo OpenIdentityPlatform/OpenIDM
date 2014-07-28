@@ -419,11 +419,12 @@ orientdb&gt; </screen>
 $ ./startup.sh -p samples/sample1
   </screen>
   
-  <para>Reconcile the objects in the resources, either by setting 
-  <literal>"enabled" : true</literal> in the schedule configuration file 
-  (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</filename>)
-  and then waiting until the scheduled reconciliation happens, or by using the
-  REST interface. Note how the following command uses a regular HTTP connection.
+  <para>
+   Reconcile the objects in the resources, either by setting
+   <literal>"enabled" : true</literal> in the schedule configuration file
+   (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</filename>)
+   and then waiting until the scheduled reconciliation happens, or by using the
+   REST interface, as shown in the following example.
   </para>
 
   <screen>$ curl \
@@ -563,7 +564,7 @@ $ ./startup.sh -p samples/sample1
   session querying OrientDB.</para>
 
   <para>
-   As defined in the <filename>conf/policy.json</filename> file, the
+   As defined in the mapping file <filename>conf/sync.json</filename>, the
    <literal>sn</literal> and <literal>mail</literal> parameters correspond
    to family name (surname) and email address, respectively.
   </para>
@@ -579,7 +580,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 ---+---------+--------------------+--------------------+--------------------
   #| RID     |familyName          |email               |description         
 ---+---------+--------------------+--------------------+--------------------
-  0|    #-2:1|smith               |[1]                 |My first user
+  0|    #-2:1|smith               |joe@example.com     |My first user
   1|    #-2:2|Jensen              |bjensen@example.com |Created By XML1
   2|    #-2:3|Carter              |scarter@example.com |Created By XML1
 ---+---------+--------------------+--------------------+--------------------
@@ -729,23 +730,12 @@ $ curl \
  </section>
  
  <section xml:id="sample-adding-users-rest">
-  <title>Adding Users Through REST</title>
+  <title>Adding Users Over REST</title>
 
   <para>
-   You can add users through the UI. Once you are logged in as the OpenIDM
-   administrator, the process is straightforward, as shown in the following
-   figure.
+   You can also add users to the local repository over the REST interface. The
+   following example adds a user named James Berg.
   </para>
-
-  <mediaobject>
-   <alt>Examples of adding a new user</alt>
-   <imageobject>
-    <imagedata fileref="images/sample1-useradd.png" format="PNG" />
-   </imageobject>
-  </mediaobject>
-
-  <para>You can also add users directly to the local repository through the
-  REST interface. The following example adds a user named James Berg.</para>
 
   <para>Create <literal>james</literal> (UNIX).</para>
   <screen>$ <userinput>curl \
@@ -827,5 +817,19 @@ $ curl \
   <para>OpenIDM creates the new user in the repository. If you configure a
   mapping to apply changes from the local repository to the XML file connector
   as a target, OpenIDM then updates the XML file to add the new user.</para>
+
+  <para>
+   You can also add users through the UI, which uses the OpenIDM REST API.
+   When you have logged into the UI as the OpenIDM administrator, the process is
+   straightforward, as shown in the following figure.
+  </para>
+
+  <mediaobject>
+   <alt>Examples of adding a new user</alt>
+   <imageobject>
+    <imagedata fileref="images/sample1-useradd.png" format="PNG" />
+   </imageobject>
+  </mediaobject>
+
  </section>
 </chapter>
