@@ -498,7 +498,6 @@ Stopping OpenIDM (31391)</computeroutput></screen>
   "_rev": "1",
   "lastPasswordSet": "",
   "postalCode": "",
-  "_id": "joe",
   "accountStatus": "active",
   "description": "My first user",
   "_id":"joe"
