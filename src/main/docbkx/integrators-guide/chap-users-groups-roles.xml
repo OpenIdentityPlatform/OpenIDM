@@ -156,13 +156,6 @@
     <citetitle>Installation Guide</citetitle>.
    </para>
 
-   <para>
-    When you create, assign, or delete a role from a specific user entry,
-    OpenIDM triggers either an <literal>onAssignment</literal> or an
-    <literal>onUnassignment</literal> script. That operation may be an alias
-    as defined in the <filename>defaultMapping.js</filename> file.
-   </para>
-
    <section xml:id="create-role-definition">
     <title>To Create a Role Definition</title>
 
@@ -632,6 +625,13 @@ $ curl \
      <para>
       Any changes to a managed role definition are logged in the audit log.
      </para>
+
+    <para>
+     When you create, assign, or delete a role from a specific user entry,
+     OpenIDM triggers either an <literal>onAssignment</literal> or an
+     <literal>onUnassignment</literal> script. That operation may be an alias
+     as defined in the <filename>defaultMapping.js</filename> file.
+    </para>
 
    </section>
 
