@@ -569,8 +569,6 @@ $ curl \
        way in which the value is removed. You can set this option to
        <literal>"removeFromTarget"</literal>.
       </para>
-     </listitem>
-     <listitem>
       <para>
        The <literal>"mergeWithTarget"</literal> operation first merges the source
        value with the existing target value, then adds the value or values from
@@ -584,8 +582,6 @@ $ curl \
        When this operation is specified, the value from the role assignments
        becomes the only authoritative source for the attribute.
       </para>
-     </listitem>
-     <listitem>
       <para>
        The <literal>"mergeWithTarget"</literal>, <literal>"replaceTarget"</literal>
        and <literal>"removeFromTarget"</literal> operations are aliases, as
@@ -629,8 +625,7 @@ $ curl \
     <para>
      When you create, assign, or delete a role from a specific user entry,
      OpenIDM triggers either an <literal>onAssignment</literal> or an
-     <literal>onUnassignment</literal> script. That operation may be an alias
-     as defined in the <filename>defaultMapping.js</filename> file.
+     <literal>onUnassignment</literal> script.
     </para>
 
    </section>
@@ -1082,30 +1077,12 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
     assignments to the target resources.
    </para>
    <para>
-    To enable this mapping assignment, edit the <filename>sync.json</filename>
-    file. Add the following extract:
-   </para>
-   <programlisting language="java">
-"mappings" : [
-    {
-        "assignmentsToMap" : [
-            "ldap"
-        ],
-    },
-</programlisting>
-   <para>
     The following sample extract of a <filename>sync.json</filename> file
     applies the <literal>ldap</literal> assignment, illustrated in the previous
     section, on the target resource (<literal>system/ldap/account</literal>) for
     all entries that have <literal>"effectiveAssignments" : "ldap"</literal> in
     the source.
    </para>
-   <programlisting language="java">
-    },
-    "assignmentsToMap" : [
-        "ldap"
-    ],
-</programlisting>
    <programlisting language="javascript">
 {
     "name" : "managedUser_systemLdapAccounts",
