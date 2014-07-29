@@ -1280,6 +1280,16 @@ Content-Length: 89
    </informaltable>
    <note>
     <para>
+     When you create a system object with a PUT request (that is, specifying a
+     client-assigned ID), you should specify the ID in the URL only and not in
+     the JSON payload. If you specify a different ID in the URL and in the JSON
+     payload, the request will fail, with an error similar to the following:
+    </para>
+    <screen>{
+    "code":500,
+    "reason":"Internal Server Error",
+    "message":"The uid attribute is not single value attribute."}</screen>
+    <para>
      The <literal>patch</literal> action is not supported on system objects.
     </para>
    </note>
