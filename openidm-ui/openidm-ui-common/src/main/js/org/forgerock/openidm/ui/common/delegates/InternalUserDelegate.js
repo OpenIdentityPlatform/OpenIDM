@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/user/delegates/InternalUserDelegate", [
+define("org/forgerock/openidm/ui/common/delegates/InternalUserDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/user/delegates/InternalUserDelegate", [
     obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         //PATCH for repo is unsupported
         
-        obj.readEntity(id, function(user) {
+        return obj.readEntity(id).then(function(user) {
             var i, v;
             
             for(i = 0; i < patchDefinitionObject.length; i++) {
@@ -48,10 +48,8 @@ define("org/forgerock/openidm/ui/user/delegates/InternalUserDelegate", [
                 user[v.field] = v.value;
             }
             
-            obj.updateEntity(id, user, successCallback, errorCallback);
+            return obj.updateEntity(id, user, successCallback, errorCallback);
         });
-        
-        //obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
     };
 
     return obj;

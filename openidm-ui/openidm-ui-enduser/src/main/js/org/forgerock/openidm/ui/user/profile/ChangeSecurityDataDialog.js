@@ -32,12 +32,13 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "UserDelegate",
-    "org/forgerock/openidm/ui/user/delegates/InternalUserDelegate",
+    "AuthnDelegate",
+    "org/forgerock/openidm/ui/common/delegates/InternalUserDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/user/delegates/SecurityQuestionDelegate"
-], function(Dialog, validatorsManager, conf, userDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
+], function(Dialog, validatorsManager, conf, userDelegate, authnDelegate, internalUserDelegate, uiUtils, eventManager, constants, securityQuestionDelegate) {
     var ChangeSecurityDataDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSecurityDataDialogTemplate.html",
 
@@ -81,9 +82,11 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
                 delete conf.passwords;
                 this.close();
 
-                userDelegate.getProfile(function (user) {
-                    conf.loggedUser = user;
-                });
+                return authnDelegate.getProfile()
+                    .then(function(user) {
+                        conf.loggedUser = user;
+                        return user;
+                    });
 
             }, this));
         },
@@ -100,9 +103,9 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog", [
         render: function() {
             this.actions = [];
             this.addAction($.t("common.form.update"), "submit");
-            
+
             this.delegate = conf.globalData.userComponent === "repo/internal/user" ? internalUserDelegate : userDelegate;
-                        
+
             $("#dialogs").hide();
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {

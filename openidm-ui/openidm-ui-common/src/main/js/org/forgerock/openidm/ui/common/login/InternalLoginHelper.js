@@ -22,10 +22,10 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window */
+/*global define, window, $, _ */
 
-define("org/forgerock/openidm/ui/user/login/InternalLoginHelper", [
-    "UserDelegate",
+define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
+    "AuthnDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
@@ -34,22 +34,12 @@ define("org/forgerock/openidm/ui/user/login/InternalLoginHelper", [
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Router"
             
-], function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, router) {
+], function (authnDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, router) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        userDelegate.login(params.userName, params.password, 
-            function(user) {
-                conf.globalData.userComponent = user.component;
-                successCallback(user);
-            },
-            function() {
-                if (errorCallback) {
-                    errorCallback();
-                }
-            },
-            {
+        return authnDelegate.login(params.userName, params.password, {
                 "forbidden": { 
                     status: "403"
                 },
@@ -57,8 +47,15 @@ define("org/forgerock/openidm/ui/user/login/InternalLoginHelper", [
                     status: "401", 
                     message: "authenticationFailed"
                 }
-            }
-        );
+            }).then(function(user) {
+                conf.globalData.userComponent = user.component;
+                
+                if (successCallback) {
+                    successCallback(user);
+                }
+            
+                return user;
+            }, errorCallback);
     };
 
     obj.logout = function() {
@@ -67,25 +64,22 @@ define("org/forgerock/openidm/ui/user/login/InternalLoginHelper", [
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        userDelegate.getProfile(
-            function(user) {
-                conf.globalData.userComponent = user.component;
+        return authnDelegate.getProfile({
+            "forbidden": { 
+                status: "403"
+            },
+            "unauthorized": { 
+                status: "401"
+            }
+        }).then(function(user) {
+            conf.globalData.userComponent = user.component;
+            
+            if (successCallback) {
                 successCallback(user);
-            },
-            function() {
-                if (errorCallback) {
-                    errorCallback();
-                }
-            },
-            {
-                "forbidden": { 
-                    status: "403"
-                },
-                "unauthorized": { 
-                    status: "401"
-                }
-            }            
-        );
+            }
+            
+            return user;
+        }, errorCallback);
 
     };
     return obj;

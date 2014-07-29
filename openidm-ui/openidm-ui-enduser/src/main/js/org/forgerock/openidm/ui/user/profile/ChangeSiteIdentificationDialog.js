@@ -33,9 +33,10 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/Router",
     "UserDelegate",
+    "AuthnDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(Dialog, validatorsManager, conf, router, userDelegate, eventManager, constants) {
+], function(Dialog, validatorsManager, conf, router, userDelegate, authnDelegate, eventManager, constants) {
     var ChangeSiteIdentificationDialog = Dialog.extend({    
         contentTemplate: "templates/user/ChangeSiteIdentificationDialogTemplate.html",
         
@@ -71,12 +72,14 @@ define("org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog", [
                     //updating in profile
                     conf.loggedUser.siteImage = self.$el.find("input[name='siteImage']").val();
                     conf.loggedUser.passPhrase = self.$el.find("input[name=passPhrase]").val();
-                    
-                    userDelegate.getProfile(function(user) {
-                        conf.loggedUser = user;
-                    });
-                    
                     this.close();
+
+                    return authnDelegate.getProfile()
+                        .then(function(user) {
+                            conf.loggedUser = user;
+                            return user;
+                        });
+                    
                 }, this));
             }
         },

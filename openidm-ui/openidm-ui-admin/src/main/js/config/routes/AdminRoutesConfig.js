@@ -1,4 +1,4 @@
-/**
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -23,18 +23,23 @@
  */
 
 /*global define*/
+define("config/routes/AdminRoutesConfig", [
+], function() {
 
-define("org/forgerock/openidm/ui/user/main", [
-    "./delegates/RoleDelegate",
-    "./delegates/UserDelegate",
-    "./delegates/SiteIdentificationDelegate",
+    var obj = {
+        "configDashboard": {
+            view: "org/forgerock/openidm/ui/admin/Dashboard",
+            role: "ui-admin",
+            url: "dashboard/",
+            forceUpdate: true
+        },
+        "mandatoryPasswordChangeDialog" : {
+            base: "configDashboard",
+            dialog: "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
+            url: "dashboard/change_password/",
+            role: "ui-admin"
+        }
+    };
 
-    "./UserRegistrationView",
-    "./profile/UserProfileView",
-    "./TermsOfUseDialog",
-    "./profile/EnterOldPasswordDialog",
-    "./ForgottenPasswordDialog",
-    "./profile/ChangeSecurityDataDialog",
-    "./profile/ChangeSiteIdentificationDialog",
-    "./LoginView"
-]);
+    return obj;
+});

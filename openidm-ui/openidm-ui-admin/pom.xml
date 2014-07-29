@@ -31,8 +31,8 @@
     <version>3.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>openidm-ui-config</artifactId>
-  <name>OpenIDM UI Config</name>
+  <artifactId>openidm-ui-admin</artifactId>
+  <name>OpenIDM UI Admin</name>
   <packaging>bundle</packaging>
 
   <properties>
@@ -60,6 +60,23 @@
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.forgerock.commons.ui.libs</groupId>
+      <artifactId>jquery-ui</artifactId>
+      <version>1.10.4.custom</version>
+      <classifier>min</classifier>
+      <type>js</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.forgerock.commons.ui.libs</groupId>
+      <artifactId>jquery.jqGrid</artifactId>
+      <version>4.5.4</version>
+      <classifier>min</classifier>
+      <type>js</type>
+    </dependency>
+
   </dependencies>
 
   <profiles>
@@ -90,6 +107,7 @@
               <disallowInsecureCharsInRegExp>false</disallowInsecureCharsInRegExp>
               <excludes>
                 <exclude>**/libs/*.js</exclude>
+                <exclude>**/libs/i18n/*.js</exclude>
                 <exclude>**/*Test.js</exclude>
               </excludes>
             </configuration>
@@ -150,16 +168,40 @@
           </plugin>
 
           <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+                <descriptors>
+                    <descriptor>src/main/assembly/zip.xml</descriptor>
+                </descriptors>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <groupId>org.apache.felix</groupId>
             <artifactId>maven-bundle-plugin</artifactId>
             <extensions>true</extensions>
+            <executions>
+              <execution>
+                  <id>bundle-manifest</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>manifest</goal>
+                  </goals>
+              </execution>
+            </executions>
             <configuration>
               <instructions>
                 <Import-Package>*</Import-Package>
                 <Include-Resource>
-                  <!-- order here matters; we want depedencies in first, then overwritten by local resources -->
-                  public=target/dependency,
-                  public=target/classes
+                    public=target/openidm-ui-admin-${openidm.version}-www
                 </Include-Resource>
               </instructions>
             </configuration>
@@ -194,6 +236,7 @@
             <configuration>
               <excludes>
                 <exclude>**/libs/*.js</exclude>
+                <exclude>**/libs/i18n/*.js</exclude>
                 <exclude>**/*Test.js</exclude>
               </excludes>
             </configuration>
@@ -300,21 +343,45 @@
             </executions>
           </plugin>
 
-          <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-              <instructions>
-                <Import-Package>*</Import-Package>
-                <Include-Resource>
-                public=target/classes,
-                public=src/main/resources
-                </Include-Resource>
-                <Bundle-SymbolicName>${project.groupId}.ui.enduser</Bundle-SymbolicName>
-              </instructions>
-            </configuration>
-          </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/zip.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*</Import-Package>
+                        <Include-Resource>
+                            public=target/openidm-ui-admin-${openidm.version}-www
+                        </Include-Resource>
+                    </instructions>
+                </configuration>
+            </plugin>
         </plugins>
       </build>         
     </profile>

@@ -57,42 +57,6 @@ define("UserDelegate", [
             }
         }, error: errorCallback} );
     };
-
-    /**
-     * Starting session. Sending username and password to authenticate and returns user's id.
-     */
-    obj.login = function(uid, password, successCallback, errorCallback, errorsHandlers) {
-        var headers = {},
-            promise;
-        headers[constants.HEADER_PARAM_USERNAME] = uid;
-        headers[constants.HEADER_PARAM_PASSWORD] = password;
-        headers[constants.HEADER_PARAM_NO_SESSION] = false;
-
-        promise = obj.getProfile(successCallback, errorCallback, errorsHandlers, headers);
-
-        delete headers[constants.HEADER_PARAM_PASSWORD];
-
-        return promise;
-    };
-    
-    obj.getUserById = function(id, component, successCallback, errorCallback, errorsHandlers) {
-
-        return this.serviceCall({
-            serviceUrl: constants.host + "/openidm/" + component, url: "/" + id, type: "GET", 
-            error: errorCallback,
-            errorsHandlers: errorsHandlers}).then(function (user) {
-                if (!_.has(user, 'uid')) {
-                    user.uid = user.userName || user._id;
-                }
-
-                if (successCallback) {
-                    successCallback(user);
-                }
-
-                return user;
-            });
-    };
-
        
     /**
      * Check credentials method
@@ -114,62 +78,6 @@ define("UserDelegate", [
                 }
             }
 
-        });
-    };
-    
-    /**
-     * Checks if logged in and returns users id
-     */
-    obj.getProfile = function(successCallback, errorCallback, errorsHandlers, headers) {
-        var uiRoles = {
-            "openidm-authorized": "ui-user",
-            "openidm-admin": "ui-admin"
-        };
-
-        return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/info/login",
-            url: "",
-            headers: headers,
-            success: function (rawData) {
-                var i,data;
-
-                if(!rawData.authorizationId) {
-                    if(errorCallback) {
-                        errorCallback();
-                    }
-                } else if(successCallback) {
-                
-                    data = {
-                        id : rawData.authorizationId.id,
-                        username : rawData.authenticationId,
-                        uid : rawData.authenticationId,
-                        roles: rawData.authorizationId.roles,
-                        component: rawData.authorizationId.component
-                    };
-
-                    // previously roles were sometimes stored as a CSV - convert those into a proper array
-                    if (typeof data.roles === "string") {
-                        data.roles = data.roles.split(",");
-                    }
-
-                    for (i=(data.roles.length-1);i>=0;i--) {
-                        if (_.has(uiRoles,data.roles[i])) {
-                            data.roles.push(uiRoles[data.roles[i]]);
-                        }
-                    }
-
-                    obj.getUserById(data.id, data.component, function (userData) {
-                        userData.roles = data.roles;
-                        userData.component = data.component;
-                        if(!userData.userName){
-                            userData.userName = userData._id;
-                        }
-                        successCallback(userData);
-                    }, errorCallback, errorsHandlers);
-                }
-            },
-            error: errorCallback,
-            errorsHandlers: errorsHandlers
         });
     };
 
@@ -285,6 +193,3 @@ define("UserDelegate", [
 
     return obj;
 });
-
-
-

@@ -44,28 +44,37 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
          * particular property we are attempting to validate was included in the list of those
          * with errors.
          */
-        obj.serviceCall({
+        return obj.serviceCall({
             url: "/" + baseEntity + "?_action=validateObject",
             data: JSON.stringify(args.fullObject),
-            type: "POST",
-            success: function (data) {
-                var haveWeFailed = false;
-                if (data.failedPolicyRequirements)
-                {
-                    _.each(data.failedPolicyRequirements, function (failedReq) {
-                        if (failedReq.property === args.property)
-                        {
-                            haveWeFailed = true;
+            type: "POST"
+        }).then(function (data){
+            var haveWeFailed = false;
+            if (data.failedPolicyRequirements) {
+                _.each(data.failedPolicyRequirements, function (failedReq) {
+                    if (failedReq.property === args.property) {
+                        haveWeFailed = true;
+
+                        if (callback) {
                             callback({
-                               "result": false,
+                                "result": false,
                                "failedPolicyRequirements": [failedReq]
                             });
                         }
-                    });
+
+                        return {
+                           "result": false,
+                           "failedPolicyRequirements": [failedReq]
+                        };
+                    }
+                });
+            }
+            
+            if (!haveWeFailed) { 
+                if (callback) {
+                    callback({"result": true });
                 }
-                
-                if (!haveWeFailed) { callback({ "result": true }); }
-                
+                return {"result": true };
             }
         });
         
