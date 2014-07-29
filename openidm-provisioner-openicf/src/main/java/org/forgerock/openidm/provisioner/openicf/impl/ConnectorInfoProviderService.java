@@ -339,14 +339,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                                 0,
                                 heartbeatInterval.asLong(),
                                 TimeUnit.SECONDS);
-                        try {
-                            boolean result = scheduledExecutorService.awaitTermination(5l,TimeUnit.MINUTES);
-                            if (!result) {
-                                System.out.println("Server took longer longer than 5 min...");
-                            }
-                        } catch (Exception e) {
-                            // interrupted
-                        }
                     }
                 } else {
                     logger.error("RemoteFrameworkConnectionInfo has no name");

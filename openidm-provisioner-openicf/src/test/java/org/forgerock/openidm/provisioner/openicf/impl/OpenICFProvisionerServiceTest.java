@@ -380,7 +380,18 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
             service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
-            service.activate(context);
+
+            // Attempt to activate the provisioner service 4 times, otherwise the connector info will not be initialized
+            // resulting in the connector not connecting to the remote server
+            for (int count = 0; count < 4; count++)  {
+                service.activate(context);
+                try {
+                    service.getConnectorFacade().test();
+                    break;
+                } catch (Exception e) {
+                    Thread.sleep(1000);
+                }
+            }
 
             systems.add(Pair.of(service, context));
         }
