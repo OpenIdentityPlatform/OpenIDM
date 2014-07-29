@@ -3572,17 +3572,17 @@ Properties:
 
    <para>
     You can add the attributes of your choice to a connector configuration file.
-    For example, if you want to set up
+    Specifically, if you want to set up
     <xref linkend="property-level-extensions" /> to one of the
     <literal>objectTypes</literal> such as <literal>account</literal>, use the
     format shown under <xref linkend="object-types" />.
    </para>
 
    <para>
-    For example, you can set up connectors to work with image files, which
-    are in essence, byte arrays. If you want to set up image files such as
-    user avatars for accounts, open up the appropriate provisioner file. Look
-    for an <literal>account</literal> section similar to:
+    You can configure connectors to enable provisioning of arbitrary property
+    level extensions (such as image files) to system resources. For example, if
+    you want to set up image files such as account avatars, open the appropriate
+    provisioner file. Look for an <literal>account</literal> section similar to:
    </para>
 
    <programlisting language="javascript">
@@ -3595,7 +3595,9 @@ Properties:
    </programlisting>
 
    <para>
-    Under <literal>"properties"</literal>, add the following properties:
+    Under <literal>"properties"</literal>, add one of the following code blocks.
+    The first block works for a single photo encoded as a base64 string. The
+    second block would address multiple photos encoded in the same way.
    </para>
 
    <programlisting language="javascript">
@@ -3604,6 +3606,8 @@ Properties:
     "nativeName" : "attributeByteArray",
     "nativeType" : "JAVA_TYPE_BYTE_ARRAY"
 },
+   </programlisting>
+    <programlisting language="javascript">
 "attributeByteArrayMultivalue": {
     "type": "array",
     "items": {
@@ -3613,13 +3617,6 @@ Properties:
     "nativeName": "attributeByteArrayMultivalue"
 },
    </programlisting>
-
-   <note>
-    <para>
-     The attributes described in this section work only with OpenICF connectors
-     of version 1.4 or higher.
-    </para>
-   </note>
 
  </section>
 </chapter>
