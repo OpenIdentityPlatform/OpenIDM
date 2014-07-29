@@ -3289,9 +3289,9 @@ Properties:
  --data '{
   "configurationProperties":
     {
-      "xsdIcfFilePath" : "&amp;{launcher.project.location}/data/resource-schema-1.xsd",
-      "xsdFilePath" : "&amp;{launcher.project.location}/data/resource-schema-extension.xsd",
-      "xmlFilePath" : "&amp;{launcher.project.location}/data/xmlConnectorData.xml",
+      "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+      "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+      "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml",
       "createFileIfNotExists": false
   },
   "operationTimeout": {
