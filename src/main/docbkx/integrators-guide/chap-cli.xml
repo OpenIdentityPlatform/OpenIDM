@@ -354,12 +354,11 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <command>configureconnector</command> command again so that OpenIDM can pick 
   up the new connector configuration.</para>
   
-  <screen>
-<userinput>$ ./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
-<computeroutput>Using boot properties at /openidm/conf/boot/boot.properties
-Configuration was found and picked up from:
-      /openidm/temp/provisioner.openicf-myXmlConnector.json
-...</computeroutput>
+  <screen><userinput>$ ./cli.sh configureconnector --user openidm-admin:openidm-admin myXmlConnector</userinput>
+<computeroutput>Executing ./cli.sh...
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Configuration was found and read from: /path/to/openidm/temp/provisioner.openicf-myXmlConnector.json</computeroutput>
   </screen>
 
   <para>
