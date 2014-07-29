@@ -3147,6 +3147,7 @@ Properties:
    <listitem><para>csv file</para></listitem>
    <listitem><para>database table</para></listitem>
    <listitem><para>ldap</para></listitem>
+   <listitem><para>scripted groovy</para></listitem>
    <listitem><para>scripted sql</para></listitem>
    <listitem><para>xml</para></listitem>
   </itemizedlist>
