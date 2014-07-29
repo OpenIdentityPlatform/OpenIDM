@@ -232,6 +232,10 @@
    </para>
    <programlisting># openidm.fileinstall.enabled=false</programlisting>
    <para>
+    This setting also disables the file-based configuration view, which means
+    that OpenIDM reads its configuration only from the repository.
+   </para>
+   <para>
     Before you disable automatic polling, you must have started the OpenIDM
     instance at least once to ensure that the configuration has been loaded into
     the repository.
@@ -240,18 +244,6 @@
     Note if automatic polling is enabled, changes to scripts that are  called
     from a JSON configuration file are taken into account immediately.
    </para>
-  </section>
-
-  <section xml:id="disabling-file-based-config">
-   <title>Disabling the File-Based Configuration View</title>
-   <para>
-    To control configuration changes to the OpenIDM system, you disable the
-    file-based configuration view and have OpenIDM read its configuration only
-    from the repository. To disable the file-based configuration view, edit the
-    <filename>conf/system.properties</filename> file to uncomment the following
-    line:
-   </para>
-   <programlisting># openidm.fileinstall.enabled=false</programlisting>
   </section>
 
         <!-- Section still in progress
