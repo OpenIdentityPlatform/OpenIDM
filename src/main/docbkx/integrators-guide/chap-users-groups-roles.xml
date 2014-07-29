@@ -552,8 +552,13 @@ $ curl \
      </listitem>
      <listitem>
       <para>
-       When you update a role that adds or removes an attribute, that action
-       triggers either an <literal>"assignmentOperation"</literal> or an
+       When you update a role by adding, updating, or removing an attribute,
+       that action triggers either an <literal>"assignmentOperation"</literal>
+       or an <literal>"unassignmentOperation"</literal>.
+      </para>
+      <para>
+       If you assign or unassign a role to a user, that action will also trigger
+       either an <literal>"assignmentOperation"</literal> or an
        <literal>"unassignmentOperation"</literal>.
       </para>
       <para>
@@ -562,8 +567,6 @@ $ curl \
        <literal>"mergeWithTarget"</literal> or to the default,
        <literal>"replaceTarget"</literal>.
       </para>
-     </listitem>
-     <listitem>
       <para>
        In contrast, the <literal>"unassignmentOperation"</literal> specifies the
        way in which the value is removed. You can set this option to
@@ -590,20 +593,25 @@ $ curl \
      </listitem>
      <listitem>
       <para>
-       The <literal>onAssignment</literal> and <literal>onUnassignment</literal>
-       options are assignment-specific. Either option supports further
-       customization.
+       The <literal>"onAssignment"</literal> and
+       <literal>"onUnassignment"</literal> scripts are assignment-specific.
+       Either option supports further customization.
       </para>
       <para>
-       Every sync operation triggers an <literal>onAssignment</literal> script.
-       In contrast, an <literal>onUnassignment</literal> script is triggered
+       When you create, assign, or delete a role from a specific user entry,
+       OpenIDM triggers either an <literal>"onAssignment"</literal> or an
+       <literal>"onUnassignment"</literal> script.
+      </para>
+      <para>
+       Every sync operation triggers an <literal>"onAssignment"</literal> script.
+       In contrast, an <literal>"onUnassignment"</literal> script is triggered
        only when an assignment is removed from a role, or when a role is
        unassigned from a user.
       </para>
       <para>
-       If you customize an <literal>onAssignment</literal> or an
-       <literal>onUnassignment</literal> script, make sure the script returns
-       a <literal>targetObject</literal>. Otherwise, the script operation may
+       If you customize an <literal>"onAssignment"</literal> or an
+       <literal>"onUnassignment"</literal> script, make sure the script returns
+       a <literal>"targetObject"</literal>. Otherwise, the script operation may
        fail.
       </para>
      </listitem>
@@ -619,14 +627,8 @@ $ curl \
       the effective assignments to the target resource.
      </para>
      <para>
-      Any changes to a managed role definition are logged in the audit log.
+      OpenIDM logs any changes to a managed role definition in the audit log.
      </para>
-
-    <para>
-     When you create, assign, or delete a role from a specific user entry,
-     OpenIDM triggers either an <literal>onAssignment</literal> or an
-     <literal>onUnassignment</literal> script.
-    </para>
 
    </section>
 
