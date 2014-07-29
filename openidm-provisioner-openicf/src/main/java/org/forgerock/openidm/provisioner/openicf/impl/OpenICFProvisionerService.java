@@ -1303,32 +1303,24 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ResultHandler<Resource> handler) {
             try {
                 if (objectClassInfoHelper.isCreateable()) {
-                    if (null == request.getNewResourceId()) {
-                        final ConnectorFacade facade = getConnectorFacade0(handler, CreateApiOp.class);
-                        if (null == facade) {
-                            // getConnectorFacade0 already handles error when returning null
-                            return;
-                        }
-                        final Set<Attribute> createAttributes =
-                                objectClassInfoHelper.getCreateAttributes(request, cryptoService);
-
-                        OperationOptions operationOptions = operations.get(CreateApiOp.class)
-                                .build(jsonConfiguration, objectClassInfoHelper)
-                                .build();
-
-                        Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
-                                AttributeUtil.filterUid(createAttributes), operationOptions);
-
-                        Resource resource = getCurrentResource(facade, uid, null);
-                        activityLogger.log(context, RequestType.CREATE, "message", getSource(objectClass, uid.getUidValue()), null, resource.getContent(), Status.SUCCESS);
-                        handler.handleResult(resource);
-                    } else {
-                        // If the __NAME__ attribute is not mapped then fail
-                        final ResourceException e =
-                                new NotSupportedException(
-                                        "Create operations are not supported with client assigned id");
-                        handler.handleError(e);
+                    final ConnectorFacade facade = getConnectorFacade0(handler, CreateApiOp.class);
+                    if (null == facade) {
+                        // getConnectorFacade0 already handles error when returning null
+                        return;
                     }
+                    final Set<Attribute> createAttributes =
+                            objectClassInfoHelper.getCreateAttributes(request, cryptoService);
+
+                    OperationOptions operationOptions = operations.get(CreateApiOp.class)
+                            .build(jsonConfiguration, objectClassInfoHelper)
+                            .build();
+
+                    Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
+                            AttributeUtil.filterUid(createAttributes), operationOptions);
+
+                    Resource resource = getCurrentResource(facade, uid, null);
+                    activityLogger.log(context, RequestType.CREATE, "message", getSource(objectClass, uid.getUidValue()), null, resource.getContent(), Status.SUCCESS);
+                    handler.handleResult(resource);
                 } else {
                     // If the __NAME__ attribute is not mapped then fail
                     final ResourceException e =
