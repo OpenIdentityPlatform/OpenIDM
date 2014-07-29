@@ -32,8 +32,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Embedded Jetty Configuration</title>
 
- <para>OpenIDM <?eval ${serverDocTargetVersion}?> includes an embedded Jetty web
- server.</para>
+ <para>
+  OpenIDM ${serverDocTargetVersion} includes an embedded Jetty web server.
+ </para>
 
  <para>To configure the embedded Jetty server, edit
  <filename>openidm/conf/jetty.xml</filename>. OpenIDM delegates most of the
@@ -42,9 +43,13 @@
  lets you take advantage of all Jetty capabilities, as the web server is not
  configured through an abstraction that might limit some of the options.</para>
 
- <para>The Jetty configuration can reference configuration properties (such as
- port numbers and key store details) from OpenIDM's
- <filename>boot.properties</filename> configuration file.</para>
+ <para>
+  The Jetty configuration can reference configuration properties (such as port
+  numbers and key store details) from OpenIDM's
+  <filename>boot.properties</filename> configuration file. If you change the
+  ports in the <filename>boot.properties</filename> file, you must make the same
+  change in the <filename>config.properties</filename> file.
+ </para>
 
  <section xml:id="access-openidm-config-properties">
   <title>Using OpenIDM Configuration Properties in the Jetty Configuration</title>
