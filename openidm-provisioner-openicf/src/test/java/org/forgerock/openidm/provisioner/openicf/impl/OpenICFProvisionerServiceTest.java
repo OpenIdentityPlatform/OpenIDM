@@ -184,6 +184,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                 }
             });
             router.addRoute("repo/synchronisation/pooledSyncStage", new MemoryBackend());
+            router.addRoute("audit/activity", new MemoryBackend());
         } catch (IllegalStateException e) {
             /* ignore */
         }
@@ -379,7 +380,24 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
             service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
-            service.activate(context);
+
+            // Attempt to activate the provisioner service up to 4 times, using ConnectorFacade#test to
+            // validate proper initializationn.  If the connector info manager is not be initialized, the
+            // test fails because the connector cannot connect to the remote server.  In this test, it 
+            // manifests as a timing issue owing to the flexibility in the provisioner service and the 
+            // connector info provider supporting the ability for the connector server to come and go, as
+            // managed by the health check thread (see ConnectorInfoProviderService#initialiseRemoteManager).
+            // The test simply executes too fast for the health check thread to complete setup of the
+            // connector info manager.
+            for (int count = 0; count < 4; count++)  {
+                service.activate(context);
+                try {
+                    service.getConnectorFacade().test();
+                    break;
+                } catch (Exception e) {
+                    Thread.sleep(1000);
+                }
+            }
 
             systems.add(Pair.of(service, context));
         }
@@ -540,7 +558,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
     }
 
 
-    @Test(dataProvider = "groovy-only", enabled = false)
+    @Test(dataProvider = "groovy-only", enabled = true)
     public void testPagedSearch(String systemName) throws Exception {
 
         for (int i = 0; i < 100; i++) {
@@ -548,7 +566,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
             co.put("sortKey", i);
 
             CreateRequest request = Requests.newCreateRequest("system/" + systemName + "/account", co);
-            connection.create(new RootContext(), request);
+            connection.create(new SecurityContext(new RootContext(), "system", null ), request);
         }
 
         QueryRequest queryRequest = Requests.newQueryRequest("system/" + systemName + "/account");
