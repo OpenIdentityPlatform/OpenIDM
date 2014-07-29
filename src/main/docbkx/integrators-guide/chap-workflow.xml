@@ -1294,15 +1294,14 @@ openidm.create('workflow/processinstance', null, params);
      Complete the specified task. The variables required by the task are
      provided in the request body. For example:
     </para>
-    <screen>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
  --data '{"requestApproved":"true"}' \
- "https://localhost:8443/openidm/workflow/taskinstance/15?_action=complete"
-    </screen>
+ "https://localhost:8443/openidm/workflow/taskinstance/15?_action=complete"</userinput></screen>
    </listitem>
    <listitem>
     <para>
@@ -1310,15 +1309,14 @@ openidm.create('workflow/processinstance', null, params);
      into his list of pending tasks. The ID of the user who claims the task is
      provided in the request body. For example:
     </para>
-    <screen>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
  --data '{"userId":"manager1"}' \
- "https://localhost:8443/openidm/workflow/taskinstance/15?_action=claim"
-    </screen>
+ "https://localhost:8443/openidm/workflow/taskinstance/15?_action=claim"</userinput></screen>
    </listitem>
   </itemizedlist>
  </section>
