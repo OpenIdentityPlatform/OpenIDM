@@ -664,7 +664,7 @@
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>Property Level Extensions</term>
+    <term xml:id="property-level-extensions">Property Level Extensions</term>
     <listitem>
      <variablelist>
       <varlistentry>
@@ -3563,5 +3563,61 @@ Properties:
    "ok": true,
    "name": "xmlfile"
 }</screen>
+ </section>
+
+ <section xml:id="adding-to-connector-config">
+  <title>Adding Attributes to Connectors</title>
+
+   <para>
+    You can add the attributes of your choice to a connector configuration file.
+    For example, if you want to set up
+    <xref linkend="property-level-extensions" /> to one of the
+    <literal>objectTypes</literal> such as <literal>account</literal>, use the
+    format shown under <xref linkend="object-types" />.
+   </para>
+
+   <para>
+    For example, you can set up connectors to work with image files, which
+    are in essence, byte arrays. If you want to set up image files such as
+    user avatars for accounts, open up the appropriate provisioner file. Look
+    for an <literal>account</literal> section similar to:
+   </para>
+
+   <programlisting language="javascript">
+"account" : {
+    "$schema" : "http://json-schema.org/draft-03/schema",
+    "id" : "__ACCOUNT__",
+    "type" : "object",
+    "nativeType" : "__ACCOUNT__",
+    "properties" : {
+   </programlisting>
+
+   <para>
+    Under <literal>"properties"</literal>, add the following properties:
+   </para>
+
+   <programlisting language="javascript">
+"attributeByteArray" : {
+    "type" : "string",
+    "nativeName" : "attributeByteArray",
+    "nativeType" : "JAVA_TYPE_BYTE_ARRAY"
+},
+"attributeByteArrayMultivalue": {
+    "type": "array",
+    "items": {
+        "type": "string",
+        "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+    },
+    "nativeName": "attributeByteArrayMultivalue"
+},
+   </programlisting>
+
+   <note>
+    <para>
+     The attributes described in this section work only with OpenICF connectors
+     of version 1.4 or higher.
+    </para>
+   </note>
+
  </section>
 </chapter>
