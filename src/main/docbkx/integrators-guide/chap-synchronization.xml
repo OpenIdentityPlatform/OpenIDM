@@ -4154,7 +4154,7 @@ map;
   repository.</para>
 
   <programlisting language="javascript">
-repoUser = openidm.read("managed/user/ddoe);</programlisting>
+repoUser = openidm.read("managed/user/ddoe");</programlisting>
 
   <para>The following example reads an account from an external LDAP
   resource.</para>
