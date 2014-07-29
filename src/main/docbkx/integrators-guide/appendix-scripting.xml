@@ -790,7 +790,7 @@ org.forgerock.openidm.script.ScriptException: missing name after . operator
                     <term>alias</term>
                     <listitem>
                         <para>string</para>
-                        <para>The key alias in the key store with which to encrypt the node.</para>
+                        <para>The key alias in the keystore with which to encrypt the node.</para>
                     </listitem>
                 </varlistentry>
             </variablelist>

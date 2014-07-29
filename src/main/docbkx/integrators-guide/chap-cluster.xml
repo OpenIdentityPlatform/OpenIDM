@@ -215,7 +215,7 @@ openidm.instance.type=clustered-additional
      <para>
       The instance type is used during the setup process. When the primary node
       has been configured, additional nodes are bootstrapped with the security
-      settings (key store and trust store) of the primary node. After all nodes
+      settings (keystore and truststore) of the primary node. After all nodes
       have been configured, they are all considered equal in the cluster, that
       is, there is no concept of a "master" node.
      </para>

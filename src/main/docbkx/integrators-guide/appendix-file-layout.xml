@@ -478,7 +478,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/samples/security/</filename></term>
    <listitem>
-    <para>Sample key store, trust store, and certificates</para>
+    <para>Sample keystore, truststore, and certificates</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -521,7 +521,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/security/</filename></term>
    <listitem>
-    <para>OpenIDM security configuration, key store, and trust store</para>
+    <para>OpenIDM security configuration, keystore, and truststore</para>
    </listitem>
   </varlistentry>
   <varlistentry>

@@ -451,11 +451,13 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
   xlink:href="integrators-guide#security-jetty"><citetitle>Secure
   Jetty</citetitle></link>.</para>
 
-  <para>Use TLS/SSL to access OpenIDM, ideally with mutual authentication so
-  that only trusted systems can invoke each other. TLS/SSL protects data on
-  the network. Mutual authentication with strong certificates, imported into the
-  trust and key stores of each application, provides a level of confidence
-  for trusting application access.</para>
+  <para>
+   Use TLS/SSL to access OpenIDM, ideally with mutual authentication so that
+   only trusted systems can invoke each other. TLS/SSL protects data on the
+   network. Mutual authentication with strong certificates, imported into the
+   trust and keystores of each application, provides a level of confidence for
+   trusting application access.
+  </para>
 
   <para>Augment this protection with message level security where
   appropriate.</para>
@@ -733,7 +735,7 @@ Server: Jetty(8.y.z-SNAPSHOT)
    </para>
 
    <step>
-    <para>Add the new key to the key store.</para>
+    <para>Add the new key to the keystore.</para>
     <screen><userinput>$ cd /path/to/openidm/
 $ keytool \
  -genseckey \
@@ -973,10 +975,10 @@ $ <userinput>curl \
 
   <para>
    OpenIDM uses the information in <filename>conf/boot/boot.properties</filename>,
-   including the key store password, to start up. The key store password is
+   including the keystore password, to start up. The keystore password is
    <literal>changeit</literal> by default, and is stored in clear text in the
-   <filename>boot.properties</filename> file. To set an obfuscated version
-   of the key store password in the <filename>boot.properties</filename> file,
+   <filename>boot.properties</filename> file. To set an obfuscated version of
+   the keystore password in the <filename>boot.properties</filename> file,
    follow these steps.
   </para>
 
@@ -1004,7 +1006,7 @@ CRYPT:a8b5a01ba48a306f300b62a1541734c7
      Paste the obfuscated password (<literal>OBF:xxxxxxx</literal>) and the
      cryptographic key (<literal>CRYPT:xxxxxxx</literal>) into the
      <filename>conf/boot/boot.properties</filename> file. Comment out the
-     regular key store password and remove the comment tags from the lines that
+     regular keystore password and remove the comment tags from the lines that
      contain the obfuscated password and the cryptographic key:
     </para>
     <screen>
