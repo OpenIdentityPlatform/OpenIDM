@@ -151,6 +151,13 @@
    </listitem>
    <listitem>
     <para>
+     <literal>content-type</literal>. The media type of the data that is sent,
+     for example <literal>Content-Type: application/json</literal> or
+     <literal>Content-Type: application/xml</literal>.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
      <literal>body</literal>. The body/resource representation to send (for PUT
      and POST operations), in string format.
     </para>
