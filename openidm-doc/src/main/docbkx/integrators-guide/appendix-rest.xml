@@ -346,14 +346,6 @@
   ...
 }</computeroutput>
    </screen>
-   <note>
-    <para>
-     Creating objects with a PUT request (specifying a client-assigned ID) is
-     not supported for system resources. To create an object on a system
-     resource, you must use a POST request, with the <literal>create</literal>
-     action.
-    </para>
-   </note>
   </section>
 
   <section xml:id="rest-supported-read">
@@ -1275,7 +1267,8 @@ Content-Length: 89
       <row>
        <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
        <entry>PUT</entry>
-       <entry>Updates a system object (replaces the entire object).</entry>
+       <entry>Creates a system object, or updates the system object, if it
+        exists (replaces the entire object).</entry>
       </row>
       <row>
        <entry>/openidm/system/<replaceable>system-name</replaceable>/<replaceable>system-object</replaceable>/<replaceable>id</replaceable></entry>
