@@ -536,7 +536,7 @@
    </listitem>
    <listitem>
     <para>
-     If the <literal>gropuRoleMapping</literal> and
+     If the <literal>groupRoleMapping</literal> and
      <literal>groupMembership</literal> properties are defined, OpenIDM
      assigns additional roles to users depending on any existing group
      membership.
