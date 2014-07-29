@@ -369,7 +369,7 @@ openidm.scheduler.execute.persistent.schedules=true
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term>invokelogLevel (optional)</term>
+   <term>invokeLogLevel (optional)</term>
    <listitem>
     <para>Specifies the level at which the invocation will be logged. 
     Particularly for schedules that run very frequently, such as LiveSync, the 
