@@ -177,7 +177,7 @@
      "method":"GET",
      "content-type":"application/xml"
    }' \
- "https://localhost:8443/openidm/external/rest?_action=proxy"</userinput>
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput>
 <computeroutput>{
     "detail": {
         "content": "&lt;html>&lt;head>&lt;title>December Communications, Inc. Missing Page&lt;/title> (...) &lt;/html>\n"
