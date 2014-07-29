@@ -262,7 +262,7 @@
  <programlisting language="javascript">
  ...
     "propertyMapping" : {
-        "authenticationId" : "_id",
+        "authenticationId" : "username",
         "userCredential" : "password",
         "userRoles" : "roles"
     },
