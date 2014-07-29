@@ -662,7 +662,7 @@
    stores detailed color values, background image paths, and a number of other
    common styling options. Because the UI theme configuration file is part of
    the configuration store, it is shared by all nodes in a cluster. Changes made
-   to this file do therefore not have to be replicated manually across nodes.
+   to this file do not have to be replicated manually across nodes.
   </para>
   <para>
    To change theme elements that are not included in the UI theme configuration
