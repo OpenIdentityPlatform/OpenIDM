@@ -102,13 +102,7 @@
    A number of sample connector configurations are available in the
    <filename>openidm/samples/provisioners</filename> directory. To use these
    connectors, edit the configuration files as required, and copy them to the
-   <filename>openidm/conf</filename> directory. If you are creating your own
-   connector configuration files, <emphasis>do not include additional dash
-   characters ( <literal>-</literal> ) in the connector
-   <replaceable>name</replaceable></emphasis>, as this might cause problems with
-   the OSGi parser. For example, the name
-   <filename>provisioner.openicf-hrdb.json</filename> is fine. The name
-   <filename>provisioner.openicf-hr-db.json</filename> is not.
+   <filename>openidm/conf</filename> directory.
   </para>
   <para>
    The following figure shows how OpenIDM connects to resources by using
@@ -386,6 +380,12 @@
         <literal>(1.1.0.0,1.4.0.0]</literal> indicates that all connector
         versions from 1.1 to 1.4, excluding 1.1 but including 1.4, are
         supported.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        <literal>(1.1.0.0,1.4.0.0)</literal> indicates that all connector
+        versions from 1.1 to 1.4, exclusive, are supported.
        </para>
       </listitem>
      </itemizedlist>
