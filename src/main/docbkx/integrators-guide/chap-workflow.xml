@@ -247,13 +247,13 @@ script task using expression resolver: [
   
   <programlisting language="javascript">
 {
-   "enabled"  : "true"
+   "enabled"  : true
 }
   </programlisting>
   
   <para>
    You can disable the workflow module by setting the
-   <literal>"enabled"</literal> property to <literal>"false"</literal>.
+   <literal>"enabled"</literal> property to <literal>false</literal>.
   </para>
   
   <para>
