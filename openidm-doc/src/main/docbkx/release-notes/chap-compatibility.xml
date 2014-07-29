@@ -133,7 +133,7 @@
           "content-type" : "application/xml"
        }' \
  --request POST \
- "https://localhost:8443/openidm/external/rest?_action=proxy"</userinput></screen>
+ "https://localhost:8443/openidm/external/rest?_action=call"</userinput></screen>
       </listitem>
       <listitem>
        <para>
