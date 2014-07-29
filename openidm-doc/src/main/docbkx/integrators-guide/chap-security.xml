@@ -801,16 +801,18 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
    <secondary>Disabling</secondary>
   </indexterm>
 
-  <para>If you do not want to use regular HTTP on a production OpenIDM system,
-   edit the <filename>openidm/conf/jetty.xml</filename> configuration file.
-   Comment out the line that enables regular HTTP.
+  <para>
+   If you do not want to use regular HTTP on a production OpenIDM system, edit
+   the <filename>openidm/conf/jetty.xml</filename> configuration file. Comment
+   out the line that enables regular HTTP.
   </para>
 
   <para>
    The following excerpt includes the Java comment code that you would add
    around the <literal>openidm.port.http</literal> argument. The value of this
    argument (8080 by default) is taken from the
-   <filename>/path/to/openidm/conf/boot/boot.properties</filename> file.
+   <filename>conf/boot/boot.properties</filename> file and the
+   <filename>conf/config.properties</filename> file.
   </para>
 
   <programlisting language="xml">
