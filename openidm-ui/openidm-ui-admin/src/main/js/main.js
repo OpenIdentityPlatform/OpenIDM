@@ -24,11 +24,6 @@
 
 /*global require, define*/
 
-
-/**
- * @author yaromin
- */
-
 require.config({
     paths: {
         less: "libs/less-1.5.1-min",
@@ -38,7 +33,6 @@ require.config({
         underscore: "libs/underscore-1.4.4-min",
         js2form: "libs/js2form-1.0",
         form2js: "libs/form2js-1.0",
-        contentflow: "libs/contentflow",
         spin: "libs/spin-1.2.5-min",
         jqueryui: "libs/jquery-ui-1.10.4.custom-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
@@ -47,9 +41,8 @@ require.config({
         handlebars: "libs/handlebars-1.0.rc.1",
         moment: "libs/moment-1.7.2-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
-        UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
-        SiteIdentificationDelegate: "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate"
+        SiteIdentificationDelegate: "org/forgerock/openidm/ui/common/delegates/SiteIdentificationDelegate"
     },
 
     shim: {
@@ -65,9 +58,6 @@ require.config({
         },
         form2js: {
             exports: "form2js"
-        },
-        contentflow: {
-            exports: "contentflow"
         },
         spin: {
             exports: "spin"
@@ -107,7 +97,6 @@ require([
     "backbone",
     "form2js",
     "js2form",
-    "contentflow",
     "spin",
     "jqgrid",
     "jqueryui",
@@ -120,12 +109,10 @@ require([
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/main", 
-    "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/admin/main",
-    "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/common/main",
     "config/main"
-], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
+], function(a, b, c, d, e, g, h, i, j, k, l, m, n, i18n, constants, eventManager) {
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 

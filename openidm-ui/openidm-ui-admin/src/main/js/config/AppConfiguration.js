@@ -24,9 +24,6 @@
 
 /*global define*/
 
-/**
- * @author yaromin
- */
 define("config/AppConfiguration", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager"
@@ -42,11 +39,18 @@ define("config/AppConfiguration", [
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/GenericRouteInterfaceMap",
                     configuration: {
-                        LoginView : "org/forgerock/openidm/ui/user/LoginView",
-                        UserProfileView : "org/forgerock/openidm/ui/user/profile/UserProfileView",
-                        LoginDialog : "org/forgerock/commons/ui/common/LoginDialog",
-                        RegisterView : "org/forgerock/openidm/ui/user/UserRegistrationView",
-                        ChangeSecurityDataDialog : "org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog"
+                        LoginView : "org/forgerock/commons/ui/common/LoginView",
+                        LoginDialog : "org/forgerock/commons/ui/common/LoginDialog"
+                    }
+                },
+                {
+                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
+                    configuration: {
+                        messages: {
+                        },
+                        loader: [
+                            {"messages":"config/messages/CommonMessages"}
+                        ]
                     } 
                 },
                 {
@@ -60,8 +64,7 @@ define("config/AppConfiguration", [
                     moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                     configuration: {
                         processConfigurationFiles: [
-                            "config/process/IDMConfig",
-                            "config/process/UserConfig",
+                            "config/process/AdminConfig",
                             "config/process/CommonConfig"
                         ]
                     } 
@@ -73,9 +76,7 @@ define("config/AppConfiguration", [
                         },
                         loader: [
                             {"routes":"config/routes/CommonRoutesConfig"}, 
-                            {"routes":"config/routes/AdminRoutesConfig"},
-                            {"routes":"config/routes/UserRoutesConfig"},
-                            {"routes":"config/routes/IDMRoutesConfig"}
+                            {"routes":"config/routes/AdminRoutesConfig"}
                         ]
                     } 
                 },
@@ -108,67 +109,26 @@ define("config/AppConfiguration", [
                                         "name": "config.AppConfiguration.Navigation.links.dashboard",
                                         "icon": "glyph-icon-th-list",
                                         "inactive": false
-                                    },
-                                    "users": {
-                                        "url": "#users/",
-                                        "name": "config.AppConfiguration.Navigation.links.users",
-                                        "icon": "glyph-icon-user",
-                                        "inactive": false
                                     }
-                                }    
-                            },
-                            "user" : {
-                                "urls": {
-                                    "dashboard": {
-                                        "url": "#dashboard/",
-                                        "name": "config.AppConfiguration.Navigation.links.dashboard",
-                                        "icon": "glyph-icon-th-list",
-                                        "inactive": false
-                                    }
-                                }    
+                                }
                             }
                         }                                       
-                    } 
-                },
-                {
-                    moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
-                    configuration: {
-                        forms: { // Workflow User Task to View mapping
-                            "org.forgerock.applicationAcceptance": "org/forgerock/openidm/ui/admin/workflow/tasks/customview/ApplicationAcceptanceTask",
-                            "org.forgerock.sendNotificationInit": "org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotificationProcess"
-                        }
                     } 
                 },
                 {
                     moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                     configuration: {
                         templateUrls: [ //preloaded templates
-                            //"templates/apps/application.html",
-                            "templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html",
-                            "templates/admin/workflow/tasks/ShowUserProfile.html"
                         ]
                     } 
                 },
-                {
-                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
-                    configuration: {
-                        messages: {
-                        },
-                        loader: [
-                            {"messages":"config/messages/CommonMessages"},
-                            {"messages":"config/messages/AdminMessages"},
-                            {"messages":"config/messages/UserMessages"}
-                        ]
-                    } 
-                },
+                
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
                     configuration: {
                         policyDelegate: "org/forgerock/openidm/ui/common/delegates/PolicyDelegate",
                         validators: { },
                         loader: [
-                            {"validators":"config/validators/AdminValidators"},
-                            {"validators":"config/validators/UserValidators"},
                             {"validators":"config/validators/CommonValidators"}
                         ]
                     } 

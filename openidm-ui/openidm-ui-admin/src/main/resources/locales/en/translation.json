@@ -64,6 +64,11 @@
         }
     },
     "templates" : {
+        "MandatoryChangePassword" : {
+            "title" : "Change Password Dialog",
+            "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure password.",
+            "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password." 
+        }, 
         "user" : {
             "LoginDialog" : {
                 "refreshOnLogin" : "Should refresh on login" 
@@ -83,12 +88,6 @@
             },
             "DefaultBaseTemplate" : {
                 "orPhone" : ", or phone"
-            },
-            "ChangeSecurityDataDialogTemplate" : {
-                "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
-                "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
-                "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
             },
             "ChangeSiteIdentificationDialogTemplate" : {
                 "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
@@ -129,16 +128,16 @@
                     "requestCount_plural" : "__count__  requests"
                 }
             },
-            "ChangeUserPasswordDialogTemplate" : {
-                "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter new password in the fields below to change user's password."
-            },
             "UsersTemplate" : {
                 "remainingUsers" : "remaining users"
             }
         }
     },
     "common" : {
+        "config" : {
+            "password" : "Password",
+            "confirmPassword" : "Confirm Password"
+        },
          "form" : {
             "true" : "True",
             "false" : "False",

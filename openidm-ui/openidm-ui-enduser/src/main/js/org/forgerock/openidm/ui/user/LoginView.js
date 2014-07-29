@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/LoginView",
-    "SiteIdentificationDelegate",
+    "",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(commonLoginView, siteIdentificationDelegate, conf) {
     

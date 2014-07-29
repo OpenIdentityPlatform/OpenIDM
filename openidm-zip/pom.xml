@@ -164,7 +164,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui-config</artifactId>
+            <artifactId>openidm-ui-admin</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>

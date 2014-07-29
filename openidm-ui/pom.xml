@@ -32,7 +32,7 @@
     </parent>
 
     <properties>
-      <forgerock-ui.version>1.0.15</forgerock-ui.version>
+      <forgerock-ui.version>1.0.16</forgerock-ui.version>
     </properties>
 
     <artifactId>openidm-ui</artifactId>
@@ -40,9 +40,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>openidm-ui-common</module>
-        <module>openidm-ui-config</module>
+        <module>openidm-ui-admin</module>
         <module>openidm-ui-enduser</module>
     </modules>
- 
-    
 </project>

@@ -37,20 +37,20 @@ define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/config/ui/configuration");
 
     obj.getConfiguration = function(successCallback, errorCallback) {
-        var i;
         console.info("Getting configuration");
         
-        obj.serviceCall({url: "", success: function(data) {
-            if(successCallback) {                           
-                successCallback(data.configuration);
-            }
-        }, error: errorCallback, headers: {
+        return obj.serviceCall({url: "", headers: {
             "X-OpenIDM-Password": "anonymous",
             "X-OpenIDM-Username": "anonymous",
             "X-OpenIDM-NoSession": "true"
-        }});
+        }})
+        .then(function(data) {
+            if(successCallback) {                           
+                successCallback(data.configuration);
+            }
+            return data.configuration;
+        }, errorCallback);
     };
-    
     return obj;
 });
 

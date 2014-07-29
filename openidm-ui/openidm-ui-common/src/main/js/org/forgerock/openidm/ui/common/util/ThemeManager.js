@@ -30,7 +30,7 @@
 define("ThemeManager", [
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/admin/ConfigDelegate"
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function(constants,conf,configDelegate) {
     
     var obj = {},

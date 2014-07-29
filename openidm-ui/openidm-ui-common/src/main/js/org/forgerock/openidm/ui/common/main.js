@@ -25,8 +25,14 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/common/main", [
-    "./util/Constants",
-    "./util/ThemeManager",
+    "./delegates/AuthnDelegate",
+    "./delegates/ConfigDelegate",
+    "./delegates/InternalUserDelegate",
+    "./delegates/PolicyDelegate",
     "./delegates/SiteConfigurationDelegate",
-    "./delegates/PolicyDelegate"
+
+    "./login/InternalLoginHelper",
+    
+    "./util/Constants",
+    "./util/ThemeManager"
 ]);
