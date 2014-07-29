@@ -1128,7 +1128,7 @@ $ <userinput>curl \
     
     <para>The number of processed tasks whose details are retained is governed 
     by the <literal>"openidm.taskscanner.maxcompletedruns"</literal> property 
-    in the <filename>conf/boot.properties</filename> file. By default, the 
+    in the <filename>conf/system.properties</filename> file. By default, the 
     last one hundred completed tasks are retained.</para>
    </section>
  
