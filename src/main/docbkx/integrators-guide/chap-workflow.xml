@@ -271,7 +271,7 @@ script task using expression resolver: [
   </para>
   <programlisting language="javascript">
   {
-    "enabled"  : "true",
+    "enabled"  : true,
     "location" : "remote",
     "engine" : {
         "url" : "http://localhost:9090/openidm-workflow-remote-<?eval ${serverDocTargetVersion}?>",
