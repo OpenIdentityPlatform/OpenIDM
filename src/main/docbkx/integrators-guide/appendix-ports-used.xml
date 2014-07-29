@@ -73,10 +73,11 @@
      <primary>Ports</primary>
      <secondary>8444</secondary>
     </indexterm>
-    <para>HTTPS access to the REST API, requiring SSL mutual authentication.
-    Clients presenting certificates found in the trust store under
-    <filename>openidm/security/</filename> are granted access to the
-    system.</para>
+    <para>
+     HTTPS access to the REST API, requiring SSL mutual authentication. Clients
+     that present certificates found in the truststore under
+     <filename>openidm/security/</filename> are granted access to the system.
+    </para>
    </listitem>
   </varlistentry>
  </variablelist>

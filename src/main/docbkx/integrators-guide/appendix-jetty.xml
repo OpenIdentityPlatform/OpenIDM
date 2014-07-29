@@ -45,7 +45,7 @@
 
  <para>
   The Jetty configuration can reference configuration properties (such as port
-  numbers and key store details) from OpenIDM's
+  numbers and keystore details) from OpenIDM's
   <filename>boot.properties</filename> configuration file. If you change the
   ports in the <filename>boot.properties</filename> file, you must make the same
   change in the <filename>config.properties</filename> file.
@@ -126,22 +126,28 @@
     <varlistentry>
      <term>keystoreKeyPassword</term>
      <listitem>
-      <para>Maps to <literal>openidm.keystore.key.password</literal>, or the
-      key store password if not set</para>
+      <para>
+       Maps to <literal>openidm.keystore.key.password</literal>, or the keystore
+       password, if not set
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>truststoreLocation</term>
      <listitem>
-      <para>Maps to <literal>openidm.truststore.location</literal>, or the
-      key store location if not set</para>
+      <para>
+       Maps to <literal>openidm.truststore.location</literal>, or the keystore
+       location, if not set
+      </para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>truststorePassword</term>
      <listitem>
-      <para>Maps to <literal>openidm.truststore.password</literal>, or the
-      key store password if not set</para>
+      <para>
+       Maps to <literal>openidm.truststore.password</literal>, or the keystore
+       password, if not set
+      </para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -168,7 +174,7 @@
     <para>The HTTP, SSL, and Mutual Authentication ports defined in OpenIDM</para>
    </listitem>
    <listitem>
-    <para>Same key store/trust store settings as OpenIDM</para>
+    <para>The same keystore and truststore settings as OpenIDM</para>
    </listitem>
    <listitem>
     <para>Trivial sample realm,
