@@ -958,7 +958,8 @@ $ <userinput>curl \
   <title>Managing Reconciliation Over REST</title>
   <para>
    You can trigger, cancel, and monitor reconciliation operations over REST,
-   using the REST endpoint <literal>http://localhost:8080/openidm/recon</literal>.
+   using the REST endpoint
+   <literal>https://localhost:8443/openidm/recon</literal>.
   </para>
 
   <section xml:id="triggering-recons">
@@ -1110,7 +1111,7 @@ $ <userinput>curl \
     <para>
      You can display a list of reconciliation processes that have completed, and
      those that are in progress, by running a RESTful GET on
-     <literal>"http://localhost:8080/openidm/recon"</literal>. The following
+     <literal>"https://localhost:8443/openidm/recon"</literal>. The following
      example displays all reconciliation runs.
     </para>
 
@@ -3724,14 +3725,18 @@ INFO: uid=jdoe,ou=people,dc=example,dc=com saved to dead letter queue
    property, it is not necessary to set case sensitivity, because the mapping
    uses the setting of the referred links.</para>
 
-   <para>Note that configuring OpenIDM to be case-insensitive when comparing
-   links does not make the OpenICF provisioner case-insensitive when it requests
-   data. For example, if a user entry is stored with the ID <literal>testuser</literal>
-   and you make a request for <literal>http://localhost:8080/openidm/managed/TESTuser</literal>,
-   most provisioners will filter out the match because of the difference in case,
-   and will indicate that the record is not found. To prevent the provisioner from
-   performing this secondary filtering, set the <literal>enableFilteredResultsHandler</literal>
-   property to <literal>false</literal> in the provisioner configuration. For example:</para>
+   <para>
+    Note that configuring OpenIDM to be case-insensitive when comparing links
+    does not make the OpenICF provisioner case-insensitive when it requests
+    data. For example, if a user entry is stored with the ID
+    <literal>testuser</literal> and you make a request for
+    <literal>https://localhost:8443/openidm/managed/TESTuser</literal>, most
+    provisioners will filter out the match because of the difference in case,
+    and will indicate that the record is not found. To prevent the provisioner
+    from performing this secondary filtering, set the
+    <literal>enableFilteredResultsHandler</literal> property to
+    <literal>false</literal> in the provisioner configuration. For example:
+   </para>
 
    <screen>"resultsHandlerConfig" :
 {
