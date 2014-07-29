@@ -689,12 +689,12 @@
   <section xml:id="ui-style">
    <title>Changing the Default Stylesheet</title>
    <para>
-    Most changes to the UI stylesheets can be made in the UI them configuration
-    file.
+    Most changes to the UI stylesheets can be made in the UI theme configuration
+    file (<filename>conf/ui-themeconfig.json</filename>).
    </para>
    <para>
-    The following modification changes the background color of the UI to dark
-    grey.
+    With the following modification made to that file, the background color of
+    the UI is changed to dark grey.
    </para>
    <screen><userinput>$ grep "background-color" /path/to/openidm/conf/ui-themeconfig.json</userinput>
 <computeroutput>"background-color" : "#ababab",</computeroutput>
