@@ -159,8 +159,8 @@
          }' \
  https://localhost:8443/openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com</userinput></screen>
        <para>
-        The resulting <literal>_id OpenIDM</literal> ${serverDocTargetVersion}
-        is:
+        The resulting <literal>_id</literal> in OpenIDM
+        ${serverDocTargetVersion} is:
        </para>
        <screen>"_id":"uid=jsmith,ou=people,dc=example,dc=com"</screen>
        <para>
