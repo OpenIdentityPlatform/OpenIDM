@@ -30,11 +30,11 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>OpenIDM Fixes, Limitations, &amp; Known Issues</title>
 
- <!-- TODO: Update for the release. -->
+ <!-- TODO: Put this back once the release is done.
  <note>
   <para>The current list of fixes and issues reflects OpenIDM
   ${serverDocTargetVersion} in progress as of July 28, 2014.</para>
- </note>
+ </note>   -->
 
  <para>OpenIDM issues are tracked at <link
  xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM'
