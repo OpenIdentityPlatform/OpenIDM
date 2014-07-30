@@ -216,7 +216,7 @@
        <para>
         Furthermore, to describe the authentication target, you may see
         <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, or
-        <literal>PASSTHROGH</literal> used as aliases for
+        <literal>PASSTHROUGH</literal> used as aliases for
         <literal>DELEGATED</literal>.
        </para>
        <para>
