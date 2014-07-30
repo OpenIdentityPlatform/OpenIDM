@@ -128,7 +128,7 @@
         are expanded into the directory
         <filename>path/to/openidm/ui/default/enduser/public</filename>, and can
         be edited in this location. Changes made to files in this directory will
-        after a browser refresh.
+        take effect after a browser refresh.
        </para>
       </listitem>
       <listitem>
