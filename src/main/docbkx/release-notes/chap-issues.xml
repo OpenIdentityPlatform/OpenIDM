@@ -292,9 +292,20 @@
    is not supported.
   </para>
   <para>
-   The documented procedure for using an Oracle repository currently applies to
-   the Express release and not to the Enterprise release.
+   The OpenIDM implementation of roles does not enforce referential integrity.
+   In other words, you can set up users with a hypothetical role x, before you
+   create that referential role x. Conversely, if you delete an existing
+   referential role y, users with that role will retain that role.
   </para>
+  <para>
+   When dynamically assigned roles are added, OpenIDM does not set up
+   provisioning for previously existing users.
+  </para>
+  <para>
+   Any updates to dynamically assigned roles will not update users assigned
+   with those roles.
+  </para>
+
  </section>
 
  <section xml:id="known-issues">
