@@ -1604,4 +1604,104 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
 
  </section>
 
+ <!-- This section is a workaround, and should be deleted when (a) an SSL cert
+ needs to be imported only once and (b) when it can be imported with the
+  OpenIDM native cli.sh keytool command -->
+
+ <section xml:id="jdbc-repos-ssl">
+  <title>Configuring SSL with a JDBC Repository</title>
+
+  <para>
+   To configure SSL with a JDBC repository, you need to import the CA
+   certificate file for the server into two locations: the Java truststore
+   and the OpenIDM truststore. That certificate file could have a name like
+   <filename>ca-cert.pem</filename>. If you have a different genuine or
+   self-signed certificate file, substitute accordingly.
+  </para>
+
+  <para>
+   To import the CA certificate file into both truststores, use the
+   <command>keytool</command> command native to the Java environment, typically
+   located in the <filename>/path/to/jre-version/bin</filename> directory. On
+   some UNIX-based systems, <command>/usr/bin/keytool</command> may link
+   to that command.
+  </para>
+
+  <para>
+   You can find the Java truststore file, <filename>cacerts</filename>, in the
+   <filename>/path/to/jre-version/jre/lib/security</filename> directory. On
+   some UNIX-based systems, that may be linked to a location such as
+   <filename>/etc/pki/java/cacerts</filename>.
+  </para>
+
+  <procedure xml:id="import-cacert-jdbc">
+   <title>Preparing OpenIDM for SSL with a JDBC Repository</title>
+   <step>
+    <para>
+     Import the <filename>ca-cert.pem</filename> certificate into the Java
+     truststore file with the following command:
+    </para>
+
+    <screen>$ keytool \
+ -importcert \
+ -trustcacerts
+ -file ca-cert.pem \
+ -alias "DB cert" \
+ -keystore /etc/pki/java/cacerts
+    </screen>
+   </step>
+   <step>
+    <para>
+     Import the <filename>ca-cert.pem</filename> certificate into the OpenIDM
+     truststore file with the following command:
+    </para>
+
+    <screen>$ keytool \
+ -importcert \
+ -trustcacerts \
+ -file ca-cert.pem \
+ -alias "DB cert" \
+ -keystore /path/to/openidm/security/truststore
+    </screen>
+   </step>
+   <step>
+    <para>
+     Open the repository configuration file, <filename>repo.jdbc.json</filename>.
+    </para>
+    <para>
+     Look for the <literal>"jdbcUrl"</literal> properties. You should see a
+     <literal>jdbc</literal> URL. Add a
+     <literal>?characterEncoding=utf8&amp;useSSL=true</literal> to the end of
+     that URL.
+    </para>
+    <para>
+     The <literal>"jdbcUrl"</literal> that you configure depends on your JDBC
+     repository. The following entries correspond to appropriate
+     <literal>"jdbcURL"</literal> properties for MySQL, MSSQL, and Oracle DB,
+     respectively.
+    </para>
+    <screen>
+"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8&amp;useSSL=true"</screen>
+    <screen>
+"jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;
+     databaseName=openidm;applicationName=OpenIDM?characterEncoding=utf8&amp;useSSL=true"</screen>
+    <screen>
+"jdbcUrl" : "jdbc:oracle:thin:@//localhost:1521/openidm?characterEncoding=utf8&amp;useSSL=true"</screen>
+   </step>
+   <step>
+    <para>
+     Open the <filename>/path/to/openidm/conf/config.properties</filename> file.
+     Find the <literal>org.osgi.framework.bootdelegation</literal> property.
+     Make sure that property includes a reference to the
+     <literal>javax.net.ssl</literal> option. If you started with the default
+     version of <filename>config.properties</filename> that line should now
+     read as follows:
+    </para>
+    <screen>
+org.osgi.framework.bootdelegation=sun.*,com.sun.*,apple.*,com.apple.*,javax.net.ssl
+    </screen>
+   </step>
+  </procedure>
+
+ </section>
 </chapter>
