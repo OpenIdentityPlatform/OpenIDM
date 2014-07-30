@@ -291,6 +291,10 @@
    As an embedded system, local integration is supported. Remote integration
    is not supported.
   </para>
+  <para>
+   The documented procedure for using an Oracle repository currently applies to
+   the Express release and not to the Enterprise release.
+  </para>
  </section>
 
  <section xml:id="known-issues">
