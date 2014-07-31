@@ -304,7 +304,11 @@ $ cp bin/default/script/access.js script/
       Note that the format of system object <literal>_ids</literal> has changed
       in OpenIDM 3.0.0 (they are no longer URL-encoded). Therefore, system
       object <literal>_ids</literal> in an existing links table will not be
-      recognized by an OpenIDM 3.0.0 reconciliation process.
+      recognized by an OpenIDM 3.0.0 reconciliation process. For more
+      information, see <link
+      xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2091"
+      xlink:show="new">OPENIDM-2091</link>: Migration script for encoded ids in
+      the links table.
      </para>
     </listitem>
    </itemizedlist>
