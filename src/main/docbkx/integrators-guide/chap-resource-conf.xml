@@ -3067,15 +3067,18 @@ Properties:
   <section xml:id="powershell-connector">
    <title>Powershell Connector</title>
    <para>
-    The PowerShell connector is a generic scripted connector that enables you to
-    run PowerShell scripts to provision, synchronize, and deprovision user
-    accounts in Active Directory.
+    The PowerShell connector is a generic scripted connector to address the
+    Microsoft Windows ecosystem. You can use this connector to provision any
+    Microsoft system, including, but not limited to, Active Directory, MS SQL,
+    MS Exchange, Sharepoint, Office365, and Azure. Essentially, any task that
+    can be performed with PowerShell can be executed through this connector.
    </para>
    <para>
     The PowerShell connector runs on the .NET platform and requires the
-    installation of a .NET connector server on the Active Directory server. To
-    install the .NET connector, follow the instructions in <xref
-    linkend="install-.net-connector" />.
+    installation of a .NET connector server on the Windows system. To install
+    the .NET connector, follow the instructions in <xref
+    linkend="install-.net-connector" />. The PowerShell connector requires
+    PowerShell V2.
    </para>
    <para>
     The PowerShell connector is not bundled with OpenIDM, and must be downloaded
