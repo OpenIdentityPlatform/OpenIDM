@@ -319,6 +319,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     protected void handleRequest(final ServerContext context, final Request request,
             final Bindings bindings) {
         bindings.put("request", request);
+        bindings.put("resourceName", request.getResourceNameObject());
         bindings.put("context", context);
     }
 }
