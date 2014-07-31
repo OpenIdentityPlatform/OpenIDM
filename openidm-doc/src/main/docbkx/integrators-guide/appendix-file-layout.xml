@@ -141,14 +141,6 @@
     system</para></listitem>
   </varlistentry>
   <varlistentry>
-    <term><filename>openidm/bin/defaults/script/init.groovy</filename></term>
-    <listitem>
-     <para>
-      The initialization script that enables support for groovy scripting.
-     </para>
-    </listitem>
-  </varlistentry>
-  <varlistentry>
     <term><filename>openidm/bin/defaults/script/lib/*</filename></term>
     <listitem>
      <para>
