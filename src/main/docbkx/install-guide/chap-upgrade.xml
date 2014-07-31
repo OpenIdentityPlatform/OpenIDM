@@ -223,6 +223,15 @@ $ cp bin/default/script/access.js script/
       should end up in the <filename>openidm-3.0/conf</filename> directory.
      </para>
     </listitem>
+    <listitem>
+     <para>
+      Pay particular attention to the <filename>conf/repo.jdbc.json</filename>
+      file in your existing deployment. If you have customized this file, make
+      sure that these customizations are ported to the corresponding file in the
+      3.0.0 deployment. For example, if you have defined any new queries, add
+      these queries to the OpenIDM 3.0 <filename>repo.jdbc.json</filename> file.
+     </para>
+    </listitem>
    </itemizedlist>
   </step>
   <step>
@@ -265,16 +274,44 @@ $ cp bin/default/script/access.js script/
     audit data, if required.
    </para>
    <para>
-    The database schema has changed slightly in
-    OpenIDM 3.0.0. The following tables have been added:
-    <literal>security</literal>, <literal>securitykeys</literal>,
-    <literal>clusterobjects</literal>, and
-    <literal>clusterobjectproperties</literal>. In addition, the following
-    columns have been added to the <literal>auditrecon</literal> table:
-    <literal>actionid</literal>, <literal>exceptiondetail</literal>,
-    <literal>mapping</literal>, <literal>messagedetail</literal>.</para>
+    When you migrate this data, note the following points:
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      The way in which queries on system objects are constructed has changed.
+      This includes correlation queries on system objects. For more information,
+      see <link
+      xlink:show="new" xlink:href="integrators-guide#constructing-queries"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Constructing
+      Queries</citetitle></link> in the <citetitle>Integrators Guide</citetitle>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      The database schema has changed slightly in OpenIDM 3.0.0. The following
+      tables have been added: <literal>security</literal>,
+      <literal>securitykeys</literal>, <literal>clusterobjects</literal>, and
+      <literal>clusterobjectproperties</literal>. In addition, the following
+      columns have been added to the <literal>auditrecon</literal> table:
+      <literal>actionid</literal>, <literal>exceptiondetail</literal>,
+      <literal>mapping</literal>, <literal>messagedetail</literal>, and
+      <literal>_rev</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Note that the format of system object <literal>_ids</literal> has changed
+      in OpenIDM 3.0.0 (they are no longer URL-encoded). Therefore, system
+      object <literal>_ids</literal> in an existing links table will not be
+      recognized by an OpenIDM 3.0.0 reconciliation process.
+     </para>
+    </listitem>
+   </itemizedlist>
    <para>
-    Your data migration strategy might vary, depending on your repository.
+    Your data migration strategy might vary, depending on your repository. You
+    can either migrate your existing 2.1.0 database, or start with a new
+    3.0.0 database and import your existing data.
    </para>
    <itemizedlist>
     <para>
@@ -285,6 +322,12 @@ $ cp bin/default/script/access.js script/
       Using the appropriate schema script from the new OpenIDM 3.0.0 instance
       (<filename>/path/to/openidm-3.0/db/scripts/<replaceable>repo</replaceable>/openidm.sql</filename>),
       take the changes described above and apply them to your existing database.
+     </para>
+     <para>
+      Use the <literal>--force</literal> option in MySQL (or an equivalent
+      option for your repository type) to create the new tables, then edit the
+      <literal>auditrecon</literal> table manually, to add the columns described
+      previously.
      </para>
     </listitem>
    </itemizedlist>
