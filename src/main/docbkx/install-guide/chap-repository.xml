@@ -565,7 +565,7 @@ Id   State          Name
   <para>
    For more information on connecting to an Oracle database, see
    <link xlink:show="new"
-   xlink:href="docs.oracle.com/cd/E11882_01/appdev.112/e10766/tdddg_connecting.htm"
+   xlink:href="http://docs.oracle.com/cd/E11882_01/appdev.112/e10766/tdddg_connecting.htm"
    >Connecting to Oracle Database</link>.
   </para>
 
@@ -616,7 +616,7 @@ ROLES        openidm-reg
     >Oracle Technology Network</link> and place it in the
     <filename>openidm/db/scripts/oracle</filename> directory.</para>
    <screen>$ ls /path/to/openidm/db/scripts/oracle
-    ojdbc6_g.jar
+ojdbc6_g.jar
    </screen>
   </step>
   <step>
