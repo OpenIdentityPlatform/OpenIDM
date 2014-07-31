@@ -556,17 +556,11 @@ Id   State          Name
    This section assumes that you have configured an Oracle
    Database with <link xlink:show="new"
    xlink:href="http://docs.oracle.com/cd/B28359_01/network.111/b28317/tnsnames.htm"
-   >Local Naming Parameters (tnsnames.ora)</link>, the credentials of the
-   service user associated with OpenIDM,
+   >Local Naming Parameters (tnsnames.ora)</link>, a schema owner, and
+   optionally a service user and its associated credentials for use by OpenIDM.
   </para>
 
  <procedure>
-
-  <para>
-   This section assumes that an Oracle Database has been installed and
-   configured with a container, a user with privileges to that container,
-   along with a <literal>defaultCatalog</literal>
-  </para>
 
   <para>
    For more information on connecting to an Oracle database, see
@@ -576,15 +570,10 @@ Id   State          Name
   </para>
 
   <para>
-   You will need an appropriate Oracle DB user to import the OpenIDM data
-   definition language script, <filename>openidm.sql</filename> into the Oracle
-   Database. You can find that script in the
-   <filename>/path/to/openidm/db/scripts/oracle</filename> directory.
-  </para>
-
-  <para>
-   You should also create any required database tables for use as the
-   OpenIDM internal repository.
+   You will need to import the OpenIDM schema using the data definition language
+   script found in
+   <filename>/path/to/openidm/db/scripts/oracle/openidm.sql</filename> using the
+   appropriate schema owner user.
   </para>
 
   <para>
@@ -761,27 +750,29 @@ $ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
    </listitem>
    <listitem>
     <para>
-     The <literal>"jdbcUrl"</literal> corresponds to the URL of the Oracle DB,
-     along with the service name, based on <link xlink:show="new"
-     xlink:href="http://docs.oracle.com/cd/B28359_01/network.111/b28317/tnsnames.htm"
-     >Local Naming Parameters (tnsnames.ora)</link>. The endpoint of the
-     <literal>"jdbcUrl"</literal> does not have to be <literal>openidm</literal>.
+     The <literal>"jdbcUrl"</literal> corresponds to the URL of the Oracle DB
+     listener, including the service name, based on your configured Local Naming
+     Parameters (tnsnames.ora). It should be whatever is appropriate for your
+     environment. Replace "openidm" with the service name from your TNS
+     description.
     </para>
    </listitem>
    <listitem>
     <para>
      The <literal>"username"</literal> and <literal>"password"</literal>
      corresponds to the credentials of the service user that connects from
-     OpenIDM. The <literal>"username"</literal> does not have to be
-     <literal>"openidm"</literal>
+     OpenIDM. Use the username of the service user you have created with grants
+     to the OpenIDM tables you created earlier.
     </para>
    </listitem>
    <listitem>
     <para>
-     The <literal>"defaultCatalog"</literal> is the schema owner of the Oracle
-     DB. That owner may or may not have the same credentials as the service
-     user that connects from OpenIDM. The <literal>"defaultCatalog"</literal>
-     does not have to be <literal>"openidm"</literal>
+     The <literal>"defaultCatalog"</literal> is used to generate queries
+     appropriate to your OpenIDM schema in Oracle. It should match the user who
+     "owns" the tables. If your schema owner was <literal>"openidm"</literal>,
+     then the <literal>"defaultCatalog"</literal> should also be
+     <literal>"openidm"</literal>. This will cause OpenIDM to generate queries
+     such as <literal>"SELECT objectid FROM openidm.internaluser"</literal>.
     </para>
    </listitem>
   </itemizedlist>
