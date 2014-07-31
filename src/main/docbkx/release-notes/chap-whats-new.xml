@@ -38,6 +38,33 @@
   </para>
 
   <variablelist>
+
+   <varlistentry>
+    <term>Commons REST</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} is the first ForgeRock product to
+      fully implement the ForgeRock Commons REST API. It is the ForgeRock-unique
+      RESTful API with a set of easy-to-remember REST calls: create, read,
+      update, delete, patch, action, and query (CRUDPAQ). For more information,
+      see <link xlink:show="new" xlink:href="release-notes#major-changes"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
+      To Existing Functionality</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>New OpenICF 1.4.0.0 Connectors</term>
+    <listitem>
+     <para>
+      OpenICF connectors support interfaces between OpenIDM and a variety of
+      external databases. For more information, see <link xlink:show="new"
+      xlink:href="release-notes#major-changes"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
+      To Existing Functionality</citetitle></link>
+     </para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Role-based Provisioning</term>
     <listitem>
@@ -88,12 +115,25 @@
      <para>
       Previous releases supported only JavaScript, with the exception of
       Workflow definitions and certain generic scripted connectors. With
-      product-wide Groovy scripting, the language can now be used throughout to
-      define business logic and customizations.
+      product-wide Groovy scripting, the language can now be used throughout
+      to define business logic and customizations.
      </para>
     </listitem>
    </varlistentry>
 
+   <varlistentry>
+    <term>PowerShell Capabilities</term>
+    <listitem>
+      <para>
+       OpenIDM ${serverDocTargetVersion} supports PowerShell scripts.
+      </para>
+      <para>
+       The PowerShell connector is a generic scripted connector that enables
+       you to run PowerShell scripts to provision, synchronize, and deprovision
+       user accounts in Active Directory.
+      </para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Synchronization Delivery Guarantees</term>
     <listitem>
