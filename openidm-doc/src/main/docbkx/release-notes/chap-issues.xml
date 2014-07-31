@@ -47,10 +47,10 @@
    OpenIDM ${serverDocTargetVersion} includes the following major fixes and
    improvements.
   </para>
-
-  <!-- List generated at 11:21:14 20140730 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.0.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 10:10:38 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.0.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2067" xlink:show="new">OPENIDM-2067</link>: For an MS SQL repository, queries in the repo config file containing concatenation functions do not work</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2063" xlink:show="new">OPENIDM-2063</link>: Failed to start OpenIDM when MySQL was used as repo with SSL enabled</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2061" xlink:show="new">OPENIDM-2061</link>: Recon Fails to create users from AD "REV" : invalid identifier [Oracle]</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2017" xlink:show="new">OPENIDM-2017</link>: OpenIDM does not check availability of remote connectors.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2009" xlink:show="new">OPENIDM-2009</link>: External REST service does not pass custom headers</para></listitem>
@@ -58,7 +58,7 @@
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1972" xlink:show="new">OPENIDM-1972</link>: scheduler.json should be delivered with instanceId of &amp;{openidm.node.id} instead of scheduler1234</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1967" xlink:show="new">OPENIDM-1967</link>: Exceptions in connector when using remote java connector server are not wrapped properly</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1966" xlink:show="new">OPENIDM-1966</link>: External REST calls without any authentication specified are now refused</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1961" xlink:show="new">OPENIDM-1961</link>: Persistence scheduler jobs can't be fail over</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1961" xlink:show="new">OPENIDM-1961</link>: Persistent scheduler jobs cannot be failed over</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1960" xlink:show="new">OPENIDM-1960</link>: when password of internal user is encrypted in MySQL repo, we can not authenticate with this user</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1953" xlink:show="new">OPENIDM-1953</link>: sample2 authentication should not be looking in managed/user</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1943" xlink:show="new">OPENIDM-1943</link>: LiveSync of ObjectClass __ALL__ is broken</para></listitem>
@@ -281,50 +281,53 @@
 
  <section xml:id="limitations">
   <title>Limitations</title>
-  <para>
-   A conditional GET request, with the <literal>If-Match</literal> request
-   header, is not currently supported.
-  </para>
-  <para>
-   OpenIDM provides an embedded workflow and business process engine based
-   on Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
-   As an embedded system, local integration is supported. Remote integration
-   is not supported.
-  </para>
-  <para>
-   The OpenIDM implementation of roles does not enforce referential integrity.
-   In other words, you can set up users with a hypothetical role x, before you
-   create that referential role x. Conversely, if you delete an existing
-   referential role y, users with that role will retain that role.
-  </para>
-  <para>
-   When dynamically assigned roles are added, OpenIDM does not set up
-   provisioning for previously existing users.
-  </para>
-  <para>
-   Any updates to dynamically assigned roles will not update users assigned
-   with those roles.
-  </para>
-
+  <itemizedlist>
+   <para>
+    OpenIDM ${serverDocTargetVersion} has the following known limitations:
+   </para>
+   <listitem>
+    <para>
+     A conditional GET request, with the <literal>If-Match</literal> request
+     header, is not currently supported.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     OpenIDM provides an embedded workflow and business process engine based on
+     Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+     As an embedded system, local integration is supported. Remote integration
+     is not currently supported.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     The OpenIDM implementation of roles does not enforce referential integrity.
+     In other words, you can set up users with a hypothetical role x, before you
+     create that referential role x. Conversely, if you delete an existing
+     referential role y, users with that role will retain that role.
+    </para>
+    <para>
+     When dynamically assigned roles are added, OpenIDM does not set up
+     provisioning for previously existing users. Any updates to dynamically
+     assigned roles will not update users assigned with those roles.
+    </para>
+   </listitem>
+  </itemizedlist>
  </section>
 
  <section xml:id="known-issues">
   <title>Known Issues</title>
-                  <!--TODO add OPENIDM-1784 regardless of priority:
-                  If there is an error in the connector connectorRef config,
-                  the connector is unavailable. However, no exception or warning
-                  is generated, only "service unavailable".-->
   <para>
    OpenIDM ${serverDocTargetVersion} has the following known issues.
   </para>
-
-  <!-- List generated at 11:47:43 20140730 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 10:15:37 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2089" xlink:show="new">OPENIDM-2089</link>: Remove the need to store certificates in the default java keystore when doing ssl over jdbc.</para></listitem>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2088" xlink:show="new">OPENIDM-2088</link>: Review the config.properties library exports to see if a jdk version declaration is necessary.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2079" xlink:show="new">OPENIDM-2079</link>: Cannot PATCH managed user when ID contains special characters.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2078" xlink:show="new">OPENIDM-2078</link>: PermGen leak in "source" scripts</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2074" xlink:show="new">OPENIDM-2074</link>: When the workflow module is disabled, shutdown errors are displayed on the console</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2068" xlink:show="new">OPENIDM-2068</link>: Audit service does not pass cREST paging parameters along with other query details</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2063" xlink:show="new">OPENIDM-2063</link>: Failed to start OpenIDM when MySQL was used as repo with SSL enabled</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2062" xlink:show="new">OPENIDM-2062</link>: openidm/system/NAME?_action=test does not properly handle encrypted values causing the tests to fail. </para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2058" xlink:show="new">OPENIDM-2058</link>: Issues on status code and response content for REST API of Configuration with put and delete</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2057" xlink:show="new">OPENIDM-2057</link>: Issues on status code and response content for REST API of System with post, and delete</para></listitem>
