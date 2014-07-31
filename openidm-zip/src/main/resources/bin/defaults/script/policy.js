@@ -210,13 +210,10 @@ policyImpl = (function (){
                 "username": value
             };
     
-            requestBaseArray = request.resourceName.split("/");
-            if (requestBaseArray.length === 3) {
-                requestId = requestBaseArray.pop();
-            }
+            requestId = resourceName.leaf();
             existing = openidm.query("repo/internal/user",  queryParams);
     
-            if (existing.result.length !== 0 && (!requestId || (existing.result[0]._id !== requestId))) {
+            if (existing.result.length !== 0 && (!requestId || (existing.result[0]._id != requestId))) {
                 return [{"policyRequirement": "UNIQUE"}];
             }
         }
@@ -232,13 +229,10 @@ policyImpl = (function (){
                 "value": value
             };
 
-            requestBaseArray = request.resourceName.split("/");
-            if (requestBaseArray.length === 3) {
-                requestId = requestBaseArray.pop();
-            }
-            existing = openidm.query(requestBaseArray.join("/"),  queryParams);
-    
-            if (existing.result.length !== 0 && (!requestId || (existing.result[0]._id !== requestId))) {
+            requestId = resourceName.leaf();
+            existing = openidm.query(resourceName.parent().toString(),  queryParams);
+
+            if (existing.result.length !== 0 && (!requestId || (existing.result[0]._id != requestId))) {
                 return [{"policyRequirement": "UNIQUE"}];
             }
         }
