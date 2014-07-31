@@ -328,10 +328,12 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
             SecurityContext securityContext = context.asContext(SecurityContext.class);
             bindings.put("security", securityContext.getAuthorizationId());
             bindings.put("request", ScriptUtil.getRequestMap(request, context));
+            bindings.put("resourceName", request.getResourceNameObject());
             bindings.put("_context", ScriptUtil.getLazyContext(context));
             bindings.put("context", context);
         } else {
             bindings.put("request", request);
+            bindings.put("resourceName", request.getResourceNameObject());
             bindings.put("context", context);
         }
     }
