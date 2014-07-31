@@ -47,8 +47,9 @@
    OpenIDM ${serverDocTargetVersion} includes the following major fixes and
    improvements.
   </para>
-  <!-- List generated at 10:10:38 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.0.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 16:46:20 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.0.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
+   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2079" xlink:show="new">OPENIDM-2079</link>: Cannot PATCH managed user when ID contains special characters.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2067" xlink:show="new">OPENIDM-2067</link>: For an MS SQL repository, queries in the repo config file containing concatenation functions do not work</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2063" xlink:show="new">OPENIDM-2063</link>: Failed to start OpenIDM when MySQL was used as repo with SSL enabled</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2061" xlink:show="new">OPENIDM-2061</link>: Recon Fails to create users from AD "REV" : invalid identifier [Oracle]</para></listitem>
@@ -320,11 +321,9 @@
   <para>
    OpenIDM ${serverDocTargetVersion} has the following known issues.
   </para>
-  <!-- List generated at 10:15:37 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
+  <!-- List generated at 16:48:57 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2089" xlink:show="new">OPENIDM-2089</link>: Remove the need to store certificates in the default java keystore when doing ssl over jdbc.</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2088" xlink:show="new">OPENIDM-2088</link>: Review the config.properties library exports to see if a jdk version declaration is necessary.</para></listitem>
-   <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2079" xlink:show="new">OPENIDM-2079</link>: Cannot PATCH managed user when ID contains special characters.</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2078" xlink:show="new">OPENIDM-2078</link>: PermGen leak in "source" scripts</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2074" xlink:show="new">OPENIDM-2074</link>: When the workflow module is disabled, shutdown errors are displayed on the console</para></listitem>
    <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-2068" xlink:show="new">OPENIDM-2068</link>: Audit service does not pass cREST paging parameters along with other query details</para></listitem>
