@@ -378,7 +378,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
       </listitem>
       <listitem>
        <para>
-        The way in which queries on system object are constructed has changed.
+        The way in which queries on system objects are constructed has changed.
         Queries that followed the OpenICF format are no longer supported and
         query filters must now be specified in common filter notation. This
         includes correlation queries on system objects.
