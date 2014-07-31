@@ -39,13 +39,13 @@
 
  <variablelist>
   <para>
-   When you unpack and start OpenIDM <?eval ${serverDocTargetVersion}?>, you create
-   the following files and directories. Note that the precise paths will depend
-   on the install, project, and working directories that you have selected
-   during startup. For more information, see <link
+   When you unpack and start OpenIDM ${serverDocTargetVersion}, you create the
+   following files and directories. Note that the precise paths will depend on
+   the install, project, and working directories that you have selected during
+   startup. For more information, see <link
    xlink:href="integrators-guide#startup-configuration"
-   xlink:role="http://docbook.org/xlink/role/olink">
-   <citetitle>Specifying the OpenIDM Startup Configuration</citetitle></link>.
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Specifying the
+   OpenIDM Startup Configuration</citetitle></link>.
   </para>
   
   <varlistentry>
@@ -98,6 +98,39 @@
     <filename>openidm/script</filename> folder.</para></listitem>
   </varlistentry>
   <varlistentry>
+    <term><filename>openidm/bin/defaults/script/audit/*.js</filename></term>
+    <listitem>
+     <para>Scripts related to the audit logging service.</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/auth/*.js</filename></term>
+    <listitem>
+     <para>Scripts related to the authentication mechanism, described in the
+      <link xlink:href="integrators-guide#openidm-authentication"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Authentication
+      chapter</citetitle></link>.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/compensate.js</filename></term>
+    <listitem><para>Script that provides the compensation functionality to
+     assure or roll back reconciliation operations. For more information, see
+     <link xlink:href="integrators-guide#sync-types-automatic"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>How Automatic
+     Sync Works With onSync</citetitle></link>.
+    </para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/info/crypto.js</filename></term>
+    <listitem>
+     <para>
+      A wrapper script for the <literal>openidm.encrypt</literal> function.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
     <term><filename>openidm/bin/defaults/script/info/login.js</filename></term>
     <listitem><para>Provides information about the current OpenIDM session.
     </para></listitem>
@@ -106,7 +139,32 @@
     <term><filename>openidm/bin/defaults/script/info/ping.js</filename></term>
     <listitem><para>Provides basic information about the health of an OpenIDM 
     system</para></listitem>
-  </varlistentry>  
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/init.groovy</filename></term>
+    <listitem>
+     <para>
+      The initialization script that enables support for groovy scripting.
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/lib/*</filename></term>
+    <listitem>
+     <para>
+      Internal libraries required by certain OpenIDM javascripts
+     </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/linkedView.js</filename></term>
+    <listitem>
+     <para>
+      A script that returns all the records linked to a specific resource, used
+      in reconciliation.
+     </para>
+    </listitem>
+  </varlistentry>
   <varlistentry>
     <term><filename>openidm/bin/defaults/script/policy.js</filename></term>
     <listitem><para>Defines each policy and specifies how policy validation is 
@@ -115,7 +173,18 @@
   <varlistentry>
     <term><filename>openidm/bin/defaults/script/policyFilter.js</filename></term>
     <listitem><para>Enforces policy validation</para></listitem>
-  </varlistentry>  
+  </varlistentry>
+  <varlistentry>
+    <term><filename>openidm/bin/defaults/script/roles/*.js</filename></term>
+    <listitem>
+     <para>
+      Scripts to provide the default roles functionality. For more information,
+      see <link xlink:href="integrators-guide#configuring-custom-roles"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+      Custom Roles</citetitle></link>.
+     </para>
+    </listitem>
+  </varlistentry>
   <varlistentry>
     <term><filename>openidm/bin/defaults/script/router-authz.js</filename></term>
     <listitem><para>Provides the functions that enforce access rules</para></listitem>
@@ -147,6 +216,7 @@
     <listitem><para>Files relating to the Apache Software License</para></listitem>
   </varlistentry>
   <varlistentry>
+    <term><filename>openidm/bin/install-service.bat</filename></term>
     <term><filename>openidm/bin/MonitorService.bat</filename></term>
     <term><filename>openidm/bin/prunmgr.exe</filename></term>     
     <term><filename>openidm/bin/amd64/prunsrv.exe</filename></term>
@@ -203,6 +273,13 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/conf/cluster.json</filename></term>
+   <listitem>
+    <para>Configuration file to enable use of this OpenIDM instance in a
+     cluster</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/conf/config.properties</filename></term>
    <listitem>
     <para>Felix and OSGi bundle configuration properties</para>
@@ -214,17 +291,22 @@
     <para>Endpoint configuration files required by the UI for the default 
     workflows</para>
    </listitem>
-  </varlistentry>  
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/info-*.json</filename></term>
+   <listitem>
+    <para>
+     Configuration files for the info service, described in <link
+     xlink:href="integrators-guide#info-service"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Obtaining
+     Information About an OpenIDM Instance</citetitle></link>.
+    </para>
+   </listitem>
+  </varlistentry>
   <varlistentry>
    <term><filename>openidm/conf/jetty.xml</filename></term>
    <listitem>
     <para>Jetty configuration controlling access to the REST interface</para>
-   </listitem>
-  </varlistentry>
-  <varlistentry>
-   <term><filename>openidm/conf/logging-config.xml</filename></term>
-   <listitem>
-    <para>Experimental log configuration</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -276,6 +358,15 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/conf/servletfilter-*.json</filename></term>
+   <listitem>
+    <para>Sample servlet filter configuration, described in <link
+    xlink:href="integrators-guide#registering-servlet-filters"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Registering
+    Additional Servlet Filters</citetitle></link>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/conf/system.properties</filename></term>
    <listitem>
     <para>System configuration properties used when starting OpenIDM
@@ -300,6 +391,19 @@
    <listitem>
     <para>Configurable list of security questions available when registering 
     users in the user interface</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui-themeconfig.json</filename></term>
+   <listitem>
+    <para>Customizable UI theme configuration file</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/conf/ui.context-enduser.json</filename></term>
+   <listitem>
+    <para>Configuration file that specifies the context root of the UI,
+    <literal>/openidmui</literal> by default</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -405,25 +509,26 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/samples/sample2/</filename></term>
    <listitem>
-    <para>OpenDJ connector sample with no back link</para>
+    <para>One-way reconciliation sample using OpenDJ and LDAP connector</para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><filename>openidm/samples/sample2b/</filename></term>
    <listitem>
-    <para>OpenDJ connector sample with back link</para>
+    <para>Bi-directional reconciliation sample using OpenDJ and LDAP
+     connector</para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><filename>openidm/samples/sample2c/</filename></term>
    <listitem>
-    <para>OpenDJ connector sample synchronizing users' LDAP group membership</para>
+    <para>Sample using LDAP connector to synchronize LDAP group membership</para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><filename>openidm/samples/sample2d/</filename></term>
    <listitem>
-    <para>OpenDJ connector sample synchronizing LDAP groups</para>
+    <para>>Sample using LDAP connector to synchronize LDAP groups</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -435,7 +540,8 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/samples/sample4/</filename></term>
    <listitem>
-    <para>CSV connector sample</para>
+    <para>Sample demonstrating synchronization between two external resources
+    (CSV and XML) without using the OpenIDM internal repository</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -446,9 +552,18 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/samples/sample5b/</filename></term>
+   <listitem>
+    <para>Similar to sample 5 but also configures a compensation script that
+     attempts to ensure either all the synchronization or none of the
+     synchronization is performed</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/samples/sample6/</filename></term>
    <listitem>
-    <para>LiveSync sample for use with one or two LDAP servers</para>
+    <para>LiveSync and reconciliation sample for use with two LDAP servers,
+    using Active Directory and OpenDJ</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -466,7 +581,8 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <varlistentry>
    <term><filename>openidm/samples/sample9/</filename></term>
    <listitem>
-    <para>Sample showing asynchronous reconciliation with workflows</para>
+    <para>Sample demonstrating how to perform an asynchronous action from a
+     reconciliation</para>
    </listitem>
   </varlistentry>  
   <varlistentry>
@@ -502,6 +618,12 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    <term><filename>openidm/samples/workflow/</filename></term>
    <listitem>
     <para>Typical use case of a workflow for provisioning</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/samples/usecase/*</filename></term>
+   <listitem>
+    <para>Several workflow samples to demonstrate common use cases</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -544,9 +666,15 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/ui/</filename></term>
+   <term><filename>openidm/ui/default/*</filename></term>
    <listitem>
-    <para>OpenIDM graphical UI files</para>
+    <para>Default OpenIDM graphical UI files</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/ui/extension/*</filename></term>
+   <listitem>
+    <para>Location for any UI customizations</para>
    </listitem>
   </varlistentry>
   <varlistentry>
