@@ -907,8 +907,8 @@ Shell}</string>
 			<real>149.13810729980469</real>
 			<key>Points</key>
 			<array>
-				<string>{390.07430588410909, 125.22879391938746}</string>
-				<string>{434.57682599722051, 437.50499935060992}</string>
+				<string>{390.07430588690897, 125.22879391938733}</string>
+				<string>{434.57682607863796, 437.50499935053347}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -950,8 +950,8 @@ Shell}</string>
 			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{197.99999422052127, 102.40830230712892}</string>
-				<string>{197.99990593215082, 191.50000000000179}</string>
+				<string>{197.99999422052127, 102.40830230712891}</string>
+				<string>{197.99999422052127, 191.5}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1256,8 +1256,8 @@ Framwork}</string>
 			<real>-1</real>
 			<key>Points</key>
 			<array>
-				<string>{197.99996444924943, 218.49999999001969}</string>
-				<string>{197.99975304256139, 298.77932578017027}</string>
+				<string>{197.99999476386807, 218.50000000308702}</string>
+				<string>{197.99999476386807, 298.77898456855792}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1390,8 +1390,6 @@ Framwork}</string>
 				<dict>
 					<key>CornerRadius</key>
 					<real>9</real>
-					<key>Pattern</key>
-					<integer>1</integer>
 				</dict>
 			</dict>
 			<key>Text</key>
@@ -1587,7 +1585,7 @@ Framwork}</string>
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-06-12 18:34:13 +0000</string>
+	<string>2014-07-04 08:41:56 +0000</string>
 	<key>Modifier</key>
 	<string>Lana Frost</string>
 	<key>NotesVisible</key>
