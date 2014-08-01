@@ -1,0 +1,64 @@
+<div class="connector-input-body">
+	<div class="group-field-block">
+	    <label class="light">Host</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.host" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.host}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Port</label>
+	    <input class="form-size-s" data-validator="required" type="text" name="configurationProperties.port" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.port}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">User</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.user" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.user}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">password</label>
+	    <input class="form-size-l" data-validator="required" type="password" name="configurationProperties.password" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.password}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">database</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.database" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.database}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Create File If Not Exists</label>
+	    <select class="form-size-s" name="configurationProperties.autoCommit" required>
+	    {{#select connectorDefaults.configurationProperties.autoCommit}}
+	    	<option value="true">True</option>
+	    	<option value="false">False</option>
+	    {{/select}}
+	    </select>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Reload Script On Execution</label>
+	    <select class="form-size-s" name="configurationProperties.reloadScriptOnExecution" required>
+	    {{#select connectorDefaults.configurationProperties.reloadScriptOnExecution}}
+	    	<option value="true">True</option>
+	    	<option value="false">False</option>
+	    {{/select}}
+	    </select>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">JDBC Driver</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">JDBC Connection Url</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcConnectionUrl" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcConnectionUrl}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">JDBC Url Template</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Create Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.createScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Test Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Search Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
+	</div>
+</div>

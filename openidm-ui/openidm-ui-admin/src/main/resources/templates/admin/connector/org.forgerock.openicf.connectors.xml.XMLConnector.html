@@ -1,0 +1,23 @@
+<div class="connector-input-body">
+	<div class="group-field-block">
+	    <label class="light">XSD ICF File Path</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdIcfFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdIcfFilePath}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">XSD File Path</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdFilePath}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">XML File Path</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.xmlFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xmlFilePath}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Create File If Not Exists</label>
+	    <select class="form-size-s" name="configurationProperties.createFileIfNotExists" required>
+	    {{#select connectorDefaults.configurationProperties.createFileIfNotExists}}
+	    	<option value="true">True</option>
+	    	<option value="false">False</option>
+	    {{/select}}
+	    </select>
+	</div>
+</div>

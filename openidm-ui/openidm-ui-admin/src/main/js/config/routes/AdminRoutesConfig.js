@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,6 +38,25 @@ define("config/routes/AdminRoutesConfig", [
             dialog: "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
             url: "dashboard/change_password/",
             role: "ui-admin"
+        },
+        "connectorView" : {
+            view: "org/forgerock/openidm/ui/admin/connector/ConnectorView",
+            role: "ui-admin",
+            url: "connectors/",
+            forceUpdate: true
+        },
+        "EditConnectorView" : {
+            view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
+            role: "ui-admin",
+            url: /^connectors\/edit\/(.+)\/$/,
+            pattern: "connectors/edit/?/",
+            forceUpdate: true
+        },
+        "addConnectorView" : {
+            view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
+            role: "ui-admin",
+            url: "connectors/add/",
+            forceUpdate: true
         }
     };
 

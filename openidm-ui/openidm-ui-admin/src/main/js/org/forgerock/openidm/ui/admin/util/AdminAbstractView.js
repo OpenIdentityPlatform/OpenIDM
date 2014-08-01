@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,19 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, _, Handlebars, form2js */
 
-define("config/main", [
-    "./process/AdminConfig",
-    "./process/CommonConfig",
+define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
+    "org/forgerock/commons/ui/common/main/AbstractView"
+], function(AbstractView) {
+    var AdminAbstractView = AbstractView.extend({
+        baseTemplate: "templates/admin/AdminBaseTemplate.html"
+    });
 
-    "./routes/AdminRoutesConfig",
-    "./routes/CommonRoutesConfig",
-
-    "./validators/CommonValidators",
-
-    "./AppConfiguration",
-
-    "./messages/CommonMessages",
-    "./messages/AdminMessages"
-]);
+    return AdminAbstractView;
+});

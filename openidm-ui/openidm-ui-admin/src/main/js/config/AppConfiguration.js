@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -49,7 +49,8 @@ define("config/AppConfiguration", [
                         messages: {
                         },
                         loader: [
-                            {"messages":"config/messages/CommonMessages"}
+                            {"messages":"config/messages/CommonMessages"},
+                            {"messages":"config/messages/AdminMessages"}
                         ]
                     } 
                 },
@@ -108,6 +109,12 @@ define("config/AppConfiguration", [
                                         "url": "#dashboard/",
                                         "name": "config.AppConfiguration.Navigation.links.dashboard",
                                         "icon": "glyph-icon-th-list",
+                                        "inactive": false
+                                    },
+                                    "connectors": {
+                                        "url": "#connectors/",
+                                        "name": "config.AppConfiguration.Navigation.links.connectors",
+                                        "icon": "glyph-icon-star",
                                         "inactive": false
                                     }
                                 }

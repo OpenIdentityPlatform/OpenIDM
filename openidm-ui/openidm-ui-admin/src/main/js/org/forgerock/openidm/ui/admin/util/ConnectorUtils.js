@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -18,23 +18,25 @@
  * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
+ * your own identifying information:i
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $*/
 
-define("config/main", [
-    "./process/AdminConfig",
-    "./process/CommonConfig",
+define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
 
-    "./routes/AdminRoutesConfig",
-    "./routes/CommonRoutesConfig",
+], function () {
 
-    "./validators/CommonValidators",
+    var obj = {};
 
-    "./AppConfiguration",
+    obj.cleanConnectorName = function(name) {
+        var cleanName = name.replace(/org\.forgerock\.openicf\.connectors\.|org\.identityconnectors\./g, "");
+        cleanName = cleanName.replace(".","_");
 
-    "./messages/CommonMessages",
-    "./messages/AdminMessages"
-]);
+        return cleanName;
+    };
+
+    return obj;
+});
+

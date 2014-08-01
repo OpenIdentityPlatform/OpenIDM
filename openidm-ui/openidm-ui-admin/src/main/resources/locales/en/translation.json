@@ -1,5 +1,5 @@
-{
-    "config" : {
+{ 
+    "config" : { 
         "dates" : {
             "monthNames" : "January, February, March, April, May, June, July, August, September, October, November, December",
             "monthNamesShort" : "Jan., Feb., Mar., Apr., May., Jun., Jul., Aug., Sep., Oct., Nov., Dec.",
@@ -30,6 +30,7 @@
                 "userNameUpdated" : "Username has been modified succesfully.",
                 "afterRegistration" : "User has been registered successfully",
                 "siteIdentificationChanged" : "Site identification image has been changed",
+                "securityDataChanged" : "Security data has been changed",
                 "userAlreadyExists" : "User already exists",
                 "errorDeletingNotification" : "Error deleting notification.",
                 "errorFetchingNotifications" : "Error Fetching notifications."
@@ -44,6 +45,16 @@
                 "unclaimedTask" : "Task has been unclaimed.",
                 "startedProcess" : "Process has been started",
                 "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
+            },
+            "ConnectorMessages" : {
+                "connectorSaved" : "Connector has been saved, now testing connector.",
+                "connectorTestNotPass" : "Connector configuration not valid.",
+                "connectorTestFailed" : "Unable to test connector.",
+                "connectorSaveFail" : "Failed to save connector please try again.",
+                "connectorTestPass" : "Connector successfully created",
+                "deleteConnectorSuccess" : "Connector successfully deleted",
+                "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
+                "connectorsNotAvailable" : "System currently has no available connectors."
             }
         },
         "AppConfiguration" : {
@@ -58,7 +69,8 @@
                     "tasksMenu" : "Tasks",
                     "allTasks" : "Tasks that are in my group's queue",
                     "myTasks" : "My tasks",
-                    "startProcess" : "Start process"
+                    "startProcess" : "Start process",
+                    "connectors" : "Connectors"
                 }
             }
         }
@@ -131,6 +143,28 @@
             "UsersTemplate" : {
                 "remainingUsers" : "remaining users"
             }
+        },
+        "connector" : {
+            "groovy_ScriptedConnector":"Groovy Connector",
+            "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
+            "scriptedsql_ScriptedSQLConnector":"SQL Connector",
+            "xml_XMLConnector":"XML Connector",
+            "csvfile_CSVFileConnector":"CSV Connector",
+            "databasetable_DatabaseTableConnector":"Database Connector",
+            "ldap_LdapConnector":"LDAP Connector",
+            "connectorName" : "Connector Name",
+            "connectorEnabled" : "Enabled",
+            "connectorType" : "Connector Type",
+            "connectorDelete" : "Are you sure you wish to delete this connector?",
+            "connectorError" : "Invalid connector configuration",
+            "connectorNameUnknown" : "Unknown",
+            "addTitle" : "Add Connector",
+            "editTitle" : "Edit Connector",
+            "addButtonTitle" : "Add",
+            "updateButtonTitle" : "Update",
+            "addConnectorTitle" : "Add Connector",
+            "activeState" : "Active",
+            "errorState" : "Error"
         }
     },
     "common" : {
@@ -139,6 +173,8 @@
             "confirmPassword" : "Confirm Password"
         },
          "form" : {
+            "ok" : "Okay",
+            "confirm" :"Confirmation",
             "true" : "True",
             "false" : "False",
             "update" : "Update",
