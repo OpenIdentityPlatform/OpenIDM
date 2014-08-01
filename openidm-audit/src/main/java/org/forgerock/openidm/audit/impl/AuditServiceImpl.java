@@ -71,6 +71,7 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
+import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -945,7 +946,7 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put(RECON_LOG_MESSAGE, entry.get(RECON_LOG_MESSAGE));
         formattedEntry.put(RECON_LOG_MESSAGE_DETAIL, entry.get(RECON_LOG_MESSAGE_DETAIL));
         formattedEntry.put(RECON_LOG_EXCEPTION, entry.get(RECON_LOG_EXCEPTION));
-        if ("".equals(entry.get(RECON_LOG_ENTRY_TYPE)) || null == entry.get(RECON_LOG_ENTRY_TYPE)) {
+        if (AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY.equals(entry.get(RECON_LOG_ENTRY_TYPE))) {
             // recon entry
             formattedEntry.put(RECON_LOG_ACTION_ID, entry.get(RECON_LOG_ACTION_ID));
             formattedEntry.put(RECON_LOG_ACTION, entry.get(RECON_LOG_ACTION));
