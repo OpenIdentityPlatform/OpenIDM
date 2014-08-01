@@ -1,0 +1,201 @@
+<div class="connector-input-body">
+    <div class="group-field-block">
+        <label class="light">Host</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.host" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.host}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Port</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.port" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.port}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">SSL</label>
+        <select class="form-size-s" name="configurationProperties.ssl" required>
+        {{#select connectorDefaults.configurationProperties.ssl}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Principal</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.principal" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.principal}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Credentials</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.credentials" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.credentials}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Base Contexts</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.baseContexts" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.baseContexts}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Base Contexts To Synchronize</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.baseContextsToSynchronize" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.baseContextsToSynchronize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Account Search Filter</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.accountSearchFilter" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Account Synchronization Filter</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.accountSynchronizationFilter" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.accountSynchronizationFilter}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Group Search Filter</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.groupSearchFilter" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" required>
+    </div>
+
+    <div class="group-field-block">
+        <label class="light">Group Synchronization Filter</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.groupSynchronizationFilter" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.groupSynchronizationFilter}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Password Attribute To Synchronize</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordAttributeToSynchronize" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.passwordAttributeToSynchronize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Synchronize Passwords</label>
+        <select class="form-size-s" name="configurationProperties.synchronizePasswords" required>
+        {{#select connectorDefaults.configurationProperties.synchronizePasswords}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Remove Log Entry Object Class From Filter</label>
+        <select class="form-size-s" name="configurationProperties.removeLogEntryObjectClassFromFilter" required>
+        {{#select connectorDefaults.configurationProperties.removeLogEntryObjectClassFromFilter}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Modifiers Names To Filter Out</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.modifiersNamesToFilterOut[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.modifiersNamesToFilterOut}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Password Decryption Key</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordDecryptionKey" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.passwordDecryptionKey}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Change Log Block Size</label>
+        <input class="form-size-s" data-validator="required" type="text" name="configurationProperties.changeLogBlockSize" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.changeLogBlockSize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Attributes To Synchronize</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.attributesToSynchronize[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.attributesToSynchronize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Change Number Attribute</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.changeNumberAttribute" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.changeNumberAttribute}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Password Decryption Initialization Vector</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordDecryptionInitializationVector" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.passwordDecryptionInitializationVector}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Filter With Or Instead Of And</label>
+        <select class="form-size-s" name="configurationProperties.filterWithOrInsteadOfAnd" required>
+        {{#select connectorDefaults.configurationProperties.filterWithOrInsteadOfAnd}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Object Classes To Synchronize</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.objectClassesToSynchronize[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.objectClassesToSynchronize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">VLV Sort Attribute</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.vlvSortAttribute" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.vlvSortAttribute}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Password Attribute</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordAttribute" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.passwordAttribute}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Use Blocks</label>
+        <select class="form-size-s" name="configurationProperties.useBlocks" required>
+        {{#select connectorDefaults.configurationProperties.useBlocks}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Maintain Posix Group Membership</label>
+        <select class="form-size-s" name="configurationProperties.maintainPosixGroupMembership" required>
+        {{#select connectorDefaults.configurationProperties.maintainPosixGroupMembership}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Failover</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.failover[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.failover}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Read Schema</label>
+        <select class="form-size-s" name="configurationProperties.readSchema" required>
+        {{#select connectorDefaults.configurationProperties.readSchema}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Account Object Classes</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.accountObjectClasses[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.accountObjectClasses}}" required>
+    </div>
+   <div class="group-field-block">
+        <label class="light">Account Username Attributes</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.accountUserNameAttributes[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.accountUserNameAttributes}}" required>
+    </div>
+   <div class="group-field-block">
+        <label class="light">Group Member Attribute</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.groupMemberAttribute" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.groupMemberAttribute}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Password Hash Algorithm</label>
+        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordHashAlgorithm[]" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.passwordHashAlgorithm}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Use Paged Result Control</label>
+        <select class="form-size-s" name="configurationProperties.usePagedResultControl" required>
+        {{#select connectorDefaults.configurationProperties.usePagedResultControl}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Block Size</label>
+        <input class="form-size-s" data-validator="required" type="text" name="configurationProperties.blockSize" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.blockSize}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">UID Attribute</label>
+        <input class="form-size-s" data-validator="required" type="text" name="configurationProperties.uidAttribute" data-validator-event="keyup" value="{{connectorDefaults.configurationProperties.uidAttribute}}" required>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Maintain LDAP Group Membership</label>
+        <select class="form-size-s" name="configurationProperties.maintainLdapGroupMembership" required>
+        {{#select connectorDefaults.configurationProperties.maintainLdapGroupMembership}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+    <div class="group-field-block">
+        <label class="light">Respect Resource Password Policy Change After Reset</label>
+        <select class="form-size-s" name="configurationProperties.respectResourcePasswordPolicyChangeAfterReset" required>
+        {{#select connectorDefaults.configurationProperties.respectResourcePasswordPolicyChangeAfterReset}}
+            <option value="true">True</option>
+            <option value="false">False</option>
+        {{/select}}
+        </select>
+    </div>
+</div>

@@ -1,0 +1,104 @@
+<div class="connector-input-body">	
+	<div class="group-field-block">
+	    <label class="light">Authenticate Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.authenticateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Warning Level</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.warningLevel" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.warningLevel}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Minimum Recompilation Interval</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.minimumRecompilationInterval" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Delete Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.deleteScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Schema Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.schemaScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Customizer Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.customizerScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Resolve Username Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.resolveUsernameScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Debug</label>
+	    <select class="form-size-s" name="configurationProperties.debug" required>
+	    {{#select connectorDefaults.configurationProperties.debug}}
+	    	<option value="true">True</option>
+	    	<option value="false">False</option>
+	    {{/select}}
+	    </select>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Target Directory</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.targetDirectory" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.targetDirectory}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Disabled Global ASTTransformations</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.disabledGlobalASTTransformations" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.disabledGlobalASTTransformations}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Classpath</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.classpath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.classpath}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Script Extensions</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.scriptExtensions" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.scriptExtensions}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Test Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Update Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.updateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Source Encoding</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.sourceEncoding" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.sourceEncoding}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Search Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationPropertiessearchScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Script On Resource Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.scriptOnResourceScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.scriptOnResourceScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Script Base Class</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.scriptBaseClass" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.scriptBaseClass}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Verbose</label>
+	    <select class="form-size-s" name="configurationProperties.verbose" required>
+	    {{#select connectorDefaults.configurationProperties.verbose}}
+	    	<option value="true">True</option>
+	    	<option value="false">False</option>
+	    {{/select}}
+	    </select>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Create Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.createScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Recompile Groovy Source</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.recompileGroovySource" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.recompileGroovySource}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Tolerance</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.tolerance" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.tolerance}}" required>
+	</div>
+	<div class="group-field-block">
+	    <label class="light">Sync Script File Name</label>
+	    <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.syncScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" required>
+	</div>
+</div>

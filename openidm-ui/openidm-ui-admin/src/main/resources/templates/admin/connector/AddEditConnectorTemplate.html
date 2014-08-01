@@ -1,0 +1,50 @@
+<h1 id="addEditConnectorTitle">{{addEditTitle}}</h1>
+<div class="connector-input-body">
+    <form id="connectorForm" class="form clearfix" autocomplete="off">
+        <div class="group-field-block">
+            <label class="light">{{t "templates.connector.connectorName"}}</label>
+
+            {{#if editState}}
+                <input class="form-size-l" type="text" id="connectorName" name="name" value="{{connectorName}}" data-validator-event="keyup blur" required autofocus disabled="true">
+            {{else}}
+                <input class="form-size-l" type="text" id="connectorName" name="name" value="" data-validator="required" data-validator-event="keyup blur" required autofocus>
+            {{/if}}
+
+            <div class="validation-message"></div>
+        </div>
+
+        <div class="group-field-block">
+            <label class="light">{{t "templates.connector.connectorEnabled"}}</label>
+            <select class="form-size-s" name="enabled">
+                {{#select enabled}}
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                {{/select}}
+            </select>
+        </div>
+
+        <div class="group-field-block">
+            <label 	class="light">{{t "templates.connector.connectorType"}}</label>
+            {{#if editState}}
+            <select class="form-size-m" id="connectorType"  name="connectorType" required disabled="true">
+                {{#each connectors}}
+                    <option value="{{connectorName}}">{{displayName}}  {{bundleVersion}}</option>
+                {{/each}}
+            </select>
+            {{else}}
+            <select class="form-size-m" id="connectorType" name="connectorType required">
+                {{#each connectors}}
+                    <option value="{{connectorName}}">{{displayName}}  {{bundleVersion}}</option>
+                {{/each}}
+            </select>
+            {{/if}}
+        </div>
+
+        <div class="" id="connectorDetails">
+        </div>
+
+        <div class="float-right group-actions-block">
+            <input type="submit" id="addEditConnector" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
+        </div>
+    </form>
+</div>

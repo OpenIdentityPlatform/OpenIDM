@@ -22,23 +22,45 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, Backbone, _, window */
+/*global define, $, _ */
 
-define("org/forgerock/openidm/ui/admin/Dashboard", [
+define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/Router"
-], function(AbstractView, eventManager, constants, conf, router) {
-        var DashboardView = AbstractView.extend({ 
-        baseTemplate: "templates/admin/AdminBaseTemplate.html",
-        template: "templates/admin/DashboardTemplate.html",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function(AbstractView, eventManager, constants, conf, ConnectorDelegate, validatorsManager) {
+    var ConnectorTypeView = AbstractView.extend({
+        element: "#connectorDetails",
+        noBaseTemplate: true,
 
         render: function(args, callback) {
-            this.parentRender(callback);
+            var base = "templates/admin/connector/";
+
+            $("#connectorDetails").hide();
+
+            this.data.connectorDefaults = args.connectorDefaults;
+
+            this.template = base + args.connectorType +".html";
+
+            this.parentRender(_.bind(function() {
+                if(args.animate) {
+                    $("#connectorDetails").slideDown("slow", function() {});
+                } else {
+                    $("#connectorDetails").show();
+                }
+
+                validatorsManager.bindValidators(this.$el);
+
+                if(callback){
+                    callback();
+                }
+            }, this));
         }
     });
 
-    return new DashboardView();
+    return new ConnectorTypeView();
 });
+

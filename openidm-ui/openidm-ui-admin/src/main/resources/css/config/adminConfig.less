@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,19 +22,25 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
 
-define("config/main", [
-    "./process/AdminConfig",
-    "./process/CommonConfig",
+/*
+Base Colors
+*/
 
-    "./routes/AdminRoutesConfig",
-    "./routes/CommonRoutesConfig",
+@fogerock-yellow: #e1dd00;
+@forgerock-light-gray: #9aa2a6;
+@forgerock-dark-gray: #2e3437;
+@forgerock-light-green: #80b7ab;
+@forgerock-dark-green: #5da192;
 
-    "./validators/CommonValidators",
 
-    "./AppConfiguration",
 
-    "./messages/CommonMessages",
-    "./messages/AdminMessages"
-]);
+/*
+	Basic Style Overrides 
+*/
+@light-font-color: #fff;
+@dark-font-color: #5a646d;
+@admin-footer-color: @forgerock-light-gray;
+@admin-menu-bar: @forgerock-dark-gray;
+@admin-main-body-color: @forgerock-light-gray;
+

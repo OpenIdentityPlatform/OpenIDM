@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,19 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
 
-define("config/main", [
-    "./process/AdminConfig",
-    "./process/CommonConfig",
+#footer {
+	height:60px;
+	margin-top:-60px;
+	color:@light-font-color;
+	background-color: #5d6871;
+}
 
-    "./routes/AdminRoutesConfig",
-    "./routes/CommonRoutesConfig",
+.menubar {
+	margin-bottom:0px;
+}
 
-    "./validators/CommonValidators",
+.menubar .menu {
+	background-image:none; 
+}
 
-    "./AppConfiguration",
+body {
+	background-image:none;
+}
 
-    "./messages/CommonMessages",
-    "./messages/AdminMessages"
-]);

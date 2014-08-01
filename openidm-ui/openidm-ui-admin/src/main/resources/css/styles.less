@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,19 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/* css basic configuration */
+@import "common/config.less";
 
-define("config/main", [
-    "./process/AdminConfig",
-    "./process/CommonConfig",
+/* helpers, functions, columns */
+@import "common/helpers.less"; 
 
-    "./routes/AdminRoutesConfig",
-    "./routes/CommonRoutesConfig",
+/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
+@import "common/layout.less";
 
-    "./validators/CommonValidators",
+/* specific css used in specific modules */
+@import "config/adminConfig.less";
+@import "config/adminStyle.less";
+@import "common/forms.less";
+@import "config/connectorView.less";
+@import "fontawesome/less/font-awesome.less";
 
-    "./AppConfiguration",
-
-    "./messages/CommonMessages",
-    "./messages/AdminMessages"
-]);
