@@ -52,6 +52,7 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -1122,7 +1123,7 @@ class ObjectMapping {
     }
 
     private void logReconStart(String reconId, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_START, dateUtil);
+        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START, dateUtil);
         reconStartEntry.timestamp = new Date();
         reconStartEntry.reconId = reconId;
         reconStartEntry.message = "Reconciliation initiated by " + context.asContext(SecurityContext.class).getAuthenticationId();
@@ -1130,7 +1131,7 @@ class ObjectMapping {
     }
 
     private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_END, dateUtil);
+        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END, dateUtil);
         reconEndEntry.timestamp = new Date();
         reconEndEntry.reconId = reconContext.getReconId();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
@@ -2180,12 +2181,8 @@ class ObjectMapping {
      */
     private class ReconEntry {
 
-        public final static String RECON_START = "start";
-        public final static String RECON_END = "summary";
-        public final static String RECON_ENTRY = "entry";
-
         /** Type of the audit log entry. Allows for marking recon start / summary records */
-        public String entryType = RECON_ENTRY;
+        public String entryType = AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
         /** TODO: Description. */
         public final SyncOperation op;
         /** The id identifying the reconciliation run */
@@ -2246,7 +2243,7 @@ class ObjectMapping {
             this.rootContext = rootContext;
             this.entryType = entryType;
             this.dateUtil = dateUtil;
-            if (!entryType.equals(RECON_ENTRY)) {
+            if (!AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY.equals(entryType)) {
                 this.mappingName = name;
             }
         }
@@ -2255,7 +2252,7 @@ class ObjectMapping {
          * Constructor for regular reconciliation log entries
          */
         public ReconEntry(SyncOperation op, Context rootContext, DateUtil dateUtil) {
-            this(op, rootContext, RECON_ENTRY, dateUtil);
+            this(op, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY, dateUtil);
         }
 
         /**
