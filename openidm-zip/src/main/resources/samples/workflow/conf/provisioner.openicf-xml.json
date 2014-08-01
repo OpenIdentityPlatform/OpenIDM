@@ -8,8 +8,8 @@
     "producerBufferSize" : 100,
     "connectorPoolingSupported" : true,
     "poolConfigOption" : {
-        "maxObjects" : 10,
-        "maxIdle" : 10,
+        "maxObjects" : 1,
+        "maxIdle" : 1,
         "maxWait" : 150000,
         "minEvictableIdleTimeMillis" : 120000,
         "minIdle" : 1
