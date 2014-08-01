@@ -30,6 +30,10 @@ import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 
+import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_FILTER;
+import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_ID;
+
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
@@ -55,11 +59,11 @@ public class RequestUtil {
 
         final QueryRequest request = Requests.newQueryRequest(resourceContainer);
         for (Map.Entry<String, Object> e: parameters.entrySet()) {
-            if (PARAM_QUERY_ID.equals(e.getKey())) {
+            if (PARAM_QUERY_ID.equals(e.getKey()) || FIELD_QUERY_ID.equals(e.getKey())) {
                 request.setQueryId(String.valueOf(e.getValue()));
-            } else if (PARAM_QUERY_EXPRESSION.equals(e.getKey())) {
+            } else if (PARAM_QUERY_EXPRESSION.equals(e.getKey()) || FIELD_QUERY_EXPRESSION.equals(e.getKey())) {
                 request.setQueryExpression(String.valueOf(e.getValue()));
-            } else if (PARAM_QUERY_FILTER.equals(e.getKey())) {
+            } else if (PARAM_QUERY_FILTER.equals(e.getKey()) || FIELD_QUERY_FILTER.equals(e.getKey())) {
                 request.setQueryFilter(QueryFilter.valueOf(String.valueOf(e.getValue())));
             } else {
                 request.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
