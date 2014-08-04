@@ -288,6 +288,12 @@
    </para>
    <listitem>
     <para>
+     The OpenDJ Password Synchronization Plugin is not currently supported with
+     OpenIDM ${serverDocTargetVersion}.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
      A conditional GET request, with the <literal>If-Match</literal> request
      header, is not currently supported.
     </para>
