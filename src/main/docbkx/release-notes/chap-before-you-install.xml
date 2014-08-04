@@ -30,8 +30,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'>
  <title>Before You Install OpenIDM Software</title>
 
- <para>This chapter covers prerequisites for installing and running OpenIDM
- software.</para>
+ <para>
+  This chapter covers prerequisites for installing and running OpenIDM software.
+ </para>
 
  <variablelist>
   <para>
@@ -52,7 +53,7 @@
      </listitem>
      <listitem>
       <para>
-       Microsoft SQL Server 2008 Express
+       Microsoft SQL Server 2008
       </para>
      </listitem>
      <listitem>
@@ -98,6 +99,16 @@
      xlink:href="http://openicf.forgerock.org/connectors/" xlink:show="new"
      >OpenICF project connectors site</link>.
     </para>
+    <para>
+     When using the LDAP connector to provision to Active Directory, OpenIDM
+     ${serverDocTargetVersion} supports Active Directory Domain Controllers and
+     Active Directory Global Catalogues. This release also provides support for
+     Active Directory Lightweight Directory Services (LDS).
+    </para>
+    <para>
+     OpenIDM ${serverDocTargetVersion} also provides support for Windows 2012 R2
+     as the remote system for connectors and password synchronization plugins.
+    </para>
    </listitem>
   </varlistentry>
 
@@ -124,6 +135,16 @@
     </itemizedlist>
    </listitem>
   </varlistentry>
+
+  <varlistentry>
+   <term>Operating Systems</term>
+   <listitem>
+    <para>
+     OpenIDM ${serverDocTargetVersion} has been tested on most variations of
+     Linux and on Windows 2008 R2 and Windows 2012 R2.
+    </para>
+   </listitem>
+  </varlistentry>
  </variablelist>
 
  <para>
@@ -141,6 +162,9 @@
   On Windows systems, use Java SE JDK 7 update 6 or later, to take advantage of
   a recent JVM fix relating to non-blocking sockets with the default Jetty
   configuration.
+ </para>
+ <para>
+  OpenIDM ${serverDocTargetVersion} also supports OpenJDK 1.7.
  </para>
  <para>
   You need 150 MB disk space and 1 GB memory for an evaluation installation. For
