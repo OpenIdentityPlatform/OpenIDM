@@ -1340,9 +1340,9 @@ $ ./startup.sh -p samples/sample5</screen>
     xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension
-    samples/sample5/data/resource-schema-extension.xsd
+    /path/to/openidm/samples/sample5/data/resource-schema-extension.xsd
     http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd
-    data/resource-schema-1.xsd"&gt;
+    /path/to/openidm/samples/sample5/data/resource-schema-1.xsd"&gt;
     &lt;ri:__ACCOUNT__&gt;
        &lt;icf:__UID__&gt;1&lt;/icf:__UID__&gt;
        &lt;icf:__PASSWORD__&gt;TestPassw0rd2&lt;/icf:__PASSWORD__&gt;
