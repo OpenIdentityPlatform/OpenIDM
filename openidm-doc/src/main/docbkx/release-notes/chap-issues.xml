@@ -288,8 +288,10 @@
    </para>
    <listitem>
     <para>
-     The OpenDJ Password Synchronization Plugin is not currently supported with
-     OpenIDM ${serverDocTargetVersion}.
+     The Password Synchronization plugins are not currently supported with
+     OpenIDM ${serverDocTargetVersion}. An updated version of these plugins will
+     be released shortly to align with the OpenIDM ${serverDocTargetVersion}
+     release.
     </para>
    </listitem>
    <listitem>
