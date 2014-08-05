@@ -40,32 +40,6 @@
   <variablelist>
 
    <varlistentry>
-    <term>Commons REST</term>
-    <listitem>
-     <para>
-      OpenIDM ${serverDocTargetVersion} is the first ForgeRock product to
-      fully implement the ForgeRock Commons REST API. It is the ForgeRock-unique
-      RESTful API with a set of easy-to-remember REST calls: create, read,
-      update, delete, patch, action, and query (CRUDPAQ). For more information,
-      see <link xlink:show="new" xlink:href="release-notes#major-changes"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
-      To Existing Functionality</citetitle></link>.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>New OpenICF 1.4.0.0 Connectors</term>
-    <listitem>
-     <para>
-      OpenICF connectors support interfaces between OpenIDM and a variety of
-      external databases. For more information, see <link xlink:show="new"
-      xlink:href="release-notes#major-changes"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
-      To Existing Functionality</citetitle></link>
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
     <term>Role-based Provisioning</term>
     <listitem>
      <para>
@@ -117,6 +91,33 @@
       Workflow definitions and certain generic scripted connectors. With
       product-wide Groovy scripting, the language can now be used throughout
       to define business logic and customizations.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Commons REST</term>
+    <listitem>
+     <para>
+      OpenIDM ${serverDocTargetVersion} implements the ForgeRock Commons REST
+      API. This RESTful API is unique to ForgeRock and includes a set of
+      easy-to-remember REST calls: create, read, update, delete, patch, action,
+      and query (CRUDPAQ). For more information, see <link
+      xlink:show="new" xlink:href="release-notes#major-changes"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
+      To Existing Functionality</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>New OpenICF 1.4.0.0 Connectors</term>
+    <listitem>
+     <para>
+      OpenICF connectors support interfaces between OpenIDM and a variety of
+      external databases. For more information, see <link xlink:show="new"
+      xlink:href="release-notes#major-changes"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Major Changes
+      To Existing Functionality</citetitle></link>
      </para>
     </listitem>
    </varlistentry>
