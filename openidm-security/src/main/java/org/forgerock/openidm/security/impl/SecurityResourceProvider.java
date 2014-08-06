@@ -49,12 +49,14 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
@@ -218,6 +220,19 @@ public class SecurityResourceProvider {
         content.put("type", cert.getType());
         content.put("cert", getCertString(cert));
         content.put("publicKey", getKeyMap(cert.getPublicKey()));
+        if (cert instanceof X509Certificate) {
+            Map<String, Object> issuer = new HashMap<String, Object>();
+            X500Name name = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal((X509Certificate)cert));
+            issuer.put("C", name.getRDNs(BCStyle.C)[0].getFirst().getValue().toString());
+            issuer.put("ST", name.getRDNs(BCStyle.ST)[0].getFirst().getValue().toString());
+            issuer.put("L", name.getRDNs(BCStyle.L)[0].getFirst().getValue().toString());
+            issuer.put("OU", name.getRDNs(BCStyle.OU)[0].getFirst().getValue().toString());
+            issuer.put("O", name.getRDNs(BCStyle.O)[0].getFirst().getValue().toString());
+            issuer.put("CN", name.getRDNs(BCStyle.CN)[0].getFirst().getValue().toString()); 
+            content.put("issuer", issuer);
+            content.put("notBefore", ((X509Certificate)cert).getNotBefore());
+            content.put("notAfter", ((X509Certificate)cert).getNotAfter());
+        }
         return content;
     }
 
