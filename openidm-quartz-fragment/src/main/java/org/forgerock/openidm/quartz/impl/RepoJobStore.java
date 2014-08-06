@@ -494,7 +494,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                         boolean removed = removeWaitingTrigger(t);
                         t.updateWithNewCalendar(calendar, getMisfireThreshold());
                         tw.updateTrigger(t);
-                        logger.debug("Updating Trigger {} in group {}", new Object[]{tw.getName(),tw.getGroup()});
+                        logger.debug("Updating Trigger {} in group {}", tw.getName(),tw.getGroup());
                         updateTriggerInRepo(tw.getGroup(), tw.getName(), tw, tw.getRevision());
                         if (removed) {
                             addWaitingTrigger(t);
@@ -535,7 +535,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (jobNames.contains(jobName)) {
                     // Update job
                     JobWrapper oldJw = getJobWrapper(jobGroup, jobName);
-                    logger.debug("Updating Job {} in group {}", new Object[] {jobName,jobGroup});
+                    logger.debug("Updating Job {} in group {}", jobName, jobGroup);
                     UpdateRequest r = Requests.newUpdateRequest(jobId, jw.getValue());
                     r.setRevision(oldJw.getRevision());
                     getConnectionFactory().getConnection().update(getServerContext(), r);
@@ -548,7 +548,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     getConnectionFactory().getConnection().update(getServerContext(), r);
 
                     // Create job
-                    logger.debug("Creating Job {} in group {}", new Object[] {jobName,jobGroup});
+                    logger.debug("Creating Job {} in group {}", jobName, jobGroup);
                     getConnectionFactory().getConnection().create(getServerContext(), getCreateRequest(jobId, jw.getValue().asMap()));
                 }
             } catch (ResourceException e) {
@@ -627,7 +627,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     public Trigger acquireNextTrigger(SchedulingContext context, long noLaterThan)
             throws JobPersistenceException {
         synchronized (lock) {
-            logger.debug("acquiring next trigger");
+            logger.debug("Attempting to acquire the next trigger");
             Trigger trigger = null;
             WaitingTriggers waitingTriggers = null;
             while (trigger == null) {
@@ -653,6 +653,13 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     continue;
                 }
 
+                if (noLaterThan > 0) {
+                    if (nextFireTime.getTime() > noLaterThan) {
+                        logger.debug("Trigger fire time {} is later than {}, not acquiring",  nextFireTime, new Date(noLaterThan));
+                        return null;
+                    }
+                }
+
                 if(!removeWaitingTrigger(trigger)) {
                     trigger = null;
                     continue;
@@ -670,13 +677,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     continue;
                 }
 
-                if (noLaterThan > 0) {
-                    if (nextFireTime.getTime() > noLaterThan) {
-                        addWaitingTrigger(trigger);
-                        return null;
-                    }
-                }
-
                 tw.setAcquired(true);
                 trigger.setFireInstanceId(getFiredTriggerRecordId());
                 try {
@@ -690,7 +690,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                 addAcquiredTrigger(trigger, instanceId);
 
-                logger.debug("Acquired next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
+                logger.debug("Acquired next trigger {} to be fired at {}", trigger.getName(), trigger.getNextFireTime());
                 return (Trigger)trigger.clone();
             }
             logger.debug("No waiting triggers to acquire");
@@ -706,8 +706,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized (lock) {
             TriggerWrapper tw = getTriggerWrapper(trigger.getGroup(), trigger.getName());
             if (tw == null) {
-                logger.debug("Cannot release acquired trigger {} in group {}, trigger does not exist",
-                        new Object[] {trigger.getName(),trigger.getGroup()});
+                logger.debug("Cannot release acquired trigger {} in group {}, trigger does not exist", trigger.getName(), trigger.getGroup());
                 return;
             }
             if (tw.isAcquired()) {
@@ -716,8 +715,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 addWaitingTrigger(trigger);
                 removeAcquiredTrigger(trigger, instanceId);
             } else {
-                logger.warn("Cannot release acquired trigger {} in group {}, trigger has not been acquired",
-                        new Object[] {trigger.getName(),trigger.getGroup()});
+                logger.warn("Cannot release acquired trigger {} in group {}, trigger has not been acquired", trigger.getName(), trigger.getGroup());
             }
         }
     }
@@ -909,7 +907,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     triggers.add(trigger);
                 }
             }
-            logger.debug("Found {} triggers for group {}", new Object[] {triggers.size(), groupName});
+            logger.debug("Found {} triggers for group {}", triggers.size(), groupName);
             return triggers.toArray(new Trigger[triggers.size()]);
         }
     }
@@ -985,8 +983,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized (lock) {
             TriggerWrapper tw = getTriggerWrapper(triggerGroup, triggerName);
             if (tw == null) {
-                logger.warn("Cannot pause trigger {} in group {}, trigger does not exist",
-                        new Object [] {triggerName, triggerGroup});
+                logger.warn("Cannot pause trigger {} in group {}, trigger does not exist", triggerName, triggerGroup);
                 return;
             }
             Trigger trigger;
@@ -1098,7 +1095,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (oldJw == null) {
                    return false;
                 }
-                logger.debug("Deleting job {} in group {}", new Object[]{jobName, groupName});
+                logger.debug("Deleting job {} in group {}", jobName, groupName);
                 DeleteRequest r = Requests.newDeleteRequest(jobId);
                 r.setRevision(oldJw.getRevision());
                 getConnectionFactory().getConnection().delete(getServerContext(), r);
@@ -1140,7 +1137,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                     // Delete trigger
                     rev = tw.getRevision();
-                    logger.debug("Deleting trigger {} in group {}", new Object[]{triggerName, groupName});
+                    logger.debug("Deleting trigger {} in group {}", triggerName, groupName);
                     DeleteRequest r = Requests.newDeleteRequest(triggerId);
                     r.setRevision(rev);
                     getConnectionFactory().getConnection().delete(getServerContext(), r);
@@ -1163,7 +1160,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                                 getConnectionFactory().getConnection().update(getServerContext(), ru);
                             }
                             // Delete job
-                            logger.debug("Deleting job {} in group {}", new Object[] { jobName, groupName });
+                            logger.debug("Deleting job {} in group {}", jobName, groupName);
                             r = Requests.newDeleteRequest(jobId);
                             r.setRevision(jw.getRevision());
                             getConnectionFactory().getConnection().delete(getServerContext(), r);
@@ -1192,8 +1189,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                         || !oldTrigger.getJobGroup().equals(newTrigger.getJobGroup())) {
                     throw new JobPersistenceException("Error replacing trigger, new trigger references a different job");
                 }
-                logger.debug("Replacing trigger {} in group {} with trigger {} in group {}",
-                        new Object[]{triggerName, groupName, newTrigger.getName(), groupName});
+                logger.debug("Replacing trigger {} in group {} with trigger {} in group {}", triggerName, groupName, newTrigger.getName(), groupName);
                 deleted = removeTrigger(context, triggerName, groupName);
             }
             try {
@@ -1275,8 +1271,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         synchronized (lock) {
             TriggerWrapper tw = getTriggerWrapper(triggerGroup, triggerName);
             if (tw == null) {
-                logger.warn("Cannot resume trigger {} in group {}, trigger does not exist",
-                        new Object[]{triggerName, triggerGroup});
+                logger.warn("Cannot resume trigger {} in group {}, trigger does not exist", triggerName, triggerGroup);
                 return;
             }
             Trigger trigger;
@@ -1438,6 +1433,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     public TriggerFiredBundle triggerFired(SchedulingContext context, Trigger trigger)
             throws JobPersistenceException {
         synchronized (lock) {
+            logger.debug("Trigger {} has fired", trigger.getFullName());
             TriggerWrapper tw;
             try {
                 tw = getTriggerWrapper(trigger.getGroup(), trigger.getName());
@@ -1523,6 +1519,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     public void triggeredJobComplete(SchedulingContext context, Trigger trigger,
             JobDetail jobDetail, int triggerInstCode) throws JobPersistenceException {
         synchronized(lock) {
+            logger.debug("Job {} has completed", jobDetail.getFullName());
             String jobKey = getJobNameKey(jobDetail);
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
             JsonValue triggerValue = getTriggerFromRepo(trigger.getGroup(), trigger.getName());
@@ -1791,7 +1788,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private void addAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
             try {
-                logger.debug("Adding acquired trigger {} for instance {}", new Object[]{trigger.getName(), instanceId});
+                logger.debug("Adding acquired trigger {} for instance {}", trigger.getName(), instanceId);
                 int retries = 0;
                 while (writeRetries == -1 || retries <= writeRetries) {
                     try {
@@ -1820,7 +1817,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private boolean removeAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
             try {
-                logger.debug("Removing acquired trigger {} for instance {}", new Object[]{trigger.getName(), instanceId});
+                logger.debug("Removing acquired trigger {} for instance {}", trigger.getName(), instanceId);
                 boolean result = false;
                 int retries = 0;
                 while (writeRetries == -1 || retries <= writeRetries) {
@@ -1857,7 +1854,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             try {
                 map = getConnectionFactory().getConnection().read(getServerContext(), Requests.newReadRequest(repoId)).getContent().asMap();
             } catch (NotFoundException e) {
-                logger.debug("repo list {} not found, lets create it", "names");
+                logger.trace("repo list {} not found, lets create it", "names");
                 map = null;
             }
             if (map == null) {
@@ -1884,7 +1881,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (tw == null) {
                     logger.warn("Could not add {} to list of waiting Triggers. Trigger not found in repo", id);
                 } else {
-                    logger.debug("Found acquired trigger {} in group {}", new Object[]{tw.getName(),tw.getGroup()});
+                    logger.trace("Found acquired trigger {} in group {}", tw.getName(),tw.getGroup());
                     acquiredTriggers.add(tw.getTrigger());
                 }
             }
@@ -1939,7 +1936,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 if (tw == null) {
                     logger.warn("Could not add {} to list of waiting Triggers. Trigger not found in repo", id);
                 } else {
-                    logger.debug("Found waiting trigger {} in group {}", new Object[]{tw.getName(),tw.getGroup()});
+                    logger.debug("Found waiting trigger {} in group {}", tw.getName(),tw.getGroup());
                     waitingTriggers.add(tw.getTrigger());
                 }
             }
@@ -1985,7 +1982,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private void addRepoListName(String name, String id, String list)
             throws JobPersistenceException, ResourceException {
         synchronized (lock) {
-            logger.debug("Adding name: {} to {}", new Object[]{name, id});
+            logger.trace("Adding name: {} to {}", name, id);
             Map<String, Object> map = getOrCreateRepo(id);
             String rev = (String)map.get("_rev");
 
@@ -2017,7 +2014,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      private boolean removeRepoListName(String name, String id, String list)
             throws JobPersistenceException, ResourceException {
         synchronized (lock) {
-            logger.debug("Removing name: {} from {}", new Object[]{name, id});
+            logger.trace("Removing name: {} from {}", name, id);
             Map<String, Object> map = getOrCreateRepo(id);
             String rev = (String)map.get("_rev");
 
@@ -2351,6 +2348,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             try {
                 // Free acquired triggers
                 AcquiredTriggers triggers = getAcquiredTriggers(eventInstanceId);
+                logger.debug("Found {} acquired triggers while recovering instance {}", triggers.getTriggers().size(), eventInstanceId);
                 for (Trigger trigger : triggers.getTriggers()) {
                     boolean removed = false;
                     int retry = 0;
