@@ -534,13 +534,19 @@ if (syncResults.success) {
       <primary>Synchronization</primary>
       <secondary>Creating attributes</secondary>
      </indexterm>
-     <para>You can create attributes on the target as part of the mapping. In
-     the preceding example, a <literal>phoneExtension</literal> attribute with
-     a default value of <literal>0047</literal> is created on the target. The
-     <literal>"default"</literal> property can also be used to specify the
-     value to assign to the target property if the <literal>"source"</literal>
-     property and the <literal>"transform"</literal> script yield a null value.
-     If no value is specified, the default value is null.
+     <para>
+      You can create attributes on the target as part of the mapping. In the
+      preceding example, a <literal>phoneExtension</literal> attribute with a
+      default value of <literal>0047</literal> is created on the target.
+     </para>
+     <para>
+      You can also use the <literal>"default"</literal> property to specify a
+      value that should be assigned to the target property. When determining
+      the value of the target property, any associated conditions are evaluated
+      first, followed by the transform script, if present. The default value is
+      applied (for update and create actions) if the <literal>"source"</literal>
+      property and the <literal>"transform"</literal> script yield a null value.
+      The default value overrides the target value, if one exists.
      </para>
 
      <indexterm>
