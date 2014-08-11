@@ -124,8 +124,21 @@
   </para>
 
   <literallayout class="monospaced">
-/openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com
+/openidm/system/ldap/account/07b46858-56eb-457c-b935-cfe6ddf769c7
   </literallayout>
+
+  <para>
+   Note that for LDAP resources, you should not map the LDAP
+   <literal>dn</literal> to the OpenIDM <literal>uidAttribute</literal>
+   (<literal>_id</literal>). The attribute that is used for the
+   <literal>_id</literal> should be immutable. You should therefore map the LDAP
+   <literal>entryUUID</literal> operational attribute to the OpenIDM
+   <literal>_id</literal>, as shown in the following excerpt of the provisioner
+   configuration file:
+  </para>
+  <programlisting>...
+"uidAttribute" : "entryUUID",
+... </programlisting>
 
  </section>
 
@@ -359,18 +372,20 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/system/ldap/account/uid=mike,ou=People,dc=example,dc=com"</userinput>
+ "https://localhost:8443/openidm/system/ldap/account/fc252fd9-b982-3ed6-b42a-c76d2546312c"</userinput>
 <computeroutput>{
-  "_id": "uid=mike,ou=People,dc=example,dc=com",
-  "sn": "Smith",
-  "telephoneNumber": "082082082",
-  "description": null,
-  "mail": "mike@example.com",
-  "givenName": "Mike",
-  "cn": "Mike Smith",
-  "dn": "uid=mike,ou=People,dc=example,dc=com",
-  "uid": "mike",
-  "ldapGroups": []
+    "givenName": "Barbara",
+    "telephoneNumber": "1-503-334-2546",
+    "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+    "description": "Created for OpenIDM",
+    "mail": "bjensen@example.com",
+    "ldapGroups": [
+        "cn=openidm2,ou=Groups,dc=example,dc=com"
+    ],
+    "cn": "Babara Jensen",
+    "uid": "bjensen",
+    "sn": "Jensen",
+    "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
 }   </computeroutput></screen>
 
   </section>
@@ -394,20 +409,22 @@
  --header "Content-Type: application/json" \
  --header "If-Match : *" \
  --request PUT \
- --data '{"description":"The new description for Mike"}'
- "https://localhost:8443/openidm/system/ldap/account/uid=mike,ou=People,dc=example,dc=com"</userinput>
+ --data '{"description":"The new description for Babs Jensen"}'
+ "https://localhost:8443/openidm/system/ldap/account/fc252fd9-b982-3ed6-b42a-c76d2546312c"</userinput>
 <computeroutput>{
-  "_id": "uid=mike,ou=People,dc=example,dc=com",
-  "sn": "Smith",
-  "telephoneNumber": "082082082",
-  "description": "The new description for Mike",
-  "mail": "mike@example.com",
-  "givenName": "Mike",
-  "cn": "Mike Smith",
-  "dn": "uid=mike,ou=People,dc=example,dc=com",
-  "uid": "mike",
-  "ldapGroups": []
-}  </computeroutput></screen>
+    "givenName": "Barbara",
+    "telephoneNumber": "1-503-334-2546",
+    "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+    "description": "The new description for Babs Jensen",
+    "mail": "bjensen@example.com",
+    "ldapGroups": [
+        "cn=openidm2,ou=Groups,dc=example,dc=com"
+    ],
+    "cn": "Babara Jensen",
+    "uid": "bjensen",
+    "sn": "Jensen",
+    "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
+} </computeroutput></screen>
   <para>
    To update a managed object with a POST request, use the
    <literal>patch</literal> action and specify the updated fields as an array in
@@ -479,10 +496,10 @@
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
- "https://localhost:8443/openidm/system/ldap/account/uid=james,ou=People,dc=example,dc=com"</userinput>
+ "https://localhost:8443/openidm/system/ldap/account/e81c7f15-2e6d-4c3c-8005-890101070dd9"</userinput>
 <computeroutput>{
-  "_id": "uid=james,ou=People,dc=example,dc=com"
-}   </computeroutput></screen>
+    "_id": "e81c7f15-2e6d-4c3c-8005-890101070dd9"
+}  </computeroutput></screen>
  </section>
 
  <section xml:id="rest-supported-query">
@@ -524,83 +541,6 @@
     </para>
    </listitem>
   </itemizedlist>
-
-  <para>
-   The following additional query parameters are supported.
-  </para>
-  <variablelist>
-   <varlistentry>
-    <term><literal>_sortKeys</literal></term>
-    <listitem>
-     <para>
-      When configured with a comma-separated list, this will order the way
-      JSON resources are returned by this query request.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><literal>_pagedResultsCookie</literal></term>
-    <listitem>
-     <para>
-      Opaque cookie used by the server to keep track of the position
-      in the search results. The format of the cookie is a string value.
-     </para>
-     <para>
-      The server provides the cookie value on the first request. You should then
-      supply the cookie value in subsequent requests until the server returns a
-      null cookie, meaning that the final page of results has been returned.
-     </para>
-     <para>
-      Paged results are enabled only if the <literal>_pageSize</literal> is a
-      non-zero integer.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><literal>_pagedResultsOffset</literal></term>
-    <listitem>
-     <para>
-      Specifies the index within the result set of the number of records to be
-      skipped before the first result is returned. The format of the
-      <literal>_pagedResultsOffset</literal> is an integer value. When the value
-      of <literal>_pagedResultsOffset</literal> is greater than or equal to 1,
-      the server returns pages, starting after the specified index.
-     </para>
-     <para>
-      This request assumes that the <literal>_pageSize</literal> is set, and not
-      equal to zero.
-     </para>
-     <para>
-      For example, if the result set includes 10 records, the
-      <literal>_pageSize</literal> is 2, and the
-      <literal>_pagedResultsOffset</literal> is 6, the server skips the first 6
-      records, then returns 2 records, 7 and 8. The
-      <literal>_pagedResultsCookie</literal> value would then be 8 (the index of
-      the last returned record) and the <literal>_remainingPagedResults</literal>
-      value would be 2, the last two records (9 and 10) that have not yet been
-      returned.
-     </para>
-     <para>
-      If the offset points to a page beyond the last of the search results, the
-      result set returned is empty.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><literal>_pageSize</literal></term>
-    <listitem>
-     <para>
-      An optional parameter indicating that query results should be returned in
-      pages of the specified size. For all paged result requests other than the
-      initial request, a cookie should be provided with the query request.
-     </para>
-     <para>
-      The default behavior is not to return paged query results. If set, this
-      parameter should be an integer value, greater than zero.
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
 
   <para>
    For additional information on queries, see the section on <link
@@ -1330,7 +1270,7 @@ Content-Length: 89
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "http://localhost:8080/openidm/system?_action=liveSync&amp;source=system/ldap/account"</userinput>
+ "https://localhost:8443/openidm/system?_action=liveSync&amp;source=system/ldap/account"</userinput>
 <computeroutput>{
   "_rev": "1",
   "_id": "SYSTEMLDAPACCOUNT",
@@ -1379,7 +1319,7 @@ Content-Length: 89
  --request POST \
  "https://localhost:8443/openidm/system/ldap/account?_action=authenticate&amp;username=bjensen&amp;password=Passw0rd"</userinput>
 <computeroutput>{
-  "_id": "uid=bjensen,ou=People,dc=example,dc=com"
+  "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
 }</computeroutput></screen>
    </example>
 
@@ -1410,8 +1350,52 @@ Content-Length: 89
     "uid":"jsmith",
     "ldapGroups":[],
     "sn":"Smith",
-    "_id":"uid=jsmith,ou=people,dc=example,dc=com"
+    "_id":"07b46858-56eb-457c-b935-cfe6ddf769c7"
 }   </computeroutput></screen>
+   </example>
+
+   <example>
+    <title>Renaming a system object</title>
+    <para>
+     You can rename a system object simply by supplying a new naming attribute
+     value in a PUT request. The PUT request replaces the entire object. The
+     naming attribute depends on the external resource.
+    </para>
+    <para>
+     The following example renames an object on an LDAP server, by changing the
+     DN of the LDAP object (effectively performing a modDN operation on that
+     object).
+    </para>
+    <para>
+     The example renames the user created in the previous example.
+    </para>
+    <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "If-Match: *" \
+ --data '{
+    "cn":"James Smith",
+    "dn":"uid=jimmysmith,ou=people,dc=example,dc=com",
+    "uid":"jimmysmith",
+    "sn":"Smith",
+    "givenName":"James",
+    "mail": "jsmith@example.com"}' \
+ --request PUT \
+ "https://localhost:8443/openidm/system/ldap/account/07b46858-56eb-457c-b935-cfe6ddf769c7"</userinput>
+<computeroutput>{
+  "mail":"jsmith@example.com",
+  "cn":"James Smith",
+  "sn":"Smith",
+  "dn":"uid=jimmysmith,ou=people,dc=example,dc=com",
+  "ldapGroups":[],
+  "telephoneNumber":null,
+  "description":"Created by OpenIDM REST",
+  "givenName":"James",
+  "uid":"jimmysmith",
+  "_id":"07b46858-56eb-457c-b935-cfe6ddf769c7"
+}</computeroutput>    </screen>
    </example>
 
    <example>
@@ -1428,18 +1412,18 @@ Content-Length: 89
   "pagedResultsCookie": null,
   "resultCount": 3,
   "result": [
-    {
-      "_id": "uid=jdoe,ou=People,dc=example,dc=com",
-      "dn": "uid=jdoe,ou=People,dc=example,dc=com"
-    },
-    {
-      "_id": "uid=bjensen,ou=People,dc=example,dc=com",
-      "dn": "uid=bjensen,ou=People,dc=example,dc=com"
-    },
-    {
-      "_id": "uid=jsmith,ou=people,dc=example,dc=com",
-      "dn": "uid=jsmith,ou=people,dc=example,dc=com"
-    }
+        {
+           "dn": "uid=jdoe,ou=People,dc=example,dc=com",
+           "_id": "1ff2e78f-4c4c-300c-b8f7-c2ab160061e0"
+       },
+       {
+           "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+           "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
+       },
+       {
+           "dn": "uid=jimmysmith,ou=people,dc=example,dc=com",
+           "_id": "07b46858-56eb-457c-b935-cfe6ddf769c7"
+       }
   ]
 }</computeroutput></screen>
    </example>
