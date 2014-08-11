@@ -22,6 +22,7 @@ import java.util.Map;
 
 // SLF4J
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.openidm.sync.ReconAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ class Policy {
     private final Situation situation;
 
     /** TODO: Description. */
-    private final Action action;
+    private final ReconAction action;
 
     /** TODO: Description. */
     private final Script script;
@@ -73,7 +74,7 @@ class Policy {
         situation = config.get("situation").required().asEnum(Situation.class);
         JsonValue action = config.get("action").required();
         if (action.isString()) {
-            this.action = action.asEnum(Action.class);
+            this.action = action.asEnum(ReconAction.class);
             this.script = null;
             this.scriptScope = null;
         } else {
@@ -114,8 +115,8 @@ class Policy {
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction(LazyObjectAccessor source, LazyObjectAccessor target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
-        Action result = null;
+    public ReconAction getAction(LazyObjectAccessor source, LazyObjectAccessor target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
+        ReconAction result = null;
         if (action != null) { // static action specified
             result = action;
         } else if (script != null) { // action is dynamically determine
@@ -151,7 +152,7 @@ class Policy {
                 scope.put("target", target.asMap());
             }
             try {
-                result = Action.valueOf(script.exec(scope).toString());
+                result = ReconAction.valueOf(script.exec(scope).toString());
             } catch (NullPointerException npe) {
                 throw new SynchronizationException("action script returned null value");
             } catch (IllegalArgumentException iae) {
@@ -164,7 +165,7 @@ class Policy {
         return result;
     }
 
-    public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, Action action, boolean sourceAction) throws SynchronizationException {
+    public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, ReconAction action, boolean sourceAction) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("sourceAction", sourceAction);

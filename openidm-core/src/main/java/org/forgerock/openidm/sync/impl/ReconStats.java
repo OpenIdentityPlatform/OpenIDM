@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.sync.impl;
 
+import org.forgerock.openidm.sync.ReconAction;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,7 +103,7 @@ public class ReconStats {
         notValid.add(id);
     }
 
-    public void addAction(String id, Action action) {
+    public void addAction(String id, ReconAction action) {
     }
 
     public Map<String, Object> asMap() {

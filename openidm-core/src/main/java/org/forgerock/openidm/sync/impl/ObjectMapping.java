@@ -57,6 +57,7 @@ import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.openidm.sync.impl.Scripts.Script;
 import org.forgerock.openidm.util.DateUtil;
@@ -680,7 +681,7 @@ class ObjectMapping {
 
         try {
             Context rootContext = context.asContext(RootContext.class);
-            Action action = params.get("action").required().asEnum(Action.class);
+            ReconAction action = params.get("action").required().asEnum(ReconAction.class);
             SyncOperation op = null;
             ReconEntry entry = null;
             SynchronizationException exception = null;
@@ -737,7 +738,7 @@ class ObjectMapping {
                 op.action = action;
                 op.performAction();
             } catch (SynchronizationException se) {
-                if (op.action != Action.EXCEPTION) {
+                if (op.action != ReconAction.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                     if (reconId != null) {
                         LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
@@ -747,7 +748,7 @@ class ObjectMapping {
                 }
                 setReconEntryMessage(entry, se);
             }
-            if (reconId != null && !Action.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
+            if (reconId != null && !ReconAction.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 if (op instanceof SourceSyncOperation) {
                     entry.reconciling = "source";
@@ -916,17 +917,33 @@ class ObjectMapping {
                 ? syncException.getMessage() + ". Root cause: " + cause.getMessage()
                 : cause.getMessage();
     }
-    
-    private final ReconAction sourceRecon = new ReconAction() {
+
+    /**
+     * Reconciliation interface.
+     * Implementation is passed to ReconPhase and executed by the ReconTask
+     *
+     * @author cgdrake
+     */
+    private interface Recon {
         /**
-         * Reconcile a given source ID
-         * @param id the id to reconcile
-         * @param objectEntry the optional full object entry, or null if on demand read should be used
+         * Reconcile a given object ID
+         * @param id the object id to reconcile
+         * @param entry an optional value if the given entry was pre-loaded, or null if not
          * @param reconContext reconciliation context
          * @param rootContext json resource root ctx
          * @param allLinks all links if pre-queried, or null for on-demand link querying
          * @param remainingIds The set to update/remove any targets that were matched
          * @throws SynchronizationException if there is a failure reported in reconciling this id
+         */
+        void recon(String id, JsonValue entry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException;
+    }
+
+    /**
+     * Reconcile a given source ID
+     */
+    private final Recon sourceRecon = new Recon() {
+        /**
+         * {@inheritDoc}
          */
         @Override
         public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)
@@ -950,7 +967,7 @@ class ObjectMapping {
             try {
                 op.sync();
             } catch (SynchronizationException se) {
-                if (op.action != Action.EXCEPTION) {
+                if (op.action != ReconAction.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
                 }
@@ -963,7 +980,7 @@ class ObjectMapping {
                 remainingIds.remove(normalizedHandledId);
                 LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
             }
-            if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+            if (!ReconAction.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 entry.reconciling = "source";
                 try {
@@ -983,16 +1000,13 @@ class ObjectMapping {
         }
     };
 
-    private final ReconAction targetRecon = new ReconAction() {
+    /**
+     * Reconcile a given target ID
+     */
+    private final Recon targetRecon = new Recon() {
         /**
-        * Reconcile a given target ID
-        * @param id the id to reconcile
-        * @param objectEntry the optional full object entry, or null if on demand read should be used
-        * @param reconContext reconciliation context
-        * @param rootContext json resource root ctx
-        * @param allLinks all links if pre-queried, or null for on-demand link querying
-        * @throws SynchronizationException if there is a failure reported in reconciling this id
-        */
+         * {@inheritDoc}
+         */
         @Override
         public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
@@ -1011,13 +1025,13 @@ class ObjectMapping {
             try {
                 op.sync();
             } catch (SynchronizationException se) {
-                if (op.action != Action.EXCEPTION) {
+                if (op.action != ReconAction.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(), se);
                 }
                 setReconEntryMessage(entry, se);
             }
-            if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+            if (!ReconAction.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 entry.reconciling = "target";
                 if (op.getSourceObjectId() != null) {
@@ -1041,11 +1055,11 @@ class ObjectMapping {
         Context rootContext;
         Map<String, Link> allLinks;
         Collection<String> remainingIds;
-        ReconAction reconById;
+        Recon reconById;
 
         public ReconTask(ResultEntry resultEntry, ReconciliationContext reconContext,
                                ServerContext parentContext, Context rootContext,
-                Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
+                Map<String, Link> allLinks, Collection<String> remainingIds, Recon reconById) {
             this.id = resultEntry.getId();
             // This value is null if it wasn't pre-queried
             this.objectEntry = resultEntry.getValue();
@@ -1080,12 +1094,12 @@ class ObjectMapping {
         Context rootContext;
         Map<String, Link> allLinks;
         Collection<String> remainingIds;
-        ReconAction reconById;
+        Recon reconById;
 
         public ReconPhase(Iterator<ResultEntry> resultIter, ReconciliationContext reconContext,
                 ServerContext parentContext, Context rootContext,
-                Map<String, Link> allLinks, Collection<String> remainingIds, ReconAction reconById) {
-            super(resultIter, reconContext, reconById);
+                Map<String, Link> allLinks, Collection<String> remainingIds, Recon reconById) {
+            super(resultIter, reconContext);
             this.parentContext = parentContext;
             this.rootContext = rootContext;
             this.allLinks = allLinks;
@@ -1149,7 +1163,7 @@ class ObjectMapping {
      * @param action the explicit action to invoke
      * @param reconId an optional identifier for the recon context if this is done in the context of reconciliation
      */
-    public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId)
+    public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, ReconAction action, String reconId)
             throws SynchronizationException {
         ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
         linkOp.init(sourceObject, targetObject, situation, action, reconId);
@@ -1185,7 +1199,7 @@ class ObjectMapping {
         /** TODO: Description. */
         public Situation situation;
         /** TODO: Description. */
-        public Action action;
+        public ReconAction action;
         public String actionId;
         public boolean ignorePostAction = false;
         public Policy activePolicy = null;
@@ -1348,13 +1362,13 @@ class ObjectMapping {
             }
         }
 
-        protected Action getAction() {
-            return (this.action == null ? Action.IGNORE : this.action);
+        protected ReconAction getAction() {
+            return (this.action == null ? ReconAction.IGNORE : this.action);
         }
 
         /**
          * TODO: Description.
-         * @param sourceAction sourceAction true if the {@link Action} is determined for the {@link SourceSyncOperation}
+         * @param sourceAction sourceAction true if the {@link ReconAction} is determined for the {@link SourceSyncOperation}
          * and false if the action is determined for the {@link TargetSyncOperation}.
          * @throws SynchronizationException TODO.
          */
@@ -1407,7 +1421,7 @@ class ObjectMapping {
                                 String sourceId = getSourceObjectId();
                                 if (isLinkingEnabled()) {
                                     // Create and populate the PendingActionContext for the LINK action
-                                    context = PendingAction.createPendingActionContext(context, Action.LINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
+                                    context = PendingAction.createPendingActionContext(context, ReconAction.LINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
                                 }
 
                                 targetObjectAccessor = createTargetObject(context, createTargetObject);
@@ -1417,7 +1431,7 @@ class ObjectMapping {
                                     break;
                                 }
 
-                                boolean wasLinked = PendingAction.wasPerformed(context, Action.LINK);
+                                boolean wasLinked = PendingAction.wasPerformed(context, ReconAction.LINK);
                                 if (wasLinked) {
                                     linkCreated = true;
                                     LOGGER.debug("Pending link for {} during {} has already been created, skipping additional link processing", sourceId, reconId);
@@ -1460,7 +1474,7 @@ class ObjectMapping {
                                     linkObject.update();
                                 }
                                 // TODO: Detect change of source id, and update link accordingly.
-                                if (action == Action.CREATE || action == Action.LINK) {
+                                if (action == ReconAction.CREATE || action == ReconAction.LINK) {
                                     break; // do not update target
                                 }
                                 if (getSourceObject() != null && getTargetObject() != null) {
@@ -1474,7 +1488,7 @@ class ObjectMapping {
                             case DELETE:
                                 if (isLinkingEnabled()) {
                                     // Create and populate the PendingActionContext for the LINK action
-                                    context = PendingAction.createPendingActionContext(context, Action.UNLINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
+                                    context = PendingAction.createPendingActionContext(context, ReconAction.UNLINK, ObjectMapping.this.name, getSourceObject(), reconId, situation);
                                 }
                                 if (getTargetObjectId() != null && getTargetObject() != null) { // forgiving; does nothing if no target
                                     execScript("onDelete", onDeleteScript);
@@ -1483,7 +1497,7 @@ class ObjectMapping {
                                     targetObjectAccessor = new LazyObjectAccessor(service,
                                             targetObjectSet, getTargetObjectId(), null);
                                 }
-                                boolean wasUnlinked = PendingAction.wasPerformed(context, Action.UNLINK);
+                                boolean wasUnlinked = PendingAction.wasPerformed(context, ReconAction.UNLINK);
                                 if (wasUnlinked) {
                                     LOGGER.debug("Pending unlink for {} during {} has already been performed, skipping additional unlink processing", getTargetObjectId(), reconId);
                                     break;
@@ -1525,7 +1539,7 @@ class ObjectMapping {
 
         /**
          * TODO: Description.
-         * @param sourceAction sourceAction true if the {@link Action} is determined for the {@link SourceSyncOperation}
+         * @param sourceAction sourceAction true if the {@link ReconAction} is determined for the {@link SourceSyncOperation}
          * and false if the action is determined for the {@link TargetSyncOperation}.
          * @throws SynchronizationException TODO.
          */
@@ -1729,7 +1743,7 @@ class ObjectMapping {
             return true;
         }
 
-        public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId) {
+        public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, ReconAction action, String reconId) {
             String sourceObjectId = (sourceObject != null && !sourceObject.isNull()) ? sourceObject.get("_id").required().asString() : null;
             String targetObjectId = (targetObject != null && !targetObject.isNull()) ? targetObject.get("_id").required().asString() : null;
             this.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceObjectId, sourceObject);
