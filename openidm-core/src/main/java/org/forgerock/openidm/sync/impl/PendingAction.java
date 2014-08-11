@@ -24,6 +24,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.sync.PendingActionContext;
+import org.forgerock.openidm.sync.ReconAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ class PendingAction {
      * @param targetObject the full target object
      * @throws SynchronizationException if the action failed
      */
-    public static void handlePendingActions(ServerContext context, Action action, ArrayList<ObjectMapping> mappings, 
+    public static void handlePendingActions(ServerContext context, ReconAction action, ArrayList<ObjectMapping> mappings,
             String resourceContainer, String resourceId, JsonValue targetObject) throws SynchronizationException {
         // Detect if there is a pending action matching the supplied action
         PendingActionContext pendingActionContext = null;
@@ -100,7 +101,7 @@ class PendingAction {
      * @param situation the original situation
      * @return the created PendingActionContext
      */
-    public static ServerContext createPendingActionContext(Context context, Action action, String mappingName, 
+    public static ServerContext createPendingActionContext(Context context, ReconAction action, String mappingName,
             JsonValue sourceObject, String reconId, Situation situation) {
         // Create the pending action data map
         Map<String, Object> pendingActionMap = new HashMap<String, Object>();
@@ -138,7 +139,7 @@ class PendingAction {
      * @param action the pending action
      * @return true if the pending action was performed, false otherwise
      */
-    public static boolean wasPerformed(Context context, Action action) {
+    public static boolean wasPerformed(Context context, ReconAction action) {
         try {
             PendingActionContext pendingActionContext = getPendingActionContext(context, action);
             // Check if this PendingActionContext matches the supplied action
@@ -159,7 +160,7 @@ class PendingAction {
      * @return the PendingActionContext associated with the supplied action.
      * @throws IllegalArgumentException
      */
-    public static PendingActionContext getPendingActionContext(Context context, Action action) 
+    public static PendingActionContext getPendingActionContext(Context context, ReconAction action)
             throws IllegalArgumentException {
         Context currentContext = context;
         while (currentContext != null) {

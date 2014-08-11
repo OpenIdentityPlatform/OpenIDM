@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.DateUtil;
 
 /**
@@ -135,13 +135,13 @@ public class ReconciliationStatistic {
      * @param action the action that was processed
      */
     public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, boolean linkWasCreated,
-            Situation situation, Action action) {
+            Situation situation, ReconAction action) {
         if (sourceId != null) {
             sourceProcessed.incrementAndGet();
         }
         
         if (targetId != null) {
-            if (Action.CREATE.equals(action)) {
+            if (ReconAction.CREATE.equals(action)) {
                 targetCreated.incrementAndGet();
             } else {
                 targetProcessed.incrementAndGet();

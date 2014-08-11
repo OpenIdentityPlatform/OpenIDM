@@ -14,14 +14,14 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync.impl;
+package org.forgerock.openidm.sync;
 
 /**
- * TODO: Description.
+ * A Reconciliation action.
  *
  * @author Paul C. Bryan
  */
-enum Action {
+public enum ReconAction {
 
     /** A target object should be created and linked. */
     CREATE,

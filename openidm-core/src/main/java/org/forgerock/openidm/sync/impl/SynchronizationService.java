@@ -58,6 +58,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.Predicate;
@@ -292,7 +293,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     private JsonValue notifyCreate(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue object)
             throws SynchronizationException {
         // Handle pending link action if present
-        PendingAction.handlePendingActions(context, Action.LINK, mappings, resourceContainer, resourceId, object);
+        PendingAction.handlePendingActions(context, ReconAction.LINK, mappings, resourceContainer, resourceId, object);
         return syncAllMappings(new SyncAction() {
             @Override
             public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
@@ -314,7 +315,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     private JsonValue notifyDelete(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue oldValue)
             throws SynchronizationException {
         // Handle pending unlink action if present
-        PendingAction.handlePendingActions(context, Action.UNLINK, mappings, resourceContainer, resourceId, oldValue);
+        PendingAction.handlePendingActions(context, ReconAction.UNLINK, mappings, resourceContainer, resourceId, oldValue);
         return syncAllMappings(new SyncAction() {
             @Override
             public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {

@@ -25,9 +25,10 @@
 package org.forgerock.openidm.sync.impl;
 
 //import java.text.SimpleDateFormat;
+import org.forgerock.openidm.sync.ReconAction;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,7 @@ public class PhaseStatistic {
      * @param action the action that was processed
      */
     public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, boolean linkCreated, 
-            Situation situation, Action action) {
+            Situation situation, ReconAction action) {
         
         String id = null;
         if (phase == Phase.SOURCE) {
