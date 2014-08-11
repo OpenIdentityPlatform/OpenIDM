@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function(commonProfileView, countryStateDelegate, conf, uiUtils, validatorsManager) {
     
-    var obj = Object.getPrototypeOf(commonProfileView);
+    var obj = $.extend({}, commonProfileView);
     
     obj.data.hasAddressDetails = true;
     
