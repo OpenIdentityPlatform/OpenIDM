@@ -25,13 +25,9 @@
 /*global define, $, _ */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(AbstractView, eventManager, constants, conf, ConnectorDelegate, validatorsManager) {
+], function(ConnectorTypeAbstractView, validatorsManager) {
     var ConnectorTypeView = AbstractView.extend({
         element: "#connectorDetails",
         noBaseTemplate: true,
