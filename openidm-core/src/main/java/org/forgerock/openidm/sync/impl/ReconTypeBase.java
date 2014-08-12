@@ -230,7 +230,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * auto-detect if a given entry contains just id info, 
      * or contains full data
      * 
-     * The detection has limitations, such as requiring at least two
+     * The detection has limitations, such as requiring at least three
      * data fields aside from fields it expects in id queries. 
      * This may not be case for all custom connectors, in which case 
      * explicit config is required instead of using auto detect.
@@ -256,10 +256,10 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             }
             
             // OpenICF specific filter: those connectors may return field 
-            // marked as name too in ids query 
+            // marked as name and id too in ids query 
             // This implies that to be considered "full" result, it must
-            // include at least 2 additional fields besides id and rev
-            ignoreFields++;
+            // include at least 3 additional fields besides id and rev
+            ignoreFields += 2;
             
             return sourceEntry.size() > ignoreFields;
         } else {
