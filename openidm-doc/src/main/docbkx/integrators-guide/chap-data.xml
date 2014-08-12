@@ -501,6 +501,125 @@ var results = openidm.query("system/ScriptedSQL/account", params)
      </varlistentry>
     </variablelist>
    </section>
+
+  <section xml:id="paging-query-results">
+   <title>Paging Query Results</title>
+   <para>
+    The OpenIDM repository provides some support for paging results, useful, for
+    example, for UI display purposes. Note that this paging is not guaranteed to
+    include all results if the data moves in between paging calls. Predefined
+    queries must be configured to support paging. For example:
+   </para>
+   <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",</screen>
+   <para>
+    This query configuration enables the paging parameters to be used, for
+    example, in a query such as the following:
+   </para>
+   <screen><userinput>$ curl \
+  --cacert self-signed.crt \
+  --header "X-OpenIDM-Username: openidm-admin" \
+  --header "X-OpenIDM-Password: openidm-admin" \
+  --header "Content-Type: application/json" \
+  --request GET \
+  "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&amp;_pageSize=2&amp;_pagedResultsOffset=3"</userinput>
+ <computeroutput>{
+   "remainingPagedResults": 2,
+   "pagedResultsCookie": "5",
+   "resultCount": 2,
+   "result": [
+     {
+       "_rev": "0",
+       "_id": "b980999e-aa5c-4655-b2a0-08731b64e0ba"
+     },
+     {
+       "_rev": "0",
+       "_id": "c72b9c00-1e2c-4139-9e7f-fb9fb822db96"
+     }
+   ]
+ }</computeroutput>  </screen>
+   <para>
+    Paging is supported for managed objects, as queries on these objects are
+    delegated to the repository. There is currently no out of the box support
+    for paged queries on other objects.
+   </para>
+   <variablelist>
+    <para>
+     The following paging parameters are supported:
+    </para>
+    <varlistentry>
+     <term><literal>_pagedResultsCookie</literal></term>
+     <listitem>
+      <para>
+       Opaque cookie used by the server to keep track of the position
+       in the search results. The format of the cookie is a string value.
+      </para>
+      <para>
+       The server provides the cookie value on the first request. You should then
+       supply the cookie value in subsequent requests until the server returns a
+       null cookie, meaning that the final page of results has been returned.
+      </para>
+      <para>
+       Paged results are enabled only if the <literal>_pageSize</literal> is a
+       non-zero integer.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>_pagedResultsOffset</literal></term>
+     <listitem>
+      <para>
+       Specifies the index within the result set of the number of records to be
+       skipped before the first result is returned. The format of the
+       <literal>_pagedResultsOffset</literal> is an integer value. When the value
+       of <literal>_pagedResultsOffset</literal> is greater than or equal to 1,
+       the server returns pages, starting after the specified index.
+      </para>
+      <para>
+       This request assumes that the <literal>_pageSize</literal> is set, and not
+       equal to zero.
+      </para>
+      <para>
+       For example, if the result set includes 10 records, the
+       <literal>_pageSize</literal> is 2, and the
+       <literal>_pagedResultsOffset</literal> is 6, the server skips the first 6
+       records, then returns 2 records, 7 and 8. The
+       <literal>_pagedResultsCookie</literal> value would then be 8 (the index of
+       the last returned record) and the <literal>_remainingPagedResults</literal>
+       value would be 2, the last two records (9 and 10) that have not yet been
+       returned.
+      </para>
+      <para>
+       If the offset points to a page beyond the last of the search results, the
+       result set returned is empty.
+      </para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>_pageSize</literal></term>
+     <listitem>
+      <para>
+       An optional parameter indicating that query results should be returned in
+       pages of the specified size. For all paged result requests other than the
+       initial request, a cookie should be provided with the query request.
+      </para>
+      <para>
+       The default behavior is not to return paged query results. If set, this
+       parameter should be an integer value, greater than zero.
+      </para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+ <!--
+  <section xml:id="sorting-query-results">
+   <title>Sorting Query Results</title>
+   <para>
+    You can sort the results of a query on a managed object, using the
+    <literal>_sortKeys</literal> parameter. This parameter takes a
+    comma-separated list as a value and orders the way in which the JSON result
+    is returned, based on this list.
+   </para>
+  </section> -->
  </section>
 
 </chapter>
