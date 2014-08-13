@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.security.impl;
 
+import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -104,18 +105,19 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                         Certificate cert = pair.getKey();
                         PrivateKey key = pair.getValue();
 
-                        String password = request.getContent().get("password").defaultTo(
-                                Param.getKeystoreKeyPassword()).asString();
-
                         // Add it to the store and reload
                         logger.debug("Adding certificate entry under the alias {}", alias);
-                        store.getStore().setCertificateEntry(alias, cert);
+                        store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
+                                new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
                         store.store();
                         manager.reload();
                         // Save the store to the repo (if clustered)
                         saveStore();
 
                         result = returnCertificate(alias, cert);
+                        if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
+                            result.put("privateKey", getKeyMap(key));
+                        }
                     }
                 } else {
                     // Generate CSR
