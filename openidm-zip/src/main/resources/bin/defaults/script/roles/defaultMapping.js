@@ -120,7 +120,7 @@ function areAttributesEqual(attr1, attr2) {
 }
 
 // Check for any assignments that have been removed or modified
-if (typeof oldSource !== "undefined" && oldSource !== null) {
+if (typeof oldSource !== 'undefined' && oldSource !== null) {
     var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
     var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
     var unassigned = [];
@@ -135,7 +135,7 @@ if (typeof oldSource !== "undefined" && oldSource !== null) {
                 // This assignment has been unassigned
                 var onUnassignment = oldAssignment.onUnassignment;
                 // Check if an onUnassignment script is configured
-                if (onUnassignment != "undefined" && onUnassignment != null) {
+                if (typeof onUnassignment !== 'undefined' && onUnassignment !== null) {
                     onUnassignment.attributes = oldAssignment.attributes;
                     execOnScript(onUnassignment);
                 }
@@ -171,7 +171,7 @@ if (typeof oldSource !== "undefined" && oldSource !== null) {
                         // Default to replace and use the entire value
                         unassignmentOperation = defaultUnassignmentOperation;
                     }
-                    if (unassignmentOperation != "undefined" && unassignmentOperation != null) {
+                    if (typeof unassignmentOperation !== 'undefined' && unassignmentOperation !== null) {
                         var config = getConfig(unassignmentOperation);
                         config.attributeName = oldAttribute.name;
                         config.attributeValue = oldAttribute.value;
@@ -179,7 +179,9 @@ if (typeof oldSource !== "undefined" && oldSource !== null) {
                         // Update the target (working copy)
                         target[oldAttribute.name] = unassignmentResult;
                         // Update the existingTarget, in order to carry changes over to additional operations that may use the existingTarget
-                        existingTarget[oldAttribute.name] = unassignmentResult;
+                        if (typeof existingTarget !== 'undefined' && existingTarget !== null) {
+                            existingTarget[oldAttribute.name] = unassignmentResult;
+                        }
                     }
                 }
             }
@@ -198,7 +200,7 @@ if (assignments != null) {
                 var attributes = assignment.attributes;
                 var onAssignment = assignment.onAssignment;
                 // Check if an onAssignment script is configured
-                if (onAssignment != "undefined" && onAssignment != null) {
+                if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
                     onAssignment.attributes = attributes;
                     execOnScript(onAssignment);
                 }
