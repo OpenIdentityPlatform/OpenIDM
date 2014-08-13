@@ -76,8 +76,8 @@
    The following sections describe how to manage certificates and keys over REST.
   </para>
 
-  <example xml:id="display-keystore-over-rest">
-   <title>To Display the Contents of the Keystore</title>
+  <section xml:id="display-keystore-over-rest">
+   <title>Displaying the Contents of the Keystore</title>
 
    <para>
     OpenIDM generates a symmetric key and a private key the first time the
@@ -126,24 +126,22 @@ $ <userinput>curl \
      </para>
     </listitem>
    </itemizedlist>
-  </example>
+  </section>
 
   <section xml:id="csr-over-rest">
-   <title>To Generate a Certificate Signing Request Over REST</title>
+   <title>Generating a Certificate Signing Request Over REST</title>
 
    <para>
     To request a signed certificate, generate a certificate signing request
     (CSR) over REST, as described in this section. The details of the CSR are
     specified in JSON format, for example:
    </para>
-   <programlisting language="javascript">
-{
+   <programlisting language="javascript">{
     "DN" : "www.example.com",
     "OU" : "HR",
     "L"  : "Cupertino",
     "C"  : "US"
-}
-   </programlisting>
+}  </programlisting>
 
    <para>
     For information about the complete contents of a CSR, see
@@ -155,7 +153,7 @@ $ <userinput>curl \
     the URL. The following example, uses the default alias
     (<literal>openidm-localhost</literal>). If you have created your own private
     key for this request, specify its alias instead of
-    <literal>openidm-localhost</literal>. Set <literal> "returnPrivateKey" : true</literal>
+    <literal>openidm-localhost</literal>. Set <literal>"returnPrivateKey" : true</literal>
     to return the private key along with the request.
    </para>
 
@@ -269,11 +267,7 @@ lteew02UT+GNv/gC71bXCw\ncFTxnmKjP8YYIBBqZXzuk9wEaHN7OdGybUW0dsBCGxTXwDKe8XiA
     which the CSR was generated, include the private key in the PUT request.
    </para>
 
-   <!-- Since I don't have a CRT from a CSR, I did not check this. But
-    I did make cREST appropriate changes, e.g. application/json and
-    "alias": "openidm-localhost" -->
-   <screen>
-$ <userinput>curl \
+   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -363,14 +357,112 @@ QBzCfEbwMlJ17OB0AgWzNrbaak3MCmW1mh7OecjQwge1ajy7ho+JtQ==\n
     <computeroutput>
 {
     "_id": "openidm-localhost"
-}
-    </computeroutput>
-   </screen>
+}   </computeroutput>   </screen>
 
    <para>
     If the import is successful, the command returns the alias of the keystore
     to which the signed certificate was added.
    </para>
+  </section>
+
+  <section xml:id="certificate-over-rest">
+   <title>Generating a Self-Signed Certificate Over REST</title>
+   <para>
+    To generate a self-signed X.509 certificate, use the
+    <literal>generateCert</literal> action on the <literal>keystore</literal>
+    endpoint. This action must be performed as an authenticated administrative
+    user. The generated certificate is returned in the response to the request,
+    and stored in the OpenIDM keystore.
+   </para>
+   <para>
+    Specify the details of the certificate in the JSON payload. For example:
+   </para>
+   <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "algorithm" : "RSA",
+   "signatureAlgorithm" : "SHA512WithRSAEncryption",
+   "keySize"  : 2048,
+   "domainName"  : "www.example.com",
+   "validFrom" : "2014-08-13T07:59:44.497+02:00",
+   "validTo" : "2015-08-13T07:59:44.497+02:00",
+   "returnPrivateKey" : true,
+   "alias" : "new-alias"
+ }' \
+ "https://localhost:8443/openidm/security/keystore?_action=generateCert"
+   </userinput>
+   <computeroutput>{
+  "publicKey": {
+    "algorithm": "RSA",
+    "encoded": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+    ...
+    \n-----END PUBLIC KEY-----\n",
+    "format": "X.509"
+  },
+  "cert": "-----BEGIN CERTIFICATE-----\nMIIDSDCCAjCgAwIBAgIGAUfOo3GvMA0GCSqGSIb3
+    ...
+    \n-----END CERTIFICATE-----\n",
+  "type": "X.509",
+  "_id": "new-alias"
+}</computeroutput>
+   </screen>
+   <itemizedlist>
+    <para>
+     The following certificate details can be specified:
+    </para>
+    <listitem>
+     <para>
+      <literal>"algorithm"</literal> (optional) - the public key algorithm, for
+      example, <literal>RSA</literal>. If no algorithm is specified, a default
+      of <literal>RSA</literal> is used.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"signatureAlgorithm"</literal> (optional) - the signature type,
+      for example, <literal>SHA512WithRSAEncryption</literal>. If no algorithm
+      is specified, a default of <literal>SHA512WithRSAEncryption</literal> is
+      used.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"keySize"</literal> (optional) - the size of the key (in bits)
+      used in the cryptographic algorithm, for example <literal>2048</literal>.
+      If no key size is specified, a default of <literal>2048</literal> is used.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"domainName"</literal> - the fully qualified domain name (FQDN)
+      of your server, for example <literal>www.example.com</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"validFrom"</literal> and <literal>"validTo"</literal> (optional)
+      - the validity period of the certificate, in UTC time format, for example
+      <literal>2014-08-13T07:59:44.497+02:00</literal>. If no values are
+      specified, the certificate is valid for one year, from the current date.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"returnPrivateKey"</literal> (optional) - set this to
+      <literal>true</literal> to return the private key along with the request.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <literal>"alias"</literal> - the keystore alias or string that identifies
+      the certificate, for example <literal>openidm-localhost</literal>.
+     </para>
+    </listitem>
+   </itemizedlist>
   </section>
 
   <section xml:id="security-endpoints">
