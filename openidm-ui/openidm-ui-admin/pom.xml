@@ -106,6 +106,7 @@
             <configuration>
               <disallowInsecureCharsInRegExp>false</disallowInsecureCharsInRegExp>
               <excludes>
+                <exclude>**/libs/ldapfilters/*.js</exclude>
                 <exclude>**/libs/*.js</exclude>
                 <exclude>**/libs/i18n/*.js</exclude>
                 <exclude>**/*Test.js</exclude>

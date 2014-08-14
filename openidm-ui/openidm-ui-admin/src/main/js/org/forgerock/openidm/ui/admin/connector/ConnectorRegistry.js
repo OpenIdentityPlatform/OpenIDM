@@ -22,19 +22,32 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, form2js, _, js2form, window, require */
 
-define("org/forgerock/openidm/ui/admin/main", [
-	"./Dashboard",
-	"./MandatoryPasswordChangeDialog",
-	
-	"./delegates/ConnectorDelegate",
+define("org/forgerock/openidm/ui/admin/connector/ConnectorRegistry", [
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function(AbstractConfigurationAware) {
+    var obj = new AbstractConfigurationAware();
 
-	"./connector/ConnectorView",
-	"./connector/AddEditConnectorView",
-    "./connector/ConnectorTypeAbstractView",
-	"./connector/ConnectorTypeView",
-    "./connector/ConnectorRegistry",
+    obj.updateConfigurationCallback = function (conf) {
+        this.configuration = conf;
 
-    "./util/ConnectorUtils"
-]);
+        _.each(conf,function(val,key){
+            define(key, require[val]);
+
+            require([val]);
+        });
+    };
+
+    obj.getConnectorModule = function (type) {
+        if(_.isUndefined(this.configuration[type])) {
+            return require("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView");
+        } else {
+            return require(this.configuration[type]);
+        }
+    };
+
+    return obj;
+});
+
+

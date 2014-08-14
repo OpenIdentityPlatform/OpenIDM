@@ -26,24 +26,30 @@
 General Connector Display
 */
 
-.connector-input-body form.form .group-field-block label{ 
-	width:200px;
-	text-align:right; 
-	overflow: hidden;
-	text-overflow: ellipsis;	
+
+
+.connector-input-body label {
+  display:inline-block;
+  margin-right:5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connector-input-body form.form .group-field-block label {
+  width:200px;
+  text-align:right;
+  overflow: hidden;
+}
+
+.connector-input-body form.form .group-field-block label.long-label {
+  width:195px;
+  overflow: hidden;
 }
 
 .connector-input-body input[type="text"]:disabled,
 .connector-input-body select:disabled {
 	color: #bbb;
 	opacity: .8;
-}
-
-.config-toolbar {
-	padding-top:15px;
-	padding-bottom:15px;
-	border-top:1px solid #ddd;
-	border-bottom:1px solid #ddd;
 }
 
 .connector-body{
@@ -89,6 +95,18 @@ General Connector Display
   color:#5d6871;
 }
 
+.clean-btn {
+  background-color:#fff;
+  border:none;
+  vertical-align: top;
+  margin-top: 7px;
+  cursor:pointer;
+}
+
+.clean-btn:hover {
+  color:#5e887f;
+}
+
 /*
 	Connector type information
 */
@@ -117,14 +135,17 @@ General Connector Display
 }
 
 .connector-given-name {
-	font-weight:bold;
-	font-size:12px;
+  font-weight: bold;
+  font-size: 12px;
 }
 
-.connector-input-body label {
-	display:inline;
-	margin-right:20px;
-	width:150px;
+.connector-input-body .group-field-block .add-btn {
+  margin-left:0px;
+}
+
+.connector-input-body .group-field-block .add-btn span{
+  display:inline-block;
+  width:140px;
 }
 
 /*
@@ -150,19 +171,178 @@ Connector Status details
 /*
 	Connector Add/Edit 	
 */
- .connector-input-body .group-field-block {
- 	margin-top:15px;
+  .connector-input-body form.form .group-field-block {
+    padding-left:10px;
+    margin-top:0px;
+    margin-bottom:5px;
  }
 
+.connector-input-body form.form .group-field-block .note {
+  font-size:14px;
+  font-weight:bold;
+}
+
 .connector-input-body .form-size-s {
-	width:250px;
+  width:260px;
 }
 
 .connector-input-body .form-size-m {
-	width:450px;
+  width:460px;
 }
 
 .connector-input-body .form-size-l {
-	width:708px;
+  width:674px;
+}
+
+form.form .group-field-block .inline label.label-size-s  {
+  width:80px;
+}
+
+form.form .group-field-block .inline input[type='checkbox'] {
+  margin-top:10px;
+}
+
+.inline .inline-right {
+  margin-right:10px;
+}
+
+.connector-input-body fieldset {
+  border: 1px #ddd solid;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 5px;
+  background-color: white;
+}
+
+.connector-input-body fieldset.connector-closed-group {
+  height:40px;
+}
+
+.connector-input-body .connector-details-body fieldset{
+  margin-top:15px;
+}
+
+.connector-input-body form.form fieldset .group-lead{
+  padding-top:0px;
+  margin-top:15px;
+}
+
+.connector-input-body form.form fieldset .group-note-lead{
+  padding-top:0px;
+  margin-top:10px;
+}
+
+.connector-input-body legend{
+  height:25px;
+  padding:5px 5px 0px 5px;
+  background-color:#80b7ab;
+  border:2px solid #5fa595;
+  cursor:pointer;
+  margin-left:10px;
+  color:white;
+}
+
+.connector-input-body legend:hover{
+  background-color:lighten(#80b7ab, @button-hover-lightness);
+}
+
+.connector-input-body legend span{
+  margin-right:10px;
+  width: 170px;
+  display: inline-block;
+  text-overflow: ellipsis;
+}
+
+.connector-input-body .filter {
+  font-style:italic;
+  color:#888;
+}
+
+.connector-input-body form.form .group-actions-block {
+  margin-top:15px;
+}
+
+.connector-input-body form.form .error {
+  text-align: left;
+  padding-left: 5px;
+  padding-top: 5px;
+}
+
+form.form .group-field-block .outside-element div.validation-message {
+  width: 690px;
+}
+
+form.form .group-field-block .outside-element .inline {
+  width:710px;
+}
+
+form.form .group-field-block .small-outside-element div.validation-message {
+  width: 498px;
+}
+
+form.form .group-field-block div.validation-message {
+  display:block;
+  float:none;
+  width: 910px;
+}
+
+form.form .error-size-s div.validation-message {
+  width:495px;
+}
+
+/**
+  Filter Dialog Styles
+*/
+
+.filter-form .filter {
+  padding: 10px 10px 10px 10px;
+  background-color:white;
+  border: 1px solid #ddd;
+  height:18px;
+}
+
+.filter-form .clean-btn {
+  vertical-align:middle;
+  background-color:#f9f9f9;
+  font-size:15px;
+}
+
+.filter-form .group-actions-block {
+  margin-top:15px;
+}
+
+.filter-form .node select {
+  font-size:13px;
+  margin-top:10px;
+  height:30px;
+}
+
+.connector-details-body .inline-link {
+  vertical-align:top;
+  padding-top:5px;
+}
+
+.certificate {
+  width: 600px;
+  height: 400px;
+  font-family: monospace !important;
+}
+
+.ui-dialog .ui-dialog-content {
+  padding-left:5px;
+}
+
+.ui-dialog .ui-dialog-buttonpane{
+  padding-bottom:0px;
+  padding-right:0px;
+}
+
+.ui-dialog .error {
+  float: right;
+  margin-right: 15px;
+}
+
+div.ui-dialog .group-field-block div.validation-message {
+  width:605px;
 }
 

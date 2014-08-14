@@ -44,6 +44,12 @@ define("config/AppConfiguration", [
                     }
                 },
                 {
+                    moduleClass: "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
+                    configuration: {
+                        "org.identityconnectors.ldap.LdapConnector" : "org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView"
+                    }
+                },
+                {
                     moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                     configuration: {
                         messages: {
@@ -136,7 +142,8 @@ define("config/AppConfiguration", [
                         policyDelegate: "org/forgerock/openidm/ui/common/delegates/PolicyDelegate",
                         validators: { },
                         loader: [
-                            {"validators":"config/validators/CommonValidators"}
+                            {"validators":"config/validators/CommonValidators"},
+                            {"validators":"config/validators/AdminValidators"}
                         ]
                     } 
                 }

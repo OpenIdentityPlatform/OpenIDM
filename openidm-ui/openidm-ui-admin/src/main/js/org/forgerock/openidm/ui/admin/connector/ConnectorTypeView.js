@@ -25,37 +25,12 @@
 /*global define, $, _ */
 
 define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(AbstractView, validatorsManager) {
-    var ConnectorTypeView = AbstractView.extend({
-        element: "#connectorDetails",
-        noBaseTemplate: true,
+    "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView"
+], function(ConnectorTypeAbstractView) {
+    var ConnectorTypeView = ConnectorTypeAbstractView.extend({
 
-        render: function(args, callback) {
-            var base = "templates/admin/connector/";
-
-            $("#connectorDetails").hide();
-
-            this.data.connectorDefaults = args.connectorDefaults;
-
-            this.template = base + args.connectorType +".html";
-
-            this.parentRender(_.bind(function() {
-                if(args.animate) {
-                    $("#connectorDetails").slideDown("slow", function() {});
-                } else {
-                    $("#connectorDetails").show();
-                }
-
-                validatorsManager.bindValidators(this.$el);
-
-                if(callback){
-                    callback();
-                }
-            }, this));
-        }
     });
 
     return new ConnectorTypeView();
 });
+

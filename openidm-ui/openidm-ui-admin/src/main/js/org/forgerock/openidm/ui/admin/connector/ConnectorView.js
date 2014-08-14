@@ -40,8 +40,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorView", [
             "click .connector-delete": "deleteConnections"
         },
         render: function(args, callback) {
-            var i;
-
             //Remove when commons updates
             Handlebars.registerHelper('select', function(value, options){
                 var selected = $('<select />').html(options.fn(this));
@@ -68,7 +66,10 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorView", [
                 this.data = {"currentConnectors": connectors};
 
                 this.parentRender(_.bind(function(){
-                    this.$el.find(".connector-body").tooltip();
+                    this.$el.find(".connector-body").tooltip({
+                        position: { my: "left+15 center", at: "right center" },
+                        track: true
+                    });
                 }, this));
             }, this));
         },
