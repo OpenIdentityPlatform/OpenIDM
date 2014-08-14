@@ -1,106 +1,171 @@
-<div class="connector-input-body">
-    <div class="group-field-block">
-        <label class="light">Quoting</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.quoting" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.quoting}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Host</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.host" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.host}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Port</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.port" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.port}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">User</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.user" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.user}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Password</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.password" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.password}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Database</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.database" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.database}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Table</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.table" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.table}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Key Column</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.keyColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.keyColumn}}" required>
-    </div>
+<fieldset>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="quoting" title="{{t "templates.connector.databaseTableConnector.quoting"}}" class="light">{{t "templates.connector.databaseTableConnector.quoting"}}</label>
+                <input id="quoting" class="form-size-l" data-validator="required" type="text" name="configurationProperties.quoting" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.quoting}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         <div class="group-field-block">
-        <label class="light">Password Column</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordColumn}}" required>
-    </div>
-    </div>
+            <div class="separate-message">
+                <label for="host" title="{{t "templates.connector.databaseTableConnector.host"}}" class="light">{{t "templates.connector.databaseTableConnector.host"}}</label>
+                <input id="host" class="form-size-l" data-validator="required" type="text" name="configurationProperties.host" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.host}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         <div class="group-field-block">
-        <label class="light">JDC Driver</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" required>
-    </div>
-    </div>
+            <div class="separate-message">
+                <label for="port" title="{{t "templates.connector.databaseTableConnector.port"}}" class="light">{{t "templates.connector.databaseTableConnector.port"}}</label>
+                <input id="port" class="form-size-l" data-validator="required" type="text" name="configurationProperties.port" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.port}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         <div class="group-field-block">
-        <label class="light">JDBC Url Template</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" required>
-    </div>
-    </div>
+            <div class="separate-message">
+                <label for="user" title="{{t "templates.connector.databaseTableConnector.user"}}" class="light">{{t "templates.connector.databaseTableConnector.user"}}</label>
+                <input id="user" class="form-size-l" data-validator="required" type="text" name="configurationProperties.user" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.user}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         <div class="group-field-block">
-        <label class="light">Password Column</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordColumn}}" required>
-    </div>
-	<div class="group-field-block">
-	    <label class="light">Enable Empty String</label>
-	    <select class="form-size-s" name="configurationProperties.enableEmptyString" required>
-	    {{#select connectorDefaults.configurationProperties.enableEmptyString}}
-	    	<option value="true">True</option>
-	    	<option value="false">False</option>
-	    {{/select}}
-	    </select>
-	</div>
-	<div class="group-field-block">
-	    <label class="light">Rethrow All SQL Exceptions</label>
-	    <select class="form-size-s" name="configurationProperties.rethrowAllSQLExceptions" required>
-	    {{#select connectorDefaults.configurationProperties.rethrowAllSQLExceptions}}
-	    	<option value="true">True</option>
-	    	<option value="false">False</option>
-	    {{/select}}
-	    </select>
-	</div>
-	<div class="group-field-block">
-	    <label class="light">Native Timestamps</label>
-	    <select class="form-size-s" name="configurationProperties.nativeTimestamps" required>
-	    {{#select connectorDefaults.configurationProperties.nativeTimestamps}}
-	    	<option value="true">True</option>
-	    	<option value="false">False</option>
-	    {{/select}}
-	    </select>
-	</div>
-	<div class="group-field-block">
-	    <label class="light">All Native</label>
-	    <select class="form-size-s" name="configurationProperties.allNative" required>
-	    {{#select connectorDefaults.configurationProperties.allNative}}
-	    	<option value="true">True</option>
-	    	<option value="false">False</option>
-	    {{/select}}
-	    </select>
-	</div>
-    </div>
+            <div class="separate-message">
+                <label for="password" title="{{t "templates.connector.databaseTableConnector.password"}}" class="light">{{t "templates.connector.databaseTableConnector.password"}}</label>
+                <input id="password" class="form-size-l" data-validator="required" type="text" name="configurationProperties.password" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.password}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
         <div class="group-field-block">
-        <label class="light">Valid Connection Query</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.validConnectionQuery" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.validConnectionQuery}}" required>
+            <div class="separate-message">
+                <label for="database" title="{{t "templates.connector.databaseTableConnector.database"}}" class="light">{{t "templates.connector.databaseTableConnector.database"}}</label>
+                <input id="database" class="form-size-l" data-validator="required" type="text" name="configurationProperties.database" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.database}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="table" title="{{t "templates.connector.databaseTableConnector.table"}}" class="light">{{t "templates.connector.databaseTableConnector.table"}}</label>
+                <input id="table" class="form-size-l" data-validator="required" type="text" name="configurationProperties.table" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.table}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="keyColumn" title="{{t "templates.connector.databaseTableConnector.keyColumn"}}" class="light">{{t "templates.connector.databaseTableConnector.keyColumn"}}</label>
+                <input id="keyColumn" class="form-size-l" data-validator="required" type="text" name="configurationProperties.keyColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.keyColumn}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="passwordColumn" title="{{t "templates.connector.databaseTableConnector.passwordColumn"}}" class="light">{{t "templates.connector.databaseTableConnector.passwordColumn"}}</label>
+                <input id="passwordColumn" class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordColumn}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="jdcDriver" title="{{t "templates.connector.databaseTableConnector.jdcDriver"}}" class="light">{{t "templates.connector.databaseTableConnector.jdcDriver"}}</label>
+                <input id="jdcDriver" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="jdcUrlTemplate" title="{{t "templates.connector.databaseTableConnector.jdcUrlTemplate"}}" class="light">{{t "templates.connector.databaseTableConnector.jdcUrlTemplate"}}</label>
+                <input id="jdcUrlTemplate" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="passwordColumn" title="{{t "templates.connector.databaseTableConnector.passwordColumn"}}" class="light">{{t "templates.connector.databaseTableConnector.passwordColumn"}}</label>
+                <input id="passwordColumn" class="form-size-l" data-validator="required" type="text" name="configurationProperties.passwordColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.passwordColumn}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <label for="enableEmptyString" title="{{t "templates.connector.databaseTableConnector.enableEmptyString"}}" class="light">{{t "templates.connector.databaseTableConnector.enableEmptyString"}}</label>
+            <select id="enableEmptyString" class="form-size-s" name="configurationProperties.enableEmptyString" required>
+            {{#select connectorDefaults.configurationProperties.enableEmptyString}}
+                <option value="true">True</option>
+                <option value="false">False</option>
+            {{/select}}
+            </select>
+        </div>
+        <div class="group-field-block">
+            <label for="rethrowSQL" title="{{t "templates.connector.databaseTableConnector.rethrowSQL"}}" class="light">{{t "templates.connector.databaseTableConnector.rethrowSQL"}}</label>
+            <select id="rethrowSQL" class="form-size-s" name="configurationProperties.rethrowAllSQLExceptions" required>
+            {{#select connectorDefaults.configurationProperties.rethrowAllSQLExceptions}}
+                <option value="true">True</option>
+                <option value="false">False</option>
+            {{/select}}
+            </select>
+        </div>
+        <div class="group-field-block">
+            <label for="natvieTimestamps" title="{{t "templates.connector.databaseTableConnector.natvieTimestamps"}}" class="light">{{t "templates.connector.databaseTableConnector.natvieTimestamps"}}</label>
+            <select id="natvieTimestamps" class="form-size-s" name="configurationProperties.nativeTimestamps" required>
+            {{#select connectorDefaults.configurationProperties.nativeTimestamps}}
+                <option value="true">True</option>
+                <option value="false">False</option>
+            {{/select}}
+            </select>
+        </div>
+        <div class="group-field-block">
+            <label for="allNative" title="{{t "templates.connector.databaseTableConnector.allNative"}}" class="light">{{t "templates.connector.databaseTableConnector.allNative"}}</label>
+            <select id="allNative" class="form-size-s" name="configurationProperties.allNative" required>
+            {{#select connectorDefaults.configurationProperties.allNative}}
+                <option value="true">True</option>
+                <option value="false">False</option>
+            {{/select}}
+            </select>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="validConnectionQuery" title="{{t "templates.connector.databaseTableConnector.validConnectionQuery"}}" class="light">{{t "templates.connector.databaseTableConnector.validConnectionQuery"}}</label>
+                <input id="validConnectionQuery" class="form-size-l" data-validator="required" type="text" name="configurationProperties.validConnectionQuery" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.validConnectionQuery}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="changeLogColumn" title="{{t "templates.connector.databaseTableConnector.changeLogColumn"}}" class="light">{{t "templates.connector.databaseTableConnector.changeLogColumn"}}</label>
+                <input id="changeLogColumn" class="form-size-l" data-validator="required" type="text" name="configurationProperties.changeLogColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.changeLogColumn}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="dataSource" title="{{t "templates.connector.databaseTableConnector.dataSource"}}" class="light">{{t "templates.connector.databaseTableConnector.dataSource"}}</label>
+                <input id="dataSource" class="form-size-l" data-validator="required" type="text" name="configurationProperties.datasource" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.datasource}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="jndiProperties" title="{{t "templates.connector.databaseTableConnector.jndiProperties"}}" class="light">{{t "templates.connector.databaseTableConnector.jndiProperties"}}</label>
+                <input id="jndiProperties" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jndiProperties" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jndiProperties}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
     </div>
-    <div class="group-field-block">
-        <label class="light">Change Log Column</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.changeLogColumn" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.changeLogColumn}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">Data Source</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.datasource" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.datasource}}" required>
-    </div>
-    <div class="group-field-block">
-        <label class="light">JNDI Properties</label>
-        <input class="form-size-l" data-validator="required" type="text" name="configurationProperties.jndiProperties" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jndiProperties}}" required>
-    </div>
-</div>
+</fieldset>
+
+

@@ -32,6 +32,7 @@ define("config/main", [
     "./routes/CommonRoutesConfig",
 
     "./validators/CommonValidators",
+    "./validators/AdminValidators",
 
     "./AppConfiguration",
 

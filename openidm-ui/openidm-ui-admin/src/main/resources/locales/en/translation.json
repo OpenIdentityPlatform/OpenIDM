@@ -51,7 +51,7 @@
                 "connectorTestNotPass" : "Connector configuration not valid.",
                 "connectorTestFailed" : "Unable to test connector.",
                 "connectorSaveFail" : "Failed to save connector please try again.",
-                "connectorTestPass" : "Connector successfully created",
+                "connectorTestPass" : "Connector successfully saved",
                 "deleteConnectorSuccess" : "Connector successfully deleted",
                 "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
                 "connectorsNotAvailable" : "System currently has no available connectors."
@@ -164,7 +164,164 @@
             "updateButtonTitle" : "Update",
             "addConnectorTitle" : "Add Connector",
             "activeState" : "Active",
-            "errorState" : "Error"
+            "errorState" : "Error",
+            "baseTitle" : "Base Connector Details",
+            "groovyConnector": {
+                "classpath" : "Classpath",
+                "authenticateScriptFileName" : "Authenticate Script File Name",
+                "createScriptFileName" : "Create Script File Name",
+                "deleteScriptFileName" : "Delete Script File Name",
+                "resolveUsernameScriptFileName" : "Resolve Username Script File Name",
+                "schemaScriptFileName" : "Schema Script File Name",
+                "scriptResourceFileName" : "Script On Resource Script File Name",
+                "searchScriptFileName" : "Search Script File Name",
+                "syncScriptFileName" : "SYNC Script File Name",
+                "testScriptFileName" : "Test Script File Name",
+                "updateScriptFileName" : "Update Script File Name"
+            },
+            "groovyPoolableConnector" : {
+                "authenticateScriptFileName" : "Authenticate Script File Name",
+                "warningLevel" : "Warning Level",
+                "minimumRecompilationInterval" : "Minimum Recompilation Interval",
+                "deleteScriptFileName" : "Delete Script File Name",
+                "schemaScriptFileName" : "Schema Script File Name",
+                "customizerScriptFileName" : "Customizer Script File Name",
+                "resolveUsernameScriptFileName" : "Resolve Username Script File Name",
+                "debug" : "Debug",
+                "targetDirectory" : "Target Directory",
+                "disabledGlobalAst" : "Disabled Global ASTTransformations",
+                "classpath" : "Classpath",
+                "scriptExtensions" : "Script Extensions",
+                "testScriptFileName" : "Test Script File Name",
+                "updateScriptFileName" : "Update Script File Name",
+                "sourceEncoding" : "Source Encoding",
+                "searchScriptFileName" : "Search Script File Name",
+                "scriptOnResourceFileName" : "Script On Resource Script File Name",
+                "scriptBaseClass" : "Script Base Class",
+                "verbose" : "Verbose",
+                "createScriptFileName" : "Create Script File Name",
+                "recompileGroovySource" : "Recompile Groovy Source",
+                "tolerance" : "Tolerance",
+                "syncScriptFileName" : "Sync Script File Name"
+            },
+            "csvConnector" : {
+                "filePath" : "File Path",
+                "uniqueAttribute" : "Unique Attribute",
+                "nameAttribute" : "Name Attribute",
+                "passwordAttribute" : "Password Attribute"
+            },
+            "xmlConnector" : {
+                "xsdicfFilePath" : "XSD ICF File Path",
+                "xsdFilePath" : "XSD File Path",
+                "xmlFilePath" : "XML File Path",
+                "createIfNotExists" : "Create File If Not Exists"
+            },
+            "scriptedSQLConnector" : {
+                "host" : "Host",
+                "port" : "Port",
+                "user" : "User",
+                "password" : "Password",
+                "database" : "Database",
+                "createIfNotExists" : "Create File If Not Exists",
+                "reloadScriptOnExecution" : "Reload Script On Execution",
+                "jdbcDriver" : "JDBC Driver",
+                "jdbcConnectionUrl" : "JDBC Connection Url",
+                "jdbcUrlTemplate" : "JDBC Url Template",
+                "createScriptFileName" : "Create Script File Name",
+                "testScriptFileName" : "Test Script File Name",
+                "searchScriptFileName" : "Search Script File Name"
+            },
+            "databaseTableConnector" : {
+                "quoting" : "Quoting",
+                "host" : "Host",
+                "port" : "Port",
+                "user" : "User",
+                "password" : "Password",
+                "database" : "Database",
+                "table" : "Table",
+                "keyColumn" : "Key Column",
+                "passwordColumn" : "Password Column",
+                "jdcDriver" : "JDC Driver",
+                "jdcUrlTemplate" : "JDBC Url Template",
+                "passwordColumn" : "Password Column",
+                "enableEmptyString" : "Enable Empty String",
+                "rethrowSQL" : "Rethrow All SQL Exceptions",
+                "natvieTimestamps" : "Native Timestamps",
+                "allNative" : "All Native",
+                "validConnectionQuery" : "Valid Connection Query",
+                "changeLogColumn" : "Change Log Column",
+                "dataSource" : "Data Source",
+                "jndiProperties" : "JNDI Properties"
+            },
+            "ldapConnector" : {
+                "link": "Setup Active Directory",
+                "title": "Data Source: Active Directory",
+                "host": "Host name or IP",
+                "port": "Port",
+                "ssl": "Use SSL?",
+                "certificate": "SSL Certificate",
+                "certificateHint": "Paste your server's Base64-encoded X509 certificate here, if self-signed or signed by an unknown Certificate Authority",
+                "username": "Account Distinguished Name (DN)",
+                "usernamePlaceholder":"cn=Administrator,cn=Users,dc=company,dc=com",
+                "password": "Password",
+                "accountUserNameAttributes": "Attribute used for login",
+                "baseContextTitle":"Base Context",
+                "baseContext": "Enter the path to your base dn",
+                "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
+                "baseContextAdd":"Add Base Context",
+                "accountObjectClasses" : "objectclasses for users",
+                "addAccountObjectClasses" : "Add User Object",
+                "addUsersTitle": "User Details",
+                "groupObjectClasses": "objectclasses for groups",
+                "addGroupObjectClasses" : "Add User Object",
+                "addGroupTitle" : "Group Details",
+                "accountSearchFilter": "User Filter",
+                "groupSearchFilter": "Group Filter",
+                "validate": "Validate settings",
+                "checking": "Checking active directory settings...",
+                "connected": "Connection to active directory successful",
+                "failed": "Connection to active directory failed",
+                "authorizeGroups": "Save and Assign Admins",
+                "hideCert": "hide certificate",
+                "showCert": "show certificate",
+                "filter": {
+                    "title": {
+                        "dialog": "Update __type__"
+                    },
+                    "options": {
+                        "none": "No Filter",
+                        "and": "All of...",
+                        "or": "Any of...",
+                        "not": "None of...",
+                        "expr": "The value for "
+                    },
+                    "delimiters": {
+                        "and": "And",
+                        "or": "Or"
+                    },
+                    "tags" : {
+                        "approxMatch": "Starting with",
+                        "greaterOrEqual": "GTE (>=)",
+                        "lessOrEqual": "LTE (<=)",
+                        "equalityMatch": "Matching",
+                        "extensible": {
+                            "rules": {
+                                "bitAnd": "Bitwise AND",
+                                "bitOr": "Bitwise OR"
+                            }
+                        }
+                    }
+                },
+                "errorMessages": {
+                    "unknownHost" : "Unknown Host",
+                    "portOutOfRange" : "Port Out of Range",
+                    "connectionRefused" : "Connection Refused",
+                    "operationTimedOut" : "Operation Timed Out",
+                    "sslHandshakeException" : "SSL Handshake Exception",
+                    "invalidCredentials" : "Invalid Username or Password",
+                    "badBaseContext" : "Bad Base Context(s)"
+                }
+            }
         }
     },
     "common" : {
