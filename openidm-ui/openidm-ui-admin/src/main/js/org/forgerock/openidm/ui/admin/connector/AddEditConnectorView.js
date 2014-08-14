@@ -45,6 +45,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "click #connectorForm fieldset legend" : "sectionHideShow"
         },
         connectorTypeRef: null,
+
         render: function(args, callback) {
             //Remove when commons updates
             Handlebars.registerHelper('select', function(value, options){
@@ -162,22 +163,31 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             $.extend(true, mergedResult, connDetails, connectorData);
 
-            ConfigDelegate.setEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function(result){
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
+            if(this.data.editState) {
+                ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                    this.testConnector(mergedResult);
+                }, this));
+            } else {
+                ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                    this.testConnector(mergedResult);
+                }, this));
+            }
+        },
 
-                _.delay(_.bind(function(){
-                    ConnectorDelegate.testConnector(mergedResult.name).then(_.bind(function(result){
-                        if(result.ok === true){
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
-                        } else {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestNotPass");
-                        }
+        testConnector: function(mergedResult) {
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
-                    },this));
-                },this), 1500);
+            _.delay(_.bind(function () {
+                ConnectorDelegate.testConnector(mergedResult.name).then(_.bind(function (result) {
+                    if (result.ok === true) {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
+                    } else {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestNotPass");
+                    }
 
-            },this));
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
+                }, this));
+            }, this), 1500);
         },
 
         sectionHideShow: function(event) {

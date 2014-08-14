@@ -79,18 +79,11 @@ define("org/forgerock/openidm/ui/common/delegates/ConfigDelegate", [
         }
     };
 
-    obj.setEntity = function(id, objectParam, successCallback, errorCallback) {
-        return this.serviceCall({url: "/" + id,
-            type: "PUT",
-            success: successCallback,
-            error: errorCallback,
-            data: JSON.stringify(objectParam),
-            headers: {
-                "If-None-Match" :'"' + "*" + '"'
-            }
-        }).always(function () {
-            delete conf.delegateCache.config[id];
-        });
+    obj.updateEntity = function(id, objectParam, successCallback, errorCallback) {
+        return Object.getPrototypeOf(obj).updateEntity.call(obj, id, objectParam, successCallback, errorCallback)
+            .always(function () {
+                delete conf.delegateCache.config[id];
+            });
     };
 
     obj.deleteEntity = function(id, successCallback, errorCallback) {
