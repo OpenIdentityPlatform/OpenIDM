@@ -107,258 +107,6 @@ public class AuditServiceImplTest {
     }
 
     @Test
-    public void testActivityActionFilter() {
-        // Given
-        /*
-        "eventTypes" : {
-            "activity" : {
-                "filter" : {
-                    "actions" : [ "create" ]
-                },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("create");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext context = mock(ServerContext.class);
-
-        // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertFalse(filter.isFiltered(context, create));
-        assertTrue(filter.isFiltered(context, update));
-        assertFalse(filter.isFiltered(context, skittle)); // non-RequestTypes are always unfiltered
-    }
-
-    @Test
-    public void testActivityActionFilterWithNonRequestTypeAction() {
-        // Given
-        /*
-        "eventTypes" : {
-            "activity" : {
-                "filter" : {
-                    "actions" : [ "skittle" ]
-                },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("skittle");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext context = mock(ServerContext.class);
-
-        // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertTrue(filter.isFiltered(context, create));
-        assertTrue(filter.isFiltered(context, update));
-        assertFalse(filter.isFiltered(context, skittle)); // non-RequestTypes are always unfiltered
-    }
-
-    @Test
-    public void testReconActionFilter() {
-        // Given
-        /*
-        "eventTypes" : {
-            "recon" : {
-                "filter" : {
-                    "actions" : [ "link", "unlink" ]
-                },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("link");
-                                    add("unlink");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext context = mock(ServerContext.class);
-
-        // When
-        CreateRequest link = Requests.newCreateRequest("recon", null, json(object(field("action", "link"))));
-        CreateRequest unlink = Requests.newCreateRequest("recon", null, json(object(field("action", "unlink"))));
-        CreateRequest exception = Requests.newCreateRequest("recon", null, json(object(field("action", "exception"))));
-        CreateRequest skittle = Requests.newCreateRequest("recon", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertFalse(filter.isFiltered(context, link));
-        assertFalse(filter.isFiltered(context, unlink));
-        assertTrue(filter.isFiltered(context, exception));
-        assertFalse(filter.isFiltered(context, skittle)); // non-Actions are always unfiltered
-    }
-
-    @Test
-    public void testReconActionFilterWithNonRequestTypeAction() {
-        // Given
-        /*
-        "eventTypes" : {
-            "recon" : {
-                "filter" : {
-                    "actions" : [ "skittle" ]
-                },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("skittle");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext context = mock(ServerContext.class);
-
-        // When
-        CreateRequest link = Requests.newCreateRequest("recon", null, json(object(field("action", "link"))));
-        CreateRequest unlink = Requests.newCreateRequest("recon", null, json(object(field("action", "unlink"))));
-        CreateRequest exception = Requests.newCreateRequest("recon", null, json(object(field("action", "exception"))));
-        CreateRequest skittle = Requests.newCreateRequest("recon", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertTrue(filter.isFiltered(context, link));
-        assertTrue(filter.isFiltered(context, unlink));
-        assertTrue(filter.isFiltered(context, exception));
-        assertFalse(filter.isFiltered(context, skittle)); // non-Actions are always unfiltered
-    }
-
-    @Test
-    public void testActivityTriggerFilter() {
-        // Given
-        /*
-        "eventTypes" : {
-            "activity" : {
-                "filter" : {
-                     "triggers" : {
-                         "sometrigger" : [
-                             "create",
-                             "update"
-                         ]
-                     }
-                 },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("create");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext noTrigger = mock(ServerContext.class);
-        ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
-
-        // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertFalse(filter.isFiltered(noTrigger, create));
-        assertFalse(filter.isFiltered(noTrigger, update));
-        assertFalse(filter.isFiltered(noTrigger, skittle));
-        assertFalse(filter.isFiltered(hasTrigger, create));
-        assertTrue(filter.isFiltered(hasTrigger, update));
-        assertFalse(filter.isFiltered(hasTrigger, skittle));// non-RequestTypes are always unfiltered
-    }
-
-    @Test
-    public void testActivityTriggerFilterWithNonRequestTypeAction() {
-        // Given
-        /*
-        "eventTypes" : {
-            "activity" : {
-                "filter" : {
-                     "triggers" : {
-                         "sometrigger" : [ "skittle" ]
-                     }
-                 },
-            },
-        }
-        */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("skittle");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-        AuditLogFilter filter = auditService.getAuditLogFilter(config);
-        ServerContext noTrigger = mock(ServerContext.class);
-        ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
-
-        // When
-        CreateRequest create = Requests.newCreateRequest("activity", null, json(object(field("action", "create"))));
-        CreateRequest update = Requests.newCreateRequest("activity", null, json(object(field("action", "update"))));
-        CreateRequest skittle = Requests.newCreateRequest("activity", null, json(object(field("action", "skittle"))));
-
-        // Then
-        assertFalse(filter.isFiltered(noTrigger, create));
-        assertFalse(filter.isFiltered(noTrigger, update));
-        assertFalse(filter.isFiltered(noTrigger, skittle));
-        assertTrue(filter.isFiltered(hasTrigger, create));
-        assertTrue(filter.isFiltered(hasTrigger, update));
-        assertFalse(filter.isFiltered(hasTrigger, skittle));// non-RequestTypes are always unfiltered
-    }
-
-    @Test
     public void testFilterActivityAuditContext() throws Exception {
 
         //Given
@@ -411,7 +159,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -440,7 +188,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -471,7 +219,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -504,7 +252,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         TriggerContext triggerContext = new TriggerContext(new RootContext(), "sometrigger");
         ServerContext context = new ServerContext(triggerContext);
         ResultHandler<Resource> handler = mock(ResultHandler.class);
@@ -536,7 +284,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -569,7 +317,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -603,7 +351,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -639,7 +387,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
@@ -677,7 +425,7 @@ public class AuditServiceImplTest {
                         }});
                     }});
                 }});
-        auditService.auditFilter = auditService.getAuditLogFilter(config);
+        auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
