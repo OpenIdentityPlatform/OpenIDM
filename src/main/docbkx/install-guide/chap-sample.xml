@@ -106,14 +106,33 @@ orientdb&gt; </screen>
    </varlistentry>
   </variablelist>
   
-  <para>You can also use OrientDB Studio to query the default OrientDB 
-  repository. After you have installed and started OpenIDM, point your browser 
-  to <link xlink:href="http://localhost:2480/" />. The default database
-  is <literal>openidm</literal> and the default user and password are
-  <literal>admin</literal> and <literal>admin</literal>. Click Connect to
-  connect to the repository. For more information about OrientDB Studio, see the
-  <link xlink:href="http://code.google.com/p/orient/wiki/OrientDB_Studio">
-  OrientDB Studio documentation</link>.</para>
+  <para>
+   You can also use OrientDB Studio to query the default OrientDB repository.
+   After you have installed and started OpenIDM, point your browser to
+   <link xlink:href="http://localhost:2480/" />. The default database is
+   <literal>openidm</literal> and the default user and password are
+   <literal>admin</literal> and <literal>admin</literal>. Click Connect to
+   connect to the repository.
+  </para>
+  <para>
+   To change the default password, use the following POST request on the
+   <literal>repo</literal> endpoint:
+  </para>
+  <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/repo?_action=updateDbCredentials&amp;user=admin&amp;password=newPassword"
+   </userinput></screen>
+  <para>
+   This command updates both the repository and the repository configuration file.
+  </para>
+  <para>
+   For more information about OrientDB Studio, see
+   the <link xlink:href="http://code.google.com/p/orient/wiki/OrientDB_Studio">
+   OrientDB Studio documentation</link>.</para>
  </section>
 
  <section xml:id="about-the-sample">
