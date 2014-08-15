@@ -25,14 +25,13 @@ import org.forgerock.json.resource.ServerContext;
  * @author brmiller
  */
 interface AuditLogFilter {
-
     /**
-     * Test whether the given context and reqeust should be filtered.
+     * Test whether the log message described in the request should be filtered out; i.e. not logged.
      *
      * @param context the ServerContext associated with the request
      * @param request the audit log create request.  Implementations will typically
      *                examine request.getContent()
-     * @return whether to filter the request
+     * @return true if the log message should be dropped, false if it should be logged
      */
     boolean isFiltered(ServerContext context, CreateRequest request);
 }

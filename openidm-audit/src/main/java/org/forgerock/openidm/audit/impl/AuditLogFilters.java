@@ -29,8 +29,12 @@ import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
+import org.forgerock.script.Script;
+import org.forgerock.script.ScriptEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.script.ScriptException;
 
 import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_ACTIVITY;
 import static org.forgerock.openidm.audit.impl.AuditServiceImpl.TYPE_RECON;
@@ -158,6 +162,37 @@ public class AuditLogFilters {
     }
 
     /**
+     * A filter implemented via a {@link ScriptEntry}.
+     */
+    private static class ScriptedFilter implements AuditLogFilter {
+        private ScriptEntry scriptEntry;
+
+        private ScriptedFilter(ScriptEntry scriptEntry) {
+            this.scriptEntry = scriptEntry;
+        }
+
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            if (!scriptEntry.isActive()) {
+                // do not filter if script has become in active
+                return false;
+            }
+
+            Script script = scriptEntry.getScript(context);
+            script.put("request", request);
+            script.put("context", context);
+            try {
+                // Flip the polarity of the script return.  We want the customer-facing semantic to be filter-in,
+                // but the implementation uses a filter-out paradigm.
+                return !((Boolean) script.eval());
+            } catch (ScriptException e) {
+                logger.warn("Audit filter script {} threw exception {} - not filtering", scriptEntry.getName().getName(), e.toString());
+                return false;
+            }
+        }
+    }
+
+    /**
      * A composite filter that filters if any one of the constituents filters.
      */
     private static class CompositeFilter implements AuditLogFilter {
@@ -267,6 +302,16 @@ public class AuditLogFilters {
         return filters.isEmpty() || onlyContainsNone(filters)
                 ? NONE // don't bother creating a composite filter out of nothing or a bunch of nothings
                 : new CompositeFilter(filters);
+    }
+
+    /**
+     * Creates an audit log filter implemented in a script.
+     *
+     * @param scriptEntry the Script
+     * @return an audit log filter via script
+     */
+    static AuditLogFilter newScriptedFilter(ScriptEntry scriptEntry) {
+        return new ScriptedFilter(scriptEntry);
     }
 
     /**
