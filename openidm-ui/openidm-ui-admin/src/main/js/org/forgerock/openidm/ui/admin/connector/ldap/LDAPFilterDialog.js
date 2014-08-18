@@ -28,7 +28,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "ldapjs/index"
+    "ldapjs-filter"
 ], function (AbstractView, conf, uiUtils, ldapjs) {
     var isRootFilter = true,
         ActiveDirectoryFilterDialog = AbstractView.extend({

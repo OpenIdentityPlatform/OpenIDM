@@ -150,16 +150,42 @@
           </plugin>
 
           <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+                <descriptors>
+                    <descriptor>src/main/assembly/zip.xml</descriptor>
+                </descriptors>
+                <finalName>www</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <groupId>org.apache.felix</groupId>
             <artifactId>maven-bundle-plugin</artifactId>
             <extensions>true</extensions>
+            <executions>
+              <execution>
+                  <id>bundle-manifest</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>manifest</goal>
+                  </goals>
+              </execution>
+            </executions>
             <configuration>
               <instructions>
                 <Import-Package>*</Import-Package>
                 <Include-Resource>
-                  <!-- order here matters; we want depedencies in first, then overwritten by local resources -->
-                  public=target/dependency,
-                  public=target/classes
+                    public=target/www
                 </Include-Resource>
               </instructions>
             </configuration>
@@ -301,15 +327,42 @@
           </plugin>
 
           <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+                <descriptors>
+                    <descriptor>src/main/assembly/zip.xml</descriptor>
+                </descriptors>
+                <finalName>www</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <groupId>org.apache.felix</groupId>
             <artifactId>maven-bundle-plugin</artifactId>
             <extensions>true</extensions>
+            <executions>
+              <execution>
+                  <id>bundle-manifest</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>manifest</goal>
+                  </goals>
+              </execution>
+            </executions>
             <configuration>
               <instructions>
                 <Import-Package>*</Import-Package>
                 <Include-Resource>
-                public=target/classes,
-                public=src/main/resources
+                    public=target/www
                 </Include-Resource>
                 <Bundle-SymbolicName>${project.groupId}.ui.enduser</Bundle-SymbolicName>
               </instructions>

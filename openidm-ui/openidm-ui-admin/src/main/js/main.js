@@ -43,7 +43,7 @@ require.config({
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         SiteIdentificationDelegate: "org/forgerock/openidm/ui/common/delegates/SiteIdentificationDelegate",
-        ldapjs: "libs/ldapfilters"
+        "ldapjs-filter": "libs/ldapjs-filter-2253-min"
     },
 
     shim: {
@@ -109,12 +109,13 @@ require([
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
-    "ldapjs/index",
     "org/forgerock/openidm/ui/common/main", 
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/common/main",
+    "AuthnDelegate",
+    "ThemeManager",
     "config/main"
-], function(a, b, c, d, e, g, h, i, j, k, l, m, n, i18n, constants, eventManager, ldapjs) {
+], function(a, b, c, d, e, g, h, i, j, k, l, m, n, i18n, constants, eventManager) {
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 

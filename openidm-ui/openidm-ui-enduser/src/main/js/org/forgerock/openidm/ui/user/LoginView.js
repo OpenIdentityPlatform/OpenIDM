@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/user/LoginView", [
     "org/forgerock/commons/ui/common/LoginView",
-    "",
+    "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(commonLoginView, siteIdentificationDelegate, conf) {
     
@@ -44,8 +44,7 @@ define("org/forgerock/openidm/ui/user/LoginView", [
                         this.$el.find("#passPhrase").text(data.passPhrase).show();
                         this.$el.find("#identificationMessage").hide();
                     }, this));
-                }
-                else {
+                } else {
                     this.$el.find("#siteImage").hide();
                     this.$el.find("#passPhrase").hide();
                     this.$el.find("#identificationMessage").show();
@@ -59,14 +58,24 @@ define("org/forgerock/openidm/ui/user/LoginView", [
     
     obj = new LoginView();
 
-    obj.render = function (args) {
+    obj.render = function (args, callback) {
+
         if (conf.globalData.securityQuestions || conf.globalData.selfRegistration || conf.globalData.siteIdentification) {
             obj.baseTemplate = "templates/common/MediumBaseTemplate.html";
         }
-        commonLoginView.render.call(this, args, _.bind(handleLoginChange, this));
+
+        commonLoginView.render.call(this, args, _.bind(function () {
+
+            handleLoginChange.call(this);
+
+            if (callback) {
+                callback();
+            }
+
+        }, this));
     };
 
-    obj.events["change input[name=login]"] = handleLoginChange;
+    obj.events["change input[name=login]"] = _.bind(handleLoginChange, obj);
     
     return obj;
 });

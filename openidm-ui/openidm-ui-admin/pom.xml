@@ -77,6 +77,14 @@
       <type>js</type>
     </dependency>
 
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>ldapjs-filter</artifactId>
+        <version>2253</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
   </dependencies>
 
   <profiles>
@@ -174,6 +182,8 @@
                 <descriptors>
                     <descriptor>src/main/assembly/zip.xml</descriptor>
                 </descriptors>
+                <finalName>www</finalName>
+                <appendAssemblyId>false</appendAssemblyId>
             </configuration>
             <executions>
                 <execution>
@@ -202,7 +212,7 @@
               <instructions>
                 <Import-Package>*</Import-Package>
                 <Include-Resource>
-                    public=target/openidm-ui-admin-${openidm.version}-www
+                    public=target/www
                 </Include-Resource>
               </instructions>
             </configuration>
@@ -350,6 +360,8 @@
                     <descriptors>
                         <descriptor>src/main/assembly/zip.xml</descriptor>
                     </descriptors>
+                    <finalName>www</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
@@ -378,7 +390,7 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Include-Resource>
-                            public=target/openidm-ui-admin-${openidm.version}-www
+                            public=target/www
                         </Include-Resource>
                     </instructions>
                 </configuration>
