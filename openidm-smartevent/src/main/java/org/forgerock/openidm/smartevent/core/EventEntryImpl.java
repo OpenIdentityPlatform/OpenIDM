@@ -56,6 +56,7 @@ public class EventEntryImpl implements EventEntry {
      */
     public final void end() {
         // User called this end() method directly, delegate the event publishing
+        endTime = System.nanoTime();
         publisher.end(eventName, this);
     }
 

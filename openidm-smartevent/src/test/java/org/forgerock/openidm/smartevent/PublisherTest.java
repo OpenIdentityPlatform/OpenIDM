@@ -54,7 +54,7 @@ public class PublisherTest {
         return new ObjectName(StatisticsHandler.MBEAN_NAME);
     }
     
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void validateStartEndStatistics() throws Exception {
         Object dummyPayload = new JsonValue("{'test': 'some value'}");
         Object dummyContext1 = "Some context value";
@@ -66,18 +66,17 @@ public class PublisherTest {
         Assert.assertTrue(totals instanceof Map);
         Object statisticsEntry = ((Map)totals).get(EVENT_BASIC_TEST.asString());
         Assert.assertNotNull(statisticsEntry, "Expected a statistic entry for " + EVENT_BASIC_TEST + ", but is null.");
-        System.out.println("Basic invoke statistics test entry: " + statisticsEntry);
     }
     
     /**
-     * Do a million start/end measurements after an initial warm up, 
+     * Do a number of start/end measurements after an initial warm up, 
      * single threaded
      * Because of varying test environments the 
      * failure condition for this basic performance smoke test
      * is set at a lax level. 
      * Real performance (printed on standard out) should be much higher
     */
-    @Test(enabled=false)
+    @Test(enabled=true)
     public void performanceSmokeTest() throws Exception {
 
         int warmup = 100000;
