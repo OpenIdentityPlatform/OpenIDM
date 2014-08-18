@@ -22,8 +22,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.lmax.disruptor.RingBuffer;
+
+import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +54,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     /**
      * Access to the ring buffer for monitoring/history display purposes
      */
-    // Disruptor<DisruptorEventEntry> disruptor;
     Disruptor<DisruptorReferringEventEntry> disruptor;
 
     /**
@@ -57,9 +61,16 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
      */
     public Map<String, MonitoringInfo> map = new HashMap<String, MonitoringInfo>();
 
-    public StatisticsHandler(
-    /* Disruptor<DisruptorEventEntry> disruptor */
-    Disruptor<DisruptorReferringEventEntry> disruptor) {
+    // Regular statistics logging option
+    private ScheduledExecutorService logScheduler;
+    
+    private boolean enableSummaryLogging;
+
+    /**
+     * Constructor
+     * @param disruptor an optional reference to the ring buffer from the disruptor library, or null if this library is not used 
+     */    
+    public StatisticsHandler(Disruptor<DisruptorReferringEventEntry> disruptor) {
 
         this.disruptor = disruptor;
 
@@ -71,7 +82,48 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
             mbs.registerMBean(this, statName);
         } catch (Exception ex) {
             logger.info("Failed to register statistics MBean", ex);
-            ;
+        }
+        
+        setEnableSummaryLogging(Boolean.valueOf(System.getProperty("openidm.smartevent.summarylogging",
+                Boolean.TRUE.toString())));
+        
+        logScheduler = Executors.newScheduledThreadPool(1);
+
+        Runnable logTotal = new Runnable() {
+            @Override
+            public void run() {
+                logger.info("Summary: " + StatisticsHandler.this.getTotals());
+            }            
+        };
+        long initialDelay = 0;
+        long delay = 60;
+        
+        logScheduler.scheduleWithFixedDelay(logTotal, initialDelay, delay, TimeUnit.SECONDS);
+        
+    }
+    
+    private void setEnableSummaryLogging(boolean enable) {
+        this.enableSummaryLogging = enable;
+        if (enableSummaryLogging) {
+            if (logScheduler == null) {
+                logScheduler = Executors.newScheduledThreadPool(1);    
+            }
+    
+            Runnable logTotal = new Runnable() {
+                @Override
+                public void run() {
+                    logger.info("Summary: " + StatisticsHandler.this.getTotals());
+                }            
+            };
+            long initialDelay = 60;
+            long delay = 60;
+            
+            logScheduler.scheduleWithFixedDelay(logTotal, initialDelay, delay, TimeUnit.SECONDS);
+        } else {
+            if (logScheduler != null) {
+                logScheduler.shutdownNow();
+            }
+            logScheduler = null;
         }
     }
 
@@ -94,13 +146,15 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         // Present history ordered by start time, with latest start time first
         Map recent = new TreeMap(Collections.reverseOrder());
         try {
-            RingBuffer<DisruptorReferringEventEntry> buf =
-                    disruptor.getRingBuffer();
-            if (buf != null) {
-                for (int count = 0; count < buf.getBufferSize(); count++) {
-                    DisruptorReferringEventEntry entry = buf.claimAndGetPreallocated(count);
-                    if (entry != null && entry.startTime > 0) {
-                        recent.put(Long.valueOf(entry.startTime), entry.toString());
+            if (disruptor != null) {
+                RingBuffer<DisruptorReferringEventEntry> buf =
+                        disruptor.getRingBuffer();
+                if (buf != null) {
+                    for (int count = 0; count < buf.getBufferSize(); count++) {
+                        DisruptorReferringEventEntry entry = buf.claimAndGetPreallocated(count);
+                        if (entry != null && entry.startTime > 0) {
+                            recent.put(Long.valueOf(entry.startTime), entry.toString());
+                        }
                     }
                 }
             }
@@ -217,6 +271,9 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
 
     /**
      * Consumes the events off the ring buffer
+     * @param eventEntryWrap event entry
+     * @param sequence the sequence identifier if applicable to a publisher
+     * @param endOfBatch if batching of event processing is used, a flag indicating the end of a batch
      */
     public void onEvent(final DisruptorReferringEventEntry eventEntryWrap, final long sequence,
             final boolean endOfBatch) throws Exception {
@@ -225,9 +282,17 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         // batchTime = System.nanoTime();
         // }
         // eventEntryWrap.endTime = batchTime;
-
         EventEntryImpl eventEntry = eventEntryWrap.delegate;
-        long diff = eventEntryWrap.getRawDuration();
+        onEvent(eventEntry, sequence, endOfBatch);
+    }
+
+    /**
+     * @see #onEvent
+     */
+    public void onEvent(final EventEntry eventEntryParam, final long sequence,
+            final boolean endOfBatch) {
+        EventEntryImpl eventEntry = (EventEntryImpl) eventEntryParam;
+        long diff = eventEntry.endTime - eventEntry.startTime;
 
         MonitoringInfo entry = map.get(eventEntry.eventName.asString());
         if (entry == null) {

@@ -30,7 +30,11 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.forgerock.openidm.smartevent.core.DisabledPublisher;
 import org.forgerock.openidm.smartevent.core.DisruptorReferringPublisher;
+import org.forgerock.openidm.smartevent.core.BlockingPublisher;
 import org.forgerock.openidm.smartevent.core.PluggablePublisher;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author aegloff
@@ -50,6 +54,15 @@ import org.forgerock.openidm.smartevent.core.PluggablePublisher;
  */
 public class Name {
 
+    private final static Logger logger = LoggerFactory.getLogger(Name.class);
+
+    /**
+     * The available publisher types for handling event pub/sub
+     * BLOCKING uses a blocking queue for the events
+     * DISRUPTOR uses a non-blocking library with a ring buffer 
+     */
+    enum PublisherType {BLOCKING, DISRUPTOR};
+     
     // Holds the event stringified name to the Name instance mapping
     static ConcurrentMap<String, Name> names = new ConcurrentHashMap<String, Name>();
 
@@ -73,13 +86,17 @@ public class Name {
      */
     boolean resultHistoryEnabled = false;
 
+    PublisherType publisherType;
+    
     PluggablePublisher publisherImpl;
 
     private Name(String stringifiedName) {
         this.stringifiedName = stringifiedName;
         // Default Setting
         setEventsEnabled(Boolean.valueOf(System.getProperty("openidm.smartevent.enabled",
-                Boolean.FALSE.toString())));
+                Boolean.TRUE.toString())));
+        this.publisherType = (PublisherType.valueOf(PublisherType.class, System.getProperty("openidm.smartevent.publishertype",
+                PublisherType.BLOCKING.toString())));
         // Name parsing can be added here
     }
 
@@ -131,9 +148,9 @@ public class Name {
         this.tags = tags;
         return this;
     }
-
+    
     /**
-     * Fluent API to set events publishing behavior
+     * Fluent API to set events publishing type
      * 
      * @param enabled
      *            true to enable event publishing for this Name, false to
@@ -143,13 +160,13 @@ public class Name {
     public Name setEventsEnabled(boolean enabled) {
         eventsEnabled = enabled;
         if (enabled == true) {
-            publisherImpl = DisruptorReferringPublisher.getInstance();
+            publisherImpl = createPublisher();
         } else {
             publisherImpl = DisabledPublisher.getInstance();
         }
         return this;
     }
-
+    
     /**
      * @return the events publishing state
      */
@@ -193,5 +210,18 @@ public class Name {
      */
     public final String asString() {
         return stringifiedName;
+    }
+    
+    /**
+     * Factory method, could eventually be moved out
+     */
+    private PluggablePublisher createPublisher() {
+        if (PublisherType.DISRUPTOR.equals(publisherType)) {
+            logger.debug("Event type: " + stringifiedName + " publisher: DISRUPTOR ");
+            return DisruptorReferringPublisher.getInstance();
+        } else {
+            logger.debug("Event type: " + stringifiedName + " publisher: BLOCKING");
+            return BlockingPublisher.getInstance();
+        }
     }
 }
