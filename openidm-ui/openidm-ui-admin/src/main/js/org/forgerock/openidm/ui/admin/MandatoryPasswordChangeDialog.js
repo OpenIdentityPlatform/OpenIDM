@@ -66,7 +66,7 @@ define("org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog", [
             }, this));
         },
         
-        render: function() {
+        render: function(args, callback) {
             this.actions = [];
                                 
             $("#dialogs").hide();
@@ -78,6 +78,10 @@ define("org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog", [
                     $("#dialogs .dialogActions").hide();
 
                     this.$el.find("[name=password]").focus();
+
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
             }, this));
             

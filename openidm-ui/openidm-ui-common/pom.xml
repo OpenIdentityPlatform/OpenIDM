@@ -39,6 +39,20 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <dependencies>
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>sinon</artifactId>
+        <version>1.9.1</version>
+        <type>js</type>
+    </dependency>
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>qunit</artifactId>
+        <version>1.14.0</version>
+        <type>js</type>
+    </dependency>
+  </dependencies>
 
 
 
@@ -85,6 +99,29 @@
               </execution>
             </executions>
           </plugin>
+
+
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <executions>
+                  <execution>
+                      <id>copy-test-dependencies</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>copy-dependencies</goal>
+                      </goals>
+                      <configuration>
+                          <outputDirectory>${project.build.directory}/test/libs</outputDirectory>
+                          <includeArtifactIds>sinon,qunit</includeArtifactIds>
+                          <overWriteReleases>false</overWriteReleases>
+                          <overWriteSnapshots>false</overWriteSnapshots>
+                          <overWriteIfNewer>true</overWriteIfNewer>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
+
 
           <plugin>
               <artifactId>maven-assembly-plugin</artifactId>

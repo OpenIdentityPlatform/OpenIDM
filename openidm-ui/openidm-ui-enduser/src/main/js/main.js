@@ -48,8 +48,7 @@ require.config({
         moment: "libs/moment-1.7.2-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
-        SiteIdentificationDelegate: "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate"
+        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager"
     },
 
     shim: {

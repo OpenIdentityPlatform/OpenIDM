@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,15 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global require, define, QUnit, $ */
 
-define("org/forgerock/openidm/ui/common/main", [
-    "./delegates/ConfigDelegate",
-    "./delegates/InternalUserDelegate",
-    "./delegates/PolicyDelegate",
-    "./delegates/SiteConfigurationDelegate",
+define([
+    "./mocks/systemInit",
+    "org/forgerock/commons/ui/common/LoginView"
+], function (systemInit, loginView) {
 
-    "./login/InternalLoginHelper",
-    
-    "./util/Constants"
-]);
+    return {
+        executeAll: function (server) {
+            module('Common IDM functionality');
+
+            QUnit.asyncTest("Login Form", function () {
+                systemInit(server);
+
+                loginView.render([], function () {
+                    QUnit.ok(loginView.$el.find("#login").length && loginView.$el.find("#password").length, "Username and Password displayed")
+
+                    QUnit.start();
+                });
+                
+            });
+        }
+    };
+
+}); 

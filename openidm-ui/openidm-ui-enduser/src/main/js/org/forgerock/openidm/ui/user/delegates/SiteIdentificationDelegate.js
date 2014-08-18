@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("SiteIdentificationDelegate", [
+define("org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
