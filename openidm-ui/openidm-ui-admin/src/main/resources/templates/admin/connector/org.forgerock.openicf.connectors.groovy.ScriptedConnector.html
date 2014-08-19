@@ -3,15 +3,20 @@
     <div class="group-body">
         <div class="group-field-block group-lead">
             <div class="separate-message">
-                <label for="classpath" title="{{t "templates.connector.groovyConnector.classpath"}}" class="light">{{t "templates.connector.groovyConnector.classpath"}}</label>
+                <label for="classpath" class="light">{{t "templates.connector.groovyConnector.classpath"}}</label>
                 <input id="classpath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.classpath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.classpath}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
+    </div>
+</fieldset>
+<fieldset>
+    <legend><span>{{t "templates.connector.groovyConnector.scriptTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <div class="group-body">
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="authenticateScriptFileName" title="{{t "templates.connector.groovyConnector.authenticateScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.authenticateScriptFileName"}}</label>
+                <label for="authenticateScriptFileName" class="light">{{t "templates.connector.groovyConnector.authenticateScriptFileName"}}</label>
                 <input id="authenticateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.authenticateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -19,7 +24,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="createScriptFileName" title="{{t "templates.connector.groovyConnector.createScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.createScriptFileName"}}</label>
+                <label for="createScriptFileName" class="light">{{t "templates.connector.groovyConnector.createScriptFileName"}}</label>
                 <input id="createScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.createScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -27,7 +32,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="deleteScriptFileName" title="{{t "templates.connector.groovyConnector.deleteScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.deleteScriptFileName"}}</label>
+                <label for="deleteScriptFileName" class="light">{{t "templates.connector.groovyConnector.deleteScriptFileName"}}</label>
                 <input id="deleteScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.deleteScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -35,7 +40,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="resolveUsernameScriptFileName" title="{{t "templates.connector.groovyConnector.resolveUsernameScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.resolveUsernameScriptFileName"}}</label>
+                <label for="resolveUsernameScriptFileName" class="light">{{t "templates.connector.groovyConnector.resolveUsernameScriptFileName"}}</label>
                 <input id="resolveUsernameScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.resolveUsernameScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -43,7 +48,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="schemaScriptFileName" title="{{t "templates.connector.groovyConnector.schemaScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.schemaScriptFileName"}}</label>
+                <label for="schemaScriptFileName" class="light">{{t "templates.connector.groovyConnector.schemaScriptFileName"}}</label>
                 <input id="schemaScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.schemaScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -51,7 +56,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="scriptResourceFileName" title="{{t "templates.connector.groovyConnector.scriptResourceFileName"}}" class="light">{{t "templates.connector.groovyConnector.scriptResourceFileName"}}</label>
+                <label for="scriptResourceFileName" class="light">{{t "templates.connector.groovyConnector.scriptResourceFileName"}}</label>
                 <input id="scriptResourceFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.scriptOnResourceScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.scriptOnResourceScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -59,7 +64,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" title="{{t "templates.connector.groovyConnector.searchScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.searchScriptFileName"}}</label>
+                <label for="searchScriptFileName" class="light">{{t "templates.connector.groovyConnector.searchScriptFileName"}}</label>
                 <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.searchScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -67,7 +72,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="syncScriptFileName" title="{{t "templates.connector.groovyConnector.syncScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.syncScriptFileName"}}</label>
+                <label for="syncScriptFileName" class="light">{{t "templates.connector.groovyConnector.syncScriptFileName"}}</label>
                 <input id="syncScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.syncScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -75,7 +80,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="testScriptFileName" title="{{t "templates.connector.groovyConnector.testScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.testScriptFileName"}}</label>
+                <label for="testScriptFileName" class="light">{{t "templates.connector.groovyConnector.testScriptFileName"}}</label>
                 <input id="testScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -83,7 +88,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="updateScriptFileName" title="{{t "templates.connector.groovyConnector.updateScriptFileName"}}" class="light">{{t "templates.connector.groovyConnector.updateScriptFileName"}}</label>
+                <label for="updateScriptFileName" class="light">{{t "templates.connector.groovyConnector.updateScriptFileName"}}</label>
                 <input id="updateScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.updateScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>

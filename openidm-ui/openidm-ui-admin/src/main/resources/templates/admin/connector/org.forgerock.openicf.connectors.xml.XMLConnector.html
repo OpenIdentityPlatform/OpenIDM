@@ -3,7 +3,7 @@
     <div class="group-body">
         <div class="group-field-block group-lead">
             <div class="separate-message">
-                <label for="xsdicfFilePath" title="{{t "templates.connector.xmlConnector.xsdicfFilePath"}}" class="light">{{t "templates.connector.xmlConnector.xsdicfFilePath"}}</label>
+                <label for="xsdicfFilePath" class="light">{{t "templates.connector.xmlConnector.xsdicfFilePath"}}</label>
                 <input id="xsdicfFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdIcfFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdIcfFilePath}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -11,7 +11,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="xsdFilePath" title="{{t "templates.connector.xmlConnector.xsdFilePath"}}" class="light">{{t "templates.connector.xmlConnector.xsdFilePath"}}</label>
+                <label for="xsdFilePath" class="light">{{t "templates.connector.xmlConnector.xsdFilePath"}}</label>
                 <input id="xsdFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xsdFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xsdFilePath}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -19,14 +19,14 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="xmlFilePath" title="{{t "templates.connector.xmlConnector.xmlFilePath"}}" class="light">{{t "templates.connector.xmlConnector.xmlFilePath"}}</label>
+                <label for="xmlFilePath" class="light">{{t "templates.connector.xmlConnector.xmlFilePath"}}</label>
                 <input id="xmlFilePath" class="form-size-l" data-validator="required" type="text" name="configurationProperties.xmlFilePath" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.xmlFilePath}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
         <div class="group-field-block">
-            <label for="createIfNotExists" title="{{t "templates.connector.xmlConnector.createIfNotExists"}}" class="light">{{t "templates.connector.xmlConnector.createIfNotExists"}}</label>
+            <label for="createIfNotExists" class="light">{{t "templates.connector.xmlConnector.createIfNotExists"}}</label>
             <select if="createIfNotExists" class="form-size-s" name="configurationProperties.createFileIfNotExists" required>
             {{#select connectorDefaults.configurationProperties.createFileIfNotExists}}
                 <option value="true">True</option>

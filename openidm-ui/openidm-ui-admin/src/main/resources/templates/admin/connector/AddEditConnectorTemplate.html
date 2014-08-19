@@ -7,15 +7,15 @@
             <div class="group-body">
                 <div class="group-field-block group-lead">
                     <div class="separate-message">
-                        <label for="connectorName" title="{{t "templates.connector.connectorName"}}" class="light">{{t "templates.connector.connectorName"}}</label>
+                        <label for="connectorName" class="light">{{t "templates.connector.connectorName"}}</label>
                         <input id="connectorName" class="form-size-l" type="text" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}}data-validator="required" data-validator-event="keyup blur" required autofocus {{/if}}>
                         <span></span>
                         <div class="validation-message"></div>
                     </div>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="connectorEnabled" title="{{t "templates.connector.connectorEnabled"}}" class="light">{{t "templates.connector.connectorEnabled"}}</label>
+                <div class="group-field-block no-validation-block">
+                    <label for="connectorEnabled" class="light">{{t "templates.connector.connectorEnabled"}}</label>
                     <select id="connectorEnabled" class="form-size-s" name="enabled">
                         {{#select enabled}}
                             <option value="true">True</option>
@@ -24,8 +24,8 @@
                     </select>
                 </div>
 
-                <div class="group-field-block">
-                    <label for="connectorType" title="{{t "templates.connector.connectorType"}}" class="light">{{t "templates.connector.connectorType"}}</label>
+                <div class="group-field-block no-validation-block">
+                    <label for="connectorType" class="light">{{t "templates.connector.connectorType"}}</label>
                     <select id="connectorType" class="form-size-m" name="connectorType" {{#if editState}} disabled="true" {{/if}}>
                         {{#each connectors}}
                             <option value="{{connectorName}}">{{displayName}}  {{bundleVersion}}</option>
@@ -38,7 +38,13 @@
         <div class="connector-details-body" id="connectorDetails">
         </div>
 
-        <div class="float-right group-actions-block">
+        <div style="display:none;" id="connectorErrorMessage" class="float-left error-box">
+            <p class="error-message"></p>
+            <button type="button" class="close-button" data-dismiss="alert">
+                <span>×</span>
+            </button>
+        </div>
+        <div class="float-right form-button-bar">
             <input type="submit" id="addEditConnector" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
         </div>
     </form>

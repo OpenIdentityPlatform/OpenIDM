@@ -36,13 +36,15 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function(AdminAbstractView, eventManager, validatorsManager, constants, ConnectorDelegate, ConnectorType, ConnectorRegistry, connectorUtils, router, ConfigDelegate) {
+
     var AddConnectorView = AdminAbstractView.extend({
         template: "templates/admin/connector/AddEditConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
-            "click #connectorForm fieldset legend" : "sectionHideShow"
+            "click #connectorForm fieldset legend" : "sectionHideShow",
+            "click .error-box .close-button" : "closeError"
         },
         connectorTypeRef: null,
 
@@ -76,7 +78,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.data.editState = true;
 
                     ConfigDelegate.readEntity("provisioner.openicf/" +args[0]).then(_.bind(function(data){
-                        console.log(data);
                         data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
                         this.data.connectors = [data.connectorRef];
                         this.data.connectorName = data.name;
@@ -91,11 +92,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                             this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName);
 
                             this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName, "animate": true, "connectorDefaults": data}, _.bind(function(){
-                                this.$el.find("#connectorForm").tooltip({
-                                    position: { my: "left+15 center", at: "right center" },
-                                    track:true
-                                });
-
                                 validatorsManager.validateAllFields(this.$el);
                             }, this));
 
@@ -163,31 +159,26 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             $.extend(true, mergedResult, connDetails, connectorData);
 
-            if(this.data.editState) {
-                ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
-                    this.testConnector(mergedResult);
-                }, this));
-            } else {
-                ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
-                    this.testConnector(mergedResult);
-                }, this));
-            }
-        },
+            ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (result) {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
 
-        testConnector: function(mergedResult) {
-            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
+                if(this.data.editState) {
+                    ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                        _.delay(function () {
+                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
+                        }, 1500);
+                    }, this));
+                } else {
+                    ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                        _.delay(function() {
+                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
+                        }, 1500);
+                    }, this));
+                }
 
-            _.delay(_.bind(function () {
-                ConnectorDelegate.testConnector(mergedResult.name).then(_.bind(function (result) {
-                    if (result.ok === true) {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
-                    } else {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestNotPass");
-                    }
-
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
-                }, this));
-            }, this), 1500);
+            }, this), _.bind(function(result) {
+                this.showError(result);
+            }, this));
         },
 
         sectionHideShow: function(event) {
@@ -201,6 +192,81 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             $(clickedEle).find("i").toggleClass("fa-minus-square-o");
 
             $(clickedEle).parent().find(".group-body").slideToggle("slow");
+        },
+
+        showError: function(msg) {
+            var error = JSON.parse(msg.responseText);
+
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
+
+            this.$el.find("#connectorErrorMessage .error-message").html(this.parseErrorMessage(error.message));
+            this.$el.find("#connectorErrorMessage").show();
+        },
+
+        closeError : function() {
+            this.$el.find("#connectorErrorMessage").hide();
+        },
+
+        parseErrorMessage: function(err) {
+            var transformErrors = [
+                {
+                    searchString: 'UnknownHostException',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.unknownHost'
+                },
+                {
+                    searchString: 'port out of range',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.portOutOfRange'
+                },
+                {
+                    searchString: 'Connection refused',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.connectionRefused'
+                },
+                {
+                    searchString: 'Operation timed out',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.operationTimedOut'
+                },
+                {
+                    searchString: 'SSLHandshakeException',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.sslHandshakeException'
+                },
+                {
+                    searchString: 'data 52e',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.invalidCredentials'
+                },
+                {
+                    searchString: 'NamingException',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.invalidCredentials'
+                },
+                {
+                    searchString: 'Bad Base Context(s)',
+                    replaceAll: false,
+                    replaceString: 'templates.connector.errorMessages.badBaseContext'
+                },
+                {
+                    searchString: 'java.lang.String to int',
+                    replaceAll: true,
+                    replaceString: 'templates.connector.errorMessages.portOutOfRange'
+                }
+            ];
+
+            _.each(transformErrors, function(e){
+                if(err.indexOf(e.searchString) > -1){
+                    if(e.replaceAll) {
+                        err = $.t(e.replaceString);
+                    } else {
+                        err = err.replace(e.searchString,$.t(e.replaceString));
+                    }
+                }
+            });
+
+            return err;
         }
     });
 

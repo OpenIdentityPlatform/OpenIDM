@@ -26,24 +26,16 @@
 General Connector Display
 */
 
-
-
-.connector-input-body label {
-  display:inline-block;
-  margin-right:5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.form-button-bar {
+  height:35px;
+  margin-top:15px;
 }
 
 .connector-input-body form.form .group-field-block label {
-  width:200px;
-  text-align:right;
-  overflow: hidden;
-}
-
-.connector-input-body form.form .group-field-block label.long-label {
-  width:195px;
-  overflow: hidden;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding-bottom: 0px;
 }
 
 .connector-input-body input[type="text"]:disabled,
@@ -99,8 +91,12 @@ General Connector Display
   background-color:#fff;
   border:none;
   vertical-align: top;
-  margin-top: 7px;
+  margin-top: 30px;
   cursor:pointer;
+}
+
+.node .clean-btn {
+  margin-top:5px;
 }
 
 .clean-btn:hover {
@@ -171,11 +167,22 @@ Connector Status details
 /*
 	Connector Add/Edit 	
 */
-  .connector-input-body form.form .group-field-block {
-    padding-left:10px;
-    margin-top:0px;
-    margin-bottom:5px;
- }
+.connector-input-body form.form .group-field-block {
+  padding:0px 0px 0px 10px;
+  margin-top:0px;
+}
+
+.connector-input-body form.form .no-validation-block {
+  margin-bottom:10px;
+}
+
+.connector-input-body form.form .field {
+  margin-bottom:0px;
+}
+
+.connector-input-body form.form .group-field-buttons button {
+  margin-bottom: 5px;
+}
 
 .connector-input-body form.form .group-field-block .note {
   font-size:14px;
@@ -187,11 +194,15 @@ Connector Status details
 }
 
 .connector-input-body .form-size-m {
-  width:460px;
+  width:500px;
+}
+
+.connector-input-body .outside-element .form-size-m {
+  width:620px;
 }
 
 .connector-input-body .form-size-l {
-  width:674px;
+  width:910px;
 }
 
 form.form .group-field-block .inline label.label-size-s  {
@@ -200,6 +211,8 @@ form.form .group-field-block .inline label.label-size-s  {
 
 form.form .group-field-block .inline input[type='checkbox'] {
   margin-top:10px;
+  margin-right: 15px;
+  margin-bottom: 10px;
 }
 
 .inline .inline-right {
@@ -269,25 +282,72 @@ form.form .group-field-block .inline input[type='checkbox'] {
 }
 
 form.form .group-field-block .outside-element div.validation-message {
-  width: 690px;
+  width: 640px;
 }
 
 form.form .group-field-block .outside-element .inline {
-  width:710px;
+  width:660px;
+}
+
+form.form .group-field-block .small-outside-element .inline {
+  width:310px;
 }
 
 form.form .group-field-block .small-outside-element div.validation-message {
-  width: 498px;
+  width: 280px;
 }
 
 form.form .group-field-block div.validation-message {
   display:block;
   float:none;
-  width: 910px;
+  width: 928px;
 }
 
 form.form .error-size-s div.validation-message {
   width:495px;
+}
+
+/**
+  Connerctor Error Display
+*/
+
+.error-box {
+  width:700px;
+  height:25px;
+  background-color:#f2dede;
+  margin-top:15px;
+  padding: 5px 10px 5px 10px;
+  color:#a94442;
+  border:#ebccd1 solid 2px;
+  padding: 3px 0px 0px 0px;
+}
+
+.error-box .error-message {
+  float:left;
+  width:670px;
+  padding: 2px 0px 0px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.error-box .close-button {
+  float: right;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 14px;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  filter: alpha(opacity=20);
+  opacity: .2;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding:0px;
+}
+
+.error-box .close-button:hover {
+  filter: alpha(opacity=50);
+  opacity: .5;
 }
 
 /**
@@ -319,12 +379,14 @@ form.form .error-size-s div.validation-message {
 
 .connector-details-body .inline-link {
   vertical-align:top;
-  padding-top:5px;
+  padding-top:30px;
+  width:80px;
 }
 
 .certificate {
   width: 600px;
   height: 400px;
+  margin-top:15px;
   font-family: monospace !important;
 }
 
