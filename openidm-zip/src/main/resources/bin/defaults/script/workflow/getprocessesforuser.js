@@ -127,10 +127,10 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
     
     if (request.additionalParameters.userId) {
         user = getUser(request.additionalParameters.userId);
-        roles = user.effectiveRoles;
+        roles = user.effectiveRoles || user.roles;
     } else {
         user = getUser(request.additionalParameters.userName);
-        roles = user.effectiveRoles;
+        roles = user.effectiveRoles || user.roles;
     }
     
     processDefinitions = openidm.query("workflow/processdefinition", processDefinitionsQueryParams).result;
