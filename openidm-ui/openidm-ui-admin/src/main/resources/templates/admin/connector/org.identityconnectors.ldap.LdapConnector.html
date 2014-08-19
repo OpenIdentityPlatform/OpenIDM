@@ -3,7 +3,7 @@
     <div class="group-body">
         <div class="group-field-block group-lead">
             <div class="separate-message">
-                <label for="host" title="{{t "templates.connector.ldapConnector.host"}}" class="light">{{t "templates.connector.ldapConnector.host"}}</label>
+                <label for="host" class="light">{{t "templates.connector.ldapConnector.host"}}</label>
                 <input id="host" autocomplete="off" data-validator-event="keyup blur" data-validator="required" type="text" class="form-size-l" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" />
                 <span></span>
                 <div class="validation-message"></div>
@@ -20,14 +20,14 @@
 
         <div class="group-field-block">
             <div class="separate-message small-outside-element">
-                <div style="width:530px;" class="inline">
-                    <label for="port" title="Port" class="light">Port</label>
+                <div class="inline">
+                    <label for="port" class="light">{{t "templates.connector.ldapConnector.port"}}</label>
                     <input id="port" data-validator-event="keyup blur" data-validator="required" class="form-size-s inline-right" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
                     <span></span>
                 </div>
-                <div class="inline">
+                <div style="width:125px;" class="inline">
                     <input id="ssl" autocomplete="off" type="checkbox" class="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
-                    <label for="ssl" title="{{t "templates.connector.ldapConnector.ssl"}}" class="label-size-s light">{{t "templates.connector.ldapConnector.ssl"}}</label>
+                    <label for="ssl" class="label-size-s light">{{t "templates.connector.ldapConnector.ssl"}}</label>
                 </div>
                 <div class="inline inline-link">
                     <a href="#" id="toggleCert" style="display:none;">{{t "templates.connector.ldapConnector.showCert"}}</a>
@@ -38,16 +38,16 @@
 
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="principal" title="{{t "templates.connector.ldapConnector.username"}}" class="light">{{t "templates.connector.ldapConnector.username"}}</label>
+                <label for="principal" class="light">{{t "templates.connector.ldapConnector.username"}}</label>
                 <input id="principal" data-validator-event="keyup blur" data-validator="required" class="form-size-l" autocomplete="off" type="text" name="configurationProperties.principal" placeholder="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" value="{{connectorDefaults.configurationProperties.principal}}" />
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
 
-        <div class="group-field-block">
+        <div class="group-field-block no-validation-block">
             <div class="separate-message">
-                <label for="credentials" title="{{t "templates.connector.ldapConnector.password"}}" class="light">{{t "templates.connector.ldapConnector.password"}}</label>
+                <label for="credentials" class="light">{{t "templates.connector.ldapConnector.password"}}</label>
                 <input id="credentials" autocomplete="off" class="form-size-l" type="password" name="configurationProperties.credentials" value="" {{#if connectorDefaults.configurationProperties.credentials}} placeholder="********" {{/if}} />
             </div>
         </div>
@@ -66,7 +66,7 @@
                 <div class="field group-field-block">
                     <div class="separate-message outside-element">
                         <div class="inline">
-                            <label title="{{t "templates.connector.ldapConnector.baseContext"}}" class="light long-label">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                            <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                             <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
                             <span></span>
                         </div>
@@ -79,7 +79,7 @@
             <div class="field group-field-block">
                 <div class="separate-message outside-element">
                     <div class="inline">
-                        <label title="{{t "templates.connector.ldapConnector.baseContext"}}" class="light long-label">{{t "templates.connector.ldapConnector.baseContext"}}</label>
+                        <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                         <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
                         <span></span>
                     </div>
@@ -93,12 +93,12 @@
 <fieldset>
     <legend><span>{{t "templates.connector.ldapConnector.addUsersTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
-        <div class="group-field-block group-lead">
-            <label title="{{t "templates.connector.ldapConnector.accountSearchFilter"}}" class="light">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
+        <div class="group-field-block group-lead no-validation-block">
+            <label class="light">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
             <input autocomplete="off" class="filter form-size-l" type="text" id="accountSearchFilter" name="configurationProperties.accountSearchFilter" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" />
         </div>
         <div id="accountObjectClassesWrapper">
-            <div class="group-field-block">
+            <div class="group-field-block group-field-buttons">
                 <button type="button" field_type="accountObjectClasses" id="addAccountObjectClassesButton" name="addAccountObjectClassesButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.addAccountObjectClasses"}}</span><i class="fa fa-lg fa-plus"></i></button>
             </div>
             {{#if connectorDefaults.configurationProperties.accountObjectClasses.length}}
@@ -106,7 +106,7 @@
                     <div class="group-field-block field">
                         <div class="separate-message outside-element">
                             <div class="inline">
-                                <label class="light long-label" title="Object classes for users">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
+                                <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                                 <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value="{{value}}"/>
                                 <span></span>
                             </div>
@@ -119,7 +119,7 @@
                 <div class="group-field-block field">
                     <div class="separate-message outside-element">
                         <div class="inline">
-                            <label class="light long-label" title="Object classes for users">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
+                            <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                             <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value=""/>
                             <span></span>
                         </div>
@@ -134,7 +134,7 @@
 <fieldset>
     <legend><span>{{t "templates.connector.ldapConnector.addGroupTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
-        <div class="group-field-block group-lead">
+        <div class="group-field-block group-lead no-validation-block">
             <label title="Group Filter" class="light">Group Filter</label>
             <input autocomplete="off" class="filter form-size-l" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
         </div>
@@ -145,20 +145,28 @@
             {{#if connectorDefaults.configurationProperties.groupObjectClasses.length}}
                 {{#each_with_index connectorDefaults.configurationProperties.groupObjectClasses}}
                     <div class="group-field-block field">
-                        <div class="inline">
-                            <label class="light long-label" title="Object classes for groups">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
-                            <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value="{{value}}"/>
+                        <div class="separate-message outside-element">
+                            <div class="inline">
+                                <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
+                                <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value="{{value}}"/>
+                                <span></span>
+                            </div>
+                            <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-minus"></i></button>
+                            <div class="validation-message"></div>
                         </div>
-                        <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-minus"></i></button>
                     </div>
                 {{/each_with_index}}
             {{else}}
                 <div class="group-field-block field">
-                    <div class="inline">
-                        <label class="light long-label" title="Object classes for groups">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
-                        <input class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value=""/>
+                    <div class="separate-message outside-element">
+                        <div class="inline">
+                            <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
+                            <input class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value=""/>
+                            <span></span>
+                        </div>
+                        <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-minus"></i></button>
+                        <div class="validation-message"></div>
                     </div>
-                    <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-minus"></i></button>
                 </div>
             {{/if}}
         </div>

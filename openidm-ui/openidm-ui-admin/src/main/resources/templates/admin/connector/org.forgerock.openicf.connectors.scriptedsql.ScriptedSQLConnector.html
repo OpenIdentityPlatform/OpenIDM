@@ -41,7 +41,7 @@
                 <div class="validation-message"></div>
             </div>
         </div>
-        <div class="group-field-block">
+        <div class="group-field-block no-validation-block">
             <label for="createIfNotExists" title="{{t "templates.connector.scriptedSQLConnector.createIfNotExists"}}" class="light">{{t "templates.connector.scriptedSQLConnector.createIfNotExists"}}</label>
             <select id="createIfNotExists" class="form-size-s" name="configurationProperties.autoCommit" required>
             {{#select connectorDefaults.configurationProperties.autoCommit}}
@@ -50,8 +50,8 @@
             {{/select}}
             </select>
         </div>
-        <div class="group-field-block">
-            <label for="reloadScriptOnExecution" title="{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}" class="light">{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}</label>
+        <div class="group-field-block no-validation-block">
+            <label for="reloadScriptOnExecution" class="light">{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}</label>
             <select id="reloadScriptOnExecution" class="form-size-s" name="configurationProperties.reloadScriptOnExecution" required>
             {{#select connectorDefaults.configurationProperties.reloadScriptOnExecution}}
                 <option value="true">True</option>
@@ -61,7 +61,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="jdbcDriver" title="{{t "templates.connector.scriptedSQLConnector.jdbcDriver"}}" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcDriver"}}</label>
+                <label for="jdbcDriver" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcDriver"}}</label>
                 <input id="jdbcDriver" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -69,7 +69,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="jdbcConnectionUrl" title="{{t "templates.connector.scriptedSQLConnector.jdbcConnectionUrl"}}" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcConnectionUrl"}}</label>
+                <label for="jdbcConnectionUrl" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcConnectionUrl"}}</label>
                 <input id="jdbcConnectionUrl" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcConnectionUrl" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcConnectionUrl}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -77,7 +77,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="jdbcUrlTemplate" title="{{t "templates.connector.scriptedSQLConnector.jdbcUrlTemplate"}}" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcUrlTemplate"}}</label>
+                <label for="jdbcUrlTemplate" class="light">{{t "templates.connector.scriptedSQLConnector.jdbcUrlTemplate"}}</label>
                 <input id="jdbcUrlTemplate" class="form-size-l" data-validator="required" type="text" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -85,7 +85,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="createScriptFileName" title="{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}" class="light">{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}</label>
+                <label for="createScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}</label>
                 <input id="createScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.createScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -93,7 +93,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="testScriptFileName" title="{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}" class="light">{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}</label>
+                <label for="testScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}</label>
                 <input id="testScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>
@@ -101,7 +101,7 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="searchScriptFileName" title="{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}" class="light">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
+                <label for="searchScriptFileName" class="light">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
                 <input id="searchScriptFileName" class="form-size-l" data-validator="required" type="text" name="configurationProperties.testScriptFileName" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" required>
                 <span></span>
                 <div class="validation-message"></div>

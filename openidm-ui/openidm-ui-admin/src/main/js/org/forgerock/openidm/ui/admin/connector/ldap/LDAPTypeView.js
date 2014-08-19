@@ -194,7 +194,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                         };
 
                     validatorsManager.bindValidators(_this.$el.find("#certificateContainerClone"));
-                    validatorsManager.validateAllFields(this.$el);
+                    validatorsManager.validateAllFields(_this.$el);
 
                     textarea.on("keyup change", updateBtnStatus);
 
@@ -218,7 +218,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
 
                                 validatorsManager.validateAllFields(_this.$el);
 
-                                $( this ).dialog( "close" );
+                                $(this).dialog("close");
                             }
                         }
                     },

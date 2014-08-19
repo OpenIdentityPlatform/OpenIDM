@@ -35,14 +35,6 @@ define("config/messages/AdminMessages", [
             "connectorSaved": {
                 msg: "config.messages.ConnectorMessages.connectorSaved",
                 type: "info"
-            }, 
-            "connectorTestNotPass": {
-                msg: "config.messages.ConnectorMessages.connectorTestNotPass",
-                type: "error"
-            },
-            "connectorTestFailed": {
-                msg: "config.messages.ConnectorMessages.connectorTestFailed",
-                type: "error"
             },
             "connectorSaveFail": {
                 msg: "config.messages.ConnectorMessages.connectorSaveFail",
@@ -51,6 +43,10 @@ define("config/messages/AdminMessages", [
             "connectorTestPass": {
                 msg: "config.messages.ConnectorMessages.connectorTestPass",
                 type: "info"
+            },
+            "connectorTestFailed": {
+                msg: "config.messages.ConnectorMessages.connectorTestFailed",
+                type: "error"
             },
             "deleteConnectorSuccess": {
                 msg: "config.messages.ConnectorMessages.deleteConnectorSuccess",
