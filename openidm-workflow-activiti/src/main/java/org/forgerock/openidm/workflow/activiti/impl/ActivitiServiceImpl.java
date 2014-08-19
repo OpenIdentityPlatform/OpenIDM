@@ -365,7 +365,7 @@ public class ActivitiServiceImpl implements RequestHandler {
             }
             barInstallerConfiguration = null;
         }
-        if ("h2".equals(((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDatabaseType() )) {
+        if (processEngine != null && "h2".equals(((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDatabaseType() )) {
             DataSource h2DdataSource = ((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDataSource();
             java.sql.Connection conn = null;
             try {
