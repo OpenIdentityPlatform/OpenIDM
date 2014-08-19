@@ -149,12 +149,12 @@ if (request.method !== "query") {
         if (request.additionalParameters.userId) {
             user = getUser(request.additionalParameters.userId);
             userId = user._id; 
-            roles = user.effectiveRoles;
+            roles = user.effectiveRoles || user.roles;
             userName = user.userName ? user.userName : user._id;
         } else {
             user = getUser(request.additionalParameters.userName);
             userId = user._id; 
-            roles = user.effectiveRoles;
+            roles = user.effectiveRoles || user.roles;
             userName = user.userName ? user.userName : user._id;
         }
     }
