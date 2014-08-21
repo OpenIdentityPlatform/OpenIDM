@@ -167,9 +167,8 @@
   </para>
 
   <para>
-   In general, UUIDs are better in production, as they can be generated easily
-   in clustered environments. However, you might have specific reasons that
-   dictate a different scheme for generating IDs.
+   For more information on whether to use PUT or POST to create managed objects,
+   see <xref linkend="put-post-managed-objects" />.
   </para>
 
  </section>
@@ -696,6 +695,25 @@ ETag: "0"
 ...
 [<replaceable>JSON representation of updated object</replaceable>]</programlisting>
 
+     <note xml:id="put-post-managed-objects">
+      <title>Should You Use PUT or POST to Create a Managed Object?</title>
+      <para>
+       You can use PUT and POST to create managed objects. To create a
+       managed object with a PUT, you would include the <literal>_id</literal>
+       in the request, to be assigned by the cleint. If you create a managed
+       object with a POST, the server assigns the <literal>_id</literal> in the
+       form of a UUID.
+      </para>
+      <para>
+       In some cases, you may want to use PUT, as POST is not idempotent. If you
+       can specify the <literal>_id</literal> to assign to the object, use PUT.
+      </para>
+      <para>
+       Alternatively, POST generates a server-assigned ID in the form of a
+       UUID. In some cases, you may prefer to use UUIDs in production, as a
+       POST can generate them easily in clustered environments.
+      </para>
+     </note>
     </listitem>
    </varlistentry>
    <varlistentry>
