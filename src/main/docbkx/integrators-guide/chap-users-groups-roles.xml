@@ -219,10 +219,13 @@
     </para>
 
      <para>
-      Most of the examples in this guide use client-assigned IDs when creating
-      resources, as it makes the examples easier to read. In general,
-      server-assigned UUIDs are better in production, as they can be generated
-      easily in clustered environments.
+      Most of the examples in this guide use PUT to create client-assigned IDs
+      for resources, as it makes the examples easier to read. Sometimes you may
+      prefer to use POST to create server-assigned UUIDs. For more information,
+      see <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+      xlink:href="integrators-guide#put-post-managed-objects">
+      <citetitle>Should You Use PUT or POST to Create A Managed Object?
+      </citetitle></link>
      </para>
    </section>
 
@@ -534,8 +537,12 @@ $ curl \
       <para>
        <literal>"_id"</literal> is the object identifier of the role, by which it
        is accessed over REST. These examples use a client-assigned ID, for ease
-       of reference, however, in production it is recommended that you use a
-       server-assigned UUID.
+       of reference, however, in production, you may make a different choice.
+       For more information, see
+       <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+       xlink:href="integrators-guide#put-post-managed-objects">
+       <citetitle>Should You Use PUT or POST to Create A Managed Object?
+       </citetitle></link>
       </para>
      </listitem>
      <listitem>
