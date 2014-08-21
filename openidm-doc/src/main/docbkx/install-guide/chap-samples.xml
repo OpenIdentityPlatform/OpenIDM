@@ -2439,5 +2439,457 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
     
     </section>
   
+ </section>
+
+ <section xml:id="more-sample-openam">
+  <title>Sample OpenAM - Configuring Authentication Management for OpenIDM</title>
+   <indexterm>
+    <primary>Samples</primary>
+    <secondary>Sample OpenAM - Authentication Management for OpenIDM</secondary>
+   </indexterm>
+
+  <para>
+   This sample demonstrates how you can protect a deployment of OpenIDM with
+   ForgeRock's <link xlink:show="new"
+   xlink:href="http://docs.forgerock.org/en/index.html?product=openam&amp;version=11.0.0">
+   <citetitle>OpenAM Access Management</citetitle></link> product.
+  </para>
+
+  <para>
+   In this sample, you will use OpenIDM together with OpenAM and ForgeRock's
+   <link xlink:href="http://docs.forgerock.org/en/index.html?product=opendj&amp;version=2.6.0">
+   <citetitle>OpenDJ Directory Services</citetitle></link> product.
+  </para>
+
+  <para>
+   When configured together, you can demonstrate one use case that maximizes
+   Identity Relationship Management (IRM) functionality. OpenIDM can maintain
+   user data in OpenDJ data stores. Once protected by OpenAM, you can configure
+   rules for authorized access.
+  </para>
+
+  <para>
+   This sample configures OpenIDM and OpenDJ on one system, with a URL of
+   <literal>openidm.example.com</literal>. It configures OpenAM on a separate
+   second system, with a URL of <literal>openam.example.com</literal>.
+  </para>
+
+  <!--TODO: update if/when OpenAM 11 is updated to work with this sample, ref
+   OPENAM-4381 -->
+  <note>
+   <para>
+    At this time, this sample assumes that you have deployed OpenAM 12.
+   </para>
+  </note>
+
+  <section xml:id="prepare-sample-openam">
+   <title>Prepare the Sample</title>
+
+   <para>
+    Before installing OpenIDM, you need to prepare your systems. To set up this
+    sample, you need to take the following basic steps:
+   </para>
+
+   <itemizedlist>
+    <listitem>
+     <para>
+      Install OpenDJ, using a base DN of <literal>dc=example,dc=com</literal>.
+      Be sure to import the <filename>Example.ldif</filename> file available in
+      the <literal>samples/openam/data</literal> directory.
+      This example assumes that you install OpenDJ on the same system as
+      OpenIDM, with a FQDN of <literal>openidm.example.com</literal>.
+     </para>
+     <para>
+      If you set up OpenDJ on a secure port with a self-signed certificate, you
+      should import that certificate into the OpenIDM datastore, as described in
+      the following section of the Integrator's Guide: <link xlink:show="new"
+      xlink:role="http://docbook.org/roles/xlink/role/olink"
+      xlink:href="integrators-guide#security-management-service"><citetitle>
+      Accessing the Security Management Service</citetitle></link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Install an OpenAM 12 server in an environment that OpenIDM can access with
+      RESTful calls. For installation instructions, see the <link xlink:show="new"
+      xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/install-guide/index.html">
+      <citetitle>OpenAM Installation Guide</citetitle></link>. This example
+      assumes that you have deployed the associated <literal>.war</literal>
+      file in your selected Java EE container with the following name:
+      <filename>openam.war</filename>.
+     </para>
+     <para>
+      When installing OpenAM, configure it to use the OpenDJ data store
+      installed on <literal>openidm.example.com</literal>.
+     </para>
+     <para>
+      This sample assumes that you will configure OpenAM-based Single Sign-On
+      (SSO) as described in the OpenAM Administration Guide. For this sample,
+      you will need to configure <literal>.example.com</literal> as the sole
+      cookie domain as described in the following section of the noted OpenAM
+      Guide: <link xlink:show="new"
+      xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/admin-guide/index.html#configure-sso-one-domain">
+      <citetitle>Configure SSO on One Domain</citetitle></link>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      As OpenAM works with FQDNs, you will need to either set up the noted
+      FQDNs <literal>(openam.example.com and openidm.example.com)</literal> in
+      an address database such as a DNS server or the static
+      <filename>hosts</filename> configuration file of both systems.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Do not start OpenIDM yet. You need to configure it further.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+   <note>
+    <para>
+     When you configure OpenAM, you do not need to install a Java EE agent. This
+     sample uses the <literal>OPENAM_SESSION</literal> module to protect
+     OpenIDM.
+    </para>
+   </note>
+   </section>
+
+   <section xml:id="configure-openam-sample">
+    <title>Configuring OpenIDM for the OpenAM Sample</title>
+
+    <para>
+     Before starting OpenIDM, you will need to change two configuration files,
+     related to authentication and provisioning.
+    </para>
+
+    <section xml:id="configure-openam-sample-auth-json">
+     <title>Configuring the authentication.json File for OpenAM</title>
+
+     <para>
+      To configure OpenIDM authentication, open the
+      <filename>authentication.json</filename> file. For this sample, you can
+      find that file in the <literal>samples/openam/conf</literal> directory.
+     </para>
+
+     <para>
+      Under <literal>"authModules"</literal>, find the
+      <literal>"OPENAM_SESSION"</literal> authentication module. The default
+      version of the <filename>authentication.json</filename> file includes two
+      entries which you must fill in:
+     </para>
+
+     <programlisting language="javascript">"authModules" : [
+  {
+     "name" : "OPENAM_SESSION",
+     "properties" : {
+       "openamDeploymentUrl" : "",
+       "groupRoleMapping" : {
+         "openidm-admin" : [ ]
+       },</programlisting>
+
+     <para>
+      Based on a standard <literal>openidm-admin</literal> user and the
+      previously noted URL and <literal>.war</literal> file for your OpenAM
+      deployment, you would change the code snippet to:
+     </para>
+
+     <programlisting language="javascript">"authModules" : [
+  {
+     "name" : "OPENAM_SESSION",
+     "properties" : {
+       "openamDeploymentUrl" : "https://openam.example.com:8443/openam",
+       "groupRoleMapping" : {
+         "openidm-admin" : [
+           "cn=idmAdmins,ou=Groups,dc=example,dc=com"
+         ]
+       },</programlisting>
+
+     <para>
+      Do remember to include <literal>/openam</literal> in the value of
+      <literal>"openamDeploymentUrl"</literal>. After the Java EE container used
+      for OpenAM starts, it unpacks a file such as <literal>openam.war</literal>
+      so that you can access it on the <literal>/openam</literal> endpoint.
+     </para>
+
+     <para>
+      With the <literal>"groupRoleMapping"</literal>, you can add the
+      Distinguished Names (DN) of groups to the list. This feature will then
+      assign the noted role, such as <literal>openidm-admin</literal> to any user
+      who is a member of one of these groups. For more information on how roles
+      are assigned, see the following section in the Integrator's Guide on
+      <link xlink:role="http://docbook.org/roles/xlink/role/olink"
+      xlink:href="integrators-guide#openidm-roles" xlink:show="new">
+      <citetitle>Roles and Authentication</citetitle></link>.
+     </para>
+     <!-- The README suggests this is needed only for self-signed certs. I think
+     this may be required for regular certs too, or does our truststore include
+     the "standard list"? -->
+
+     <para>
+      The <literal>"openamDeploymentUrl"</literal> shown above assumes that you
+      are using SSL. If you have a self-signed certificate, you will need to
+      import that into the OpenIDM truststore file. For more information, see
+      the following section of the Integrator's Guide: <link xlink:show="new"
+      xlink:role="http://docbook.org/roles/xlink/role/olink"
+      xlink:href="integrators-guide#security-management-service"><citetitle>
+      Accessing the Security Management Service</citetitle></link>.
+     </para>
+
+    </section>
+
+    <section xml:id="configure-openam-sample-prov">
+     <title>Configure Provisioning for the OpenAM Sample</title>
+
+      <para>
+       This section describes how you can customize the
+       <filename>provisioner.openicf-ldap.json</filename> file. The following
+       edits parallel those for <link xlink:show="new"
+       xlink:role="http://docbook.org/roles/xlink/role/olink"
+       xlink:href="install-guide#more-sample2c"><citetitle>Sample
+       2c - Synchronizing LDAP Group Membership</citetitle></link>.
+      </para>
+
+      <para>
+       Open the noted provisioner file, which you can find in the
+       <literal>samples/openam/conf</literal> directory. In the
+       initial version of this file, you should see something similar to the
+       following code:
+      </para>
+
+      <programlisting language="javascript">{
+  "name" : "ldap",
+  "configurationProperties" : {
+       "host" : "localhost",
+       "port" : 1389,
+       "ssl" : false,
+       "principal" : "cn=Directory Manager",
+       "credentials" : "password",
+       "baseContexts" : [
+           "dc=example,dc=com"
+       ],
+       "baseContextsToSynchronize" : [
+           "dc=example,dc=com"
+       ],</programlisting>
+
+      <para>
+       This snippet already matches the noted base context of
+       <literal>"dc=example,dc=com"</literal> with a principal of
+       <literal>"cn=Directory Manager"</literal>.
+      </para>
+
+      <para>
+       You will want to change the <literal>"localhost"</literal> entry to the
+       URL where OpenDJ is installed. In this case, that URL is
+       <literal>openidm.example.com</literal>. Depending on whether you want to
+       set up communications over a regular or secure LDAP port, you might
+       change the <literal>"port"</literal> number to 389 or 636. The following
+       excerpt illustrates the change to a secure connector configuration:
+      </para>
+
+     <programlisting language="javascript">{
+  "name" : "ldap",
+  "configurationProperties" : {
+      "host" : "openidm.example.com",
+      "port" : 636,
+      "ssl" : true,
+      "principal" : "cn=Directory Manager",
+      "credentials" : "password",
+      "baseContexts" : [
+          "dc=example,dc=com"
+      ],
+      "baseContextsToSynchronize" : [
+          "dc=example,dc=com"
+      ],</programlisting>
+
+      <para>
+       Just remember, if you want to set up secure communications with OpenDJ,
+       you should configure OpenDJ with that in mind. If you have a self-signed
+       certificate for OpenDJ, you will also want to import that into the
+       OpenIDM truststore, as discussed in the following section of the
+       Integrator's Guide: <link xlink:show="new"
+       xlink:role="http://docbook.org/roles/xlink/role/olink"
+       xlink:href="integrators-guide#security-management-service"><citetitle>
+       Accessing the Security Management Service</citetitle></link>.
+      </para>
+
+    </section>
+
   </section>
+
+  <section xml:id="install-sample-openam">
+   <title>Install the Sample</title>
+
+   <para>
+    If you have not already done so, make sure OpenDJ is running on its
+    assigned system, in this case, <literal>openidm.example.com</literal>.
+   </para>
+
+   <para>
+    Finish preparing OpenIDM, with the procedure described in
+    <xref linkend="preparing-openidm"/>, then start OpenIDM with the
+    configuration for sample openam.
+   </para>
+
+   <screen>$ cd /path/to/openidm
+    $ ./startup.sh -p samples/openam</screen>
+
+   <para>
+    If you have not already done so, make sure OpenAM is also running on its
+    assigned system, in this case, <literal>openam.example.com</literal>.
+   </para>
+
+  </section>
+
+  <section xml:id="run-sample-openam">
+   <title>Running the Sample</title>
+
+    <para>
+     With everything configured, now run reconciliation on the
+     <literal>openidm.example.com</literal> system. The following command
+     imports users from the OpenDJ database into the OpenIDM managed/user
+     database:
+    </para>
+
+    <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
+   <para>
+    Successful reconciliation returns a reconciliation run ID.
+   </para>
+
+  </section>
+
+  <section xml:id="review-sample-openam">
+   <title>Make Sure the Sample Works as Intended</title>
+
+   <para>
+    You should still be able to access the OpenIDM UI
+    in the "normal" way. In this case, you would point a browser to
+    <literal>https://openidm.example.com:8443/openidmui</literal>.
+   </para>
+
+   <para>
+    The difference is how OpenIDM uses a proxy service to authenticate with
+    OpenAM's REST-based authentication service. This sample implements the
+    proxy service as a custom endpoint in the <filename>openamProxy.js</filename>
+    file, in the <literal>samples/openam/script</literal>
+    directory.
+   </para>
+
+   <para>
+    The first time you log into the OpenIDM UI, you should see a login prompt
+    configured with OpenAM. The default version of this prompt appears quite
+    similar to the OpenIDM prompt. When you login through OpenAM, successfully,
+    you will receive a valid SSO token.
+   </para>
+
+   <para>
+    The next time you access OpenIDM, with the SSO token stored in your browser,
+    you will be logged in automatically, with all the roles configured for your
+    user account. This works only if your session is still active in OpenAM.
+    For more information, see the OpenAM Administration Guide section on
+    <link xlink:show="new"
+    xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/admin-guide/#session-mgmt">
+    <citetitle>Session Management</citetitle></link>.
+   </para>
+
+   <note>
+    <para>You can review the contents of the SSO token by pointing a browser to
+    the FQDN of the OpenIDM instance, with the <literal>info/login</literal>
+    endpoint. In this case, that URL would be
+    <literal>https://openidm.example.com/openidm/info/login</literal>.</para>
+   </note>
+
+  </section>
+
+  <section xml:id="sample-openam-going-further">
+   <title>Additional Options for the OpenAM Sample</title>
+
+   <para>
+    You can extend the OpenAM sample in one of three ways:
+   </para>
+
+   <itemizedlist>
+    <listitem>
+     <para><literal>Disable INTERNAL_USER by enabling LiveSync</literal></para>
+     <para>
+      To keep OpenDJ in sync with the OpenIDM managed/user database, you can
+      enable scheduled reconciliation and LiveSync. To do so, edit the following
+      files: <filename>schedule-recon.json</filename> and
+      <filename>schedule-livesync.json</filename>, in the
+      <literal>samples/openam/conf</literal> directory. Set
+      <literal>"enabled" : true</literal> in each of these files.
+     </para>
+     <para>
+      This ensures that any change to the OpenDJ user store is automatically
+      reflected in the OpenIDM managed/user data store. For a similar example,
+      see <xref linkend="more-sample6"/>.
+     </para>
+     <para>
+      Execute the reconciliation command described earlier in the description
+      for this sample.
+     </para>
+     <para>
+      Once scheduled reconciliation and LiveSync are configured, you can then
+      disable the <literal>INTERNAL_USER</literal> under
+      <literal>authModules</literal> in the relevant
+      <filename>authentication.json</filename> file. Just navigate to that
+      section of the file and set <literal>"enabled" : false</literal>. Once
+      complete, the only users with access to OpenIDM are users with a valid
+      SSO authentication token in their browsers.
+     </para>
+    </listitem>
+
+   <!-- possible additional options; can incorporate with more detail
+    <listitem>
+     <para>
+      <literal>Set up workflows to request access to applications</literal>
+     </para>
+     <para>
+      You can configure a workflow to allow users to request access to
+      additional applications. Upon approval, OpenIDM can update user accounts
+      with the permissions used by OpenAM to control access to that application.
+      For more information on workflows, see the Integrator's Guide section to
+      <link xlink:role="http://docbook.org/roles/xlink/role/olink"
+      xlink:href="integrators-guide#chap-workflow" xlink:show="new">
+      <citetitle>Integrating Business Processes and Workflows</citetitle>.
+      </link>
+     </para>
+    </listitem>
+    <listitem>
+     <para><literal>Single Sign-On Dashboard</literal></para>
+     <para>
+      You could extend workflow concepts to give users a choice of
+      applications, based on their SSO token. Once configured, you could set up
+      a "Single Sign-On" application dashboard for your users.
+     </para>
+    </listitem>               also:
+
+    Integrated Services For Custom Applications
+Based on the presence of a shared SSO token, any application secured by OpenAM
+ could reliably invoke OpenIDM REST services in an integrated and transparent
+ way. For example, an intranet portal could make AJAX requests to OpenIDM to
+ start a workflow process or execute a query. The fact that the request was
+ being made to OpenIDM would be hidden from the user - the SSO token that they
+ used to access the intranet would also be used by OpenIDM, and everything
+ would just work seamlessly.
+    -->
+   </itemizedlist>
+
+  </section>
+
+ </section>
+
 </chapter>
