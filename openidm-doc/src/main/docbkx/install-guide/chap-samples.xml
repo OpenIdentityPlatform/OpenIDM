@@ -2475,7 +2475,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
   </para>
 
   <!--TODO: update if/when OpenAM 11 is updated to work with this sample, ref
-   OPENAM-4381 -->
+   AME-4386 -->
   <note>
    <para>
     At this time, this sample assumes that you have deployed OpenAM 12.
@@ -2554,9 +2554,9 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
 
    <note>
     <para>
-     When you configure OpenAM, you do not need to install a Java EE agent. This
-     sample uses the <literal>OPENAM_SESSION</literal> module to protect
-     OpenIDM.
+     When you configure OpenAM for this sample, you do not need to install a
+     Java EE agent. This sample uses the  <literal>OPENAM_SESSION</literal>
+     module to protect OpenIDM.
     </para>
    </note>
    </section>
