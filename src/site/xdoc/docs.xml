@@ -44,7 +44,6 @@
     <a href="./doc/release-notes/index.html">HTML (single page)</a>,
     <a href="./doc/release-notes/index/index.html">HTML (1 page/chapter)</a>,
     <a href="./doc/OpenIDM-Release-Notes.pdf">PDF</a>,
-    <a href="./doc/OpenIDM-Release-Notes.rtf">RTF</a>,
     <a href="./doc/webhelp/release-notes/index.html">Webhelp</a></dd>
 
     <dt>Installation Guide</dt>
@@ -52,7 +51,6 @@
     <a href="./doc/install-guide/index.html">HTML (single page)</a>,
     <a href="./doc/install-guide/index/index.html">HTML (1 page/chapter)</a>,
     <a href="./doc/OpenIDM-Install-Guide.pdf">PDF</a>,
-    <a href="./doc/OpenIDM-Install-Guide.rtf">RTF</a>,
     <a href="./doc/webhelp/install-guide/index.html">Webhelp</a></dd>
 
     <dt>Integrator's Guide</dt>
@@ -60,7 +58,6 @@
     <a href="./doc/integrators-guide/index.html">HTML (single page)</a>,
     <a href="./doc/integrators-guide/index/index.html">HTML (1 page/chapter)</a>,
     <a href="./doc/OpenIDM-Integrators-Guide.pdf">PDF</a>,
-    <a href="./doc/OpenIDM-Integrators-Guide.rtf">RTF</a>,
     <a href="./doc/webhelp/integrators-guide/index.html">Webhelp</a></dd>
 
 <!--
