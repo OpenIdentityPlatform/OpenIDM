@@ -52,7 +52,7 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.provisioner.ConfigurationService;
+import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
@@ -64,9 +64,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -92,11 +94,42 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     public static final String ROUTER_PREFIX =  "/system";
 
-    public static final String ACTION_CREATE_CONFIGURATION = "CREATECONFIGURATION";
-    public static final String ACTION_TEST_CONFIGURATION = "testConfig";
-    public static final String ACTION_TEST_CONNECTOR = "test";
-    public static final String ACTION_LIVE_SYNC = "liveSync";
-    public static final String ACTION_ACTIVE_SYNC = "activeSync";
+    /**
+     * Actions supported on this resource provider
+     */
+    public enum SystemAction {
+        /** Captures the changes on a remote system, the pushes those changes to OpenIDM */
+        activeSync,
+        /** Captures the changes on a remote system, the pushes those changes to OpenIDM */
+        liveSync,
+        /** Test a connector to see if the connection is available */
+        test,
+        /** Test an existing connector configuration */
+        testConfig,
+        /** Multi phase configuration event calls this to generate the response */
+        createConfiguration,
+        /** List the connector [types] available in the system */
+        availableConnectors,
+        /** Generates the core configuration for a connector */
+        createCoreConfig,
+        /** Generates the full configuration for a connector */
+        createFullConfig;
+
+        private static Set<SystemAction> requiringConnectorConfigurationHelper = EnumSet.of(
+                createConfiguration, availableConnectors, createCoreConfig, createFullConfig);
+
+        /** Checks to see that ConnectorConfigurationHelper is available */
+        boolean requiresConnectorConfigurationHelper() {
+            return requiringConnectorConfigurationHelper.contains(this);
+        }
+
+        private static Set<SystemAction> liveSyncActions = EnumSet.of(activeSync, liveSync);
+
+        /** Checks to see if action is live sync */
+        boolean isLiveSync() {
+            return liveSyncActions.contains(this);
+        }
+    }
 
     @Reference(referenceInterface = ProvisionerService.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -142,42 +175,35 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
-    private ConfigurationService configurationService;
-
+    private ConnectorConfigurationHelper connectorConfigurationHelper;
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
-        if (ACTION_CREATE_CONFIGURATION.equalsIgnoreCase(request.getAction())) {
-            if (null != configurationService) {
-                try {
-                    handler.handleResult(configurationService.configure(request.getContent()));
-                } catch (ResourceException e) {
-                    handler.handleError(e);
-                } catch (Exception e) {
-                    handler.handleError(new InternalServerErrorException(e));
-                }
-            } else {
-                handler.handleError(new ServiceUnavailableException("The required service is not available"));
+        try {
+            final ProvisionerService ps;
+            final JsonValue content = request.getContent();
+            final JsonValue id = content.get("id");
+            final SystemAction action = request.getActionAsEnum(SystemAction.class);
+            if (action.requiresConnectorConfigurationHelper() && null == connectorConfigurationHelper) {
+                throw new ServiceUnavailableException("The required service is not available");
             }
-        } else if (ACTION_TEST_CONFIGURATION.equalsIgnoreCase(request.getAction())) {
-            try {
-                JsonValue config = request.getContent();
-                if (!config.get("id").isNull()) {
+            switch (action) {
+            case createConfiguration:
+                handler.handleResult(connectorConfigurationHelper.configure(content));
+                break;
+            case testConfig:
+                JsonValue config = content;
+                if (!id.isNull()) {
                     throw new BadRequestException("A system ID must not be specified in the request");
                 }
-                ProvisionerService ps = locateServiceForTest(config.get("name"));
+                ps = locateServiceForTest(config.get("name"));
                 if (ps == null) {
                     throw new BadRequestException("Invalid configuration to test: no 'name' specified");
                 }
                 handler.handleResult(new JsonValue(ps.testConfig(config)));
-            } catch (ResourceException e) {
-                handler.handleError(e);
-            } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
-            }
-        } else if (ACTION_TEST_CONNECTOR.equalsIgnoreCase(request.getAction())) {
-            try {
-                ProvisionerService ps = locateServiceForTest(request.getContent().get("id"));
+                break;
+            case test:
+                ps = locateServiceForTest(id);
                 if (ps != null) {
                     handler.handleResult(new JsonValue(ps.getStatus()));
                 } else {
@@ -187,28 +213,40 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     }
                     handler.handleResult(new JsonValue(list));
                 }
-            } catch (ResourceException e) {
-                handler.handleError(e);
-            } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
-            }
-        } else if (isLiveSyncAction(request.getAction())) {
-            JsonValue params = new JsonValue(request.getAdditionalParameters());
-            try {
+                break;
+            case activeSync:
+            case liveSync:
+                JsonValue params = new JsonValue(request.getAdditionalParameters());
                 String source = params.get("source").asString();
                 if (source == null) {
                     logger.debug("liveSync requires an explicit source parameter, source is : {}", source );
                     throw new BadRequestException("liveSync action requires either an explicit source parameter, "
-                                + "or needs to be called on a specific provisioner URI");
+                            + "or needs to be called on a specific provisioner URI");
                 } else {
                     logger.debug("liveSync called with explicit source parameter {}", source);
                 }
                 handler.handleResult(liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString())));
-            } catch (ResourceException e) {
-                handler.handleError(e);
+                break;
+            case availableConnectors:
+                handler.handleResult(connectorConfigurationHelper.getAvailableConnectors());
+                break;
+            case createCoreConfig:
+                handler.handleResult(connectorConfigurationHelper.generateConnectorCoreConfig(content));
+                break;
+            case createFullConfig:
+                handler.handleResult(connectorConfigurationHelper.generateConnectorFullConfig(content));
+                break;
+            default:
+                handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
+                return;
             }
-        } else {
-            handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (IllegalArgumentException e) {
+            // from getActionAsEnum
+            handler.handleError(new BadRequestException(e.getMessage(), e));
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
         }
     }
 
@@ -244,8 +282,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     public void execute(ServerContext context, Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
-            String action = params.get("action").asString();
-            if (isLiveSyncAction(action)) {
+            if (params.get("action").asEnum(SystemAction.class).isLiveSync()) {
                 String source = params.get("source").required().asString();
                 liveSync(source, true);
             }
@@ -253,17 +290,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             throw new ExecutionException(jve);
         } catch (ResourceException e) {
             throw new ExecutionException(e);
+        } catch (IllegalArgumentException e) {
+            // not a liveSync action, so no-op
         } catch (RuntimeException e) {
             throw new ExecutionException(e);
         }
-    }
-
-    /**
-     * @param action the requested action
-     * @return true if the action string is to live sync
-     */
-    private boolean isLiveSyncAction(String action) {
-        return (ACTION_LIVE_SYNC.equalsIgnoreCase(action) || ACTION_ACTIVE_SYNC.equalsIgnoreCase(action));
     }
 
     /**

@@ -2559,7 +2559,7 @@ Deactivate Method: deactivate (declared in the descriptor)
 Modified Method: -
 Services: org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider
           org.forgerock.openidm.metadata.MetaDataProvider
-          org.forgerock.openidm.provisioner.ConfigurationService
+          org.forgerock.openidm.provisioner.ConnectorConfigurationHelper
 Service Type: service
 Reference: osgiConnectorEventPublisher
     Satisfied: satisfied

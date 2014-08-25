@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -468,13 +468,14 @@ public class ConnectorUtil {
         }
     }
 
-    public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {
+    public static JsonValue createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {
         target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));
         target.put(OPENICF_RESULTSHANDLER_CONFIG_OPTION, getResultsHandlerConfiguration(source.getResultsHandlerConfiguration()));
         target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));
         Map<String, Object> configurationProperties = new LinkedHashMap<String, Object>();
         target.put(OPENICF_CONFIGURATION_PROPERTIES, configurationProperties);
         setConfigurationProperties(source.getConfigurationProperties(), configurationProperties);
+        return target;
     }
 
 

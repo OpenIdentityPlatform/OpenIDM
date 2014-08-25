@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,12 +28,15 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 
 /**
- * Configuration generation helper
+ * Helper methods which assist with generating connector configuration. These methods can be called
+ * to validate connector configurations as well as check which connectors are available for configuration.
+ * After each phase of generated configuration the user can customize the properties generated and have
+ * them validated.
  *
  * @author $author$
  * @version $Revision$ $Date$
  */
-public interface ConfigurationService {
+public interface ConnectorConfigurationHelper {
     /**
      * Multi phase configuration event calls this to generate the response for
      * the next phase.
@@ -54,4 +57,32 @@ public interface ConfigurationService {
      *             contains the detailed information.
      */
     public void test(JsonValue params) throws ResourceException;
+
+    /**
+     * Get available connectors from an installation
+     *
+     * @return {@code JsonValue} containing all available connectors
+     * @throws ResourceException
+     */
+    public JsonValue getAvailableConnectors() throws ResourceException;
+
+    /**
+     * Generate the core configuration
+     *
+     * @param params connector configuration
+     * @return core connector configuration
+     * @throws ResourceException
+     */
+    public JsonValue generateConnectorCoreConfig(JsonValue params) throws ResourceException;
+
+    /**
+     * Generate the full configuration
+     *
+     * @param params connector configuration
+     * @return full connector configuration
+     * @throws ResourceException
+     */
+    public JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException;
+
+
 }
