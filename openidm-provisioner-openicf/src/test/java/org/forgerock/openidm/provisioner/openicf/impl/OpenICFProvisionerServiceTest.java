@@ -491,7 +491,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
 
             ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/account",
-                    SystemObjectSetService.ACTION_LIVE_SYNC);
+                    SystemObjectSetService.SystemAction.liveSync.toString());
 
             stage = connection.action(new RootContext(), actionRequest);
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 1);
@@ -548,7 +548,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
                             stage);
             connection.create(new RootContext(), createRequest);
             actionRequest = Requests.newActionRequest("system/" + systemName + "/group",
-                    SystemObjectSetService.ACTION_LIVE_SYNC);
+                    SystemObjectSetService.SystemAction.liveSync.toString());
 
             stage = connection.action(new RootContext(), actionRequest);
             Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 16);
@@ -833,7 +833,7 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
 
 
         ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName,
-                SystemObjectSetService.ACTION_LIVE_SYNC);
+                SystemObjectSetService.SystemAction.liveSync.toString());
 
         stage = connection.action(new RootContext(), actionRequest);
         Assert.assertEquals(ConnectorUtil.convertToSyncToken(stage.get("connectorData")).getValue(), 17);
