@@ -700,9 +700,8 @@ ETag: "0"
       <para>
        You can use PUT and POST to create managed objects. To create a
        managed object with a PUT, you would include the <literal>_id</literal>
-       in the request, to be assigned by the client. If you create a managed
-       object with a POST, the server assigns the <literal>_id</literal> in the
-       form of a UUID.
+       in the request. If you create a managed object with a POST, the server
+       assigns the <literal>_id</literal> in the form of a UUID.
       </para>
       <para>
        In some cases, you may want to use PUT, as POST is not idempotent. If you
