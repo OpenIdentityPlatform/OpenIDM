@@ -1571,12 +1571,17 @@ class ObjectMapping {
                     JsonPointer pointer = new JsonPointer(key);
                     JsonValue source = sourceObjectAccessor.getObject();
                     if (!source.isNull() && source.get(pointer) != null) {
-                        JsonValue value = source.get(pointer);
-                        if (value.isList()) {
-                            if (!value.asList().contains(sourceCondition.get(key).getObject())) {
+                        JsonValue valueToTest = source.get(pointer);
+                        Object sourceConditionValue = sourceCondition.get(key).getObject();
+                        if (valueToTest.isList()) {
+                            if (!valueToTest.asList().contains(sourceConditionValue)) {
                                 return false;
                             }
-                        } else if (!value.getObject().equals(sourceCondition.get(key).getObject())) {
+                        } else if (valueToTest.isMap()) {
+                            if (!valueToTest.asMap().containsKey(sourceConditionValue)) {
+                                return false;
+                            }                            
+                        } else if (!valueToTest.getObject().equals(sourceConditionValue)) {
                             return false;
                         }
                     } else {
