@@ -201,9 +201,10 @@ public class AuditLogFilters {
 
         private CompositeFilter(List<AuditLogFilter> filters) {
             this.filters = new ArrayList<AuditLogFilter>();
-            // only add filters which are not the NONE filter
             for (AuditLogFilter filter : filters) {
-                if (!filter.equals(NONE)) {
+                if (filter instanceof CompositeFilter) {
+                    this.filters.addAll(((CompositeFilter) filter).filters);
+                } else if (!filter.equals(NONE)) {
                     this.filters.add(filter);
                 }
             }
@@ -298,7 +299,7 @@ public class AuditLogFilters {
      * @param filters the list of audit log filters
      * @return a composite filter of filters, or NONE, if there are no filters
      */
-    static AuditLogFilter newCompositeActionFilter(List<AuditLogFilter> filters) {
+    static AuditLogFilter newCompositeFilter(List<AuditLogFilter> filters) {
         return filters.isEmpty() || onlyContainsNone(filters)
                 ? NONE // don't bother creating a composite filter out of nothing or a bunch of nothings
                 : new CompositeFilter(filters);
@@ -312,6 +313,17 @@ public class AuditLogFilters {
      */
     static AuditLogFilter newScriptedFilter(ScriptEntry scriptEntry) {
         return new ScriptedFilter(scriptEntry);
+    }
+
+    /**
+     * Creates an audit log filter implemented in a script for a particular event type.
+     *
+     * @param eventType the event type
+     * @param scriptEntry the Script
+     * @return an audit log filter via script
+     */
+    static AuditLogFilter newScriptedFilter(String eventType, ScriptEntry scriptEntry) {
+        return new EventTypeFilter(eventType, new ScriptedFilter(scriptEntry));
     }
 
     /**
