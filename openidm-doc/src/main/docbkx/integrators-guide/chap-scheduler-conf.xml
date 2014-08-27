@@ -747,8 +747,7 @@ openidm.scheduler.execute.persistent.schedules=true
    to the <filename>openidm/script</filename> directory.
   </para>
   
-  <programlisting language="javascript">
-{
+  <programlisting language="javascript">{
     "enabled" : true,
     "type" : "cron",
     "schedule" : "0 0 * * * ?",
@@ -816,7 +815,7 @@ openidm.scheduler.execute.persistent.schedules=true
     <para>
      By default, the task scanner runs in a multi-threaded manner, that is,
      numerous threads are dedicated to the same scanning task run.
-     Multithreading generally improves the performance of the task scanner. The
+     Multi-threading generally improves the performance of the task scanner. The
      default number of threads for a single scanning task is ten. To change this
      default, set the <literal>"numberOfThreads"</literal> property.
     </para>
@@ -852,7 +851,13 @@ openidm.scheduler.execute.persistent.schedules=true
       <term><literal>"property"</literal></term>
       <listitem>
        <para>
-        Defines the property against which the query is performed.
+        Defines the property against which the query is performed. In the
+        previous example, the <literal>"property" : "sunset/date"</literal>
+        indicates a JSON pointer that maps to the object attribute, and can be
+        understood as <literal>sunset: {"date" : "<replaceable>date</replaceable>"}</literal>.
+        For more information about JSON pointer syntax, see
+        <link xlink:show="new"
+        xlink:href="http://tools.ietf.org/html/rfc6901">RFC 6901</link>.
        </para>
        <para>
         If you are using a JDBC repository, with a generic mapping, you must
