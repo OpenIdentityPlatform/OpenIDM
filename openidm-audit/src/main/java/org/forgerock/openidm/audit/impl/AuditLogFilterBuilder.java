@@ -17,6 +17,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.util.promise.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 /**
  * A builder for AuditLogFilters.
@@ -38,11 +42,11 @@ class AuditLogFilterBuilder {
     private static final Logger logger = LoggerFactory.getLogger(AuditLogFilterBuilder.class);
 
     /**
-     * Map of config element JsonPointers to a builder function that creates the appropriate AuditLogFilter
+     * Map of config element config paths to a builder function that creates the appropriate AuditLogFilter
      * from that config.
      */
-    private final Map<JsonPointer, Function<JsonValue, AuditLogFilter, Exception>> auditLogFilterBuilder =
-            new HashMap<JsonPointer, Function<JsonValue, AuditLogFilter, Exception>>();
+    private final Map<String, Function<JsonValue, AuditLogFilter, Exception>> auditLogFilterBuilder =
+            new HashMap<String, Function<JsonValue, AuditLogFilter, Exception>>();
 
     /**
      * Add a mapping from a config path to the factory function used to build an audit log filter for this
@@ -52,7 +56,7 @@ class AuditLogFilterBuilder {
      * @param filterFactory the function to create an AuditLogFilter from that config subset
      * @return this builder object
      */
-    AuditLogFilterBuilder add(JsonPointer configPath, Function<JsonValue, AuditLogFilter, Exception> filterFactory) {
+    AuditLogFilterBuilder add(String configPath, Function<JsonValue, AuditLogFilter, Exception> filterFactory) {
         auditLogFilterBuilder.put(configPath, filterFactory);
         return this;
     }
@@ -62,7 +66,7 @@ class AuditLogFilterBuilder {
      * @param configPath a JsonPointer to a config subset
      * @return this builder object
      */
-    AuditLogFilterBuilder remove(JsonPointer configPath) {
+    AuditLogFilterBuilder remove(String configPath) {
         auditLogFilterBuilder.remove(configPath);
         return this;
     }
@@ -75,10 +79,19 @@ class AuditLogFilterBuilder {
      */
     AuditLogFilter build(JsonValue config) {
         List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
-        for (Map.Entry<JsonPointer, Function<JsonValue, AuditLogFilter, Exception>> entry :
-                auditLogFilterBuilder.entrySet()) {
-            final JsonValue filterConfig = config.get(entry.getKey());
+        for (Map.Entry<String, Function<JsonValue, AuditLogFilter, Exception>> entry : auditLogFilterBuilder.entrySet()) {
+            final String configPath = entry.getKey();
             final Function<JsonValue, AuditLogFilter, Exception> builder = entry.getValue();
+
+            final JsonValue filterConfig;
+            if (configPath.contains("*")) {
+                // config path contains a wildcard - use special glob-processing
+                filterConfig = getByGlob(config, configPath);
+            } else {
+                // config path is normal, treat as JsonPointer
+                filterConfig = config.get(new JsonPointer(configPath));
+            }
+
             // if filterConfig is null, then we do not have this config
             if (filterConfig != null) {
                 try {
@@ -89,6 +102,97 @@ class AuditLogFilterBuilder {
                 }
             }
         }
-        return AuditLogFilters.newCompositeActionFilter(filters);
+        return AuditLogFilters.newCompositeFilter(filters);
+    }
+
+    /**
+     * Returns a JsonValue whose keys replace the elements matched by wildcard path elements and values are the
+     * values at those keys.  A simple example:
+     * <pre>
+     *     value = {
+     *         "outside" : {
+     *             "temp" : {
+     *                 "value" : 5,
+     *                 "unit" : "fahrenheit"
+     *             },
+     *             "barometer" : {
+     *                 "value" : 700
+     *                 "unit" : "mmHg"
+     *             }
+     *         },
+     *         "inside" : {
+     *             "temp" : {
+     *                 "value" : 30,
+     *                 "unit" : "celsius"
+     *             },
+     *             "barometer" : {
+     *                 "value" : 760
+     *                 "unit" : "mmHg"
+     *             }
+     *         }
+     *     }
+     * </pre>
+     * then
+     * <pre>
+     *     getByGlob(value, "*&#47;temp")
+     * </pre>
+     * will rturn
+     * <pre>
+     *     {
+     *         "outside" : {
+     *             "value" : 5,
+     *             "unit" : "fahrenheit"
+     *         },
+     *         "inside" : {
+     *             "value" : 30,
+     *             "unit" : "celsius"
+     *         }
+     *     }
+     * </pre>
+     * Note how this picks out just the temp subvalues.  If multiple wildcards occur in the path, the result will
+     * have multiple levels of keys following the wildcard expansion.
+     *
+     * @param value the JsonValue to extract path elements
+     * @param path the JsonPointer-like path containing wildcards
+     * @return a JsonValue map of matching keys to values a those keys
+     */
+    JsonValue getByGlob(final JsonValue value, final String path) {
+        return getByGlob(value, path.split("/"));
+    }
+
+    /**
+     * Match the JsonValue according to the path array.
+     *
+     * @param value the JsonValue to extract path elements
+     * @param paths an array of path elements to search on
+     * @return a JsonValue map of matching keys to values a those keys
+    */
+    JsonValue getByGlob(final JsonValue value, final String[] paths) {
+
+        if (value.isNull()) {
+            return json(object());
+        }
+
+        if (paths.length == 0) {
+            return value;
+        }
+
+        final String path = paths[0];
+        final String[] remainingPath = Arrays.copyOfRange(paths, 1, paths.length);
+
+        if ("*".equals(path)) {
+            // this path matches all "nodes" under 'value' - add all children who continue to match the subsequent path
+            final JsonValue result = json(object());
+            for (String key : value.keys()) {
+                JsonValue child = getByGlob(value.get(key), remainingPath);
+                if (child.size() > 0) {
+                    result.put(key, child);
+                }
+            }
+            return result;
+        } else {
+            // regular path element - get it (recursion)
+            return getByGlob(value.get(path), remainingPath);
+        }
     }
 }

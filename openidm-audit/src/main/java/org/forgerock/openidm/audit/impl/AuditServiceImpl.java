@@ -89,7 +89,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeFilter;
 
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 import static org.forgerock.openidm.audit.util.ActivityLogger.ACTION;
@@ -135,7 +135,6 @@ public class AuditServiceImpl implements AuditService {
     public static final String TYPE_RECON = "recon";
     public static final String TYPE_ACTIVITY = "activity";
     public static final String TYPE_ACCESS = "access";
-    public static final String[] EVENT_TYPES = new String[] { TYPE_ACCESS, TYPE_ACTIVITY, TYPE_RECON };
 
     // Recognized queries
     public static final String QUERY_BY_RECON_ID = "audit-by-recon-id";
@@ -188,36 +187,8 @@ public class AuditServiceImpl implements AuditService {
     RouteService routeService;
 
     /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC,
-            bind = "bindScriptRegistry",
-            unbind = "unbindScriptRegistry")
+    @Reference(policy = ReferencePolicy.STATIC)
     protected ScriptRegistry scriptRegistry;
-
-    void bindScriptRegistry(final ScriptRegistry service) throws ResourceException {
-        logger.debug("binding RepositoryService");
-        scriptRegistry = service;
-
-        // add audit log filter script for event types on ScriptRegistry injection
-        for (final String eventType : EVENT_TYPES) {
-            auditLogFilterBuilder.add(new JsonPointer("eventTypes/" + eventType + "/filter/script"),
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
-                        @Override
-                        public AuditLogFilter apply(JsonValue scriptConfig) throws Exception {
-                            return newScriptedFilter(scriptRegistry.takeScript(scriptConfig));
-                        }
-                    });
-        }
-    }
-
-    void unbindScriptRegistry(final ScriptRegistry service) {
-        logger.debug("unbinding RepositoryService");
-        scriptRegistry = null;
-
-        // remove script-baed audit log filters for event types on ScriptRegistry de-injection
-        for (final String eventType : EVENT_TYPES) {
-            auditLogFilterBuilder.remove(new JsonPointer("eventTypes/" + eventType + "/filter/script"));
-        }
-    }
 
     /** the script to execute to format exceptions */
     private static ScriptEntry exceptionFormatterScript = null;
@@ -275,14 +246,14 @@ public class AuditServiceImpl implements AuditService {
     }
 
     final AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
-            .add(new JsonPointer("eventTypes/activity/filter/actions"),
+            .add("eventTypes/activity/filter/actions",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) throws Exception {
                             return newActivityActionFilter(actions);
                         }
                     })
-            .add(new JsonPointer("eventTypes/activity/filter/triggers"),
+            .add("eventTypes/activity/filter/triggers",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) throws Exception {
@@ -290,17 +261,17 @@ public class AuditServiceImpl implements AuditService {
                             for (String trigger : triggers.keys()) {
                                 filters.add(newActivityActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeActionFilter(filters);
+                            return newCompositeFilter(filters);
                         }
                     })
-            .add(new JsonPointer("eventTypes/recon/filter/actions"),
+            .add("eventTypes/recon/filter/actions",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) throws Exception {
                             return newReconActionFilter(actions);
                         }
                     })
-            .add(new JsonPointer("eventTypes/recon/filter/triggers"),
+            .add("eventTypes/recon/filter/triggers",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) throws Exception {
@@ -308,10 +279,108 @@ public class AuditServiceImpl implements AuditService {
                             for (String trigger : triggers.keys()) {
                                 filters.add(newReconActionFilter(triggers.get(trigger), trigger));
                             }
-                            return AuditLogFilters.newCompositeActionFilter(filters);
+                            return AuditLogFilters.newCompositeFilter(filters);
                         }
                     });
 
+    @Activate
+    void activate(ComponentContext compContext) throws Exception {
+        logger.debug("Activating Service with configuration {}", compContext.getProperties());
+        try {
+            // Upon activation the ScriptRegistry is present so we can add script-based audit log filters for event types
+            auditLogFilterBuilder.add("eventTypes/*/filter/script",
+                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                        @Override
+                        public AuditLogFilter apply(JsonValue config) throws Exception {
+                            List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
+                            for (String eventType : config.keys()) {
+                                JsonValue filterConfig = config.get(eventType);
+                                try {
+                                    filters.add(newScriptedFilter(eventType, scriptRegistry.takeScript(filterConfig)));
+                                } catch (Exception e) {
+                                    logger.error("Audit Log Filter builder threw exception {} while processing {} for {}",
+                                            e.getClass().getName(), filterConfig.toString(), eventType, e);
+                                }
+                            }
+                            return newCompositeFilter(filters);
+                        }
+                    });
+            setConfig(enhancedConfig.getConfigurationAsJson(compContext));
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not start Audit service.", ex);
+            throw ex;
+        }
+        logger.info("Audit service started.");
+    }
+
+    /**
+     * Configuration modified handling
+     * Ensures audit logging service stays registered
+     * even whilst configuration changes
+     */
+    @Modified
+    void modified(ComponentContext compContext) throws Exception {
+        logger.debug("Reconfiguring aduit service with configuration {}", compContext.getProperties());
+        try {
+            JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
+            if (hasConfigChanged(config, newConfig)) {
+                deactivate(compContext);
+                activate(compContext);
+                logger.info("Reconfigured audit service {}", compContext.getProperties());
+            }
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not reconfigure Audit service.", ex);
+            throw ex;
+        }
+    }
+
+    private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
+        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
+    }
+
+    void setConfig(JsonValue jsonConfig) throws Exception {
+        config = jsonConfig;
+        globalAuditLoggers.addAll(getGlobalAuditLoggers(config));
+        eventAuditLoggers.putAll(getEventAuditLoggers(config));
+        auditFilter = auditLogFilterBuilder.build(config);
+        watchFieldFilters.addAll(getEventJsonPointerList(config, TYPE_ACTIVITY, "watchedFields"));
+        passwordFieldFilters.addAll(getEventJsonPointerList(config, TYPE_ACTIVITY, "passwordFields"));
+        JsonValue efConfig = config.get("exceptionFormatter");
+        if (!efConfig.isNull()) {
+            exceptionFormatterScript =  scriptRegistry.takeScript(efConfig);
+        }
+    }
+
+    @Deactivate
+    void deactivate(ComponentContext compContext) {
+        logger.debug("Deactivating Service {}", compContext.getProperties());
+        for (AuditLogger auditLogger : globalAuditLoggers) {
+            try {
+                auditLogger.cleanup();
+            } catch (Exception ex) {
+                logger.info("AuditLogger cleanup reported failure", ex);
+            }
+        }
+        for (List<AuditLogger> auditLoggers : eventAuditLoggers.values()) {
+            for (AuditLogger auditLogger : auditLoggers) {
+                try {
+                    auditLogger.cleanup();
+                } catch (Exception ex) {
+                    logger.info("AuditLogger cleanup reported failure", ex);
+                }
+            }
+        }
+
+        // remove script-based audit log filters for event types
+        auditLogFilterBuilder.remove("eventTypes/*/filter/script");
+
+        globalAuditLoggers.clear();
+        eventAuditLoggers.clear();
+        auditFilter = AuditLogFilters.NONE;
+        watchFieldFilters.clear();
+        passwordFieldFilters.clear();
+        logger.info("Audit service stopped.");
+    }
 
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
@@ -377,7 +446,7 @@ public class AuditServiceImpl implements AuditService {
             }
 
             // Activity log preprocessing
-            if (type.equals("activity")) {
+            if (TYPE_ACTIVITY.equals(type)) {
                 processActivityLog(obj);
             }
 
@@ -652,56 +721,6 @@ public class AuditServiceImpl implements AuditService {
         }
     }
 
-    @Activate
-    void activate(ComponentContext compContext) throws Exception {
-        logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        try {
-            setConfig(enhancedConfig.getConfigurationAsJson(compContext));
-        } catch (Exception ex) {
-            logger.warn("Configuration invalid, can not start Audit service.", ex);
-            throw ex;
-        }
-        logger.info("Audit service started.");
-    }
-
-    /**
-     * Configuration modified handling
-     * Ensures audit logging service stays registered
-     * even whilst configuration changes
-     */
-    @Modified
-    void modified(ComponentContext compContext) throws Exception {
-        logger.debug("Reconfiguring aduit service with configuration {}", compContext.getProperties());
-        try {
-            JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
-            if (hasConfigChanged(config, newConfig)) {
-                deactivate(compContext);
-                activate(compContext);
-                logger.info("Reconfigured audit service {}", compContext.getProperties());
-            }
-        } catch (Exception ex) {
-            logger.warn("Configuration invalid, can not reconfigure Audit service.", ex);
-            throw ex;
-        }
-    }
-
-    private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
-        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
-    }
-
-    void setConfig(JsonValue jsonConfig) throws Exception {
-        config = jsonConfig;
-        globalAuditLoggers.addAll(getGlobalAuditLoggers(config));
-        eventAuditLoggers.putAll(getEventAuditLoggers(config));
-        auditFilter = auditLogFilterBuilder.build(config);
-        watchFieldFilters.addAll(getEventJsonPointerList(config, "activity", "watchedFields"));
-        passwordFieldFilters.addAll(getEventJsonPointerList(config, "activity", "passwordFields"));
-        JsonValue efConfig = config.get("exceptionFormatter");
-        if (!efConfig.isNull()) {
-            exceptionFormatterScript =  scriptRegistry.takeScript(efConfig);
-        }
-    }
-
     /**
      * Fetches a list of JsonPointers from the config file under a specified event and field name
      * Expects it to look similar to:
@@ -759,33 +778,6 @@ public class AuditServiceImpl implements AuditService {
             }
         }
         return configuredLoggers;
-    }
-
-    @Deactivate
-    void deactivate(ComponentContext compContext) {
-        logger.debug("Deactivating Service {}", compContext.getProperties());
-        for (AuditLogger auditLogger : globalAuditLoggers) {
-            try {
-                auditLogger.cleanup();
-            } catch (Exception ex) {
-                logger.info("AuditLogger cleanup reported failure", ex);
-            }
-        }
-        for (List<AuditLogger> auditLoggers : eventAuditLoggers.values()) {
-            for (AuditLogger auditLogger : auditLoggers) {
-                try {
-                    auditLogger.cleanup();
-                } catch (Exception ex) {
-                    logger.info("AuditLogger cleanup reported failure", ex);
-                }
-            }
-        }
-        globalAuditLoggers.clear();
-        eventAuditLoggers.clear();
-        auditFilter = AuditLogFilters.NONE;
-        watchFieldFilters.clear();
-        passwordFieldFilters.clear();
-        logger.info("Audit service stopped.");
     }
 
     public static void preformatLogEntry(String type, Map<String, Object> entryMap) {

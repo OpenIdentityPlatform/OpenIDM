@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionProvider;
@@ -46,11 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 import static org.mockito.Mockito.mock;
@@ -98,14 +98,14 @@ public class AuditLogFilterBuilderTest {
     }
 
     private AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
-            .add(new JsonPointer("eventTypes/activity/filter/actions"),
+            .add("eventTypes/activity/filter/actions",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) throws Exception {
                             return newActivityActionFilter(actions);
                         }
                     })
-            .add(new JsonPointer("eventTypes/activity/filter/triggers"),
+            .add("eventTypes/activity/filter/triggers",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) throws Exception {
@@ -113,17 +113,17 @@ public class AuditLogFilterBuilderTest {
                             for (String trigger : triggers.keys()) {
                                 filters.add(newActivityActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeActionFilter(filters);
+                            return newCompositeFilter(filters);
                         }
                     })
-            .add(new JsonPointer("eventTypes/recon/filter/actions"),
+            .add("eventTypes/recon/filter/actions",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) throws Exception {
                             return newReconActionFilter(actions);
                         }
                     })
-            .add(new JsonPointer("eventTypes/recon/filter/triggers"),
+            .add("eventTypes/recon/filter/triggers",
                     new Function<JsonValue, AuditLogFilter, Exception>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) throws Exception {
@@ -131,7 +131,7 @@ public class AuditLogFilterBuilderTest {
                             for (String trigger : triggers.keys()) {
                                 filters.add(newReconActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeActionFilter(filters);
+                            return newCompositeFilter(filters);
                         }
                     });
 
@@ -417,7 +417,7 @@ public class AuditLogFilterBuilderTest {
                 }});
 
         AuditLogFilter filter = new AuditLogFilterBuilder()
-                .add(new JsonPointer("eventTypes/activity/filter/script"),
+                .add("eventTypes/activity/filter/script",
                         new Function<JsonValue, AuditLogFilter, Exception>() {
                             @Override
                             public AuditLogFilter apply(JsonValue scriptConfig) throws Exception {
@@ -439,4 +439,48 @@ public class AuditLogFilterBuilderTest {
         assertFalse(filter.isFiltered(context, skittle)); // don't filter weird stuff
     }
 
+    @Test
+    public void testGetByGlob() {
+
+        JsonValue config = new JsonValue(
+                new HashMap<String, Object>() {{
+                    put("eventTypes", new HashMap<String, Object>() {{
+                        put("activity", new HashMap<String, Object>() {{
+                            put("filter", new HashMap<String, Object>() {{
+                                put("actions", new ArrayList<String>() {{
+                                    add("create");
+                                }});
+                            }});
+                        }});
+                        put("recon", new HashMap<String, Object>() {{
+                            put("filter", new HashMap<String, Object>() {{
+                                put("script", new HashMap<String, Object>() {{
+                                    put("type", "text/javascript");
+                                    put("name", "reconfilter.js");
+                                }});
+                            }});
+                        }});
+                        put("custom", new HashMap<String, Object>() {{
+                            put("filter", new HashMap<String, Object>() {{
+                                put("script", new HashMap<String, Object>() {{
+                                    put("type", "text/javascript");
+                                    put("name", "customfilter.js");
+                                }});
+                            }});
+                        }});
+                    }});
+                }});
+
+
+        JsonValue result = new AuditLogFilterBuilder().getByGlob(config, "eventTypes/*/filter/script");
+        assertThat(result.isDefined("activity")).isFalse();
+        assertThat(result.isDefined("recon")).isTrue();
+        assertThat(result.get("recon").isDefined("type")).isTrue();
+        assertThat(result.get("recon").isDefined("name")).isTrue();
+        assertThat(result.get("recon").get("name").asString()).isEqualTo("reconfilter.js");
+        assertThat(result.isDefined("custom")).isTrue();
+        assertThat(result.get("custom").isDefined("type")).isTrue();
+        assertThat(result.get("custom").isDefined("name")).isTrue();
+        assertThat(result.get("custom").get("name").asString()).isEqualTo("customfilter.js");
+    }
 }
