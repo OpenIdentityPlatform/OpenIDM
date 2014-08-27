@@ -178,5 +178,15 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
         </Arg>
     </Call>
 
+    <!-- Set the pax-web osgi port values -->
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>org.osgi.service.http.port</Arg>
+        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.http</Arg></Call></Arg>
+    </Call>
+    <Call class="java.lang.System" name="setProperty">
+        <Arg>org.osgi.service.http.port.secure</Arg>
+        <Arg><Call class="org.forgerock.openidm.jetty.Param"  name="getProperty"><Arg>openidm.port.https</Arg></Call></Arg>
+    </Call>
+
 </Configure>
 
