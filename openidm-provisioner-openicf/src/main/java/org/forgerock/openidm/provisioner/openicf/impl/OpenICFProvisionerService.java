@@ -1861,33 +1861,59 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     /**
      * Gets a brief status report about the current status of this service instance.
-     * </p/>
+     * <p>
+     * An example response when the configuration is enabled
      * {@code {
-     * "name" : "LDAP",
-     * "component.id" : "1",
-     * "component.name" : "org.forgerock.openidm.provisioner.openicf.ProvisionerService",
+     * "name" : "ldap",
+     * "enabled" : true,
+     * "config" : "config/provisioner.openicf/ldap"
+     * "connectorRef" :
+     *  {
+     *      "connectorName": "org.identityconnectors.ldap.LdapConnector",
+     *      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+     *      "bundleVersion": "[1.1.0.1,1.1.2.0)"
+     *  } ,
      * "ok" : true
      * }}
      *
-     * @return
+     * An example response when the configuration is disabled
+     * {@code {
+     * "name": "ldap",
+     * "enabled": false,
+     * "config": "config/provisioner.openicf/ldap",
+     * "error": "connector not available",
+     * "ok": false
+     * }}
+     *
+     * @return a Map of the current status of a connector
      */
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
-        try {
-            JsonValue jv = new JsonValue(result);
-            jv.put("name", systemIdentifier.getName());
-            ConnectorFacade connectorFacade = getConnectorFacade();
-            try {
-                connectorFacade.test();
-            } catch (UnsupportedOperationException e) {
-                jv.put("reason", "TEST UnsupportedOperation");
-            }
-            jv.put("ok", true);
+        JsonValue jv = new JsonValue(result);
+        boolean ok = false;
+
+        jv.put("name", systemIdentifier.getName());
+        jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
+        jv.put("config", "config/provisioner.openicf/" + factoryPid);
+        if (connectorReference != null) {
             jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(connectorReference.getConnectorKey()));
-            jv.put("config", "config/provisioner.openicf/" + factoryPid);
-        } catch (Throwable e) {
-            result.put("error", e.getMessage());
         }
+
+        try {
+            ConnectorFacade connectorFacade = getConnectorFacade();
+            if (connectorFacade == null) {
+                jv.put("error", "connector not available");
+            } else {
+                connectorFacade.test();
+                ok = true;
+            }
+        } catch (UnsupportedOperationException e) {
+            jv.put("error", "TEST UnsupportedOperation");
+        } catch (Exception e) {
+            jv.put("error", e.getMessage());
+        }
+
+        jv.put("ok", ok);
         return result;
     }
 
