@@ -34,14 +34,8 @@
  <variablelist>
   <para>
    By default, OpenIDM ${serverDocTargetVersion} listens on the following ports
-   (specified in the files
-   <filename>/path/to/openidm/conf/boot/boot.properties</filename> and
-   <filename>/path/to/openidm/conf/config.properties</filename>):
-  </para>
-  <para>
-   If you change the default port numbers, you must make the same modification
-   in both the <filename>boot.properties</filename> and
-   <filename>config.properties</filename> files.
+   (specified in the file
+   <filename>/path/to/openidm/conf/boot/boot.properties</filename>):
   </para>
 
   <varlistentry>
