@@ -127,6 +127,9 @@ orientdb&gt; </screen>
  "https://localhost:8443/openidm/repo?_action=updateDbCredentials&amp;user=admin&amp;password=newPassword"
    </userinput></screen>
   <para>
+   You must restart OpenIDM for the change to take effect.
+  </para>
+  <para>
    This command updates both the repository and the repository configuration file.
   </para>
   <para>
