@@ -102,7 +102,7 @@ public class GenericTableHandler implements TableHandler {
         return queries.queryIdExists(queryId);
     }
 
-    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
+    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
 
         this.mainTableName = cfg.mainTableName;
@@ -122,7 +122,7 @@ public class GenericTableHandler implements TableHandler {
 
         queries = new TableQueries(new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
-        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, queryMap);
+        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, commandsConfig, queryMap);
 
         // TODO: Consider taking into account DB meta-data rather than just configuration
         //DatabaseMetaData metadata = connection.getMetaData();
@@ -614,6 +614,11 @@ public class GenericTableHandler implements TableHandler {
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection)
             throws ResourceException {
         return queries.query(type, params, connection);
+    }
+
+    @Override
+    public Integer command(String type, Map<String, Object> params, Connection connection) throws SQLException, ResourceException {
+        return queries.command(type, params, connection);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,11 +24,10 @@
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -36,96 +35,77 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.exception.OQueryParsingException;
-import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
+import com.orientechnologies.orient.core.sql.OCommandSQL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
- * Configured and add-hoc query support on OrientDB
+ * Configured and add-hoc command support on OrientDB
  * 
- * Queries can contain tokens of the format ${token-name}
+ * Commands can contain tokens of the format ${token-name}
  * 
- * @author aegloff
  * @author brmiller
  */
-public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryRequest, List<ODocument>> {
+public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Integer> {
 
-    final static Logger logger = LoggerFactory.getLogger(Queries.class);
+    final static Logger logger = LoggerFactory.getLogger(Commands.class);
 
-    public Queries() {
-        super(new HashMap<String, QueryInfo<OSQLSynchQuery<ODocument>>>());
-    }
-    
-    /**
-     * Set the pre-configured queries, which are identified by a query identifier and can be
-     * invoked using this identifier
-     * 
-     * Success to set the queries does not mean they are valid as some can only be validated at
-     * query execution time.
-     * 
-     * @param queries the complete list of configured queries, mapping from query id to the 
-     * query expression which may optionally contain tokens in the form ${token-name}.
-     */
-    @Override
-    public void setConfiguredQueries(Map<String, String> queries) {
-        // Query all IDs is a mandatory query, default it and allow override.
-        if (!queries.containsKey("query-all-ids")) {
-            queries.put("query-all-ids", "select _openidm_id from ${unquoted:_resource}");
-        }
+    private static final String COMMAND_ID = "commandId";
+    private static final String COMMAND_EXPRESSION = "commandExpression";
 
-        super.setConfiguredQueries(queries);
+    public Commands() {
+        super(new HashMap<String, QueryInfo<OCommandSQL>>());
     }
 
     /**
-     * Create an SQL synchronous query returning an ODocument containing the query result.
+     * Create an SQL command to execute the command query.
      *
      * @param queryString the query expression, including tokens to replace
      * @return the prepared query object
-     * */
-    protected OSQLSynchQuery<ODocument> createQueryObject(String queryString) {
-        return new OSQLSynchQuery<ODocument>(queryString);
+     */
+    protected OCommandSQL createQueryObject(String queryString) {
+        return new OCommandSQL(queryString);
     }
 
     /**
-     * Execute a query, either a pre-configured query by using the query ID, or a query expression passed as 
+     * Execute a command, either a pre-configured command by using the command ID, or a command expression passed as
      * part of the params.
-     * 
+     *
      * The keys for the input parameters as well as the return map entries are in QueryConstants.
-     * 
+     *
      * @param type the relative/local resource name, which needs to be converted to match the OrientDB document class name
-     * @param request the query request, including parameters which include the query id, or the query expression, as well as the 
+     * @param request the query request, including parameters which include the query id, or the query expression, as well as the
      *        token key/value pairs to replace in the query
      * @param database a handle to a database connection instance for exclusive use by the query method whilst it is executing.
      * @return The query result, which includes meta-data about the query, and the result set itself.
-     * @throws BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
+     * @throws org.forgerock.json.resource.BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
      */
-    public List<ODocument> query(final String type, QueryRequest request, final ODatabaseDocumentTx database)
+    public Integer query(final String type, final ActionRequest request, final ODatabaseDocumentTx database)
             throws BadRequestException {
 
         final Map<String, String> params = new HashMap<String, String>(request.getAdditionalParameters());
         params.put(QueryConstants.RESOURCE_NAME, OrientDBRepoService.typeToOrientClassName(type));
-        params.putAll(getPagingParameters(request));
 
-        if (request.getQueryId() == null && request.getQueryExpression() == null) {
-            throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
-                    + " to identify/define a query must be passed in the parameters. " + params);
+        if (params.get(COMMAND_ID) == null && params.get(COMMAND_EXPRESSION) == null) {
+            throw new BadRequestException("Either " + COMMAND_ID + " or " + COMMAND_EXPRESSION
+                    + " to identify/define a command must be passed in the parameters. " + params);
         }
 
-        final QueryInfo<OSQLSynchQuery<ODocument>> queryInfo;
+        final QueryInfo<OCommandSQL> queryInfo;
         try {
-            queryInfo = findQueryInfo(type, request.getQueryId(), request.getQueryExpression());
+            queryInfo = findQueryInfo(type, params.get(COMMAND_ID), params.get(COMMAND_EXPRESSION));
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("The passed identifier " + request.getQueryId()
-                    + " does not match any configured queries on the OrientDB repository service.");
+            throw new BadRequestException("The passed command identifier " + params.get(COMMAND_ID)
+                    + " does not match any configured commands on the OrientDB repository service.");
         }
 
-        List<ODocument> result = null;
+        Integer result = null;
 
-        logger.debug("Evaluate query {}", queryInfo.getQueryString());
-        Name eventName = getEventName(request.getQueryId(), request.getQueryExpression());
+        logger.debug("Evaluate command {}", queryInfo.getQueryString());
+        Name eventName = getEventName(params.get(COMMAND_ID), params.get(COMMAND_EXPRESSION));
         EventEntry measure = Publisher.start(eventName, queryInfo, null);
 
         // Disabled prepared statements until pooled usage is clarified
@@ -138,6 +118,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                 result = doTokenSubsitutionQuery(queryInfo, params, database);
             }
             measure.setResult(result);
+            return result;
         } catch (OQueryParsingException firstTryEx) {
             if (tryPrepared /* queryInfo.isUsePrepared() */ ) {
                 // Prepared query is invalid, fall back onto add-hoc resolved query
@@ -150,56 +131,26 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                     queryInfo.setUsePrepared(false);
                 } catch (OQueryParsingException secondTryEx) {
                     // TODO: consider differentiating between bad configuration and bad request
-                    throw new BadRequestException("Failed to resolve and parse the query "
+                    throw new BadRequestException("Failed to resolve and parse the command "
                             + queryInfo.getQueryString() + " with params: " + params, secondTryEx);
                 }
             } else {
                 // TODO: consider differentiating between bad configuration and bad request
-                throw new BadRequestException("Failed to resolve and parse the query "
+                throw new BadRequestException("Failed to resolve and parse the command "
                         + queryInfo.getQueryString() + " with params: " + params, firstTryEx);
             }
         } catch (IllegalArgumentException ex) {
             // TODO: consider differentiating between bad configuration and bad request
-            throw new BadRequestException("Query is invalid: "
+            throw new BadRequestException("Command is invalid: "
                     + queryInfo.getQueryString() + " " + ex.getMessage(), ex);
         } catch (RuntimeException ex) {
-            logger.warn("Unexpected failure during DB query: {}", ex.getMessage());
+            logger.warn("Unexpected failure during DB command: {}", ex.getMessage());
             throw ex;
         } finally {
             measure.end();
         }
 
         return result;
-    }
-
-    /**
-     * Return the page size and offset parameters as requested.
-     *
-     * @param request the QueryRequest
-     * @return the Map of page size and results offset
-     */
-    private Map<String, String> getPagingParameters(QueryRequest request) {
-        final Map<String, String> params = new HashMap<String, String>(2);
-
-        // If paged results are requested then decode the cookie in order to determine
-        // the index of the first result to be returned.
-        final int requestPageSize = request.getPageSize();
-
-        final String offsetParam;
-        final String pageSizeParam;
-
-        if (requestPageSize > 0) {
-            offsetParam = String.valueOf(request.getPagedResultsOffset());
-            pageSizeParam = String.valueOf(requestPageSize);
-        } else {
-            offsetParam = "0";
-            pageSizeParam = "-1"; // unlimited in Orient
-        }
-
-        params.put(QueryConstants.PAGED_RESULTS_OFFSET, offsetParam);
-        params.put(QueryConstants.PAGE_SIZE, pageSizeParam);
-
-        return params;
     }
 
 }

@@ -73,9 +73,9 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.repo.orientdb.impl.query.Commands;
 import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
 import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
-import org.forgerock.openidm.router.RouteService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +105,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     
     // Keys in the JSON configuration
     public static final String CONFIG_QUERIES = "queries";
+    public static final String CONFIG_COMMANDS = "commands";
     public static final String CONFIG_DB_URL = "dbUrl";
     public static final String CONFIG_USER = "user";
     public static final String CONFIG_PASSWORD = "password";
@@ -117,8 +118,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public static final String CONFIG_PROPERTY_NAMES = "propertyNames";
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
-    
-    public static final String ACTION_UPDATE_CREDENTIALS = "updateDbCredentials";
+
+    private enum Action {
+        updateDbCredentials,
+        command
+    }
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
@@ -146,6 +150,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     // TODO: evaluate use of Guice instead
     PredefinedQueries predefinedQueries = new PredefinedQueries();
     Queries queries = new Queries();
+    Commands commands = new Commands();
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     EmbeddedOServerService embeddedServer;
@@ -486,29 +491,54 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        String action = request.getAction();
-        Map<String, String> params = request.getAdditionalParameters();
         try {
-            if (ACTION_UPDATE_CREDENTIALS.equals(action)) {
-                String newUser = params.get("user");
-                String newPassword = params.get("password");
-                if (newUser == null || newPassword == null) {
-                    throw new BadRequestException("Expecting 'user' and 'password' parameters");
-                }
-                synchronized (dbLock) {
-                    DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
-                    JsonValue config = connectionFactory.getConnection().read(context, Requests.newReadRequest("config", PID)).getContent();
-                    config.put("user", newUser);
-                    config.put("password", newPassword);
-                    UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
-                    connectionFactory.getConnection().update(context, updateRequest);
-                    handler.handleResult(new JsonValue(params));
-                }
-            } else {
-                handler.handleError(new BadRequestException("Unknown action: " + action));
+            Map<String, String> params = request.getAdditionalParameters();
+            switch (request.getActionAsEnum(Action.class)) {
+                case updateDbCredentials:
+                    String newUser = params.get("user");
+                    String newPassword = params.get("password");
+                    if (newUser == null || newPassword == null) {
+                        throw new BadRequestException("Expecting 'user' and 'password' parameters");
+                    }
+                    synchronized (dbLock) {
+                        DBHelper.updateDbCredentials(dbURL, user, password, newUser, newPassword);
+                        JsonValue config = connectionFactory.getConnection().read(context, Requests.newReadRequest("config", PID)).getContent();
+                        config.put("user", newUser);
+                        config.put("password", newPassword);
+                        UpdateRequest updateRequest = Requests.newUpdateRequest("config/" + PID, config);
+                        connectionFactory.getConnection().update(context, updateRequest);
+                        handler.handleResult(new JsonValue(params));
+                    }
+                    break;
+                case command:
+                    handler.handleResult(new JsonValue(command(request)));
+                    break;
+                default:
+                    handler.handleError(new BadRequestException("Unknown action: " + request.getAction()));
             }
+        } catch (IllegalArgumentException e) {
+            handler.handleError(new BadRequestException("Unknown action: " + request.getAction()));
         } catch (ResourceException e) {
             handler.handleError(new BadRequestException("Error updating DB credentials: " + e.getMessage(), e));
+        }
+    }
+
+    /**
+     * Execute a database command according to the details in the action request.
+     *
+     * @param request the ActionRequest
+     * @return the number of affected rows/records.
+     * @throws ResourceException on failure to resolvd query
+     */
+    public Object command(ActionRequest request) throws ResourceException {
+
+        ODatabaseDocumentTx db = getConnection();
+        try {
+            return commands.query(request.getResourceName(), request, db);
+        } finally {
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
@@ -831,9 +861,14 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             poolMinSize = config.get(CONFIG_POOL_MIN_SIZE).defaultTo(DEFAULT_POOL_MIN_SIZE).asInteger();
             poolMaxSize = config.get(CONFIG_POOL_MAX_SIZE).defaultTo(DEFAULT_POOL_MAX_SIZE).asInteger();
 
-            Map map = config.get(CONFIG_QUERIES).asMap();
-            Map<String, String> queryMap = (Map<String, String>) map;
+            Map<String, String> queryMap = config.get(CONFIG_QUERIES)
+                    .defaultTo(new HashMap<String, String>())
+                    .asMap(String.class);
             queries.setConfiguredQueries(queryMap);
+            Map<String, String> commandMap = config.get(CONFIG_COMMANDS)
+                    .defaultTo(new HashMap<String, String>())
+                    .asMap(String.class);
+            commands.setConfiguredQueries(commandMap);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start OrientDB repository", ex);
             throw ex;

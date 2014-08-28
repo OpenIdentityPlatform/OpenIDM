@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2013 ForgeRock AS. All rights reserved.
+ * Copyright © 2013-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,8 +34,9 @@ import java.util.Map;
  */
 public class H2TableHandler extends GenericTableHandler {
 
-    public H2TableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize, sqlExceptionHandler);
+    public H2TableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
+            int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {

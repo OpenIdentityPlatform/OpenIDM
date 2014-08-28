@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,18 +23,13 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
+import java.util.List;
+
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.forgerock.json.resource.BadRequestException;
-
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,13 +34,12 @@ import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-import static org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.logger;
 
 public class MSSQLTableHandler extends GenericTableHandler {
 
-    public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig,
+    public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {

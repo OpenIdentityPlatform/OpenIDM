@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -152,9 +152,28 @@ public interface TableHandler {
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      * @throws java.sql.SQLException
      */
-    
-    public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
+    public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection)
                 throws SQLException, ResourceException;
+
+    /**
+     * Performs the command on the specified target and returns the number of affected objects
+     * <p>
+     * Commands are parametric; a set of named parameters is provided as the query criteria.
+     * The command returns the number of records altered/updated/deleted.
+     *
+     * @param type identifies the object to query.
+     * @param params the parameters of the query to perform.
+     * @param connection
+     * @return the number of records affected.
+     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
+     * configured, a query expression that is invalid, or missing query substitution tokens.
+     * @throws ForbiddenException if access to the object or specified query is forbidden.
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
+     * @throws java.sql.SQLException
+     */
+
+    public Integer command(String type, Map<String, Object> params, Connection connection)
+            throws SQLException, ResourceException;
 
     /**
      * Check if a given queryId exists in our set of known queries
