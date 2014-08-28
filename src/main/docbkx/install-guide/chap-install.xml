@@ -57,6 +57,54 @@
    <para>
     The equivalent version of OpenJDK should work for evaluation.
    </para>
+   <para>
+    In addition, on Windows systems, you must set the
+    <literal>JAVA_HOME</literal> environment variable to point to the root of a
+    valid Java installation. The following steps indicate how to set the
+    <literal>JAVA_HOME</literal> environment variable on Windows Server 2008 R2.
+    Adjust the steps for your specific environment.
+   </para>
+   <itemizedlist>
+    <listitem>
+     <para>
+      Locate your JRE Installation Directory. If you have not changed the
+      installation path for the Java Runtime Environment during installation, it
+      will be in a directory under <literal>C:\Program Files\Java\</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Select Start > Control Panel > System and Security > System.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Click Advanced System Settings.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Click Environment Variables.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Under System Variables, click New.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Enter the Variable name (<literal>JAVA_HOME</literal>) and set the
+      Variable value to the JRE installation directory, for example
+      <literal>C:\Program Files\Java\jre7</literal>.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      Click OK.
+     </para>
+    </listitem>
+   </itemizedlist>
   </section>
   
   <section xml:id="application-container-prerequisites">
