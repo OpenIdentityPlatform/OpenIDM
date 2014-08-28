@@ -3377,9 +3377,8 @@ Properties:
    To list the external systems that are connected to an OpenIDM instance, use
    the <literal>test</literal> action on the URL
    <literal>https://localhost:8443/openidm/system/</literal>. The following
-   example shows two external LDAP servers connected to OpenIDM:
+   example shows the connector configurations for two LDAP systems.
   </para>
-
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -3387,15 +3386,26 @@ Properties:
  --header "Content-Type: application/json" \
  --request POST \
  "https://localhost:8443/openidm/system?_action=test"</userinput>
-   <computeroutput>
-[
+<computeroutput>[
   {
+    "config": "config/provisioner.openicf/ldap",
+    "connectorRef": {
+      "bundleVersion": "[1.1.0.1,1.1.2.0)",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
     "ok": true,
-    "name": "ldap1"
+    "name": "ldap"
   },
   {
+    "config": "config/provisioner.openicf/ad",
+    "connectorRef": {
+      "bundleVersion": "[1.1.0.1,1.1.2.0)",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
     "ok": true,
-    "name": "ldap2"
+    "name": "ad"
   }
 ]</computeroutput></screen>
   <para>
@@ -3413,16 +3423,21 @@ Properties:
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/system/ldap1?_action=test"</userinput>
-   <computeroutput>
-{
+ "https://localhost:8443/openidm/system/ldap?_action=test"</userinput>
+<computeroutput>{
+  "config": "config/provisioner.openicf/ldap",
+  "connectorRef": {
+    "bundleVersion": "[1.1.0.1,1.1.2.0)",
+    "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+    "connectorName": "org.identityconnectors.ldap.LdapConnector"
+  },
   "ok": true,
-  "name": "ldap1"
+  "name": "ldap"
 }</computeroutput></screen>
   <para>
    If there is a problem with the connection, the request returns an error
    message. In the following example, the LDAP server named
-   <literal>ldap1</literal> is down.
+   <literal>ldap</literal> is down.
   </para>
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -3430,10 +3445,10 @@ Properties:
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/system/ldap1?_action=test"</userinput>
-   <computeroutput>{
-  "error": "javax.naming.CommunicationException: localhost:1389
-            [Root exception is java.net.ConnectException: Connection refused]",
+ "https://localhost:8443/openidm/system/ldap?_action=test"</userinput>
+<computeroutput>{
+  "error": "javax.naming.CommunicationException: localhost:1389 [Root exception
+    is java.net.ConnectException: Connection refused]",
   "name": "ldap"
 }</computeroutput></screen>
   <para>
