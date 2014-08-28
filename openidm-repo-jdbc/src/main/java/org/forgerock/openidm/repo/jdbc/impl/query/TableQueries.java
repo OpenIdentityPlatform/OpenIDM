@@ -295,7 +295,7 @@ public class TableQueries {
                 foundQuery = queries.getQuery(con, queryId, type, params);
             } else {
                 throw new BadRequestException("The passed query identifier " + queryId
-                        + " does not match any configured configured on the OrientDB repository service.");
+                        + " does not match any configured queries on the JDBC repository service.");
             }
         } catch (SQLException ex) {
             throw new InternalServerErrorException("DB reported failure preparing query: "
@@ -348,7 +348,7 @@ public class TableQueries {
                 foundQuery = commands.getQuery(con, queryId, type, params);
             } else {
                 throw new BadRequestException("The passed command identifier " + queryId
-                        + " does not match any configured commands on the OrientDB repository service.");
+                        + " does not match any configured commands on the JDBC repository service.");
             }
         } catch (SQLException ex) {
             throw new InternalServerErrorException("DB reported failure preparing command: "
