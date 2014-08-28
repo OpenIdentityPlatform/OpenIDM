@@ -52,6 +52,7 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -177,6 +178,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConnectorConfigurationHelper connectorConfigurationHelper;
 
+    /**
+     * Cryptographic service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private CryptoService cryptoService;
+
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
@@ -189,7 +196,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             }
             switch (action) {
             case createConfiguration:
-                handler.handleResult(connectorConfigurationHelper.configure(content));
+                handler.handleResult(connectorConfigurationHelper.configure(cryptoService.decryptIfNecessary(content)));
                 break;
             case testConfig:
                 JsonValue config = content;
@@ -231,10 +238,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 handler.handleResult(connectorConfigurationHelper.getAvailableConnectors());
                 break;
             case createCoreConfig:
-                handler.handleResult(connectorConfigurationHelper.generateConnectorCoreConfig(content));
+                handler.handleResult(connectorConfigurationHelper.generateConnectorCoreConfig(
+                        cryptoService.decryptIfNecessary(content)));
                 break;
             case createFullConfig:
-                handler.handleResult(connectorConfigurationHelper.generateConnectorFullConfig(content));
+                handler.handleResult(connectorConfigurationHelper.generateConnectorFullConfig(
+                        cryptoService.decryptIfNecessary(content)));
                 break;
             default:
                 handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
