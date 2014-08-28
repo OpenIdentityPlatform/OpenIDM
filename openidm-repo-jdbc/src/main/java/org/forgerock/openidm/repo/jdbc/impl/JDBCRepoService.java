@@ -93,6 +93,9 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
@@ -117,6 +120,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
+    private static final String ACTION_COMMAND = "command";
 
     private static ServiceRegistration sharedDataSource = null;
 
@@ -635,9 +639,79 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Override
     public void handleAction(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
-        final ResourceException e =
-                new NotSupportedException("Action operations are not supported");
-        handler.handleError(e);
+        try {
+            if (ACTION_COMMAND.equalsIgnoreCase(request.getAction())) {
+                handler.handleResult(command(request));
+            } else {
+                throw new NotSupportedException("Action operations are not supported");
+            }
+        } catch (final ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
+        }
+    }
+
+    /**
+     * Performs the repo command defined by the {@code request).
+     *
+     * @param request the request specifying the commandId or commandExpression and command parameters
+     * @return the number of records affected
+     * @throws ResourceException on failure to execute the command query
+     */
+    private JsonValue command(ActionRequest request) throws ResourceException {
+        final String type = request.getResourceName();
+
+        JsonValue result = null;
+        Connection connection = null;
+        boolean retry;
+        int tryCount = 0;
+        do {
+            TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                        "No handler configured for resource type " + type);
+            }
+
+            retry = false;
+            ++tryCount;
+            try {
+                connection = getConnection();
+                connection.setAutoCommit(false);
+
+                result = new JsonValue(handler.command(type, new HashMap<String, Object>(request.getAdditionalParameters()), connection));
+
+                connection.commit();
+            } catch (SQLException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SQL Exception in command on {} with error code {}, sql state {}",
+                            new Object[] { request.getResourceName(), ex.getErrorCode(), ex.getSQLState(), ex });
+                }
+                rollback(connection);
+                if (handler.isRetryable(ex, connection)) {
+                    if (tryCount <= maxTxRetry) {
+                        retry = true;
+                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                    }
+                }
+                if (!retry) {
+                    throw new InternalServerErrorException("Command failed " + ex.getMessage(), ex);
+                }
+            } catch (ResourceException ex) {
+                logger.debug("ResourceException in command on {}", request.getResourceName(), ex);
+                rollback(connection);
+                throw ex;
+            } catch (RuntimeException ex) {
+                logger.debug("Runtime Exception in command on {}", request.getResourceName(), ex);
+                rollback(connection);
+                throw new InternalServerErrorException(
+                        "Command query failed with unexpected failure: " + ex.getMessage(), ex);
+            } finally {
+                CleanupHelper.loggedClose(connection);
+            }
+        } while (retry);
+
+        return result;
     }
 
     // Utility method to cleanly roll back including logging
@@ -795,6 +869,114 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
             maxTxRetry = connectionConfig.get("maxTxRetry").defaultTo(5).asInteger().intValue();
 
+            ds = getDataSource(connectionConfig, bundleContext);
+
+            // Table handling configuration
+            String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
+            JsonValue genericQueries = config.get("queries").get("genericTables");
+            JsonValue genericCommands = config.get("commands").get("genericTables");
+            int maxBatchSize =
+                    connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
+
+            tableHandlers = new HashMap<String, TableHandler>();
+            // TODO Make safe the database type detection
+            DatabaseType databaseType =
+                    DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(
+                            DatabaseType.ANSI_SQL99.name()).asString());
+
+            JsonValue defaultMapping = config.get("resourceMapping").get("default");
+            if (!defaultMapping.isNull()) {
+                defaultTableHandler =
+                        getGenericTableHandler(databaseType, defaultMapping, dbSchemaName,
+                                genericQueries, genericCommands, maxBatchSize);
+                logger.debug("Using default table handler: {}", defaultTableHandler);
+            } else {
+                logger.warn("No default table handler configured");
+            }
+
+            // Default the configuration table for bootstrap
+            JsonValue defaultTableProps = json(object(
+                    field("mainTable", "configobjects"),
+                    field("propertiesTable", "configobjectproperties"),
+                    field("searchableDefault", Boolean.FALSE)));
+
+            GenericTableHandler defaultConfigHandler =
+                    getGenericTableHandler(databaseType, defaultTableProps, dbSchemaName,
+                            genericQueries, genericCommands, 1);
+            tableHandlers.put("config", defaultConfigHandler);
+
+            JsonValue genericMapping = config.get("resourceMapping").get("genericMapping");
+            if (!genericMapping.isNull()) {
+                for (String key : genericMapping.keys()) {
+                    JsonValue value = genericMapping.get(key);
+                    if (key.endsWith("/*")) {
+                        // For matching purposes strip the wildcard at the end
+                        key = key.substring(0, key.length() - 1);
+                    }
+                    TableHandler handler =
+                            getGenericTableHandler(databaseType, value, dbSchemaName,
+                                    genericQueries, genericCommands, maxBatchSize);
+
+                    tableHandlers.put(key, handler);
+                    logger.debug("For pattern {} added handler: {}", key, handler);
+                }
+            }
+
+            JsonValue explicitQueries = config.get("queries").get("explicitTables");
+            JsonValue explicitCommands = config.get("commands").get("explicitTables");
+            JsonValue explicitMapping = config.get("resourceMapping").get("explicitMapping");
+            if (!explicitMapping.isNull()) {
+                for (Object keyObj : explicitMapping.keys()) {
+                    JsonValue value = explicitMapping.get((String) keyObj);
+                    String key = (String) keyObj;
+                    if (key.endsWith("/*")) {
+                        // For matching purposes strip the wildcard at the end
+                        key = key.substring(0, key.length() - 1);
+                    }
+                    TableHandler handler =
+                            getMappedTableHandler(databaseType, value,
+                                    value.get("table").required().asString(),
+                                    value.get("objectToColumn").required().asMap(),
+                                    dbSchemaName, explicitQueries, explicitCommands, maxBatchSize);
+
+                    tableHandlers.put(key, handler);
+                    logger.debug("For pattern {} added handler: {}", key, handler);
+                }
+            }
+
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid, can not start JDBC repository.", ex);
+            throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
+        } catch (InternalServerErrorException ex) {
+            throw new InvalidException(
+                    "Could not initialize mapped table handler, can not start JDBC repository.", ex);
+        }
+
+        Connection testConn = null;
+        try {
+            // Check if we can get a connection
+            testConn = getConnection();
+            testConn.setAutoCommit(true); // Ensure we do not implicitly start
+                                          // transaction isolation
+        } catch (Exception ex) {
+            logger.warn(
+                    "JDBC Repository start-up experienced a failure getting a DB connection: "
+                            + ex.getMessage()
+                            + ". If this is not temporary or resolved, Repository operation will be affected.",
+                    ex);
+        } finally {
+            if (testConn != null) {
+                try {
+                    testConn.close();
+                } catch (SQLException ex) {
+                    logger.warn("Failure during test connection close ", ex);
+                }
+            }
+        }
+    }
+
+    private DataSource getDataSource(JsonValue connectionConfig, BundleContext bundleContext) {
+        try {
             // Data Source configuration
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             String jtaName = connectionConfig.get(CONFIG_JTA_NAME).asString();
@@ -815,8 +997,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 }
 
                 useDataSource = true;
-                ds = (DataSource) ctx.lookup(jndiName); // e.g.
-                                                        // "java:comp/env/jdbc/MySQLDB"
+                return (DataSource) ctx.lookup(jndiName); // e.g.
+                // "java:comp/env/jdbc/MySQLDB"
             } else if (!StringUtils.isBlank(jtaName)) {
                 // e.g.
                 // osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)
@@ -824,7 +1006,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 Object service = ServiceUtil.getService(bundleContext, lookupName, null, true);
                 if (service instanceof DataSource) {
                     useDataSource = true;
-                    ds = (DataSource) service;
+                    return (DataSource) service;
                 } else {
                     throw new RuntimeException("DataSource can not be retrieved for: " + jtaName);
                 }
@@ -861,166 +1043,60 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                                     DataSourceFactory.newInstance(connectionConfig), serviceParams);
                 }
                 if (enableConnectionPool) {
-                    ds = DataSourceFactory.newInstance(connectionConfig);
-                    useDataSource = true;
                     logger.info("DataSource connection pool enabled.");
+                    useDataSource = true;
+                    return DataSourceFactory.newInstance(connectionConfig);
                 } else {
                     logger.info("No DataSource connection pool enabled.");
+                    return null;
                 }
             }
-
-            // Table handling configuration
-            String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
-            JsonValue genericQueries = config.get("queries").get("genericTables");
-            int maxBatchSize =
-                    connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
-
-            tableHandlers = new HashMap<String, TableHandler>();
-            // TODO Make safe the database type detection
-            DatabaseType databaseType =
-                    DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(
-                            DatabaseType.ANSI_SQL99.name()).asString());
-
-            JsonValue defaultMapping = config.get("resourceMapping").get("default");
-            if (!defaultMapping.isNull()) {
-                defaultTableHandler =
-                        getGenericTableHandler(databaseType, defaultMapping, dbSchemaName,
-                                genericQueries, maxBatchSize);
-                logger.debug("Using default table handler: {}", defaultTableHandler);
-            } else {
-                logger.warn("No default table handler configured");
-            }
-
-            // Default the configuration table for bootstrap
-            JsonValue defaultTableProps = new JsonValue(new HashMap());
-            defaultTableProps.put("mainTable", "configobjects");
-            defaultTableProps.put("propertiesTable", "configobjectproperties");
-            defaultTableProps.put("searchableDefault", Boolean.FALSE);
-            GenericTableHandler defaultConfigHandler =
-                    getGenericTableHandler(databaseType, defaultTableProps, dbSchemaName,
-                            genericQueries, 1);
-            tableHandlers.put("config", defaultConfigHandler);
-
-            JsonValue genericMapping = config.get("resourceMapping").get("genericMapping");
-            if (!genericMapping.isNull()) {
-                for (String key : genericMapping.keys()) {
-                    JsonValue value = genericMapping.get(key);
-                    if (key.endsWith("/*")) {
-                        // For matching purposes strip the wildcard at the end
-                        key = key.substring(0, key.length() - 1);
-                    }
-                    TableHandler handler =
-                            getGenericTableHandler(databaseType, value, dbSchemaName,
-                                    genericQueries, maxBatchSize);
-
-                    tableHandlers.put(key, handler);
-                    logger.debug("For pattern {} added handler: {}", key, handler);
-                }
-            }
-
-            JsonValue explicitQueries = config.get("queries").get("explicitTables");
-            JsonValue explicitMapping = config.get("resourceMapping").get("explicitMapping");
-            if (!explicitMapping.isNull()) {
-                for (Object keyObj : explicitMapping.keys()) {
-                    JsonValue value = explicitMapping.get((String) keyObj);
-                    String key = (String) keyObj;
-                    if (key.endsWith("/*")) {
-                        // For matching purposes strip the wildcard at the end
-                        key = key.substring(0, key.length() - 1);
-                    }
-                    TableHandler handler =
-                            getMappedTableHandler(databaseType, value, value.get("table")
-                                    .required().asString(), value.get("objectToColumn").required()
-                                    .asMap(), dbSchemaName, explicitQueries, maxBatchSize);
-
-                    tableHandlers.put(key, handler);
-                    logger.debug("For pattern {} added handler: {}", key, handler);
-                }
-            }
-
-        } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid, can not start JDBC repository.", ex);
-            throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
         } catch (NamingException ex) {
             throw new InvalidException("Could not find configured jndiName " + jndiName
                     + " to start repository ", ex);
-        } catch (InternalServerErrorException ex) {
-            throw new InvalidException(
-                    "Could not initialize mapped table handler, can not start JDBC repository.", ex);
-        }
-
-        Connection testConn = null;
-        try {
-            // Check if we can get a connection
-            testConn = getConnection();
-            testConn.setAutoCommit(true); // Ensure we do not implicitly start
-                                          // transaction isolation
-        } catch (Exception ex) {
-            logger.warn(
-                    "JDBC Repository start-up experienced a failure getting a DB connection: "
-                            + ex.getMessage()
-                            + ". If this is not temporary or resolved, Repository operation will be affected.",
-                    ex);
-        } finally {
-            if (testConn != null) {
-                try {
-                    testConn.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during test connection close ", ex);
-                }
-            }
         }
     }
 
     GenericTableHandler getGenericTableHandler(DatabaseType databaseType, JsonValue tableConfig,
-            String dbSchemaName, JsonValue queries, int maxBatchSize) {
-
-        GenericTableHandler handler = null;
+            String dbSchemaName, JsonValue queries, JsonValue commands, int maxBatchSize) {
 
         // TODO: make pluggable
         switch (databaseType) {
         case DB2:
-            handler =
-                    new DB2TableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new DB2TableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DB2SQLExceptionHandler());
-            break;
         case ORACLE:
-            handler =
-                    new OracleTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new OracleTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DefaultSQLExceptionHandler());
-            break;
         case POSTGRESQL:
-            handler =
-                    new PostgreSQLTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new PostgreSQLTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DefaultSQLExceptionHandler());
-            break;
         case MYSQL:
-            handler =
-                    new GenericTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new GenericTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new MySQLExceptionHandler());
-            break;
         case SQLSERVER:
-            handler =
-                    new MSSQLTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new MSSQLTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DefaultSQLExceptionHandler());
-            break;
         case H2:
-            handler =
-                    new H2TableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new H2TableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DefaultSQLExceptionHandler());
-            break;
-
         default:
-            handler =
-                    new GenericTableHandler(tableConfig, dbSchemaName, queries, maxBatchSize,
+            return
+                    new GenericTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new DefaultSQLExceptionHandler());
         }
-        return handler;
     }
 
     MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig,
-            String table, Map objectToColumn, String dbSchemaName, JsonValue explicitQueries,
-            int maxBatchSize) throws InternalServerErrorException {
+            String table, Map<String, Object> objectToColumn, String dbSchemaName,
+            JsonValue explicitQueries, JsonValue explicitCommands, int maxBatchSize)
+            throws InternalServerErrorException {
 
         final Accessor<CryptoService> cryptoServiceAccessor = new Accessor<CryptoService>() {
             public CryptoService access() {
@@ -1028,41 +1104,33 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             }
         };
 
-        MappedTableHandler handler = null;
-
         // TODO: make pluggable
         switch (databaseType) {
         case DB2:
-            handler =
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+            return
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DB2SQLExceptionHandler(), cryptoServiceAccessor);
-            break;
         case ORACLE:
-            handler =
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+            return
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
-            break;
         case POSTGRESQL:
-            handler =
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+            return
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
-            break;
         case MYSQL:
-            handler =
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+            return
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new MySQLExceptionHandler(), cryptoServiceAccessor);
-            break;
         case SQLSERVER:
-            handler =
+            return
                     new MSSQLMappedTableHandler(table, objectToColumn, dbSchemaName,
-                            explicitQueries, new DefaultSQLExceptionHandler(),
+                            explicitQueries, explicitCommands, new DefaultSQLExceptionHandler(),
                             cryptoServiceAccessor);
-            break;
         default:
-            handler =
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries,
+            return
+                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DefaultSQLExceptionHandler(), cryptoServiceAccessor);
         }
-        return handler;
     }
 }

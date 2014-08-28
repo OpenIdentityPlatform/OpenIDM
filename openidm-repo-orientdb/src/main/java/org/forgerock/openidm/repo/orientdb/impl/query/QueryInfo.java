@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,17 +23,14 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
-import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
-
 /**
  * Information about a query, and state of the query
  * 
  * @author aegloff
  */
-final class QueryInfo {
+final class QueryInfo<Q> {
     private boolean usePrepared;
-    private OSQLSynchQuery<ODocument> preparedQuery;
+    private Q preparedQuery;
     private String queryString;
 
     /**
@@ -43,7 +40,7 @@ final class QueryInfo {
      * @param preparedQuery an optional prepared query representation
      * @param queryString the query in string form with optional OpenIDM tokens
      */
-    public QueryInfo(boolean usePrepared, OSQLSynchQuery<ODocument> preparedQuery, String queryString) {
+    public QueryInfo(boolean usePrepared, Q preparedQuery, String queryString) {
         this.usePrepared = usePrepared;
         this.preparedQuery = preparedQuery;
         this.queryString = queryString;
@@ -55,6 +52,7 @@ final class QueryInfo {
     public boolean isUsePrepared() {
         return usePrepared;
     }
+
     /**
      * @param prep whether queries should attempt to use the prepared query representation.
      */
@@ -65,7 +63,7 @@ final class QueryInfo {
     /**
      * @return an optional prepared query representation
      */
-    public OSQLSynchQuery<ODocument> getPreparedQuery() {
+    public Q getPreparedQuery() {
         return preparedQuery;
     }
     

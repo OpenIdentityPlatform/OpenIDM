@@ -52,7 +52,7 @@ public class QueryInfoTest {
         boolean usePrepared = true;
         String queryString = "select * from managed/user";
         OSQLSynchQuery preparedQuery = new OSQLSynchQuery(queryString);
-        QueryInfo queryInfo = new QueryInfo(usePrepared, preparedQuery, queryString);
+        QueryInfo<OSQLSynchQuery> queryInfo = new QueryInfo<OSQLSynchQuery>(usePrepared, preparedQuery, queryString);
         assertTrue(queryInfo.isUsePrepared());
         assertEquals(queryInfo.getPreparedQuery(), preparedQuery);
         assertEquals(queryInfo.getQueryString(), queryString);
@@ -63,7 +63,7 @@ public class QueryInfoTest {
         boolean usePrepared = false;
         String queryString = "select ${_fields} from managed/user";
         OSQLSynchQuery preparedQuery = null;
-        QueryInfo queryInfo = new QueryInfo(usePrepared, preparedQuery, queryString);
+        QueryInfo<OSQLSynchQuery> queryInfo = new QueryInfo<OSQLSynchQuery>(usePrepared, preparedQuery, queryString);
         assertFalse(queryInfo.isUsePrepared());
         assertEquals(queryInfo.getPreparedQuery(), preparedQuery);
         assertEquals(queryInfo.getQueryString(), queryString);

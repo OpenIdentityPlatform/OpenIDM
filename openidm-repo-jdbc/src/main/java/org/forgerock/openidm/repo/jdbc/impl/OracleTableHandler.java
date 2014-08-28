@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -44,8 +44,9 @@ import org.slf4j.LoggerFactory;
 public class OracleTableHandler extends GenericTableHandler {
     final static Logger logger = LoggerFactory.getLogger(OracleTableHandler.class);
 
-    public OracleTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize, sqlExceptionHandler);
+    public OracleTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
+            int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
     @Override

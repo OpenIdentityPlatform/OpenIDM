@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -71,7 +71,7 @@ public class MappedTableHandler implements TableHandler {
     final String tableName;
     String dbSchemaName;
 
-    final LinkedHashMap<String, String> rawMappingConfig;
+    final LinkedHashMap<String, Object> rawMappingConfig;
     Mapping explicitMapping;
 
     // The json pointer (used as names) of the properties to replace the ?
@@ -88,20 +88,18 @@ public class MappedTableHandler implements TableHandler {
     String updateQueryStr;
     String deleteQueryStr;
 
-    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName,
-            JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler,
+    public MappedTableHandler(String tableName, Map<String, Object> mapping, String dbSchemaName,
+            JsonValue queriesConfig, JsonValue commandsConfig, SQLExceptionHandler sqlExceptionHandler,
             Accessor<CryptoService> cryptoServiceAccessor) throws InternalServerErrorException {
 
-        // TODO Replace this with a "guarantee" somewhere when/if the provision
-        // of this
-        // accessor becomes more automatic
+        // TODO Replace this with a "guarantee" somewhere when/if the provision of this accessor becomes more automatic
         if (cryptoServiceAccessor == null)
             throw new InternalServerErrorException("No CryptoServiceAccessor found!");
 
         this.tableName = tableName;
         this.dbSchemaName = dbSchemaName;
         // Maintain a stable ordering
-        this.rawMappingConfig = new LinkedHashMap<String, String>();
+        this.rawMappingConfig = new LinkedHashMap<String, Object>();
         this.rawMappingConfig.putAll(mapping);
 
         explicitMapping =
@@ -115,7 +113,7 @@ public class MappedTableHandler implements TableHandler {
         }
 
         queries = new TableQueries(new ExplicitQueryResultMapper(explicitMapping));
-        queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, null);
+        queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
 
@@ -468,6 +466,11 @@ public class MappedTableHandler implements TableHandler {
     }
 
     @Override
+    public Integer command(String type, Map<String, Object> params, Connection connection) throws SQLException, ResourceException {
+        return queries.command(type, params, connection);
+    }
+
+    @Override
     public boolean queryIdExists(String queryId) {
         return queries.queryIdExists(queryId);
     }
@@ -510,7 +513,7 @@ class ExplicitQueryResultMapper implements QueryResultMapper {
             InternalServerErrorException {
 
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        Set names = Mapping.getColumnNames(rs);
+        Set<String> names = Mapping.getColumnNames(rs);
         while (rs.next()) {
             JsonValue obj = explicitMapping.mapToJsonValue(rs, names);
             result.add(obj.asMap());
@@ -528,7 +531,7 @@ class Mapping {
 
     String tableName;
     Accessor<CryptoService> cryptoServiceAccessor;
-    List<ColumnMapping> columnMappings = new ArrayList();
+    List<ColumnMapping> columnMappings = new ArrayList<ColumnMapping>();
     ColumnMapping revMapping; // Quick access to mapping for MVCC revision
     ObjectMapper mapper = new ObjectMapper();
 
@@ -546,7 +549,7 @@ class Mapping {
         }
     }
 
-    public JsonValue mapToJsonValue(ResultSet rs, Set columnNames) throws SQLException,
+    public JsonValue mapToJsonValue(ResultSet rs, Set<String> columnNames) throws SQLException,
     InternalServerErrorException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
 
