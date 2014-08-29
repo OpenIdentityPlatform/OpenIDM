@@ -25,6 +25,7 @@ package org.forgerock.openidm.util;
 
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
@@ -40,7 +41,7 @@ import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
 
 
 /**
- * Utility methods for helping build/manipluate CREST request objects.
+ * Utility methods for helping build/manipulate CREST request objects.
  */
 public class RequestUtil {
 
@@ -72,4 +73,29 @@ public class RequestUtil {
 
         return request;
     }
+
+    /**
+     * @param queryCfg the query configuration
+     * @return true if the query configuration explicitly defines the query to execute, false if not
+     */
+    public static boolean hasQueryId(JsonValue queryCfg) {
+        return queryCfg.isDefined(PARAM_QUERY_ID) || queryCfg.isDefined(FIELD_QUERY_ID);
+    }
+
+    /**
+     * @param queryCfg The query configuration
+     * @return true if the query configuration explicitly defines the query to execute, false if not
+     */
+    public static boolean hasQueryExpression(JsonValue queryCfg) {
+        return queryCfg.isDefined(PARAM_QUERY_EXPRESSION) || queryCfg.isDefined(FIELD_QUERY_EXPRESSION);
+    }
+
+    /**
+     * @param queryCfg The query configuration
+     * @return true if the query configuration explicitly defines the query to execute, false if not
+     */
+    public static boolean hasQueryFilter(JsonValue queryCfg) {
+        return queryCfg.isDefined(PARAM_QUERY_FILTER) || queryCfg.isDefined(FIELD_QUERY_FILTER);
+    }
+
 }
