@@ -25,13 +25,11 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.repo.RepositoryService;
 
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
@@ -45,6 +43,10 @@ import com.orientechnologies.orient.server.config.OServerNetworkProtocolConfigur
 import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
 import com.orientechnologies.orient.server.config.OServerStorageConfiguration;
 import com.orientechnologies.orient.server.config.OServerUserConfiguration;
+import com.orientechnologies.orient.server.network.OServerNetworkListener;
+import com.orientechnologies.orient.server.network.protocol.ONetworkProtocol;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Component for embedded OrientDB server
@@ -77,6 +79,25 @@ public class EmbeddedOServerService {
             throw ex;
         }
     }
+    
+    void modified(JsonValue config) throws Exception {
+        logger.trace("Handle service modified notification");
+        Map<String,Class<? extends ONetworkProtocol>> networkProtocols = orientDBServer.getNetworkProtocols();
+        
+        List<OServerNetworkListener> networkListeners = orientDBServer.getNetworkListeners();
+        for (OServerNetworkListener listener : networkListeners) {
+            listener.shutdown();
+        }
+        networkListeners.clear();
+        
+        List<OServerNetworkListenerConfiguration> listeners = getListeners(config);
+        for (OServerNetworkListenerConfiguration listener : listeners) {
+            networkListeners.add(new OServerNetworkListener(orientDBServer, listener.ipAddress, 
+                    listener.portRange, listener.protocol, networkProtocols.get(listener.protocol),
+                    listener.parameters, listener.commands)
+            );
+        }
+    }
 
     void deactivate() {
         if (orientDBServer != null) {
@@ -84,7 +105,56 @@ public class EmbeddedOServerService {
             logger.debug("Embedded DB server stopped.");
         }
     }
+ 
+    private List<OServerNetworkListenerConfiguration> getListeners(JsonValue config) {
 
+        List<OServerNetworkListenerConfiguration> listeners = new ArrayList<OServerNetworkListenerConfiguration>();
+
+        Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
+        JsonValue binaryConfig = config.get("embeddedServer").get("overrideConfig")
+        		.get("network").get("listeners").get("binary");                
+        OServerNetworkListenerConfiguration serverListener = new OServerNetworkListenerConfiguration();
+        serverListener.ipAddress = binaryConfig.get("ipAddress").defaultTo("0.0.0.0").asString();
+        serverListener.portRange = binaryConfig.get("portRange").defaultTo("2424-2424").asString();
+        if (clustered) {
+            serverListener.protocol = "distributed";
+        } else {
+            serverListener.protocol = "binary";
+        }
+        listeners.add(serverListener);
+
+        Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")
+                .get("enabled").defaultTo(Boolean.FALSE).asBoolean();
+        if (studioUiEnabled) {
+            JsonValue httpConfig = config.get("embeddedServer").get("overrideConfig")
+                            .get("network").get("listeners").get("http");
+            OServerNetworkListenerConfiguration studioListener = new OServerNetworkListenerConfiguration();
+            studioListener.ipAddress = httpConfig.get("ipAddress").defaultTo("127.0.0.1").asString();
+            studioListener.portRange = httpConfig.get("portRange").defaultTo("2480-2480").asString();
+            studioListener.protocol = "http";
+
+            // Access to the studio web app
+            OServerCommandConfiguration command = new OServerCommandConfiguration();
+            command.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
+            command.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
+            command.parameters = new OServerEntryConfiguration[2];
+            command.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");
+            command.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");
+
+            studioListener.commands = new OServerCommandConfiguration[]{
+                command
+            };
+
+            studioListener.parameters = new OServerParameterConfiguration[1];
+            // Connection custom parameters. If not specified the global configuration will be taken
+            studioListener.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
+            listeners.add(studioListener);
+        }
+
+        return listeners;
+    }
+    
+    
     // TODO: make configurable
     protected OServerConfiguration getOrientDBConfig(JsonValue config) {
 
@@ -158,65 +228,7 @@ public class EmbeddedOServerService {
         protocol2.name = "http";
         protocol2.implementation = "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb";
         configuration.network.protocols.add(protocol2);
-//        NOTE: No longer exists as of 1.1.0-SNAPSHOT evidently
-//        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();
-//        protocol3.name = "distributed";
-//        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";
-//        configuration.network.protocols.add(protocol3);
-
-        configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
-        OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
-
-
-        // Explicitly access the restructured config format, intent is to replace with a more general 
-        // default/override mechanism
-        JsonValue binaryConfig = config.get("embeddedServer").get("overrideConfig")
-                .get("network").get("listeners").get("binary");
-
-        listener1.ipAddress = binaryConfig.get("ipAddress").defaultTo("0.0.0.0").asString();
-        listener1.portRange = binaryConfig.get("portRange").defaultTo("2424-2424").asString();
-        if (clustered) {
-            listener1.protocol = "distributed";
-        } else {
-            listener1.protocol = "binary";
-        }
-        configuration.network.listeners.add(listener1);
-        OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
-
-        JsonValue httpConfig = config.get("embeddedServer").get("overrideConfig")
-                .get("network").get("listeners").get("http");
-
-        listener2.ipAddress = httpConfig.get("ipAddress").defaultTo("127.0.0.1").asString();
-        listener2.portRange = httpConfig.get("portRange").defaultTo("2480-2480").asString();
-
-        listener2.protocol = "http";
-
-//        NOTE: no longer used in 1.3
-//        OServerCommandConfiguration command1 = new OServerCommandConfiguration();
-//        command1.pattern = "POST|*.action GET|*.action";
-//        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
-//        command1.parameters = new OServerEntryConfiguration[0];
-
-        // Access to the studio web app
-        OServerCommandConfiguration command2 = new OServerCommandConfiguration();
-        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
-        command2.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
-        command2.parameters = new OServerEntryConfiguration[2];
-        command2.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");
-        command2.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");
-
-        listener2.commands = new OServerCommandConfiguration[]{
-//                command1,
-                command2
-        };
-
-        listener2.parameters = new OServerParameterConfiguration[1];
-        // Connection custom parameters. If not specified the global configuration will be taken
-        listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
-
-        if (studioUiEnabled) {
-            configuration.network.listeners.add(listener2);
-        }
+        configuration.network.listeners = getListeners(config);
 
         OServerStorageConfiguration storage1 = new OServerStorageConfiguration();
         storage1.name = "temp";
@@ -255,8 +267,6 @@ public class EmbeddedOServerService {
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
                 new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio"),
                 new OServerEntryConfiguration("orient.home", dbFolder.getAbsolutePath())
-                //new OServerEntryConfiguration("log.console.level", "info"),
-                //new OServerEntryConfiguration("log.file.level", "fine")
         };
         // OrientDB currently logs a warning if this is not set, 
         // although it should be taking the setting from the config above instead.

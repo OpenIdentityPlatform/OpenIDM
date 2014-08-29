@@ -891,6 +891,22 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
     }
     
+    private String getUser(JsonValue config) {
+        return config.get(CONFIG_USER).defaultTo("admin").asString();
+    }
+    
+    private String getPassword(JsonValue config) {
+        return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
+    }
+    
+    private int getPoolMinSize(JsonValue config) {
+        return config.get(CONFIG_POOL_MIN_SIZE).defaultTo(DEFAULT_POOL_MIN_SIZE).asInteger();
+    }
+    
+    private int getPoolMaxSize(JsonValue config) {
+        return config.get(CONFIG_POOL_MAX_SIZE).defaultTo(DEFAULT_POOL_MAX_SIZE).asInteger();
+    }
+    
     /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
@@ -934,19 +950,28 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository", ex); 
             throw ex;
         }
+        if (existingConfig != null
+                && !existingConfig.get("embeddedServer").equals(newConfig.get("embeddedServer"))) {
+            // The embedded server configuration has changed so re-initialize it.
+            embeddedServer.modified(newConfig);
+        }
         if (existingConfig != null 
-                && dbURL.equals(getDBUrl(newConfig))) {
+                && user.equals(getUser(newConfig))
+                && password.equals(getPassword(newConfig))
+                && dbURL.equals(getDBUrl(newConfig))
+                && poolMinSize == getPoolMinSize(newConfig)
+                && poolMaxSize == getPoolMaxSize(newConfig)) {
             // If the DB pool settings don't change keep the existing pool
             logger.info("(Re-)initialize repository with latest configuration.");
-            init(newConfig);
-            if (bootRepo != null) {
-                bootRepo.init(newConfig);
-            }
         } else {
             // If the DB pool settings changed do a more complete re-initialization
             logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");
-            deactivate(compContext);
-            activate(compContext);
+            DBHelper.closePool(dbURL, pool);
+        }
+        init(newConfig);
+        
+        if (bootRepo != null) {
+            bootRepo.init(newConfig);
         }
         
         existingConfig = newConfig;
