@@ -299,7 +299,7 @@ $ curl \
     "_id": "bjensen",
     "description": "Created for OpenIDM",
     "accountStatus": "active",
-    "telephoneNumber": "1-503-334-2546",
+    "telephoneNumber": "1-360-229-7105",
     "roles": [ "openidm-authorized", "managed/role/newrole" ],
     "effectiveAssignments" : {
       "ldap" : {
@@ -960,7 +960,7 @@ $ curl \
         "openidm-authorized",
         "managed/role/ldap"
     ],
-    "telephoneNumber": "1-503-334-2546",
+    "telephoneNumber": "1-360-229-7105",
     "postalAddress": "",
     "userName": "bjensen",
     "stateProvince": "",
