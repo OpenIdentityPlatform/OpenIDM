@@ -41,9 +41,10 @@ import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_EXPRESSION;
-import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_FILTER;
 import static org.forgerock.json.resource.servlet.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryExpression;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryFilter;
+import static org.forgerock.openidm.util.RequestUtil.hasQueryId;
 
 /**
  * A base class for reconciliation type handling
@@ -143,9 +144,9 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     protected boolean specifiesQuery(JsonValue queryCfg) {
         // Check if there is a property that defines what query to execute
         boolean specifiesQuery =
-                queryCfg.isDefined(PARAM_QUERY_ID)
-                || queryCfg.isDefined(PARAM_QUERY_EXPRESSION)
-                || queryCfg.isDefined(PARAM_QUERY_FILTER);
+                hasQueryId(queryCfg)
+                || hasQueryExpression(queryCfg)
+                || hasQueryFilter(queryCfg);
 
         if (logger.isDebugEnabled()) {
             if (specifiesQuery) {
