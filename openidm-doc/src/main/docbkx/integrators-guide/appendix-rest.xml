@@ -374,7 +374,7 @@
  "https://localhost:8443/openidm/system/ldap/account/fc252fd9-b982-3ed6-b42a-c76d2546312c"</userinput>
 <computeroutput>{
     "givenName": "Barbara",
-    "telephoneNumber": "1-503-334-2546",
+    "telephoneNumber": "1-360-229-7105",
     "dn": "uid=bjensen,ou=People,dc=example,dc=com",
     "description": "Created for OpenIDM",
     "mail": "bjensen@example.com",
@@ -412,7 +412,7 @@
  "https://localhost:8443/openidm/system/ldap/account/fc252fd9-b982-3ed6-b42a-c76d2546312c"</userinput>
 <computeroutput>{
     "givenName": "Barbara",
-    "telephoneNumber": "1-503-334-2546",
+    "telephoneNumber": "1-360-229-7105",
     "dn": "uid=bjensen,ou=People,dc=example,dc=com",
     "description": "The new description for Babs Jensen",
     "mail": "bjensen@example.com",
