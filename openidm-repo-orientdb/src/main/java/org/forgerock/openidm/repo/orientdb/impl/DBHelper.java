@@ -161,6 +161,20 @@ public class DBHelper {
     }
     
     /**
+     * Close and remove a pool managed by this helper
+     */
+    public synchronized static void closePool(String dbUrl, ODatabaseDocumentPool pool) {
+        logger.debug("Close DB pool for {} {}", dbUrl, pool);
+        try {
+            pools.remove(dbUrl);
+            pool.close();
+            logger.trace("Closed pool for {} {}", dbUrl, pool);
+        } catch (Exception ex) {
+            logger.info("Failure reported in closing pool {} {}", new Object[] {dbUrl, pool, ex});
+        }
+    }
+    
+    /**
      * Initialize the DB pool.
      * @param dbURL the orientdb URL
      * @param user the orientdb user to connect
