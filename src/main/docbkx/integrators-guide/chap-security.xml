@@ -896,9 +896,12 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
   </indexterm>
 
   <para>
-   If you do not want to use regular HTTP on a production OpenIDM system, edit
-   the <filename>openidm/conf/jetty.xml</filename> configuration file. Comment
-   out the line that enables regular HTTP.
+   If you do not want to use regular HTTP on a production OpenIDM system, you
+   need to make two changes.
+  </para>
+  <para>
+   First, edit the <filename>openidm/conf/jetty.xml</filename> configuration
+   file. Comment out the line that enables regular HTTP.
   </para>
 
   <para>
@@ -926,6 +929,16 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
       &lt;/New&gt;
    &lt;/Arg&gt;
 &lt;/Call&gt;</programlisting>
+
+  <para>
+   Second, edit the <filename>openidm/conf/config.properties</filename>
+   configuration file. Set the <literal>org.osgi.service.http.enabled</literal>
+   property to false, as shown in the following excerpt:
+  </para>
+
+  <programlisting># Enable pax web http/https services to enable jetty
+org.osgi.service.http.enabled=false
+org.osgi.service.http.secure.enabled=true</programlisting>
  </section>
  
  <section xml:id="security-urls">
