@@ -1205,7 +1205,7 @@ $ cp samples/misc/external.email.json samples/sample5/conf
      <para>
       Edit the <filename>external.email.json</filename> file for outbound email,
       as described in the chapter on
-      <link xlink:show="new" xlink:href="integrators-guide#chap-email"
+      <link xlink:show="new" xlink:href="integrators-guide#chap-mail"
       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sending
       Email</citetitle></link>.
      </para>
