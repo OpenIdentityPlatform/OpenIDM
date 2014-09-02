@@ -95,7 +95,7 @@
 
   <xinclude:include href="../legal.xml" />
   <date><?dbtimestamp format="B d, Y"?></date>
-  <pubdate>${pubDate}</pubdate>
+  <pubdate>Publication date: <?dbtimestamp format="B d, Y"?></pubdate>
   <releaseinfo>${softwareReleaseDate}</releaseinfo>
  </info>
 
