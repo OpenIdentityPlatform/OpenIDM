@@ -19,10 +19,12 @@ package org.forgerock.openidm.audit.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.RequestType;
@@ -31,6 +33,7 @@ import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.util.promise.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,15 +53,61 @@ public class AuditLogFilters {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
 
+    /** Type alias for converting the value of a JsonValue to a particular type */
+    interface JsonValueObjectConverter<V> extends Function<JsonValue, V, JsonValueException> {}
+
     /**
      * A NullObject implementation that never filters.
      */
-    public static AuditLogFilter NONE = new AuditLogFilter() {
+    public static AuditLogFilter NEVER = new AuditLogFilter() {
         @Override
         public boolean isFiltered(ServerContext context, CreateRequest request) {
             return false;
         }
     };
+
+    /** JsonValueObjectConverter for returning the object as a String */
+    static final JsonValueObjectConverter<String> AS_STRING =
+            new JsonValueObjectConverter<String>() {
+                @Override
+                public String apply(JsonValue value) {
+                    return value.asString();
+                }
+            };
+
+    /** JsonValueObjectConverter for returning the object a named field-values filter */
+    static final JsonValueObjectConverter<AuditLogFilter> AS_SINGLE_FIELD_VALUES_FILTER =
+            new JsonValueObjectConverter<AuditLogFilter>() {
+                @Override
+                public AuditLogFilter apply(JsonValue value) {
+                    return newFieldValueFilter(
+                            value.get("name").required().asString(),
+                            // FIXME replace with JsonValue#asSet as soon as available in non-snapshot
+                            new HashSet<String>(value.get("values").required().asList(String.class)),
+                            AS_STRING); // currently assumes values are strings
+                }
+            };
+
+    /**
+     * A filter that filters on a set of fields and their values.  The log entry is
+     * filtered out if the field value in the request is not in the values-set.
+     */
+    private static class FieldValueFilter<V> implements AuditLogFilter {
+        String field;
+        Set<V> values;
+        JsonValueObjectConverter<V> asValue;
+
+        FieldValueFilter(String field, Set<V> values, JsonValueObjectConverter<V> asValue) {
+            this.field = field;
+            this.values = values;
+            this.asValue = asValue;
+        }
+
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            return !values.contains(asValue.apply(request.getContent().get(field)));
+        }
+    }
 
     /**
      * A filter that filters out any actions <em>A</em> that are not contained
@@ -66,25 +115,26 @@ public class AuditLogFilters {
      *
      * @param <A> the action enum type
      */
-    private static class ActionFilter<A extends Enum<A>> implements AuditLogFilter {
+    private static class ActionFilter<A extends Enum<A>> extends FieldValueFilter<A> {
 
-        private final Class<A> clazz;
-        private final Set<A> actionsToLog;
+        private static final String FIELD_ACTION = "action";
 
-        private ActionFilter(Class<A> clazz, Set<A> actionsToLog) {
-            this.clazz = clazz;
-            this.actionsToLog = actionsToLog;
+        private ActionFilter(final Class<A> clazz, final Set<A> actionsToLog) {
+            super(FIELD_ACTION, actionsToLog, new JsonValueObjectConverter<A>() {
+                public A apply(JsonValue value) throws JsonValueException {
+                    return value.asEnum(clazz);
+                }
+            });
         }
 
         @Override
         public boolean isFiltered(ServerContext context, CreateRequest request) {
-            JsonValue action = request.getContent().get("action");
             // don't filter requests that do not specify an action
-            if (action.isNull()) {
+            if (request.getContent().get(field).isNull()) {
                 return false;
             }
             try {
-                return !actionsToLog.contains(action.asEnum(clazz));
+                return super.isFiltered(context, request);
             } catch (IllegalArgumentException e) {
                 // don't filter an action that isn't one of the designated enum constants
                 return false;
@@ -193,21 +243,37 @@ public class AuditLogFilters {
     }
 
     /**
-     * A composite filter that filters if any one of the constituents filters.
+     * An abstract composite filter that wraps a list of other filters.
      */
-    private static class CompositeFilter implements AuditLogFilter {
+    private abstract static class CompositeFilter implements AuditLogFilter {
 
-        private final List<AuditLogFilter> filters;
+        final List<AuditLogFilter> filters;
 
         private CompositeFilter(List<AuditLogFilter> filters) {
             this.filters = new ArrayList<AuditLogFilter>();
             for (AuditLogFilter filter : filters) {
-                if (filter instanceof CompositeFilter) {
-                    this.filters.addAll(((CompositeFilter) filter).filters);
-                } else if (!filter.equals(NONE)) {
+                if (!filter.equals(NEVER)) {
                     this.filters.add(filter);
                 }
             }
+        }
+
+        @Override
+        public abstract boolean isFiltered(ServerContext context, CreateRequest request);
+    }
+
+    /**
+     * A composite filter that filters if any one of the component filters.
+     * <p>
+     * Returns an {@code AuditLogFilter} whose {@code isFiltered} returns true if any one of its
+     * components' {@code isFiltered} returns true. The components are evaluated in order, and
+     * evaluation will be "short-circuited" as soon as a component filter whose {@code isFiltered}
+     * returns true is found.
+     */
+    private static class OrCompositeFilter extends CompositeFilter {
+
+        private OrCompositeFilter(List<AuditLogFilter> filters) {
+            super(filters);
         }
 
         @Override
@@ -221,11 +287,35 @@ public class AuditLogFilters {
         }
     }
 
+    /**
+     * A composite filter that only filters if all of the component filters.
+     * <p>
+     * Returns an {@code AuditLogFilter} whose {@code isFiltered} returns true if each of its
+     * components' {@code isFiltered} returns true. The components are evaluated in order, and
+     * evaluation will be "short-circuited" as soon as a filter whose {@code isFiltered} returns
+     * false is found.
+     */
+    private static class AndCompositeFilter extends CompositeFilter {
+
+        private AndCompositeFilter(List<AuditLogFilter> filters) {
+            super(filters);
+        }
+
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            for (AuditLogFilter filter : filters) {
+                if (!filter.isFiltered(context, request)) {
+                    // short-circuit on a single filter that does not filter
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
     private static <A extends Enum<A>> Set<A> getActions(Class<A> actionClass, JsonValue actions) {
         final Set<A> filter = EnumSet.noneOf(actionClass);
 
-        // Refactor to asSet(new Function() -> { return asEnum(actionClass); })
-        // after CREST-169
         for (JsonValue action : actions) {
             try {
                 filter.add(action.asEnum(actionClass));
@@ -237,6 +327,17 @@ public class AuditLogFilters {
     }
 
     /**
+     * Creates an audit filter on a particular event type.
+     *
+     * @param eventType the eventType to consider on this filter
+     * @param filter the filter to apply
+     * @return an AuditLogFilter that applies the given filter if the record's eventType matches
+     */
+    static AuditLogFilter newEventTypeFilter(String eventType, AuditLogFilter filter) {
+        return new EventTypeFilter(eventType, filter);
+    }
+
+    /**
      * Creates a new action-filter for the <em>activity</em> event type.  If a request action is null or a value
      * that is not a {@link RequestType} constant, it will not be filtered.  It is also not possible to specify
      * filtering of null, or non-{@link RequestType} values.
@@ -245,7 +346,7 @@ public class AuditLogFilters {
      * @return an AuditLogFilter that filters activity actions.
      */
     static AuditLogFilter newActivityActionFilter(JsonValue actions) {
-        return new EventTypeFilter(TYPE_ACTIVITY,
+        return newEventTypeFilter(TYPE_ACTIVITY,
                 new ActionFilter<RequestType>(RequestType.class, getActions(RequestType.class, actions)));
     }
 
@@ -259,7 +360,7 @@ public class AuditLogFilters {
      * @return an AuditLogFilter that filters activity actions for a particular trigger.
      */
     static AuditLogFilter newActivityActionFilter(JsonValue actions, String trigger) {
-        return new EventTypeFilter(TYPE_ACTIVITY,
+        return newEventTypeFilter(TYPE_ACTIVITY,
                 new TriggerFilter(trigger,
                         new ActionFilter<RequestType>(RequestType.class, getActions(RequestType.class, actions))));
     }
@@ -273,7 +374,7 @@ public class AuditLogFilters {
      * @return an AuditLogFilter that filters recon actions.
      */
     static AuditLogFilter newReconActionFilter(JsonValue actions) {
-        return new EventTypeFilter(TYPE_RECON,
+        return newEventTypeFilter(TYPE_RECON,
                 new ActionFilter<ReconAction>(ReconAction.class, getActions(ReconAction.class, actions)));
     }
 
@@ -287,22 +388,51 @@ public class AuditLogFilters {
      * @return an AuditLogFilter that filters recon actions for a particular trigger.
      */
     static AuditLogFilter newReconActionFilter(JsonValue actions, String trigger) {
-        return new EventTypeFilter(TYPE_RECON,
+        return newEventTypeFilter(TYPE_RECON,
                 new TriggerFilter(trigger,
                         new ActionFilter<ReconAction>(ReconAction.class, getActions(ReconAction.class, actions))));
     }
 
     /**
-     * Creates a composite audit log filter that filters if any of its constituent filters filters.
-     * Simplifies to a {@link #NONE} "never-filter" if the filter list is empty or only contains {@link #NONE} filters.
+     * Creates a composite audit log filter that filters if any of its component filters filter.
+     * <p>
+     * Returns an {@code AuditLogFilter} whose {@code isFiltered} returns true if any one of its
+     * components' {@code isFiltered} returns true. The component filters are evaluated in order, and
+     * evaluation will be "short-circuited" as soon as a filter whose {@code isFiltered} returns true
+     * is found.
+     * <p>
+     * Simplifies to a {@link #NEVER} "never-filter" if the filter list is empty or only contains
+     * {@link #NEVER} filters.
      *
      * @param filters the list of audit log filters
-     * @return a composite filter of filters, or NONE, if there are no filters
+     * @return a composite filter of filters that filters when a single filter in the list filters,
+     *         or NEVER, if there are no filters
      */
-    static AuditLogFilter newCompositeFilter(List<AuditLogFilter> filters) {
-        return filters.isEmpty() || onlyContainsNone(filters)
-                ? NONE // don't bother creating a composite filter out of nothing or a bunch of nothings
-                : new CompositeFilter(filters);
+    static AuditLogFilter newOrCompositeFilter(List<AuditLogFilter> filters) {
+        return filters.isEmpty() || onlyContainsNever(filters)
+                ? NEVER // don't bother creating a composite filter out of only never-filters
+                : new OrCompositeFilter(filters);
+    }
+
+    /**
+     * Creates a composite audit log filter that filters if all of its component filters filter.
+     * <p>
+     * Returns an {@code AuditLogFilter} whose {@code isFiltered} returns true if each of its
+     * components' {@code isFiltered} returns true. The components are evaluated in order, and
+     * evaluation will be "short-circuited" as soon as a filter whose {@code isFiltered} returns
+     * false is found.
+     * <p>
+     * Simplifies to a {@link #NEVER} "never-filter" if the filter list is empty or only contains
+     * {@link #NEVER} filters.
+     *
+     * @param filters the list of fields and values
+     * @return a composite audit log filter that filters only when ALL filters filter,
+     *         or NEVER, if there are no filters
+     */
+    static AuditLogFilter newAndCompositeFilter(List<AuditLogFilter> filters) {
+        return filters.isEmpty() || onlyContainsNever(filters)
+                ? NEVER // don't bother creating a composite filter out of only never-filters
+                : new AndCompositeFilter(filters);
     }
 
     /**
@@ -323,20 +453,36 @@ public class AuditLogFilters {
      * @return an audit log filter via script
      */
     static AuditLogFilter newScriptedFilter(String eventType, ScriptEntry scriptEntry) {
-        return new EventTypeFilter(eventType, new ScriptedFilter(scriptEntry));
+        return newEventTypeFilter(eventType, newScriptedFilter(scriptEntry));
     }
 
     /**
-     * Returns true if the collection of filters only contains {@link #NONE} filters, false if it contains at least one
-     * non-{@link #NONE} filter
+     * Creates an field-value filter.
+     *
+     * @param <V> the value type
+     * @param field the field to filter on
+     * @param values the set of values for {@code field} that, if present in the request body, will
+     *               avoid being filtered out
+     * @param asValue a transformation function for the type of field values
+     * @return an audit log filter that includes (does not filter) records whose value for a particular
+     *         field is in a set of values
+     */
+    static <V> AuditLogFilter newFieldValueFilter(String field, Set<V> values,
+            final JsonValueObjectConverter<V> asValue) {
+        return new FieldValueFilter<V>(field, values, asValue);
+    }
+
+    /**
+     * Returns true if the collection of filters only contains {@link #NEVER} filters, false if it contains at least one
+     * non-{@link #NEVER} filter
      *
      * @param collection the collection of filters to test
-     * @return true if the collection of filters only contains {@link #NONE} filters, false if it contains at least one
-     *         non-{@link #NONE} filter
+     * @return true if the collection of filters only contains {@link #NEVER} filters, false if it contains at least one
+     *         non-{@link #NEVER} filter
      */
-    private static final boolean onlyContainsNone(Collection<AuditLogFilter> collection) {
+    private static final boolean onlyContainsNever(Collection<AuditLogFilter> collection) {
         for (AuditLogFilter element : collection) {
-            if (!element.equals(NONE)) {
+            if (!element.equals(NEVER)) {
                 return false;
             }
         }

@@ -68,6 +68,7 @@ import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
+import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
 import org.forgerock.openidm.audit.util.AuditConstants;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -87,9 +88,12 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newEventTypeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
 
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 import static org.forgerock.openidm.audit.util.ActivityLogger.ACTION;
@@ -227,7 +231,7 @@ public class AuditServiceImpl implements AuditService {
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    AuditLogFilter auditFilter = AuditLogFilters.NONE;
+    AuditLogFilter auditFilter = AuditLogFilters.NEVER;
 
     List<JsonPointer> watchFieldFilters = new ArrayList<JsonPointer>();
     List<JsonPointer> passwordFieldFilters = new ArrayList<JsonPointer>();
@@ -246,40 +250,60 @@ public class AuditServiceImpl implements AuditService {
     }
 
     final AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
+            /* filter activity events on configured actions to include */
             .add("eventTypes/activity/filter/actions",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue actions) throws Exception {
+                        public AuditLogFilter apply(JsonValue actions) {
                             return newActivityActionFilter(actions);
                         }
                     })
+            /* filter activity events on configured actions to include when a particular trigger context is in scope */
             .add("eventTypes/activity/filter/triggers",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue triggers) throws Exception {
+                        public AuditLogFilter apply(JsonValue triggers) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
                             for (String trigger : triggers.keys()) {
                                 filters.add(newActivityActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeFilter(filters);
+                            return newOrCompositeFilter(filters);
                         }
                     })
+            /* filter recon events on configured actions to include */
             .add("eventTypes/recon/filter/actions",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue actions) throws Exception {
+                        public AuditLogFilter apply(JsonValue actions) {
                             return newReconActionFilter(actions);
                         }
                     })
+            /* filter recon events on configured actions to include when a particular trigger context is in scope */
             .add("eventTypes/recon/filter/triggers",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue triggers) throws Exception {
+                        public AuditLogFilter apply(JsonValue triggers) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
                             for (String trigger : triggers.keys()) {
                                 filters.add(newReconActionFilter(triggers.get(trigger), trigger));
                             }
-                            return AuditLogFilters.newCompositeFilter(filters);
+                            return newOrCompositeFilter(filters);
+                        }
+                    })
+            /* filter events with specific field values for any event type */
+            .add("eventTypes/*/filter/fields",
+                    new JsonValueObjectConverter<AuditLogFilter>() {
+                        @Override
+                        public AuditLogFilter apply(JsonValue fieldsConfig) {
+                            List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
+                            // the glob in the JsonPointer will return a map of matched entry types to field configurations
+                            for (String eventType : fieldsConfig.keys()) {
+                                // fieldConfig is something like { "field" : "type", "values" : [ "summary" ] }
+                                JsonValue fieldConfig = fieldsConfig.get(eventType);
+                                filters.add(newEventTypeFilter(eventType,
+                                        newAndCompositeFilter(fieldConfig.asList(AS_SINGLE_FIELD_VALUES_FILTER))));
+                            }
+                            return newOrCompositeFilter(filters);
                         }
                     });
 
@@ -289,12 +313,12 @@ public class AuditServiceImpl implements AuditService {
         try {
             // Upon activation the ScriptRegistry is present so we can add script-based audit log filters for event types
             auditLogFilterBuilder.add("eventTypes/*/filter/script",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue config) throws Exception {
+                        public AuditLogFilter apply(JsonValue scriptConfig) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
-                            for (String eventType : config.keys()) {
-                                JsonValue filterConfig = config.get(eventType);
+                            for (String eventType : scriptConfig.keys()) {
+                                JsonValue filterConfig = scriptConfig.get(eventType);
                                 try {
                                     filters.add(newScriptedFilter(eventType, scriptRegistry.takeScript(filterConfig)));
                                 } catch (Exception e) {
@@ -302,7 +326,7 @@ public class AuditServiceImpl implements AuditService {
                                             e.getClass().getName(), filterConfig.toString(), eventType, e);
                                 }
                             }
-                            return newCompositeFilter(filters);
+                            return newOrCompositeFilter(filters);
                         }
                     });
             setConfig(enhancedConfig.getConfigurationAsJson(compContext));
@@ -376,7 +400,7 @@ public class AuditServiceImpl implements AuditService {
 
         globalAuditLoggers.clear();
         eventAuditLoggers.clear();
-        auditFilter = AuditLogFilters.NONE;
+        auditFilter = AuditLogFilters.NEVER;
         watchFieldFilters.clear();
         passwordFieldFilters.clear();
         logger.info("Audit service stopped.");

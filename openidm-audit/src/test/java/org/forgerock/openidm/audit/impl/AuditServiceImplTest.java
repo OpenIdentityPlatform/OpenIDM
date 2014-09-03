@@ -30,6 +30,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
@@ -41,8 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
 
 /**
  * Test the audit service.
@@ -112,6 +111,7 @@ public class AuditServiceImplTest {
         //Given
         AuditContext auditContext = new AuditContext(new RootContext());
         ServerContext context = new ServerContext(auditContext);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -130,6 +130,7 @@ public class AuditServiceImplTest {
 
         //Given
         ServerContext context = mock(ServerContext.class);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -147,20 +148,20 @@ public class AuditServiceImplTest {
     public void testFilterActivityExplicitlyIncluded() throws Exception {
 
         //Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("create");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("actions", array("create"))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -178,18 +179,20 @@ public class AuditServiceImplTest {
     public void testFilterActivityAllExcluded() throws Exception {
 
         //Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>());
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("actions", array())
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -207,20 +210,20 @@ public class AuditServiceImplTest {
     public void testFilterActivityUnknownAction() throws Exception {
 
         //Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("create");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("actions", array("create"))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -238,23 +241,23 @@ public class AuditServiceImplTest {
     public void testFilterTriggerActivityExplicitlyIncluded() throws Exception {
 
         // Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("create");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    field("sometrigger", array("create"))
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         TriggerContext triggerContext = new TriggerContext(new RootContext(), "sometrigger");
         ServerContext context = new ServerContext(triggerContext);
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         // When
@@ -272,20 +275,22 @@ public class AuditServiceImplTest {
     public void testFilterTriggerActivityAllExcluded() throws Exception {
 
         //Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>());
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    field("sometrigger", array())
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         //When
@@ -303,22 +308,22 @@ public class AuditServiceImplTest {
     public void testFilterTriggerActivityUnknownAction() throws Exception {
 
         // Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("create");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    field("sometrigger", array("create"))
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         // When
@@ -337,22 +342,22 @@ public class AuditServiceImplTest {
     public void testFilterTriggerReconLinkAction() throws Exception {
 
         // Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("recon", new ArrayList<String>() {{
-                                        add("link");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    field("recon", array("link"))
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
@@ -373,22 +378,23 @@ public class AuditServiceImplTest {
     public void testFilterTriggerReconUnknownAction() throws Exception {
 
         // Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("recon", new ArrayList<String>() {{
-                                        add("create"); // create is an unknown action for recon, as it is not in Action - it should be ignored
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("recon", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    // create is an unknown action for recon, as it is not in Action - it should be ignored
+                                    field("recon", array("create"))
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
@@ -409,24 +415,23 @@ public class AuditServiceImplTest {
     public void testFilterTriggerReconWithNoAction() throws Exception {
 
         // Given
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("recon", new ArrayList<String>() {{
-                                        // filter to log link and unlink only
-                                        add("link");
-                                        add("unlink");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                    field("eventTypes", object(
+                        field("activity", object(
+                            field("filter", object(
+                                field("triggers", object(
+                                    // filter to log link and unlink only
+                                    field("recon", array("link", "unlink"))
+                                ))
+                            ))
+                        ))
+                    ))
+                ));
+
         auditService.auditFilter = auditService.auditLogFilterBuilder.build(config);
         ServerContext context = new ServerContext(new TriggerContext(new RootContext(), "recon"));
+        @SuppressWarnings("unchecked")
         ResultHandler<Resource> handler = mock(ResultHandler.class);
 
         // based on ObjectMapping.ReconEntry which uses action from SyncOperation.action which is an
