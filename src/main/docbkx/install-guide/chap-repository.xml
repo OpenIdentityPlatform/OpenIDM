@@ -806,21 +806,20 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 ...</computeroutput></screen>
   </section>
 
- <!-- TODO Include this section when we support PostGreSQL - This information is
- currently provided in the wiki
  <section xml:id="repository-postgresql">
-  <title>To Set Up OpenIDM With PostGreSQL</title>
-  <para>
-   Note that PostGreSQL has been minimally tested but is not yet supported in
-   production environments.
-  </para>
+  <title>To Set Up OpenIDM With PostgreSQL</title>
+  <note>
+   <para>
+    The use of PostgreSQL as a repository is supported for Java 1.7 only.
+   </para>
+  </note>
   <para>
    This procedure assumes that PostgreSQL (version 9.3 or later) is installed
    and running on the local host.
   </para>
   <para>
    <emphasis>Before starting OpenIDM for the first time</emphasis>, set up
-   OpenIDM to use a PostGreSQL repository, as described in the following
+   OpenIDM to use a PostgreSQL repository, as described in the following
    procedure.
   </para>
   <procedure>
@@ -828,52 +827,35 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
     <para>
      OpenIDM includes a script
      (<filename>path/to/openidm/db/scripts/postgresql/createuser.pgsql</filename>)
-     that sets up an <literal>openidm</literal> database and user, and grants
-     the appropriate permissions.
+     that sets up an <literal>openidm</literal> database and user, with a
+     default password of <literal>openidm</literal>. The script also grants the
+     appropriate permissions.
     </para>
     <para>
-     Edit this script to set a password for the <literal>openidm</literal> user
-     that will be created. The default password is <literal>openidm</literal>.
+     Edit this script if you want to change the password of the
+     <literal>openidm</literal> user, for example:
     </para>
-    <screen>
-     <userinput>
-$ more /path/to/openidm/db/scripts/postgresql/createuser.pgsql
-     </userinput>
-     <computeroutput>
-
-create user openidm with password 'mypassword';
-
+    <screen><userinput>$ more /path/to/openidm/db/scripts/postgresql/createuser.pgsql</userinput>
+<computeroutput>create user openidm with password 'mypassword';
 create database openidm encoding 'utf8' owner openidm;
-
-grant all privileges on database openidm to openidm;
-     </computeroutput>
-    </screen>
+grant all privileges on database openidm to openidm;</computeroutput></screen>
    </step>
    <step>
     <para>
      Execute the <literal>createuser.pgsql</literal> script as follows:
     </para>
-    <screen>
-     <userinput>
-$ psql &lt; /path/to/openidm/db/scripts/postgresql/createuser.pgsql
-     </userinput>
-     <computeroutput>
-CREATE ROLE
+    <screen><userinput>$ psql &lt; /path/to/openidm/db/scripts/postgresql/createuser.pgsql</userinput>
+<computeroutput>CREATE ROLE
 CREATE DATABASE
-GRANT
-     </computeroutput>
-    </screen>
+GRANT</computeroutput></screen>
    </step>
    <step>
     <para>
      Execute the <literal>openidm.pgsql</literal> script as the new
      <literal>openidm</literal> user that you created in the first step.
     </para>
-    <screen>
-     <userinput>
-$ psql -U openidm &lt; /path/to/openidm/db/scripts/postgresql/openidm.pgsql
-     </userinput>
-     <computeroutput>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/scripts/postgresql/openidm.pgsql</userinput>
+<computeroutput>
 CREATE SCHEMA
 CREATE TABLE
 CREATE TABLE
@@ -886,46 +868,36 @@ INSERT 0 1
 INSERT 0 1
 COMMIT
 CREATE INDEX
-CREATE INDEX
-     </computeroutput>
-    </screen>
+CREATE INDEX</computeroutput></screen>
     <para>
      Your database has now been initialized.
     </para>
    </step>
    <step>
     <para>
-     Remove the OrientDB repository configuration file
-     (<filename>conf/repo.orientdb.json</filename>.
+     Remove the OrientDB repository configuration file from the OpenIDM
+     configuration directory (<filename>conf/repo.orientdb.json</filename>).
     </para>
-    <screen>
-$ rm /path/to/openidm/conf/repo.orientdb.json
-    </screen>
+    <screen><userinput>$ rm /path/to/openidm/conf/repo.orientdb.json</userinput></screen>
    </step>
    <step>
     <para>
-     Copy the PostGreSQL repository configuration file
+     Copy the PostgreSQL repository configuration file
      (<filename>samples/misc/repo.jdbc-postgres.json</filename>) to the
-     configuration directory, and rename it <filename>repo.jdcb.json</filename>.
+     configuration directory, and rename it <filename>repo.jdbc.json</filename>.
     </para>
-    <screen>
-$ cd /path/to/openidm
-$ cp samples/misc/repo.jdbc-postgres.json conf/repo.jdbc.json
-    </screen>
+    <screen><userinput>$ cd /path/to/openidm
+$ cp samples/misc/repo.jdbc-postgres.json conf/repo.jdbc.json</userinput></screen>
    </step>
    <step>
     <para>
      If you changed the password in step 1 of this procedure, edit the
-     <filename>repo.jdcb.json</filename> file to set the value for the
+     <filename>repo.jdbc.json</filename> file to set the value for the
      <literal>"password"</literal> field to whatever password you set for the
      <literal>openidm</literal> user. For example:
     </para>
-    <screen>
-     <userinput>
-$ more conf/repo.jdbc.json
-     </userinput>
-     <computeroutput>
-{
+    <screen><userinput>$ more conf/repo.jdbc.json</userinput>
+<computeroutput>{
     "connection" : {
         "dbType" : "POSTGRESQL",
         "jndiName" : "",
@@ -933,8 +905,7 @@ $ more conf/repo.jdbc.json
         "jdbcUrl" : "jdbc:postgresql://localhost:5432/openidm",
         "username" : "openidm",
         "password" : "mypassword",
-     </computeroutput>
-    </screen>
+...}</computeroutput></screen>
    </step>
    <step>
     <para>
@@ -946,6 +917,15 @@ $ more conf/repo.jdbc.json
      <literal>active</literal>, whereas <literal>repo.orientdb</literal> is
      <literal>unsatisfied</literal>.
     </para>
+    <screen><computeroutput>-> OpenIDM ready</computeroutput>
+<userinput>scr list</userinput>
+<computeroutput>Id   State          Name
+...
+[   4] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+...
+[   3] [active       ] org.forgerock.openidm.repo.jdbc
+...
+-></computeroutput></screen>
    </step>
    <step>
     <para>
@@ -954,12 +934,16 @@ $ more conf/repo.jdbc.json
      required indexes. The file includes extensive comments on the indexes
      that are being created.
     </para>
-    <screen width="102">
-$ psql -U postgres openidm &lt; /path/to/openidm/db/scripts/postgresql/default_schema_optimization.pgsql
-    </screen>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/scripts/postgresql/default_schema_optimization.pgsql</userinput>
+<computeroutput>CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX</computeroutput></screen>
    </step>
   </procedure>
- </section>  -->
+ </section>
 
  <section xml:id="jdbc-repo-config">
   <title>Understanding the JDBC Repository Configuration File</title>
