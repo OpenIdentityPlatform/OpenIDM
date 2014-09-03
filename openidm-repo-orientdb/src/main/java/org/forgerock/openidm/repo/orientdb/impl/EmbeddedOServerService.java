@@ -92,7 +92,7 @@ public class EmbeddedOServerService {
         
         List<OServerNetworkListenerConfiguration> listeners = getListeners(config);
         for (OServerNetworkListenerConfiguration listener : listeners) {
-            networkListeners.add(new OServerNetworkListener(orientDBServer, listener.ipAddress, 
+            networkListeners.add(new OServerNetworkListener(orientDBServer, null, listener.ipAddress, 
                     listener.portRange, listener.protocol, networkProtocols.get(listener.protocol),
                     listener.parameters, listener.commands)
             );

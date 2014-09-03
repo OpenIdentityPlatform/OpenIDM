@@ -311,7 +311,8 @@
                         "indexType" : "notunique"
         }
                 ]
-            }
+            },
+            "_studio_bookmark" : {}
         }
     },
     "embeddedServer" : {

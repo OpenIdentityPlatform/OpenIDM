@@ -49,7 +49,6 @@ import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.serialization.compression.impl.ONothingCompression;
 import com.orientechnologies.orient.core.storage.OStorage;
 import java.util.Collection;
 import java.util.Set;
@@ -88,11 +87,7 @@ public class DBHelper {
 
         ODatabaseDocumentTx setupDbConn = null;
         ODatabaseDocumentPool pool = null;
-        try {
-            // Disable Snappy compression as it does not currently work inside
-            // OSGi containers. Need to do this here before the DB is created.
-            OGlobalConfiguration.STORAGE_COMPRESSION_METHOD.setValue(ONothingCompression.NAME);
-       
+        try {       
             if (setupDB) {
                 logger.debug("Check DB exists in expected state for pool {}", dbURL);
                 setupDbConn = checkDB(dbURL, user, password, completeConfig);
