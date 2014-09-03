@@ -26,7 +26,8 @@
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
                     "**/openidm-config*.jar",
-                    "**/openidm-crypto*.jar"
+                    "**/openidm-crypto*.jar",
+                    "**/snappy-java*.jar"
                 ],
                 "start-level":3,
                 "action":"install.start"

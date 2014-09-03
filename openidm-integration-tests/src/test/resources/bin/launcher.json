@@ -26,7 +26,8 @@
                 "includes":[
                     "**/openidm-repo-jdbc*.jar",
                     "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar"
+                    "**/org.apache.felix.scr-*.jar",
+                    "**/snappy-java*.jar"
                 ],
                 "start-level":3,
                 "action":"install.start"
