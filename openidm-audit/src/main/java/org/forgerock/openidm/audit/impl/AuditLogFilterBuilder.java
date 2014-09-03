@@ -24,7 +24,9 @@ import java.util.Map;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.util.promise.Function;
+import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +47,8 @@ class AuditLogFilterBuilder {
      * Map of config element config paths to a builder function that creates the appropriate AuditLogFilter
      * from that config.
      */
-    private final Map<String, Function<JsonValue, AuditLogFilter, Exception>> auditLogFilterBuilder =
-            new HashMap<String, Function<JsonValue, AuditLogFilter, Exception>>();
+    private final Map<String, JsonValueObjectConverter<AuditLogFilter>> auditLogFilterBuilder =
+            new HashMap<String, JsonValueObjectConverter<AuditLogFilter>>();
 
     /**
      * Add a mapping from a config path to the factory function used to build an audit log filter for this
@@ -56,7 +58,7 @@ class AuditLogFilterBuilder {
      * @param filterFactory the function to create an AuditLogFilter from that config subset
      * @return this builder object
      */
-    AuditLogFilterBuilder add(String configPath, Function<JsonValue, AuditLogFilter, Exception> filterFactory) {
+    AuditLogFilterBuilder add(String configPath, JsonValueObjectConverter<AuditLogFilter> filterFactory) {
         auditLogFilterBuilder.put(configPath, filterFactory);
         return this;
     }
@@ -79,9 +81,9 @@ class AuditLogFilterBuilder {
      */
     AuditLogFilter build(JsonValue config) {
         List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
-        for (Map.Entry<String, Function<JsonValue, AuditLogFilter, Exception>> entry : auditLogFilterBuilder.entrySet()) {
+        for (Map.Entry<String, JsonValueObjectConverter<AuditLogFilter>> entry : auditLogFilterBuilder.entrySet()) {
             final String configPath = entry.getKey();
-            final Function<JsonValue, AuditLogFilter, Exception> builder = entry.getValue();
+            final Function<JsonValue, AuditLogFilter, JsonValueException> builder = entry.getValue();
 
             final JsonValue filterConfig;
             if (configPath.contains("*")) {
@@ -102,7 +104,7 @@ class AuditLogFilterBuilder {
                 }
             }
         }
-        return AuditLogFilters.newCompositeFilter(filters);
+        return AuditLogFilters.newOrCompositeFilter(filters);
     }
 
     /**

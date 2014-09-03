@@ -33,24 +33,29 @@ import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.javascript.RhinoScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.source.DirectoryContainer;
-import org.forgerock.util.promise.Function;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.script.ScriptException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.field;
 import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newActivityActionFilter;
-import static org.forgerock.openidm.audit.impl.AuditLogFilters.newCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newAndCompositeFilter;
+import static org.forgerock.openidm.audit.impl.AuditLogFilters.newOrCompositeFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFilter;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 import static org.mockito.Mockito.mock;
@@ -99,39 +104,39 @@ public class AuditLogFilterBuilderTest {
 
     private AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
             .add("eventTypes/activity/filter/actions",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue actions) throws Exception {
+                        public AuditLogFilter apply(JsonValue actions) {
                             return newActivityActionFilter(actions);
                         }
                     })
             .add("eventTypes/activity/filter/triggers",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue triggers) throws Exception {
+                        public AuditLogFilter apply(JsonValue triggers) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
                             for (String trigger : triggers.keys()) {
                                 filters.add(newActivityActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeFilter(filters);
+                            return newOrCompositeFilter(filters);
                         }
                     })
             .add("eventTypes/recon/filter/actions",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue actions) throws Exception {
+                        public AuditLogFilter apply(JsonValue actions) {
                             return newReconActionFilter(actions);
                         }
                     })
             .add("eventTypes/recon/filter/triggers",
-                    new Function<JsonValue, AuditLogFilter, Exception>() {
+                    new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
-                        public AuditLogFilter apply(JsonValue triggers) throws Exception {
+                        public AuditLogFilter apply(JsonValue triggers) {
                             List<AuditLogFilter> filters = new ArrayList<AuditLogFilter>();
                             for (String trigger : triggers.keys()) {
                                 filters.add(newReconActionFilter(triggers.get(trigger), trigger));
                             }
-                            return newCompositeFilter(filters);
+                            return newOrCompositeFilter(filters);
                         }
                     });
 
@@ -147,18 +152,17 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("create");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("actions", array("create"))
+                                        ))
+                                ))
+                        ))
+                ));
+
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
 
@@ -185,18 +189,17 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("skittle");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("actions", array("skittle"))
+                                        ))
+                                ))
+                        ))
+                ));
+
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
 
@@ -223,19 +226,16 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("link");
-                                    add("unlink");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("recon", object(
+                                        field("filter", object(
+                                                field("actions", array("link", "unlink"))
+                                        ))
+                                ))
+                        ))
+                ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
 
@@ -264,18 +264,16 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("skittle");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("recon", object(
+                                        field("filter", object(
+                                                field("actions", array("skittle"))
+                                        ))
+                                ))
+                        ))
+                ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext context = mock(ServerContext.class);
 
@@ -309,20 +307,18 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("create");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("triggers", object(
+                                                        field("sometrigger", array("create"))
+                                                ))
+                                        ))
+                                ))
+                        ))
+                ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext noTrigger = mock(ServerContext.class);
         ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
@@ -355,20 +351,18 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("triggers", new HashMap<String, Object>() {{
-                                    put("sometrigger", new ArrayList<String>() {{
-                                        add("skittle");
-                                    }});
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("triggers", object(
+                                                        field("sometrigger", array("skittle"))
+                                                ))
+                                        ))
+                                ))
+                        ))
+                ));
         AuditLogFilter filter = auditLogFilterBuilder.build(config);
         ServerContext noTrigger = mock(ServerContext.class);
         ServerContext hasTrigger = new ServerContext(new TriggerContext(new RootContext(), "sometrigger"));
@@ -402,26 +396,29 @@ public class AuditLogFilterBuilderTest {
             },
         }
         */
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("script", new HashMap<String, Object>() {{
-                                    put("type", "text/javascript");
-                                    put("name", "logfilter.js");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("script", object(
+                                                        field("type", "text/javascript"),
+                                                        field("name", "logfilter.js")
+                                                ))
+                                        ))
+                                ))
+                        ))
+                ));
         AuditLogFilter filter = new AuditLogFilterBuilder()
                 .add("eventTypes/activity/filter/script",
-                        new Function<JsonValue, AuditLogFilter, Exception>() {
+                        new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                             @Override
-                            public AuditLogFilter apply(JsonValue scriptConfig) throws Exception {
-                                return newScriptedFilter(scriptRegistry.takeScript(scriptConfig));
+                            public AuditLogFilter apply(JsonValue scriptConfig) {
+                                try {
+                                    return newScriptedFilter(scriptRegistry.takeScript(scriptConfig));
+                                } catch (ScriptException e) {
+                                    return AuditLogFilters.NEVER;
+                                }
                             }
                         })
                 .build(config);
@@ -439,38 +436,159 @@ public class AuditLogFilterBuilderTest {
         assertFalse(filter.isFiltered(context, skittle)); // don't filter weird stuff
     }
 
+    private AuditLogFilterBuilder getFieldValueFilterBuilder() {
+        return new AuditLogFilterBuilder()
+                .add("/",
+                        new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
+                            @Override
+                            public AuditLogFilter apply(JsonValue filterConfig) {
+                                return newAndCompositeFilter(filterConfig.asList(AS_SINGLE_FIELD_VALUES_FILTER));
+                            }
+                        });
+    }
+
+    @Test
+    public void testFieldFilter() {
+        // Filter-in if entryType is summary or reconType is full
+
+        // Given
+        JsonValue config = json(array(
+                object(
+                        field("name", "entryType"),
+                        field("values", array("summary"))
+                ),
+                object(
+                        field("name", "reconType"),
+                        field("values", array("full"))
+                )
+        ));
+
+        AuditLogFilter filter = getFieldValueFilterBuilder().build(config);
+        ServerContext context = mock(ServerContext.class);
+
+        // When
+        CreateRequest start = Requests.newCreateRequest("recon", null, json(object(field("entryType", "start"))));
+        CreateRequest entry = Requests.newCreateRequest("recon", null, json(object(field("entryType", "entry"))));
+        CreateRequest summary = Requests.newCreateRequest("recon", null, json(object(field("entryType", "summary"))));
+        CreateRequest full = Requests.newCreateRequest("recon", null, json(object(field("entryType", "entry"), field("reconType", "full"))));
+        CreateRequest byId = Requests.newCreateRequest("recon", null, json(object(field("entryType", "entry"), field("reconType", "byId"))));
+
+
+        // Then
+        assertTrue(filter.isFiltered(context, start));  // filter out start
+        assertTrue(filter.isFiltered(context, entry));   // filter out entry
+        assertFalse(filter.isFiltered(context, summary)); // don't filter summary
+        assertFalse(filter.isFiltered(context, full)); // don't filter full
+        assertTrue(filter.isFiltered(context, byId)); // filter out byId
+    }
+
+    @Test
+    public void testFieldFilterDuplicate() {
+        // test duplicate field filters
+
+        // Given
+        JsonValue config = json(array(
+                object(
+                        field("name", "entryType"),
+                        field("values", array("summary"))
+                ),
+                object(
+                        field("name", "entryType"),
+                        field("values", array("start"))
+                )
+        ));
+
+        AuditLogFilter filter = getFieldValueFilterBuilder().build(config);
+        ServerContext context = mock(ServerContext.class);
+
+        // When
+        CreateRequest start = Requests.newCreateRequest("recon", null, json(object(field("entryType", "start"))));
+        CreateRequest entry = Requests.newCreateRequest("recon", null, json(object(field("entryType", "entry"))));
+        CreateRequest summary = Requests.newCreateRequest("recon", null, json(object(field("entryType", "summary"))));
+
+
+        // Then
+        assertFalse(filter.isFiltered(context, start));  // don't filter start
+        assertTrue(filter.isFiltered(context, entry));   // filter out entiy
+        assertFalse(filter.isFiltered(context, summary)); // don't filter summary
+    }
+
+    /** an always-true filter */
+    private static AuditLogFilter TRUE = new AuditLogFilter() {
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            return true;
+        }
+    };
+
+    /** an always-false filter */
+    public static AuditLogFilter FALSE = new AuditLogFilter() {
+        @Override
+        public boolean isFiltered(ServerContext context, CreateRequest request) {
+            return false;
+        }
+    };
+
+    /** Test data for composite audit log filters:
+     *
+     * <ul>
+     *     <li>array of 3 filters from which to create a composite filter</li>
+     *     <li>expected result from OrCompositeFilter</li>
+     *     <li>expected result from AndCompositeFilter</li>
+     * </ul>
+     */
+    @DataProvider(name = "compositeData")
+    public Object[][] createCompositeData() {
+        return new Object[][] {
+                { new AuditLogFilter[] { TRUE, TRUE, TRUE }, true, true },
+                { new AuditLogFilter[] { TRUE, TRUE, FALSE }, true, false },
+                { new AuditLogFilter[] { TRUE, FALSE, TRUE }, true, false },
+                { new AuditLogFilter[] { TRUE, FALSE, FALSE }, true, false },
+                { new AuditLogFilter[] { FALSE, TRUE, TRUE }, true, false },
+                { new AuditLogFilter[] { FALSE, TRUE, FALSE }, true, false },
+                { new AuditLogFilter[] { FALSE, FALSE, TRUE }, true, false },
+                { new AuditLogFilter[] { FALSE, FALSE, FALSE }, false, false }
+        };
+    }
+
+    @Test(dataProvider = "compositeData")
+    public void testCompositeIdentity(AuditLogFilter[] filters, boolean orFilterResult, boolean andFilterResult) {
+        ServerContext context = mock(ServerContext.class);
+        CreateRequest request = mock(CreateRequest.class);
+
+        assertThat(newOrCompositeFilter(Arrays.asList(filters)).isFiltered(context, request)).isEqualTo(orFilterResult);
+        assertThat(newAndCompositeFilter(Arrays.asList(filters)).isFiltered(context, request)).isEqualTo(andFilterResult);
+    }
+
     @Test
     public void testGetByGlob() {
 
-        JsonValue config = new JsonValue(
-                new HashMap<String, Object>() {{
-                    put("eventTypes", new HashMap<String, Object>() {{
-                        put("activity", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("actions", new ArrayList<String>() {{
-                                    add("create");
-                                }});
-                            }});
-                        }});
-                        put("recon", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("script", new HashMap<String, Object>() {{
-                                    put("type", "text/javascript");
-                                    put("name", "reconfilter.js");
-                                }});
-                            }});
-                        }});
-                        put("custom", new HashMap<String, Object>() {{
-                            put("filter", new HashMap<String, Object>() {{
-                                put("script", new HashMap<String, Object>() {{
-                                    put("type", "text/javascript");
-                                    put("name", "customfilter.js");
-                                }});
-                            }});
-                        }});
-                    }});
-                }});
-
+        JsonValue config = json(
+                object(
+                        field("eventTypes", object(
+                                field("activity", object(
+                                        field("filter", object(
+                                                field("actions", array("create"))
+                                        ))
+                                )),
+                                field("recon", object(
+                                        field("filter", object(
+                                                field("script", object(
+                                                        field("type", "text/javascript"),
+                                                        field("name", "reconfilter.js")
+                                                ))
+                                        ))
+                                )),
+                                field("custom", object(
+                                        field("filter", object(
+                                                field("script", object(
+                                                        field("type", "text/javascript"),
+                                                        field("name", "customfilter.js")
+                                                ))
+                                        ))
+                                ))
+                        ))
+                ));
 
         JsonValue result = new AuditLogFilterBuilder().getByGlob(config, "eventTypes/*/filter/script");
         assertThat(result.isDefined("activity")).isFalse();
