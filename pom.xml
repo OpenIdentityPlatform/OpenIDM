@@ -382,6 +382,62 @@
                 <module>openidm-integration-tests</module>
             </modules>
         </profile>
+        <profile>
+            <!-- To scan the licenses -->
+            <id>generateLicenseReport</id>
+            <build>
+                <plugins>
+                    <plugin>
+                      <groupId>org.codehaus.mojo</groupId>
+                      <artifactId>license-maven-plugin</artifactId>
+                      <version>1.7</version>
+                      <executions>
+                        <execution>
+                          <id>aggregate-add-third-party</id>
+                          <goals>
+                            <goal>aggregate-add-third-party</goal> 
+                          </goals>
+                          <configuration>
+                            <useMissingFile>true</useMissingFile>
+                            <fileTemplate>/org/codehaus/mojo/license/third-party-file-groupByLicense.ftl</fileTemplate>
+                            <failIfWarning>true</failIfWarning>
+                            <licenseMerges>
+                              <licenseMerge>Apache 2.0|
+                                            The Apache Software License, Version 2.0|
+                                            Apache v2|Apache 2|ASL, version 2|
+                                            Apache License, Version 2.0|
+                                            Apache License|
+                                            Apache-2.0|
+                                            ALv2|
+                                            Apache 2.0 license|
+                                            Apache License Version 2.0|
+                                            Apache Software License - Version 2.0|
+                                            Apache License 2.0</licenseMerge>
+                              <licenseMerge>CDDL 1.0|
+                                            COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0|
+                                            CDDL|
+                                            CDDL-1.0|
+                                            CDDL 1.0 license|
+                                            Common Development and Distribution License (CDDL) v1.0</licenseMerge>
+                              <licenseMerge>MIT|
+                                            MIT License|
+                                            The MIT License</licenseMerge>
+                              <licenseMerge>GPL-2.0|
+                                            The GNU General Public License, Version 2</licenseMerge>
+                              <licenseMerge>LGPL license|
+                                            GNU Lesser General Public License|
+                                            GNU LESSER GENERAL PUBLIC LICENSE</licenseMerge>
+                              <licenseMerge>LGPL 2.1 license|
+                                            LGPL, version 2.1|
+                                            GNU Lesser General Public License, Version 2.1</licenseMerge>
+                            </licenseMerges>
+                          </configuration>
+                        </execution>
+                      </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <dependencyManagement>
@@ -1049,7 +1105,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
     <reporting>
