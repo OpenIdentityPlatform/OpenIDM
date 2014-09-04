@@ -710,14 +710,20 @@
           the CSV file is used to service read and query requests.
          </para>
         </listitem>
-        <!-- Not yet committed:
         <listitem>
-         <para><literal>router</literal> - enables log events to be
-         directed to any endpoint in the system, for example,
-         <literal>system/scriptedsql</literal> or <literal>endpoint/myhandler</literal>.
+         <para>
+          <literal>router</literal> - enables log events to be
+          directed to any endpoint in the system, such as
+          <literal>system/scriptedsql</literal> or
+          <literal>endpoint/myhandler</literal>.
+         </para>
+         <para>
+          As noted with previous instances of <literal>logType</literal>, the
+          <literal>location</literal> specifies the relative directory, and
+          <literal>useForQueries</literal> defines whether the logger is used
+          to service read and query requests.
          </para>
         </listitem>
-        -->
        </itemizedlist>
       </listitem>
     </varlistentry>
@@ -754,6 +760,92 @@
     Audit Log Locations</citetitle></link> shows how you can configure
     <literal>logTo</literal> to direct audit logs to a user home directory.
    </para>
+
+   <para>
+    If you want to review the audit log, read the section on <link xlink:show="new"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    xlink:href="integrators-guide#querying-recon-logs"><citetitle>Querying the
+    Reconciliation Audit Log</citetitle></link>. You can review several
+    different ways to run a RESTful GET on audit endpoints in that section.
+   </para>
+
+   <section xml:id="audit-remote-logging">
+    <title>Logging to a Remote System</title>
+
+    <para>
+     You can configure logging to a remote system. OpenIDM exposes a useful
+     logging configuration in the <filename>openidm/samples/audit-sample</filename>
+     directory, in the <filename>conf/audit.json</filename> configuration file.
+     The <literal>logTo</literal> location stanza differs slightly from other
+     versions of that file, in that it includes the following excerpt:
+    </para>
+
+    <!-- TODO: watch for updates to audit-sample, rev to this section may be coming -->
+
+    <programlisting language="javascript">...
+        "logTo" : [
+    ...
+            },
+            {
+                 "logType" : "router",
+                 "location" : "system/auditdb",
+                 "useForQueries" : true
+            }
+     ...
+    </programlisting>
+
+    <para>
+     To connect to an external JDBC database, you can use the
+     <literal>location</literal> property, which is configured with the
+     <literal>auditdb</literal> system.
+    </para>
+
+    <para>
+     You can then set up that connection
+     in the <filename>conf/provisioner.openicf-scriptedsql.json</filename> file.
+     In this particular example, that file starts with:
+    </para>
+
+    <programlisting language="javascript">{
+     "name" : "auditdb",</programlisting>
+
+    <para>
+     You can configure remote access in that file, in the
+     <literal>configurationProperties</literal> stanza, in the
+     <literal>host</literal> and <literal>jdbcConnectionUrl</literal> properties.
+     Substitute the URL or IP address of the running remote MySQL server for
+     <literal>localhost</literal>:
+    </para>
+
+    <programlisting language="javascript">...
+ },
+     "configurationProperties" : {
+     "host" : "localhost",
+     "port" : "3306",
+     "user" : "root",
+     "password" : "password",
+     "database" : "audit",
+     "autoCommit" : false,
+     "reloadScriptOnExecution" : false,
+     "jdbcDriver" : "com.mysql.jdbc.Driver",
+     "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/audit",
+     "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
+     "createScriptFileName" : "&amp;{launcher.project.location}/tools/CreateScript.groovy",
+     "testScriptFileName" : "&amp;{launcher.project.location}/tools/TestScript.groovy",
+     "searchScriptFileName" : "&amp;{launcher.project.location}/tools/SearchScript.groovy"
+ },
+    ...</programlisting>
+
+    <para>
+     After you change the <literal>localhost</literal> entries, start OpenIDM
+     with the configuration associated with your audit configuration. The
+     following command is based on the
+     <filename>openidm/samples/audit-sample</filename> that comes with OpenIDM.
+    </para>
+
+    <screen>$ ./setup.sh -p samples/audit-sample</screen>
+
+   </section>
 
   </section>
 
