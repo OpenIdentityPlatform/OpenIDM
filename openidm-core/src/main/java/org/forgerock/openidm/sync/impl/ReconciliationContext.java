@@ -375,6 +375,7 @@ public class ReconciliationContext {
         reconSummary.put("situationSummary", getStatistics().getSituationSummary());
         reconSummary.put("started", getStatistics().getStarted());
         reconSummary.put("ended", getStatistics().getEnded());
+        reconSummary.put("duration", getStatistics().getDuration());
         return reconSummary;
     }
 
