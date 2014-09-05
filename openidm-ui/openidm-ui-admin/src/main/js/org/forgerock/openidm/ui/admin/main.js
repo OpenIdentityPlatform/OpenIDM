@@ -30,11 +30,13 @@ define("org/forgerock/openidm/ui/admin/main", [
 	
 	"./delegates/ConnectorDelegate",
 
-	"./connector/ConnectorView",
+	"./ResourcesView",
 	"./connector/AddEditConnectorView",
     "./connector/ConnectorTypeAbstractView",
 	"./connector/ConnectorTypeView",
     "./connector/ConnectorRegistry",
+
+    "./managed/AddEditManagedView",
 
     "./util/ConnectorUtils"
 ]);

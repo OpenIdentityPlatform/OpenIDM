@@ -1,0 +1,66 @@
+<div id="resourceConnectorContainer" class="resource-container">
+    <h3>{{t "templates.connector.connectorTitle"}}</h3>
+    {{#each currentConnectors}}
+		<div data-connector-title="{{cleanUrlName}}" class="resource-body">
+			<div class="resource-type-body">
+				<div class="resource-tools">
+					{{#if editable}}
+					<a href="#connectors/edit/{{cleanUrlName}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
+					{{/if}}
+					<span class="pull-right resource-delete connector-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
+				</div>
+				<div class="resource-info">
+					<span><i class="fa fa-paper-plane fa-3x"></i></span>
+					<p class="resource-type-name">{{displayName}}</p>
+				</div>
+			</div>
+			<hr /> 
+			<div class="resource-status-body">
+				<p class="resource-given-name">{{name}}</p>
+				  {{#if ok}}
+				    <p class="resource-status resource-available"><i class="fa fa-check-circle-o "></i> {{t "templates.connector.activeState"}}</p>
+				  {{else}}
+				  	<p title="{{errorMessage}}" class="resource-status resource-unavailable"><i class="fa fa-times-circle"></i> {{t "templates.connector.errorState"}}</p>
+				  {{/if}}
+			</div>
+		</div>
+	{{/each}}
+    <a class="add-resource-link" href="#connectors/add/">
+        <div id="connectorsAdd" class="resource-body add-resource-body">
+            <div class="resource-type-inner">
+                <div class="resource-info">
+                    <span><i class="fa fa-plus-circle fa-3x"></i></span>
+                    <p>{{t "templates.connector.addConnectorTitle"}}</p>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div id="resourceManagedContainer" class="resource-container">
+    <h3>{{t "templates.managed.managedTitle"}}</h3>
+    {{#each currentManagedObjects}}
+    <div data-managed-title="{{name}}" class="resource-body">
+        <div class="resource-type-body managed-type">
+            <div class="resource-tools">
+                <a href="#managed/edit/{{name}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
+                <span class="pull-right resource-delete managed-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
+            </div>
+            <div class="resource-info">
+                <span><i class="fa fa-database fa-3x"></i></span>
+                <p class="resource-type-name">{{name}}</p>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+    <a class="add-resource-link" href="#managed/add/">
+        <div id="managedAdd" class="resource-body add-resource-body">
+            <div class="resource-type-inner">
+                <div class="resource-info">
+                    <span><i class="fa fa-plus-circle fa-3x"></i></span>
+                    <p>{{t "templates.managed.addManagedTitle"}}</p>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>

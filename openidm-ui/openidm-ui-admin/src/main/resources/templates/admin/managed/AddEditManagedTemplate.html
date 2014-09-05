@@ -1,0 +1,81 @@
+<h3>{{addEditTitle}}</h3>
+<div class="resource-input-body">
+    <form id="managedObjectForm" class="form clearfix" autocomplete="off">
+        <fieldset>
+            <legend><span>{{t "common.form.generalDetails"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body">
+                <div class="group-field-block group-lead">
+                    <div class="separate-message">
+                        <label for="managedObjectName" class="light">{{t "templates.managed.managedObjectName"}}</label>
+                        <input id="managedObjectName" class="form-size-l" type="text" name="name" value="{{currentManagedObject.name}}" data-validator="required" data-validator-event="keyup blur" required autofocus>
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend><span>{{t "templates.managed.managedProperties"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div id="managedPropertyWrapper" class="group-body">
+                <div class="group-field-block group-note-lead">
+                    <p class="note">{{t "templates.managed.managedPropertyMessage"}}</p>
+                    <button type="button" id="addManagedProperties" name="addManagedProperties" class="button add-btn"><span>{{t "templates.managed.addProperty"}}</span><i class="fa fa-lg fa-plus"></i></button>
+                </div>
+                <div style="display:none;" id="managed-object-hidden-property" class="group-field-block small-field-block field">
+                    <div class="separate-message add-remove-block">
+                        <label class="light">{{t "templates.managed.addProperty"}}</label>
+                        <div class="inline inline-medium">
+                            <button type="button" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                            <input  class="form-size-s" autocomplete="off" type="text" name="" value=""/>
+                            <span></span>
+                        </div>
+                        <div class="inline inline-small">
+                            <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                            <label class="inline-label light">{{t "templates.managed.encrypted"}}</label>
+                        </div>
+                        <div class="inline inline-small">
+                            <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                            <label class="inline-label light">{{t "templates.managed.private"}}</label>
+                        </div>
+                        <div class="inline inline-small">
+                            <input autocomplete="off" type="checkbox" class="checkbox" name="" value="true">
+                            <label class="inline-label light">{{t "templates.managed.virtual"}}</label>
+                        </div>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+                {{#if currentManagedObject.properties.length}}
+                    {{#each_with_index currentManagedObject.properties}}
+                        <div class="group-field-block small-field-block field">
+                            <div class="separate-message add-remove-block">
+                                <label class="light">{{t "templates.managed.managedProperties"}}</label>
+                                <div class="inline inline-medium">
+                                    <button type="button" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                                    <input data-validator-event="keyup blur" data-validator="required" class="form-size-s" autocomplete="off" type="text" name="properties[{{index}}].name" value="{{value.name}}"/>
+                                    <span></span>
+                                </div>
+                                <div class="inline inline-small">
+                                    <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].encryption" {{#notequal value.encryption undefined}} checked {{/notequal}}>
+                                    <label class="inline-label light">{{t "templates.managed.encrypted"}}</label>
+                                </div>
+                                <div class="inline inline-small">
+                                    <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].scope" {{#notequal value.scope undefined}} checked {{/notequal}}>
+                                    <label class="inline-label light">{{t "templates.managed.private"}}</label>
+                                </div>
+                                <div class="inline inline-small">
+                                    <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].type" {{#notequal value.type undefined}} checked {{/notequal}}>
+                                    <label class="inline-label light">{{t "templates.managed.virtual"}}</label>
+                                </div>
+                                <div class="validation-message"></div>
+                            </div>
+                        </div>
+                    {{/each_with_index}}
+                {{/if}}
+            </div>
+        </fieldset>
+
+        <div class="float-right form-button-bar">
+            <input type="submit" id="addEditManaged" name="addEditButton" value="{{addEditSubmitTitle}}" class="button" disabled="true">
+        </div>
+    </form>
+</div>

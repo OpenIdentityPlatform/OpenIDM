@@ -118,8 +118,8 @@ define("config/AppConfiguration", [
                                         "inactive": false
                                     },
                                     "connectors": {
-                                        "url": "#connectors/",
-                                        "name": "config.AppConfiguration.Navigation.links.connectors",
+                                        "url": "#resources/",
+                                        "name": "config.AppConfiguration.Navigation.links.resources",
                                         "icon": "glyph-icon-star",
                                         "inactive": false
                                     }

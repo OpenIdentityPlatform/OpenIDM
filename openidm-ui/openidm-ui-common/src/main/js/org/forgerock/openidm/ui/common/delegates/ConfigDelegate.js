@@ -52,6 +52,10 @@ define("org/forgerock/openidm/ui/common/delegates/ConfigDelegate", [
         return Object.getPrototypeOf(obj).serviceCall.call(obj,callParams);
     };
 
+    obj.getConfigList = function(successCallback, errorCallback) {
+        return obj.serviceCall({ url:"", type: "GET", success: successCallback, error: errorCallback});
+    };
+
     obj.readEntity = function (id, successCallback, errorCallback) {
         var promise = $.Deferred(),
             clone;
