@@ -49,6 +49,7 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
 
         result.put(QueryDefinition.UPDATEQUERYSTR, "UPDATE " + mainTable + " SET objectid = ?, rev = ?, fullobject = ?::json WHERE id = ?");
         result.put(QueryDefinition.CREATEQUERYSTR, "INSERT INTO " + mainTable + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?::json)");
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj USING " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid = ? AND obj.rev = ?");
         result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id IN (SELECT obj.id FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ? AND obj.objectid = ?)");
         return result;
     }
