@@ -189,7 +189,16 @@ public class ReconciliationStatistic {
     public int getLinkCreated() {
         return linkCreated.get();
     }
-    
+
+    /**
+     * @return the duration, in millisconds, that the reconciliation took, -1 if unavailable
+     */
+    public long getDuration() {
+        return (startTime > 0 && endTime > 0)
+                ? endTime - startTime
+                : 0;
+    }
+
     /**
      * @return The reconciliation start time, formatted
      */
@@ -224,7 +233,7 @@ public class ReconciliationStatistic {
 
         results.put("startTime", getStarted());
         results.put("endTime", getEnded());
-        results.put("duration", endTime - startTime);
+        results.put("duration", getDuration());
         results.put("reconId", reconContext.getReconId());
         // TODO: what is this name?
         //results.put("reconName", reconContext.getName());
