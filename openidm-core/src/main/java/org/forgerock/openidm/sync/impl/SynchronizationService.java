@@ -223,7 +223,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      * @see #syncAllMappings(org.forgerock.openidm.sync.impl.SynchronizationService.SyncAction, String, String)
      */
     private interface SyncAction {
-        JsonValue sync(ObjectMapping mapping) throws SynchronizationException;
+        JsonValue sync(ServerContext context, ObjectMapping mapping) throws SynchronizationException;
     }
 
     /**
@@ -235,7 +235,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
      * @returns a JsonValue list of ObjectMappings' sync results
      * @throws SynchronizationException on failure to sync one of the mappings
      */
-    private JsonValue syncAllMappings(SyncAction action, final String resourceContainer, final String resourceId)
+    private JsonValue syncAllMappings(ServerContext context, SyncAction action, final String resourceContainer, final String resourceId)
             throws SynchronizationException {
         final JsonValue syncDetails = new JsonValue(new ArrayList<Object>());
         SynchronizationException exceptionPending = null;
@@ -260,7 +260,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             try {
                 if (exceptionPending == null) {
                     // no failures yet, sync this one
-                    mappingResult = action.sync(mapping);
+                    mappingResult = action.sync(context, mapping);
                 } else {
                     // we've already failed, skip the sync attempt
                     result = MappingSyncResult.SKIPPED;
@@ -294,20 +294,20 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             throws SynchronizationException {
         // Handle pending link action if present
         PendingAction.handlePendingActions(context, ReconAction.LINK, mappings, resourceContainer, resourceId, object);
-        return syncAllMappings(new SyncAction() {
+        return syncAllMappings(context, new SyncAction() {
             @Override
-            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
-                return mapping.notifyCreate(resourceContainer, resourceId, object);
+            public JsonValue sync(ServerContext context, ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyCreate(context, resourceContainer, resourceId, object);
             }
         }, resourceContainer, resourceId);
     }
 
     private JsonValue notifyUpdate(ServerContext context, final String resourceContainer, final String resourceId, final JsonValue oldValue, final JsonValue newValue)
             throws SynchronizationException {
-        return syncAllMappings(new SyncAction() {
+        return syncAllMappings(context, new SyncAction() {
             @Override
-            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
-                return mapping.notifyUpdate(resourceContainer, resourceId, oldValue, newValue);
+            public JsonValue sync(ServerContext context, ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyUpdate(context, resourceContainer, resourceId, oldValue, newValue);
             }
         }, resourceContainer, resourceId);
     }
@@ -316,10 +316,10 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             throws SynchronizationException {
         // Handle pending unlink action if present
         PendingAction.handlePendingActions(context, ReconAction.UNLINK, mappings, resourceContainer, resourceId, oldValue);
-        return syncAllMappings(new SyncAction() {
+        return syncAllMappings(context, new SyncAction() {
             @Override
-            public JsonValue sync(ObjectMapping mapping) throws SynchronizationException {
-                return mapping.notifyDelete(resourceContainer, resourceId, oldValue);
+            public JsonValue sync(ServerContext context, ObjectMapping mapping) throws SynchronizationException {
+                return mapping.notifyDelete(context, resourceContainer, resourceId, oldValue);
             }
         }, resourceContainer, resourceId);
     }

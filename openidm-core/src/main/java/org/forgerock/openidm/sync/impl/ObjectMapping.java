@@ -75,6 +75,7 @@ import org.slf4j.LoggerFactory;
  * @author Paul C. Bryan
  * @author aegloff
  * @author brmiller
+ * @author ckienle
  */
 class ObjectMapping {
 
@@ -105,12 +106,12 @@ class ObjectMapping {
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
     /**
-     * Date util used when creating ReconObject timestamps
+     * Date utility used for formatting timestamps in LogEntrys
      */
     private static final DateUtil dateUtil = DateUtil.getDateUtil("UTC");
 
-    /** Status of a recon operation */
-    private enum Status { SUCCESS, FAILURE }
+    /** Status of a recon or sync operation */
+    enum Status { SUCCESS, FAILURE }
 
     /** The mapping name */
     private final String name;
@@ -363,13 +364,14 @@ class ObjectMapping {
      * Convenience function with deleted defaulted to false and oldValue defaulted to null
      * @see ObjectMapping#doSourceSync(String, JsonValue, boolean, JsonValue)
      */
-    private JsonValue doSourceSync(String resourceId, JsonValue value) throws SynchronizationException {
-        return doSourceSync(resourceId, value, false, null);
+    private JsonValue doSourceSync(Context context, String resourceId, JsonValue value) throws SynchronizationException {
+        return doSourceSync(context, resourceId, value, false, null);
     }
 
     /**
      * Source synchronization
      *
+     * @param context the Context to use for this request
      * @param resourceId object identifier.
      * @param value null to have it query the source state if applicable,
      *        or JsonValue to tell it the value of the existing source to sync
@@ -377,14 +379,15 @@ class ObjectMapping {
      * @return sync results of the {@link SyncOperation}
      * @throws SynchronizationException if sync-ing fails.
      */
-    private JsonValue doSourceSync(String resourceId, JsonValue value, boolean sourceDeleted, JsonValue oldValue)
+    private JsonValue doSourceSync(Context context, String resourceId, JsonValue value, boolean sourceDeleted, JsonValue oldValue)
             throws SynchronizationException {
-        LOGGER.trace("Start source synchronization of {} {}", resourceId,
-                (value == null) ? "without a value" : "with a value");
+        JsonValue result = null;
+        LOGGER.trace("Start source synchronization of {} {}", resourceId, (value == null) ? "without a value" : "with a value");
 
         // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
         op.oldValue = oldValue;
+        SyncEntry entry = new SyncEntry(op, context, dateUtil);
         if (sourceDeleted) {
             op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, null);
         } else if (value != null) {
@@ -393,7 +396,23 @@ class ObjectMapping {
         } else {
             op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId);
         }
-        return op.sync();
+        entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, resourceId);
+        try {
+            result = op.sync();
+        } catch (SynchronizationException e) {
+            if (op.action != ReconAction.EXCEPTION) {
+                // exception was not intentional, set status to failure
+                entry.status = Status.FAILURE;
+                LOGGER.warn("Unexpected failure during source synchronization", e);
+            }
+            setLogEntryMessage(entry, e);
+            throw e;
+        } finally {
+            entry.targetObjectId = op.getTargetObjectId();
+            entry.actionId = op.actionId;
+            logSyncEntry(entry);
+        }
+        return result;
     }
 
     /**
@@ -587,7 +606,7 @@ class ObjectMapping {
      * @return the SynchronizationOperatioin result details
      * @throws SynchronizationException on failure to synchronize
      */
-    public JsonValue notifyCreate(String resourceContainer, String resourceId, JsonValue value)
+    public JsonValue notifyCreate(Context context, String resourceContainer, String resourceId, JsonValue value)
             throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
             if (value == null || value.getObject() == null) {
@@ -595,7 +614,7 @@ class ObjectMapping {
                 value = LazyObjectAccessor.rawReadObject(
                         service.getServerContext(), service.getConnectionFactory(), resourceContainer, resourceId);
             }
-            return doSourceSync(resourceId, value); // synchronous for now
+            return doSourceSync(context, resourceId, value); // synchronous for now
         }
         return new JsonValue(null);
     }
@@ -610,7 +629,7 @@ class ObjectMapping {
      * @return
      * @throws SynchronizationException on failure to synchronize
      */
-    public JsonValue notifyUpdate(String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue)
+    public JsonValue notifyUpdate(Context context, String resourceContainer, String resourceId, JsonValue oldValue, JsonValue newValue)
             throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
         	if (newValue == null || newValue.getObject() == null) { // notification without the actual value
@@ -619,7 +638,7 @@ class ObjectMapping {
             }
 
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
-                return doSourceSync(resourceId, newValue, false, oldValue); // synchronous for now
+                return doSourceSync(context, resourceId, newValue, false, oldValue); // synchronous for now
             } else {
                 LOGGER.trace("There is nothing to update on {}", resourceContainer + "/" + resourceId);
             }
@@ -636,10 +655,10 @@ class ObjectMapping {
      * @return
      * @throws SynchronizationException on failure to synchronize
      */
-    public JsonValue notifyDelete(String resourceContainer, String resourceId, JsonValue oldValue)
+    public JsonValue notifyDelete(Context context, String resourceContainer, String resourceId, JsonValue oldValue)
             throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
-            return doSourceSync(resourceId, null, true, oldValue); // synchronous for now
+            return doSourceSync(context, resourceId, null, true, oldValue); // synchronous for now
         }
         return new JsonValue(null);
     }
@@ -691,11 +710,11 @@ class ObjectMapping {
                     op = sop;
                     sop.fromJsonValue(params);
 
-                    entry = new ReconEntry(sop, rootContext, dateUtil);
-                    entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sop.getSourceObjectId());
+                    entry = new ReconEntry(sop, rootContext, dateUtil, name);
+                    entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sop.getSourceObjectId());
                     if (null == sop.getSourceObject()) {
                         exception = new SynchronizationException(
-                                "Source object " + entry.sourceId + " does not exists");
+                                "Source object " + entry.sourceObjectId + " does not exists");
                         throw exception;
                     }
                     //TODO blank check
@@ -715,12 +734,12 @@ class ObjectMapping {
                     top.fromJsonValue(params);
                     String targetId = params.get("targetId").required().asString();
 
-                    entry = new ReconEntry(top, rootContext, dateUtil);
-                    entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
+                    entry = new ReconEntry(top, rootContext, dateUtil, name);
+                    entry.targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
                     top.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
                     if (null == top.getTargetObject()) {
                         exception = new SynchronizationException(
-                                "Target object " + entry.targetId + " does not exists");
+                                "Target object " + entry.targetObjectId + " does not exists");
                         throw exception;
                     }
                     top.assessSituation();
@@ -746,21 +765,21 @@ class ObjectMapping {
                         LOGGER.warn("Unexpected failure in performing action {}", params, se);
                     }
                 }
-                setReconEntryMessage(entry, se);
+                setLogEntryMessage(entry, se);
             }
             if (reconId != null && !ReconAction.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 if (op instanceof SourceSyncOperation) {
                     entry.reconciling = "source";
                     if (op.getTargetObject() != null) {
-                        entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet,
+                        entry.targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet,
                                 op.getTargetObject().get("_id").asString());
                     }
                     entry.setAmbiguousTargetIds(((SourceSyncOperation) op).getAmbiguousTargetIds());
                 } else {
                     entry.reconciling = "target";
                     if (op.getSourceObject() != null) {
-                        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet,
+                        entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet,
                                 op.getSourceObject().get("_id").asString());
                     }
                 }
@@ -894,7 +913,14 @@ class ObjectMapping {
 // TODO: cleanup orphan link objects (no matching source or target) here
     }
 
-    public void setReconEntryMessage(ReconEntry entry, Exception syncException) {
+    /**
+     * Sets the LogEntry message and messageDetail with the appropriate information
+     * from the given Exception.
+     * 
+     * @param entry the LogEntry
+     * @param syncException the Exception
+     */
+    public void setLogEntryMessage(LogEntry entry, Exception syncException) {
         JsonValue messageDetail = null;  // top level ResourceException
         Throwable cause = syncException; // Root cause
         entry.exception = syncException;
@@ -950,7 +976,7 @@ class ObjectMapping {
                 throws SynchronizationException {
             SourceSyncOperation op = new SourceSyncOperation();
             op.reconContext = reconContext;
-            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil, name);
             if (objectEntry == null) {
                 // Load source detail on demand
                 op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
@@ -962,7 +988,7 @@ class ObjectMapping {
                 String normalizedSourceId = linkType.normalizeSourceId(id);
                 op.initializeLink(allLinks.get(normalizedSourceId));
             }
-            entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, id);
+            entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, id);
             op.reconId = reconContext.getReconId();
             try {
                 op.sync();
@@ -971,7 +997,7 @@ class ObjectMapping {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
                 }
-                setReconEntryMessage(entry, se);
+                setLogEntryMessage(entry, se);
             }
             String[] targetIds = op.getTargetIds();
             for (String handledId : targetIds) {
@@ -985,7 +1011,7 @@ class ObjectMapping {
                 entry.reconciling = "source";
                 try {
                     if (op.hasTargetObject()) {
-                        entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
+                        entry.targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
                     }
                 } catch (SynchronizationException ex) {
                     entry.message = "Failure in preparing recon entry " + ex.getMessage()
@@ -1012,7 +1038,7 @@ class ObjectMapping {
             reconContext.checkCanceled();
             TargetSyncOperation op = new TargetSyncOperation();
             op.reconContext = reconContext;
-            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);            
+            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil, name);            
             if (objectEntry == null) {
                 // Load target detail on demand
                 op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
@@ -1020,7 +1046,7 @@ class ObjectMapping {
                 // Pre-queried target detail
                 op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id, objectEntry);
             }
-            entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
+            entry.targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
             op.reconId = reconContext.getReconId();
             try {
                 op.sync();
@@ -1029,13 +1055,13 @@ class ObjectMapping {
                     entry.status = Status.FAILURE; // exception was not intentional
                     LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(), se);
                 }
-                setReconEntryMessage(entry, se);
+                setLogEntryMessage(entry, se);
             }
             if (!ReconAction.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 entry.reconciling = "target";
                 if (op.getSourceObjectId() != null) {
-                    entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
+                    entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, op.getSourceObjectId());
                 }
                 entry.actionId = op.actionId;
                 logReconEntry(entry);
@@ -1122,10 +1148,10 @@ class ObjectMapping {
     }
 
     /**
-     * TODO: Description.
+     * Creates a recon entry in the audit log.
      *
-     * @param entry TODO.
-     * @throws SynchronizationException TODO.
+     * @param entry the entry to create
+     * @throws SynchronizationException
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
@@ -1135,9 +1161,24 @@ class ObjectMapping {
             throw new SynchronizationException(ose);
         }
     }
+    
+    /**
+     * Creates a sync entry in the audit log.
+     *
+     * @param entry the entry to create
+     * @throws SynchronizationException
+     */
+    private void logSyncEntry(SyncEntry entry) throws SynchronizationException {
+        try {
+            CreateRequest cr = Requests.newCreateRequest("audit/sync",entry.toJsonValue());
+            service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
+        } catch (ResourceException ose) {
+            throw new SynchronizationException(ose);
+        }
+    }
 
     private void logReconStart(String reconId, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START, dateUtil);
+        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START, dateUtil, name);
         reconStartEntry.timestamp = new Date();
         reconStartEntry.reconId = reconId;
         reconStartEntry.message = "Reconciliation initiated by " + context.asContext(SecurityContext.class).getAuthenticationId();
@@ -1145,7 +1186,7 @@ class ObjectMapping {
     }
 
     private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END, dateUtil);
+        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END, dateUtil, name);
         reconEndEntry.timestamp = new Date();
         reconEndEntry.reconId = reconContext.getReconId();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
@@ -2192,112 +2233,6 @@ class ObjectMapping {
                             new Object[] {situation, getSourceObject(), targetId, linkObject});
                 }
             }
-        }
-    }
-
-    /**
-     * TEMPORARY.
-     */
-    private class ReconEntry {
-
-        /** Type of the audit log entry. Allows for marking recon start / summary records */
-        public String entryType = AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
-        /** TODO: Description. */
-        public final SyncOperation op;
-        /** The id identifying the reconciliation run */
-        public String reconId;
-        /** The root invocation context */
-        public final Context rootContext;
-        /** TODO: Description. */
-        public Date timestamp;
-        /** TODO: Description. */
-        public Status status = ObjectMapping.Status.SUCCESS;
-        /** TODO: Description. */
-        public String sourceId;
-        /** TODO: Description. */
-        public String targetId;
-        /** TODO: Description. */
-        public String reconciling;
-        /** TODO: Description. */
-        public String message;
-        /** TODO: Description. */
-        public JsonValue messageDetail;
-        /** TODO: Description. */
-        public Exception exception;
-        /** TODO: Description. */
-        public String actionId;
-        // Name of the mapping
-        public String mappingName;
-
-        private DateUtil dateUtil;
-
-        // A comma delimited formatted representation of any ambiguous identifiers
-        protected String ambigiousTargetIds;
-        public void setAmbiguousTargetIds(List<String> ambiguousIds) {
-            if (ambiguousIds != null) {
-                StringBuilder sb = new StringBuilder();
-                boolean first = true;
-                for (String id : ambiguousIds) {
-                    if (!first) {
-                        sb.append(", ");
-                    }
-                    first = false;
-                    sb.append(id);
-                }
-                ambigiousTargetIds = sb.toString();
-            } else {
-                ambigiousTargetIds = "";
-            }
-        }
-
-        private String getReconId() {
-            return (reconId == null && op != null) ? op.reconId : reconId;
-        }
-
-        /**
-         * Constructor that allows specifying the type of reconciliation log entry
-         */
-        public ReconEntry(SyncOperation op, Context rootContext, String entryType, DateUtil dateUtil) {
-            this.op = op;
-            this.rootContext = rootContext;
-            this.entryType = entryType;
-            this.dateUtil = dateUtil;
-            if (!AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY.equals(entryType)) {
-                this.mappingName = name;
-            }
-        }
-
-        /**
-         * Constructor for regular reconciliation log entries
-         */
-        public ReconEntry(SyncOperation op, Context rootContext, DateUtil dateUtil) {
-            this(op, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY, dateUtil);
-        }
-
-        /**
-         * TODO: Description.
-         *
-         * @return TODO.
-         */
-        private JsonValue toJsonValue() {
-            JsonValue jv = new JsonValue(new HashMap<String, Object>());
-            jv.put("entryType", entryType);
-            jv.put("rootActionId", rootContext.getId());
-            jv.put("reconId", getReconId());
-            jv.put("reconciling", reconciling);
-            jv.put("sourceObjectId", sourceId);
-            jv.put("targetObjectId", targetId);
-            jv.put("ambiguousTargetObjectIds", ambigiousTargetIds);
-            jv.put("timestamp", dateUtil.formatDateTime(timestamp));
-            jv.put("situation", ((op == null || op.situation == null) ? null : op.situation.toString()));
-            jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
-            jv.put("status", (status == null ? null : status.toString()));
-            jv.put("message", message);
-            jv.put("messageDetail", messageDetail);
-            jv.put("actionId", actionId);
-            jv.put("exception", exception);
-            jv.put("mapping", mappingName);
-            return jv;
         }
     }
 }
