@@ -131,6 +131,16 @@ Stopping OpenIDM (81491)
      </para>
     </listitem>
    </itemizedlist>
+   <para>
+    Depending on the level of customization you have made in your current
+    deployment, it might be simpler to start with your 2.x
+    <filename>boot.properties</filename> file, and copy all new settings from
+    the 3.0.0 file to your existing file. However, as a best practice, it is
+    recommended that you keep all configuration customizations (including new
+    properties and changed settings) in a single location in your configuration
+    files, so that these can simply be copy/pasted to the configuration files of
+    the new OpenIDM version.
+   </para>
   </step>
   <step>
    <para>
@@ -140,6 +150,28 @@ Stopping OpenIDM (81491)
    <screen>$ cd /path/to/openidm-3.0
 $ cp -r /path/to/openidm-2.1/security .
    </screen>
+   <para>
+    You can locate the entire <filename>security/</filename> folder with your
+    project, rather than in the default OpenIDM installation directory, however
+    you must specify the location in your project's
+    <filename>boot.properties</filename> file, <emphasis>relative to the OpenIDM
+    installation directory</emphasis>. For example, if your
+    <filename>security/</filename> folder is located at
+    <filename>/path/to/openidm/myproject/security</filename>, you would need to
+    edit the <filename>boot.properties</filename> file as follows:
+    <screen><userinput>$ more /path/to/openidm/myproject/conf/boot/boot.properties</userinput>
+<computeroutput>...
+openidm.keystore.type=JCEKS
+openidm.truststore.type=JKS
+openidm.keystore.provider=
+openidm.keystore.location=myproject/security/keystore.jceks
+openidm.truststore.location=myproject/security/truststore</computeroutput></screen>
+   </para>
+   <para>
+    The keystore and truststore locations are automatically prepended with the
+    install location, so you must specify the path relative to the install
+    location, rather than using property substitution.
+   </para>
   </step>
   <step>
    <para>
