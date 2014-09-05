@@ -25,6 +25,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,16 +60,20 @@ public class ReconciliationStatistic {
     private AtomicInteger linkCreated = new AtomicInteger();
     private AtomicInteger targetProcessed = new AtomicInteger();
     private AtomicInteger targetCreated = new AtomicInteger();
-    
+    private Map<ObjectMapping.Status, AtomicInteger> statusProcessed = new EnumMap<ObjectMapping.Status, AtomicInteger>(ObjectMapping.Status.class);
+
     private PhaseStatistic sourceStat;
     private PhaseStatistic targetStat;
     
     private Map<ReconStage, Map> stageStat = new ConcurrentHashMap<ReconStage, Map>();
-    
+
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
         sourceStat = new PhaseStatistic(this, PhaseStatistic.Phase.SOURCE);
         targetStat = new PhaseStatistic(this, PhaseStatistic.Phase.TARGET);
+        for (ObjectMapping.Status status : ObjectMapping.Status.values()) {
+            statusProcessed.put(status, new AtomicInteger());
+        }
     }
     
     public PhaseStatistic getSourceStat() {
@@ -130,7 +135,7 @@ public class ReconciliationStatistic {
      * @param targetId The target id processed, or null if none
      * @param linkExisted indication if the link existed before the operation
      * @param linkId the link identifier, if available. For created links this may not currently be available.
-     * @param linkCreated indication if a new link was created during the operation
+     * @param linkWasCreated indication if a new link was created during the operation
      * @param situation the assessed situation
      * @param action the action that was processed
      */
@@ -154,7 +159,11 @@ public class ReconciliationStatistic {
             linkCreated.incrementAndGet();
         }
     }
-    
+
+    public void processStatus(ObjectMapping.Status status) {
+        statusProcessed.get(status).incrementAndGet();
+    }
+
     /**
      * @return The number of existing source objects processed
      */
@@ -220,7 +229,7 @@ public class ReconciliationStatistic {
         } 
         return endFormatted;
     }
-    
+
     public boolean hasEnded() {
         if (endTime == 0) {
             return false;
@@ -262,5 +271,13 @@ public class ReconciliationStatistic {
         getSourceStat().updateSummary(situationSummary);
         getTargetStat().updateSummary(situationSummary);
         return situationSummary;
+    }
+
+    public Map<String, Integer> getStatusSummary() {
+        Map<String, Integer> statusSummary = new ConcurrentHashMap<String, Integer>();
+        for (Map.Entry<ObjectMapping.Status, AtomicInteger> entry : statusProcessed.entrySet()) {
+            statusSummary.put(entry.getKey().toString(), entry.getValue().intValue());
+        }
+        return statusSummary;
     }
 }

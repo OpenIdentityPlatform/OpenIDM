@@ -112,7 +112,7 @@ public class PhaseStatistic {
     public Map<String, Object> asMap() {
         Map<String, Object> results = new HashMap();
 
-        results.put("processed", processedEntries);
+        results.put("processed", getProcessed());
 
         Map<String, Object> nv = new HashMap();
         nv.put("count", notValid.size());
