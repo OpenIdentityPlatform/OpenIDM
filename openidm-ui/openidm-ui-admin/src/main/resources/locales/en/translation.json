@@ -55,6 +55,11 @@
                 "deleteConnectorSuccess" : "Connector successfully deleted",
                 "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
                 "connectorsNotAvailable" : "System currently has no available connectors."
+            },
+            "ManagedObjectMessages" : {
+                "deleteManagedSuccess" : "Managed object successfully deleted",
+                "deleteManagedFail" : "Error deleting managed object unable to remove managed object",
+                "saveSuccessful" : "Managed Object has been saved."
             }
         },
         "AppConfiguration" : {
@@ -70,7 +75,7 @@
                     "allTasks" : "Tasks that are in my group's queue",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
-                    "connectors" : "Connectors"
+                    "resources" : "Resources"
                 }
             }
         }
@@ -144,6 +149,20 @@
                 "remainingUsers" : "remaining users"
             }
         },
+        "managed" : {
+            "addManagedTitle" : "Add Managed Object",
+            "managedTitle" : "Managed Objects",
+            "managedDelete" : "Are you sure you wish to delete this managed object?",
+            "addTitle" : "Add Managed Object",
+            "editTitle" : "Edit Managed Object",
+            "managedObjectName" : "Managed Object Name",
+            "managedProperties" : "Managed Properties",
+            "managedPropertyMessage" : "If you have special managed object property add them below. Not all properties need to be added, only those with special functionality.",
+            "addProperty" : "Add Property",
+            "encrypted" : "Encrypted",
+            "private" : "Private",
+            "virtual" : "Virtual"
+        },
         "connector" : {
             "groovy_ScriptedConnector":"Groovy Connector",
             "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
@@ -160,9 +179,8 @@
             "connectorNameUnknown" : "Unknown",
             "addTitle" : "Add Connector",
             "editTitle" : "Edit Connector",
-            "addButtonTitle" : "Add",
-            "updateButtonTitle" : "Update",
             "addConnectorTitle" : "Add Connector",
+            "connectorTitle" : "Connectors",
             "activeState" : "Active",
             "errorState" : "Error",
             "baseTitle" : "Base Connector Details",
@@ -341,6 +359,7 @@
             "confirmPassword" : "Confirm Password"
         },
          "form" : {
+            "add" : "Add",
             "ok" : "Okay",
             "confirm" :"Confirmation",
             "true" : "True",
@@ -364,6 +383,7 @@
             "accept" : "Accept",
             "reject" : "Reject",
             "createdAt" : "Created at",
+            "generalDetails" : "General Details",
             "search" : "Search",
             "submit" : "Submit",
             "actions" : "Actions",

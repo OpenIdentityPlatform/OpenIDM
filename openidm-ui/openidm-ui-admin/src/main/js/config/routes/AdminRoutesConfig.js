@@ -39,13 +39,13 @@ define("config/routes/AdminRoutesConfig", [
             url: "dashboard/change_password/",
             role: "ui-admin"
         },
-        "connectorView" : {
-            view: "org/forgerock/openidm/ui/admin/connector/ConnectorView",
+        "resourcesView" : {
+            view: "org/forgerock/openidm/ui/admin/ResourcesView",
             role: "ui-admin",
-            url: "connectors/",
+            url: "resources/",
             forceUpdate: true
         },
-        "EditConnectorView" : {
+        "editConnectorView" : {
             view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
             role: "ui-admin",
             url: /^connectors\/edit\/(.+)\/$/,
@@ -56,6 +56,19 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
             role: "ui-admin",
             url: "connectors/add/",
+            forceUpdate: true
+        },
+        "editManagedView" : {
+            view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
+            role: "ui-admin",
+            url: /^managed\/edit\/(.+)\/$/,
+            pattern: "managed/edit/?/",
+            forceUpdate: true
+        },
+        "addManagedView" : {
+            view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
+            role: "ui-admin",
+            url: "managed/add/",
             forceUpdate: true
         }
     };

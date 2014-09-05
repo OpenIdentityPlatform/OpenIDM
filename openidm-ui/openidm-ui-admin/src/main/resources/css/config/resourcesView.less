@@ -23,7 +23,133 @@
  */
 
 /*
-General Connector Display
+  General resources Display
+*/
+
+.resource-body {
+  border:1px solid #ddd;
+  float:left;
+  margin-right:15px;
+  height:225px;
+  width:220px;
+  text-align:center;
+  background-color:white;
+  margin-top: 15px;
+}
+
+.resource-container h3 {
+  margin-top:10px;
+  line-height:18px;
+}
+
+.add-resource-body {
+  cursor:pointer;
+  background-color:#eee;
+}
+
+.add-resource-body:hover {
+  color:#5e887f;
+}
+
+.resource-tools {
+  height:15px;
+}
+
+.resource-tools .resource-edit {
+  margin-left:10px;
+}
+
+.resource-tools .resource-edit,
+.resource-tools .resource-delete {
+  cursor:pointer;
+}
+
+.resource-tools .resource-edit:hover,
+.resource-tools .resource-delete:hover {
+  color:#5e887f;
+}
+
+.resource-body a,
+.content a.add-resource-link{
+  color:#5d6871;
+}
+
+.resource-container {
+  clear:both;
+  padding-top:5px;
+}
+
+/*
+	Resource type information
+*/
+.resource-type-body {
+	padding:10px; 
+	color:#5d6871;
+}
+
+.resource-info {
+	padding:35px 0px 5px 0px;
+}
+
+.managed-type .resource-info {
+    padding:65px 0px 5px 0px;
+}
+
+.add-resource-body .resource-info {
+	padding-top:75px;
+}
+
+.resource-info span {
+	display:inline-block; 
+	margin-bottom:10px;
+}
+
+.resource-given-name,
+.resource-type-name {
+	overflow: hidden;
+	text-overflow: ellipsis;		
+}
+
+.resource-given-name {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.resource-input-body .group-field-block .add-btn {
+  margin-left:0px;
+}
+
+.resource-input-body .group-field-block .add-btn span{
+  display:inline-block;
+  width:140px;
+}
+
+.resource-body hr {
+  border-top: 1px solid #ddd;
+}
+
+/*
+  Resource Status details
+*/
+.resource-status-body {
+	padding: 3px 10px 10px 3px;
+	text-align:left;
+}
+
+.resource-status-body p{
+	padding:0px 0px 5px 10px;
+}
+
+.resource-unavailable {
+	color:@color-error;
+}
+
+.resource-available {
+	color:@color-success;
+}
+
+/*
+	Connector Add/Edit 	
 */
 
 .form-button-bar {
@@ -31,60 +157,17 @@ General Connector Display
   margin-top:15px;
 }
 
-.connector-input-body form.form .group-field-block label {
+.resource-input-body form.form .group-field-block label {
   display: block;
   width: 100%;
   text-align: left;
   padding-bottom: 0px;
 }
 
-.connector-input-body input[type="text"]:disabled,
-.connector-input-body select:disabled {
-	color: #bbb;
-	opacity: .8;
-}
-
-.connector-body{
-	border:1px solid #ddd;
-	float:left;
-	margin-top:15px;
-	margin-right:15px;
-	height:300px;
-	width:223px;
-	text-align:center;
-	background-color:white;
-}
-
-.add-connector-body {
-	cursor:pointer;
-	background-color:#eee;
-}
-
-.add-connector-body:hover {
-	color:#5e887f;
-}
-
-.connector-tools {
-    height:15px;
-}
-
-.connector-tools .connector-edit {
-	margin-left:10px;
-}
-
-.connector-tools .connector-edit,
-.connector-tools .connector-delete {
-	cursor:pointer;
-}
-
-.connector-tools .connector-edit:hover,
-.connector-tools .connector-delete:hover {
-	color:#5e887f;
-}
-
-.connector-body a,
-.content a.add-connector-link{
-  color:#5d6871;
+.resource-input-body input[type="text"]:disabled,
+.resource-input-body select:disabled {
+  color: #bbb;
+  opacity: .8;
 }
 
 .clean-btn {
@@ -103,106 +186,42 @@ General Connector Display
   color:#5e887f;
 }
 
-/*
-	Connector type information
-*/
-.connector-type-body {
-	padding:10px; 
-	color:#5d6871;
-}
-
-.connector-info {
-	padding:65px 0px 35px 0px;
-}
-
-.add-connector-body .connector-info {
-	padding-top:105px;
-}
-
-.connector-info span {
-	display:inline-block; 
-	margin-bottom:10px;
-}
-
-.connector-given-name,
-.connector-type-name {
-	overflow: hidden;
-	text-overflow: ellipsis;		
-}
-
-.connector-given-name {
-  font-weight: bold;
-  font-size: 12px;
-}
-
-.connector-input-body .group-field-block .add-btn {
-  margin-left:0px;
-}
-
-.connector-input-body .group-field-block .add-btn span{
-  display:inline-block;
-  width:140px;
-}
-
-/*
-Connector Status details
-*/
-.connector-status-body {
-	padding: 3px 10px 10px 3px;
-	text-align:left;
-}
-
-.connector-status-body p{
-	padding:0px 0px 5px 10px;
-}
-
-.connector-unavailable {
-	color:@color-error;
-}
-
-.connector-available {
-	color:@color-success;
-}
-
-/*
-	Connector Add/Edit 	
-*/
-.connector-input-body form.form .group-field-block {
+.resource-input-body form.form .group-field-block {
   padding:0px 0px 0px 10px;
   margin-top:0px;
 }
 
-.connector-input-body form.form .no-validation-block {
+.resource-input-body form.form .no-validation-block {
   margin-bottom:10px;
 }
 
-.connector-input-body form.form .field {
+.resource-input-body form.form .field {
   margin-bottom:0px;
 }
 
-.connector-input-body form.form .group-field-buttons button {
+.resource-input-body form.form .group-field-buttons button {
   margin-bottom: 5px;
 }
 
-.connector-input-body form.form .group-field-block .note {
+.resource-input-body form.form .group-field-block .note {
   font-size:14px;
   font-weight:bold;
 }
 
-.connector-input-body .form-size-s {
+.resource-input-body .form-size-s {
   width:260px;
 }
 
-.connector-input-body .form-size-m {
+.resource-input-body .form-size-m {
   width:500px;
 }
 
-.connector-input-body .outside-element .form-size-m {
+.resource-input-body .outside-element .form-size-m {
   width:620px;
 }
 
-.connector-input-body .form-size-l {
-  width:910px;
+.resource-input-body .form-size-l {
+  width:900px;
 }
 
 form.form .group-field-block .inline label.label-size-s  {
@@ -210,7 +229,8 @@ form.form .group-field-block .inline label.label-size-s  {
 }
 
 form.form .group-field-block .inline input[type='checkbox'] {
-  margin-top:10px;
+  position:relative;
+  top:10px;
   margin-right: 15px;
   margin-bottom: 10px;
 }
@@ -219,33 +239,30 @@ form.form .group-field-block .inline input[type='checkbox'] {
   margin-right:10px;
 }
 
-.connector-input-body fieldset {
+.resource-input-body fieldset {
   border: 1px #ddd solid;
   padding-left: 0px;
   padding-right: 0px;
   padding-bottom: 5px;
   background-color: white;
-}
-
-.connector-input-body fieldset.connector-closed-group {
-  height:40px;
-}
-
-.connector-input-body .connector-details-body fieldset{
   margin-top:15px;
 }
 
-.connector-input-body form.form fieldset .group-lead{
+.resource-input-body fieldset.connector-closed-group {
+  height:40px;
+}
+
+.resource-input-body form.form fieldset .group-lead{
   padding-top:0px;
   margin-top:15px;
 }
 
-.connector-input-body form.form fieldset .group-note-lead{
+.resource-input-body form.form fieldset .group-note-lead{
   padding-top:0px;
   margin-top:10px;
 }
 
-.connector-input-body legend{
+.resource-input-body legend{
   height:25px;
   padding:5px 5px 0px 5px;
   background-color:#80b7ab;
@@ -255,38 +272,49 @@ form.form .group-field-block .inline input[type='checkbox'] {
   color:white;
 }
 
-.connector-input-body legend:hover{
+.resource-input-body legend:hover{
   background-color:lighten(#80b7ab, @button-hover-lightness);
 }
 
-.connector-input-body legend span{
+.resource-input-body legend span{
   margin-right:10px;
   width: 170px;
   display: inline-block;
   text-overflow: ellipsis;
 }
 
-.connector-input-body .filter {
+.resource-input-body .filter {
   font-style:italic;
   color:#888;
 }
 
-.connector-input-body form.form .group-actions-block {
+.resource-input-body form.form .group-actions-block {
   margin-top:15px;
 }
 
-.connector-input-body form.form .error {
+.resource-input-body form.form .error {
   text-align: left;
   padding-left: 5px;
   padding-top: 5px;
+  float:right;
+}
+
+.resource-input-body form.form form.form .group-field-block .small-outside-element .ssl-radio {
+  width:125px;
+  position:relative;
+  bottom:8px;
+}
+
+.resource-input-body form.form .inline .error {
+  float:none;
 }
 
 form.form .group-field-block .outside-element div.validation-message {
-  width: 640px;
+  width: 668px;
 }
 
 form.form .group-field-block .outside-element .inline {
-  width:660px;
+  width:690px;
 }
 
 form.form .group-field-block .small-outside-element .inline {
@@ -300,7 +328,7 @@ form.form .group-field-block .small-outside-element div.validation-message {
 form.form .group-field-block div.validation-message {
   display:block;
   float:none;
-  width: 928px;
+  width: 920px;
 }
 
 form.form .error-size-s div.validation-message {
@@ -407,4 +435,35 @@ form.form .error-size-s div.validation-message {
 div.ui-dialog .group-field-block div.validation-message {
   width:605px;
 }
+
+/*
+  Shared Add/Edit
+*/
+
+form.form .group-field-block .inline-medium {
+  width:335px;
+}
+
+form.form .group-field-block .inline-small {
+  width:auto;
+  position: relative;
+  bottom:8px;
+}
+
+.resource-input-body form.form .group-field-block .inline-label {
+  width:auto;
+}
+
+form.form .group-field-block .inline .remove-btn {
+  float:left;
+  margin-top:5px;
+}
+
+form.form .small-field-block .invalid div.validation-message {
+  width:308px;
+}
+
+/*
+  Managed Objects Add/Edit
+*/
 

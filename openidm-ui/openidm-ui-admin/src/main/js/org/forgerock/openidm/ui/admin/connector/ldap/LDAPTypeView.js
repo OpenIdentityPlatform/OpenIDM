@@ -201,7 +201,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     updateBtnStatus();
                 },
                 close: function(e, ui) {
-                    $('#certificateContainerClone').dialog("destroy");
+                    _this.$el.find('#certificateContainerClone').dialog("destroy");
                 },
                 buttons: [
                     {

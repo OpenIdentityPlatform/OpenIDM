@@ -55,6 +55,18 @@ define("config/messages/AdminMessages", [
             "deleteConnectorFail": {
                 msg: "config.messages.ConnectorMessages.deleteConnectorFail",
                 type: "error"
+            },
+            "deleteManagedSuccess": {
+                msg: "config.messages.ManagedObjectMessages.deleteManagedSuccess",
+                type: "info"
+            },
+            "deleteManagedFail": {
+                msg: "config.messages.ManagedObjectMessages.deleteManagedFail",
+                type: "error"
+            },
+            "managedObjectSaveSuccess" : {
+                msg: "config.messages.ManagedObjectMessages.saveSuccessful",
+                type: "info"
             }
     };
     

@@ -37,7 +37,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function(AdminAbstractView, eventManager, validatorsManager, constants, ConnectorDelegate, ConnectorType, ConnectorRegistry, connectorUtils, router, ConfigDelegate) {
 
-    var AddConnectorView = AdminAbstractView.extend({
+    var AddEditConnectorView = AdminAbstractView.extend({
         template: "templates/admin/connector/AddEditConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
@@ -63,7 +63,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.data.editState = false;
                     this.data.connectorName = "";
                     this.data.addEditTitle = $.t("templates.connector.addTitle");
-                    this.data.addEditSubmitTitle = $.t("templates.connector.addButtonTitle");
+                    this.data.addEditSubmitTitle = $.t("common.form.add");
 
                     this.parentRender(_.bind(function () {
                         validatorsManager.bindValidators(this.$el);
@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.data.connectorType = data.connectorRef.connectorName;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
-                        this.data.addEditSubmitTitle = $.t("templates.connector.updateButtonTitle");
+                        this.data.addEditSubmitTitle = $.t("common.form.update");
 
                         this.parentRender(function() {
                             validatorsManager.bindValidators(this.$el);
@@ -165,13 +165,13 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 if(this.data.editState) {
                     ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
                         _.delay(function () {
-                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
+                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                         }, 1500);
                     }, this));
                 } else {
                     ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
                         _.delay(function() {
-                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
+                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                         }, 1500);
                     }, this));
                 }
@@ -270,6 +270,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         }
     });
 
-    return new AddConnectorView();
+    return new AddEditConnectorView();
 });
 
