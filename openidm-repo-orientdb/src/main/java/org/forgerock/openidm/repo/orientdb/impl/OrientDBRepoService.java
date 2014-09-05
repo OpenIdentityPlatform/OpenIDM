@@ -87,6 +87,7 @@ import com.orientechnologies.orient.core.exception.ODatabaseException;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.ORecordDuplicatedException;
+import com.orientechnologies.orient.core.version.OSimpleVersion;
 
 /**
  * Repository service implementation using OrientDB
@@ -453,9 +454,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 throw new NotFoundException("Object does not exist for delete on: " + request.getResourceName());
             }
             
-            existingDoc.setVersion(ver); // State the version we expect to delete for MVCC check
-
-            db.delete(existingDoc); 
+            db.delete(existingDoc.getIdentity(), new OSimpleVersion(ver)); 
             logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
             return DocumentUtil.toResource(existingDoc);
         } catch (ODatabaseException ex) {
