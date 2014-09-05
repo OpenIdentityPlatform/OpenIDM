@@ -137,6 +137,7 @@ public class AuditServiceImpl implements AuditService {
 
     // Types of logs
     public static final String TYPE_RECON = "recon";
+    public static final String TYPE_SYNC = "sync";
     public static final String TYPE_ACTIVITY = "activity";
     public static final String TYPE_ACCESS = "access";
 
@@ -175,6 +176,18 @@ public class AuditServiceImpl implements AuditService {
     public static final String RECON_LOG_SITUATION = "situation";
     public static final String RECON_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String RECON_LOG_TARGET_OBJECT_ID = "targetObjectId";
+    
+    public static final String SYNC_LOG_TIMESTAMP = "timestamp";
+    public static final String SYNC_LOG_ACTION_ID = "actionId";
+    public static final String SYNC_LOG_ROOT_ACTION_ID = "rootActionId";
+    public static final String SYNC_LOG_STATUS = "status";
+    public static final String SYNC_LOG_MESSAGE = "message";
+    public static final String SYNC_LOG_MESSAGE_DETAIL = "messageDetail";
+    public static final String SYNC_LOG_EXCEPTION = "exception";
+    public static final String SYNC_LOG_ACTION = "action";
+    public static final String SYNC_LOG_SITUATION = "situation";
+    public static final String SYNC_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
+    public static final String SYNC_LOG_TARGET_OBJECT_ID = "targetObjectId";
 
     // ----- Declarative Service Implementation
 
@@ -835,6 +848,8 @@ public class AuditServiceImpl implements AuditService {
     public static Map<String, Object> formatLogEntry(Map<String, Object> entry, String type) {
         if (AuditServiceImpl.TYPE_RECON.equals(type)) {
             return AuditServiceImpl.formatReconEntry(entry);
+        } else if (AuditServiceImpl.TYPE_SYNC.equals(type)) {
+            return AuditServiceImpl.formatSyncEntry(entry);
         } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {
             return AuditServiceImpl.formatActivityEntry(entry);
         } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {
@@ -886,6 +901,29 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put(STATUS, entry.get(STATUS));
         formattedEntry.put(CHANGED_FIELDS, entry.get(CHANGED_FIELDS));
         formattedEntry.put(PASSWORD_CHANGED, entry.get(PASSWORD_CHANGED));
+        return formattedEntry;
+    }
+
+    /**
+     * Returns a audit log sync entry.
+     *
+     * @param entry the full entry to format
+     * @return the formatted entry
+     */
+    public static Map<String, Object> formatSyncEntry(Map<String, Object> entry) {
+        Map<String, Object> formattedEntry = new LinkedHashMap<String, Object>();
+        formattedEntry.put(LOG_ID, entry.get(LOG_ID));
+        formattedEntry.put(SYNC_LOG_TIMESTAMP, entry.get(SYNC_LOG_TIMESTAMP));
+        formattedEntry.put(SYNC_LOG_ROOT_ACTION_ID, entry.get(SYNC_LOG_ROOT_ACTION_ID));
+        formattedEntry.put(SYNC_LOG_STATUS, entry.get(SYNC_LOG_STATUS));
+        formattedEntry.put(SYNC_LOG_MESSAGE, entry.get(SYNC_LOG_MESSAGE));
+        formattedEntry.put(SYNC_LOG_MESSAGE_DETAIL, entry.get(SYNC_LOG_MESSAGE_DETAIL));
+        formattedEntry.put(SYNC_LOG_EXCEPTION, entry.get(SYNC_LOG_EXCEPTION));
+        formattedEntry.put(SYNC_LOG_ACTION, entry.get(SYNC_LOG_ACTION));
+        formattedEntry.put(SYNC_LOG_ACTION_ID, entry.get(SYNC_LOG_ACTION_ID));
+        formattedEntry.put(SYNC_LOG_SITUATION, entry.get(SYNC_LOG_SITUATION));
+        formattedEntry.put(SYNC_LOG_SOURCE_OBJECT_ID, entry.get(SYNC_LOG_SOURCE_OBJECT_ID));
+        formattedEntry.put(SYNC_LOG_TARGET_OBJECT_ID, entry.get(SYNC_LOG_TARGET_OBJECT_ID));
         return formattedEntry;
     }
 
