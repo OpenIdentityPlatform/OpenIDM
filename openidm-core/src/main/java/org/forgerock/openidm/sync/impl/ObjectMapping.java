@@ -603,7 +603,7 @@ class ObjectMapping {
      * @param resourceContainer source system
      * @param resourceId source object id
      * @param value object to synchronize
-     * @return the SynchronizationOperatioin result details
+     * @return the SynchronizationOperation result details
      * @throws SynchronizationException on failure to synchronize
      */
     public JsonValue notifyCreate(Context context, String resourceContainer, String resourceId, JsonValue value)
@@ -999,6 +999,10 @@ class ObjectMapping {
                 }
                 setLogEntryMessage(entry, se);
             }
+            // update statistics with status
+            if (reconContext != null) {
+                reconContext.getStatistics().processStatus(entry.status);
+            }
             String[] targetIds = op.getTargetIds();
             for (String handledId : targetIds) {
                 // If target system has case insensitive IDs, remove without regard to case
@@ -1056,6 +1060,10 @@ class ObjectMapping {
                     LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(), se);
                 }
                 setLogEntryMessage(entry, se);
+            }
+            // update statistics with status
+            if (reconContext != null) {
+                reconContext.getStatistics().processStatus(entry.status);
             }
             if (!ReconAction.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
@@ -2162,8 +2170,8 @@ class ObjectMapping {
                 } finally {
                     measurePerform.end();
                     if (reconContext != null) {
-                        reconContext.getStatistics().getTargetStat().processed(getSourceObjectId(), getTargetObjectId(), linkExisted, getLinkId(), linkCreated,
-                                situation, action);
+                        reconContext.getStatistics().getTargetStat().processed(getSourceObjectId(), getTargetObjectId(),
+                                linkExisted, getLinkId(), linkCreated, situation, action);
                     }
                 }
                 return toJsonValue();

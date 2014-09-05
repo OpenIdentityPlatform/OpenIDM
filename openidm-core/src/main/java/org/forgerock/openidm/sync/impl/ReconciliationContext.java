@@ -325,7 +325,7 @@ public class ReconciliationContext {
     }
 
     /**
-     * @param stage Sets the current state and stage in the reconciliation process
+     * @param newStage Sets the current state and stage in the reconciliation process
      */
     public void setStage(ReconStage newStage) {
         // If there is already a stage in progress, end it first
@@ -373,6 +373,7 @@ public class ReconciliationContext {
         reconSummary.put("stageDescription", getStage().getDescription());
         reconSummary.put("progress", getProgress());
         reconSummary.put("situationSummary", getStatistics().getSituationSummary());
+        reconSummary.put("statusSummary", getStatistics().getStatusSummary());
         reconSummary.put("started", getStatistics().getStarted());
         reconSummary.put("ended", getStatistics().getEnded());
         reconSummary.put("duration", getStatistics().getDuration());
