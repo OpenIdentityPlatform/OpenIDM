@@ -205,7 +205,7 @@ public class ReconciliationStatistic {
     public long getDuration() {
         return (startTime > 0 && endTime > 0)
                 ? endTime - startTime
-                : 0;
+                : -1;
     }
 
     /**
