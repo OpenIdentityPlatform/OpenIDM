@@ -116,7 +116,7 @@ var httpAccessConfig =
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowQueryExpression()",
-            "excludePatterns": "system/*"
+            "excludePatterns": "system/*,repo,repo/*"
         },
         // additional rules for openidm-admin that selectively enable certain parts of system/
         {  
@@ -132,6 +132,21 @@ var httpAccessConfig =
             "roles"     : "openidm-admin",
             "methods"   : "action",
             "actions"   : "test,testConfig,createconfiguration,liveSync,authenticate"
+        },
+        // Disallow command action on repo
+        {  
+            "pattern"   : "repo",
+            "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowCommandAction()"
+        },
+        {  
+            "pattern"   : "repo/*",
+            "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowCommandAction()"
         },
         
         // Additional checks for authenticated users
