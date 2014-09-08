@@ -41,6 +41,7 @@ require.config({
         handlebars: "libs/handlebars-1.0.rc.1",
         moment: "libs/moment-1.7.2-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
+        jsonEditor: "libs/jsoneditor-0.7.9-min",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
         SiteIdentificationDelegate: "org/forgerock/openidm/ui/common/delegates/SiteIdentificationDelegate",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min"
@@ -63,12 +64,15 @@ require.config({
         spin: {
             exports: "spin"
         },
+        jsonEditor: {
+            exports: "jsonEditor"
+        },
         jqueryui: {
             exports: "jqueryui"
         },
         jqgrid: {
             deps: ["jqueryui", "i18nGrid"]
-        }, 
+        },
         xdate: {
             exports: "xdate"
         },
@@ -106,16 +110,17 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/main", 
+    "org/forgerock/openidm/ui/common/main",
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/common/main",
     "AuthnDelegate",
     "ThemeManager",
     "config/main"
-], function(a, b, c, d, e, g, h, i, j, k, l, m, n, i18n, constants, eventManager) {
+], function(a, b, c, d, e, g, h, i, j, k, l, m, n, jsonEditor, i18n, constants, eventManager) {
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 

@@ -34,17 +34,21 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
     "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function(AdminAbstractView, eventManager, validatorsManager, constants, ConnectorDelegate, ConnectorType, ConnectorRegistry, connectorUtils, router, ConfigDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog"
+], function(AdminAbstractView, eventManager, validatorsManager, constants, ConnectorDelegate, ConnectorType, ConnectorRegistry, connectorUtils, router, ConfigDelegate, objectTypesDialog) {
 
     var AddEditConnectorView = AdminAbstractView.extend({
         template: "templates/admin/connector/AddEditConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
-            "click input[type=submit]": "formSubmit",
+            "click #addEditConnector": "formSubmit",
             "onValidate": "onValidate",
             "click #connectorForm fieldset legend" : "sectionHideShow",
-            "click .error-box .close-button" : "closeError"
+            "click .error-box .close-button" : "closeError",
+            "click #addEditObjectType": "addEditObjectType",
+            "click #validateConnector": "validate",
+            "change input" : "disableButtons"
         },
         connectorTypeRef: null,
 
@@ -63,6 +67,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.data.editState = false;
                     this.data.connectorName = "";
                     this.data.addEditTitle = $.t("templates.connector.addTitle");
+                    this.data.addEditSubmitTitle = $.t("templates.connector.addButtonTitle");
+                    this.data.addEditObjectTypeTitle = $.t("templates.connector.addObjectTypeTitle");
                     this.data.addEditSubmitTitle = $.t("common.form.add");
 
                     this.parentRender(_.bind(function () {
@@ -84,6 +90,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.data.connectorType = data.connectorRef.connectorName;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
+                        this.data.addEditSubmitTitle = $.t("templates.connector.updateButtonTitle");
+                        this.data.addEditObjectTypeTitle = $.t("templates.connector.editObjectTypeTitle");
+                        this.data.objectType = data.objectTypes;
                         this.data.addEditSubmitTitle = $.t("common.form.update");
 
                         this.parentRender(function() {
@@ -137,16 +146,14 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             }
         },
 
-        formSubmit: function(event) {
-            event.preventDefault();
-
+        getProvisioner: function() {
             var connectorData,
                 connDetails = this.connectorTypeRef.data.connectorDefaults,
                 mergedResult = {};
 
             connectorData = form2js('connectorForm', '.', true);
 
-            if(connectorData.enabled === "true") {
+            if (connectorData.enabled === "true") {
                 connectorData.enabled = true;
             } else {
                 connectorData.enabled = false;
@@ -155,30 +162,70 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             delete connectorData.connectorType;
 
             //Add a dummy object type here for now until we have the creator
+            connectorData.configurationProperties.readSchema = false;
             connectorData.objectTypes = {};
 
             $.extend(true, mergedResult, connDetails, connectorData);
 
+            mergedResult.objectTypes = this.data.userDefinedObjectType || this.data.objectType;
+
+            return mergedResult;
+        },
+
+        formSubmit: function(event) {
+            event.preventDefault();
+            var mergedResult = this.getProvisioner();
+
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
+
+            if(this.data.editState) {
+                ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                    _.delay(function () {
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                    }, 1500);
+                }, this));
+            } else {
+                ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                    _.delay(function() {
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                    }, 1500);
+                }, this));
+            }
+        },
+
+
+        validate: function(event) {
+            event.preventDefault();
+
+            var mergedResult = this.getProvisioner();
+
             ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (result) {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
 
-                if(this.data.editState) {
-                    ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
-                        _.delay(function () {
-                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
-                        }, 1500);
-                    }, this));
-                } else {
-                    ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
-                        _.delay(function() {
-                            eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
-                        }, 1500);
-                    }, this));
-                }
+                    if(!this.data.editState) {
+                        this.data.objectType = result.objectTypes;
+                    }
 
-            }, this), _.bind(function(result) {
-                this.showError(result);
-            }, this));
+                    this.data.userDefinedObjectType = null;
+                    this.$el.find("#addEditObjectType").prop('disabled', false);
+                    this.$el.find("#addEditConnector").prop('disabled', false);
+                }, this), _.bind(function(result) {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
+
+                    if(!this.data.editState) {
+                        this.data.objectType = {};
+                    }
+
+                    this.$el.find("#addEditObjectType").prop('disabled', true);
+                    this.$el.find("#addEditConnector").prop('disabled', true);
+                    this.showError(result);
+                }, this)
+            );
+        },
+
+        disableButtons: function() {
+            this.$el.find("#addEditObjectType").prop('disabled', true);
+            this.$el.find("#addEditConnector").prop('disabled', true);
         },
 
         sectionHideShow: function(event) {
@@ -267,6 +314,14 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             });
 
             return err;
+        },
+
+        addEditObjectType: function() {
+            objectTypesDialog.render(this.data.userDefinedObjectType ||this.data.objectType, _.bind(this.saveObjectType, this));
+        },
+
+        saveObjectType: function(newObjectType) {
+            this.data.userDefinedObjectType = newObjectType;
         }
     });
 

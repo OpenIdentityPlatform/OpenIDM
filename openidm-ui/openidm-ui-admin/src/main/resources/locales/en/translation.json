@@ -1,5 +1,5 @@
-{ 
-    "config" : { 
+{
+    "config" : {
         "dates" : {
             "monthNames" : "January, February, March, April, May, June, July, August, September, October, November, December",
             "monthNamesShort" : "Jan., Feb., Mar., Apr., May., Jun., Jul., Aug., Sep., Oct., Nov., Dec.",
@@ -48,10 +48,9 @@
             },
             "ConnectorMessages" : {
                 "connectorSaved" : "Connector has been saved, now testing connector.",
-                "connectorSaved" : "Connector has been saved, now testing connector.",
                 "connectorTestFailed" : "Your Validation Failed. See details below.",
                 "connectorSaveFail" : "Failed to save connector please try again.",
-                "connectorTestPass" : "Connector successfully saved",
+                "connectorTestPass" : "Validation passed",
                 "deleteConnectorSuccess" : "Connector successfully deleted",
                 "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
                 "connectorsNotAvailable" : "System currently has no available connectors."
@@ -84,11 +83,11 @@
         "MandatoryChangePassword" : {
             "title" : "Change Password Dialog",
             "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure password.",
-            "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password." 
-        }, 
+            "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password."
+        },
         "user" : {
             "LoginDialog" : {
-                "refreshOnLogin" : "Should refresh on login" 
+                "refreshOnLogin" : "Should refresh on login"
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
@@ -179,11 +178,26 @@
             "connectorNameUnknown" : "Unknown",
             "addTitle" : "Add Connector",
             "editTitle" : "Edit Connector",
+            "addButtonTitle" : "Add",
+            "updateButtonTitle" : "Update",
+            "addObjectTypeTitle": "Add ObjectType",
+            "editObjectTypeTitle": "Edit ObjectType",
+            "readSchema": "Read Schema",
+            "validateConnector": "Validate Connector",
             "addConnectorTitle" : "Add Connector",
             "connectorTitle" : "Connectors",
             "activeState" : "Active",
             "errorState" : "Error",
             "baseTitle" : "Base Connector Details",
+            "objectTypes": {
+                "saveObjectType": "Save ObjectType and Close",
+                "discardEdits": "Discard Changes and Close",
+                "bulkDeleteMsg": "You can only perform bulk deletes, please select one objectType to make edits",
+                "deleteObjectTypes": "Delete Selected ObjectTypes",
+                "addNewObjecttype": "Add a new object type",
+                "deleteObject": "Delete Object",
+                "saveObject": "Save Object"
+            },
             "errorMessages": {
                 "unknownHost" : "Unknown Host",
                 "portOutOfRange" : "Port Out of Range",
@@ -475,7 +489,7 @@
             "changePhoto" : "Change photo",
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
-         }, 
+         },
          "task" : {
             "unassigned" : "Unassigned",
             "assignToMe" : "Assign to me",
@@ -535,15 +549,15 @@
                             "for" : "For",
                             "application" : "Application",
                             "requested" : "Requested",
-                            "actions" : "Actions"                            
+                            "actions" : "Actions"
                         },
                         "headers" : {
                             "initiator" : "Initiator",
                             "key" : "Key",
                             "requested" : "Requested",
                             "inQueue" : "In queue",
-                            "actions" : "Actions"    
-                        }   
+                            "actions" : "Actions"
+                        }
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
@@ -564,7 +578,7 @@
                         "profileWillBeDeleted" : "%s account will be deleted."
                     },
                     "ChangeUserPasswordDialog" : {
-                        "securityDataChangeForWhom" : "Security data change for %s" 
+                        "securityDataChangeForWhom" : "Security data change for %s"
                     }
                 }
             },
@@ -574,7 +588,7 @@
                         "noNotifications" : "You have no notifications right now.",
                         "seeMoreNotifications" : "see more notifications"
                     }
-                }, 
+                },
                 "BaseApplicationsView" : {
                     "noApplicationsHere" : "Your have no apps here",
                     "noDefaultApplications" : "Your have no default apps",

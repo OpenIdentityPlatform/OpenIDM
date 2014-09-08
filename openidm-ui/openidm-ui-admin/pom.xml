@@ -78,6 +78,14 @@
     </dependency>
 
     <dependency>
+      <groupId>org.forgerock.commons.ui.libs</groupId>
+      <artifactId>jsoneditor</artifactId>
+      <version>0.7.9</version>
+      <classifier>min</classifier>
+      <type>js</type>
+    </dependency>
+
+    <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>
         <artifactId>ldapjs-filter</artifactId>
         <version>2253</version>
