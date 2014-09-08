@@ -343,9 +343,8 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
-     * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param obj the contents of the object to put in the object set.
+     * @param context the request server context
+     * @param request the contents of the object to update
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
@@ -518,7 +517,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         } catch (IllegalArgumentException e) {
             handler.handleError(new BadRequestException("Unknown action: " + request.getAction()));
         } catch (ResourceException e) {
-            handler.handleError(new BadRequestException("Error updating DB credentials: " + e.getMessage(), e));
+            handler.handleError(e);
         }
     }
 
@@ -527,7 +526,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      *
      * @param request the ActionRequest
      * @return the number of affected rows/records.
-     * @throws ResourceException on failure to resolvd query
+     * @throws ResourceException on failure to resolved query
      */
     public Object command(ActionRequest request) throws ResourceException {
 
@@ -701,7 +700,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     
     /**
      * @return A connection from the pool. Call close on the connection when done to return to the pool.
-     * @throws org.forgerock.openidm.objset.InternalServerErrorException
+     * @throws InternalServerErrorException
      */
     ODatabaseDocumentTx getConnection() throws InternalServerErrorException {
         ODatabaseDocumentTx db = null;

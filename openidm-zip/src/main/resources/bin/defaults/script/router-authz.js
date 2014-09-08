@@ -311,6 +311,10 @@ function disallowQueryExpression() {
     return  !request.queryExpression;
 }
 
+function disallowCommandAction() {
+    return  request.method !== "action" || request.action !== "command";
+}
+
 //////// Do not alter functions below here as part of your authz configuration
 
 function passesAccessConfig(id, roles, method, action) {
