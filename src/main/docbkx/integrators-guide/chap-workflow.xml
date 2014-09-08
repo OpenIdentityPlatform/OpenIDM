@@ -877,8 +877,7 @@ openidm.create('workflow/processinstance', null, params);
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "If-Match: *" \
  --request DELETE \
- "http://localhost:8080/openidm/workflow/processdefinition/managedUserApproval:1:3"
-    </userinput>
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3"</userinput>
     </screen>
     <para>
      The delete request returns the contents of the deleted workflow definition.

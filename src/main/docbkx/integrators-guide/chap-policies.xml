@@ -649,11 +649,11 @@ $ <userinput>curl \
       <screen>$ <userinput>curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
+ --cacert self-signed.crt \
  --header "Content-Type: application/json" \
  --request POST \
  --data '{ "password" : "12345" }' \
- "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
-       </userinput>
+ "https://localhost:8443/openidm/policy/managed/user/bjensen?_action=validateProperty"</userinput>
        <computeroutput>
 {
     "result": false,
