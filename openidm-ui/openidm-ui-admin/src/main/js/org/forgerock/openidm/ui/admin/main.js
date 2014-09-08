@@ -38,5 +38,7 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./managed/AddEditManagedView",
 
-    "./util/ConnectorUtils"
+    "./util/ConnectorUtils",
+
+    "./objectTypes/ObjectTypesDialog"
 ]);
