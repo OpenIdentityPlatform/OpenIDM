@@ -1670,8 +1670,7 @@ $ <userinput>curl \
      RESTful GET on the <literal>audit/recon</literal> endpoint. For example:
     </para>
 
-    <screen>
-$ <userinput>curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1686,108 +1685,112 @@ $ <userinput>curl \
     <programlisting language="javascript">{
   "entries": [
     {
-      "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
-      "messageDetail": null,
-      "message": "Reconciliation initiated by openidm-admin",
-      "timestamp": "2013-05-08T07:58:33.296Z",
-      "reconId": "5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f",
-      "entryType": "start",
-      "_id": "11381e20-3679-469d-a71c-c557c2bd091e",
-      "status": "SUCCESS",
-      "exception": "",
-      "mapping": "systemXmlfileAccounts_managedUser"
-    },
-    {
-      "messageDetail": null,
-      "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
-      "situation": "ABSENT",
-      "actionId": "86995423-8a43-4fc7-9c3c-9e450e0234cb",
       "targetObjectId": "managed/user/scarter",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "9f59bb8a-31c6-41af-8f27-02094391ba0c",
-      "reconId": "5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f",
-      "status": "SUCCESS",
-      "exception": "",
+      "sourceObjectId": "system/xmlfile/account/scarter",
+      "situation": "ABSENT",
       "reconciling": "source",
       "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-08T07:58:33.791Z",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "fe250514-d3e1-477a-bb90-88bd4525d70b",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.575Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
       "message": null,
-      "sourceObjectId": "system/xmlfile/account/scarter"
+      "messageDetail": null
     },
     {
-      "messageDetail": null,
-      "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
-      "situation": "ABSENT",
-      "actionId": "dea9b5c5-7a75-4cab-b8e4-176bea0a94a6",
-      "targetObjectId": "managed/user/bjensen",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "4fd285ef-a409-4875-abd0-5d70965fe172",
-      "reconId": "5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f",
-      "status": "SUCCESS",
+      "mapping": "systemXmlfileAccounts_managedUser",
       "exception": "",
-      "reconciling": "source",
-      "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-08T07:58:33.793Z",
-      "message": null,
-      "sourceObjectId": "system/xmlfile/account/bjensen"
-      },
-      {
-        "rootActionId": "d0578abf-f38e-4ede-a7dc-5ee9eaa8ce53",
-        "messageDetail": {
-          "ended": "2013-05-08T07:58:33.813Z",
-          "started": "2013-05-08T07:58:33.294Z",
-          "situationSummary": {
-            "SOURCE_MISSING": 0,
-            "FOUND": 0,
-            "SOURCE_IGNORED": 0,
-            "UNQUALIFIED": 0,
-            "UNASSIGNED": 0,
-            "TARGET_IGNORED": 0,
-            "CONFIRMED": 0,
-            "AMBIGUOUS": 0,
-            "ABSENT": 2,
-            "MISSING": 0
-          },
-          "progress": {
-            "links": {
-              "created": 2,
-              "existing": {
-                "total": "0",
-                "processed": 0
-              }
-            },
-            "target": {
-              "created": 2,
-              "existing": {
-                "total": "0",
-                "processed": 0
-              }
-            },
-            "source": {
-              "existing": {
-                "total": "2",
-                "processed": 2
-              }
+      "_id": "10e4195b-7b38-4b99-9916-a6d2de137c11",
+      "entryType": "start",
+      "timestamp": "2014-09-08T08:57:47.218Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": "Reconciliation initiated by openidm-admin",
+      "messageDetail": null
+    },
+    {
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "exception": "",
+      "_id": "d8634325-78f6-4504-b9f4-ba7b9103e391",
+      "entryType": "summary",
+      "timestamp": "2014-09-08T08:57:47.607Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0 CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 ",
+      "messageDetail": {
+        "stage": "COMPLETED_SUCCESS",
+        "stageDescription": "reconciliation completed.",
+        "progress": {
+          "links": {
+            "created": 2,
+            "existing": {
+              "processed": 0,
+              "total": "0"
             }
           },
-          "stageDescription": "reconciling target entries",
-          "stage": "ACTIVE_RECONCILING_TARGET",
-          "state": "ACTIVE",
-          "mapping": "systemXmlfileAccounts_managedUser"
+          "source": {
+            "existing": {
+              "processed": 2,
+              "total": "2"
+            }
+          },
+          "target": {
+            "created": 2,
+            "existing": {
+              "processed": 0,
+              "total": "0"
+            }
+          }
         },
-        "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
-           CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 ",
-        "timestamp": "2013-05-08T07:58:33.813Z",
-        "reconId": "5cf09dfa-e85c-4d52-ab6c-8ba7c2e3d34f",
-        "entryType": "summary",
-        "_id": "a8a81f9f-fa8f-49f4-a0d6-c88b5fc4be2a",
-        "status": "SUCCESS",
-        "exception": "",
-        "mapping": "systemXmlfileAccounts_managedUser"
+        "duration": 388,
+        "situationSummary": {
+          "SOURCE_MISSING": 0,
+          "FOUND": 0,
+          "SOURCE_IGNORED": 0,
+          "UNQUALIFIED": 0,
+          "UNASSIGNED": 0,
+          "TARGET_IGNORED": 0,
+          "CONFIRMED": 0,
+          "AMBIGUOUS": 0,
+          "ABSENT": 2,
+          "MISSING": 0
+        },
+        "statusSummary": {
+          "FAILURE": 0,
+          "SUCCESS": 2
+        },
+        "state": "SUCCESS",
+        "mapping": "systemXmlfileAccounts_managedUser",
+        "started": "2014-09-08T08:57:47.218Z",
+        "ended": "2014-09-08T08:57:47.606Z"
       }
-    ]
+    },
+    {
+      "targetObjectId": "managed/user/bjensen",
+      "sourceObjectId": "system/xmlfile/account/bjensen",
+      "situation": "ABSENT",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "939fd113-1158-4f5c-a7f7-6c4b005dce2f",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.579Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": null,
+      "messageDetail": null
+    }
+  ]
 }    </programlisting>
 
     <para>
@@ -1803,12 +1806,12 @@ $ <userinput>curl \
      <literal>_id</literal> in the URL. For example:
     </para>
 
-    <screen><?dbfo pgwide="1"?>$ curl \
+    <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon/9f59bb8a-31c6-41af-8f27-02094391ba0c"</screen>
+ "https://localhost:8443/openidm/audit/recon/fe250514-d3e1-477a-bb90-88bd4525d70b"</screen>
 
     <para>
      The following sample output shows the results of a read operation on a
@@ -1816,22 +1819,22 @@ $ <userinput>curl \
     </para>
 
     <programlisting language="javascript">{
- "targetObjectId": "managed/user/5b9b75e8-2667-4040-a50d-7a644922f072",
- "sourceObjectId": "system/ldap/account/uid=jdoe,ou=People,dc=example,dc=com",
- "situation": "CONFIRMED",
- "reconciling": "source",
- "ambiguousTargetObjectIds": "",
- "action": "UPDATE",
- "actionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
- "exception": "",
- "_id": "88802a56-8be9-43bf-aaf9-d861820f3e39",
- "entryType": "",
- "timestamp": "2014-03-06T06:59:14.637Z",
- "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
- "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
- "status": "SUCCESS",
- "message": null,
- "messageDetail": null
+  "targetObjectId": "managed/user/scarter",
+  "sourceObjectId": "system/xmlfile/account/scarter",
+  "situation": "ABSENT",
+  "reconciling": "source",
+  "ambiguousTargetObjectIds": "",
+  "action": "CREATE",
+  "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+  "exception": "",
+  "_id": "fe250514-d3e1-477a-bb90-88bd4525d70b",
+  "entryType": "entry",
+  "timestamp": "2014-09-08T08:57:47.575Z",
+  "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+  "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+  "status": "SUCCESS",
+  "message": null,
+  "messageDetail": null
 }   </programlisting>
 
     <para>
@@ -1840,12 +1843,12 @@ $ <userinput>curl \
      ID, as follows:
     </para>
 
-    <screen><?dbfo pgwide="1"?>$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"</screen>
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"</userinput></screen>
 
     <para>
      Output similar to the following is returned, for the specified
@@ -1853,131 +1856,118 @@ $ <userinput>curl \
     </para>
 
     <programlisting language="javascript">{
- "remainingPagedResults": -1,
- "pagedResultsCookie": null,
- "resultCount": 5,
- "result": [
-   {
-     "mapping": "systemLdapAccounts_managedUser",
-     "exception": "",
-     "_id": "e8932aef-31ad-43e8-ab5a-c997b247ab9d",
-     "entryType": "summary",
-     "timestamp": "2014-03-06T06:59:14.691Z",
-     "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-     "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-     "status": "SUCCESS",
-     "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
-         CONFIRMED: 1 SOURCE_MISSING: 0 ABSENT: 0 TARGET_IGNORED: 0 UNASSIGNED: 2 ",
-     "messageDetail": {
-       "stage": "ACTIVE_RECONCILING_TARGET",
-       "stageDescription": "reconciling target entries",
-       "ended": "2014-03-06T06:59:14.691Z",
-       "started": "2014-03-06T06:59:14.353Z",
-       "mapping": "systemLdapAccounts_managedUser",
-       "state": "ACTIVE",
-       "situationSummary": {
-         "SOURCE_MISSING": 0,
-         "FOUND": 0,
-         "SOURCE_IGNORED": 0,
-         "UNQUALIFIED": 0,
-         "UNASSIGNED": 2,
-         "TARGET_IGNORED": 0,
-         "CONFIRMED": 1,
-         "AMBIGUOUS": 0,
-         "ABSENT": 0,
-         "MISSING": 0
-       },
-       "progress": {
-         "links": {
-           "created": 0,
-           "existing": {
-             "processed": 1,
-             "total": "1"
-           }
-         },
-       "source": {
-         "existing": {
-           "processed": 1,
-           "total": "1"
-         }
-       },
-       "target": {
-         "created": 0,
-         "existing": {
-           "processed": 3,
-           "total": "3"
-         }
-       }
-     }
-   }
- },
- {
-   "targetObjectId": "managed/user/e8b93d84-5295-4286-b951-cea07550a331",
-   "sourceObjectId": null,
-   "situation": "UNASSIGNED",
-   "reconciling": "target",
-   "ambiguousTargetObjectIds": null,
-   "action": "IGNORE",
-   "actionId": null,
-   "exception": "",
-   "_id": "7878e924-0aa6-46a9-8d42-716eae098121",
-   "entryType": "",
-   "timestamp": "2014-03-06T06:59:14.674Z",
-   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "status": "SUCCESS",
-   "message": null,
-   "messageDetail": null
- },
- {
-   "targetObjectId": "managed/user/0e4cfe5e-3d9d-4d74-acf4-596f610eda5a",
-   "sourceObjectId": null,
-   "situation": "UNASSIGNED",
-   "reconciling": "target",
-   "ambiguousTargetObjectIds": null,
-   "action": "IGNORE",
-   "actionId": null,
-   "exception": "",
-   "_id": "795d1616-9ec7-44c7-80f5-bc7c566bd2fe",
-   "entryType": "",
-   "timestamp": "2014-03-06T06:59:14.653Z",
-   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "status": "SUCCESS",
-   "message": null,
-   "messageDetail": null
- },
- {
-   "targetObjectId": "managed/user/5b9b75e8-2667-4040-a50d-7a644922f072",
-   "sourceObjectId": "system/ldap/account/uid=jdoe,ou=People,dc=example,dc=com",
-   "situation": "CONFIRMED",
-   "reconciling": "source",
-   "ambiguousTargetObjectIds": "",
-   "action": "UPDATE",
-   "actionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "exception": "",
-   "_id": "88802a56-8be9-43bf-aaf9-d861820f3e39",
-   "entryType": "",
-   "timestamp": "2014-03-06T06:59:14.637Z",
-   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "status": "SUCCESS",
-   "message": null,
-   "messageDetail": null
- },
- {
-   "mapping": "systemLdapAccounts_managedUser",
-   "exception": "",
-   "_id": "91c00e7f-1975-4f68-bfba-7740e8f05ec5",
-   "entryType": "start",
-   "timestamp": "2014-03-06T06:59:14.354Z",
-   "reconId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "rootActionId": "a0c8ea66-8798-451d-a55c-9d4b95f0941e",
-   "status": "SUCCESS",
-   "message": "Reconciliation initiated by openidm-admin",
-   "messageDetail": null
- }
-]
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 4,
+  "result": [
+    {
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "exception": "",
+      "_id": "d8634325-78f6-4504-b9f4-ba7b9103e391",
+      "entryType": "summary",
+      "timestamp": "2014-09-08T08:57:47.607Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0
+           CONFIRMED: 0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 ",
+      "messageDetail": {
+        "stage": "COMPLETED_SUCCESS",
+        "stageDescription": "reconciliation completed.",
+        "progress": {
+          "links": {
+            "created": 2,
+            "existing": {
+              "processed": 0,
+              "total": "0"
+            }
+          },
+          "source": {
+            "existing": {
+              "processed": 2,
+              "total": "2"
+            }
+          },
+          "target": {
+            "created": 2,
+            "existing": {
+              "processed": 0,
+              "total": "0"
+            }
+          }
+        },
+        "duration": 388,
+        "situationSummary": {
+          "SOURCE_MISSING": 0,
+          "FOUND": 0,
+          "SOURCE_IGNORED": 0,
+          "UNQUALIFIED": 0,
+          "UNASSIGNED": 0,
+          "TARGET_IGNORED": 0,
+          "CONFIRMED": 0,
+          "AMBIGUOUS": 0,
+          "ABSENT": 2,
+          "MISSING": 0
+        },
+        "statusSummary": {
+          "FAILURE": 0,
+          "SUCCESS": 2
+        },
+        "state": "SUCCESS",
+        "mapping": "systemXmlfileAccounts_managedUser",
+        "started": "2014-09-08T08:57:47.218Z",
+        "ended": "2014-09-08T08:57:47.606Z"
+      }
+    },
+    {
+      "mapping": "systemXmlfileAccounts_managedUser",
+      "exception": "",
+      "_id": "10e4195b-7b38-4b99-9916-a6d2de137c11",
+      "entryType": "start",
+      "timestamp": "2014-09-08T08:57:47.218Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": "Reconciliation initiated by openidm-admin",
+      "messageDetail": null
+    },
+    {
+      "targetObjectId": "managed/user/scarter",
+      "sourceObjectId": "system/xmlfile/account/scarter",
+      "situation": "ABSENT",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "fe250514-d3e1-477a-bb90-88bd4525d70b",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.575Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": null,
+      "messageDetail": null
+    },
+    {
+      "targetObjectId": "managed/user/bjensen",
+      "sourceObjectId": "system/xmlfile/account/bjensen",
+      "situation": "ABSENT",
+      "reconciling": "source",
+      "ambiguousTargetObjectIds": "",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "939fd113-1158-4f5c-a7f7-6c4b005dce2f",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.579Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
+      "message": null,
+      "messageDetail": null
+    }
+  ]
 }</programlisting>
 
     <para>
@@ -1988,13 +1978,12 @@ $ <userinput>curl \
      reconciliation operation:
     </para>
 
-    <screen width="102">
-$ <userinput>curl \
+    <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=fd2a59df-1fcd-444d-97ca-2c8a7ec6dc6c"</userinput>
+ "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=e5f3190d-41d9-4bea-907d-b287a9436a45"</userinput>
     </screen>
 
     <para>
@@ -2003,45 +1992,48 @@ $ <userinput>curl \
     </para>
 
     <programlisting language="javascript">{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
   "result": [
     {
-      "messageDetail": null,
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "situation": "ABSENT",
-      "actionId": "1a391fe8-201b-4f59-ad05-92ee804488a8",
       "targetObjectId": "managed/user/scarter",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "6dc0a18a-826d-487d-a29f-5cd8d2f55465",
-      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-      "status": "SUCCESS",
-      "exception": "",
+      "sourceObjectId": "system/xmlfile/account/scarter",
+      "situation": "ABSENT",
       "reconciling": "source",
       "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-14T08:20:41.763Z",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "fe250514-d3e1-477a-bb90-88bd4525d70b",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.575Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
       "message": null,
-      "sourceObjectId": "system/xmlfile/account/scarter"
+      "messageDetail": null
     },
     {
-      "messageDetail": null,
-      "rootActionId": "3c098d6f-a5e5-483c-a8ce-82911a10b0a9",
-      "situation": "ABSENT",
-      "actionId": "0aaba292-1dd3-4e98-a0e2-04bec9ae5209",
       "targetObjectId": "managed/user/bjensen",
-      "action": "CREATE",
-      "entryType": "",
-      "_id": "1cda457e-54e2-451b-8a40-ef93dec7e60c",
-      "reconId": "1ef8e7b6-33dc-4f92-810a-b51913508a68",
-      "status": "SUCCESS",
-      "exception": "",
+      "sourceObjectId": "system/xmlfile/account/bjensen",
+      "situation": "ABSENT",
       "reconciling": "source",
       "ambiguousTargetObjectIds": "",
-      "timestamp": "2013-05-14T08:20:41.760Z",
+      "action": "CREATE",
+      "actionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "exception": "",
+      "_id": "939fd113-1158-4f5c-a7f7-6c4b005dce2f",
+      "entryType": "entry",
+      "timestamp": "2014-09-08T08:57:47.579Z",
+      "reconId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "rootActionId": "e5f3190d-41d9-4bea-907d-b287a9436a45",
+      "status": "SUCCESS",
       "message": null,
-      "sourceObjectId": "system/xmlfile/account/bjensen"
+      "messageDetail": null
     }
   ]
-}   </programlisting>
+}</programlisting>
 
     <para>
      The activity logs track all operations on internal (managed) and external
