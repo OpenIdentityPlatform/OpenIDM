@@ -42,12 +42,12 @@ class ReconEntry extends LogEntry {
     /** 
      * Type of the audit log entry (start/entry/summary) 
      */
-    public String entryType = AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
+    private String entryType = AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY;
     
     /** 
      * The id identifying the reconciliation run 
      */
-    public String reconId;
+    private String reconId;
     
     /**
      * A string describing what is being reconciled
@@ -57,13 +57,18 @@ class ReconEntry extends LogEntry {
     /**
      *  A comma delimited formatted representation of any ambiguous identifiers
      */
-    protected String ambigiousTargetIds;
+    private String ambigiousTargetIds;
     
     /**
-     * The name of the mapping accociated with this entry
+     * The name of the mapping associated with this entry
      */
-    protected String mappingName;
-    
+    private String mappingName;
+
+    /**
+     * The reconciliation action
+     */
+    private ReconciliationService.ReconAction reconAction;
+
     /**
      * Sets the ambiguous target IDs.
      * 
@@ -98,12 +103,15 @@ class ReconEntry extends LogEntry {
     /**
      * Constructor that allows specifying the type of reconciliation log entry
      */
-    public ReconEntry(SyncOperation op, Context rootContext, String entryType, DateUtil dateUtil, String name) {
+    public ReconEntry(SyncOperation op, Context rootContext, String entryType, DateUtil dateUtil, String name,
+            ReconciliationService.ReconAction reconAction, String reconId) {
         super(op, rootContext, dateUtil);
         this.entryType = entryType;
         if (!AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY.equals(entryType)) {
             this.mappingName = name;
         }
+        this.reconAction = reconAction;
+        this.reconId = reconId;
     }
 
     /**
@@ -122,6 +130,7 @@ class ReconEntry extends LogEntry {
         jv.put("reconciling", reconciling);
         jv.put("ambiguousTargetObjectIds", ambigiousTargetIds);
         jv.put("mapping", mappingName);
+        jv.put("reconAction", reconAction != null ? reconAction.toString() : null);
         return jv;
     }
 }

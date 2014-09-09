@@ -838,7 +838,7 @@ class ObjectMapping {
             context = new TriggerContext(context, "recon");
             ObjectSetContext.push(context);
             Context rootContext = context.asContext(RootContext.class);
-            logReconStart(reconId, rootContext, context);
+            logReconStart(reconContext, rootContext, context);
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
             reconContext.getStatistics().sourceQueryStart();
@@ -1185,18 +1185,21 @@ class ObjectMapping {
         }
     }
 
-    private void logReconStart(String reconId, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START, dateUtil, name);
+    private void logReconStart(ReconciliationContext reconContext, Context rootContext, ServerContext context)
+            throws SynchronizationException {
+        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START,
+                dateUtil, name, reconContext.getReconAction(), reconContext.getReconId());
         reconStartEntry.timestamp = new Date();
-        reconStartEntry.reconId = reconId;
-        reconStartEntry.message = "Reconciliation initiated by " + context.asContext(SecurityContext.class).getAuthenticationId();
+        reconStartEntry.message = "Reconciliation initiated by "
+                + context.asContext(SecurityContext.class).getAuthenticationId();
         logReconEntry(reconStartEntry);
     }
 
-    private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context) throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END, dateUtil, name);
+    private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context)
+            throws SynchronizationException {
+        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END,
+                dateUtil, name, reconContext.getReconAction(), reconContext.getReconId());
         reconEndEntry.timestamp = new Date();
-        reconEndEntry.reconId = reconContext.getReconId();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconEndEntry.message = simpleSummary;
         reconEndEntry.messageDetail = new JsonValue(reconContext.getSummary());

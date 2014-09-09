@@ -570,6 +570,7 @@ CREATE TABLESPACE SOIDM08
 CREATE TABLE SOPENIDM.AUDITRECON
        (OBJECTID                   VARCHAR(38)    NOT NULL
        ,RECONID                    VARCHAR(36)
+       ,RECONACTION                VARCHAR(36)
        ,RECONCILING                VARCHAR(12)    NOT NULL
        ,SOURCEOBJECTID             VARCHAR(511)
        ,TARGETOBJECTID             VARCHAR(511)

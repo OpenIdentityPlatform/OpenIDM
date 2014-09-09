@@ -51,10 +51,13 @@ public class ReconciliationContext {
     ObjectMapping mapping;
     ReconciliationService service;
 
-    // The additional recon parameters
+    /** The reconciliation action */
+    private ReconciliationService.ReconAction reconAction;
+
+    /** The additional recon parameters */
     private JsonValue reconParams;
     
-    // The overriding configuration
+    /** The overriding configuration */
     private JsonValue overridingConfig;
 
     private ReconStage stage = ReconStage.ACTIVE_INITIALIZED;
@@ -90,6 +93,7 @@ public class ReconciliationContext {
             ReconciliationService service)
         throws BadRequestException {
 
+        this.reconAction = reconAction;
         this.mapping = mapping;
         this.reconId = callingContext.getId();
         this.reconStat = new ReconciliationStatistic(this);
@@ -98,7 +102,7 @@ public class ReconciliationContext {
         this.service = service;
         
         reconTypeHandler = createReconTypeHandler(reconAction);
-        
+
         // Initialize the executor for this recon, or null if no executor should be used
         int noOfThreads = mapping.getTaskThreads();
         if (noOfThreads > 0) {
@@ -122,6 +126,13 @@ public class ReconciliationContext {
         default:
             throw new BadRequestException("Unknown action " + reconAction.toString());
         }
+    }
+
+    /**
+     * @return the reconciliation action
+     */
+    public ReconciliationService.ReconAction getReconAction() {
+        return reconAction;
     }
     
     /**
@@ -374,6 +385,7 @@ public class ReconciliationContext {
         reconSummary.put("progress", getProgress());
         reconSummary.put("situationSummary", getStatistics().getSituationSummary());
         reconSummary.put("statusSummary", getStatistics().getStatusSummary());
+        reconSummary.put("parameters", reconTypeHandler.getReconParameters());
         reconSummary.put("started", getStatistics().getStarted());
         reconSummary.put("ended", getStatistics().getEnded());
         reconSummary.put("duration", getStatistics().getDuration());

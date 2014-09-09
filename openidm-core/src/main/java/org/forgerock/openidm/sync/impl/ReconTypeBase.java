@@ -278,4 +278,8 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      */
     public abstract ResultIterable queryTarget() throws SynchronizationException;
 
+    /**
+     * @inheritDoc
+     */
+    public abstract JsonValue getReconParameters();
 }

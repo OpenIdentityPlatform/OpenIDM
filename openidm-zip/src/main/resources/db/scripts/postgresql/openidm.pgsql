@@ -208,6 +208,7 @@ CREATE TABLE openidm.auditrecon (
   entrytype VARCHAR(7) DEFAULT NULL,
   rootactionid VARCHAR(511) DEFAULT NULL,
   reconid VARCHAR(36) DEFAULT NULL,
+  reconaction VARCHAR(36) DEFAULT NULL,
   reconciling VARCHAR(12) DEFAULT NULL,
   sourceobjectid VARCHAR(511) DEFAULT NULL,
   targetobjectid VARCHAR(511) DEFAULT NULL,
