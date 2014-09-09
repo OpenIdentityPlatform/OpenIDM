@@ -75,7 +75,7 @@
         if (managedUserId.result.length !== 1) {
             throw {
                 "code" : 401,
-                "message" : "Access denied, unabled to find linked managed/user entry"
+                "message" : "Access denied, unable to find linked managed/user entry"
             };
         }
 
