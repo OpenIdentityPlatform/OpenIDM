@@ -220,7 +220,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`objectid`)
+  PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
 
