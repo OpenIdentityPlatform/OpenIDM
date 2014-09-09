@@ -165,6 +165,23 @@ CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_entrytype` ON `openidm`.`au
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_situation` ON `openidm`.`auditrecon`(`situation` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditrecon_status` ON `openidm`.`auditrecon`(`status` ASC);
   
+   
+CREATE TABLE IF NOT EXISTS `openidm`.`auditsync` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rootactionid` VARCHAR(511) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `situation` VARCHAR(24) NULL ,
+  `activity` VARCHAR(24) NULL ,
+  `status` VARCHAR(7) NULL ,
+  `message` TEXT NULL ,
+  `actionid` VARCHAR(255) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL,
+  PRIMARY KEY (`objectid`) );
+  
   
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,

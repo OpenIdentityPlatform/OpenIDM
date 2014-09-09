@@ -283,6 +283,32 @@ END
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`auditsync`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='auditsync' AND xtype='U')
+BEGIN
+CREATE  TABLE  [openidm].[auditsync] 
+(
+  objectid NVARCHAR(38) NOT NULL ,
+  rootactionid NVARCHAR(511) NULL ,
+  sourceobjectid NVARCHAR(511) NULL ,
+  targetobjectid NVARCHAR(511) NULL ,
+  activitydate NVARCHAR(29) NULL ,
+  situation NVARCHAR(24) NULL ,
+  activity NVARCHAR(24) NULL ,
+  status NVARCHAR(7) NULL ,
+  message NTEXT NULL ,
+  actionid NVARCHAR(511) NULL ,
+  exceptiondetail NTEXT NULL ,
+  mapping NTEXT NULL ,
+  messagedetail NTEXT NULL ,
+  PRIMARY KEY CLUSTERED (objectid),
+);
+EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditsync, 'COLUMN', activitydate;
+END
+
+
+-- -----------------------------------------------------
 -- Table `openidm`.`auditactivity`
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditactivity' and xtype='U')

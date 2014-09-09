@@ -64,6 +64,15 @@
             "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')"
         }
     },
+    "commands" : {
+        "genericTables" : {
+        },
+        "explicitTables" : {
+            "purge-by-recon-id" : "DELETE FROM ${_dbSchema}.${_table} WHERE reconId = ${reconId}",
+            "perge-by-recon-date" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (select reconId from ${_dbSchema}.auditrecon where activitydate < '${timestamp}' and entryType = 'summary') as x ON x.reconId = r.reconId"
+            "perge-by-recon-date-mapping" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (select reconId from ${_dbSchema}.auditrecon where mapping like '${mapping}' and activitydate < '${timestamp}' and entryType = 'summary') as x ON x.reconId = r.reconId"
+        }   
+    }
     "resourceMapping" : {
         "default" : {
             "mainTable" : "genericobjects",
@@ -191,6 +200,25 @@
                     "actionId" : "actionid",
                     "exception" : "exceptiondetail",
                     "mapping" : "mapping",
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
+                }
+            },
+            "audit/sync" : {
+                "table" : "auditsync",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "status" : "status",
+                    "situation" : "situation",
+                    "action" : "activity",
+                    "actionId" : "actionid",
+                    "rootActionId" : "rootactionid",
+                    "sourceObjectId" : "sourceobjectid",
+                    "targetObjectId" : "targetobjectid",
+                    "timestamp" : "activitydate",
+                    "mapping" : "mapping",
+                    "exception" : "exceptiondetail",
+                    "message" : "message",
                     "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
                 }
             },

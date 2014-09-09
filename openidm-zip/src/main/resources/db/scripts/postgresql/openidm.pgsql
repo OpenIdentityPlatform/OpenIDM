@@ -227,6 +227,28 @@ CREATE TABLE openidm.auditrecon (
 
 
 -- -----------------------------------------------------
+-- Table openidm.auditsync
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.auditsync (
+  objectid VARCHAR(38) NOT NULL,
+  rootactionid VARCHAR(511) DEFAULT NULL,
+  sourceobjectid VARCHAR(511) DEFAULT NULL,
+  targetobjectid VARCHAR(511) DEFAULT NULL,
+  activitydate VARCHAR(29) DEFAULT NULL,
+  situation VARCHAR(24) DEFAULT NULL,
+  activity VARCHAR(24) DEFAULT NULL,
+  status VARCHAR(7) DEFAULT NULL,
+  message TEXT,
+  actionid VARCHAR(255) DEFAULT NULL,
+  exceptiondetail TEXT,
+  mapping TEXT,
+  messagedetail TEXT,
+  PRIMARY KEY (objectid)
+);
+
+
+-- -----------------------------------------------------
 -- Table openidm.internaluser
 -- -----------------------------------------------------
 

@@ -174,6 +174,40 @@ ADD CONSTRAINT PRIMARY_1 PRIMARY KEY
 ENABLE
 ;
 
+-- DROP TABLE auditsync CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table auditsync ...
+CREATE TABLE auditsync (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  rootactionid VARCHAR2(511 CHAR),
+  sourceobjectid VARCHAR2(511 CHAR),
+  targetobjectid VARCHAR2(511 CHAR),
+  activitydate VARCHAR2(29 CHAR),
+  situation VARCHAR2(24 CHAR),
+  activity VARCHAR2(24 CHAR),
+  status VARCHAR2(7 CHAR),
+  message CLOB,
+  actionid VARCHAR2(511 CHAR),
+  exceptiondetail CLOB,
+  mapping CLOB,
+  messagedetail CLOB
+);
+
+
+COMMENT ON COLUMN auditsync.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
+;
+
+PROMPT Creating Primary Key Constraint PRIMARY_13 on table auditsync ... 
+ALTER TABLE auditsync
+ADD CONSTRAINT PRIMARY_13 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
 -- DROP TABLE configobjectproperties CASCADE CONSTRAINTS;
 
 
