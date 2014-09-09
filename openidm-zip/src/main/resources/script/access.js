@@ -109,7 +109,7 @@ var httpAccessConfig =
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
         },
 
-        // openidm-admin can request nearly anything (some exceptions being a few system endpoints)
+        // openidm-admin can request nearly anything (some exceptions being a few system and repo endpoints)
         {  
             "pattern"   : "*",
             "roles"     : "openidm-admin",
