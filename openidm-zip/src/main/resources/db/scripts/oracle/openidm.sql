@@ -145,6 +145,7 @@ CREATE TABLE auditrecon (
   entrytype VARCHAR2(7 CHAR),
   rootactionid VARCHAR2(511 CHAR),
   reconid VARCHAR2(36 CHAR),
+  reconaction VARCHAR2(36 CHAR),
   reconciling VARCHAR2(12 CHAR),
   sourceobjectid VARCHAR2(511 CHAR),
   targetobjectid VARCHAR2(511 CHAR),

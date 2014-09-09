@@ -33,6 +33,10 @@ import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 /**
  * Represents a reconciliation of a set defined by query/queries,
  * typically a sub-set of source and/or target objects
@@ -64,5 +68,12 @@ public class ReconTypeByQuery extends ReconTypeBase {
     public ResultIterable queryTarget() throws SynchronizationException {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
                 Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());                
+    }
+
+    public JsonValue getReconParameters() {
+        return json(object(
+                field("sourceQuery", sourceQuery.getObject()),
+                field("targetQuery", targetQuery.getObject())
+        ));
     }
 }

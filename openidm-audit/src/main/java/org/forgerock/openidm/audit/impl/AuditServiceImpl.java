@@ -164,6 +164,7 @@ public class AuditServiceImpl implements AuditService {
     public static final String RECON_LOG_ENTRY_TYPE = "entryType";
     public static final String RECON_LOG_TIMESTAMP = "timestamp";
     public static final String RECON_LOG_RECON_ID = "reconId";
+    public static final String RECON_LOG_RECON_ACTION = "reconAction";
     public static final String RECON_LOG_ROOT_ACTION_ID = "rootActionId";
     public static final String RECON_LOG_STATUS = "status";
     public static final String RECON_LOG_MESSAGE = "message";
@@ -939,6 +940,7 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put(RECON_LOG_ENTRY_TYPE, entry.get(RECON_LOG_ENTRY_TYPE));
         formattedEntry.put(RECON_LOG_TIMESTAMP, entry.get(RECON_LOG_TIMESTAMP));
         formattedEntry.put(RECON_LOG_RECON_ID, entry.get(RECON_LOG_RECON_ID));
+        formattedEntry.put(RECON_LOG_RECON_ACTION, entry.get(RECON_LOG_RECON_ACTION));
         formattedEntry.put(RECON_LOG_ROOT_ACTION_ID, entry.get(RECON_LOG_ROOT_ACTION_ID));
         formattedEntry.put(RECON_LOG_STATUS, entry.get(RECON_LOG_STATUS));
         formattedEntry.put(RECON_LOG_MESSAGE, entry.get(RECON_LOG_MESSAGE));

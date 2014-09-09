@@ -24,6 +24,8 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import org.forgerock.json.fluent.JsonValue;
+
 /**
  * interface for handling different recon types
  * @author aegloff
@@ -52,4 +54,9 @@ public interface ReconTypeHandler {
      * @return true if the the recon should allow an empty source set, false otherwise.
      */
     boolean allowEmptySourceSet();
+
+    /**
+     * @return the recon parameters concerning source and target selection
+     */
+    public abstract JsonValue getReconParameters();
 }
