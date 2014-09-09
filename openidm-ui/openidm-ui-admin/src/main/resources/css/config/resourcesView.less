@@ -83,31 +83,31 @@
 	Resource type information
 */
 .resource-type-body {
-	padding:10px; 
-	color:#5d6871;
+  padding:10px;
+  color:#5d6871;
 }
 
 .resource-info {
-	padding:35px 0px 5px 0px;
+  padding:35px 0px 5px 0px;
 }
 
 .managed-type .resource-info {
-    padding:65px 0px 5px 0px;
+  padding:65px 0px 5px 0px;
 }
 
 .add-resource-body .resource-info {
-	padding-top:75px;
+  padding-top:75px;
 }
 
 .resource-info span {
-	display:inline-block; 
-	margin-bottom:10px;
+  display:inline-block;
+  margin-bottom:10px;
 }
 
 .resource-given-name,
 .resource-type-name {
-	overflow: hidden;
-	text-overflow: ellipsis;		
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .resource-given-name {
@@ -132,20 +132,20 @@
   Resource Status details
 */
 .resource-status-body {
-	padding: 3px 10px 10px 3px;
-	text-align:left;
+  padding: 3px 10px 10px 3px;
+  text-align:left;
 }
 
 .resource-status-body p{
-	padding:0px 0px 5px 10px;
+  padding:0px 0px 5px 10px;
 }
 
 .resource-unavailable {
-	color:@color-error;
+  color:@color-error;
 }
 
 .resource-available {
-	color:@color-success;
+  color:@color-success;
 }
 
 /*
@@ -164,10 +164,12 @@
   padding-bottom: 0px;
 }
 
-.resource-input-body input[type="text"]:disabled,
-.resource-input-body select:disabled {
+input[type="text"]:disabled,
+select:disabled,
+textarea:disabled {
   color: #bbb;
   opacity: .8;
+  background-color:#eee;
 }
 
 .clean-btn {
@@ -467,3 +469,10 @@ form.form .small-field-block .invalid div.validation-message {
   Managed Objects Add/Edit
 */
 
+.managed-property .group-field-block {
+  margin-left:20px;
+}
+
+.group-field-block .select-button-form {
+  margin-right:15px;
+}

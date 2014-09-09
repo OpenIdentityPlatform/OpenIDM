@@ -20,19 +20,19 @@
         <div class="group-field-block no-validation-block">
             <label for="debug" class="light">{{t "templates.connector.groovyPoolableConnector.debug"}}</label>
             <select id="debug" class="form-size-s" name="configurationProperties.debug" required>
-                {{#select connectorDefaults.configurationProperties.debug}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-                {{/select}}
+                {{#staticSelect connectorDefaults.configurationProperties.debug}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+                {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block no-validation-block">
             <label for="verbose" class="light">{{t "templates.connector.groovyPoolableConnector.verbose"}}</label>
             <select id="verbose" class="form-size-s" name="configurationProperties.verbose" required>
-                {{#select connectorDefaults.configurationProperties.verbose}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-                {{/select}}
+                {{#staticSelect connectorDefaults.configurationProperties.verbose}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+                {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block">

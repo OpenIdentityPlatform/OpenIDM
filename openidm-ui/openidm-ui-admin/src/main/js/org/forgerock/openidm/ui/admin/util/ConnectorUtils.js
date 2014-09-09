@@ -31,10 +31,10 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
     var obj = {};
 
     obj.cleanConnectorName = function(name) {
-        var cleanName = name.replace(/org\.forgerock\.openicf\.connectors\.|org\.identityconnectors\./g, "");
-        cleanName = cleanName.replace(".","_");
+        var clearName = name.split(".");
+            clearName = clearName[clearName.length - 2] + "_" +clearName[clearName.length - 1];
 
-        return cleanName;
+        return clearName;
     };
 
     return obj;
