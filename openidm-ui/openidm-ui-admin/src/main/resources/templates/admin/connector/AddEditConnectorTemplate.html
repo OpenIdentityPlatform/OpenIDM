@@ -17,10 +17,10 @@
                 <div class="group-field-block no-validation-block">
                     <label for="connectorEnabled" class="light">{{t "templates.connector.connectorEnabled"}}</label>
                     <select id="connectorEnabled" class="form-size-s" name="enabled">
-                        {{#select enabled}}
-                            <option value="true">True</option>
-                            <option value="false">False</option>
-                        {{/select}}
+                        {{#staticSelect enabled}}
+                            <option value="true">{{t "common.form.true"}}</option>
+                            <option value="false">{{t "common.form.false"}}</option>
+                        {{/staticSelect}}
                     </select>
                 </div>
 

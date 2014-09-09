@@ -53,13 +53,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         connectorTypeRef: null,
 
         render: function(args, callback) {
-            //Remove when commons updates
-            Handlebars.registerHelper('select', function(value, options){
-                var selected = $('<select />').html(options.fn(this));
-                selected.find('[value=' + value + ']').attr({'selected':'selected'});
-
-                return selected.html();
-            });
 
             ConnectorDelegate.availableConnectors().then(_.bind(function(connectors){
                 if(args.length === 0) {

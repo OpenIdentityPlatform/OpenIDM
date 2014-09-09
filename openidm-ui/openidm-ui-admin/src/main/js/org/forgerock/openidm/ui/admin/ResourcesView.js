@@ -77,9 +77,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
                 this.data.currentRepo = _.find(configFiles[0].configurations, function(file){
                     return file.pid.search("repo.") !== -1;
-                }, this);
-
-                this.data.currentRepo = this.data.currentRepo.pid;
+                }, this).pid;
 
                 if(this.data.currentRepo === "repo.orientdb") {
                     ConfigDelegate.readEntity(this.data.currentRepo).then(_.bind(function (repo) {
@@ -122,17 +120,18 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
         deleteManaged: function(event) {
             var selectedItems = $(event.currentTarget).parents(".resource-body"),
-                promises = [],
-                managedTitle = selectedItems.attr("data-managed-title");
+                promises = [];
 
             uiUtils.jqConfirm($.t("templates.managed.managedDelete"), _.bind(function(){
-                this.data.currentManagedObjects = _.filter(this.data.currentManagedObjects, function(managedObject, index){
-                    return managedObject.name !== managedTitle;
-                }, this);
+                _.each(this.data.currentManagedObjects, _.bind(function(managedObject, index){
+                    if(managedObject.name === selectedItems.attr("data-managed-title")) {
+                        this.data.currentManagedObjects.splice(index, 1);
+                    }
+                }, this));
 
                 if(this.data.currentRepo === "repo.orientdb") {
-                    if(this.data.repoObject.dbStructure.orientdbClass["managed_"+managedTitle] !== undefined){
-                        delete this.data.repoObject.dbStructure.orientdbClass["managed_"+managedTitle];
+                    if(this.data.repoObject.dbStructure.orientdbClass["managed_"+selectedItems.attr("data-managed-title")] !== undefined){
+                        delete this.data.repoObject.dbStructure.orientdbClass["managed_"+selectedItems.attr("data-managed-title")];
                     }
 
                     promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
@@ -141,15 +140,16 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
 
                 $.when.apply($, promises).then(function(){
-                        selectedItems.remove();
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
-                    },
-                    function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
-                    });
-            },this), "330px");
+                    selectedItems.remove();
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
+                },
+                function(){
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
+                });
+            },this), "340px");
         }
     });
 
     return new ResourcesView();
 });
+

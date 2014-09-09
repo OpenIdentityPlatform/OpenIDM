@@ -44,19 +44,19 @@
         <div class="group-field-block no-validation-block">
             <label for="createIfNotExists" title="{{t "templates.connector.scriptedSQLConnector.createIfNotExists"}}" class="light">{{t "templates.connector.scriptedSQLConnector.createIfNotExists"}}</label>
             <select id="createIfNotExists" class="form-size-s" name="configurationProperties.autoCommit" required>
-            {{#select connectorDefaults.configurationProperties.autoCommit}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.autoCommit}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block no-validation-block">
             <label for="reloadScriptOnExecution" class="light">{{t "templates.connector.scriptedSQLConnector.reloadScriptOnExecution"}}</label>
             <select id="reloadScriptOnExecution" class="form-size-s" name="configurationProperties.reloadScriptOnExecution" required>
-            {{#select connectorDefaults.configurationProperties.reloadScriptOnExecution}}
+            {{#staticSelect connectorDefaults.configurationProperties.reloadScriptOnExecution}}
                 <option value="true">True</option>
                 <option value="false">False</option>
-            {{/select}}
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block">

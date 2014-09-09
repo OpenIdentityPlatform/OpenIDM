@@ -10,10 +10,10 @@
     <div class="group-field-block">
         <label class="light">SSL</label>
         <select class="form-size-s" name="configurationProperties.ssl" required>
-            {{#select connectorDefaults.configurationProperties.ssl}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.ssl}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
@@ -56,18 +56,18 @@
     <div class="group-field-block">
         <label class="light">Synchronize Passwords</label>
         <select class="form-size-s" name="configurationProperties.synchronizePasswords" required>
-            {{#select connectorDefaults.configurationProperties.synchronizePasswords}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.synchronizePasswords}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
         <label class="light">Remove Log Entry Object Class From Filter</label>
         <select class="form-size-s" name="configurationProperties.removeLogEntryObjectClassFromFilter" required>
-            {{#select connectorDefaults.configurationProperties.removeLogEntryObjectClassFromFilter}}
-            <option value="true">True</option>
-            <option value="false">False</option>
+            {{#staticSelect connectorDefaults.configurationProperties.removeLogEntryObjectClassFromFilter}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
             {{/select}}
         </select>
     </div>
@@ -98,10 +98,10 @@
     <div class="group-field-block">
         <label class="light">Filter With Or Instead Of And</label>
         <select class="form-size-s" name="configurationProperties.filterWithOrInsteadOfAnd" required>
-            {{#select connectorDefaults.configurationProperties.filterWithOrInsteadOfAnd}}
+            {{#staticSelect connectorDefaults.configurationProperties.filterWithOrInsteadOfAnd}}
             <option value="true">True</option>
             <option value="false">False</option>
-            {{/select}}
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
@@ -119,19 +119,19 @@
     <div class="group-field-block">
         <label class="light">Use Blocks</label>
         <select class="form-size-s" name="configurationProperties.useBlocks" required>
-            {{#select connectorDefaults.configurationProperties.useBlocks}}
+            {{#staticSelect connectorDefaults.configurationProperties.useBlocks}}
             <option value="true">True</option>
             <option value="false">False</option>
-            {{/select}}
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
         <label class="light">Maintain Posix Group Membership</label>
         <select class="form-size-s" name="configurationProperties.maintainPosixGroupMembership" required>
-            {{#select connectorDefaults.configurationProperties.maintainPosixGroupMembership}}
+            {{#staticSelect connectorDefaults.configurationProperties.maintainPosixGroupMembership}}
             <option value="true">True</option>
             <option value="false">False</option>
-            {{/select}}
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
@@ -141,10 +141,10 @@
     <div class="group-field-block">
         <label class="light">Read Schema</label>
         <select class="form-size-s" name="configurationProperties.readSchema" required>
-            {{#select connectorDefaults.configurationProperties.readSchema}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.readSchema}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
@@ -166,10 +166,10 @@
     <div class="group-field-block">
         <label class="light">Use Paged Result Control</label>
         <select class="form-size-s" name="configurationProperties.usePagedResultControl" required>
-            {{#select connectorDefaults.configurationProperties.usePagedResultControl}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.usePagedResultControl}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
@@ -183,19 +183,19 @@
     <div class="group-field-block">
         <label class="light">Maintain LDAP Group Membership</label>
         <select class="form-size-s" name="configurationProperties.maintainLdapGroupMembership" required>
-            {{#select connectorDefaults.configurationProperties.maintainLdapGroupMembership}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.maintainLdapGroupMembership}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
     <div class="group-field-block">
         <label class="light">Respect Resource Password Policy Change After Reset</label>
         <select class="form-size-s" name="configurationProperties.respectResourcePasswordPolicyChangeAfterReset" required>
-            {{#select connectorDefaults.configurationProperties.respectResourcePasswordPolicyChangeAfterReset}}
-            <option value="true">True</option>
-            <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.respectResourcePasswordPolicyChangeAfterReset}}
+            <option value="true">{{t "common.form.true"}}</option>
+            <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
         </select>
     </div>
 </div>

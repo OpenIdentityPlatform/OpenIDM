@@ -26,6 +26,36 @@ define("config/validators/AdminValidators", [
 
                 callback();
             }
+        },
+        "bothRequired": {
+            "name": "Two Required Fields",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var inputs = input.parent().find("input"),
+                    secondInput;
+
+                if(inputs.length !== 2) {
+                    callback([$.t("templates.scriptEditor.bothRequired")]);
+                    return;
+                }
+
+                if (!$(inputs[0]).val() || $(inputs[0]).val() === "") {
+                    callback([$.t("templates.scriptEditor.bothRequired")]);
+                    return;
+                }
+
+                if (!$(inputs[1]).val() || $(inputs[1]).val() === "") {
+                    callback([$.t("templates.scriptEditor.bothRequired")]);
+                    return;
+                }
+
+                secondInput = inputs.not(input);
+                secondInput.toggleClass("invalid", false);
+                secondInput.attr("data-validation-status", "ok");
+
+                callback();
+            }
         }
     };
 

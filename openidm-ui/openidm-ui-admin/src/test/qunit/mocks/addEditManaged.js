@@ -26,7 +26,9 @@
 define([
     "text!templates/admin/AdminBaseTemplate.html",
     "text!templates/admin/managed/AddEditManagedTemplate.html",
-    "text!templates/admin/ResourcesViewTemplate.html"
+    "text!templates/admin/ResourcesViewTemplate.html",
+    "text!templates/admin/util/ScriptEditor.html",
+    "text!templates/admin/util/ScriptDialog.html"
 ], function () {
 
     /* an unfortunate need to duplicate the file names here, but I haven't
@@ -34,7 +36,9 @@ define([
     var staticFiles = [
             "templates/admin/AdminBaseTemplate.html",
             "templates/admin/managed/AddEditManagedTemplate.html",
-            "templates/admin/ResourcesViewTemplate.html"
+            "templates/admin/ResourcesViewTemplate.html",
+            "templates/admin/util/ScriptEditor.html",
+            "templates/admin/util/ScriptDialog.html"
         ],
         deps = arguments;
 

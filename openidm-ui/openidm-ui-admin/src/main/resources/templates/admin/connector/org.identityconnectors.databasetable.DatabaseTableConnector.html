@@ -100,37 +100,37 @@
         <div class="group-field-block no-validation-block">
             <label for="enableEmptyString" class="light">{{t "templates.connector.databaseTableConnector.enableEmptyString"}}</label>
             <select id="enableEmptyString" class="form-size-s" name="configurationProperties.enableEmptyString" required>
-            {{#select connectorDefaults.configurationProperties.enableEmptyString}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.enableEmptyString}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block no-validation-block">
             <label for="rethrowSQL" class="light">{{t "templates.connector.databaseTableConnector.rethrowSQL"}}</label>
             <select id="rethrowSQL" class="form-size-s" name="configurationProperties.rethrowAllSQLExceptions" required>
-            {{#select connectorDefaults.configurationProperties.rethrowAllSQLExceptions}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.rethrowAllSQLExceptions}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block no-validation-block">
             <label for="natvieTimestamps" class="light">{{t "templates.connector.databaseTableConnector.natvieTimestamps"}}</label>
             <select id="natvieTimestamps" class="form-size-s" name="configurationProperties.nativeTimestamps" required>
-            {{#select connectorDefaults.configurationProperties.nativeTimestamps}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.nativeTimestamps}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block no-validation-block">
             <label for="allNative" class="light">{{t "templates.connector.databaseTableConnector.allNative"}}</label>
             <select id="allNative" class="form-size-s" name="configurationProperties.allNative" required>
-            {{#select connectorDefaults.configurationProperties.allNative}}
-                <option value="true">True</option>
-                <option value="false">False</option>
-            {{/select}}
+            {{#staticSelect connectorDefaults.configurationProperties.allNative}}
+                <option value="true">{{t "common.form.true"}}</option>
+                <option value="false">{{t "common.form.false"}}</option>
+            {{/staticSelect}}
             </select>
         </div>
         <div class="group-field-block">

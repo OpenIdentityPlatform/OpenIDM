@@ -151,7 +151,8 @@
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
             "managedTitle" : "Managed Objects",
-            "managedDelete" : "Are you sure you wish to delete this managed object?",
+            "managedDelete" : "Are you sure you want to delete this managed object?",
+            "propertyDelete": "Are you sure you want to delete this property?",
             "addTitle" : "Add Managed Object",
             "editTitle" : "Edit Managed Object",
             "managedObjectName" : "Managed Object Name",
@@ -161,6 +162,21 @@
             "encrypted" : "Encrypted",
             "private" : "Private",
             "virtual" : "Virtual"
+        },
+        "scriptEditor": {
+            "scriptDelete" : "Are you sure you want to delete this script?",
+            "addEvent" : "Add Event Hook",
+            "type" : "Type",
+            "source" : "Source",
+            "bothRequired" : "Both required",
+            "filePath" : "File Path",
+            "inline" : "Inline Script",
+            "passedVariables" : "Add passed variables",
+            "addVariable" : "Add Variable",
+            "variableName" : "Variable Name",
+            "variableValue" : "Variable Value",
+            "javascript" : "Javascript",
+            "groovy" : "Groovy"
         },
         "connector" : {
             "groovy_ScriptedConnector":"Groovy Connector",
