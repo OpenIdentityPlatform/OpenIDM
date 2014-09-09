@@ -45,14 +45,6 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                 managedPromise,
                 repoCheckPromise;
 
-            //Remove when commons updates
-            Handlebars.registerHelper('select', function(value, options){
-                var selected = $('<select />').html(options.fn(this));
-                selected.find('[value=' + value + ']').attr({'selected':'selected'});
-
-                return selected.html();
-            });
-
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
