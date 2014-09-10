@@ -466,9 +466,10 @@ class ObjectMapping {
         LazyObjectAccessor targetObject = null;
         LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
-            CreateRequest cr = Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            Resource r =  service.getConnectionFactory().getConnection().create(context, cr);
-            targetObject = new LazyObjectAccessor(service, targetObjectSet, r.getId(), target);
+            CreateRequest createRequest =
+                    Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
+            Resource resource =  service.getConnectionFactory().getConnection().create(context, createRequest);
+            targetObject = new LazyObjectAccessor(service, targetObjectSet, resource.getId(), resource.getContent());
             measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
