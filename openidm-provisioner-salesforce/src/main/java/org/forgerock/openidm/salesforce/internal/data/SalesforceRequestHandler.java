@@ -48,11 +48,15 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.audit.util.NullActivityLogger;
+import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.salesforce.internal.SalesforceConfiguration;
 import org.forgerock.openidm.salesforce.internal.SalesforceConnection;
@@ -109,6 +113,9 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
 
     private SalesforceConnection connection = null;
 
+    /** use null-object activity logger until/unless ConnectionFactory binder updates it */
+    private ActivityLogger activityLogger = NullActivityLogger.INSTANCE;
+
     private final ConcurrentMap<String, SObjectDescribe> schema =
             new ConcurrentHashMap<String, SObjectDescribe>();
 
@@ -118,6 +125,17 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     private RouteEntry routeEntry;
 
     String organizationName = null;
+
+    void bindConnectionFactory(final ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+        this.activityLogger = new RouterActivityLogger(connectionFactory);
+    }
+
+    void unbindConnectionFactory(final RouteService service) {
+        this.connectionFactory = null;
+        // ConnectionFactory has gone away, use null activity logger
+        this.activityLogger = NullActivityLogger.INSTANCE;
+    }
 
     @Activate
     void activate(ComponentContext context) throws Exception {
@@ -267,39 +285,45 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     public void createInstance(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String type = getPartition(context);
-            SObjectDescribe describe = getSObjectDescribe(type);
+            final String type = getPartition(context);
+            final SObjectDescribe describe = getSObjectDescribe(type);
             if (null != describe) {
                 final ClientResource cr = getClientResource(type, null);
                 try {
-                    JsonValue create = new JsonValue(describe.beforeCreate(request.getContent()));
+                    final JsonValue create = new JsonValue(describe.beforeCreate(request.getContent()));
                     logger.trace("Create sobjects/{} \n content: \n{}\n", type, create);
 
                     cr.getRequest().setEntity(new JacksonRepresentation<Map>(create.asMap()));
                     cr.setMethod(org.restlet.data.Method.POST);
                     handleRequest(cr, true);
-                    Representation body = cr.getResponse().getEntity();
+                    final Representation body = cr.getResponse().getEntity();
                     if (null != body && body instanceof EmptyRepresentation == false) {
-                        JacksonRepresentation<Map> rep =
+                        final JacksonRepresentation<Map> rep =
                                 new JacksonRepresentation<Map>(body, Map.class);
-                        JsonValue result = new JsonValue(rep.getObject());
-                        String id = null;
-                        String revison = null;
+                        final JsonValue result = new JsonValue(rep.getObject());
+                        result.asMap().putAll(create.asMap());
                         if (result.get("success").asBoolean()) {
-                            id = result.get("id").asString();
-                            revison = "";
                             result.put(Resource.FIELD_CONTENT_ID, result.get("id").getObject());
                         }
                         if (result.isDefined("errors") && result.get("errors").size() > 0) {
                             handler.handleError(new InternalServerErrorException(
                                     "Failed to create FIX ME"));
                         } else {
-                            handler.handleResult(new Resource(id, revison, result));
+                            final Resource resource = new Resource(result.get("id").asString(), "", result);
+                            activityLogger.log(context, request.getRequestType(), "message",
+                                    getSource(type, resource.getId()), null,
+                                    resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
+                            handler.handleResult(resource);
                         }
                     } else {
                         handler.handleError(new InternalServerErrorException(
                                 "Failed to create FIX ME?"));
                     }
+                } catch (ResourceException e) {
+                    activityLogger.log(context, request.getRequestType(), "message",
+                            getSource(type, request.getNewResourceId()), request.getContent(),
+                            null, org.forgerock.openidm.audit.util.Status.FAILURE);
+                    handler.handleError(e);
                 } finally {
                     if (null != cr) {
                         cr.release();
@@ -317,24 +341,30 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     public void readInstance(ServerContext context, String resourceId, ReadRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String type = getPartition(context);
+            final String type = getPartition(context);
             final ClientResource cr = getClientResource(type, resourceId);
             try {
                 handleRequest(cr, true);
-                Representation body = cr.getResponse().getEntity();
+                final Representation body = cr.getResponse().getEntity();
                 if (null != body && body instanceof EmptyRepresentation == false) {
-                    JacksonRepresentation<Map> rep =
+                    final JacksonRepresentation<Map> rep =
                             new JacksonRepresentation<Map>(body, Map.class);
-                    JsonValue result = new JsonValue(rep.getObject());
-                    if (result.isDefined("Id")) {
-                        result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required()
-                                .asString());
-                    }
-                    handler.handleResult(new Resource(result.get("Id").asString(), result.get(
-                            REVISION_FIELD).asString(), result));
+                    final JsonValue result = new JsonValue(rep.getObject());
+                    result.put(Resource.FIELD_CONTENT_ID, result.get("Id").asString());
+                    final Resource resource =
+                            new Resource(result.get("Id").asString(), result.get(REVISION_FIELD).asString(), result);
+                    activityLogger.log(context, request.getRequestType(), "message",
+                            getSource(type, resource.getId()), resource.getContent(),
+                            resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
+                    handler.handleResult(resource);
                 } else {
                     handler.handleError(new NotFoundException());
                 }
+            } catch (ResourceException e) {
+                activityLogger.log(context, request.getRequestType(), "message",
+                        getSource(type, resourceId), null,
+                        null, org.forgerock.openidm.audit.util.Status.FAILURE);
+                handler.handleError(e);
             } finally {
                 if (null != cr) {
                     cr.release();
@@ -381,38 +411,41 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String type = getPartition(context);
-            SObjectDescribe describe = getSObjectDescribe(type);
+            final String type = getPartition(context);
+            final SObjectDescribe describe = getSObjectDescribe(type);
             if (null != describe) {
-
-                // String id = "sobjects" + type + "/" + resourceId;
-
                 final ClientResource cr = getClientResource(type, resourceId);
                 try {
                     cr.setMethod(SalesforceConnection.PATCH);
 
-                    JsonValue update =
+                    final JsonValue update =
                             new JsonValue(describe.beforeUpdate(request.getContent()));
                     logger.trace("Update sobjects/{} \n content: \n{}\n", type, update);
 
                     cr.getRequest().setEntity(new JacksonRepresentation<Map>(update.asMap()));
 
                     handleRequest(cr, true);
-
-                    Representation body = cr.getResponse().getEntity();
+                    final JsonValue result;
+                    final Representation body = cr.getResponse().getEntity();
                     if (null != body && body instanceof EmptyRepresentation == false) {
-                        JacksonRepresentation<Map> rep =
+                         final JacksonRepresentation<Map> rep =
                                 new JacksonRepresentation<Map>(body, Map.class);
-                        JsonValue result = new JsonValue(rep.getObject());
-                        // result.put(Resource.FIELD_CONTENT_ID,
-                        // result.get("Id").required().asString());
-                        result.put(Resource.FIELD_CONTENT_ID, resourceId);
-                        handler.handleResult(new Resource(resourceId, request.getRevision(), result));
+                        result = new JsonValue(rep.getObject());
                     } else {
-                        JsonValue result = new JsonValue(new HashMap<String, Object>());
-                        result.put(Resource.FIELD_CONTENT_ID, resourceId);
-                        handler.handleResult(new Resource(resourceId, request.getRevision(), result));
+                        result = new JsonValue(new HashMap<String, Object>());
                     }
+                    result.asMap().putAll(update.asMap());
+                    result.put(Resource.FIELD_CONTENT_ID, resourceId);
+                    final Resource resource = new Resource(resourceId, request.getRevision(), result);
+                    activityLogger.log(context, request.getRequestType(), "message",
+                            getSource(type, resource.getId()), null,
+                            resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
+                    handler.handleResult(resource);
+                } catch (ResourceException e) {
+                    activityLogger.log(context, request.getRequestType(), "message",
+                            getSource(type, resourceId), request.getContent(),
+                            null, org.forgerock.openidm.audit.util.Status.FAILURE);
+                    handler.handleError(e);
                 } finally {
                     if (null != cr) {
                         cr.release();
@@ -430,39 +463,36 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
             ResultHandler<Resource> handler) {
         try {
-            String type = getPartition(context);
-            // SObjectDescribe describe = getSObjectDescribe(type);
-            // if (null != describe) {
-
+            final String type = getPartition(context);
             final ClientResource cr = getClientResource(type, resourceId);
             try {
                 cr.setMethod(org.restlet.data.Method.DELETE);
                 handleRequest(cr, true);
-                Representation body = cr.getResponse().getEntity();
+                final JsonValue result;
+                final Representation body = cr.getResponse().getEntity();
+                final Resource resource;
                 if (null != body && body instanceof EmptyRepresentation == false) {
-                    JacksonRepresentation<Map> rep =
+                    final JacksonRepresentation<Map> rep =
                             new JacksonRepresentation<Map>(body, Map.class);
-                    JsonValue result = new JsonValue(rep.getObject());
-                    // result.put(Resource.FIELD_CONTENT_ID,
-                    // result.get("Id").required().asString());
-
-                    result.put(Resource.FIELD_CONTENT_ID, resourceId);
-                    handler.handleResult(new Resource(resourceId, request.getRevision(), result));
+                    result = new JsonValue(rep.getObject());
                 } else {
-
-                    JsonValue result = new JsonValue(new HashMap<String, Object>());
-                    result.put(Resource.FIELD_CONTENT_ID, resourceId);
-                    handler.handleResult(new Resource(resourceId, request.getRevision(), result));
+                    result = new JsonValue(new HashMap<String, Object>());
                 }
+                resource = new Resource(resourceId, request.getRevision(), result);
+                result.put(Resource.FIELD_CONTENT_ID, resource.getId());
+                activityLogger.log(context, request.getRequestType(), "message", getSource(type, resource.getId()),
+                        resource.getContent(), null, org.forgerock.openidm.audit.util.Status.SUCCESS);
+                handler.handleResult(resource);
+            } catch (ResourceException e) {
+                activityLogger.log(context, request.getRequestType(), "message",
+                        getSource(type, resourceId), null,
+                        null, org.forgerock.openidm.audit.util.Status.FAILURE);
+                handler.handleError(e);
             } finally {
                 if (null != cr) {
                     cr.release();
                 }
             }
-            // } else {
-            // handler.handleError(new
-            // BadRequestException("Type not supported: " + type));
-            // }
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
@@ -637,16 +667,18 @@ public class SalesforceRequestHandler implements CollectionResourceProvider {
     }
 
     private ClientResource getClientResource(String type, String id) {
-        StringBuilder sb =
-                new StringBuilder("services/data/").append(connection.getVersion()).append(
-                        "/sobjects");
+        return connection.getChild(getSource(type, id));
+    }
+
+    private String getSource(String type, String id) {
+        StringBuilder sb = new StringBuilder("services/data/").append(connection.getVersion()).append("/sobjects");
         if (null != type) {
             sb.append('/').append(type);
             if (null != id) {
                 sb.append('/').append(id);
             }
         }
-        return connection.getChild(sb.toString());
+        return sb.toString();
     }
 
     private ClientResource getClientResource(String id) {
