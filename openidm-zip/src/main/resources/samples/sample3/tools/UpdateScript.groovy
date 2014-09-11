@@ -1,6 +1,7 @@
 /*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2014 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -8,130 +9,124 @@
  * compliance with the License.
  *
  * You can obtain a copy of the License at
- * http://www.opensource.org/licenses/cddl1.php or
- * OpenIDM/legal/CDDLv1.0.txt
+ * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
  *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
- * at OpenIDM/legal/CDDLv1.0.txt.
+ * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
- * "Portions Copyrighted 2010 [name of copyright owner]"
+ * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * $Id$
+ * @author Gael Allioux <gael.allioux@forgerock.com>
  */
-import groovy.sql.Sql;
-import groovy.sql.DataSet;
 
-// Parameters:
-// The connector sends us the following:
-// connection : SQL connection
-//
-// action: String correponding to the action (UPDATE/ADD_ATTRIBUTE_VALUES/REMOVE_ATTRIBUTE_VALUES)
-//   - UPDATE : For each input attribute, replace all of the current values of that attribute
-//     in the target object with the values of that attribute.
-//   - ADD_ATTRIBUTE_VALUES: For each attribute that the input set contains, add to the current values
-//     of that attribute in the target object all of the values of that attribute in the input set.
-//   - REMOVE_ATTRIBUTE_VALUES: For each attribute that the input set contains, remove from the current values
-//     of that attribute in the target object any value that matches one of the values of the attribute from the input set.
+import groovy.sql.Sql
+import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.exceptions.ConnectorException
+import org.identityconnectors.framework.common.objects.Attribute
+import org.identityconnectors.framework.common.objects.AttributesAccessor
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+import org.identityconnectors.framework.common.objects.Uid
 
-// log: a handler to the Log facility
-//
-// objectClass: a String describing the Object class (__ACCOUNT__ / __GROUP__ / other)
-//
-// uid: a String representing the entry uid
-//
-// attributes: an Attribute Map, containg the <String> attribute name as a key
-// and the <List> attribute value(s) as value.
-//
-// password: password string, clear text (only for UPDATE)
-//
-// options: a handler to the OperationOptions Map
+import java.sql.Connection
 
-log.info("Entering "+action+" Script");
+def operation = operation as OperationType
+def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
+def configuration = configuration as ScriptedSQLConfiguration
+def connection = connection as Connection
+def id = id as String
+def log = log as Log
+def objectClass = objectClass as ObjectClass
+def options = options as OperationOptions
+def uid = uid as Uid
+def ORG = new ObjectClass("organization")
+
+log.info("Entering " + operation + " Script");
 def sql = new Sql(connection);
 
+switch (operation) {
+    case OperationType.UPDATE:
+        switch (objectClass) {
+            case ObjectClass.ACCOUNT:
+                sql.executeUpdate("""
+                        UPDATE 
+                            Users 
+                        SET 
+                            fullname = ?,
+                            firstname = ?,
+                            lastname = ?,
+                            email = ?,
+                            organization = ?,
+                            password = coalesce(sha1(?), password),
+                            timestamp = now()
+                        WHERE 
+                            id = ?
+                        """,
+                        [
+                                updateAttributes.findString("fullname"),
+                                updateAttributes.findString("firstname"),
+                                updateAttributes.findString("lastname"),
+                                updateAttributes.findString("email"),
+                                updateAttributes.findString("organization"),
+                                updateAttributes.findString("password"),
+                                uid.uidValue
+                        ]
+                );
+                break
 
-switch ( action ) {
-    case "UPDATE":
-    switch ( objectClass ) {
-        case "__ACCOUNT__":
-        sql.executeUpdate("""
-            UPDATE 
-                Users 
-            SET 
-                fullname = ?,
-                firstname = ?,
-                lastname = ?,
-                email = ?,
-                organization = ?,
-                password = coalesce(sha1(?), password)
-            WHERE 
-                uid = ?
-            """, 
-            [
-                attributes.get("fullname").get(0),
-                attributes.get("firstname").get(0),
-                attributes.get("lastname").get(0),
-                attributes.get("email").get(0),
-                attributes.get("organization").get(0),
-                attributes.get("password") != null ? attributes.get("password").get(0) : null,
+            case ObjectClass.GROUP:
+                sql.executeUpdate("""
+                        UPDATE 
+                            Groups 
+                        SET
+                            description = ?,
+                            gid = ?,
+                            timestamp = now()
+                        WHERE 
+                            id = ?
+                        """,
+                        [
+                                updateAttributes.findString("description"),
+                                updateAttributes.findString("gid"),
+                                uid.uidValue
+                        ]
+                );
+                break
+
+            case ORG:
+                sql.executeUpdate("""
+                        UPDATE 
+                            Organizations
+                        SET 
+                            description = ?,
+                            timestamp = now()
+                        WHERE 
+                            id = ?
+                        """,
+                        [
+                                updateAttributes.findString("description"),
+                                uid.uidValue
+                        ]
+                );
+                break
+
+            default:
                 uid
-            ]
-        );
-        break
-
-        case "__GROUP__":
-        sql.executeUpdate("""
-            UPDATE 
-                Groups 
-            SET
-                description = ?,
-                gid = ?
-            WHERE 
-                name = ?
-            """, 
-            [
-                attributes.get("description").get(0), 
-                attributes.get("gid").get(0),
-                uid
-            ]
-        );
-        break
-
-        case "organization":
-        sql.executeUpdate("""
-            UPDATE 
-                Organizations
-            SET 
-                description = ?
-            WHERE 
-                name = ?
-            """, 
-            [
-                attributes.get("description").get(0), 
-                uid
-            ]
-        );
-        break
-
-        default:
-        uid;
-    }
-    break
-
-    case "ADD_ATTRIBUTE_VALUES":
-    break
-
-    case "ADD_ATTRIBUTE_VALUES":
-    break
-
-
+        }
+        return uid
+    case OperationType.ADD_ATTRIBUTE_VALUES:
+        throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                objectClass.objectClassValue + " is not supported.")
+    case OperationType.REMOVE_ATTRIBUTE_VALUES:
+        throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                objectClass.objectClassValue + " is not supported.")
     default:
-    uid
+        throw new ConnectorException("UpdateScript can not handle operation:" + operation.name())
 }
-
-return uid;

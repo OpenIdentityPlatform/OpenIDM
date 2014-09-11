@@ -1,6 +1,7 @@
 /*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -8,42 +9,49 @@
  * compliance with the License.
  *
  * You can obtain a copy of the License at
- * http://www.opensource.org/licenses/cddl1.php or
- * OpenIDM/legal/CDDLv1.0.txt
+ * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
  *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
- * at OpenIDM/legal/CDDLv1.0.txt.
+ * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
- * "Portions Copyrighted 2010 [name of copyright owner]"
+ * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * $Id$
+ * @author Gael Allioux <gael.allioux@forgerock.com>
  */
-import groovy.sql.Sql;
-import org.identityconnectors.framework.common.exceptions.InvalidPasswordException;
 
-// Parameters:
-// The connector sends the following:
-// connection
-// configuration
-// action ("AUTHENTICATE")
-// log
-// objectClass
-// options
-// username
-// password
+import groovy.sql.Sql
+import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.common.security.GuardedString
+import org.identityconnectors.common.security.SecurityUtil
+import org.identityconnectors.framework.common.exceptions.InvalidPasswordException
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
 
-// It is expected that an authentication failure will throw an error from the package org.identityconnectors.framework.common.exceptions
+import java.sql.Connection
 
-log.info("Entering "+action+" Script");
+def operation = operation as OperationType
+def configuration = configuration as ScriptedSQLConfiguration
+def connection = connection as Connection
+def username = username as String
+def log = log as Log
+def objectClass = objectClass as ObjectClass
+def options = options as OperationOptions
+def password = password as GuardedString;
+
+log.info("Entering " + operation + " Script");
 def sql = new Sql(connection);
 def authId = null;
 
-sql.eachRow("SELECT uid FROM Users WHERE uid = ? AND password = sha1(?)", [username, password]) { authId = it.uid }
+sql.eachRow("SELECT id FROM Users WHERE uid = ? AND password = sha1(?)", [username, SecurityUtil.decrypt(password)]) {
+    authId = String.valueOf(it.id)
+}
 
 if (authId == null) {
     throw new InvalidPasswordException("Authentication Failed")

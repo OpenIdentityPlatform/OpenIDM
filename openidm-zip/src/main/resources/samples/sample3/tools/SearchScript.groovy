@@ -1,6 +1,7 @@
 /*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2014 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -8,167 +9,246 @@
  * compliance with the License.
  *
  * You can obtain a copy of the License at
- * http://www.opensource.org/licenses/cddl1.php or
- * OpenIDM/legal/CDDLv1.0.txt
+ * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
  *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
- * at OpenIDM/legal/CDDLv1.0.txt.
+ * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
- * "Portions Copyrighted 2010 [name of copyright owner]"
+ * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * $Id$
+ * @author Gael Allioux <gael.allioux@forgerock.com>
  */
-import groovy.sql.Sql;
-import groovy.sql.DataSet;
 
-// Parameters:
-// The connector sends the following:
-// connection: handler to the SQL connection
-// objectClass: a String describing the Object class (__ACCOUNT__ / __GROUP__ / other)
-// action: a string describing the action ("SEARCH" here)
-// log: a handler to the Log facility
-// options: a handler to the OperationOptions Map
-// query: a handler to the Query Map
-//
-// The Query map describes the filter used.
-//
-// query = [ operation: "CONTAINS", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "ENDSWITH", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "STARTSWITH", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "EQUALS", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "GREATERTHAN", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "GREATERTHANOREQUAL", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "LESSTHAN", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "LESSTHANOREQUAL", left: attribute, right: "value", not: true/false ]
-// query = null : then we assume we fetch everything
-//
-// AND and OR filter just embed a left/right couple of queries.
-// query = [ operation: "AND", left: query1, right: query2 ]
-// query = [ operation: "OR", left: query1, right: query2 ]
-//
-// Returns: A list of Maps. Each map describing one row.
-// !!!! Each Map must contain a '__UID__' and '__NAME__' attribute.
-// This is required to build a ConnectorObject.
+import groovy.sql.Sql
+import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+import org.identityconnectors.framework.common.objects.SearchResult
+import org.identityconnectors.framework.common.objects.filter.Filter
+
+import java.sql.Connection
+
+def operation = operation as OperationType
+def configuration = configuration as ScriptedSQLConfiguration
+def connection = connection as Connection
+def filter = filter as Filter
+def log = log as Log
+def objectClass = objectClass as ObjectClass
+def options = options as OperationOptions
+def ORG = new ObjectClass("organization")
 
 
-//Need to handle the __UID__ and __NAME__ in queries - this map has entries for each objectType, 
-//and is used to translate fields that might exist in the query object from the ICF identifier
-//back to the real property name.
-def fieldMap = [
-    "organization": [
-        "__UID__": "name",
-        "__NAME__": "name"
-    ],
-    "__ACCOUNT__": [
-        "__UID__": "uid",
-        "__NAME__": "uid"
-    ],
-    "__GROUP__": [
-        "__UID__": "name",
-        "__NAME__": "name"
-    ]
-]
-
-log.info("Entering "+action+" Script");
-
-def whereTemplates = [
-    CONTAINS:'$left ${not ? "NOT " : ""}LIKE ?',
-    ENDSWITH:'$left ${not ? "NOT " : ""}LIKE ?',
-    STARTSWITH:'$left ${not ? "NOT " : ""}LIKE ?',
-    EQUALS:'$left ${not ? "<>" : "="} ?',
-    GREATERTHAN:'$left ${not ? "<=" : ">"} ?',
-    GREATERTHANOREQUAL:'$left ${not ? "<" : ">="} ?',
-    LESSTHAN:'$left ${not ? ">=" : "<"} ?',
-    LESSTHANOREQUAL:'$left ${not ? ">" : "<="} ?'
-];
-
-def whereParams = []
-def queryParser
-
-// this closure function recurses through the (potentially complex) query object in order to build an equivalent SQL 'where' expression
-queryParser = { queryObj ->
-
-    if (queryObj.operation == "OR" || queryObj.operation == "AND") {
-        return "(" + queryParser(queryObj.right) + " " + queryObj.operation + " " + queryParser(queryObj.left) + ")";
-    } else {
-
-        if (fieldMap[objectClass] && fieldMap[objectClass][queryObj.get("left")]) {
-            queryObj.put("left",fieldMap[objectClass][queryObj.get("left")]);
-        }
-
-        def engine = new groovy.text.SimpleTemplateEngine()
-        def wt = whereTemplates.get(queryObj.get("operation"))
-        def binding = [left:queryObj.get("left"),not:queryObj.get("not")]
-        def template = engine.createTemplate(wt).make(binding)
-
-        if (queryObj.get("operation") == "CONTAINS") {
-            whereParams.push("%" + queryObj.get("right") + "%")
-        } else if (queryObj.get("operation") == "ENDSWITH") {
-            whereParams.push("%" + queryObj.get("right"))
-        } else if (queryObj.get("operation") == "STARTSWITH") {
-            whereParams.push(queryObj.get("right") + "%")
-        } else {
-            whereParams.push(queryObj.get("right"))
-        }
-        return template.toString()
-    }
-}
-
+log.info("Entering " + operation + " Script");
 
 def sql = new Sql(connection);
-def result = []
-def where = "";
+def where = " WHERE 1=1 ";
+def whereParams = []
 
-if (query != null){
-    // We can use Groovy template engine to generate our custom SQL queries
-    where = " WHERE " + queryParser(query)
-    log.ok("Search WHERE clause is: "+ where)
+// Set where and whereParams if they have been passed in the request for paging
+if (options.pagedResultsCookie != null) {
+    def cookieProps = options.pagedResultsCookie.split(",");
+    assert cookieProps.size() == 2
+    // The timestamp and id are for this example only.
+    // The user can use their own properties to sort on.
+    // For paging it is important that the properties that you use must identify
+    // a distinct set of pages for each iteration of the
+    // pagedResultsCookie, which can be decided by last record of the previous set.
+    where =  " WHERE timestamp >= ? AND id > ? "
+    whereParams = [ cookieProps[0], cookieProps[1].toInteger()]
 }
 
-switch ( objectClass ) {
-    case "__ACCOUNT__":
-    sql.eachRow("SELECT * FROM Users" + where, whereParams) {
-        result.add([
-            __UID__:it.uid, 
-            __NAME__:it.uid, 
-            uid:it.uid, 
-            fullname:it.fullname,
-            firstname:it.firstname,
-            lastname:it.lastname,
-            email:it.email,
-            organization:it.organization
-        ])
+// Determine what properties will be used to sort the query
+def orderBy = []
+if (options.sortKeys != null && options.sortKeys.size() > 0) {
+    options.sortKeys.each {
+        def key = it.toString();
+        if (key.substring(0,1) == "+") {
+            orderBy.add(key.substring(1,key.size()) + " ASC")
+        } else {
+            orderBy.add(key.substring(1,key.size()) + " DESC")
+        }
     }
-    break
+    orderBy = " ORDER BY " + orderBy.join(",")
+} else {
+    orderBy = ""
+}
 
-    case "__GROUP__":
-    sql.eachRow("SELECT * FROM Groups" + where, whereParams) {
-        result.add([
-            __UID__:it.name, 
-            __NAME__:it.name, 
-            gid:it.gid,
-            description:it.description
-        ])
-    }
-    break
+def limit = ""
+if (options.pageSize != null) {
+    limit = " LIMIT " + options.pageSize.toString()
+}
 
-    case "organization":
-    sql.eachRow("SELECT * FROM Organizations" + where, whereParams) {
-        result.add([
-            __UID__:it.name, 
-            __NAME__:it.name, 
-            description:it.description
-        ])
+// keep track of lastTimestamp and lastId so we can
+// use it for the next request to do paging
+def lastTimestamp
+def lastId
+
+if (filter != null) {
+
+    def query = filter.accept(MapFilterVisitor.INSTANCE, null)
+    //Need to handle the __UID__ and __NAME__ in queries - this map has entries for each objectType, 
+    //and is used to translate fields that might exist in the query object from the ICF identifier
+    //back to the real property name.
+    def fieldMap = [
+            "organization": [
+                    "__UID__" : "id",
+                    "__NAME__": "name"
+            ],
+            "__ACCOUNT__" : [
+                    "__UID__" : "id",
+                    "__NAME__": "uid"
+            ],
+            "__GROUP__"   : [
+                    "__UID__" : "id",
+                    "__NAME__": "name"
+            ]
+    ]
+
+    def whereTemplates = [
+            CONTAINS          : '$left ${not ? "NOT " : ""}LIKE ?',
+            ENDSWITH          : '$left ${not ? "NOT " : ""}LIKE ?',
+            STARTSWITH        : '$left ${not ? "NOT " : ""}LIKE ?',
+            EQUALS            : '$left ${not ? "<>" : "="} ?',
+            GREATERTHAN       : '$left ${not ? "<=" : ">"} ?',
+            GREATERTHANOREQUAL: '$left ${not ? "<" : ">="} ?',
+            LESSTHAN          : '$left ${not ? ">=" : "<"} ?',
+            LESSTHANOREQUAL   : '$left ${not ? ">" : "<="} ?'
+    ];
+
+    // this closure function recurses through the (potentially complex) query object in order to build an equivalent SQL 'where' expression
+    def queryParser
+    queryParser = { queryObj ->
+
+        if (queryObj.operation == "OR" || queryObj.operation == "AND") {
+            return "(" + queryParser(queryObj.right) + " " + queryObj.operation + " " + queryParser(queryObj.left) + ")";
+        } else {
+
+            if (fieldMap[objectClass.objectClassValue] && fieldMap[objectClass.objectClassValue][queryObj.get("left")]) {
+                queryObj.put("left", fieldMap[objectClass.objectClassValue][queryObj.get("left")]);
+            }
+
+            def engine = new groovy.text.SimpleTemplateEngine()
+            def wt = whereTemplates.get(queryObj.get("operation"))
+            def binding = [left: queryObj.get("left"), not: queryObj.get("not")]
+            def template = engine.createTemplate(wt).make(binding)
+
+            if (queryObj.get("operation") == "CONTAINS") {
+                whereParams.push("%" + queryObj.get("right") + "%")
+            } else if (queryObj.get("operation") == "ENDSWITH") {
+                whereParams.push("%" + queryObj.get("right"))
+            } else if (queryObj.get("operation") == "STARTSWITH") {
+                whereParams.push(queryObj.get("right") + "%")
+            } else {
+                whereParams.push(queryObj.get("right"))
+            }
+            return template.toString()
+        }
     }
-    break
+
+    where = where + " AND "+ queryParser(query)
+    log.ok("Search WHERE clause is: " + where)
+}
+def resultCount = 0
+switch (objectClass) {
+    case ObjectClass.ACCOUNT:
+        sql.eachRow("""
+        SELECT
+            id,
+            uid,
+            fullname,
+            firstname,
+            lastname,
+            email,
+            organization,
+            timestamp
+        FROM
+            Users
+        ${where}
+        ${orderBy}
+        ${limit}
+        """, whereParams, { row ->
+            handler {
+                uid row.id as String
+                id row.uid
+                attribute 'uid', row.uid
+                attribute 'fullname', row.fullname
+                attribute 'firstname', row.firstname
+                attribute 'lastname', row.lastname
+                attribute 'email', row.email
+                attribute 'organization', row.organization
+            }
+            lastTimestamp = row.timestamp
+            lastId = row.id
+            resultCount++
+        });
+        break
+
+    case ObjectClass.GROUP:
+        sql.eachRow("""
+        SELECT
+            id,
+            uid,
+            gid,
+            description,
+            timestamp
+        FROM
+            Users
+        ${where}
+        ${orderBy}
+        ${limit}
+        """, whereParams, { row ->
+            handler {
+                uid row.id as String
+                id row.name
+                attribute 'gid', row.gid
+                attribute 'description', row.description
+            }
+            lastTimestamp = row.timestamp
+            lastId = row.id
+            resultCount++
+        });
+        break
+
+    case ORG:
+        sql.eachRow("""
+        SELECT
+                id,
+                uid,
+                description,
+                timestamp
+        FROM
+                Users
+        ${where}
+        ${orderBy}
+        ${limit}
+        """, whereParams, { row ->
+            handler {
+                uid row.id as String
+                id row.name
+                attribute 'description', row.description
+            }
+            lastTimestamp = row.timestamp
+            lastId = row.id
+            resultCount++
+        });
+        break
 
     default:
-    result;
+        throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                objectClass.objectClassValue + " is not supported.")
 }
 
-return result;
+// If paging is not wanted just return the default SearchResult object
+if (orderBy.toString().isEmpty() || limit.toString().isEmpty() || resultCount < options.pageSize) {
+    return new SearchResult();
+}
+
+return new SearchResult(lastTimestamp.toString() + "," + lastId.toString(), -1);

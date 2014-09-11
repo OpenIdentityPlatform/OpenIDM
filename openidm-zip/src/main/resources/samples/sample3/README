@@ -143,6 +143,40 @@ To try the example, follow these steps.
       "remainingPagedResults" : -1
     }
 
+    9. Show paging results with page size of 2
+    $ curl -u "openidm-admin:openidm-admin" --request GET "http://localhost:8080/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id" -H "Content-type:application/json
+    {
+      "result":[
+        {
+          "uid":"bob",
+          "_id":"1"
+        },
+        {
+          "uid":"rowley",
+          "_id":"2"
+        } ],
+      "resultCount":2,
+      "pagedResultsCookie":"2014-09-11 10:07:57.0,2",
+      "remainingPagedResults":-1
+    }
+
+    10. Use the pagedResultsCookie from the result in step 9 for the next query to retrieve the next result set. Make sure you encode the date:time.
+    $ curl -u "openidm-admin:openidm-admin" --request GET "http://localhost:8080/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2" -H "Content-type:application/json"
+    {
+      "result":[
+        {
+          "uid":"louis",
+          "_id":"3"
+        },
+        {
+          "uid":"john",
+          "_id":"4"
+        }],
+      "resultCount":2,
+      "pagedResultsCookie":"2014-09-11 10:07:57.0,4",
+      "remainingPagedResults":-1
+    }
+
 You can login to the OpenIDM UI (https://localhost:8443/openidmui) with any of
 the users that were created. Consult the values from "sample_HR_DB.mysql" to 
 retrieve their cleartext passwords. Users can update their profile or their password;
