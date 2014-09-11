@@ -53,6 +53,20 @@ public class ResultIterable implements Iterable<ResultEntry> {
     public Collection<String> getAllIds() {
         return allIds;
     }
+    
+    /**
+     * Remove any entries that are not in the supplied ids
+     * @param ids of entries to keep
+     */
+    public void removeNotMatchingEntries(Collection<String> ids) {
+        Iterator<ResultEntry> entryIter = this.iterator();
+        while (entryIter.hasNext()) {
+            ResultEntry entry = entryIter.next();
+            if (!ids.contains(entry.getId())) {
+                entryIter.remove();
+            }
+         }
+    }
 
     /**
      * Get an iterator over the ids and optional values

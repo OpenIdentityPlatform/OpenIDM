@@ -70,13 +70,19 @@ public class ReconciliationContext {
 
     // If set, the list of all queried source Ids
     private Set<String> sourceIds;
-    // If set, the list of all queried target Ids
-    private Set<String> targetIds;
 
+    // If set, the map of all queried target Ids to optional preloaded value 
+    private Map<String, JsonValue> targets;
+    // Whether the targets map contains preloaded values
+    private boolean hasTargetsValues;
+    
     private Integer totalSourceEntries;
     private Integer totalTargetEntries;
     private Integer totalLinkEntries;
 
+    // Marker value for nulls to use in maps without null value support
+    private final static JsonValue NULL_MARKER = new JsonValue(null);
+    
     /**
      * Creates the instance with info from the current call context
      * @param reconAction the recon action
@@ -273,6 +279,7 @@ public class ReconciliationContext {
     }
 
     /**
+     * Query (and cache if necessary) sources to reconcile
      * @return the source ids to reconcile in this recon scope
      * @throws SynchronizationException if getting the ids to reconcile failed
      */
@@ -280,6 +287,17 @@ public class ReconciliationContext {
         ResultIterable result = getReconHandler().querySource();
         setSourceIds(result.getAllIds());
         return result.iterator();
+    }
+    
+    /**
+     * Query (and cache if necessary) targets to reconcile
+     * @return the target results to reconcile in this recon scope
+     * @throws SynchronizationException if getting the entries to reconcile failed
+     */
+    ResultIterable queryTarget() throws SynchronizationException {
+        ResultIterable result = getReconHandler().queryTarget();
+        setTargets(result);
+        return result;
     }
 
     /**
@@ -291,20 +309,26 @@ public class ReconciliationContext {
         this.sourceIds.addAll(sourceIds);
         this.totalSourceEntries = Integer.valueOf(sourceIds.size());
     }
-
+    
     /**
-     * @param targetIds the list of all ids in the target object set
+     * @param targetsIterable the result with the ids and optionally values in the target object set
      * If the target system IDs are case insensitive, the ids are kept in normalized (lower case) form
      */
-    void setTargetIds(Collection<String> targetIds) {
-        // Choose a hash based collection as we need fast "contains" handling
-        this.targetIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-        if (targetIds != null) {
-            this.targetIds.addAll(targetIds);
+    void setTargets(ResultIterable targetsIterable) {
+        // Choose a hash based map as we need fast "contains" key handling
+        this.targets = new ConcurrentHashMap<String, JsonValue>();
+        hasTargetsValues = true;
+        for (ResultEntry entry : targetsIterable) {
+            if (entry.getValue() == null) {
+                hasTargetsValues = false;
+                targets.put(entry.getId(), NULL_MARKER);
+            } else {
+                targets.put(entry.getId(), entry.getValue());
+            }
         }
-        this.totalTargetEntries = Integer.valueOf(targetIds.size());
+        this.totalTargetEntries = Integer.valueOf(targets.size());
     }
-
+    
     /**
      * Set all pre-fetched links
      * Since pre-fetching all links is optional, links may be gotten individually rather than
@@ -325,14 +349,22 @@ public class ReconciliationContext {
     public Set<String> getSourceIds() {
         return sourceIds;
     }
-
+    
     /**
-     * @return the list of all ids in the target object set,
+     * @return a map all ids in the target object set,
+     * mapped to the targetvalue (if value preloaded) or to null (if not preloaded)
      * queried at the outset of reconciliation.
      * Null if no bulk target id query was done.
      */
-    public Set<String> getTargetIds() {
-        return targetIds;
+    public Map<String, JsonValue> getTargets() {
+        return targets;
+    }
+    
+    /**
+     * @return whether getTargets contains preloaded values
+     */
+    public boolean hasTargetsValues() {
+        return hasTargetsValues;
     }
 
     /**
@@ -365,7 +397,7 @@ public class ReconciliationContext {
      */
     private synchronized void cleanupState() {
         sourceIds = null;
-        targetIds = null;
+        targets = null;
         if (executor != null) {
             executor.shutdown();
             executor = null;
