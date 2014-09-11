@@ -53,6 +53,12 @@ import static org.forgerock.openidm.util.RequestUtil.hasQueryId;
  */
 public abstract class ReconTypeBase implements ReconTypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReconTypeBase.class);
+    
+    /**
+     * An indicator for which side of a reconciliation 
+     * (source or target) a query is for
+     */
+    public enum QuerySide {SOURCE, TARGET};
 
     ReconciliationContext reconContext;
     final boolean runTargetPhase;
@@ -63,6 +69,13 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * Note that auto detection has limitations, described in {@link ReconTypeBase#hasFullSourceEntry}
      */
     final Boolean sourceQueryFullEntry;
+    
+    /**
+     * If configured, sets if the defined target query returns full object data (true) or only ids (false)
+     * If not set in configuration, it will try to auto-detect this based on query results.
+     * Note that auto detection has limitations, described in {@link ReconTypeBase#hasFullTargetEntry}
+     */
+    final Boolean targetQueryFullEntry;
 
     public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
         this.reconContext = reconContext;
@@ -72,6 +85,8 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         logger.debug("runTargetPhase: {}", runTargetPhase);
         this.sourceQueryFullEntry = calcEffectiveConfig("sourceQueryFullEntry").asBoolean();
         logger.debug("sourceQueryFullEntry: {}", sourceQueryFullEntry);
+        this.targetQueryFullEntry = calcEffectiveConfig("targetQueryFullEntry").asBoolean();
+        logger.debug("targetQueryFullEntry: {}", targetQueryFullEntry);
         
     }
 
@@ -171,7 +186,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * @throws SynchronizationException if retrieving or processing the ids failed
      */
     protected ResultIterable query(final String objectSet, final JsonValue query, final ReconciliationContext reconContext, 
-            final Collection<String> collectionToPopulate, final boolean caseSensitive) throws SynchronizationException {
+            final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
         final JsonValue objList = new JsonValue(new ArrayList());
         try {
@@ -193,7 +208,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
                                 logger.warn("Resource {0} id is null!", resource);
                             }
                             else {
-                                if (fullEntriesDetected == false && hasFullSourceEntry(resource.getContent())) {
+                                if (fullEntriesDetected == false && hasFullEntry(resource.getContent(), querySide)) {
                                     fullEntriesDetected = true;
                                     logger.debug("Detected full entries in query");
                                 }
@@ -225,7 +240,8 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     }
     
     /**
-     * Whether the source query returns full entry data, or just ids
+     * Whether the query (source or target side query of a reconciliation)
+     * returns full entry data, or just ids
      * 
      * If explicitly configured, returns that setting. If not, tries to 
      * auto-detect if a given entry contains just id info, 
@@ -236,23 +252,28 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * This may not be case for all custom connectors, in which case 
      * explicit config is required instead of using auto detect.
      * 
+     * @param entry the result entry
+     * @param querySide whether the query is on the source or target side 
+     * of the reconciliation
      * @return Whether the given source entry contains data 
      * besides just id or rev of the object
      */
-    private boolean hasFullSourceEntry(JsonValue sourceEntry) {
-       
+    private boolean hasFullEntry(JsonValue entry, QuerySide querySide) {
+
         // If explicitly configured what it is meant to contain, do not try to auto detect
-        if (sourceQueryFullEntry != null) {
+        if (querySide == QuerySide.SOURCE && sourceQueryFullEntry != null) {
             return sourceQueryFullEntry;
+        } else if (querySide == QuerySide.TARGET && targetQueryFullEntry != null) {
+            return targetQueryFullEntry;
         }
         
-        if (sourceEntry != null) {
+        if (entry != null) {
 
             short ignoreFields = 0;
-            if (sourceEntry.isDefined("_id")) {
+            if (entry.isDefined("_id")) {
                 ignoreFields++;
             }
-            if (sourceEntry.isDefined("_rev")) {
+            if (entry.isDefined("_rev")) {
                 ignoreFields++;
             }
             
@@ -262,7 +283,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             // include at least 3 additional fields besides id and rev
             ignoreFields += 2;
             
-            return sourceEntry.size() > ignoreFields;
+            return entry.size() > ignoreFields;
         } else {
             return false;
         }

@@ -77,7 +77,8 @@ public class ReconTypeById extends ReconTypeBase {
 
     public ResultIterable queryTarget() throws SynchronizationException {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
-                Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());
+                Collections.synchronizedList(new ArrayList<String>()), 
+                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET);
     }
 
     public JsonValue getReconParameters() {

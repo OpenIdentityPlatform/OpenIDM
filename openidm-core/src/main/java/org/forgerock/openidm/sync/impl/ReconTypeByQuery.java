@@ -62,12 +62,14 @@ public class ReconTypeByQuery extends ReconTypeBase {
 
     public ResultIterable querySource() throws SynchronizationException {
         return query(sourceQuery.get("resourceName").asString(), sourceQuery, reconContext, 
-                ((Collection<String>) Collections.synchronizedList(new ArrayList<String>())), true);
+                ((Collection<String>) Collections.synchronizedList(new ArrayList<String>())), 
+                true, QuerySide.SOURCE);
     }
 
     public ResultIterable queryTarget() throws SynchronizationException {
         return query(targetQuery.get("resourceName").asString(), targetQuery, reconContext,
-                Collections.synchronizedList(new ArrayList<String>()), reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive());                
+                Collections.synchronizedList(new ArrayList<String>()), 
+                reconContext.getObjectMapping().getLinkType().isTargetCaseSensitive(), QuerySide.TARGET);                
     }
 
     public JsonValue getReconParameters() {

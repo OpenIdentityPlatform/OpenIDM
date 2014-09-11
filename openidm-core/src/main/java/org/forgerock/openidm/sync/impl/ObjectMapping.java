@@ -856,10 +856,11 @@ class ObjectMapping {
 
             // If we will handle a target phase, pre-load all relevant target identifiers
             Collection<String> remainingTargetIds = null;
+            ResultIterable targetIterable = null;
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 reconContext.getStatistics().targetQueryStart();
-                remainingTargetIds = reconContext.getReconHandler().queryTarget().getAllIds();
-                reconContext.setTargetIds(new ArrayList(remainingTargetIds));
+                targetIterable = reconContext.queryTarget();
+                remainingTargetIds = targetIterable.getAllIds();
                 reconContext.getStatistics().targetQueryEnd();
             } else {
                 remainingTargetIds = new ArrayList<String>();
@@ -888,9 +889,9 @@ class ObjectMapping {
 
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);         
-                ResultIterable remainingTargets = new ResultIterable(remainingTargetIds, null);
-                ReconPhase targetPhase = new ReconPhase(remainingTargets.iterator(), reconContext, context, 
+                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);       
+                targetIterable.removeNotMatchingEntries(remainingTargetIds);
+                ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context, 
                         rootContext, allLinks, null, targetRecon);
                 targetPhase.execute();
                 measureTarget.end();
@@ -1360,11 +1361,11 @@ class ObjectMapping {
                 defined = false;
             } else {
                 // Either check against a list of all targets, or load to check for existence
-                if (reconContext != null && reconContext.getTargetIds() != null) {
+                if (reconContext != null && reconContext.getTargets() != null) {
                     // If available, check against all queried existing IDs
                     // If target system has case insensitive IDs, compare without regard to case
                     String normalizedTargetId = linkType.normalizeTargetId(targetObjectAccessor.getLocalId());
-                    defined = reconContext.getTargetIds().contains(normalizedTargetId);
+                    defined = reconContext.getTargets().containsKey(normalizedTargetId);
                 } else {
                     // If no lists of existing ids is available, do a load of the object to check
                     defined = (targetObjectAccessor.getObject() != null);
@@ -1382,9 +1383,9 @@ class ObjectMapping {
          * by another process concurrently
          */
         protected boolean hadEmptyTargetObjectSet() {
-            if (reconContext != null && reconContext.getTargetIds() != null) {
+            if (reconContext != null && reconContext.getTargets() != null) {
                 // If available, check against all queried existing IDs
-                return (reconContext.getTargetIds().size() == 0);
+                return (reconContext.getTargets().size() == 0);
             } else {
                 return false;
             }
@@ -1715,6 +1716,7 @@ class ObjectMapping {
                         throw new SynchronizationException(se);
                     }
                 } else { // no script means true
+//TODO: is this the right result if getTargetObject was null?
                     result = true;
                 }
             }
@@ -1943,7 +1945,18 @@ class ObjectMapping {
                 linkObject.getLinkForSource(getSourceObjectId());
             }
             if (linkObject._id != null) {
-                targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId);
+                JsonValue preloaded = null;
+                if (reconContext != null) {
+                    // If there is a pre-loaded target value, use it
+                    if (reconContext.hasTargetsValues()) {
+                        preloaded = reconContext.getTargets().get(linkObject.targetId);
+                    }
+                }
+                if (preloaded != null) {
+                    targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId, preloaded);
+                } else {
+                    targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId);
+                }
             }
 
             if (!hasSourceObject()) {
