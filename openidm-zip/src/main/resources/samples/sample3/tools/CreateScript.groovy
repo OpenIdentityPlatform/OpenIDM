@@ -1,6 +1,7 @@
 /*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2014 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -8,74 +9,88 @@
  * compliance with the License.
  *
  * You can obtain a copy of the License at
- * http://www.opensource.org/licenses/cddl1.php or
- * OpenIDM/legal/CDDLv1.0.txt
+ * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
  *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
- * at OpenIDM/legal/CDDLv1.0.txt.
+ * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
- * "Portions Copyrighted 2010 [name of copyright owner]"
+ * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * $Id$
+ * @author Gael Allioux <gael.allioux@forgerock.com>
  */
-import groovy.sql.Sql;
-import groovy.sql.DataSet;
 
-// Parameters:
-// The connector sends us the following:
-// connection : SQL connection
-// action: String correponding to the action ("CREATE" here)
-// log: a handler to the Log facility
-// objectClass: a String describing the Object class (__ACCOUNT__ / __GROUP__ / other)
-// id: The entry identifier (OpenICF "Name" atribute. (most often matches the uid)
-// attributes: an Attribute Map, containg the <String> attribute name as a key
-// and the <List> attribute value(s) as value.
-// password: password string, clear text
-// options: a handler to the OperationOptions Map
 
-log.info("Entering "+action+" Script");
+import groovy.sql.Sql
+import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.Attribute
+import org.identityconnectors.framework.common.objects.AttributesAccessor
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+import org.identityconnectors.framework.common.objects.Uid
+
+import java.sql.Connection
+
+def operation = operation as OperationType
+def createAttributes = new AttributesAccessor(attributes as Set<Attribute>)
+def configuration = configuration as ScriptedSQLConfiguration
+def connection = connection as Connection
+def name = id as String
+def log = log as Log
+def objectClass = objectClass as ObjectClass
+def options = options as OperationOptions
+def ORG = new ObjectClass("organization")
+
+
+
+log.info("Entering " + operation + " Script");
 
 def sql = new Sql(connection);
-//Create must return UID. Let's return the name for now.
 
-switch ( objectClass ) {
-    case "__ACCOUNT__":
-    sql.execute("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha1(?),?,?,?,?,?)",
-        [
-            id,
-            attributes.get("password") != null ? attributes.get("password").get(0) : null,
-            attributes.get("firstname").get(0),
-            attributes.get("lastname").get(0),
-            attributes.get("fullname").get(0),
-            attributes.get("email").get(0),
-            attributes.get("organization").get(0)
-        ]);
-    break
+switch (objectClass) {
+    case ObjectClass.ACCOUNT:
+        def generatedKeys = sql.executeInsert("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha1(?),?,?,?,?,?)",
+                [
+                        name,
+                        createAttributes.hasAttribute("password") ? createAttributes.findString("firstname") : "",
+                        createAttributes.hasAttribute("firstname") ? createAttributes.findString("firstname") : "",
+                        createAttributes.hasAttribute("lastname") ? createAttributes.findString("lastname") : "",
+                        createAttributes.hasAttribute("fullname") ? createAttributes.findString("fullname") : "",
+                        createAttributes.hasAttribute("email") ? createAttributes.findString("email") : "",
+                        createAttributes.hasAttribute("organization") ? createAttributes.findString("organization") : ""
+                ])
+        return new Uid(generatedKeys[0][0] as String)
 
-    case "__GROUP__":
-    sql.execute("INSERT INTO Groups (gid,name,description) values (?,?,?)",
-        [
-            attributes.get("gid").get(0),
-            id,
-            attributes.get("description").get(0)
-        ]);
-    break
+        break
 
-    case "organization":
-    sql.execute("INSERT INTO Organizations (name,description) values (?,?)",
-        [
-            id,
-            attributes.get("description").get(0)
-        ]);
-    break
+    case ObjectClass.GROUP:
+        def generatedKeys = sql.executeInsert("INSERT INTO Groups (name,gid,description) values (?,?,?)",
+                [
+                        name,
+                        createAttributes.hasAttribute("gid") ? createAttributes.findString("gid") : "",
+                        createAttributes.hasAttribute("description") ? createAttributes.findString("description") : "",
+                ])
+        return new Uid(generatedKeys[0][0] as String)
+
+        break
+
+    case ORG:
+        def generatedKeys = sql.executeInsert("INSERT INTO Organizations (name ,description) values (?,?)",
+                [
+                        name,
+                        createAttributes.hasAttribute("description") ? createAttributes.findString("description") : ""
+                ])
+        return new Uid(generatedKeys[0][0] as String)
+
+        break
 
     default:
-    id;
+        throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                objectClass.objectClassValue + " is not supported.")
 }
-
-return id;

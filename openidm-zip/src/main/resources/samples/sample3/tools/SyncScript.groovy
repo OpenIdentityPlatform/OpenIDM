@@ -1,6 +1,7 @@
 /*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+ * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -8,80 +9,140 @@
  * compliance with the License.
  *
  * You can obtain a copy of the License at
- * http://www.opensource.org/licenses/cddl1.php or
- * OpenIDM/legal/CDDLv1.0.txt
+ * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
  *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
- * at OpenIDM/legal/CDDLv1.0.txt.
+ * at http://forgerock.org/license/CDDLv1.0.html
  * If applicable, add the following below the CDDL Header,
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
- * "Portions Copyrighted 2010 [name of copyright owner]"
+ * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * $Id$
+ * @author Gael Allioux <gael.allioux@forgerock.com>
  */
-import groovy.sql.Sql;
-import groovy.sql.DataSet;
 
-// Parameters:
-// The connector sends the following:
-// connection: handler to the SQL connection
-// objectClass: a String describing the Object class (__ACCOUNT__ / __GROUP__ / other)
-// action: a string describing the action ("SYNC" or "GET_LATEST_SYNC_TOKEN" here)
-// log: a handler to the Log facility
-// options: a handler to the OperationOptions Map (null if action = "GET_LATEST_SYNC_TOKEN")
-// token: a handler to an Object representing the sync token (null if action = "GET_LATEST_SYNC_TOKEN")
-//
-//
-// Returns:
-// if action = "GET_LATEST_SYNC_TOKEN", it must return an object representing the last known
-// sync token for the corresponding ObjectClass
-// 
-// if action = "SYNC":
-// A list of Maps . Each map describing one update:
-// Map should look like the following:
-//
-// [
-// "token": <Object> token object (could be Integer, Date, String) , [!! could be null]
-// "operation":<String> ("CREATE_OR_UPDATE"|"DELETE"),
-// "uid":<String> uid  (uid of the entry) ,
-// "previousUid":<String> prevuid (This is for rename ops) ,
-// "password":<String> password (optional... allows to pass clear text password if needed),
-// "attributes":Map<String,List> of attributes name/values
-// ]
 
-log.info("Entering "+action+" Script");
+import groovy.sql.Sql
+import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
+import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.exceptions.ConnectorException
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+
+import java.sql.Connection
+
+def operation = operation as OperationType
+def configuration = configuration as ScriptedSQLConfiguration
+def connection = connection as Connection
+def log = log as Log
+def objectClass = objectClass as ObjectClass
+def ORG = new ObjectClass("organization")
+
+
+
+log.info("Entering " + operation + " Script");
 def sql = new Sql(connection);
 
-if (action.equalsIgnoreCase("GET_LATEST_SYNC_TOKEN")) {
-    row = sql.firstRow("select timestamp from Users order by timestamp desc")
-    log.ok("Get Latest Sync Token script: last token is: "+row["timestamp"])
-    // We don't wanna return the java.sql.Timestamp, it is not a supported data type
-    // Get the 'long' version
-    return row["timestamp"].getTime();
-}
 
-else if (action.equalsIgnoreCase("SYNC")) {
-    def result = []
-    def tstamp = null
-    if (token != null){
-        tstamp = new java.sql.Timestamp(token)
-    }
-    else{
-        def today= new Date()
-        tstamp = new java.sql.Timestamp(today.time)
-    }
+switch (operation) {
+    case OperationType.SYNC:
+        def options = options as OperationOptions
+        def token = token as Object
 
-    sql.eachRow("select * from Users where timestamp > ${tstamp}",
-        {result.add([operation:"CREATE_OR_UPDATE", uid:it.uid, token:it.timestamp.getTime(), attributes:[firstname:it.firstname, lastname:it.lastname, email:it.email]])}
-    )
-    log.ok("Sync script: found "+result.size()+" events to sync")
-    return result;
-    }
-else { // action not implemented
-    log.error("Sync script: action '"+action+"' is not implemented in this script")
-    return null;
+        def tstamp = null
+        if (token != null) {
+            tstamp = new java.sql.Timestamp(token)
+        } else {
+            def today = new Date()
+            tstamp = new java.sql.Timestamp(today.time)
+        }
+        switch (objectClass) {
+            case ObjectClass.ACCOUNT:
+                sql.eachRow("select * from Users where timestamp > ${tstamp}", {
+                    handler({
+                        syncToken it.timestamp.getTime()
+                        CREATE_OR_UPDATE()
+                        object {
+                            id it.uid
+                            uid row.id as String
+                            attribute 'uid', it.uid
+                            attribute 'fullname', it.fullname
+                            attribute 'firstname', it.firstname
+                            attribute 'lastname', it.lastname
+                            attribute 'email', it.email
+                            attribute 'organization', it.organization
+                        }
+                    })
+                })
+                break
+
+            case ObjectClass.GROUP:
+                sql.eachRow("SELECT * FROM Groups where timestamp > ${tstamp}", {
+                    handler({
+                        syncToken it.timestamp.getTime()
+                        CREATE_OR_UPDATE()
+                        object {
+                            id it.name
+                            uid row.id as String
+                            delegate.objectClass(ObjectClass.GROUP)
+                            attribute 'gid', it.gid
+                            attribute 'description', it.description
+                        }
+                    })
+                });
+                break
+
+            case ORG:
+                sql.eachRow("SELECT * FROM Organizations where timestamp > ${tstamp}", {
+                    handler({
+                        syncToken it.timestamp.getTime()
+                        CREATE_OR_UPDATE()
+                        object {
+                            id it.name
+                            uid row.id as String
+                            delegate.objectClass(ORG)
+                            attribute 'description', it.description
+                        }
+                    })
+                });
+                break
+
+            default:
+                log.error("Sync script: objectClass " + objectClass + " is not handled by the Sync script")
+                throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                        objectClass.objectClassValue + " is not supported.")
+        }
+
+        break;
+    case OperationType.GET_LATEST_SYNC_TOKEN:
+
+        switch (objectClass) {
+            case ObjectClass.ACCOUNT:
+                row = sql.firstRow("select timestamp from Users order by timestamp desc")
+                break;
+
+            case ObjectClass.GROUP:
+                row = sql.firstRow("select timestamp from Groups order by timestamp desc")
+                break;
+            case ORG:
+                row = sql.firstRow("select timestamp from Organizations order by timestamp desc")
+                break;
+
+            default:
+                throw new UnsupportedOperationException(operation.name() + " operation of type:" +
+                        objectClass.objectClassValue + " is not supported.")
+        }
+
+        log.ok("Get Latest Sync Token script: last token is: " + row["timestamp"])
+        // We don't wanna return the java.sql.Timestamp, it is not a supported data type
+        // Get the 'long' version
+        return row["timestamp"].getTime();
+
+        break;
+    default:
+        throw new ConnectorException("SyncScript can not handle operation:" + operation.name())
 }

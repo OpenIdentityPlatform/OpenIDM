@@ -24,25 +24,47 @@
  * @author Gael Allioux <gael.allioux@forgerock.com>
  */
 
-import groovy.sql.Sql
 import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
-import org.identityconnectors.common.logging.Log
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.logging.Log
 
 import java.sql.Connection
 
+import static org.identityconnectors.framework.common.objects.AttributeInfo.Flags.REQUIRED
 
 def operation = operation as OperationType
 def configuration = configuration as ScriptedSQLConfiguration
-def connection = new Sql(connection as Connection)
+def connection = connection as Connection
 def log = log as Log
 
+builder.schema({
+    objectClass {
+        type ObjectClass.ACCOUNT_NAME
+        attributes {
+            uid String.class, REQUIRED
+            password String.class, REQUIRED
+            firstname String.class, REQUIRED
+            lastname String.class, REQUIRED
+            fullname String.class, REQUIRED
+            email String.class, REQUIRED
+            organization String.class, REQUIRED
+        }
 
-log.info("This is TestScript")
-
-// if the database connection isn't properly established, or if the 
-// schema hasn't been populated, this query will result in an error.
-// Errors thrown here will prevent the connector from being enabled.
-connection.execute("DESC Users");
-connection.execute("DESC Groups");
-connection.execute("DESC Organizations");
+    }
+    objectClass {
+        type ObjectClass.GROUP_NAME
+        attributes {
+            name String.class, REQUIRED
+            gid String.class, REQUIRED
+            description String.class, REQUIRED
+        }
+    }
+    objectClass {
+        type 'organization'
+        attributes {
+            name String.class, REQUIRED
+            description String.class, REQUIRED
+        }
+    }
+}
+)
