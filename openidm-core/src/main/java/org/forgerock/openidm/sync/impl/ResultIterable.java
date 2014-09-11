@@ -65,7 +65,7 @@ public class ResultIterable implements Iterable<ResultEntry> {
             if (!ids.contains(entry.getId())) {
                 entryIter.remove();
             }
-         }
+        }
     }
 
     /**
