@@ -685,16 +685,16 @@ public class OpenICFProvisionerServiceTest extends ConnectorFacadeFactory implem
         connection.delete(new RootContext(), deleteRequest);
     }
 
-    // ConnectionBrokenException -> InternalServerErrorException
-    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
-    public void testInternalServerErrorExceptionFromConnectionBrokenException(String systemName) throws Exception {
+    // ConnectionBrokenException -> ServiceUnavailableException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ServiceUnavailableException.class, enabled = true)
+    public void testServiceUnavailableExceptionFromConnectionBrokenException(String systemName) throws Exception {
         DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CB");
         connection.delete(new RootContext(), deleteRequest);
     }
 
-    // ConnectionFailedException -> InternalServerErrorException
-    @Test(dataProvider = "groovy-only", expectedExceptions = InternalServerErrorException.class, enabled = true)
-    public void testInternalServerErrorExceptionFromConnectionFailedException(String systemName) throws Exception {
+    // ConnectionFailedException -> ServiceUnavailableException
+    @Test(dataProvider = "groovy-only", expectedExceptions = ServiceUnavailableException.class, enabled = true)
+    public void testServiceUnavailableExceptionFromConnectionFailedException(String systemName) throws Exception {
         DeleteRequest deleteRequest = Requests.newDeleteRequest("system/" + systemName + "/__TEST__/TESTEX_CF");
         connection.delete(new RootContext(), deleteRequest);
     }

@@ -81,10 +81,9 @@ public class RouterActivityLogger implements ActivityLogger {
     }
 
     private String getRequester(Context context) {
-        SecurityContext securityContext = context.asContext(SecurityContext.class);
-        return securityContext != null
-                ? securityContext.getAuthenticationId()
-                : null;
+        return context.containsContext(SecurityContext.class)
+            ? context.asContext(SecurityContext.class).getAuthenticationId()
+            : null;
     }
 
     /**
