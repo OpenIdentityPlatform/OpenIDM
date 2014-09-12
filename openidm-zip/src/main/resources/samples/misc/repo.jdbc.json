@@ -72,7 +72,7 @@
             "perge-by-recon-date" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (select reconId from ${_dbSchema}.auditrecon where activitydate < '${timestamp}' and entryType = 'summary') as x ON x.reconId = r.reconId",
             "perge-by-recon-date-mapping" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (select reconId from ${_dbSchema}.auditrecon where mapping like '${mapping}' and activitydate < '${timestamp}' and entryType = 'summary') as x ON x.reconId = r.reconId"
         }   
-    }
+    },
     "resourceMapping" : {
         "default" : {
             "mainTable" : "genericobjects",
