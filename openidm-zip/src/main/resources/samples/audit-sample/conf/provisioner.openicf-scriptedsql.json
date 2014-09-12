@@ -158,6 +158,92 @@
                 }
             }
         },
+        "sync" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditsync",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "rootActionId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "rootactionid",
+                    "nativeType" : "string"
+                },
+                "action" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activity",
+                    "nativeType" : "string"
+                },
+                "message" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "message",
+                    "nativeType" : "string"
+                },
+                "situation" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "situation",
+                    "nativeType" : "string"
+                },
+                "sourceObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "sourceobjectid",
+                    "nativeType" : "string"
+                },
+                "status" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "status",
+                    "nativeType" : "string"
+                },
+                "targetObjectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "targetobjectid",
+                    "nativeType" : "string"
+                },
+                "timestamp" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activitydate",
+                    "nativeType" : "string"
+                },
+                "actionId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "actionid",
+                    "nativeType" : "string"
+                },
+                "exception" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "exceptiondetail",
+                    "nativeType" : "string"
+                },
+                "mapping" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "mapping",
+                    "nativeType" : "string"
+                },
+                "messageDetail" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "messagedetail",
+                    "nativeType" : "string"
+                }
+            }
+        },
         "activity" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "objectid",
