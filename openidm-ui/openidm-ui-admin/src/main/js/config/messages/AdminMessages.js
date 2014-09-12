@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -26,50 +26,54 @@
 
 define("config/messages/AdminMessages", [
 ], function() {
-    
+
     var obj = {
-            "connectorsNotAvailable": {
-                msg: "config.messages.ConnectorMessages.connectorsNotAvailable",
-                type: "error"
-            },
-            "connectorSaved": {
-                msg: "config.messages.ConnectorMessages.connectorSaved",
-                type: "info"
-            },
-            "connectorSaveFail": {
-                msg: "config.messages.ConnectorMessages.connectorSaveFail",
-                type: "error"
-            },
-            "connectorTestPass": {
-                msg: "config.messages.ConnectorMessages.connectorTestPass",
-                type: "info"
-            },
-            "connectorTestFailed": {
-                msg: "config.messages.ConnectorMessages.connectorTestFailed",
-                type: "error"
-            },
-            "deleteConnectorSuccess": {
-                msg: "config.messages.ConnectorMessages.deleteConnectorSuccess",
-                type: "info"
-            },
-            "deleteConnectorFail": {
-                msg: "config.messages.ConnectorMessages.deleteConnectorFail",
-                type: "error"
-            },
-            "deleteManagedSuccess": {
-                msg: "config.messages.ManagedObjectMessages.deleteManagedSuccess",
-                type: "info"
-            },
-            "deleteManagedFail": {
-                msg: "config.messages.ManagedObjectMessages.deleteManagedFail",
-                type: "error"
-            },
-            "managedObjectSaveSuccess" : {
-                msg: "config.messages.ManagedObjectMessages.saveSuccessful",
-                type: "info"
-            }
+        "connectorsNotAvailable": {
+            msg: "config.messages.ConnectorMessages.connectorsNotAvailable",
+            type: "error"
+        },
+        "connectorSaved": {
+            msg: "config.messages.ConnectorMessages.connectorSaved",
+            type: "info"
+        },
+        "connectorSaveFail": {
+            msg: "config.messages.ConnectorMessages.connectorSaveFail",
+            type: "error"
+        },
+        "connectorTestPass": {
+            msg: "config.messages.ConnectorMessages.connectorTestPass",
+            type: "info"
+        },
+        "connectorTestFailed": {
+            msg: "config.messages.ConnectorMessages.connectorTestFailed",
+            type: "error"
+        },
+        "deleteConnectorSuccess": {
+            msg: "config.messages.ConnectorMessages.deleteConnectorSuccess",
+            type: "info"
+        },
+        "deleteConnectorFail": {
+            msg: "config.messages.ConnectorMessages.deleteConnectorFail",
+            type: "error"
+        },
+        "deleteManagedSuccess": {
+            msg: "config.messages.ManagedObjectMessages.deleteManagedSuccess",
+            type: "info"
+        },
+        "deleteManagedFail": {
+            msg: "config.messages.ManagedObjectMessages.deleteManagedFail",
+            type: "error"
+        },
+        "managedObjectSaveSuccess" : {
+            msg: "config.messages.ManagedObjectMessages.saveSuccessful",
+            type: "info"
+        },
+        "authSaveSuccess" : {
+            msg: "config.messages.AuthenticationMessages.saveSuccessful",
+            type: "info"
+        }
     };
-    
+
     return obj;
 });
 

@@ -1,0 +1,76 @@
+<h1 id="addEditConnectorTitle">{{t "templates.auth.authTitle"}}</h1>
+
+<div class="authentication-input-body">
+    <form id="authenticationForm" class="form clearfix" autocomplete="off">
+
+        <fieldset id="sessionModuleForm">
+            <legend><span>{{t "templates.auth.sessionFieldsetName"}}</span></legend>
+            <div class="group-body">
+                <div class="group-field-block group-lead">
+                    <div class="separate-message">
+                        <label for="maxTokenLifeMinutes" class="light">{{t "templates.auth.maxLifeTitle"}}</label>
+                        <input id="maxTokenLifeMinutes" class="form-size-s" type="text" name="maxTokenLifeMinutes" value="" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+
+                <div class="group-field-block">
+                    <div class="separate-message">
+                        <label for="tokenIdleTimeMinutes" class="light">{{t "templates.auth.idleTimeTitle"}}</label>
+                        <input id="tokenIdleTimeMinutes" class="form-size-s" type="text" name="tokenIdleTimeMinutes" value="" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
+
+                <div class="group-field-block no-validation-block">
+                    <label for="sessionOnly" class="light">{{t "templates.auth.sessionOnlyTitle"}}</label>
+                    <select id="sessionOnly" class="form-size-s" name="sessionOnly">
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="authenticationModules">
+            <legend><span>{{t "templates.auth.authFieldsetName"}}</span></legend>
+
+            <div class="group-body">
+                <div class="group" id="group-copy">
+                    <h3>
+                        <i class="fa fa-pencil fa-2 edit"></i>
+                        <i class="fa fa-trash-o fa-2 trash"></i>
+                        <div class="authModuleTitle">
+                            <span class="authModuleName">{{t "templates.auth.defaultTitle"}}</span>
+                            <span class="authModuleDisabled noteHidden"> ({{t "templates.auth.disabled"}})</span>
+                            <span class="authModuleErrors noteHidden"> ({{t "templates.auth.errors"}})</span>
+                        </div>
+                        <i class="fa fa-chevron-up fa-2 up"></i>
+                        <i class="fa fa-chevron-down fa-2 down"></i>
+                    </h3>
+                    <div class="content">
+                        <div class="form"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="addNew">
+                <h3>
+                    <span>{{t "templates.auth.addNew"}}</span>
+                </h3>
+            </div>
+        </fieldset>
+
+
+        <div style="display:none;" id="authErrorMessage" class="float-left error-box">
+            <p class="error-message">{{t "templates.auth.errorsmsg"}}</p>
+        </div>
+
+        <div class="float-right form-button-bar">
+            <input type="button" name="submit" value={{t "common.form.submit"}} class="button" id="submitAuth">
+        </div>
+
+    </form>
+</div>

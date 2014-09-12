@@ -42,5 +42,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ScriptEditor",
     "./util/ScriptDialog",
 
-    "./objectTypes/ObjectTypesDialog"
+    "./objectTypes/ObjectTypesDialog",
+
+    "./authentication/AuthenticationView"
 ]);

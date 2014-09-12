@@ -39,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                 "click .script-remove" : "deleteScriptHook",
                 "click .event-hook-empty" : "addScriptHook"
             },
+            deleteElement: true,
 
             render: function (args, callback) {
                 this.element = args.element;
@@ -59,6 +60,10 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                     this.deleteCallback = args.deleteCallback;
                 }
 
+                if(args.deleteElement === false) {
+                    this.deleteElement = args.deleteElement;
+                }
+
                 this.parentRender(function() {
                     if(callback) {
                         callback();
@@ -77,7 +82,9 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                         this.deleteCallback({"element":this.element, "eventName":this.data.eventName});
                     }
 
-                    this.$el.remove();
+                    if(this.deleteElement) {
+                        this.$el.remove();
+                    }
                 },this), "290px");
             },
 
@@ -91,6 +98,10 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
 
             getScriptHook: function() {
                 return {"script" :this.data.scriptData, "eventName" : this.data.eventName};
+            },
+
+            clearScriptHook: function() {
+                this.render({"element":this.element, "eventName":this.data.eventNames});
             },
 
             getEventName: function() {
