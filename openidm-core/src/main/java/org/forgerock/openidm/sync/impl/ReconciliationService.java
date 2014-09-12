@@ -370,8 +370,8 @@ public class ReconciliationService
                 reconContext.setStage(ReconStage.COMPLETED_CANCELED);
             } else {
                 reconContext.setStage(ReconStage.COMPLETED_FAILED);
+                throw ex;
             }
-            throw ex;
         } catch (RuntimeException ex) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
             throw ex;
