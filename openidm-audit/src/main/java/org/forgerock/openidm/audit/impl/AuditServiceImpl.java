@@ -177,7 +177,8 @@ public class AuditServiceImpl implements AuditService {
     public static final String RECON_LOG_SITUATION = "situation";
     public static final String RECON_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String RECON_LOG_TARGET_OBJECT_ID = "targetObjectId";
-    
+    public static final String RECON_LOG_MAPPING = "mapping";
+
     public static final String SYNC_LOG_TIMESTAMP = "timestamp";
     public static final String SYNC_LOG_ACTION_ID = "actionId";
     public static final String SYNC_LOG_ROOT_ACTION_ID = "rootActionId";
@@ -189,6 +190,7 @@ public class AuditServiceImpl implements AuditService {
     public static final String SYNC_LOG_SITUATION = "situation";
     public static final String SYNC_LOG_SOURCE_OBJECT_ID = "sourceObjectId";
     public static final String SYNC_LOG_TARGET_OBJECT_ID = "targetObjectId";
+    public static final String SYNC_LOG_MAPPING = "mapping";
 
     // ----- Declarative Service Implementation
 
@@ -925,6 +927,7 @@ public class AuditServiceImpl implements AuditService {
         formattedEntry.put(SYNC_LOG_SITUATION, entry.get(SYNC_LOG_SITUATION));
         formattedEntry.put(SYNC_LOG_SOURCE_OBJECT_ID, entry.get(SYNC_LOG_SOURCE_OBJECT_ID));
         formattedEntry.put(SYNC_LOG_TARGET_OBJECT_ID, entry.get(SYNC_LOG_TARGET_OBJECT_ID));
+        formattedEntry.put(SYNC_LOG_MAPPING, entry.get(SYNC_LOG_MAPPING));
         return formattedEntry;
     }
 
@@ -955,9 +958,8 @@ public class AuditServiceImpl implements AuditService {
             formattedEntry.put(RECON_LOG_SITUATION, entry.get(RECON_LOG_SITUATION));
             formattedEntry.put(RECON_LOG_SOURCE_OBJECT_ID, entry.get(RECON_LOG_SOURCE_OBJECT_ID));
             formattedEntry.put(RECON_LOG_TARGET_OBJECT_ID, entry.get(RECON_LOG_TARGET_OBJECT_ID));
-        } else {
-            formattedEntry.put("mapping", entry.get("mapping"));
         }
+        formattedEntry.put(RECON_LOG_MAPPING, entry.get(RECON_LOG_MAPPING));
         return formattedEntry;
     }
 
