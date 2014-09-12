@@ -70,6 +70,12 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "managed/add/",
             forceUpdate: true
+        },
+        "authenticationView" : {
+            view: "org/forgerock/openidm/ui/admin/authentication/AuthenticationView",
+            role: "ui-admin",
+            url: "authentication/",
+            forceUpdate: true
         }
     };
 

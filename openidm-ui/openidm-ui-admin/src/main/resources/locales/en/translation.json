@@ -59,6 +59,9 @@
                 "deleteManagedSuccess" : "Managed object successfully deleted",
                 "deleteManagedFail" : "Error deleting managed object unable to remove managed object",
                 "saveSuccessful" : "Managed Object has been saved."
+            },
+            "AuthenticationMessages" : {
+                "saveSuccessful" : "Authentication configuration has been saved."
             }
         },
         "AppConfiguration" : {
@@ -74,7 +77,8 @@
                     "allTasks" : "Tasks that are in my group's queue",
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
-                    "resources" : "Resources"
+                    "resources" : "Resources",
+                    "authentication": "Authentication"
                 }
             }
         }
@@ -177,6 +181,45 @@
             "variableValue" : "Variable Value",
             "javascript" : "Javascript",
             "groovy" : "Groovy"
+        },
+        "auth": {
+            "errorsmsg": "Please address the errors in the Authentication modules before proceeding to save.",
+            "addNew": "Add New Authentication Module",
+            "errors": "Errors",
+            "disabled": "Disabled",
+            "defaultTitle": "Select an Authentication Module Type",
+            "authFieldsetName": "Authentication Module",
+            "authTitle": "Configure Authentication",
+            "sessionFieldsetName": "Session Module",
+            "sessionOnlyTitle": "Session Only",
+            "idleTimeTitle": "Token Idle Time (in minutes)",
+            "maxLifeTitle": "Max Token Life (in minutes)",
+            "type": "Type",
+            "moduleEnabled": "Module Enabled",
+            "queryOnResource": "Query on Resource",
+            "queryId": "Use Query ID",
+            "defaultUserRole": "Default User Roles",
+            "role": "Role",
+            "propertyMapping": "Property Mappings",
+            "authId": "Authentication ID",
+            "userCred": "User Credential",
+            "userOrGroup": "User Roles or Group Membership",
+            "selectOption": "Select an option",
+            "userRoles": "User Roles",
+            "groupMembership": "Group Membership",
+            "customProp": "Custom Properties",
+            "property": "Property",
+            "propertyName": "Property Name",
+            "propertyType": "Property Type",
+            "string": "String",
+            "simpleArray": "Simple Array",
+            "value": "Value",
+            "groupRoleMapping": "Group Role Mapping",
+            "roleName": "Role Name",
+            "groupMappings": "Group Mappings",
+            "group": "Group",
+            "augmentSecurityContext": "Augment Security Context"
+
         },
         "connector" : {
             "groovy_ScriptedConnector":"Groovy Connector",
@@ -388,7 +431,7 @@
             "password" : "Password",
             "confirmPassword" : "Confirm Password"
         },
-         "form" : {
+        "form" : {
             "add" : "Add",
             "ok" : "Okay",
             "confirm" :"Confirmation",
@@ -458,8 +501,8 @@
                 "shouldBeLong" : "Should be long value",
                 "wrongDateFormat" : "Wrong format"
             }
-         },
-         "user" : {
+        },
+        "user" : {
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",
@@ -505,8 +548,8 @@
             "changePhoto" : "Change photo",
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
-         },
-         "task" : {
+        },
+        "task" : {
             "unassigned" : "Unassigned",
             "assignToMe" : "Assign to me",
             "claim" : "Claim",
@@ -522,8 +565,8 @@
             "myTasks" : "My tasks",
             "tasksList" : "Tasks list",
             "processes" : "Processes"
-         },
-         "application" : {
+        },
+        "application" : {
             "applicationName" : "Application Name",
             "requestedBy" : "Requested by",
             "yourFrequentlyUsedApplications" : "Your frequently used apps",
@@ -532,8 +575,8 @@
             "addMoreApplications" : "Add more apps",
             "allAvailableApps" : "All available apps",
             "dropApplicationsHere" : "drop apps here"
-         },
-         "notification" : {
+        },
+        "notification" : {
             "notifications" : "Notifications",
             "deleteThisMessage" : "Delete this message",
             "type" : "Notification type",
@@ -543,7 +586,7 @@
                 "warning" : "Warning",
                 "error" : "Error"
             }
-         }
+        }
     },
     "openidm" : {
         "ui" : {
