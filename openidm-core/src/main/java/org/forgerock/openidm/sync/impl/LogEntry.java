@@ -33,13 +33,18 @@ import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
 import org.forgerock.openidm.util.DateUtil;
 
 /**
- * An audit log entry representation
+  An audit log entry representation
  * 
  * @author ckienle
  */
 class LogEntry {
-    
-    /** 
+
+    /**
+     * The name of the mapping associated with this entry
+     */
+    private String mappingName;
+
+    /**
      * The root invocation context 
      */
     protected final Context rootContext;
@@ -93,10 +98,19 @@ class LogEntry {
      * The DateUtil for formatting the timestamp
      */
     protected DateUtil dateUtil;
-    
-    protected LogEntry(SyncOperation op, Context rootContext, DateUtil dateUtil) {
-        this.rootContext = rootContext;
+
+    /**
+     * Construct a log entry for the provided {@link SyncOperation} and mapping name.
+     *
+     * @param op the sync operation
+     * @param mappingName the mapping name
+     * @param rootContext the root context
+     * @param dateUtil a date-formatting object
+     */
+    protected LogEntry(SyncOperation op, String mappingName, Context rootContext, DateUtil dateUtil) {
         this.op = op;
+        this.mappingName = mappingName;
+        this.rootContext = rootContext;
         this.dateUtil = dateUtil;
     }
     
@@ -107,6 +121,7 @@ class LogEntry {
      */
     protected JsonValue toJsonValue() {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
+        jv.put("mapping", mappingName);
         jv.put("rootActionId", rootContext.getId());
         jv.put("sourceObjectId", sourceObjectId);
         jv.put("targetObjectId", targetObjectId);

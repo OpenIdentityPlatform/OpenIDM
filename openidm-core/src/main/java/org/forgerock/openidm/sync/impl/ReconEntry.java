@@ -60,11 +60,6 @@ class ReconEntry extends LogEntry {
     private String ambigiousTargetIds;
     
     /**
-     * The name of the mapping associated with this entry
-     */
-    private String mappingName;
-
-    /**
      * The reconciliation action
      */
     private ReconciliationService.ReconAction reconAction;
@@ -101,25 +96,33 @@ class ReconEntry extends LogEntry {
     }
 
     /**
-     * Constructor that allows specifying the type of reconciliation log entry
+     * Construct a specific type reconciliation audit log entry from the given {@link SyncOperation} and mapping name.
+     *
+     * @param op the sync operation
+     * @param mappingName the mapping name
+     * @param rootContext the root context
+     * @param dateUtil a date-formatting object
+     * @param reconAction the reconciliation action
+     * @param reconId the recon id
      */
-    public ReconEntry(SyncOperation op, Context rootContext, String entryType, DateUtil dateUtil, String name,
+    public ReconEntry(SyncOperation op, String mappingName, Context rootContext, String entryType, DateUtil dateUtil,
             ReconciliationService.ReconAction reconAction, String reconId) {
-        super(op, rootContext, dateUtil);
+        super(op, mappingName, rootContext, dateUtil);
         this.entryType = entryType;
-        if (!AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_ENTRY.equals(entryType)) {
-            this.mappingName = name;
-        }
         this.reconAction = reconAction;
         this.reconId = reconId;
     }
 
     /**
-     * Constructor for regular reconciliation log entries
+     * Construct a regular reconciliation audit log entry from the given {@link SyncOperation} and mapping name.
+     *
+     * @param op the sync operation
+     * @param mappingName the mapping name
+     * @param rootContext the root context
+     * @param dateUtil a date-formatting object
      */
-    public ReconEntry(SyncOperation op, Context rootContext, DateUtil dateUtil, String name) {
-        super(op, rootContext, dateUtil);
-        this.mappingName = name;
+    public ReconEntry(SyncOperation op, String mappingName, Context rootContext, DateUtil dateUtil) {
+        super(op, mappingName, rootContext, dateUtil);
     }
 
     @Override
@@ -129,7 +132,6 @@ class ReconEntry extends LogEntry {
         jv.put("reconId", getReconId());
         jv.put("reconciling", reconciling);
         jv.put("ambiguousTargetObjectIds", ambigiousTargetIds);
-        jv.put("mapping", mappingName);
         jv.put("reconAction", reconAction != null ? reconAction.toString() : null);
         return jv;
     }

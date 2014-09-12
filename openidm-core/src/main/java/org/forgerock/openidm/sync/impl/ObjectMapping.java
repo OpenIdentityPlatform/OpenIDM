@@ -387,7 +387,7 @@ class ObjectMapping {
         // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
         op.oldValue = oldValue;
-        SyncEntry entry = new SyncEntry(op, context, dateUtil);
+        SyncEntry entry = new SyncEntry(op, name, context, dateUtil);
         if (sourceDeleted) {
             op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, null);
         } else if (value != null) {
@@ -711,7 +711,7 @@ class ObjectMapping {
                     op = sop;
                     sop.fromJsonValue(params);
 
-                    entry = new ReconEntry(sop, rootContext, dateUtil, name);
+                    entry = new ReconEntry(sop, name, rootContext, dateUtil);
                     entry.sourceObjectId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sop.getSourceObjectId());
                     if (null == sop.getSourceObject()) {
                         exception = new SynchronizationException(
@@ -735,7 +735,7 @@ class ObjectMapping {
                     top.fromJsonValue(params);
                     String targetId = params.get("targetId").required().asString();
 
-                    entry = new ReconEntry(top, rootContext, dateUtil, name);
+                    entry = new ReconEntry(top, name, rootContext, dateUtil);
                     entry.targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
                     top.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
                     if (null == top.getTargetObject()) {
@@ -978,7 +978,7 @@ class ObjectMapping {
                 throws SynchronizationException {
             SourceSyncOperation op = new SourceSyncOperation();
             op.reconContext = reconContext;
-            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil, name);
+            ReconEntry entry = new ReconEntry(op, name, rootContext, dateUtil);
             if (objectEntry == null) {
                 // Load source detail on demand
                 op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, id);
@@ -1044,7 +1044,7 @@ class ObjectMapping {
             reconContext.checkCanceled();
             TargetSyncOperation op = new TargetSyncOperation();
             op.reconContext = reconContext;
-            ReconEntry entry = new ReconEntry(op, rootContext, dateUtil, name);            
+            ReconEntry entry = new ReconEntry(op, name, rootContext, dateUtil);
             if (objectEntry == null) {
                 // Load target detail on demand
                 op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
@@ -1158,18 +1158,29 @@ class ObjectMapping {
     }
 
     /**
+     * Creates an entry in the audit log.
+     *
+     * @param auditTarget the audit target on which to create the entry
+     * @param entry the entry to create
+     * @throws SynchronizationException
+     */
+    private void logEntry(String auditTarget, LogEntry entry) throws SynchronizationException {
+        try {
+            CreateRequest cr = Requests.newCreateRequest(auditTarget, entry.toJsonValue());
+            service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
+        } catch (ResourceException ose) {
+            throw new SynchronizationException(ose);
+        }
+    }
+
+    /**
      * Creates a recon entry in the audit log.
      *
      * @param entry the entry to create
      * @throws SynchronizationException
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
-        try {
-            CreateRequest cr = Requests.newCreateRequest("audit/recon",entry.toJsonValue());
-            service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
-        } catch (ResourceException ose) {
-            throw new SynchronizationException(ose);
-        }
+        logEntry("audit/recon", entry);
     }
     
     /**
@@ -1179,18 +1190,13 @@ class ObjectMapping {
      * @throws SynchronizationException
      */
     private void logSyncEntry(SyncEntry entry) throws SynchronizationException {
-        try {
-            CreateRequest cr = Requests.newCreateRequest("audit/sync",entry.toJsonValue());
-            service.getConnectionFactory().getConnection().create(service.getServerContext(), cr);
-        } catch (ResourceException ose) {
-            throw new SynchronizationException(ose);
-        }
+        logEntry("audit/sync", entry);
     }
 
     private void logReconStart(ReconciliationContext reconContext, Context rootContext, ServerContext context)
             throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START,
-                dateUtil, name, reconContext.getReconAction(), reconContext.getReconId());
+        ReconEntry reconStartEntry = new ReconEntry(null, name, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_START,
+                dateUtil, reconContext.getReconAction(), reconContext.getReconId());
         reconStartEntry.timestamp = new Date();
         reconStartEntry.message = "Reconciliation initiated by "
                 + context.asContext(SecurityContext.class).getAuthenticationId();
@@ -1199,8 +1205,8 @@ class ObjectMapping {
 
     private void logReconEnd(ReconciliationContext reconContext, Context rootContext, ServerContext context)
             throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END,
-                dateUtil, name, reconContext.getReconAction(), reconContext.getReconId());
+        ReconEntry reconEndEntry = new ReconEntry(null, name, rootContext, AuditConstants.RECON_LOG_ENTRY_TYPE_RECON_END,
+                dateUtil, reconContext.getReconAction(), reconContext.getReconId());
         reconEndEntry.timestamp = new Date();
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconEndEntry.message = simpleSummary;

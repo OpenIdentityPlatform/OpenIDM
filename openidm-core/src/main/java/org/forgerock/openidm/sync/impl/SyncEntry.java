@@ -35,7 +35,15 @@ import org.forgerock.openidm.util.DateUtil;
  */
 class SyncEntry extends LogEntry {
 
-    public SyncEntry(SyncOperation op, Context rootContext, DateUtil dateUtil) {
-        super(op, rootContext, dateUtil);
+    /**
+     * Construct a sync audit log entry from the given {@link SyncOperation} and mapping name.
+     *
+     * @param op the sync operation
+     * @param mappingName the mapping name
+     * @param rootContext the root context
+     * @param dateUtil a date-formatting object
+     */
+    public SyncEntry(SyncOperation op, String mappingName, Context rootContext, DateUtil dateUtil) {
+        super(op, mappingName, rootContext, dateUtil);
     }
 }
