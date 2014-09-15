@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import static org.forgerock.json.fluent.JsonValue.array;
+import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.util.Iterables.filter;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
@@ -1442,18 +1444,27 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     operationOptionsBuilder.setSortKeys(sortKeys);
                 }
 
+                final JsonValue logValue = json(array());
                 SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
                         new ResultsHandler() {
                             @Override
                             public boolean handle(ConnectorObject obj) {
                                 try {
-                                    return handler.handleResource(objectClassInfoHelper.build(obj, cryptoService));
+                                    Resource resource = objectClassInfoHelper.build(obj, cryptoService);
+                                    logValue.add(resource.getContent().getObject());
+                                    return handler.handleResource(resource);
                                 } catch (Exception e) {
                                     handler.handleError(new InternalServerErrorException(e.getMessage(), e));
                                     return false;
                                 }
                             }
                         }, operationOptionsBuilder.build());
+                activityLogger.log(context, request.getRequestType(),
+                        "query: " + request.getQueryId()
+                        + ", queryExpression: " + request.getQueryExpression()
+                        + ", queryFilter: " + (request.getQueryFilter() != null ? request.getQueryFilter().toString() : null)
+                        + ", parameters: " + request.getAdditionalParameters(),
+                        request.getQueryId(), null, logValue, Status.SUCCESS);
                 handler.handleResult(
                         new QueryResult(
                                 searchResult != null ? searchResult.getPagedResultsCookie() : null,
