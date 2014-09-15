@@ -134,12 +134,22 @@ openidm.scheduler.execute.persistent.schedules=true
      tasks.</para>
    </listitem>
    <listitem>
-     <para><literal>executePersistentSchedules</literal> allows you to disable 
+    <para>
+     <literal>executePersistentSchedules</literal> allows you to disable
      persistent schedule execution for a specific node. If this parameter is 
      set to <literal>false</literal>, the Scheduler Service will support the 
      management of persistent schedules (CRUD operations) but it will not 
      execute any persistent schedules. The value of this property can be a 
-     string or boolean and is <literal>true</literal> by default.</para>
+     string or boolean and is <literal>true</literal> by default.
+    </para>
+    <para>
+     Note that changing the value of the
+     <literal>openidm.scheduler.execute.persistent.schedules</literal> property
+     in the <filename>boot.properties</filename> file changes the scheduler that
+     manages scheduled tasks on that node. Because the persistent and in-memory
+     schedulers are managed separately, a situation can arise where two separate
+     schedules have the same schedule name.
+    </para>
    </listitem>
    <listitem>
      <para><literal>advancedProperties</literal> (optional) enables you to 
