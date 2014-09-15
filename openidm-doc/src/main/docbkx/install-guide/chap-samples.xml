@@ -1223,7 +1223,7 @@ var params = {
       from : "openidm@example.com",
       to : "youremail@example.com",
       cc : "idmadmin2@example.com,idmadmin3@example.com",
-      subject : "Recon stats for " + source.name + " -> " + target.name,
+      subject : "Recon stats for " + global.mappingName,
       type : "text/html"
 },
 template,
