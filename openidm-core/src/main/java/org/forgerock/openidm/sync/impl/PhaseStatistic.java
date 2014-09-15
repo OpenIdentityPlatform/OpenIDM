@@ -44,17 +44,25 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class PhaseStatistic {
 
-    public enum Phase {SOURCE, TARGET};
+    public enum Phase { SOURCE, TARGET }
     
     private ReconciliationStatistic parentStat;
     Phase phase;
+    private String name;
     private Map<Situation, List<String>> ids = Collections.synchronizedMap(new EnumMap<Situation, List<String>>(Situation.class));
     private AtomicLong processedEntries = new AtomicLong();
     private List<String> notValid;
 
-    public PhaseStatistic(ReconciliationStatistic parentStat, Phase phase) {
+    long queryStartTime;
+    long queryEndTime;
+
+    long phaseStartTime;
+    long phaseEndTime;
+
+    public PhaseStatistic(ReconciliationStatistic parentStat, Phase phase, String name) {
         this.parentStat = parentStat;
         this.phase = phase;
+        this.name = name;
         ids.put(Situation.CONFIRMED, Collections.synchronizedList(new ArrayList<String>()));
         ids.put(Situation.FOUND, Collections.synchronizedList(new ArrayList<String>()));
         ids.put(Situation.ABSENT, Collections.synchronizedList(new ArrayList<String>()));
@@ -81,7 +89,7 @@ public class PhaseStatistic {
     public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, boolean linkCreated, 
             Situation situation, ReconAction action) {
         
-        String id = null;
+        String id;
         if (phase == Phase.SOURCE) {
             id = sourceId;
         } else {
@@ -108,23 +116,31 @@ public class PhaseStatistic {
     public long getProcessed() {
         return processedEntries.get();
     }
-    
-    public Map<String, Object> asMap() {
-        Map<String, Object> results = new HashMap();
 
+    public Map<String, Object> asMap() {
+        Map<String, Object> results = new HashMap<String, Object>();
+
+        results.put("name", name);
+        results.put("startTime", parentStat.getFormattedTime(phaseStartTime));
+        results.put("endTime", parentStat.getFormattedTime(phaseEndTime));
+        results.put("duration", parentStat.getDuration(phaseStartTime, phaseEndTime));
+        results.put("entryListDuration", parentStat.getDuration(queryStartTime, queryEndTime));
         results.put("processed", getProcessed());
 
-        Map<String, Object> nv = new HashMap();
+        Map<String, Object> nv = new HashMap<String, Object>();
         nv.put("count", notValid.size());
         nv.put("ids", notValid);
         results.put("NOTVALID", nv);
 
+        int entries = 0;
         for (Entry<Situation, List<String>> e : ids.entrySet()) {
-            Map<String, Object> res = new HashMap();
+            Map<String, Object> res = new HashMap<String, Object>();
+            entries += e.getValue().size();
             res.put("count", e.getValue().size());
             res.put("ids", e.getValue());
             results.put(e.getKey().name(), res);
         }
+        results.put("entries", entries);
 
         return results;
     }
@@ -134,7 +150,7 @@ public class PhaseStatistic {
             String key = e.getKey().name();
             Integer existing = simpleSummary.get(key);
             if (existing == null) {
-                existing = Integer.valueOf(0);
+                existing = 0;
             }
             Integer updated = existing + e.getValue().size();
             simpleSummary.put(key, updated);
