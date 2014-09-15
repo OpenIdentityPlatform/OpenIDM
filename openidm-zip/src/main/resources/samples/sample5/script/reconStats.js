@@ -21,12 +21,12 @@
 
 /*global global,source,target */
 
-var params = {
+var email = {
         //UPDATE THESE VALUES
         from : "openidm@example.com",
         to : "idmadmin1@example.com",
         cc : "idmadmin2@example.com,idmadmin3@example.com",
-        subject : "Recon stats for " + global.reconName,
+        subject : "Recon stats for " + global.mappingName,
         type : "text/html"
     },
     template,
@@ -35,23 +35,23 @@ var params = {
 // if there is a configuration found, assume that it has been properly configured
 if (openidm.read("config/external.email")) {
 
-    source.durationMinutes = Math.floor(source.duration/60000);
-    source.entryListDurationSeconds = Math.floor(source.allIds/1000);
+    source.durationMinutes = Math.floor(source.duration / 60.0) / 1000;
+    source.entryListDurationSeconds = Math.floor(source.entryListDuration * 1000.0 / 1000) / 1000;
 
-    target.durationMinutes = Math.floor(target.duration/60000);
-    target.entryListDurationSeconds = Math.floor(target.allIds/1000);
+    target.durationMinutes = Math.floor(target.duration / 60.0) / 1000;
+    target.entryListDurationSeconds = Math.floor(target.entryListDuration * 1000.0 / 1000) / 1000.0;
 
     load(identityServer.getInstallLocation() + "/bin/defaults/script/lib/handlebars.js");
 
     template = Handlebars.compile(readFile(identityServer.getProjectLocation() + "/script/reconStatTemplate.html"));
 
-    params._body = template({
+    email._body = template({
         "global": global,
         "source": source,
         "target": target
     });
 
-    openidm.action("external/email", "noop", {}, params);
+    openidm.action("external/email", "sendEmail", email);
 
 } else {
     console.log("Email service not configured; report not generated. ");

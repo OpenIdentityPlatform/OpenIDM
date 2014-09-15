@@ -48,12 +48,8 @@ public class ReconciliationStatistic {
     private long startTime;
     private long endTime;
     
-    private long sourceQueryStartTime;
-    private long sourceQueryEndTime;
-    private long targetQueryStartTime;
-    private long targetQueryEndTime;
-    private long linkQueryStartTime;
-    private long linkQueryEndTime;
+    long linkQueryStartTime;
+    long linkQueryEndTime;
     
     private AtomicInteger sourceProcessed = new AtomicInteger();
     private AtomicInteger linkProcessed = new AtomicInteger();
@@ -69,8 +65,8 @@ public class ReconciliationStatistic {
 
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
-        sourceStat = new PhaseStatistic(this, PhaseStatistic.Phase.SOURCE);
-        targetStat = new PhaseStatistic(this, PhaseStatistic.Phase.TARGET);
+        sourceStat = new PhaseStatistic(this, PhaseStatistic.Phase.SOURCE, reconContext.getObjectMapping().getSourceObjectSet());
+        targetStat = new PhaseStatistic(this, PhaseStatistic.Phase.TARGET, reconContext.getObjectMapping().getTargetObjectSet());
         for (ObjectMapping.Status status : ObjectMapping.Status.values()) {
             statusProcessed.put(status, new AtomicInteger());
         }
@@ -94,31 +90,31 @@ public class ReconciliationStatistic {
     
     public void startStage(ReconStage stage) {
         Map stageEntry = new ConcurrentHashMap();
-        stageEntry.put("startTime", Long.valueOf(System.currentTimeMillis()));
+        stageEntry.put("startTime", System.currentTimeMillis());
         stageStat.put(stage, stageEntry);
     }
     
     public void endStage(ReconStage stage) {
         Map stageEntry = stageStat.get(stage);
         if (stageEntry != null) {
-            stageEntry.put("endTime", Long.valueOf(System.currentTimeMillis()));
+            stageEntry.put("endTime", System.currentTimeMillis());
         }
     }
 
     public void sourceQueryStart() {
-        sourceQueryStartTime = System.currentTimeMillis();
+        sourceStat.queryStartTime = System.currentTimeMillis();
     }
     
     public void sourceQueryEnd() {
-        sourceQueryEndTime = System.currentTimeMillis();
+        sourceStat.queryEndTime = System.currentTimeMillis();
     }
     
     public void targetQueryStart() {
-        targetQueryStartTime = System.currentTimeMillis();
+        targetStat.queryStartTime = System.currentTimeMillis();
     }
     
     public void targetQueryEnd() {
-        targetQueryEndTime = System.currentTimeMillis();
+        targetStat.queryEndTime = System.currentTimeMillis();
     }
     
     public void linkQueryStart() {
@@ -127,6 +123,22 @@ public class ReconciliationStatistic {
     
     public void linkQueryEnd() {
         linkQueryEndTime = System.currentTimeMillis();
+    }
+
+    public void sourcePhaseStart() {
+        sourceStat.phaseStartTime = System.currentTimeMillis();
+    }
+
+    public void sourcePhaseEnd() {
+        sourceStat.phaseEndTime = System.currentTimeMillis();
+    }
+
+    public void targetPhaseStart() {
+        targetStat.phaseStartTime = System.currentTimeMillis();
+    }
+
+    public void targetPhaseEnd() {
+        targetStat.phaseEndTime = System.currentTimeMillis();
     }
 
     /**
@@ -203,31 +215,42 @@ public class ReconciliationStatistic {
      * @return the duration, in millisconds, that the reconciliation took, -1 if unavailable
      */
     public long getDuration() {
+        return getDuration(this.startTime, this.endTime);
+    }
+
+    /**
+     * @return the duration, in milliseconds, of an event defined by a {@code startTime} and an {@code endTime}
+     *
+     * @param startTime the start time
+     * @param endTime the end time
+     * @return the difference, in milliseconds; -1 if on endpoint is non-positve
+     */
+    public long getDuration(long startTime, long endTime) {
         return (startTime > 0 && endTime > 0)
                 ? endTime - startTime
                 : -1;
+    }
+
+    public String getFormattedTime(long epoch) {
+        String startFormatted = "";
+        if (epoch > 0) {
+            startFormatted = dateUtil.formatDateTime(new Date(epoch));
+        }
+        return startFormatted;
     }
 
     /**
      * @return The reconciliation start time, formatted
      */
     public String getStarted() {
-        String startFormatted = "";
-        if (startTime > 0) {
-            startFormatted = dateUtil.formatDateTime(new Date(startTime));
-        } 
-        return startFormatted;
+        return getFormattedTime(startTime);
     }
     
     /**
      * @return The reconciliation end time, formatted, or empty string if not ended
      */
     public String getEnded() {
-        String endFormatted = "";
-        if (endTime > 0) {
-            endFormatted = dateUtil.formatDateTime(new Date(endTime));
-        } 
-        return endFormatted;
+        return getFormattedTime(endTime);
     }
 
     public boolean hasEnded() {
@@ -238,14 +261,12 @@ public class ReconciliationStatistic {
     }
     
     public Map<String, Object> asMap() {
-        Map<String, Object> results = new HashMap();
+        Map<String, Object> results = new HashMap<String, Object>();
 
         results.put("startTime", getStarted());
         results.put("endTime", getEnded());
         results.put("duration", getDuration());
         results.put("reconId", reconContext.getReconId());
-        // TODO: what is this name?
-        //results.put("reconName", reconContext.getName());
         results.put("mappingName", reconContext.getMapping());
 
         return results;

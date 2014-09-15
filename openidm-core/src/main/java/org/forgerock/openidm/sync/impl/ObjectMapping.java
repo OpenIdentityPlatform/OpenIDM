@@ -880,9 +880,11 @@ class ObjectMapping {
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
 
+            reconContext.getStatistics().sourcePhaseStart();
             ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context,
                     rootContext, allLinks, remainingTargetIds, sourceRecon);
             sourcePhase.execute();
+            reconContext.getStatistics().sourcePhaseEnd();
             measureSource.end();
 
             LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
@@ -891,9 +893,11 @@ class ObjectMapping {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
                 reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);       
                 targetIterable.removeNotMatchingEntries(remainingTargetIds);
-                ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context, 
+                reconContext.getStatistics().targetPhaseStart();
+                ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         rootContext, allLinks, null, targetRecon);
                 targetPhase.execute();
+                reconContext.getStatistics().targetPhaseEnd();
                 measureTarget.end();
             }
 
