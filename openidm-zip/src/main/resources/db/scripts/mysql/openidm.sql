@@ -219,6 +219,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `message` TEXT NULL ,
   `actionid` VARCHAR(255) NULL ,
   `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
   `messagedetail` MEDIUMTEXT NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
