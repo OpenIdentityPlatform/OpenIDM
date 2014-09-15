@@ -63,12 +63,12 @@
     <dependency>
       <groupId>org.forgerock.openidm</groupId>
       <artifactId>openidm-system</artifactId>
-      <version>${openidm.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.forgerock.openidm</groupId>
       <artifactId>openidm-enhanced-config</artifactId>
-      <version>${openidm.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web</groupId>

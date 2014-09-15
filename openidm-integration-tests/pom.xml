@@ -245,7 +245,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openidm</groupId>
                                     <artifactId>openidm-zip</artifactId>
-                                    <version>${openidm.version}</version>
+                                    <version>${project.version}</version>
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>

@@ -37,12 +37,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-cluster</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -99,7 +99,7 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.apache.servicemix.bundles.quartz</Fragment-Host>
-                        <Export-Package>org.forgerock.openidm.quartz.impl;version="${openidm.version}"</Export-Package>
+                        <Export-Package>org.forgerock.openidm.quartz.impl;version="${project.version}"</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
