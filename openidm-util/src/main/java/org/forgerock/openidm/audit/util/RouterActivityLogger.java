@@ -55,6 +55,7 @@ public class RouterActivityLogger implements ActivityLogger {
 
     private final ConnectionFactory connectionFactory;
     private final boolean suspendException;
+    private final boolean logFullObjects;
     private final DateUtil dateUtil;
 
     /**
@@ -76,6 +77,7 @@ public class RouterActivityLogger implements ActivityLogger {
     public RouterActivityLogger(ConnectionFactory connectionFactory, boolean suspendException) {
         this.connectionFactory = connectionFactory;
         this.suspendException = suspendException;
+        this.logFullObjects = Boolean.valueOf(IdentityServer.getInstance().getProperty("openidm.audit.logFullObjects", "false"));
         // TODO Allow for configured dateUtil
         dateUtil = DateUtil.getDateUtil("UTC");
     }
@@ -123,8 +125,8 @@ public class RouterActivityLogger implements ActivityLogger {
 
         String method = requestType.name().toLowerCase();
 
-        // TODO: make configurable
         if (method != null
+                && !logFullObjects
                 && (RequestType.READ.equals(requestType) || RequestType.QUERY.equals(requestType))) {
             before = null;
             after = null;
