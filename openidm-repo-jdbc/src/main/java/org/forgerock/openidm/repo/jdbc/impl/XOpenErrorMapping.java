@@ -31,10 +31,6 @@ import java.util.Map;
 
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 
-import static org.forgerock.openidm.repo.jdbc.ErrorType.CONNECTION_FAILURE;
-import static org.forgerock.openidm.repo.jdbc.ErrorType.DEADLOCK_OR_TIMEOUT;
-import static org.forgerock.openidm.repo.jdbc.ErrorType.DUPLICATE_KEY;
-
 
 /**
  * Maps SQL state with Open Group (X/Open) SQL Standard codes
@@ -53,14 +49,14 @@ public class XOpenErrorMapping {
 
     static {
         /* codes known to represent connection failure conditions */
-        errorTypeToSqlStates.put(CONNECTION_FAILURE, Arrays.asList(
+        errorTypeToSqlStates.put(ErrorType.CONNECTION_FAILURE, Arrays.asList(
                 // X/Open 08S01 is communication link failure
                 // Known to be retryable for MySQL
                 "08S01"
         ));
 
         /* codes known to represent duplicate key conditions */
-        errorTypeToSqlStates.put(DUPLICATE_KEY, Arrays.asList(
+        errorTypeToSqlStates.put(ErrorType.DUPLICATE_KEY, Arrays.asList(
                 // X/Open 23000 is Integrity constraint violation
                 // Known to be used by Oracle, SQL Server, DB2, and MySQL
                 // Failure may be for a different constraint than duplicate though.
@@ -71,7 +67,7 @@ public class XOpenErrorMapping {
         ));
 
         /* codes known to represent deadlock/timeout conditions */
-        errorTypeToSqlStates.put(DEADLOCK_OR_TIMEOUT, Arrays.asList(
+        errorTypeToSqlStates.put(ErrorType.DEADLOCK_OR_TIMEOUT, Arrays.asList(
                 // X/Open 40001 is serialization failure such as timeout or deadlock
                 // Known to be retryable for MySQL
                 "40001"
