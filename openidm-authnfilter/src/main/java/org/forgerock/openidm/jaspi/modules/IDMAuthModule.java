@@ -19,6 +19,7 @@ package org.forgerock.openidm.jaspi.modules;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
 import org.forgerock.jaspi.modules.iwa.IWAModule;
+import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
 
 import javax.security.auth.message.module.ServerAuthModule;
 
@@ -44,7 +45,9 @@ public enum IDMAuthModule {
     /** Passthrough to OpenICF connector Auth Module. */
     PASSTHROUGH(DelegatedAuthModule.class),
     /** IWA Auth Module. */
-    IWA(IWAModule.class);
+    IWA(IWAModule.class),
+    /** OpenID Connect Auth Module. */
+    OPENID_CONNECT(OpenIdConnectModule.class);
 
     private Class<? extends ServerAuthModule> clazz;
 
