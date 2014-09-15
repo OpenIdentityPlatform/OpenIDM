@@ -42,12 +42,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -56,12 +56,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency> -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>

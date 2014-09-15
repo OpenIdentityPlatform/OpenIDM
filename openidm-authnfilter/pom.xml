@@ -54,7 +54,7 @@
                 <!--<configuration>-->
                     <!--<instructions>-->
                         <!--<Export-Package>-->
-                            <!--org.forgerock.openidm.jaspi.modules;version="${openidm.version}"-->
+                            <!--org.forgerock.openidm.jaspi.modules;version="${project.version}"-->
                         <!--</Export-Package>-->
                     <!--</instructions>-->
                 <!--</configuration>-->
@@ -66,17 +66,17 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

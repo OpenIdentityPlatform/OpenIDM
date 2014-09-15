@@ -1094,7 +1094,7 @@ $ <userinput>curl \
     </para>
     <screen>
      <userinput>
-$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${openidm.version}?>.jar
+$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${project.version}?>.jar
      </userinput>
      <computeroutput>
 This utility helps obfuscate passwords to prevent casual observation.

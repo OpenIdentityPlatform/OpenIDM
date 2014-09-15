@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -60,8 +60,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.openidm.repo;version="${openidm.version}",
-                            org.forgerock.openidm.repo.util;version="${openidm.version}"
+                            org.forgerock.openidm.repo;version="${project.version}",
+                            org.forgerock.openidm.repo.util;version="${project.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

@@ -88,7 +88,7 @@
                 <configuration>
                     <bytecodeInjections>
                         <bytecodeInjection>
-                            <expression>${openidm.version}</expression>
+                            <expression>${project.version}</expression>
                             <targetMembers>
                                 <constant>
                                     <className>org.forgerock.openidm.core.ServerConstants</className>

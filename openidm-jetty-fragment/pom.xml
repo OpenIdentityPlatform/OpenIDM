@@ -38,14 +38,14 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-crypto</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
 <!-- Not necessary when using dynamic import
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-jaas-loginmodule-repo</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 -->
         <dependency>

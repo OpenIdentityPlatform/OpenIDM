@@ -51,7 +51,7 @@
     <dependency>
       <groupId>org.forgerock.openidm</groupId>
       <artifactId>openidm-ui-common</artifactId>
-      <version>${openidm.version}</version>
+      <version>${project.version}</version>
       <type>zip</type>
       <classifier>www</classifier>
     </dependency>
@@ -173,7 +173,7 @@
                     <artifactItem>
                       <groupId>org.forgerock.openidm</groupId>
                       <artifactId>openidm-ui-common</artifactId>
-                      <version>${openidm.version}</version>
+                      <version>${project.version}</version>
                       <type>zip</type>
                       <classifier>www</classifier>
                     </artifactItem>
@@ -305,7 +305,7 @@
                     <artifactItem>
                       <groupId>org.forgerock.openidm</groupId>
                       <artifactId>openidm-ui-common</artifactId>
-                      <version>${openidm.version}</version>
+                      <version>${project.version}</version>
                       <type>zip</type>
                       <classifier>www</classifier>
                     </artifactItem>

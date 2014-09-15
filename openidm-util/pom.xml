@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-system</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
 
@@ -109,7 +109,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 

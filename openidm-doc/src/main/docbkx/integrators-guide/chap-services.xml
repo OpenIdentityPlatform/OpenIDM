@@ -679,7 +679,7 @@ Using LOGGING_CONFIG:
    -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Listening for transport dt_socket at address: 5005
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
--> OpenIDM version "<?eval ${openidm.version}?>" (revision: xxxx)
+-> OpenIDM version "<?eval ${project.version}?>" (revision: xxxx)
 OpenIDM ready
 </computeroutput>
     </screen>
