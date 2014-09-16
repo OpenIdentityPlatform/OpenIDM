@@ -1419,7 +1419,7 @@ $ <userinput>curl \
       The following example calls the same LiveSync operation as the previous
       example.
      </para>
-     <screen><?dbfo pgwide="1"?>$ curl \
+     <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1450,7 +1450,7 @@ $ <userinput>curl \
     an optional parameter (<literal>detailedFailure</literal>) to return
     additional information. For example:
    </para>
-   <screen><?dbfo pgwide="1"?>$ curl \
+   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1496,8 +1496,7 @@ $ <userinput>curl \
    <literal>employeeType</literal> on the source resource is
    <literal>Permanent</literal>, you might specify a source query as follows:
   </para>
-  <programlisting language="javascript">
-"mappings" : [
+  <programlisting language="javascript">"mappings" : [
      {
          "name" : "managedUser_systemLdapAccounts",
          "source" : "managed/user",
@@ -1505,8 +1504,7 @@ $ <userinput>curl \
          "sourceQuery" : : {
                 "queryFilter" : "employeeType eq \"Permanent\""
             },
-...
-  </programlisting>
+...</programlisting>
   <para>
    The format of the query can be any query type that is supported by the
    resource, and can include additional parameters, if applicable. OpenIDM
@@ -1553,8 +1551,7 @@ $ <userinput>curl \
    query. For example, to query a specific endpoint instead of the source
    resource, you might modify the preceding source query as follows:
   </para>
-  <programlisting language="javascript">
-"mappings" : [
+  <programlisting language="javascript">"mappings" : [
     {
         "name" : "managedUser_systemLdapAccounts",
         "source" : "managed/user",
@@ -1563,15 +1560,14 @@ $ <userinput>curl \
             "resourceName" : "endpoint/scriptedQuery"
             "queryFilter" : "employeeType eq \"Permanent\""
         },
-...
-  </programlisting>
+...</programlisting>
   <para>
    To override a source or target query that is defined in the mapping, you can
    specify the query when you call the reconciliation operation. For example, if
    you wanted to reconcile all employee entries, and not just the permanent
    employees, you would run the reconciliation operation as follows:
   </para>
-  <screen><?dbfo pgwide="1"?>$ curl \
+  <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -1590,8 +1586,7 @@ $ <userinput>curl \
    configured in the previous example, you would amend the mapping configuration
    as follows:
   </para>
-  <programlisting>
-{
+  <programlisting>{
     "mappings" : [
         {
             "name" : "systemLdapAccounts_managedUser",
@@ -1601,8 +1596,7 @@ $ <userinput>curl \
                 "queryFilter" : "employeeType eq \"Permanent\""
             },
             "runTargetPhase" : false,
-   ...
-  </programlisting>
+   ...  </programlisting>
  </section>
 
  <section xml:id="recon-by-id">
@@ -1685,6 +1679,7 @@ $ <userinput>curl \
     <programlisting language="javascript">{
   "entries": [
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/scarter",
       "sourceObjectId": "system/xmlfile/account/scarter",
       "situation": "ABSENT",
@@ -1773,6 +1768,7 @@ $ <userinput>curl \
       }
     },
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/bjensen",
       "sourceObjectId": "system/xmlfile/account/bjensen",
       "situation": "ABSENT",
@@ -1819,6 +1815,7 @@ $ <userinput>curl \
     </para>
 
     <programlisting language="javascript">{
+  "mapping": "systemXmlfileAccounts_managedUser",
   "targetObjectId": "managed/user/scarter",
   "sourceObjectId": "system/xmlfile/account/scarter",
   "situation": "ABSENT",
@@ -1932,6 +1929,7 @@ $ <userinput>curl \
       "messageDetail": null
     },
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/scarter",
       "sourceObjectId": "system/xmlfile/account/scarter",
       "situation": "ABSENT",
@@ -1950,6 +1948,7 @@ $ <userinput>curl \
       "messageDetail": null
     },
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/bjensen",
       "sourceObjectId": "system/xmlfile/account/bjensen",
       "situation": "ABSENT",
@@ -1997,6 +1996,7 @@ $ <userinput>curl \
   "resultCount": 2,
   "result": [
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/scarter",
       "sourceObjectId": "system/xmlfile/account/scarter",
       "situation": "ABSENT",
@@ -2015,6 +2015,7 @@ $ <userinput>curl \
       "messageDetail": null
     },
     {
+      "mapping": "systemXmlfileAccounts_managedUser",
       "targetObjectId": "managed/user/bjensen",
       "sourceObjectId": "system/xmlfile/account/bjensen",
       "situation": "ABSENT",
