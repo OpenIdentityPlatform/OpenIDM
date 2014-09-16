@@ -73,6 +73,7 @@ public class PhaseStatistic {
         ids.put(Situation.SOURCE_MISSING, Collections.synchronizedList(new ArrayList<String>()));
         ids.put(Situation.SOURCE_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
         ids.put(Situation.TARGET_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.FOUND_ALREADY_LINKED, Collections.synchronizedList(new ArrayList<String>()));
         notValid = Collections.synchronizedList(new ArrayList<String>());
     }
 
