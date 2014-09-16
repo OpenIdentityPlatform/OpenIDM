@@ -129,8 +129,8 @@ CREATE TABLE openidm.links (
   PRIMARY KEY (objectid)
 );
 
-CREATE INDEX idx_links_first ON openidm.links (linktype, firstid);
-CREATE INDEX idx_links_second ON openidm.links (linktype, secondid);
+CREATE UNIQUE INDEX idx_links_first ON openidm.links (linktype, firstid);
+CREATE UNIQUE INDEX idx_links_second ON openidm.links (linktype, secondid);
 
 
 -- -----------------------------------------------------
