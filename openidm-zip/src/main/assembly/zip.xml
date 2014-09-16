@@ -58,6 +58,14 @@
             <lineEnding>windows</lineEnding>
             <filtered>true</filtered>
         </fileSet>
+        <!-- Include the Forgerock binary license file if exists -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>/openidm/legal-notices</outputDirectory>
+            <includes>
+                <include>license.txt</include>
+            </includes>
+        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
