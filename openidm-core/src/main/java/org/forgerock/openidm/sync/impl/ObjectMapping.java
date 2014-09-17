@@ -801,7 +801,7 @@ class ObjectMapping {
         if (resultScript != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("source", reconContext.getStatistics().getSourceStat().asMap());
-            scope.put("target", reconContext.getStatistics().getSourceStat().asMap());
+            scope.put("target", reconContext.getStatistics().getTargetStat().asMap());
             scope.put("global", reconContext.getStatistics().asMap());
             try {
                 resultScript.exec(scope);
