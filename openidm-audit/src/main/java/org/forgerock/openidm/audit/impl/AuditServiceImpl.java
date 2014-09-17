@@ -360,7 +360,7 @@ public class AuditServiceImpl implements AuditService {
      */
     @Modified
     void modified(ComponentContext compContext) throws Exception {
-        logger.debug("Reconfiguring aduit service with configuration {}", compContext.getProperties());
+        logger.debug("Reconfiguring audit service with configuration {}", compContext.getProperties());
         try {
             JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
             if (hasConfigChanged(config, newConfig)) {
