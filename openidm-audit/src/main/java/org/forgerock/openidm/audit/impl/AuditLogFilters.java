@@ -224,7 +224,7 @@ public class AuditLogFilters {
         @Override
         public boolean isFiltered(ServerContext context, CreateRequest request) {
             if (!scriptEntry.isActive()) {
-                // do not filter if script has become in active
+                // do not filter if script has become inactive
                 return false;
             }
 
