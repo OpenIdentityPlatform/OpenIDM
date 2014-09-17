@@ -51,12 +51,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>        
         <dependency>
             <groupId>org.restlet.osgi</groupId>
@@ -218,7 +218,7 @@
                         <Embed-Directory>lib</Embed-Directory>
                         <!--Private-Package>org.forgerock.openidm.salesforce.internal*</Private-Package>
                         <Export-Package>
-                            org.forgerock.openidm.salesforce;version=${openidm.version},
+                            org.forgerock.openidm.salesforce;version=${project.parent.version},
                         </Export-Package-->
                         <Import-Package>
                             com.google.appengine.api.urlfetch;resolution:=optional,
