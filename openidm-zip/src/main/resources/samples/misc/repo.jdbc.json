@@ -3,7 +3,7 @@
         "dbType" : "MYSQL",
         "jndiName" : "",
         "driverClass" : "com.mysql.jdbc.Driver",
-        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?characterEncoding=utf8",
+        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?allowMultiQueries=true&characterEncoding=utf8",
         "username" : "openidm",
         "password" : "openidm",
         "defaultCatalog" : "openidm",
@@ -62,6 +62,13 @@
             "get-managed-users-filtered" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%') ORDER BY CASE WHEN ${orderByDir} = 'asc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END asc, CASE WHEN ${orderByDir} = 'desc' THEN CASE ${orderBy} WHEN 'userName' THEN userName WHEN 'givenName' THEN givenName WHEN 'sn' THEN sn WHEN 'mail' THEN mail WHEN 'accountStatus' THEN accountStatus END END desc LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
             "get-managed-users-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table}",
             "get-managed-users-filtered-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_table} WHERE userName LIKE concat(${userName},'%') AND mail LIKE concat(${mail},'%') AND givenName LIKE concat(${givenName},'%') AND sn LIKE concat(${sn},'%') AND accountStatus LIKE concat(${accountStatus},'%')"
+        }
+    },
+    "commands" : {
+        "genericTables" : { },
+        "explicitTables" : {
+            "purge-by-recon-expired" : "DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN (SELECT reconId FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp} AND entryType = 'summary') AS x ON x.reconId = r.reconId",
+            "purge-by-recon-number-of" : "set @num := 0, @mapping := ''; DELETE r FROM ${_dbSchema}.auditrecon r INNER JOIN ( SELECT reconId, mapping, activitydate, @num := if(@mapping = mapping, @num + 1, 1) AS row_number, @mapping := mapping as m FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY mapping, activitydate desc ) AS x ON r.reconId = x.reconId WHERE x.row_number > ${numberOf}"
         }
     },
     "resourceMapping" : {
