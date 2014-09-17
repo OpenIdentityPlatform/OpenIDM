@@ -138,7 +138,7 @@ class AuditLogFilterBuilder {
      * <pre>
      *     getByGlob(value, "*&#47;temp")
      * </pre>
-     * will rturn
+     * will return
      * <pre>
      *     {
      *         "outside" : {
