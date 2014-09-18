@@ -173,7 +173,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
   `entrytype` VARCHAR(7) NULL ,
   `rootactionid` VARCHAR(255) NULL ,
   `reconid` VARCHAR(36) NULL ,
@@ -208,7 +207,6 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditsync` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
   `rootactionid` VARCHAR(255) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,

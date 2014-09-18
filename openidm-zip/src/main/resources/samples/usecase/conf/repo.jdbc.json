@@ -188,7 +188,6 @@
                 "table" : "auditrecon",
                 "objectToColumn" : {
                     "_id" : "objectid",
-                    "_rev" : "rev",
                     "entryType" : "entrytype",
                     "rootActionId" : "rootactionid",
                     "action" : "activity",
@@ -207,6 +206,24 @@
                     "mapping" : "mapping",
                     "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
                     }
+            },
+            "audit/sync" : {
+                "table" : "auditsync",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "status" : "status",
+                    "situation" : "situation",
+                    "action" : "activity",
+                    "actionId" : "actionid",
+                    "rootActionId" : "rootactionid",
+                    "sourceObjectId" : "sourceobjectid",
+                    "targetObjectId" : "targetobjectid",
+                    "timestamp" : "activitydate",
+                    "mapping" : "mapping",
+                    "exception" : "exceptiondetail",
+                    "message" : "message",
+                    "messageDetail" : { "column" : "messagedetail", "type" : "JSON_MAP" }
+                }
             },
             "audit/access" : {
                 "table" : "auditaccess",
