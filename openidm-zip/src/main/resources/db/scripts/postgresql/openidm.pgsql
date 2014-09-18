@@ -2,7 +2,7 @@
 CREATE SCHEMA openidm AUTHORIZATION openidm;
 
 -- -----------------------------------------------------
--- Table openidm.auditactivity
+-- Table openidm.objecttpyes
 -- -----------------------------------------------------
 
 CREATE TABLE openidm.objecttypes (

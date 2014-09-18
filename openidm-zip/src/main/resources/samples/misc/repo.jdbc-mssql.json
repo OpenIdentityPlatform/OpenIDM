@@ -188,7 +188,6 @@
                 "table" : "auditsync",
                 "objectToColumn" : {
                     "_id" : "objectid",
-                    "_rev" : "rev",
                     "status" : "status",
                     "situation" : "situation",
                     "action" : "activity",
