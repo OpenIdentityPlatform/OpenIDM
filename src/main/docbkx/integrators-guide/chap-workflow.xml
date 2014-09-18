@@ -2250,26 +2250,63 @@ $ more samples/usecase/usecase2/conf/external.email.json
     </step>
     <step>
      <para>
-      Change the notification email parameters in the workflow definition file
-      (<filename>samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml</filename>).
+      Change the notification email parameters in the workflow definition file.
+      To edit the workflow definition file:
      </para>
-     <para>
-      The email parameters are towards the end of this file:
-     </para>
-     <screen><?dbfo pgwide="1"?><userinput>$ cd /path/to/openidm/samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml
+     <orderedlist>
+      <listitem>
+       <para>
+        Copy the workflow archive (<literal>.bar</literal>) file
+        (<filename>samples/usecase/usecase2/workflow/newUserCreate.bar</filename>)
+        to a temporary location.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Unzip the temporary workflow <literal>.bar</literal> file. This step
+        extracts the workflow definition file
+        (<filename>newUserCreate.bpmn20.xml</filename>) and two xhtml templates
+        required by the workflow.
+       </para>
+       <screen><userinput>$ unzip newUserCreate.bar</userinput>
+<computeroutput>Archive:  newUserCreate.bar
+  inflating: nUCDecideApprovalForm.xhtml
+  inflating: nUCStartForm.xhtml
+  inflating: newUserCreate.bpmn20.xml</computeroutput></screen>
+      </listitem>
+      <listitem>
+       <para>
+        Edit the extracted workflow definition file
+        (<filename>newUserCreate.bpmn20.xml</filename>). The email parameters
+        are towards the end of this file:
+       </para>
+       <screen><userinput>$ cd /path/to/openidm/samples/usecase/usecase2/workflow
 $ grep emailParams newUserCreate.bpmn20.xml</userinput>
-     <computeroutput>
-emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
-openidm.action("external/email", 'sendEmail',  emailParams);
-emailParams.body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
-openidm.action("external/email", 'sendEmail', emailParams);
-emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
-openidm.action("external/email", 'sendEmail', emailParams);</computeroutput>
-     </screen>
-     <para>
-      Change the <literal>from</literal> and <literal>to</literal> parameters
-      to reflect valid email addresses.
-     </para>
+<computeroutput>emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
+...</computeroutput></screen>
+       <para>
+        Change the <literal>from</literal> and <literal>to</literal> parameters
+        to reflect valid email addresses.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Zip up the amended workflow definition file, and the xhtml templates
+        into a workflow <literal>.bar</literal> file.
+       </para>
+       <screen><userinput>$ zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml</userinput>
+<computeroutput>updating: nUCDecideApprovalForm.xhtml (deflated 82%)
+updating: nUCStartForm.xhtml (deflated 82%)
+updating: newUserCreate.bpmn20.xml (deflated 85%)</computeroutput></screen>
+      </listitem>
+      <listitem>
+       <para>
+        Copy the new <literal>.bar</literal> file to the workflow directory,
+        overwriting the existing <literal>.bar</literal> file.
+       </para>
+       <screen><userinput>$ cp /tmp/newUserCreate.bar /path/to/openidm/samples/usecase/usecase2/workflow</userinput></screen>
+      </listitem>
+     </orderedlist>
     </step>
    </procedure>
 
