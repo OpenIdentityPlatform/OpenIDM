@@ -30,20 +30,19 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
-    "org/forgerock/openidm/ui/admin/Dashboard",
     "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
     "org/forgerock/openidm/ui/admin/ResourcesView",
     "./mocks/adminInit",
     "./mocks/encryptedPW",
     "./mocks/cleartextPW",
     "./mocks/addEditManaged"
-], function (sinon, constants, router, eventManager, mandatoryPasswordChangeDialog, dashboard, addEditManagedView, resourcesView, adminInit, encryptedPW, cleartextPW, addEditManaged) {
+], function (sinon, constants, router, eventManager, mandatoryPasswordChangeDialog, addEditManagedView, resourcesView, adminInit, encryptedPW, cleartextPW, addEditManaged) {
 
     return {
         executeAll: function (server) {
 
             adminInit(server);
-            
+
             var testPromises = [];
 
             module('Admin UI Functions');
@@ -51,6 +50,7 @@ define([
             QUnit.asyncTest("Initial Login Process", function () {
 
                 var dialogRenderStub = sinon.stub(mandatoryPasswordChangeDialog, "render", function (args, callback) {
+
                     mandatoryPasswordChangeDialog.render.restore();
                     mandatoryPasswordChangeDialog.render(args, function () {
 
@@ -73,12 +73,13 @@ define([
 
 
             QUnit.asyncTest("Subsequent Login Process", function () {
-                var dashboardRenderStub = sinon.stub(dashboard, "render", function (args, callback) {
-                    dashboard.render.restore();
-                    dashboard.render(args, function () {
+                var resourceRenderStub = sinon.stub(resourcesView, "render", function (args, callback) {
+
+                    resourcesView.render.restore();
+                    resourcesView.render(args, function () {
                         var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
 
-                        QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/Dashboard" && viewManager.currentDialog === "null", "Dashboard shown after successful login with encrypted password");
+                        QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/ResourcesView" && viewManager.currentDialog === "null", "Resource page shown after successful login with encrypted password");
 
                         if (callback) {
                             callback();
@@ -95,6 +96,7 @@ define([
 
             QUnit.asyncTest("Resource View", function () {
                 var resourceRenderStub = sinon.stub(resourcesView, "render", function (args, callback) {
+
                     resourcesView.render.restore();
 
                     resourcesView.render(args, function () {
@@ -125,6 +127,7 @@ define([
 
             QUnit.asyncTest("Managed Objects Add/Edit", function () {
                 var managedObjectRenderStub = sinon.stub(addEditManagedView, "render", function (args, callback) {
+
                     addEditManagedView.render.restore();
 
                     addEditManagedView.render(args, function () {

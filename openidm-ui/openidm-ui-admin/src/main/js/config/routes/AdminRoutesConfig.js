@@ -27,14 +27,8 @@ define("config/routes/AdminRoutesConfig", [
 ], function() {
 
     var obj = {
-        "configDashboard": {
-            view: "org/forgerock/openidm/ui/admin/Dashboard",
-            role: "ui-admin",
-            url: "dashboard/",
-            forceUpdate: true
-        },
         "mandatoryPasswordChangeDialog" : {
-            base: "configDashboard",
+            base: "resourcesView",
             dialog: "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
             url: "dashboard/change_password/",
             role: "ui-admin"
