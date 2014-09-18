@@ -1716,8 +1716,8 @@ Content-Length: 89
 
  </section>
 
- <section xml:id="recon-over-REST">
-  <title>Managing Reconciliation Operations Over REST</title>
+  <section xml:id="recon-over-REST">
+   <title>Managing Reconciliation Operations Over REST</title>
 
    <para>
     You can interact with the reconciliation engine over REST,
@@ -1775,7 +1775,69 @@ Content-Length: 89
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</userinput></screen>
+   </section>
+
+  <section xml:id="repo-REST">
+   <title>Managing the Repository over REST</title>
+   <para>
+    You can interact with the repository engine over REST, as shown in the
+    following table.
+   </para>
+
+    <informaltable pgwide="1">
+     <tgroup cols="3">
+      <colspec colname='c1' colwidth="50*"/>
+      <colspec colname='c2' colwidth="10*"/>
+      <colspec colname='c3' colwidth="40*"/>
+     <thead>
+      <row>
+       <entry>URI</entry>
+       <entry>HTTP Operation</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>/openidm/repo/synchronisation/deadLetterQueue/<replaceable>resource</replaceable>?_queryId=query-all-ids"</entry>
+       <entry>GET</entry>
+       <entry>Lists any failed synchronisation records for that resource, that
+        have been placed in the dead letter queue.</entry>
+      </row>
+      <row>
+       <entry>/openidm/repo/link?_queryId=query-all-ids"</entry>
+       <entry>GET</entry>
+       <entry>Lists entries in the links table</entry>
+      </row>
+      <row>
+       <entry>/openidm/repo/internal/user?_queryId=query-all-ids"</entry>
+       <entry>GET</entry>
+       <entry>Lists the internal users</entry>
+      </row>
+      <row>
+       <entry>/openidm/repo/internal/user/<replaceable>username</replaceable>"</entry>
+       <entry>PUT</entry>
+       <entry>Enables you to change the username or password of an internal user</entry>
+      </row>
+      <row>
+       <entry>/openidm/repo?_action=updateDbCredentials</entry>
+       <entry>POST</entry>
+       <entry>Enables you to change the database username and password, in the
+       case of an OrientDB repository</entry>
+      </row>
+     </tbody>
+     </tgroup>
+    </informaltable>
+
+    <para>
+     For examples of queries on the <literal>repo/</literal> endpoint, see
+     <link xlink:show="new" xlink:href="integrators-guide#repo-over-rest"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Interacting
+     With the Repository Over REST</citetitle></link>.
+    </para>
+
   </section>
+
+
 
  </section>
 
