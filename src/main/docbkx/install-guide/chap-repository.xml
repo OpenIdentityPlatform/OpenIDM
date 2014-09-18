@@ -236,22 +236,16 @@ Id   State          Name
 
   <procedure>
    <para>
-    These instructions are specific to MS SQL Server 2008 R2 Express running on
-    a local Windows XP system. Adapt the instructions for your environment.
+    These instructions are specific to MS SQL Server 2008 running on
+    a local Windows 2008 Server R2 system. Adapt the instructions for your
+    environment.
    </para>
 
    <itemizedlist>
     <para>
-     When you install MS SQL Server, note that OpenIDM has the following
+     When you install Microsoft SQL Server, note that OpenIDM has the following
      specific configuration requirements:
     </para>
-    <listitem>
-     <para>
-      OpenIDM requires SQL Server authentication. During the MS SQL Server
-      installation, make sure that you select SQL Server authentication and not
-      just Windows authentication.
-     </para>
-    </listitem>
     <listitem>
      <para>
       During the Feature Selection installation step, make sure that at least
@@ -261,6 +255,13 @@ Id   State          Name
      <para>
       These instructions require SQL Management Studio so make sure that you
       include Management Tools in the installation.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      OpenIDM requires SQL Server authentication. During the MS SQL Server
+      installation, make sure that you select SQL Server authentication (mixed
+      mode) and not just Windows authentication.
      </para>
     </listitem>
     <listitem>
@@ -278,7 +279,7 @@ Id   State          Name
       <listitem>
        <para>
         Expand the SQL Server Network Configuration item and select "Protocols
-        for SQLEXPRESS".
+        for MSSQLSERVER".
        </para>
       </listitem>
       <listitem>
@@ -305,7 +306,7 @@ Id   State          Name
        <para>
         Restart MS SQL Server for the configuration changes to take effect. To
         restart the server, select SQL Server Services in the left pane, double
-        click SQL Server (SQLEXPRESS) and click Restart.
+        click SQL Server (MSSQLSERVER) and click Restart.
        </para>
       </listitem>
       <listitem>
@@ -333,14 +334,15 @@ Id   State          Name
     <substeps>
      <step>
       <para>
-       Click Start > All Programs > MS SQL Server 2008 R2 > SQL Server
+       Click Start > All Programs > Microsoft SQL Server 2008 > SQL Server
        Management Studio.
       </para>
      </step>
      <step>
       <para>
-       On the Connect to Server panel, select SQL Server Authentication from the
-       Authentication drop down list and log in as the current user (for
+       On the Connect to Server panel, under Server Type, select Database
+       Engine. From the Authentication drop down list, select Windows
+       Authentication. If needed,  log in as the current user (for
        example, Administrator).
       </para>
      </step>
@@ -375,7 +377,7 @@ Id   State          Name
     <mediaobject>
      <alt>Default tables in the openidm MS SQL database</alt>
      <imageobject>
-      <imagedata fileref="images/sql-tables.png" format="PNG" />
+      <imagedata fileref="images/sql-tables-2008.png" format="PNG" />
      </imageobject>
     </mediaobject>
     <para>
@@ -391,18 +393,23 @@ Id   State          Name
      <step>
       <para>
        Download the JDBC Driver 4.0 for SQL Server
-       (<filename>sqljdbc_4.0.2206.100_enu.tar.gz</filename>) from <link
+       (<filename>sqljdbc_4.0.2206.100_enu.exe</filename>) from <link
        xlink:href="http://www.microsoft.com/en-us/download/details.aspx?id=11774">
        Microsoft's download site</link>. The precise URL may vary, depending on
        your location.
       </para>
       <para>
-       Extract the executable Java archive file
-       (<filename>sqljdbc4.jar</filename>) from the zip file, using 7-zip or an
-       equivalent file management application.
+       Run the downloaded executable file; it should extract multiple files,
+       include Java archive files, to a dedicated folder.
       </para>
       <para>
-       Copy the file to <filename>openidm\db\scripts\mssql</filename>.
+       Extract the executable Java archive file
+       (<filename>sqljdbc4.jar</filename>) from the dedicated folder, using
+       7-zip or an equivalent file management application.
+      </para>
+      <para>
+       Copy the Java archive file to
+       <filename>openidm\db\scripts\mssql</filename>.
       </para>
      </step>
      <step>
@@ -423,12 +430,9 @@ Id   State          Name
        Your <filename>openidm\db\scripts\mssql</filename> directory should now
        contain the following files:
       </para>
-      <screen>
-       <userinput>.\> ls \path\to\openidm\db\scripts\mssql</userinput>
-       <computeroutput>
+       <screen>
        biz.aQute.bnd.jar  openidm.sql  sqljdbc4.bnd  sqljdbc4.jar
-       </computeroutput>
-      </screen>
+       </screen>
      </step>
      <step>
       <para>
@@ -450,8 +454,8 @@ C:\> cd \path\to\openidm\db\scripts\mssql
        <filename>openidm\bundle</filename> directory.
       </para>
       <screen>
-./> mv sqljdbc4.bar sqljdbc4-osgi.jar
-./> cp sqljdbc4-osgi.jar \path\to\openidm\bundle
+./> ren sqljdbc4.bar sqljdbc4-osgi.jar
+./> copy sqljdbc4-osgi.jar \path\to\openidm\bundle
       </screen>
      </step>
     </substeps>
@@ -470,7 +474,7 @@ C:\> cd \path\to\openidm\conf\
    <step>
     <para>
      Copy the repository configuration file for MS SQL
-     (<filename>openidm\samples\misc\repo.jdbc.json</filename>) to the
+     (<filename>openidm\samples\misc\repo.jdbc-mssql.json</filename>) to the
      configuration directory.
     </para>
     <screen>
@@ -483,15 +487,14 @@ C:\> cd \path\to\openidm\conf\
      Rename the MS SQL repository configuration file to
      <filename>repo.jdbc.json</filename>.
     </para>
-    <screen>.\> mv repo.jdbc-mssql.json repo.jdbc.json</screen>
+    <screen>.\> ren repo.jdbc-mssql.json repo.jdbc.json</screen>
    </step>
    <step>
     <para>
      Update <filename>openidm\conf\repo.jdbc.json</filename> as necessary, to
      reflect your MS SQL deployment.
     </para>
-    <programlisting language="javascript">
-{
+    <programlisting language="javascript">{
     "connection" : {
         "dbType" : "SQLSERVER",
         "jndiName" : "",
@@ -503,10 +506,10 @@ C:\> cd \path\to\openidm\conf\
         "defaultCatalog" : "openidm",
         "maxBatchSize" : 100,
         "maxTxRetry" : 5,
-        "enableConnectionPool" : true
+        "enableConnectionPool" : true,
+        "connectionTimeoutInMs" : 30000
     },
-...
-    </programlisting>
+...</programlisting>
     <para>
      Specifically, check that the port matches what you have configured in MS
      SQL.
@@ -524,37 +527,19 @@ C:\> cd \path\to\openidm\conf\
   <screen><userinput>
 C:> cd \path\to\openidm
 ./> startup.bat</userinput>
-   <computeroutput>"Using OPENIDM_HOME:   \path\to\openidm"
-"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m"
+   <computeroutput>
+"Using OPENIDM_HOME:   \path\to\openidm"
+"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
 "Using LOGGING_CONFIG:
 -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
 -&gt; scr list
 Id   State          Name
-[ 19] [active      ] org.forgerock.openidm.config.starter
-[ 23] [active      ] org.forgerock.openidm.taskscanner
-[  8] [active      ] org.forgerock.openidm.external.rest
-[ 12] [active      ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[ 15] [active      ] org.forgerock.openidm.ui.simple
-[  1] [active      ] org.forgerock.openidm.router
-[ 22] [active      ] org.forgerock.openidm.scheduler
-[ 14] [active      ] org.forgerock.openidm.restlet
-[  7] [unsatisfied ] org.forgerock.openidm.external.email
+...
 [ 18] [unsatisfied ] org.forgerock.openidm.repo.orientdb
-[  6] [active      ] org.forgerock.openidm.sync
-[  3] [active      ] org.forgerock.openidm.script
-[  5] [active      ] org.forgerock.openidm.recon
-[  2] [active      ] org.forgerock.openidm.scope
-[ 10] [active      ] org.forgerock.openidm.http.contextregistrator
-[ 20] [active      ] org.forgerock.openidm.config
-[  0] [active      ] org.forgerock.openidm.audit
-[ 21] [active      ] org.forgerock.openidm.schedule
+...
 [ 17] [active      ] org.forgerock.openidm.repo.jdbc
-[ 16] [active      ] org.forgerock.openidm.workflow
-[ 13] [active      ] org.forgerock.openidm.provisioner.openicf
-[  4] [active      ] org.forgerock.openidm.managed
-[  9] [active      ] org.forgerock.openidm.authentication
-[ 11] [active      ] org.forgerock.openidm.provisioner
+...
    </computeroutput></screen>
  </section>
 
