@@ -23,10 +23,12 @@
  */
 
 /*
- * This script merges an attribute value with the target and returns the new target attribute value
+ * This script merges an attribute value with the target. Returns an object
+ * containing the new value for the attribute and (optionally) an updated
+ * attributesInfo object.
  * 
  * The following variables are supplied: 
- *   targetObject, sourceObject, existingTargetObject, attributeName, attributeValue
+ *   targetObject, sourceObject, existingTargetObject, attributeName, attributeValue, attributesInfo
  */
 
 function mergeValues(target, name, value) {
@@ -52,4 +54,9 @@ if (existingTargetObject != null && existingTargetObject[attributeName] !== null
 
 mergeValues(targetObject, attributeName, attributeValue);
 
-targetObject[attributeName];
+//Return the result object
+var result = {
+    "value" : targetObject[attributeName]
+};
+
+result;
