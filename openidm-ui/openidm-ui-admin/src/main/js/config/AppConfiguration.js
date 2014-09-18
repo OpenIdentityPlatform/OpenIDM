@@ -111,12 +111,6 @@ define("config/AppConfiguration", [
                             "admin" : {
                                 "role": "ui-admin",
                                 "urls": {
-                                    "dashboard": {
-                                        "url": "#dashboard/",
-                                        "name": "config.AppConfiguration.Navigation.links.dashboard",
-                                        "icon": "glyph-icon-th-list",
-                                        "inactive": false
-                                    },
                                     "connectors": {
                                         "url": "#resources/",
                                         "name": "config.AppConfiguration.Navigation.links.resources",

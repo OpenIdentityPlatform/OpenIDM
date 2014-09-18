@@ -41,7 +41,7 @@ define("config/process/AdminConfig", [
                 if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password)) {
                     eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog });
                 } else {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.configDashboard});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                 }
             }
         }
