@@ -8,14 +8,14 @@
     "invokeContext" : {
         "script" : {
             "type" : "text/javascript",
-            "file" : "audit/autoPurgeAuditRecon.js"
-        },
-        "input" : {
-            "mappings" : [ "%" ],
-            "purgeType" : "purgeByNumOfReconsToKeep",
-            "numOfRecons" : 1,
-            "intervalUnit" : "minutes",
-            "intervalValue" : 1
+            "file" : "audit/autoPurgeAuditRecon.js",
+            "input" : {
+                "mappings" : [ "%" ],
+                "purgeType" : "purgeByNumOfReconsToKeep",
+                "numOfRecons" : 1,
+                "intervalUnit" : "minutes",
+                "intervalValue" : 1
+            }
         }
     }
 }
