@@ -205,6 +205,9 @@ if (assignments != null) {
                     execOnScript(onAssignment);
                 }
 
+                // Used to carry information across different assignmentOperations
+                var attributesInfo = {};
+                // Loop through attributes, performing the assignementOperations
                 for (var i = 0; i < attributes.length; i++) {
                     var attribute = attributes[i];
                     var assignmentOperation = attribute.assignmentOperation;
@@ -218,8 +221,15 @@ if (assignments != null) {
                     var config = getConfig(assignmentOperation);
                     config.attributeName = name;
                     config.attributeValue = value;
+                    config.attributesInfo = attributesInfo;
+                    // The result of this call should be an object with a field "value" contianing the updated target field's value
                     var assignmentResult = openidm.action("script", "eval", config, {});
-                    target[name] = assignmentResult;
+                    // Set the new target field's value
+                    target[name] = assignmentResult.value;
+                    // Update any passed back attributesInfo
+                    if (assignmentResult.hasOwnProperty("attributesInfo")) {
+                        attributesInfo = assignmentResult.attributesInfo;
+                    }
                 }
             }
         }
