@@ -106,6 +106,7 @@
  <xinclude:include href='chap-services.xml' />
  <xinclude:include href='chap-cli.xml' />
  <xinclude:include href='chap-ui.xml' />
+ <xinclude:include href='chap-repo.xml' />
  <xinclude:include href='chap-configuration.xml' />
  <xinclude:include href='chap-data.xml' />
  <xinclude:include href='chap-users-groups-roles.xml' />
