@@ -62,14 +62,12 @@
 
   <section xml:id="internal-users">
    <title>Internal Users</title>
-   
    <para>
     OpenIDM creates two internal users by default: <literal>anonymous</literal>
     and <literal>openidm-admin</literal>. These accounts are separated from
     other user accounts to protect them from any reconciliation or
     synchronization processes.
    </para>
-   
    <para>
     OpenIDM stores internal users and their role membership in a table in the
     repository. For the way internal users are mapped, see the discussion on
@@ -79,14 +77,12 @@
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Explicit
     Mappings</citetitle></link>.
    </para>
-
    <para>
     For more information on storage mechanisms for managed users in OrientDB
     and JDBC, see <link xlink:role="http://docbook.org/xlink/role/olink"
     xlink:show="new" xlink:href="integrators-guide#working-with-managed-users">
     <citetitle>Working With Managed Users</citetitle></link>.
    </para>
-
    <variablelist>
     <varlistentry>
      <term>anonymous</term>
@@ -125,6 +121,89 @@
      </listitem>
     </varlistentry>
    </variablelist>
+  <section xml:id="repo-internal-user">
+   <title>Managing Internal Users Over REST</title>
+   <para>
+    To list the internal users over REST, query the <literal>repo</literal>
+    endpoint as follows:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET  \
+ "https://localhost:8443/openidm/repo/internal/user?_queryId=query-all-ids"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "openidm-admin"
+    },
+    {
+      "_rev": "0",
+      "_id": "anonymous"
+    }
+  ]
+}</computeroutput></screen>
+   <para>
+    To query the details of an internal user, include the user's ID in the
+    request, for example:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET  \
+ "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+<computeroutput>{
+  "password": "openidm-admin",
+  "userName": "openidm-admin",
+  "roles": "openidm-admin,openidm-authorized",
+  "_rev": "1",
+  "_id": "openidm-admin"
+}</computeroutput></screen>
+   <para>
+    To change the username or password of the default administrative user,
+    send a PUT request to the user object. The following example changes the
+    password of the <literal>openidm-admin</literal> user to
+    <literal>Passw0rd</literal>:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PUT \
+ --data '{
+    "password": "Passw0rd",
+    "userName": "openidm-admin",
+    "roles": "openidm-admin,openidm-authorized",
+    "_id": "openidm-admin"
+ }' \
+ "https://localhost:8443/openidm/repo/internal/user/openidm-admin"</userinput>
+<computeroutput>{
+  "roles": "openidm-admin,openidm-authorized",
+  "password": {
+    "$crypto": {
+      "value": {
+        "key": "openidm-sym-default",
+        "iv": "USfN9kARk4QjoyjGa/r8WA==",
+        "cipher": "AES/CBC/PKCS5Padding",
+        "data": "27tDQg49z8nWqvIOEh7VAg=="
+      },
+      "type": "x-simple-encryption"
+    }
+  },
+  "_id": "openidm-admin",
+  "userName": "openidm-admin",
+  "_rev": "2"
+}</computeroutput>
+   </screen>
+  </section>
+
   </section>
   
   <section xml:id="managed-users">
