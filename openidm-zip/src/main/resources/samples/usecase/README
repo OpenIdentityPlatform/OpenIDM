@@ -57,14 +57,31 @@ Usecase 2 - New user onboarding
     - External email service of OpenIDM has to be configured using the following file:
         samples/usecase/usecase2/conf/external.email.json
         Update the smtp settings in this file before starting the workflow.
-    - Change the notification email properties in the workflow definition file:
-        samples/usecase/usecase2/workflow/newUserCreate.bpmn20.xml
+    - Change the notification email properties in the workflow definition file.
+      To do so:
+      - Copy the workflow bar file (samples/usecase/usecase2/workflow/newUserCreate.bar)
+        to a temporary location.
+      - Unzip the temporary workflow bar file and edit the extracted workflow
+        definition (newUserCreate.bpmn20.xml).
 
         Original:
         emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com', 
                     subject : 'Use Case Test Notification', type : 'text/plain', 
                     body : 'The requested user ' + userName + ' was successfully created']
+
         Change the from and to fields to contain valid email addresses.
+
+      - When you have completed the edit, zip up the workflow definition file,
+        along with the two xhtml templates required for the sample, using a
+        command similar to the following:
+
+        $ zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml
+
+      - Copy the resulting bar file to the workflow directory, overwriting
+        the existing bar file:
+
+        $ cp /tmp/newUserCreate.bar  /path/to/openidm/samples/usecase/usecase2/workflow
+
     
     1. Start OpenIDM with the configuration for usecase2.
 
