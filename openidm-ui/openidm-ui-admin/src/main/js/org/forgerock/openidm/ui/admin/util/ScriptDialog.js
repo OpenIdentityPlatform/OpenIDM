@@ -29,8 +29,11 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(AbstractView, constants, conf, uiUtils, validatorsManager) {
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "libs/codemirror/lib/codemirror",
+    "libs/codemirror/mode/groovy/groovy",
+    "libs/codemirror/mode/javascript/javascript"
+], function(AbstractView, constants, conf, uiUtils, validatorsManager, codeMirror, jsMode, groovyMode) {
     var ScriptDialog= AbstractView.extend({
         template: "templates/admin/util/ScriptDialog.html",
         noBaseTemplate: true,
@@ -40,7 +43,8 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             "change input[type='radio']" : "scriptSelect",
             "click #addPassedVariables" : "addPassedVariable",
             "click #passedVariablesHolder .remove-btn" : "deletePassedVariable",
-            "customValidate": "customValidate"
+            "customValidate": "customValidate",
+            "change .event-select" : "changeRenderMode"
         },
 
         render: function (args, callback) {
@@ -103,6 +107,29 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 }, this),
                 open: _.bind(function() {
                     uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), _.bind(function(){
+                        var mode;
+
+                        mode = this.$el.find("select").val();
+
+                        if(mode === "text/javascript") {
+                            mode = "javascript";
+                        }
+
+                        this.cmBox = codeMirror.fromTextArea(this.$el.find("#scriptSourceCode")[0], {
+                            lineNumbers: true,
+                            mode: mode
+                        });
+
+                        this.cmBox.on("changes", _.bind(function() {
+                            this.cmBox.save();
+                            this.$el.find("#scriptSourceCode").trigger("blur");
+                        }, this));
+
+                        if(this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
+                            this.cmBox.setOption("readOnly", "nocursor");
+                            this.$el.find(".inline-code").toggleClass("code-mirror-disabled");
+                        }
+
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
                     }, this), "replace");
@@ -114,6 +141,16 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             }
         },
 
+        changeRenderMode : function(event) {
+            var mode = $(event.target).val();
+
+            if(mode === "text/javascript") {
+                mode = "javascript";
+            }
+
+            this.cmBox.setOption("mode", mode);
+        },
+
         scriptSelect: function(event) {
             event.preventDefault();
 
@@ -123,9 +160,13 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
 
             if($(targetEle).val() === "inline-code") {
                 this.setSelectedScript(filePath, sourceCode);
+                this.cmBox.setOption("readOnly", "");
+                this.$el.find(".inline-code").toggleClass("code-mirror-disabled", false);
                 sourceCode.focus();
             } else {
                 this.setSelectedScript(sourceCode, filePath);
+                this.cmBox.setOption("readOnly", "nocursor");
+                this.$el.find(".inline-code").toggleClass("code-mirror-disabled", true);
                 filePath.focus();
             }
         },
