@@ -58,9 +58,10 @@ define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
             }, errorCallback);
     };
 
-    obj.logout = function() {
+    obj.logout = function (successCallback, errorCallback) {
         delete conf.loggedUser;
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
+        successCallback();
     };
     
     obj.getLoggedUser = function(successCallback, errorCallback) {

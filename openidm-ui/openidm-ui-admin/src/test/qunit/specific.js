@@ -95,113 +95,79 @@ define([
             });
 
             QUnit.asyncTest("Resource View", function () {
-                var resourceRenderStub = sinon.stub(resourcesView, "render", function (args, callback) {
-
-                    resourcesView.render.restore();
-
-                    resourcesView.render(args, function () {
-                        var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
-
-                        QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/ResourcesView" && viewManager.currentDialog === "null", "Resource view successfully loaded");
-
-                        QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 2, "Connectors and add Connector successfully added");
-
-                        QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .resource-body").length, 5, "Managed Objects and add Managed Object successfully added");
-
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.addManagedView, args: []});
-
-                        QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/managed/AddEditManagedView" && viewManager.currentDialog === "null", "Able to successfully load add/edit Managed page.");
-
-                        if (callback) {
-                            callback();
-                        }
-
-                        QUnit.start();
-                    });
-                });
 
                 addEditManaged(server);
 
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                resourcesView.render([], function () {
+                    var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
+
+                    QUnit.equal(resourcesView.$el.find("#resourceConnectorContainer .resource-body").length, 2, "Connectors and add Connector successfully added");
+
+                    QUnit.equal(resourcesView.$el.find("#resourceManagedContainer .resource-body").length, 5, "Managed Objects and add Managed Object successfully added");
+
+                    QUnit.start();
+                });
             });
 
             QUnit.asyncTest("Managed Objects Add/Edit", function () {
-                var managedObjectRenderStub = sinon.stub(addEditManagedView, "render", function (args, callback) {
 
-                    addEditManagedView.render.restore();
+                addEditManaged(server);
 
-                    addEditManagedView.render(args, function () {
-                        var viewManager = require("org/forgerock/commons/ui/common/main/ViewManager");
+                addEditManagedView.render([], function () {
 
-                        QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/managed/AddEditManagedView" && viewManager.currentDialog === "null", "Managed Object page successfully shown");
+                    QUnit.start();
 
-                        addEditManagedView.$el.find("#addManagedProperties").trigger("click");
+                    addEditManagedView.$el.find("#addManagedProperties").trigger("click");
 
-                        QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 1, "Add Object Type property successfull");
+                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 1, "Add Object Type property successfull");
+
+                    addEditManagedView.$el.find(".add-remove-block:visible .remove-btn").trigger("click");
+                    $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
+
+                    QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete Object Type property successfull");
+
+                    addEditManagedView.$el.find("#addManagedScript").trigger("click");
+
+                    QUnit.equal(addEditManagedView.$el.find(".managed-event-hook").length, 1, "Script hook added");
+
+                    QUnit.stop();
+
+                    setTimeout(function() {
+                        addEditManagedView.$el.find(".event-hook-empty").trigger("click");
+
+                        QUnit.equal($("#scriptManagerDialogForm").length, 1, "Script editor successfully opened");
+
+                        $("#scriptFilePath").val("test");
+                        $("#scriptFilePath").trigger("blur");
+
+                        QUnit.ok($("#scriptDialogOkay").is(":disabled") === false, "Script Dialog submit button enabled");
+
+                        $("#scriptDialogOkay").trigger("click");
+
+                        QUnit.equal(addEditManagedView.$el.find(".event-hook-status").length, 2, "Script Successfully Added");
+
+                        addEditManagedView.$el.find(".event-hook-status").trigger("click");
 
                         addEditManagedView.$el.find(".add-remove-block:visible .remove-btn").trigger("click");
                         $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
 
-                        QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete Object Type property successfull");
+                        QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete script successfull");
 
-                        addEditManagedView.$el.find("#addManagedScript").trigger("click");
+                        addEditManagedView.$el.find("#managedObjectName").val("testname");
+                        addEditManagedView.$el.find("#managedObjectName").trigger("blur");
 
-                        QUnit.equal(addEditManagedView.$el.find(".managed-event-hook").length, 1, "Script hook added");
+                        QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === false, "Submit button enabled");
 
-                        QUnit.stop();
-
-                        setTimeout(function() {
-                            addEditManagedView.$el.find(".event-hook-empty").trigger("click");
-
-                            QUnit.equal($("#scriptManagerDialogForm").length, 1, "Script editor successfully opened");
-
-                            $("#scriptFilePath").val("test");
-                            $("#scriptFilePath").trigger("blur");
-
-                            QUnit.ok($("#scriptDialogOkay").is(":disabled") === false, "Script Dialog submit button enabled");
-
-                            $("#scriptDialogOkay").trigger("click");
-
-                            QUnit.equal(addEditManagedView.$el.find(".event-hook-status").length, 2, "Script Successfully Added");
-
-                            addEditManagedView.$el.find(".event-hook-status").trigger("click");
-
-                            addEditManagedView.$el.find(".add-remove-block:visible .remove-btn").trigger("click");
-                            $(".ui-dialog .ui-dialog-buttonset .ui-button:last").trigger("click");
-
-                            QUnit.equal(addEditManagedView.$el.find(".add-remove-block:visible").length, 0, "Delete script successfull");
-
-                            addEditManagedView.$el.find("#managedObjectName").val("testname");
-                            addEditManagedView.$el.find("#managedObjectName").trigger("blur");
-
-                            QUnit.ok(addEditManagedView.$el.find("#addEditManaged").is(":disabled") === false, "Submit button enabled");
-
-                            addEditManagedView.$el.find("#addEditManaged").trigger("click");
-
-                            QUnit.start();
-
-                            QUnit.stop();
-
-                            setTimeout(function() {
-                                QUnit.ok(viewManager.currentView === "org/forgerock/openidm/ui/admin/ResourcesView" && viewManager.currentDialog === "null", "Managed Object successfully saved");
-
-                                QUnit.start();
-                            }, 2000);
-                        }, 100);
-
-                        if (callback) {
-                            callback();
-                        }
+                        addEditManagedView.$el.find("#addEditManaged").trigger("click");
 
                         QUnit.start();
-                    });
+                    }, 100);
+
                 });
 
-                addEditManaged(server);
-
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.addManagedView, args: []});
             });
         }
+
     };
 
 }); 

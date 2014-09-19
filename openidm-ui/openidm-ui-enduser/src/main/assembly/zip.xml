@@ -46,6 +46,16 @@
             <includes>
                 <include>org.forgerock.commons.ui.libs:*</include>
             </includes>
+            <excludes>
+                <exclude>org.forgerock.commons.ui.libs:contentflow</exclude>
+            </excludes>
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <outputFileNameMapping>contentflow.js</outputFileNameMapping>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:contentflow</include>
+            </includes>
             <outputDirectory>/libs</outputDirectory>
         </dependencySet>
     </dependencySets>

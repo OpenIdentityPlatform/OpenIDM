@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.forgerock.commons.ui.libs</groupId>
       <artifactId>jquery-ui</artifactId>
-      <version>1.10.4.custom</version>
+      <version>1.11.1</version>
       <classifier>min</classifier>
       <type>js</type>
     </dependency>
@@ -91,6 +91,13 @@
         <version>2253</version>
         <classifier>min</classifier>
         <type>js</type>
+    </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>CodeMirror</artifactId>
+        <version>4.5.0</version>
+        <type>zip</type>
     </dependency>
 
   </dependencies>
@@ -149,13 +156,14 @@
               </execution>
             </executions>
           </plugin>   
-          
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
+
               <execution>
-                <id>unpack</id>
+                <id>unpack-forgerock-ui</id>
                 <phase>prepare-package</phase>
                 <goals>
                   <goal>unpack</goal>
@@ -180,6 +188,25 @@
 
                   </artifactItems>
                 </configuration>
+              </execution>
+
+              <execution>
+                  <id>unpack-codemirror</id>
+                  <phase>prepare-package</phase>
+                  <goals>
+                      <goal>unpack</goal>
+                  </goals>
+                  <configuration>
+                      <outputDirectory>${project.build.directory}</outputDirectory>
+                      <artifactItems>
+                        <artifactItem>
+                          <groupId>org.forgerock.commons.ui.libs</groupId>
+                          <artifactId>CodeMirror</artifactId>
+                          <version>4.5.0</version>
+                          <type>zip</type>
+                        </artifactItem>
+                      </artifactItems>
+                  </configuration>
               </execution>
             </executions>
           </plugin>
