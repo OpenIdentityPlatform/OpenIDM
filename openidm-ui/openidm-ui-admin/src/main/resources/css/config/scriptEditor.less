@@ -84,9 +84,22 @@ form.form .group-field-row label span, form.form .group-field-block label span {
   width: 588px;
 }
 
-.event-hook-window .inline-code textarea {
-  height: 165px;
-  width: 589px;
+.event-hook-window .CodeMirror {
+  height: 240px;
+  width: 609px;
+  display:inline-block;
+}
+
+.event-hook-window  .code-mirror-disabled .CodeMirror{
+  opacity:.6;
+}
+
+.ui-dialog .event-hook-window .inline-code .error {
+  margin-top:0px;
+}
+
+.inline-code .validation-message {
+  width:609px;
 }
 
 .event-hook-window .event-select {
@@ -140,5 +153,6 @@ div.ui-dialog .event-hook-window .group-field-block div.validation-message {
 .file-code .validation-message {
   width:610px;
 }
+
 
 

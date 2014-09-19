@@ -131,6 +131,9 @@
               <excludes>
                 <exclude>**/libs/ldapfilters/*.js</exclude>
                 <exclude>**/libs/*.js</exclude>
+                <exclude>**/libs/codemirror/lib/*.js</exclude>
+                <exclude>**/libs/codemirror/mode/javascript/*.js</exclude>
+                <exclude>**/libs/codemirror/mode/groovy/*.js</exclude>
                 <exclude>**/libs/i18n/*.js</exclude>
                 <exclude>**/*Test.js</exclude>
               </excludes>
