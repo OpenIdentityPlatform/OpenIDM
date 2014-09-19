@@ -28,8 +28,9 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/user/LoginView",
     "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
+    "org/forgerock/openidm/ui/admin/users/UsersView",
     "./mocks/siteIdentification"
-], function (sinon, conf, LoginView, siteIdentificationDelegate, siteIdentificationMocks) {
+], function (sinon, conf, LoginView, siteIdentificationDelegate, adminUsersView, siteIdentificationMocks) {
 
         return {
             executeAll: function (server) {
@@ -65,6 +66,7 @@ define([
 
                     });
                 });
+
 
             }
         };

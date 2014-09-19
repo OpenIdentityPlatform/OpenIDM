@@ -57,6 +57,14 @@
     </dependency>
 
     <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>contentflow</artifactId>
+        <version>1.0.2</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
     </dependency>

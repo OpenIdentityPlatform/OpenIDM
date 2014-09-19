@@ -26,7 +26,7 @@
 define([
     "text!css/config/adminConfig.less",
     "text!css/config/adminStyle.less",
-    "text!css/config/connectorView.less",
+    "text!css/config/resourcesView.less",
 
     "text!css/fontawesome/less/variables.less",
     "text!css/fontawesome/less/mixins.less",
@@ -47,7 +47,7 @@ define([
     var staticFiles = [
             "css/config/adminConfig.less",
             "css/config/adminStyle.less",
-            "css/config/connectorView.less",
+            "css/config/resourcesView.less",
 
             "css/fontawesome/less/variables.less",
             "css/fontawesome/less/mixins.less",

@@ -29,21 +29,21 @@ require.config({
         less: "libs/less-1.5.1-min",
         i18next: "libs/i18next-1.7.3-min",
         i18nGrid: "libs/i18n/grid.locale-en",
-        backbone: "libs/backbone-0.9.2-min",
-        underscore: "libs/underscore-1.4.4-min",
-        js2form: "libs/js2form-1.0",
-        form2js: "libs/form2js-1.0",
-        spin: "libs/spin-1.2.5-min",
-        jqueryui: "libs/jquery-ui-1.10.4.custom-min",
+        backbone: "libs/backbone-1.1.0-min",
+        underscore: "libs/lodash-2.4.1-min",
+        js2form: "libs/js2form-2.0",
+        form2js: "libs/form2js-2.0",
+        spin: "libs/spin-2.0.1-min",
+        jquery: "libs/jquery-1.11.1-min",
+        jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
-        xdate: "libs/xdate-0.7-min",
+        xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-1.0.rc.1",
-        moment: "libs/moment-1.7.2-min",
+        handlebars: "libs/handlebars-1.3.0-min",
+        moment: "libs/moment-2.8.1-min",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
-        SiteIdentificationDelegate: "org/forgerock/openidm/ui/common/delegates/SiteIdentificationDelegate",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min"
     },
 
@@ -68,15 +68,20 @@ require.config({
             exports: "jsonEditor"
         },
         jqueryui: {
+            deps: ["jquery"],
             exports: "jqueryui"
+        },
+        i18nGrid: {
+            deps: ["jquery"]
         },
         jqgrid: {
             deps: ["jqueryui", "i18nGrid"]
-        },
+        }, 
         xdate: {
             exports: "xdate"
         },
         doTimeout: {
+            deps: ["jquery"],
             exports: "doTimeout"
         },
         handlebars: {
