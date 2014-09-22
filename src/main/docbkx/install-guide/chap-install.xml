@@ -55,9 +55,6 @@
     that you have the latest security fixes.
    </para>
    <para>
-    The equivalent version of OpenJDK should work for evaluation.
-   </para>
-   <para>
     In addition, on Windows systems, you must set the
     <literal>JAVA_HOME</literal> environment variable to point to the root of a
     valid Java installation. The following steps indicate how to set the
