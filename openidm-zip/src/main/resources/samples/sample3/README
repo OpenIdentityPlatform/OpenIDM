@@ -177,7 +177,8 @@ To try the example, follow these steps.
       "remainingPagedResults":-1
     }
 
-You can login to the OpenIDM UI (https://localhost:8443/openidmui) with any of
-the users that were created. Consult the values from "sample_HR_DB.mysql" to 
-retrieve their cleartext passwords. Users can update their profile or their password;
-the changes will be synced back to LDAP.
+You can log in to the OpenIDM UI (https://localhost:8443/openidmui) with any of
+the users that were created in the repository by the reconciliation operation.
+Consult the values from "sample_HR_DB.mysql" to retrieve their clear text
+passwords. Users can update their profiles or passwords. Any changes will be
+automatically synchronized back to the MySQL database.
