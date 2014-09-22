@@ -49,6 +49,14 @@
     </dependency>
 
     <dependency>
+      <groupId>org.forgerock.commons.ui.libs</groupId>
+      <artifactId>jsoneditor</artifactId>
+      <version>0.7.9</version>
+      <classifier>min</classifier>
+      <type>js</type>
+    </dependency>
+
+    <dependency>
       <groupId>org.forgerock.openidm</groupId>
       <artifactId>openidm-ui-common</artifactId>
       <version>${project.version}</version>

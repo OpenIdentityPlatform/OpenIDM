@@ -49,7 +49,8 @@ require.config({
         contentflow: "libs/contentflow",
         AuthnDelegate: "org/forgerock/openidm/ui/common/delegates/AuthnDelegate",
         UserDelegate: "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager"
+        ThemeManager: "org/forgerock/openidm/ui/common/util/ThemeManager",
+        jsonEditor: "libs/jsoneditor-0.7.9-min"
     },
 
     shim: {
@@ -65,6 +66,9 @@ require.config({
         },
         form2js: {
             exports: "form2js"
+        },
+        jsonEditor: {
+            exports: "jsonEditor"
         },
         contentflow: {
             exports: "contentflow"
@@ -121,6 +125,7 @@ require([
     "doTimeout",
     "handlebars",
     "i18next",
+    "jsonEditor",
     "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -133,7 +138,7 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
+], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, jsonEditor, i18n, constants, eventManager) {
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 
