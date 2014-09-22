@@ -53,7 +53,10 @@
                 "connectorTestPass" : "Validation passed",
                 "deleteConnectorSuccess" : "Connector successfully deleted",
                 "deleteConnectorFail" : "Error deleting connector unable to remove connector.",
-                "connectorsNotAvailable" : "System currently has no available connectors."
+                "connectorsNotAvailable" : "System currently has no available connectors.",
+                "connectorBadMainVersion" : "Please enter a valid major version (Example: 1.1.0.0)",
+                "connectorBadMinorVersion" : "Please enter a valid minor version (Example: 1.1.0.0)",
+                "connectorVersionChange" : "Saving this connector will result in a version change since the current version is a range. Range __range__ now version __version__"
             },
             "ManagedObjectMessages" : {
                 "deleteManagedSuccess" : "Managed object successfully deleted",
@@ -328,10 +331,20 @@
                 "reloadScriptOnExecution" : "Reload Script On Execution",
                 "jdbcDriver" : "JDBC Driver",
                 "jdbcConnectionUrl" : "JDBC Connection Url",
+                "url" : "Url",
                 "jdbcUrlTemplate" : "JDBC Url Template",
-                "createScriptFileName" : "Create Script File Name",
-                "testScriptFileName" : "Test Script File Name",
-                "searchScriptFileName" : "Search Script File Name"
+                "createScriptFileName" : "Create File Name",
+                "testScriptFileName" : "Test File Name",
+                "searchScriptFileName" : "Search File Name",
+                "authenticateScriptFileName" : "Authentication File Name",
+                "deleteScriptFileName" : "Delete File Name",
+                "updateScriptFileName" : "Update File Name",
+                "syncScriptFileName" : "Sync File Name",
+                "schemaScriptFileName" : "Schema File Name",
+                "driverClassName" : "Driver Class Name",
+                "classpath" : "Classpath",
+                "autoCommit": "Auto Commit",
+                "scriptFiles": "Script Files"
             },
             "databaseTableConnector" : {
                 "quoting" : "Quoting",

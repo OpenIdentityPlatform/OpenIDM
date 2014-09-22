@@ -56,6 +56,18 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.ConnectorMessages.deleteConnectorFail",
             type: "error"
         },
+        "connectorBadMainVersion": {
+            msg: "config.messages.ConnectorMessages.connectorBadMainVersion",
+            type: "error"
+        },
+        "connectorBadMinorVersion": {
+            msg: "config.messages.ConnectorMessages.connectorBadMinorVersion",
+            type: "error"
+        },
+        "connectorVersionChange": {
+            msg: "config.messages.ConnectorMessages.connectorVersionChange",
+            type: "info"
+        },
         "deleteManagedSuccess": {
             msg: "config.messages.ManagedObjectMessages.deleteManagedSuccess",
             type: "info"

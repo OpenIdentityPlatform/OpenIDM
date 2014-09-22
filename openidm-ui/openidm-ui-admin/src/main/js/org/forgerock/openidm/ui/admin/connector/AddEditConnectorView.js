@@ -51,12 +51,40 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "change input" : "disableButtons"
         },
         connectorTypeRef: null,
+        connectorList: null,
 
         render: function(args, callback) {
+            this.data.versionDisplay = {};
+            this.data.currentMainVersion = null;
 
             ConnectorDelegate.availableConnectors().then(_.bind(function(connectors){
+                this.data.connectors = connectors.connectorRef;
+
+                //Clean up display names to use translated names
+                _.each(this.data.connectors , function(connector){
+                    connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorName));
+                }, this);
+
+                //Build Connector type selection
+                this.data.versionDisplay = _.chain(this.data.connectors)
+                    .groupBy( function(connectorRef) {
+                        return connectorRef.displayName;
+                    })
+                    .pairs()
+                    .sortBy(function(connectorRef) {
+                        return connectorRef[0];
+                    })
+                    .map(function(connectorRef){
+                        connectorRef[1].displayName = connectorRef[0];
+
+                        return {
+                            "groupName" : connectorRef[0],
+                            "versions" : connectorRef[1]
+                        };
+                    })
+                    .value();
+
                 if(args.length === 0) {
-                    this.data.connectors = connectors.connectorRef;
                     this.data.editState = false;
                     this.data.connectorName = "";
                     this.data.addEditTitle = $.t("templates.connector.addTitle");
@@ -77,8 +105,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     this.data.editState = true;
 
                     ConfigDelegate.readEntity("provisioner.openicf/" +args[0]).then(_.bind(function(data){
+                        var tempVersion;
+
                         data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
-                        this.data.connectors = [data.connectorRef];
                         this.data.connectorName = data.name;
                         this.data.connectorType = data.connectorRef.connectorName;
                         this.data.enabled = data.enabled;
@@ -88,20 +117,45 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.data.objectType = data.objectTypes;
                         this.data.addEditSubmitTitle = $.t("common.form.update");
 
-                        this.parentRender(function() {
+                        //Filter down to the current edited connector Type
+                        this.data.versionDisplay = _.filter(this.data.versionDisplay, function(connector){
+                            return $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.connectorType)) === connector.groupName;
+                        }, this);
+
+                        data.connectorRef.bundleVersion = this.versionRangeCheck(data.connectorRef.bundleVersion);
+                        this.data.currentMainVersion = this.findMainVersion(data.connectorRef.bundleVersion);
+
+                        //Filter the connector types down to the current major version
+                        this.data.versionDisplay[0].versions = _.filter(this.data.versionDisplay[0].versions, function(version){
+                            tempVersion = this.findMainVersion(version.bundleVersion);
+
+                            return parseFloat(this.data.currentMainVersion) === parseFloat(tempVersion);
+                        }, this);
+
+                        this.parentRender(_.bind(function() {
                             validatorsManager.bindValidators(this.$el);
+
+                            $("#connectorType").val(this.data.connectorType +"_" +data.connectorRef.bundleVersion);
+
+                            if(this.data.rangeFound) {
+                                this.$el.find("#connectorErrorMessage .error-message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range" : this.data.oldVersion, "version" : data.connectorRef.bundleVersion}));
+                                this.$el.find("#connectorErrorMessage").show();
+                            }
 
                             this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName);
 
-                            this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName, "animate": true, "connectorDefaults": data}, _.bind(function(){
+                            this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName +"_" +this.data.currentMainVersion, "animate": true, "connectorDefaults": data}, _.bind(function(){
                                 validatorsManager.validateAllFields(this.$el);
+
+                                //Set the current newest version incase there is a range
+                                this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
                             }, this));
 
                             if(callback){
                                 callback();
                             }
 
-                        });
+                        }, this));
 
                     }, this));
                 }
@@ -109,33 +163,123 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             }, this));
         },
 
+        //This function is to find the newest version of a connector and select it if a user provides a range
+        versionRangeCheck: function(version) {
+            var cleanVersion = null,
+                tempVersion,
+                tempMinorVersion,
+                mainVersion,
+                minorVersion;
+
+            //Checks to see if there is a range
+            if(version.indexOf("(") !== -1 || version.indexOf(")") !== -1 || version.indexOf("[") !== -1 || version.indexOf("]") !== -1) {
+                if(this.data.versionDisplay[0].versions.length === 1) {
+                    cleanVersion = this.data.versionDisplay[0].versions[0].bundleVersion;
+                } else {
+                    _.each(this.data.versionDisplay[0].versions, function (versions) {
+                        if (cleanVersion === null) {
+                            cleanVersion = versions.bundleVersion;
+                        } else {
+                            tempVersion = this.findMainVersion(versions.bundleVersion);
+                            tempMinorVersion = this.findMinorVersion(versions.bundleVersion);
+
+                            mainVersion = this.findMainVersion(cleanVersion);
+                            minorVersion = this.findMinorVersion(cleanVersion);
+
+                            //Parse float is used to convert the returned string version to a number to allow basic comparison of greater / lesser value
+                            if (parseFloat(mainVersion) < parseFloat(tempVersion)) {
+                                cleanVersion = versions.bundleVersion;
+                            } else if (parseFloat(mainVersion) === parseFloat(tempVersion)){
+                                if (parseFloat(minorVersion) < parseFloat(tempMinorVersion)) {
+                                    cleanVersion = versions.bundleVersion;
+                                }
+                            }
+                        }
+                    }, this);
+                }
+
+                this.data.rangeFound = true;
+                this.data.oldVersion = version;
+            } else {
+                this.data.rangeFound = false;
+                cleanVersion = version;
+            }
+
+            return cleanVersion;
+        },
+
+        //Find the major version. If a range is used it will select the newest version of a connector template available
+        //A bad main version will kill the connector edit process
+        findMainVersion: function(version){
+            if(version.length > 0) {
+                version = version.split(".");
+                version = version[0] + "." + version[1];
+
+                return version;
+            } else {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorBadMainVersion");
+                return "0.0";
+            }
+
+        },
+
+        //Finds the minor version.
+        //A bad minor version will NOT kill the connector editing process since we primarily rely on major version for everything except for JAR selection
+        findMinorVersion: function(version) {
+            if(version.length > 0) {
+                version = version.split(".");
+                version = version[2] + "." + version[3];
+
+                return version;
+            } else {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorBadMinorVersion");
+                return "0.0";
+            }
+        },
+
         loadConnectorTemplate: function() {
-            var connectorData = _.findWhere(this.data.connectors, {"connectorName": this.$el.find("#connectorType").val()}),
+            var connectorData,
                 connectorTemplate,
+                selectedValue = this.$el.find("#connectorType").val().split("_"),
+                mainVersion,
                 connectorRef;
 
+            connectorData = _.findWhere(this.data.connectors, {"connectorName": selectedValue[0], "bundleVersion": selectedValue[1]});
+
+            //If for some reason no connector data
             if(_.isUndefined(connectorData)) {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorsNotAvailable");
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorView});
             } else {
-                connectorTemplate = connectorData.connectorName;
-                connectorRef = {
-                    connectorRef: connectorData
-                };
+                mainVersion = this.findMainVersion(connectorData.bundleVersion);
 
-                ConnectorDelegate.detailsConnector(connectorRef).then(_.bind(function(connectorDefaults){
-                    this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
+                //Checking to ensure we don't reload the page if a minor version is changed
+                if(this.data.currentMainVersion === null || (parseFloat(this.data.currentMainVersion) !== parseFloat(mainVersion)) || this.data.connectorType !==  selectedValue[0]) {
+                    this.data.connectorType = selectedValue[0];
+                    this.data.currentMainVersion = this.findMainVersion(connectorData.bundleVersion);
 
-                    this.connectorTypeRef.render({"connectorType": connectorTemplate, "animate": true, "connectorDefaults": connectorDefaults}, _.bind(function(){
-                        this.$el.find("#connectorForm").tooltip({
-                            position: { my: "left+15 center", at: "right center" },
-                            track:true
-                        });
+                    connectorTemplate = connectorData.connectorName +"_" +mainVersion;
 
-                        validatorsManager.validateAllFields(this.$el);
+                    connectorRef = {
+                        connectorRef: connectorData
+                    };
+
+                    ConnectorDelegate.detailsConnector(connectorRef).then(_.bind(function(connectorDefaults){
+                        this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
+
+                        this.connectorTypeRef.render({"connectorType": connectorTemplate, "animate": true, "connectorDefaults": connectorDefaults}, _.bind(function(){
+                            this.$el.find("#connectorForm").tooltip({
+                                position: { my: "left+15 center", at: "right center" },
+                                track:true
+                            });
+
+                            validatorsManager.validateAllFields(this.$el);
+                        }, this));
                     }, this));
-                }, this));
-
+                } else {
+                    //Set the bundle version on a minor version change so it saves
+                    this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = selectedValue[1];
+                }
             }
         },
 
