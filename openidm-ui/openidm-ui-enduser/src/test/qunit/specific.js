@@ -27,48 +27,65 @@ define([
     "sinon",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/user/LoginView",
-    "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
+    "org/forgerock/openidm/ui/admin/linkedView/LinkedView",
     "org/forgerock/openidm/ui/admin/users/UsersView",
-    "./mocks/siteIdentification"
-], function (sinon, conf, LoginView, siteIdentificationDelegate, adminUsersView, siteIdentificationMocks) {
+    "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
+    "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
+    "./mocks/siteIdentification",
+    "./mocks/adminUserView"
+], function (sinon, conf, LoginView, LinkedView, usersView, adminUserProfileView, siteIdentificationDelegate, siteIdentificationMocks, adminUserViewMock) {
 
-        return {
-            executeAll: function (server) {
+    return {
+        executeAll: function (server) {
 
-                module("EndUser UI Functions");
+            module("EndUser UI Functions");
 
-                QUnit.asyncTest("Site Identification for login screen", function () {
+            QUnit.asyncTest("Site Identification for login screen", function () {
 
-                    siteIdentificationMocks(server);
-                    conf.globalData.siteIdentification = true;
+                siteIdentificationMocks(server);
+                conf.globalData.siteIdentification = true;
 
-                    LoginView.render([], function () {
+                LoginView.element = $("<div>")[0];
+                LoginView.render([], function () {
 
-                        var siteIdStub = sinon.stub(siteIdentificationDelegate, "getSiteIdentificationForLogin", function (login, callback) {
-                            siteIdentificationDelegate.getSiteIdentificationForLogin.restore();
-                            siteIdentificationDelegate.getSiteIdentificationForLogin(login, function (data) {
+                    var siteIdStub = sinon.stub(siteIdentificationDelegate, "getSiteIdentificationForLogin", function (login, callback) {
+                        siteIdentificationDelegate.getSiteIdentificationForLogin.restore();
+                        siteIdentificationDelegate.getSiteIdentificationForLogin(login, function (data) {
 
-                                callback(data);
+                            callback(data);
 
-                                QUnit.equal($("#siteImage").css('display'), "block", "Site Image displayed");
-                                QUnit.equal($("#passPhrase").text(), "human", "Site ID Phrase displayed");
+                            QUnit.equal(LoginView.$el.find("#siteImage").css('display'), "block", "Site Image displayed");
+                            QUnit.equal(LoginView.$el.find("#passPhrase").text(), "human", "Site ID Phrase displayed");
 
-                                QUnit.start();
-
-                            });
-
+                            QUnit.start();
 
                         });
 
-                        QUnit.ok($('#identificationMessage').length, "Site Identification Prompt displayed");
-
-                        $("[name=login]").val("openidm-admin").trigger("change");
 
                     });
+
+                    QUnit.ok(LoginView.$el.find('#identificationMessage').length, "Site Identification Prompt displayed");
+
+                    LoginView.$el.find("[name=login]").val("openidm-admin").trigger("change");
+
+                });
+            });
+
+
+            QUnit.asyncTest("Admin user page", function () {
+                adminUserViewMock(server);
+
+                adminUserProfileView.render(["FakeTest"], function () {
+
+                    QUnit.equal(adminUserProfileView.$el.find("#userName").val(), "FakeTest", "userName properly loaded into form");
+
+                    QUnit.equal(adminUserProfileView.$el.find("#linkedViewSelect option").length, 1, "Linked Resource properly loaded");
+
+                    QUnit.start();
+
                 });
 
-
-            }
-        };
-
+            });
+        }
+    };
 });

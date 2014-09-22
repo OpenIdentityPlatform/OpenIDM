@@ -25,31 +25,33 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/admin/main", [
-    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",    
-    "org/forgerock/openidm/ui/admin/workflow/processes/customview/main",    
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",
+    "org/forgerock/openidm/ui/admin/workflow/processes/customview/main",
+    "./users/AdminUserRegistrationView",
+    "./users/AdminUserProfileView",
+    "./users/ChangeUserPasswordDialog",
+    "./users/UsersView",
 	
-	"./workflow/FormManager",
+    "./workflow/FormManager",
 	
-	"./workflow/tasks/TaskDetailsView",
+    "./workflow/tasks/TaskDetailsView",
     "./workflow/tasks/AbstractTaskForm",
-	"./workflow/tasks/customview/ApplicationAcceptanceTask",
-	"./workflow/tasks/TasksMenuView",
-	"./workflow/tasks/TasksDashboard",
-	"./workflow/tasks/TemplateTaskForm",
+    "./workflow/tasks/customview/ApplicationAcceptanceTask",
+    "./workflow/tasks/TasksMenuView",
+    "./workflow/tasks/TasksDashboard",
+    "./workflow/tasks/TemplateTaskForm",
 	
-	"./workflow/processes/AbstractProcessForm",
+    "./workflow/processes/AbstractProcessForm",
     "./workflow/processes/StartProcessDashboardView",
+
+    "./workflow/WorkflowDelegate",
+
+    "./linkedView/LinkedView",
 	
-	"./workflow/WorkflowDelegate",
+    "./Dashboard",
 	
-	"./Dashboard",
-	
-	"./notifications/NotificationDelegate",
-	"./notifications/NotificationsView",
-	"./notifications/NotificationViewHelper"
+    "./notifications/NotificationDelegate",
+    "./notifications/NotificationsView",
+    "./notifications/NotificationViewHelper"
 	
 ]);

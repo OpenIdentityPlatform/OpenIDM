@@ -135,6 +135,11 @@
             },
             "UsersTemplate" : {
                 "remainingUsers" : "remaining users"
+            },
+            "LinkedTemplate" : {
+                "linkedResource" : "Linked Resource",
+                "linkedSystems" : "Linked Systems",
+                "noLinkedSystems" : "No Linked Systems Available."
             }
         }
     },

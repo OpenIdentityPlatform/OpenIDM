@@ -38,8 +38,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/commons/ui/common/components/ConfirmationDialog",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/user/delegates/CountryStateDelegate",
-    "org/forgerock/openidm/ui/user/delegates/RoleDelegate"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate, roleDelegate) {
+    "org/forgerock/openidm/ui/user/delegates/RoleDelegate",
+    "org/forgerock/openidm/ui/admin/linkedView/LinkedView"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate, roleDelegate, LinkedView) {
     var AdminUserProfileView = AbstractView.extend({
         template: "templates/admin/AdminUserProfileTemplate.html",
         events: {
@@ -50,21 +51,21 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             "change select[name='country']": "loadStates",
             "change select[name='stateProvince']": "selectState"
         },
-        
+
         formSubmit: function(event) {
             event.preventDefault();
-            
+
             if(validatorsManager.formValidated(this.$el)) {
                 var data = form2js(this.$el.attr("id"), '.', false),
-                    self = this, 
+                    self = this,
                     oldUserName;
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
                 oldUserName = data.oldUserName;
-                delete data.oldUserName;                
+                delete data.oldUserName;
 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
-                
+
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
                     if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
@@ -72,8 +73,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         return;
                     }
 
-
-                    
                     userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
@@ -83,12 +82,12 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 }, null, null, { "forbidden": { status: "403", event: constants.EVENT_USER_UPDATE_POLICY_FAILURE } });
             }
         },
-        
+
         editedUser: {},
-        
+
         render: function(userName, callback) {
             userName = userName[0].toString();
-            
+
             $.when(
                 userDelegate.getForUserName(userName),
                 roleDelegate.getAllRoles()
@@ -96,41 +95,41 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 _.bind(function(user, roles) {
 
                     var managedRoleMap = _.chain(roles.result)
-                                          .map(function (r) { return [r._id, r.name || r._id]; })
-                                          .object()
-                                          .value();
+                        .map(function (r) { return [r._id, r.name || r._id]; })
+                        .object()
+                        .value();
 
                     this.editedUser = user;
                     this.data.user = user;
                     this.data.roles = _.extend({}, conf.globalData.userRoles, managedRoleMap);
                     this.data.profileName = user.givenName + ' ' + user.sn;
-                    
+
                     this.parentRender(_.bind(function() {
+                        this.linkedView = new LinkedView();
+                        this.linkedView.element = "#linkedViewBody";
+
                         this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
                         validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
-                        
+
                             this.reloadData();
-                            
-                            if(callback) {
-                                callback();
-                            }
+                            this.linkedView.render({"id": user._id}, callback);
 
                         }, this));
                     }, this));
-                }, this), 
+                }, this),
 
                 function() {
                     eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
                 }
             );
         },
-        
+
         loadStates: function() {
-            var country = this.$el.find('select[name="country"]').val();            
-            
+            var country = this.$el.find('select[name="country"]').val();
+
             if(country) {
                 this.$el.find("select[name='country'] > option:first").text("");
-                
+
                 countryStateDelegate.getAllStatesForCountry(country, _.bind(function(states) {
                     uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
                         if(this.editedUser.stateProvince) {
@@ -145,56 +144,56 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
             }
         },
-        
+
         selectState: function() {
             var state = $('#profile select[name="stateProvince"]').val();
-            
+
             if(state) {
                 this.$el.find("select[name='stateProvince'] > option:first").text("");
             } else {
-                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
             }
         },
-        
+
         reloadData: function() {
-            js2form(document.getElementById(this.$el.attr("id")), this.editedUser);
+            js2form(this.$el[0], this.editedUser);
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-            
+
             _.each(this.editedUser.roles, _.bind(function(v) {
                 this.$el.find("input[name=roles][value='"+v+"']").attr('checked', true);
             }, this));
-            
+
             validatorsManager.validateAllFields(this.$el);
-            
+
             countryStateDelegate.getAllCountries(_.bind(function(countries) {
                 uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
                     if(this.editedUser.country) {
                         this.$el.find("select[name='country'] > option:first").text("");
                         this.$el.find("select[name='country']").val(this.editedUser.country);
-                        
+
                         this.loadStates();
                     }
                 }, this));
             }, this));
         },
-        
+
         deleteUser: function() {
-            confirmationDialog.render("Delete user", 
+            confirmationDialog.render("Delete user",
                 $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.userName] }),
                 $.t("common.form.delete"), _.bind(function() {
-                
-                eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
-            }, this));
+
+                    eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
+                }, this));
         },
-        
+
         back: function() {
             router.routeTo(router.configuration.routes.adminUsers, {trigger: true});
         }
-    }); 
-    
+    });
+
     return new AdminUserProfileView();
 });
 

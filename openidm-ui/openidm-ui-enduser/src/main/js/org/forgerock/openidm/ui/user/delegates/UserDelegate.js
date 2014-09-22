@@ -191,5 +191,17 @@ define("UserDelegate", [
         return obj.patchEntity({id: id, rev: rev}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
     };
 
+    /**
+     * Aggregate View Calls
+     */
+
+    obj.userLinkedView = function(id) {
+        return obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/endpoint/linkedView/managed/user/",
+            url: id,
+            type: "GET"
+        });
+    };
+
     return obj;
 });
