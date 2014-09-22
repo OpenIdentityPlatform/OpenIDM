@@ -63,7 +63,7 @@ To try the example, follow these steps.
     Bye
 
     * Note that these passwords are hashed, and not available to be read into OpenIDM as cleartext. 
-    * sha1 is used to hash these passwords for compatiblity reasons; in production uses, more secure algorithms should be used.
+    * sha1 is used to hash these passwords for compatibility reasons; in production, use more secure algorithms.
 
     5. Start OpenIDM with the configuration for sample 3.
 
@@ -144,7 +144,7 @@ To try the example, follow these steps.
     }
 
     9. Show paging results with page size of 2
-    $ curl -u "openidm-admin:openidm-admin" --request GET "http://localhost:8080/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id" -H "Content-type:application/json
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id"
     {
       "result":[
         {
@@ -161,7 +161,7 @@ To try the example, follow these steps.
     }
 
     10. Use the pagedResultsCookie from the result in step 9 for the next query to retrieve the next result set. Make sure you encode the date:time.
-    $ curl -u "openidm-admin:openidm-admin" --request GET "http://localhost:8080/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2" -H "Content-type:application/json"
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
     {
       "result":[
         {
