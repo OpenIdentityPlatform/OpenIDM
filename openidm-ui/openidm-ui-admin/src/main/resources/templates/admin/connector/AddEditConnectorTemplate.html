@@ -18,17 +18,21 @@
                     <label for="connectorEnabled" class="light">{{t "templates.connector.connectorEnabled"}}</label>
                     <select id="connectorEnabled" class="form-size-s" name="enabled">
                         {{#staticSelect enabled}}
-                            <option value="true">{{t "common.form.true"}}</option>
-                            <option value="false">{{t "common.form.false"}}</option>
+                        <option value="true">{{t "common.form.true"}}</option>
+                        <option value="false">{{t "common.form.false"}}</option>
                         {{/staticSelect}}
                     </select>
                 </div>
 
                 <div class="group-field-block no-validation-block">
                     <label for="connectorType" class="light">{{t "templates.connector.connectorType"}}</label>
-                    <select id="connectorType" class="form-size-m" name="connectorType" {{#if editState}} disabled="true" {{/if}}>
-                        {{#each connectors}}
-                            <option value="{{connectorName}}">{{displayName}}  {{bundleVersion}}</option>
+                    <select id="connectorType" class="form-size-m" name="connectorType">
+                        {{#each versionDisplay}}
+                        <optgroup label="{{groupName}}">
+                            {{#each versions}}
+                            <option value="{{connectorName}}_{{bundleVersion}}">{{displayName}} - {{bundleVersion}}</option>
+                            {{/each}}
+                        </optgroup>
                         {{/each}}
                     </select>
                 </div>

@@ -33,7 +33,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/mode/groovy/groovy",
     "libs/codemirror/mode/javascript/javascript"
-], function(AbstractView, constants, conf, uiUtils, validatorsManager, codeMirror, jsMode, groovyMode) {
+], function(AbstractView, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode) {
     var ScriptDialog= AbstractView.extend({
         template: "templates/admin/util/ScriptDialog.html",
         noBaseTemplate: true,
