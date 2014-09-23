@@ -553,7 +553,19 @@
     <varlistentry>
      <term><literal>read</literal></term>
      <listitem>
-      <para>When an object is read by using its identifier.</para>
+      <para>
+       When an object is read by using its identifier. By default, read
+       actions are not logged. Add the <literal>"read"</literal> action to the
+       list of actions to log all read actions.
+      </para>
+      <para>
+       Note that, due to the potential result size in the case of read
+       operations on <literal>system/</literal> endpoints, only the read is
+       logged, and not the resource detail. If you really need to log the
+       complete resource detail, add the following line to your
+       <filename>conf/boot/boot.properties</filename> file:
+      </para>
+      <programlisting>openidm.audit.logFullObjects=true</programlisting>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -583,7 +595,19 @@
     <varlistentry>
      <term><literal>query</literal></term>
      <listitem>
-      <para>When a query is performed on an object.</para>
+      <para>
+       When a query is performed on an object. By default, query
+       actions are not logged. Add the <literal>"query"</literal> action to the
+       list of actions to log all query actions.
+      </para>
+      <para>
+       Note that, due to the potential result size in the case of query
+       operations on <literal>system/</literal> endpoints, only the query is
+       logged, and not the resource detail. If you really need to log the
+       complete resource detail, add the following line to your
+       <filename>conf/boot/boot.properties</filename> file:
+      </para>
+      <programlisting>openidm.audit.logFullObjects=true</programlisting>
      </listitem>
     </varlistentry>
     <varlistentry>
