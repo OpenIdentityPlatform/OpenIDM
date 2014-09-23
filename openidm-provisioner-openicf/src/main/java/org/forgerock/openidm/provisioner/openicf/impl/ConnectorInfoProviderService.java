@@ -836,9 +836,11 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                             properties =
                                     ci.createDefaultAPIConfiguration().getConfigurationProperties();
                         }
+                    } catch (JsonValueException jve) {
+                        throw jve;
                     } catch (Exception e) {
-                        logger.error("Failed to parse the config of {}-{}", new Object[] {
-                            pidOrFactory, instanceAlias }, e);
+                        logger.error("Failed to parse the config of {}-{}: {}", new Object[] {
+                            pidOrFactory, instanceAlias, e.getMessage()}, e);
                     }
                     if (null != properties) {
                         JsonPointer configurationProperties =
