@@ -66,20 +66,23 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get();
 
-                userDelegate.patchUserDifferences(this.editedUser, data, function() {
+                userDelegate.patchUserDifferences(this.editedUser, data, _.bind(function() {
                     if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
                     }
 
-                    userDelegate.getForUserName(data.userName, function(user) {
+                    userDelegate.getForUserName(data.userName, _.bind(function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         router.routeTo(router.configuration.routes.adminUserProfile, {args: [data.userName], trigger : true});
+
+                        this.linkedView.render({"id": user._id});
                         self.reloadData();
-                    });
-                }, null, null, { "forbidden": { status: "403", event: constants.EVENT_USER_UPDATE_POLICY_FAILURE } });
+                    },this));
+
+                },this), null, null, { "forbidden": { status: "403", event: constants.EVENT_USER_UPDATE_POLICY_FAILURE } });
             }
         },
 
