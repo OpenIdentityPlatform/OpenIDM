@@ -273,7 +273,7 @@
         <serverDocTargetVersion>${project.version}</serverDocTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
-        <openicfBundleVersion>[1.1,1.5]</openicfBundleVersion>
+        <openicfBundleVersion>1.4.0.0</openicfBundleVersion>
         <connectorServerVersion>1.4.0.0</connectorServerVersion>
         <orientdbVersion>${orientdb.version}</orientdbVersion>
         <gaId>UA-23412190-9</gaId>
