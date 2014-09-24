@@ -689,6 +689,22 @@
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
         </fileSet>
+        <!-- google connector-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-google.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/google-connector/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
+        </fileSet>
     </fileSets>
     <!-- sample6 -->
     <files>
@@ -697,7 +713,7 @@
             <destName>provisioner.openicf-realad.json</destName>
             <outputDirectory>/openidm/samples/sample6/alternatives</outputDirectory>
         </file>
-    </files>    
+    </files>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -729,6 +745,13 @@
                 <exclude>*:*:js</exclude>
                 <exclude>*:*:zip</exclude>
                 <exclude>*:*:pom</exclude>
+                <exclude>com.google.oauth-client:google-oauth-client</exclude>
+                <exclude>com.google.oauth-client:google-oauth-java6</exclude>
+                <exclude>com.google.api-client:google-api-client</exclude>
+                <exclude>com.google.http-client:google-http-client</exclude>
+                <exclude>com.google.http-client:google-http-client-jackson2</exclude>
+                <exclude>com.google.apis:google-api-services-admin-directory</exclude>
+                <exclude>com.google.apis:google-api-services-licensing</exclude>
                 <!--exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
@@ -794,6 +817,19 @@
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors:*-connector</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/lib</outputDirectory>
+            <includes>
+                <include>com.google.oauth-client:google-oauth-client</include>
+                <include>com.google.oauth-client:google-oauth-java6</include>
+                <include>com.google.api-client:google-api-client</include>
+                <include>com.google.http-client:google-http-client</include>
+                <include>com.google.http-client:google-http-client-jackson2</include>
+                <include>com.google.apis:google-api-services-admin-directory</include>
+                <include>com.google.apis:google-api-services-licensing</include>
             </includes>
         </dependencySet>
         <dependencySet>
