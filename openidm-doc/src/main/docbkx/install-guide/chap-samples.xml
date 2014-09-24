@@ -815,270 +815,543 @@ $ ./startup.sh -p samples/sample2d</screen>
  
   </section>
  </section>
- 
+
  <section xml:id="more-sample3">
-  <title>Sample 3 - Scripted SQL</title>
-  <indexterm>
-   <primary>Samples</primary>
-   <secondary>Sample 3 - Scripted SQL</secondary>
-  </indexterm>
+  <title>Sample 3 - Scripted SQL Implementation of Groovy Connector 1.4.0.0</title>
   <para>
-   Sample 3 shows an example configuration for the Scripted SQL connector. The
-   Scripted SQL connector allows OpenIDM to communicate with the database
-   through configurable SQL scripts. Each operation, like create or delete, is
-   represented by its own script.
+   OpenICF 1.4 introduces a new, generic Groovy Connector. The Groovy Connector
+   is a scripted connector that enables you to run Groovy scripts on any
+   external resource. Without a specific implementation, the Groovy connector
+   does not do anything.
   </para>
-
   <para>
-   In this sample, you will see how OpenIDM uses a scripted connection to a
-   MySQL server. Do configure MySQL first, before starting OpenIDM.
+   This sample demonstrates a Scripted SQL implementation of the Groovy
+   Connector in which an instance of the Scripted SQL framework is made to work
+   with the HRDB schema. The "connector" in this sample is therefore really an
+   HRDB connector that is implemented with the help of the Scripted SQL (Groovy)
+   connector framework.
+   </para>
+   <para>
+    The Groovy connector is bundled with OpenIDM ${serverDocTargetVersion}, in
+    the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
   </para>
-
   <para>
-   After reconciliation with the existing MySQL database, you will be able to
-   review users in the internal repository of OpenIDM.
+   The connector configuration file for this sample
+   (<filename>sample3/conf/provisioner.openicf-scriptedsql.json</filename>)
+   indicates the Scripted SQL implementation of the Groovy connector as follows:
   </para>
-
+  <programlisting language="javascript">{
+   "name" : "scriptedsql",
+   "connectorRef" : {
+       "bundleName" : "org.forgerock.openicf.connectors.groovy-connector",
+       "bundleVersion" : "${openicfBundleVersion}",
+       "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
+   },
+...  </programlisting>
   <para>
-   Sample 3 uses the following file in the <filename>conf/</filename> directory
-   for the Scripted SQL connector:
-   <filename>conf/provisioner.openicf-scriptedsql.json</filename>. It cites
-   customizable Groovy scripts in the
-   <filename>/path/to/openidm/samples/sample3/tools</filename> directory.
+   This sample configuration assumes a MySQL server, running on the localhost,
+   and listening on port 3306. The sample database, HRDB, is created with the
+   data definition script <filename>sample3/data/sample_HR_DB.mysql</filename>.
   </para>
-
+  <para>
+   The Groovy scripts required for the sample are located in the
+   <filename>sample3/tools</filename> directory. You will need to customize
+   these scripts to address the requirements of your specific deployment,
+   however, the sample scripts are a good starting point on which to base your
+   customization.
+  </para>
+  <note>
+   <para>
+    This sample is supported with Java version 7 only. The dependencies required
+    for the sample are provided in the <literal>openidm/bundle</literal> folder
+    and do not require a separate download.
+   </para>
+   <para>
+    If you are using the Scripted SQL connector implementation with Java version
+    6, you must download the related dependencies. For more information, see
+    <xref linkend="sample-3-java-6" /> at the end of this section.
+   </para>
+  </note>
   <para>
    Prepare a fresh installation of OpenIDM before trying this sample.
   </para>
 
-  <section xml:id="external-mysql-config-sample3">
+  <section xml:id="external-mysql-config-sample3b">
    <title>External Configuration</title>
    <para>
-    In this example OpenIDM communicates with an external MySQL database server.
+    Before you start, make sure that MySQL is running.
    </para>
-   <para>
-    Make sure MySQL is running.
-   </para>
-
-   <note>
-    <para>
-     If you want to test this sample on an existing MySQL database, examine the
-     <literal>configurationProperties</literal> section of the
-     <filename>provisioner.openicf-scriptedsql.json</filename> file. Change
-     parameters such as <literal>host</literal>, <literal>database</literal>,
-     <literal>password</literal>, and <literal>jdbcConnectionUrl</literal> to
-     match your configuration.
-    </para>
-    <para>
-     The remainder of the Sample 3 documentation is based on the database
-     schema that exists in the <filename>openidm/samples/sample3/data</filename>
-     directory.
-    </para>
-   </note>
-
-   <itemizedlist>
-    <para>The sample expects the following configuration for MySQL:</para>
-    <listitem>
-     <para>The database is available on the local host.</para>
-    </listitem>
-    <listitem>
-     <para>The database listens on port 3306.</para>
-    </listitem>
-    <listitem>
-     <para>You can connect over the network to the database with user
-     <literal>root</literal> and password <literal>password</literal>.</para>
-    </listitem>
-    <listitem>
-     <para>MySQL serves a database called <literal>HRDB</literal> with a table
-      called <literal>Users</literal>.</para>
-    </listitem>
-    <listitem>
+   <procedure>
+    <step>
      <para>
-      The database schema is as described in the data definition language file,
-      <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
-      Import the file into MySQL before running the sample.
+      Ensure that the connection details in the connector configuration file
+      (<filename>sample3/conf/provisioner.openicf-scriptedsql.json</filename>)
+      match the details of your MySQL instance. The default configuration is as
+      follows:
      </para>
-     <screen>$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
-</userinput>
+     <programlisting language="javascript">"configurationProperties" : {
+    "username" : "root",
+    "password" : "password",
+    "driverClassName" : "com.mysql.jdbc.Driver",
+    "url" : "jdbc:mysql://localhost:3306/HRDB",
+    "autoCommit" : true,
+    "reloadScriptOnExecution" : false,
+    "authenticateScriptFileName" : "AuthenticateScript.groovy",
+    "createScriptFileName" : "CreateScript.groovy",
+    "testScriptFileName" : "TestScript.groovy",
+    "searchScriptFileName" : "SearchScript.groovy",
+    "deleteScriptFileName" : "DeleteScript.groovy",
+    "updateScriptFileName" : "UpdateScript.groovy",
+    "syncScriptFileName" : "SyncScript.groovy",
+    "schemaScriptFileName" : "SchemaScript.groovy",
+    "classpath" : [
+        "&amp;{launcher.project.location}/tools"
+    ]
+},   </programlisting>
+     <itemizedlist>
+      <para>
+       As indicated in the preceding excerpt of the connector configuration
+       file, the sample expects the following MySQL configuration:
+      </para>
+      <listitem>
+       <para>
+        The database is available on the local host.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The database listens on port 3306.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        You can connect over the network to the database with user
+       <literal>root</literal> and password <literal>password</literal>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The MySQL instance serves a database named <literal>HRDB</literal>.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </step>
+    <step>
+     <para>
+      The database schema is described in the data definition language file,
+      <filename>sample3/data/sample_HR_DB.mysql</filename>. To set up the
+      <literal>HRDB</literal> database and its tables, import the file into
+      MySQL before running the sample.
+     </para>
+     <screen>$ <userinput>mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql</userinput>
 Enter password:
 $ </screen>
-    </listitem>
-   </itemizedlist>
-
-   <para>
-    Once imported, you can review the contents of the sample in MySQL. The
-    following command accesses the MySQL prompt:
-   </para>
-
-   <screen>$ mysql -u root -p</screen>
-
-   <para>
-    From the <literal>mysql &gt;</literal> prompt, use the following commands
-    to review the users configured in the <filename>sample_HR_DB.mysql</filename>
-    file:
-   </para>
-
-   <screen>mysql &gt; <userinput>use HRDB;</userinput>
-    <computeroutput>
-Reading table information for completion of table and column names
+     <para>
+      The import creates a database named <literal>HRDB</literal> with a table
+      named <literal>Users</literal>.
+     </para>
+     <para>
+      After importing the schema, review the contents of the
+      <literal>HRDB</literal> database as follows:
+     </para>
+     <screen><userinput>$ mysql -u root -p</userinput>
+mysql &gt; <userinput>use HRDB;</userinput>
+<computeroutput>Reading table information for completion of table and column names
 You can turn off this feature to get a quicker startup with -A
 
 Database changed</computeroutput>
 mysql &gt; <userinput>select * from Users;</userinput>
-    <computeroutput>
-     +----+--------+--------------+-----------+----------+---------------+------...
-     | id | uid    | password     | firstname | lastname | fullname      | email...
-     +----+--------+------------------------------------------+-----------+-----...
-     |  1 | bob    | e38ad2149... | Bob       | Fleming  | Bob Fleming   | Bob. ...
-     |  2 | rowley | 2aa60a8ff... | Rowley    | Birkin   | Rowley Birkin | Rowl ...
-     |  3 | louis  | 1119cfd37... | Louis     | Balfour  | Louis Balfour | Loui ...
-     |  4 | john   | a1d7584da... | John      | Smith    | John Smith    | John ...
-     |  5 | jdoe   | edba955d0... | John      | Doe      | John Doe      | John ...
-     +----+--------+------------------------------------------+-----------+---- ...
-     5 rows in set (0.01 sec)
-    </computeroutput>
-    </screen>
-
-    <para>
-     You can exit from the MySQL prompt with the <command>quit</command>
-     command.
-    </para>
-
+     <computeroutput>
++----+--------+--------------+-----------+----------+---------------+--------...
+| id | uid    | password     | firstname | lastname | fullname      | email  ...
++----+--------+------------------------------------------+-----------+-------...
+|  1 | bob    | e38ad2149... | Bob       | Fleming  | Bob Fleming   | Bob.Fle...
+|  2 | rowley | 2aa60a8ff... | Rowley    | Birkin   | Rowley Birkin | Rowley....
+|  3 | louis  | 1119cfd37... | Louis     | Balfour  | Louis Balfour | Louis.B...
+|  4 | john   | a1d7584da... | John      | Smith    | John Smith    | John.Sm...
+|  5 | jdoe   | edba955d0... | John      | Doe      | John Doe      | John.Do...
++----+--------+------------------------------------------+-----------+-------...
+5 rows in set (0.00 sec)
+     </computeroutput></screen>
+    </step>
+   </procedure>
+   <para>
+    You can exit from the MySQL prompt with the <command>quit</command>
+    command.
+   </para>
    <note>
     <para>
      The passwords in the output shown above are hashed to the SHA-1 standard,
-     as they cannot be read into OpenIDM as cleartext.
-    </para>
-    <para>
-     The SHA-1 Hash function is used for compatibility reasons. When configuring
-     a database for production, more secure algorithms should be used.
+     as they cannot be read into OpenIDM as clear text. The SHA-1 Hash function
+     is used for compatibility reasons. In a production database, you should use
+     a more secure algorithm.
     </para>
    </note>
   </section>
 
-<section xml:id="install-sample3">
+  <section xml:id="install-sample3">
    <title>Install the Sample</title>
-
-   <itemizedlist>
-    <listitem><para>Prepare OpenIDM as described in <xref
-    linkend="preparing-openidm"/>.</para></listitem>
-    <listitem>
-     <para>Set up the MySQL driver for OpenIDM. Download MySQL Connector/J,
-      version 5.1 or later. Unpack the download and copy the .jar into the
-      <filename>openidm/bundle</filename> directory.</para>
+   <procedure>
+    <step>
+     <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Download the <link xlink:show="new"
+      xlink:href="http://dev.mysql.com/downloads/connector/j/5.1.html">MySQL
+      Driver</link>, (MySQL Connector/J, version 5.1 or later) from the MySQL
+      website. Unpack the download and copy the .jar into the
+      <filename>openidm/bundle</filename> directory.
+     </para>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
-    </listitem>
-    <listitem>
-     <para>Once the MySQL driver is in place, start OpenIDM with the
-      configuration for sample 3.</para>
-     <screen>$ cd /path/to/openidm
-$ ./startup.sh -p samples/sample3</screen>
-    </listitem>
-   </itemizedlist>
-
+    </step>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for sample 3.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample3</userinput>
+<computeroutput>Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/samples/sample3/conf/boot/boot.properties
+OpenIDM version "${serverDocTargetVersion}" (revision: 0) null null
+-> OpenIDM ready</computeroutput></screen>
+    </step>
+   </procedure>
   </section>
 
   <section xml:id="run-sample3">
-   <title>Run the Sample</title>
-
-   <para>
-    The sample 3 <filename>sync.json</filename> configuration file contains a
-    mapping to reconcile OpenIDM and the external database. Run the
-    reconciliation with the following command.
-   </para>
-
-   <screen>$ curl \
+   <title>Reconciling the Repository</title>
+   <procedure>
+    <step>
+     <para>
+      The mapping configuration file (<filename>sync.json</filename>) for this
+      sample includes the mapping <literal>systemHrdb_managedUser</literal>,
+      which synchronize users from the source <literal>HRDB</literal> table with
+      the target OpenIDM repository. Run the reconciliation operation with the
+      following command.
+     </para>
+     <screen><userinput>$ curl \
 --cacert self-signed.crt \
 --header "X-OpenIDM-Username: openidm-admin" \
 --header "X-OpenIDM-Password: openidm-admin" \
 --header "Content-Type: application/json" \
 --request POST \
-"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
-
-   <para>
-    Reconciliation creates the five users from the database in the OpenIDM
-    repository. Check the result with the following command.
-   </para>
-
-   <screen>$ curl \
+"https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</userinput>
+<computeroutput>{"_id":"179d3685-c850-4f30-a9ca-c6e37fe3f25d"}</computeroutput></screen>
+     <para>
+      The reconciliation operation returns an <literal>_id</literal> and creates
+      the five users from the MySQL database in the OpenIDM repository.
+     </para>
+    </step>
+    <step>
+     <para>
+      Retrieve the list of users from the repository by querying the IDs in the
+      repository. The following example returns the ID, username, and surname
+      of all users in the repository:
+     </para>
+   <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"</screen>
-
-   <para>
-    The output includes the identifier <literal>_id</literal> for each user.
-   </para>
-
-   <programlisting language="javascript">
-{
-    "result": [ {
-        "_id": "8366a23d-f6cf-46df-9746-469bf45aafcd",
-        "_rev": "0"
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all&amp;fields=_openidm_id,userName,sn"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 5,
+  "result": [
+    {
+      "sn": "Birkin",
+      "userName": "rowley",
+      "_rev": "0",
+      "_id": "fb207e49-3498-4772-8ad6-72b7c6dec363"
     },
     {
-        "_id": "3f90933b-9397-4897-84d0-03ed8d99f61e",
-        "_rev": "0"
+      "sn": "Smith",
+      "userName": "john",
+      "_rev": "0",
+      "_id": "bdb781b6-7225-4438-8af9-31841ceb2f4b"
     },
     {
-        "_id": "8fbf759d-bebc-42ed-b321-b69487b4470f",
-        "_rev": "0"
+      "sn": "Balfour",
+      "userName": "louis",
+      "_rev": "0",
+      "_id": "d837d220-ed69-4398-920e-34ea0fa74351"
     },
     {
-        "_id": "9592de42-a8ef-4db3-9c6c-7d191e39b084",
-        "_rev": "0"
+      "sn": "Fleming",
+      "userName": "bob",
+      "_rev": "0",
+      "_id": "22944fe5-4cd7-4a10-a747-bc9e0dad065e"
     },
     {
-        "_id": "d933441b-684b-446c-a89e-01eca6d21ef3",
-        "_rev": "0"
-    },
-    {
-        "_id": "fd962b71-752a-444b-8492-35bff57bec69",
-        "_rev": "0"
-    } ],
-    "resultCount": 6,
-    "pagedResultsCookie": null,
-    "remainingPagedResults": -1
-}</programlisting>
-
-   <para>
-    You can get more information about users with any of the following three
-    methods:
-   </para>
-
-   <para>
-    You can review the users from the UI, navigating to the domain where OpenIDM
-    is installed, with a URL similar to
-    <literal>https://localhost:8443/openidmui</literal>
-   </para>
-
-   <para>Alternatively, to view all fields for a single user, based on its
-    <literal>_id</literal>, run the following command:</para>
-
-   <screen>$ curl \
+      "sn": "Doe",
+      "userName": "jdoe",
+      "_rev": "0",
+      "_id": "21e0a3a2-3233-40d7-ad73-64e2e1f4672e"
+    }
+  ]
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      To retrieve the complete user record, include the ID of the user in the
+      request. The following example returns the record for user
+      <literal>jdoe</literal>.
+     </para>
+     <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
-
-   <para>
-    You can query specific fields with a REST call. For example, the following
-    command displays the unique ID and the <literal>givenName</literal> of all
-    managed users:
-   </para>
-
-   <screen>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=query-all&amp;fields=_openidm_id,givenName"
-</screen>
-
+ "https://localhost:8443/openidm/managed/user/21e0a3a2-3233-40d7-ad73-64e2e1f4672e"</userinput>
+<computeroutput>{
+  "stateProvince": "",
+  "userName": "jdoe",
+  "postalAddress": "",
+  "effectiveAssignments": {},
+  "roles": [
+    "openidm-authorized"
+  ],
+  "country": "",
+  "effectiveRoles": [
+    "openidm-authorized"
+  ],
+  "givenName": "John",
+  "address2": "",
+  "lastPasswordAttempt": "Thu Sep 18 2014 20:24:11 GMT+0200 (SAST)",
+  "passwordAttempts": "0",
+  "sn": "Doe",
+  "mail": "John.Does@example.com",
+  "city": "",
+  "lastPasswordSet": "",
+  "organization": "ENG",
+  "postalCode": "",
+  "_id": "21e0a3a2-3233-40d7-ad73-64e2e1f4672e",
+  "_rev": "1",
+  "accountStatus": "active",
+  "telephoneNumber": ""
+}    </computeroutput></screen>
+    </step>
+   </procedure>
   </section>
 
+  <section xml:id="sample3-paging">
+   <title>Using Paging With Sample 3</title>
+   <para>
+    All OpenICF ${openicfBundleVersion} connectors support the use of paging
+    parameters to restrict query results. The following command indicates that
+    only two records should be returned (<literal>_pageSize=2</literal>) and
+    that the records should be sorted according to their
+    <literal>timestamp</literal> and <literal>_id</literal>
+    (<literal>_sortKeys=timestamp,id</literal>). Including the
+    <literal>timestamp</literal> in the sort ensures that, as you page through
+    the set, changes to records that have already been visited are not lost.
+    Instead, those records are pushed onto the last page.
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&amp;_pageSize=2&amp;_sortKeys=timestamp,id"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": "2014-09-10 12:18:46.0,2",
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "1",
+      "uid": "bob"
+    },
+    {
+      "_id": "2",
+      "uid": "rowley"
+    }
+  ]
+}
+</computeroutput></screen>
+   <para>
+    The <literal>"pagedResultsCookie"</literal> is used by the server to keep
+    track of the position in the search results. You can ignore the
+    <literal>"remainingPagedResults": -1</literal> in the output. The real value
+    of this property is not returned because the scripts that the connector uses
+    do not do any counting of the records in the resource.
+   </para>
+   <para>
+    Using the <literal>"pagedResultsCookie"</literal> from the previous step,
+    run a similar query, to retrieve the following set of records in the
+    database. You must URL-encode the space character between the date and time
+    in the <literal>"pagedResultsCookie"</literal> value, with
+    <literal>%20</literal>, as shown in the following example:
+   </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&amp;_pageSize=2&amp;_sortKeys=timestamp,id&amp;_pagedResultsCookie2014-09-10%2012:18:46.0,2"</userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": "2014-09-10 12:18:46.0,4",
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "3",
+      "uid": "louis"
+    },
+    {
+      "_id": "4",
+      "uid": "john"
+    }
+  ]
+}</computeroutput></screen>
+   <para>
+    For more information about paging support, see <link xlink:show="new"
+    xlink:href="integrators-guide#paging-query-results"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Paging Query
+    Results</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+   </para>
+  </section>
+
+  <section xml:id="sample3-updating-mysql">
+   <title>Reconciling the MySQL Database</title>
+   <procedure>
+    <para>
+     The second mapping defined in the mapping configuration file for this
+     sample (<literal>managedUser_systemHrdb</literal>) synchronizes users from
+     the source OpenIDM repository to the target <literal>HRDB</literal> table.
+     Instead of running a manual reconciliation operation to synchronize these
+     resources, you can edit one of the user records in the OpenIDM UI. Changes
+     are propagated automatically, through the automatic synchronization
+     mechanism.
+    </para>
+    <step>
+     <para>
+      Log in to the OpenIDM UI (https://localhost:8443/openidmui) as any one of
+      the users that was created in the repository by the previous
+      reconciliation operation.
+     </para>
+     <para>
+      To obtain the clear text passwords of these users, look at the
+      <filename>samples/sample3/data/sample_HR_DB.mysql</filename> file.
+     </para>
+     <para>
+      For example, log into the UI as user <literal>john</literal> with the
+      password <literal>password4</literal>.
+     </para>
+     <mediaobject>
+      <imageobject>
+       <imagedata fileref="images/john-login.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Update the password or profile of the user <literal>john</literal> (or the
+      user as whom you logged in in the previous step).
+     </para>
+     <para>
+      The following example updates the email address for user
+      <literal>john</literal> to <literal>John.P.Smith@example.com</literal>.
+     </para>
+     <mediaobject>
+      <imageobject>
+       <imagedata fileref="images/john-address-change.png" format="PNG" />
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Changes are automatically synchronized to the MySQL database. Retrieve
+      user <literal>john</literal>'s record from the MySQL database by including
+      his <literal>_id</literal> in the query, for example:
+     </para>
+   <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/scriptedsql/account/4"</userinput>
+<computeroutput>{
+  "_id": "4",
+  "email": "John.P.Smith@example.com",
+  "organization": "SUPPORT",
+  "firstName": "John",
+  "lastName": "Smith",
+  "uid": "john",
+  "fullName": "John Smith"
+}</computeroutput></screen>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="sample-3-java-6">
+   <title>Using Sample 3 With Java Version 6</title>
+   <para>
+    The default sample works only with Java Version 7, and bundles the required
+    dependencies in the <literal>openidm/bundle</literal> folder. To use the
+    sample with Java Version 6, you must remove these dependencies and download
+    the dependencies specific to Java 6. Follow these steps:
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Remove the following jar files from the <literal>openidm/bundle</literal>
+      folder:
+     </para>
+     <itemizedlist>
+       <listitem>
+        <para>
+         <filename>tomcat-juli-8.0.12.jar</filename>
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <filename>tomcat-jdbc-8.0.12.jar</filename>
+        </para>
+       </listitem>
+     </itemizedlist>
+    </step>
+    <step>
+     <para>
+      Create a <filename>lib</filename> folder in the OpenIDM installation
+      directory.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ mkdir lib</userinput></screen>
+    </step>
+    <step>
+     <para>
+      Download the following dependencies to the <filename>openidm/lib</filename>
+      directory:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Apache Geronimo Tomcat fork (Juli), <filename>juli-7.0.39.2.jar</filename>
+        <link xlink:href="http://search.maven.org/#artifactdetails%7Corg.apache.geronimo.ext.tomcat%7Cjuli%7C7.0.39.2%7Cbundle"
+        xlink:show="new">(org.apache.geronimo.ext.tomcat:juli:7.0.39.2)</link>
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Tomcat JDBC Pool Package, <filename>tomcat-jdbc-7.0.53.jar</filename>
+        <link xlink:href="http://search.maven.org/#artifactdetails%7Corg.apache.tomcat%7Ctomcat-jdbc%7C7.0.53%7Cjar"
+        xlink:show="new">(org.apache.tomcat:tomcat-jdbc:7.0.53)</link>
+       </para>
+      </listitem>
+     </itemizedlist>
+    </step>
+   </procedure>
+   <para>
+    The remainder of the sample should work as for Java Version 7.
+   </para>
+  </section>
  </section>
 
  <section xml:id="more-sample4">
