@@ -38,15 +38,25 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.AbstractConnectionWrapper;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.CrossCutFilterResultHandler;
+import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.FilterCondition;
 import org.forgerock.json.resource.Filters;
 import org.forgerock.json.resource.FutureResult;
+import org.forgerock.json.resource.InternalServerContext;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
@@ -56,10 +66,14 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UntypedCrossCutFilter;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.filter.ScriptedFilter;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
@@ -70,7 +84,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +108,9 @@ import java.util.regex.Pattern;
 public class ServletConnectionFactory implements ConnectionFactory {
 
     public static final String PID = "org.forgerock.openidm.router";
+    
+    /** Event name prefix for monitoring the router */
+    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
 
     /**
      * Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}.
@@ -120,8 +139,8 @@ public class ServletConnectionFactory implements ConnectionFactory {
                             + ServerConstants.CONFIG_FACTORY_PID);
         }
         try {
-            connectionFactory = Resources.newInternalConnectionFactory(
-                    init(config.getConfigurationAsJson(context), requestHandler));
+            connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(
+                    init(config.getConfigurationAsJson(context), requestHandler)));
         } catch (Throwable t) {
             logger.error("Failed to configure the Filtered Router service", t);
         }
@@ -131,6 +150,239 @@ public class ServletConnectionFactory implements ConnectionFactory {
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
+    }
+    
+    private ConnectionFactory newWrappedInternalConnectionFactory(final ConnectionFactory connectionFactory) {
+        return new ConnectionFactory() {
+            @Override
+            public void close() {
+                connectionFactory.close();
+            }
+
+            @Override
+            public Connection getConnection() throws ResourceException {
+                return new AbstractConnectionWrapper<Connection>(connectionFactory.getConnection()) {
+
+                    @Override
+                    public Resource create(Context context,
+                            CreateRequest request) throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.create(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<Resource> createAsync(Context context,
+                            CreateRequest request,
+                            ResultHandler<? super Resource> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.createAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public Resource read(Context context, ReadRequest request)
+                            throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.read(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<Resource> readAsync(Context context,
+                            ReadRequest request,
+                            final ResultHandler<? super Resource> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.readAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public Resource update(Context context,
+                            UpdateRequest request) throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.update(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<Resource> updateAsync(Context context,
+                            UpdateRequest request,
+                            ResultHandler<? super Resource> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.updateAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public Resource delete(Context context,
+                            DeleteRequest request) throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.delete(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<Resource> deleteAsync(Context context,
+                            DeleteRequest request,
+                            ResultHandler<? super Resource> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.deleteAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public Resource patch(Context context, PatchRequest request)
+                            throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.patch(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<Resource> patchAsync(Context context,
+                            PatchRequest request,
+                            ResultHandler<? super Resource> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.patchAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public JsonValue action(Context context,
+                            ActionRequest request) throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.action(context, request);
+                        } finally {
+                            measure.end();
+                        }
+                    }                    
+                    @Override
+                    public FutureResult<JsonValue> actionAsync(Context context,
+                            ActionRequest request,
+                            ResultHandler<? super JsonValue> handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.actionAsync(context, request, newInstrumentedResultHandler(handler, measure));
+                    }
+                    @Override
+                    public QueryResult query(Context context, QueryRequest request,
+                            Collection<? super Resource> results) throws ResourceException {
+                        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        try {
+                            return super.query(context, request, results);
+                        } finally {
+                            measure.end();
+                        }
+                    }
+                    @Override
+                    public FutureResult<QueryResult> queryAsync(
+                            Context context, QueryRequest request,
+                            QueryResultHandler handler) {
+                        final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+                        return super.queryAsync(context, request, newInstrumentedQueryResultHandler(handler, measure));
+                    }
+                };
+            }
+            
+            @Override
+            public FutureResult<Connection> getConnectionAsync(final ResultHandler<? super Connection> handler) {
+                try {
+                    final Connection connection = getConnection();
+                    final FutureResult<Connection> future = Resources.newCompletedFutureResult(connection);
+                    if (handler != null) {
+                        handler.handleResult(connection);
+                    }
+                    return future;
+                } catch (ResourceException e) {
+                    throw new RuntimeException("Can't obtain connection", e);
+                }
+            }
+           
+            /**
+             * @param request the router request
+             * @return an event name For monitoring purposes
+             */
+            private Name getRouterEventName(Request request) {
+                RequestType requestType = request.getRequestType();
+                String idContext;
+
+                // For query and action group statistics by full URI
+                // Create has only the component name in the getResourceName to start with
+                if (RequestType.QUERY.equals(requestType) || RequestType.ACTION.equals(requestType) 
+                        || RequestType.CREATE.equals(requestType)) {
+                    idContext = request.getResourceName();
+                } else {
+                    // For RUD, patch group statistics without the local resource identifier
+                    idContext = request.getResourceNameObject().head(request.getResourceNameObject().size() - 1).toString();
+                }
+
+                String eventName = new StringBuilder(EVENT_ROUTER_PREFIX)
+                        .append(idContext)
+                        .append("/")
+                        .append(requestType.toString().toLowerCase())
+                        .toString();
+                
+                return Name.get(eventName);
+            }
+            
+            /**
+             * A result handler wrapper for smartevent measurement handling
+             * @param handler the handler to wrap
+             * @param measure the started smartevent to end upon response
+             * @return the wrapped handler
+             */
+            private ResultHandler newInstrumentedResultHandler(final ResultHandler handler, final EventEntry measure) {
+                return new ResultHandler<Object>() {  
+                    @Override
+                    public void handleResult(Object result) {
+                        try {
+                            handler.handleResult(result);
+                        } finally {
+                            measure.end();
+                        }
+                    }                    
+                    @Override
+                    public void handleError(ResourceException error) {
+                        try {
+                            handler.handleError(error);
+                        } finally {
+                            measure.end();
+                        }
+                    }                    
+                };
+            }
+            
+            /**
+             * A query result handler wrapper for smartevent measurement handling
+             * @param handler the handler to wrap
+             * @param measure the started smartevent to end upon response
+             * @return the wrapped handler
+             */
+            private QueryResultHandler newInstrumentedQueryResultHandler(final QueryResultHandler handler, final EventEntry measure) {
+                return new QueryResultHandler() {
+                    @Override
+                    public boolean handleResource(Resource resource) {
+                        return handler.handleResource(resource);    
+                    }
+                    public void handleResult(QueryResult result) {
+                        try {
+                            handler.handleResult(result);
+                        } finally {
+                            measure.end();
+                        }
+                    }                    
+                    @Override
+                    public void handleError(ResourceException error) {
+                        try {
+                            handler.handleError(error);
+                        } finally {
+                            measure.end();
+                        }
+                    }                    
+                };
+            }
+        };
     }
 
     /**
