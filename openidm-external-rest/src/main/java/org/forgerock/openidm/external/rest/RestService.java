@@ -212,6 +212,16 @@ public class RestService implements SingletonResourceProvider {
                         ChallengeResponse challengeResponse =
                                 new ChallengeResponse(ChallengeScheme.HTTP_BASIC, identifier, secret);
                         cr.setChallengeResponse(challengeResponse);
+                    } else if ("bearer".equalsIgnoreCase(type)) {
+                        String token = auth.get("token").required().asString();
+                        
+                        logger.debug("Using bearer authentication");
+                        Series<Header> extraHeaders = (Series<Header>) attrs.get("org.restlet.http.headers");
+                        if (extraHeaders == null) {
+                            extraHeaders = new Series<Header>(Header.class);
+                        }
+                        extraHeaders.set("Authorization", "Bearer " + token);
+                        attrs.put("org.restlet.http.headers", extraHeaders);
                     } else {
                         handler.handleError(new BadRequestException("Invalid auth type \"" + type + "\" on "
                                 + request.getResourceName() + "/" + request.getAction()));
