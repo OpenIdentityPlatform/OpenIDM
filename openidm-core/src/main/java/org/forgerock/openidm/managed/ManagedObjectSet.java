@@ -488,10 +488,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      *
      * @param context the current ServerContext
      * @param request the ActionRequest
-     * @return the updated object
+     * @param handler the ResultHandler
      * @throws ResourceException
      */
-    private JsonValue patchAction(final ServerContext context, final ActionRequest request)
+    private void patchAction(final ServerContext context, final ActionRequest request, final ResultHandler<JsonValue> handler)
             throws ResourceException {
 
         if (!request.getContent().required().isList()) {
@@ -504,65 +504,47 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         QueryRequest queryRequest = RequestUtil.buildQueryRequestFromParameterMap(repoId(null),
                 new JsonValue(request.getAdditionalParameters()).asMap());
 
-        final JsonValue[] lastError = new JsonValue[1];
         final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
 
         connectionFactory.getConnection().query(context, queryRequest,
                 new QueryResultHandler() {
+                    ArrayList<Resource> resources = new ArrayList<Resource>();
+            
                     @Override
                     public void handleError(final ResourceException error) {
-                        lastError[0] = error.toJsonValue();
+                        handler.handleError(error);
                     }
 
                     @Override
                     public boolean handleResource(Resource resource) {
-                        // TODO This should not fail on first error and the response should contains each result
-
-                        try {
-                            Resource decrypted = decrypt(resource);
-                            JsonValue newValue = decrypted.getContent().copy();
-                            JsonValuePatch.apply(newValue, operations);
-
-                            update(context, request, resource.getId(), resource.getRevision(), decrypted, newValue,
-                                    "Patch " + operations.toString());
-                        } catch (ResourceException e) {
-                            lastError[0] = new ConflictException(e.getMessage(), e).toJsonValue();
-                        }
-
-                        return null != lastError[0];
+                        logger.debug("Patch by query found resource " + resource.getId());
+                        resources.add(resource);
+                        return true;
                     }
 
                     @Override
                     public void handleResult(QueryResult result) {
-                        // do we care?
+                        if (resources.size() > 1) {
+                            handler.handleError(new InternalServerErrorException("Query result must yield one matching object"));
+                        } else if (resources.size() == 1) {
+                            try {
+                                Resource resource = resources.get(0);
+                                
+                                Resource decrypted = decrypt(resource);
+                                JsonValue newValue = decrypted.getContent().copy();
+                                JsonValuePatch.apply(newValue, operations);
+                                
+                                handler.handleResult(update(context, request, resource.getId(), resource.getRevision(), decrypted, newValue,
+                                        "Patch " + operations.toString()).getContent());
+                            } catch (ResourceException e) {
+                                handler.handleError(e);
+                            }
+                        } else {
+                            handler.handleError(new NotFoundException("Query returned no results"));
+                        }
+                        
                     }
                 });
-
-        // JsonValue results = new
-        // JsonValue(cryptoService.getRouter().query(repoId(null),
-        // params.asMap()), new
-        // JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
-        // if (!results.isList()) {
-        // throw new
-        // InternalServerErrorException("Expecting list result from query");
-        // } else if (results.size() == 0) {
-        // throw new NotFoundException();
-        // } else if (results.size() > 1) {
-        // throw new ConflictException("Query yielded more than one result");
-        // }
-        // JsonValue result = results.get(0);
-        // _id = result.get("_id").required().asString();
-        // if (_rev == null) { // don't override an explicitly supplied revision
-        // _rev = result.get("_rev").asString();
-        // }
-        // } catch (JsonValueException jve) {
-        // throw new InternalServerErrorException(jve);
-        // }
-        // }
-        // patch(_id, _rev, new
-        // JsonPatchWrapper(decrypt(params.get("_entity"))));
-        // empty response (and lack of exception) indicates success
-        return new JsonValue(null);
     }
 
     @Override
@@ -895,7 +877,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                     request.getResourceName(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
-                    handler.handleResult(patchAction(context, request));
+                    patchAction(context, request, handler);
                     break;
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
