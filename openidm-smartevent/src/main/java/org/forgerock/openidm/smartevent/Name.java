@@ -94,7 +94,7 @@ public class Name {
         this.stringifiedName = stringifiedName;
         // Default Setting
         setEventsEnabled(Boolean.valueOf(System.getProperty("openidm.smartevent.enabled",
-                Boolean.TRUE.toString())));
+                Boolean.FALSE.toString())));
         this.publisherType = (PublisherType.valueOf(PublisherType.class, System.getProperty("openidm.smartevent.publishertype",
                 PublisherType.BLOCKING.toString())));
         // Name parsing can be added here

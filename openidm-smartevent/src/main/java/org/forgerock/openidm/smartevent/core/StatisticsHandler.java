@@ -85,7 +85,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         }
         
         setEnableSummaryLogging(Boolean.valueOf(System.getProperty("openidm.smartevent.summarylogging",
-                Boolean.TRUE.toString())));
+                Boolean.FALSE.toString())));
         
         logScheduler = Executors.newScheduledThreadPool(1);
 
