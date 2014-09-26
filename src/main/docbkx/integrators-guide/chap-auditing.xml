@@ -48,8 +48,8 @@
  Reports</citetitle></link>.
   -->
 
- <para>The auditing interface allows you to push auditing data to files and
- to the OpenIDM repository.</para>
+ <para>The auditing interface allows you to push auditing data to local files,
+  to the OpenIDM repository, and to a remote system.</para>
 
  <section xml:id="audit-log-types">
   <title>Audit Log Types</title>
@@ -99,9 +99,9 @@
  </section>
 
  <section xml:id="audit-log-format">
-  <title>Audit Log File Formats</title>                                                  
+  <title>Audit Log Formats</title>
 
-  <para>This section describes the audit log file formats to help you map
+  <para>This section describes the audit log formats to help you map
   these to the reports you generate.</para>
 
   <variablelist xml:id="audit-access-fields">
@@ -539,12 +539,15 @@
   <section xml:id="audit-eventtypes">
    <title>Event Types</title>
 
-   <para>The <literal>eventTypes</literal> configuration specifies what events
-   OpenIDM writes to audit logs. OpenIDM supports two
-   <literal>eventTypes</literal>: <literal>activity</literal> for the activity
-   log, and <literal>recon</literal> for the reconciliation log. The filter
-   for actions under activity logging shows the actions on managed or system
-   objects for which OpenIDM writes to the activity log.</para>
+   <para>
+    The <literal>eventTypes</literal> configuration specifies what events
+    OpenIDM writes to audit logs. "OpenIDM supports the following event types:
+    access, activity, and reconciliation. You can even configure custom
+    audit data filtering and reconciliation, as described in
+    <xref linkend="audit-filtering" />" The filter for actions under activity
+    logging shows the actions on managed or system objects for which OpenIDM
+    writes to the activity log.
+   </para>
 
    <variablelist>
     <para>The <literal>filter</literal> <literal>actions</literal> list enables 
@@ -706,8 +709,7 @@
         </listitem>
         <listitem>
          <para>
-          <literal>repository</literal> - write to the OpenIDM database
-          repository.
+          <literal>repository</literal> - write to the OpenIDM repository.
          </para>
          <para>
           OpenIDM stores entries under the
@@ -917,4 +919,254 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
 +----------+--------------------------+----------------------+---------------------+---------+
 3 rows in set (0.00 sec)</screen>
  </section>
+
+ <section xml:id="audit-filtering">
+  <title>Filtering Data for Audits</title>
+
+  <para>
+   With OpenIDM, you can collect large amounts of data on each transaction,
+   subdivided in several different event types: access, activity,
+   reconciliation, and synchronization.
+  </para>
+
+  <para>
+   In some cases, you may want to minimize the amount of data collected with
+   one or more filters. As with other <xref linkend="audit-configuration" />
+   options, you can do so in the <filename>conf/audit.json</filename> file,
+   based on the event type.
+  </para>
+
+  <para>
+   For example, the following entry under <literal>eventTypes</literal> refers
+   to the <filename>auditfilter.js</filename> file to script limits to
+   reconciliation information:
+  </para>
+
+  <programlisting language="javascript">
+{
+   "eventTypes" : {
+       ...
+       "recon" : {
+           "filter" : {
+               "script" : {
+                   "type" : "text/javascript",
+                   "file" : "auditfilter.js"
+               }
+           }
+       }
+   },
+   ...
+}</programlisting>
+
+  <para>
+   You can create a script for filtering. As it does for other scripts, OpenIDM
+   makes the create request and the context objects available to the script.
+   Before the audit record is written, it can be accessed as a
+   <literal>request.content</literal> object. For guidance, see the Integrator's
+   Guide appendix on <link xlink:role="http://docbook.org/xlink/role/olink/"
+   xlink:show="new" xlink:href="integrators-guide#scripting-configuration">
+   <citetitle>Scripting Configuration</citetitle></link>.
+  </para>
+
+  <para>
+   For example, if you want to set up a script to log just the summary records
+   for mapping managed users in an LDAP data store, you could include the
+   following entry in the <filename>auditfilter.js</filename> script:
+  </para>
+
+  <programlisting language="javascript">
+return request.content.entryType == 'summary' &amp;&amp;
+   request.content.mapping == 'systemLdapAccounts_managedUser'
+  </programlisting>
+
+  <para>
+   The script must return <literal>true</literal> to include the log entry;
+   <literal>false</literal> to exclude it.
+  </para>
+
+  <para>
+   Alternatively, you can leave out null items in audit output, with a filter
+   for null items, such as:
+  </para>
+
+  <programlisting language="javascript">
+{
+   "eventTypes" : {
+      ...
+      "recon" : {
+         "filter" : {"ignore":[]}
+      }
+   },
+}</programlisting>
+
+ </section>
+
+ <section xml:id="audit-purging">
+  <title>Purging Obsolete Audit Information</title>
+
+  <para>
+   If audit records grow "excessively" large, any subsequent reconciliations
+   and queries to audit tables may become "sluggish". In a deployment with
+   limited resources, a lack of disk space may affect system performance.
+  </para>
+
+  <para>
+   You may have already run through the process of
+   <xref linkend="audit-filtering" />. If desired, you can also purge audit
+   records with specific queries. Alternatively, you can also purge audit
+   records older than a specific date, using timestamps.
+  </para>
+
+  <para>
+   OpenIDM includes a preconfigured purge script,
+   <filename>autoPurgeRecon.js</filename> in the
+   <filename>bin/defaults/script/audit</filename> directory.
+   This script purges audit log entries from the repositoyr only, not from the
+   corresponding CSV files.
+  </para>
+
+  <para>
+   You will also want to set up a schedule. For that purpose, you can find a
+   pre-configured <filename>schedule-autoPurgeAuditRecon.json</filename> file in
+   the <filename>samples/schedules</filename> subdirectory. You can configure
+   that file as desired and then copy it to the <filename>conf/</filename>
+   subdirectory for your deployment.
+  </para>
+
+  <para>
+   Examine the contents of the
+   <filename>schedule-autoPurgeAuditRecon.json</filename> file:
+  </para>
+
+  <screen>{
+   "enabled" : false,
+   "type" : "cron",
+   "schedule" : "0 0 */12 * * ?",
+   "persisted" : true,
+   "misfirePolicy" : "doNothing",
+   "invokeService" : "script",
+   "invokeContext" : {
+      "script" : {
+         "type" : "text/javascript",
+         "file" : "audit/autoPurgeAuditRecon.js",
+         "input" : {
+            "mappings" : [ "%" ],
+            "purgeType" : "purgeByNumOfReconsToKeep",
+            "numOfRecons" : 1,
+            "intervalUnit" : "minutes",
+            "intervalValue" : 1
+         }
+      }
+   }
+}</screen>
+
+  <para>
+   For more information on the schedule-related directives in this file, see
+   <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+         xlink:href="integrators-guide#scheduling-synchronization">
+    <citetitle>Scheduling Synchronization</citetitle></link>.
+  </para>
+
+  <variablelist>
+   <para>
+    Beyond scheduling, you may also be interested in the following parameters:
+   </para>
+   <varlistentry>
+    <term>input</term>
+    <listitem>
+     <para>Input information; the parameters below specify different kinds of
+      input.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>mappings</term>
+    <listitem>
+     <para>
+      An array of mappings to prune. Each element in the array can be either a
+      string or an object.
+     </para>
+     <para>
+      Strings must contain the mapping(s) name and can use "%" as a wild card
+      value that will be used in a LIKE condition.
+     </para>
+     <para>
+      Objects provide the ability to specify mapping(s) to include/exclude and
+      must be of the form:
+      <screen>{
+      "include" : "mapping1",
+      "exclude" : "mapping2"
+ </screen>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>purgeType</term>
+    <listitem>
+     <para>
+      The type of purge to perform, Can be set to one of two values:
+     </para>
+     <variablelist>
+      <varlistentry>
+       <term>purgeByNumOfReconsToKeep</term>
+       <listitem>
+        <para>
+         Uses the <literal>deleteFromAuditReconByNumOf</literal> function and
+         the <literal>numOfRecons</literal> config variable.
+        </para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>purgeByExpired</term>
+       <listitem>
+        <para>
+         Uses the <literal>deleteFromAuditReconByExpired</literal> function and
+         the config variables <literal>intervalUnit</literal> and
+         <literal>intervalValue</literal>.
+        </para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>num-of-recons</term>
+    <listitem>
+     <para>
+      The number of recon summary records to keep for a given mapping, including
+      all child records.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>intervalUnit</term>
+    <listitem>
+     <para>
+      The type of time interval when using <literal>purgeByExpired</literal>.
+      Acceptable values include: <literal>minutes</literal>,
+      <literal>hours</literal>, or <literal>days</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>intervalValue</term>
+    <listitem>
+     <para>
+      The value of the time interval when using
+      <literal>purgeByExpired</literal>. Set to an integer value.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <para>
+   Once you have filtered and purged unneeded log information from the database,
+   you can use log rotation services to limit the size of individual log files,
+   and archive them as needed. Some log rotation services also support
+   archiving to remote log servers. Details vary by the service
+   and the operating system.
+  </para>
+  
+  </section>
+
 </chapter>
