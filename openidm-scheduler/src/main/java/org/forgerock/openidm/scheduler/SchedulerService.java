@@ -505,21 +505,12 @@ public class SchedulerService implements RequestHandler {
             if (request.getResourceNameObject().isEmpty()) {
                 throw new BadRequestException("Empty resourceId");
             }
-            
-            Scheduler scheduler = null;
-            if (jobExists(request.getResourceName(), true)) {
-                scheduler = persistentScheduler;
-            } else if (jobExists(request.getResourceName(), false)) {
-                scheduler = inMemoryScheduler;
-            } else {
-                throw new NotFoundException("Schedule does not exist");
-            }
-            JobDetail job = scheduler.getJobDetail(request.getResourceName(), GROUP_NAME);
-            JobDataMap dataMap = job.getJobDataMap();
-            ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
-            Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
-            resultMap.put("_id", request.getResourceName());
-            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(resultMap)));
+            // Get the scheduler containing the scheduler
+            Scheduler scheduler = getScheduler(request.getResourceName());
+            // Get the schedule
+            JsonValue schedule = getSchedule(scheduler, request.getResourceName());
+            // Handle the result
+            handler.handleResult(new Resource(request.getResourceName(), null, schedule));
         } catch (SchedulerException e) {
             handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         } catch (Throwable t) {
@@ -570,15 +561,14 @@ public class SchedulerService implements RequestHandler {
             if (request.getResourceNameObject().isEmpty()) {
                 throw new BadRequestException("Empty resourceId");
             }
-
-            if (jobExists(request.getResourceName(), true)) {
-                persistentScheduler.deleteJob(request.getResourceName(), GROUP_NAME);
-            } else if (jobExists(request.getResourceName(), false)) {
-                inMemoryScheduler.deleteJob(request.getResourceName(), GROUP_NAME);
-            } else {
-                throw new NotFoundException("Schedule does not exist");
-            }
-            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+            // Get the scheduler containing the scheduler
+            Scheduler scheduler = getScheduler(request.getResourceName());
+            // Get the schedule
+            JsonValue schedule = getSchedule(scheduler, request.getResourceName());
+            // Delete the schedule
+            scheduler.deleteJob(request.getResourceName(), GROUP_NAME);
+            // Handle the result
+            handler.handleResult(new Resource(request.getResourceName(), null, schedule));
         } catch (JsonException e) {
             handler.handleError(new BadRequestException("Error updating schedule", e));
         } catch (SchedulerException e) {
@@ -624,7 +614,7 @@ public class SchedulerService implements RequestHandler {
                 resultMap = new HashMap<String, Object>();
                 resultMap.put(QueryResult.FIELD_RESULT, resultList);
             } else {
-                throw new ForbiddenException( "Unsupported query-id: " + queryId);
+                throw new BadRequestException( "Unsupported query-id: " + queryId);
             }
 
             for (Map<String, String> r: (List<Map<String, String>>)resultMap.get(QueryResult.FIELD_RESULT)){
@@ -737,6 +727,42 @@ public class SchedulerService implements RequestHandler {
             throw ex;
         }
         logger.info("Scheduler facility started");
+    }
+    
+    /**
+     * Returns a JsonValue representation of a schedule with the supplied name from the supplied scheduler.
+     * 
+     * @param scheduler the scheduler containing the scheduler
+     * @param name the name of the scheduler
+     * @return the JsonValue representation of the schedule
+     * @throws SchedulerException
+     * @throws ResourceException
+     */
+    private JsonValue getSchedule(Scheduler scheduler, String name) throws SchedulerException, ResourceException {
+        JobDetail job = scheduler.getJobDetail(name, GROUP_NAME);
+        JobDataMap dataMap = job.getJobDataMap();
+        ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
+        Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
+        resultMap.put("_id", name);
+        return new JsonValue(resultMap);
+    }
+    
+    /**
+     * Returns the scheduler containing the schedule with the supplied name.
+     * 
+     * @param scheduleName the name of the schedule
+     * @return the Scheduler
+     * @throws SchedulerException
+     * @throws NotFoundException
+     */
+    private Scheduler getScheduler(String scheduleName) throws SchedulerException, NotFoundException {
+        if (jobExists(scheduleName, true)) {
+            return persistentScheduler;
+        } else if (jobExists(scheduleName, false)) {
+            return inMemoryScheduler;
+        } else {
+            throw new NotFoundException("Schedule does not exist");
+        }
     }
 
     private JsonValue parseStringified(String stringified) {
