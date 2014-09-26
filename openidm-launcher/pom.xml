@@ -66,7 +66,7 @@
     </scm>
     <distributionManagement>
         <site>
-            <id>forgerock.org</id>
+            <id>community.internal.forgerock.com</id>
             <name>ForgeRock Community Server</name>
             <url>${siteDistributionURL}</url>
         </site>
@@ -108,7 +108,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
 
         <!-- Documentation and site properties -->
-        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-launcher</siteDistributionURL>
+        <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-launcher</siteDistributionURL>
         <docTargetVersion>1.0.0</docTargetVersion>
         <gaId>UA-23412190-9</gaId>
         <!--
