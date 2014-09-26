@@ -51,7 +51,7 @@
  <para>
   The <literal>"call"</literal> parameter specifies the action name to be used
   for this invocation, and is the standard method signature for the
-  <literal>openidm.action</literal> method in OpenIDM ${serverDocTargetVersion}.
+  <literal>openidm.action</literal> method in OpenIDM ${docTargetVersion}.
  </para>
  <para>
   An external REST call over REST might look something like the following:
@@ -132,13 +132,32 @@
    </listitem>
    <listitem>
     <para>
-     <literal>authenticate</literal>. The login details with which to
-     authenticate. For example:
+     <literal>authenticate</literal>. The authentication type, and the details
+     with which to authenticate.
     </para>
-    <programlisting>"authenticate" : {"type": "basic", "user" : "john", "password" : "Passw0rd"}</programlisting>
+    <para>
+     OpenIDM ${docTargetVersion} supports the following authentication types:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>
+       <literal>basic</literal> authentication, with a username and password,
+       for example:
+      </para>
+      <programlisting>"authenticate" : {"type": "basic", "user" : "john", "password" : "Passw0rd"}</programlisting>
+     </listitem>
+     <listitem>
+      <para>
+       <literal>bearer</literal> authentication,  which takes an OAuth
+       <literal>token</literal>, instead of a username and password, for
+       example:
+      </para>
+      <programlisting>"authenticate" : {"type": "bearer", "token" : "ya29.iQDWKpn8AHy09p....."}</programlisting>
+     </listitem>
+    </itemizedlist>
     <para>
      If no <literal>authenticate</literal> parameter is specified, no
-     authentication is used. Currently, only basic authentication is supported.
+     authentication is used.
     </para>
    </listitem>
    <listitem>
