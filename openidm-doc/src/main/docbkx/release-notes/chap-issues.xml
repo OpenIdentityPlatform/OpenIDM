@@ -44,7 +44,7 @@
  <section xml:id="fixes">
   <title>Fixes and Improvements</title>
   <para>
-   OpenIDM ${serverDocTargetVersion} includes the following major fixes and
+   OpenIDM ${docTargetVersion} includes the following major fixes and
    improvements.
   </para>
   <!-- List generated at 16:46:20 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+resolution+%3D+fixed+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+fixVersion+%3D+%22OpenIDM+3.0.0%22+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+AND+type+%3D+Bug&startAt=0&maxResults=500&fields=summary-->
@@ -284,13 +284,13 @@
   <title>Limitations</title>
   <itemizedlist>
    <para>
-    OpenIDM ${serverDocTargetVersion} has the following known limitations:
+    OpenIDM ${docTargetVersion} has the following known limitations:
    </para>
    <listitem>
     <para>
      The Password Synchronization plugins are not currently supported with
-     OpenIDM ${serverDocTargetVersion}. An updated version of these plugins will
-     be released shortly to align with the OpenIDM ${serverDocTargetVersion}
+     OpenIDM ${docTargetVersion}. An updated version of these plugins will
+     be released shortly to align with the OpenIDM ${docTargetVersion}
      release.
     </para>
    </listitem>
@@ -327,7 +327,7 @@
  <section xml:id="known-issues">
   <title>Known Issues</title>
   <para>
-   OpenIDM ${serverDocTargetVersion} has the following known issues.
+   OpenIDM ${docTargetVersion} has the following known issues.
   </para>
   <!-- List generated at 16:48:57 20140731 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OpenIDM+AND+resolution+%3D+Unresolved+AND+affectedVersion+in+%28%22OpenIDM+2.1.0%22%2C+%22OpenIDM+2.1.1%22%2C+%22OpenIDM+3.0.0%22%29+AND+%28labels+is+EMPTY+or+labels+not+in+%28not-for-release-notes%29%29+AND+priority+in+%28Blocker%2C+Critical%2C+Major%29+AND+type%3DBug+AND+%28component+is+EMPTY+or+component+not+in+%28documentation%2C++Documentation%29%29&startAt=0&maxResults=500&fields=summary-->
   <itemizedlist>

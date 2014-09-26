@@ -355,17 +355,17 @@
 
   <para>
    In addition to the internal and managed user authentication modules, OpenIDM
-   ${serverDocTargetVersion} supports a delegated authentication mechanism.
+   ${docTargetVersion} supports a delegated authentication mechanism.
    With delegated authentication, the username and password included with the
    REST request are validated against those stored in a remote system, such as
    an LDAP server.
   </para>
 
   <para>
-   Delegated authentication for OpenIDM ${serverDocTargetVersion} includes the
+   Delegated authentication for OpenIDM ${docTargetVersion} includes the
    functionality associated with the <literal>PASSTHROUGH</literal>,
    <literal>MANAGED_USER</literal>, and <literal>INTERNAL_USER</literal>
-   modules. OpenIDM ${serverDocTargetVersion} includes those modules as aliases
+   modules. OpenIDM ${docTargetVersion} includes those modules as aliases
    for the <literal>DELEGATED</literal> module.
   </para>
 
@@ -517,7 +517,7 @@
     <listitem>
      <para>
       Module that validates client requests by passing through to an OpenICF
-      connector. For OpenIDM ${serverDocTargetVersion}, this is an alias for
+      connector. For OpenIDM ${docTargetVersion}, this is an alias for
       <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
       <literal>PASSTHROUGH</literal>.
      </para>

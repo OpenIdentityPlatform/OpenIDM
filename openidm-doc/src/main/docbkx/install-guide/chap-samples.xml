@@ -821,8 +821,8 @@ $ ./startup.sh -p samples/sample2d</screen>
   <para>
    OpenICF 1.4 introduces a new, generic Groovy Connector. The Groovy Connector
    is a scripted connector that enables you to run Groovy scripts on any
-   external resource. Without a specific implementation, the Groovy connector
-   does not do anything.
+   external resource. To make use of the Groovy connector for any given
+   implementation, specific Groovy scripts must be created.
   </para>
   <para>
    This sample demonstrates a Scripted SQL implementation of the Groovy
@@ -832,7 +832,7 @@ $ ./startup.sh -p samples/sample2d</screen>
    connector framework.
    </para>
    <para>
-    The Groovy connector is bundled with OpenIDM ${serverDocTargetVersion}, in
+    The Groovy connector is bundled with OpenIDM ${docTargetVersion}, in
     the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
   </para>
   <para>
@@ -1017,7 +1017,7 @@ Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
 Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/samples/sample3/conf/boot/boot.properties
-OpenIDM version "${serverDocTargetVersion}" (revision: 0) null null
+OpenIDM version "${docTargetVersion}" (revision: 0) null null
 -> OpenIDM ready</computeroutput></screen>
     </step>
    </procedure>

@@ -51,19 +51,19 @@
     <term>Integration of OpenICF 1.4.0.0</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} is not compatible with the previous
+      OpenIDM ${docTargetVersion} is not compatible with the previous
       version of the OpenICF framework. If your deployment uses remote connector
       servers (either .NET or Java) you must upgrade them to the new connector
       server versions (1.4.0.0). With the exception of the Active Directory
       connector, the new connector framework <emphasis>is</emphasis> compatible
       with the older connectors, however, so you can use the older connectors
-      with an OpenIDM ${serverDocTargetVersion} deployment. Only version 1.4.0.0
+      with an OpenIDM ${docTargetVersion} deployment. Only version 1.4.0.0
       of the Active Directory connector is supported with OpenIDM
-      ${serverDocTargetVersion}. The following compatibility matrix indicates
+      ${docTargetVersion}. The following compatibility matrix indicates
       the supported connector and OpenICF framework versions.
      </para>
      <table xml:id="idm-icf-compatibility">
-      <title>OpenIDM ${serverDocTargetVersion} / OpenICF Compatibility Matrix</title>
+      <title>OpenIDM ${docTargetVersion} / OpenICF Compatibility Matrix</title>
       <tgroup cols="4">
        <thead>
         <row>
@@ -107,7 +107,7 @@
       </para>
       <listitem>
        <para>
-        In OpenIDM ${serverDocTargetVersion}, the request header
+        In OpenIDM ${docTargetVersion}, the request header
         <literal>"Content-type: application/json"</literal> is required for all
         REST calls that include a request body (POST, PUT, and PATCH). This
         header was optional in OpenIDM 2.1.
@@ -138,7 +138,7 @@
       <listitem>
        <para>
         Creating system objects with a PUT request (specifying a client-assigned
-        ID) is handled differently in OpenIDM ${serverDocTargetVersion}, in that
+        ID) is handled differently in OpenIDM ${docTargetVersion}, in that
         the resulting user _id is no longer URL-encoded. For example, consider
         the following request:
        </para>
@@ -160,7 +160,7 @@
  https://localhost:8443/openidm/system/ldap/account/uid=jsmith,ou=people,dc=example,dc=com</userinput></screen>
        <para>
         The resulting <literal>_id</literal> in OpenIDM
-        ${serverDocTargetVersion} is:
+        ${docTargetVersion} is:
        </para>
        <screen>"_id":"uid=jsmith,ou=people,dc=example,dc=com"</screen>
        <para>
@@ -214,7 +214,7 @@
     ]'
      </programlisting>
      <para>
-      In OpenIDM ${serverDocTargetVersion}, the syntax is as follows:
+      In OpenIDM ${docTargetVersion}, the syntax is as follows:
      </para>
      <programlisting>
 --data '[
@@ -278,7 +278,7 @@ throw {
       }
        </programlisting>
        <para>
-        In OpenIDM ${serverDocTargetVersion}:
+        In OpenIDM ${docTargetVersion}:
        </para>
        <programlisting>
 throw {
@@ -334,7 +334,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        </para>
        <programlisting>var processDefinitionId = request.value._processDefinitionId;</programlisting>
        <para>
-        In OpenIDM ${serverDocTargetVersion}, the corresponding script would be:
+        In OpenIDM ${docTargetVersion}, the corresponding script would be:
        </para>
        <programlisting>var processDefinitionId = request.content._processDefinitionId;</programlisting>
        <para>
@@ -358,7 +358,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        <literallayout class="monospaced"
 >org.forgerock.openidm.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
        <para>
-        In OpenIDM ${serverDocTargetVersion}, the log level is set as follows:
+        In OpenIDM ${docTargetVersion}, the log level is set as follows:
        </para>
        <literallayout class="monospaced"
 >org.forgerock.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
@@ -384,11 +384,11 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
         includes correlation queries on system objects.
        </para>
        <para>
-        For example, the following query in OpenIDM ${serverDocTargetVersion}:
+        For example, the following query in OpenIDM ${docTargetVersion}:
        </para>
 <programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent'] } }</programlisting>
        <para>
-        would be constructed as follows in OpenIDM ${serverDocTargetVersion}:
+        would be constructed as follows in OpenIDM ${docTargetVersion}:
        </para>
 <programlisting>"_queryFilter" : "employeeType eq \"Permanent\""</programlisting>
        <!--  This is currently not working https://bugster.forgerock.org/jira/browse/OPENIDM-1793
@@ -415,7 +415,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
        <para>
         The way in which the security context is addressed has changed
         from <literal>request.parent.security</literal> in OpenIDM 2.1.0 to
-        <literal>context.security</literal> in OpenIDM ${serverDocTargetVersion}.
+        <literal>context.security</literal> in OpenIDM ${docTargetVersion}.
        </para>
        <para>
         A sample object showing the security context in OpenIDM 2.1.0 follows:
@@ -436,7 +436,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
 }</programlisting>
        <para>
         A corresponding sample security context in OpenIDM
-        ${serverDocTargetVersion} would be:
+        ${docTargetVersion} would be:
        </para>
         <programlisting>
 "security": {
@@ -471,7 +471,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
      </para>
      <screen>"https://localhost:8443/openidm/workflow/processinstance?_action=createProcessInstance"</screen>
      <para>
-      In OpenIDM ${serverDocTargetVersion}, you would send a similar POST
+      In OpenIDM ${docTargetVersion}, you would send a similar POST
       request to:
      </para>
      <screen>"https://localhost:8443/openidm/workflow/processinstance?_action=create"</screen>
@@ -498,7 +498,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
 "roles":"openidm-authorized,contractor",
       </programlisting>
       <para>
-       In OpenIDM ${serverDocTargetVersion}, roles are stored in an array. For
+       In OpenIDM ${docTargetVersion}, roles are stored in an array. For
        example:
       </para>
       <programlisting>
@@ -516,7 +516,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
   <title>Deprecated Functionality</title>
   <para>
    Apart from the support for OpenICF-style queries, noted previously, no
-   functionality has been deprecated in OpenIDM ${serverDocTargetVersion}.
+   functionality has been deprecated in OpenIDM ${docTargetVersion}.
   </para>
   <para>
    No additional functionality is planned to be deprecated at this time.
@@ -527,7 +527,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
   <title>Removed Functionality</title>
   
   <para>
-   No functionality has been removed in OpenIDM ${serverDocTargetVersion}.
+   No functionality has been removed in OpenIDM ${docTargetVersion}.
   </para>
   <para>
    No functionality is planned to be removed at this time.

@@ -29,10 +29,10 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>What's New in OpenIDM ${serverDocTargetVersion}</title>
+ <title>What's New in OpenIDM ${docTargetVersion}</title>
 
   <para>
-   OpenIDM ${serverDocTargetVersion} provides many new features and product
+   OpenIDM ${docTargetVersion} provides many new features and product
    enhancements. The following list describes the main new features affecting an
    end user.
   </para>
@@ -43,7 +43,7 @@
     <term>Role-based Provisioning</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} provides the ability to create and
+      OpenIDM ${docTargetVersion} provides the ability to create and
       manage roles that can be assigned to users. Roles provides an abstraction
       layer in the way entitlements and attributes are set on target resources.
       The roles functionality makes the assignment and removal of entitlements
@@ -61,7 +61,7 @@
     <term>High Availability Support</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} supports cluster configuration and high
+      OpenIDM ${docTargetVersion} supports cluster configuration and high
       availability "out of the box".
      </para>
      <para>
@@ -83,7 +83,7 @@
     <term>Scripting Enhancements</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} supports product-wide scripting in
+      OpenIDM ${docTargetVersion} supports product-wide scripting in
       Groovy.
      </para>
      <para>
@@ -99,7 +99,7 @@
     <term>Commons REST</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} implements the ForgeRock Commons REST
+      OpenIDM ${docTargetVersion} implements the ForgeRock Commons REST
       API. This RESTful API is unique to ForgeRock and includes a set of
       easy-to-remember REST calls: create, read, update, delete, patch, action,
       and query (CRUDPAQ). For more information, see <link
@@ -126,7 +126,7 @@
     <term>PowerShell Capabilities</term>
     <listitem>
       <para>
-       OpenIDM ${serverDocTargetVersion} supports PowerShell scripts.
+       OpenIDM ${docTargetVersion} supports PowerShell scripts.
       </para>
       <para>
        The PowerShell connector is a generic scripted connector to address the
@@ -142,7 +142,7 @@
     <term>Synchronization Delivery Guarantees</term>
     <listitem>
      <para>
-      OpenIDM ${serverDocTargetVersion} provides a new <literal>onSync</literal>
+      OpenIDM ${docTargetVersion} provides a new <literal>onSync</literal>
       hook that enables clients to assess whether an overall synchronization
       operation was successful on all remote systems, with the ability to roll
       back synchronized changes in the event of one or more remote systems being
@@ -245,7 +245,7 @@
         encrypted form).
        </para>
        <para>
-        OpenIDM ${serverDocTargetVersion} supports delegated authentication
+        OpenIDM ${docTargetVersion} supports delegated authentication
         to most external data sources. This means that users are able to log
         into the UI based on, for example, their LDAP credentials. After they
         have logged in, they are able to perform the full range of
@@ -288,7 +288,7 @@
         encountered. The solution provided no high-availability or failover.
        </para>
        <para>
-        In OpenIDM ${serverDocTargetVersion}, user sessions are created as
+        In OpenIDM ${docTargetVersion}, user sessions are created as
         encrypted Java Web Token (JWT) cookies. All the details of the user are
         stored on the client, rather than on the server. Requests can therefore
         be sent to any node in a cluster, enabling high-availability and
@@ -300,7 +300,7 @@
         Scalable managed/user administration
        </para>
        <para>
-        OpenIDM ${serverDocTargetVersion} supports server-side paging, searching
+        OpenIDM ${docTargetVersion} supports server-side paging, searching
         and sorting for managed/user records. This improvement enables supports
         for the administration of millions of records in the managed/user table
         with little noticeable performance degradation, assuming correct database
@@ -317,7 +317,7 @@
         website within the organization.
        </para>
        <para>
-        OpenIDM ${serverDocTargetVersion} supports Cross Origin Resource
+        OpenIDM ${docTargetVersion} supports Cross Origin Resource
         Sharing (CORS), which allows a "white list" of domains to make REST
         calls to OpenIDM directly from within their own webpage context.
         Authenticated users are now able to interact with OpenIDM services
@@ -359,7 +359,7 @@
         Documented workflow use cases
        </para>
        <para>
-        OpenIDM ${serverDocTargetVersion} provides a number of sample workflows,
+        OpenIDM ${docTargetVersion} provides a number of sample workflows,
         that demonstrate typical use cases for OpenIDM. Each of these sample
         workflows is integrated with the default UI. For more information see
         <link xlink:show="new" xlink:href="integrators-guide#workflow-use-cases"

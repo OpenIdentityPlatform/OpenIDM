@@ -99,7 +99,7 @@ Stopping OpenIDM (81491)
      <para>
       In OpenIDM 2.1, port numbers were specified in the
       <filename>conf/jetty.xml</filename> file. In OpenIDM
-      ${serverDocTargetVersion}, the HTTP, HTTPS, and mutual authentication
+      ${docTargetVersion}, the HTTP, HTTPS, and mutual authentication
       ports are specified in the <filename>conf/boot/boot.properties</filename>
       file. If you changed the default ports in your 2.x deployment, make sure
       that the corresponding ports are specified in this file.
@@ -243,7 +243,7 @@ $ cp bin/default/script/access.js script/
      <para>
       For each configuration file that you have customized, use a file
       comparison (<literal>diff</literal>) utility to assess the differences
-      between your customized file and the ${serverDocTargetVersion} file.
+      between your customized file and the ${docTargetVersion} file.
      </para>
     </listitem>
     <listitem>

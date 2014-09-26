@@ -36,7 +36,7 @@
  <info>
   <xinclude:include href="../shared/mediaobject-fr-logo.xml" />
   <title>OpenIDM Installation Guide</title>
-  <subtitle>Version ${serverDocTargetVersion}</subtitle>
+  <subtitle>Version ${docTargetVersion}</subtitle>
   <abstract>
    <para>Guide to installing and evaluating OpenIDM. The OpenIDM project offers
    flexible, open source services for automating management of the identity
