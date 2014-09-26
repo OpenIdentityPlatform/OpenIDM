@@ -274,7 +274,7 @@ script task using expression resolver: [
     "enabled"  : true,
     "location" : "remote",
     "engine" : {
-        "url" : "http://localhost:9090/openidm-workflow-remote-<?eval ${serverDocTargetVersion}?>",
+        "url" : "http://localhost:9090/openidm-workflow-remote-${docTargetVersion}",
         "username" : "youractivitiuser",
         "password" : "youractivitipassword"
     },

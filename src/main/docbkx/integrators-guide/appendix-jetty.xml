@@ -33,7 +33,7 @@
  <title>Embedded Jetty Configuration</title>
 
  <para>
-  OpenIDM ${serverDocTargetVersion} includes an embedded Jetty web server.
+  OpenIDM ${docTargetVersion} includes an embedded Jetty web server.
  </para>
 
  <para>To configure the embedded Jetty server, edit

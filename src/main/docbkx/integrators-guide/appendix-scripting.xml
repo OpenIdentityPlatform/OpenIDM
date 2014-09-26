@@ -42,7 +42,7 @@
   </para>
 
   <para>
-   OpenIDM ${serverDocTargetVersion} supports scripts written in JavaScript and
+   OpenIDM ${docTargetVersion} supports scripts written in JavaScript and
    Groovy. OpenIDM configures script options in the
    <filename>conf/script.json</filename> file.
   </para>
@@ -68,7 +68,7 @@
     <title>Script Configuration File</title>
 
      <para>
-      OpenIDM ${serverDocTargetVersion} includes a script configuration file
+      OpenIDM ${docTargetVersion} includes a script configuration file
       in the <filename>conf/</filename> directory,
       <filename>script.json</filename>. OpenIDM uses this file to set up
       <link xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink"

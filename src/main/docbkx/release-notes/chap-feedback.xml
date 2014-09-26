@@ -38,7 +38,7 @@
  where you are likely to find an answer.</para>
 
  <para>If you have found issues or reproducible bugs within OpenIDM
- <?eval ${serverDocTargetVersion}?>, report them in <link
+ ${docTargetVersion}, report them in <link
  xlink:href='https://bugster.forgerock.org' xlink:show="new"
  >https://bugster.forgerock.org</link>.</para>
 

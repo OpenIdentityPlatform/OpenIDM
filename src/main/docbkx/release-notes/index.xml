@@ -32,7 +32,7 @@
  <info>
   <xinclude:include href="../shared/mediaobject-fr-logo.xml" />
   <title>OpenIDM Release Notes</title>
-  <subtitle>Version ${serverDocTargetVersion}</subtitle>
+  <subtitle>Version ${docTargetVersion}</subtitle>
   <abstract>
    <para>Notes covering OpenIDM software requirements, fixes, known issues.
    The OpenIDM project offers flexible, open source services for automating

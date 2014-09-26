@@ -36,7 +36,7 @@
 
  <variablelist>
   <para>
-   For OpenIDM ${serverDocTargetVersion}, the following configurations are
+   For OpenIDM ${docTargetVersion}, the following configurations are
    supported for use in production.
   </para>
   <varlistentry>
@@ -75,7 +75,7 @@
      Jetty, as provided. Alternate containers are not supported.
     </para>
     <para>
-     OpenIDM ${serverDocTargetVersion} bundles Jetty version 8.1.9.v20130131.
+     OpenIDM ${docTargetVersion} bundles Jetty version 8.1.9.v20130131.
     </para>
    </listitem>
   </varlistentry>
@@ -83,7 +83,7 @@
    <term>Connectors</term>
    <listitem>
     <para>
-     OpenIDM ${serverDocTargetVersion} comes packaged with these OpenICF
+     OpenIDM ${docTargetVersion} comes packaged with these OpenICF
      connectors:
     </para>
     <itemizedlist>
@@ -101,12 +101,12 @@
     </para>
     <para>
      When using the LDAP connector to provision to Active Directory, OpenIDM
-     ${serverDocTargetVersion} supports Active Directory Domain Controllers and
+     ${docTargetVersion} supports Active Directory Domain Controllers and
      Active Directory Global Catalogues. This release also provides support for
      Active Directory Lightweight Directory Services (LDS).
     </para>
     <para>
-     OpenIDM ${serverDocTargetVersion} also provides support for Windows 2012 R2
+     OpenIDM ${docTargetVersion} also provides support for Windows 2012 R2
      as the remote system for connectors and password synchronization plugins.
     </para>
    </listitem>
@@ -140,7 +140,7 @@
    <term>Operating Systems</term>
    <listitem>
     <para>
-     OpenIDM ${serverDocTargetVersion} has been tested on most variations of
+     OpenIDM ${docTargetVersion} has been tested on most variations of
      Linux and on Windows 2008 R2 and Windows 2012 R2.
     </para>
    </listitem>
@@ -164,7 +164,7 @@
   configuration.
  </para>
  <para>
-  OpenIDM ${serverDocTargetVersion} also supports OpenJDK 1.7.
+  OpenIDM ${docTargetVersion} also supports OpenJDK 1.7.
  </para>
  <para>
   You need 150 MB disk space and 1 GB memory for an evaluation installation. For

@@ -39,7 +39,7 @@
 
  <variablelist>
   <para>
-   When you unpack and start OpenIDM ${serverDocTargetVersion}, you create the
+   When you unpack and start OpenIDM ${docTargetVersion}, you create the
    following files and directories. Note that the precise paths will depend on
    the install, project, and working directories that you have selected during
    startup. For more information, see <link

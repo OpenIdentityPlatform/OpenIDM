@@ -270,7 +270,7 @@
 
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <serverDocTargetVersion>${project.version}</serverDocTargetVersion>
+        <docTargetVersion>${project.version}</docTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <openicfBundleVersion>1.4.0.0</openicfBundleVersion>
@@ -1066,8 +1066,8 @@
                 <inherited>false</inherited>
                 <configuration>
                     <projectName>OpenIDM</projectName>
-                    <projectVersion>${serverDocTargetVersion}</projectVersion>
-                    <latestJson>http://mcraig.org/fr/latest.php</latestJson><!-- Temporary workaround pending #QOZ-985-23233 -->
+                    <projectVersion>${docTargetVersion}</projectVersion>
+                    <latestJson>http://docs.forgerock.org/latest.json</latestJson>
                     <googleAnalyticsId>${gaId}</googleAnalyticsId>
                     <docbkxSourceDirectory>${basedir}/src/main/docbkx</docbkxSourceDirectory>
                 </configuration>

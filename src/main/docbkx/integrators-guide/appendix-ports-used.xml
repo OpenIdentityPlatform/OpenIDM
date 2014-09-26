@@ -33,7 +33,7 @@
 
  <variablelist>
   <para>
-   By default, OpenIDM ${serverDocTargetVersion} listens on the following ports
+   By default, OpenIDM ${docTargetVersion} listens on the following ports
    (specified in the file
    <filename>/path/to/openidm/conf/boot/boot.properties</filename>):
   </para>

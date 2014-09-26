@@ -32,7 +32,7 @@
  <info>
   <xinclude:include href="../shared/mediaobject-fr-logo.xml" />
   <title>OpenIDM Integrator's Guide</title>
-  <subtitle>Version ${serverDocTargetVersion}</subtitle>
+  <subtitle>Version ${docTargetVersion}</subtitle>
   <abstract>
    <para>Guide to configuring and integrating OpenIDM into identity
    management solutions. The OpenIDM project offers flexible, open source

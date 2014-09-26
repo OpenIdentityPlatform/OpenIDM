@@ -915,7 +915,7 @@ JAVA_TYPE_STRING</screen>
   </para>
   <note>
    <para>
-    OpenIDM ${serverDocTargetVersion} supports version ${connectorServerVersion}
+    OpenIDM ${docTargetVersion} supports version ${connectorServerVersion}
     of the OpenICF Framework. Therefore, you must use version
     ${connectorServerVersion} of the .NET Connector Server, or the Java Connector
     Server. The ${connectorServerVersion} Java Connector Server is backward
@@ -1557,9 +1557,9 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
    </section>
 
  <section xml:id="connectors-with-openidm">
-  <title>Connectors Supported With OpenIDM ${serverDocTargetVersion}</title>
+  <title>Connectors Supported With OpenIDM ${docTargetVersion}</title>
   <para>
-   OpenIDM ${serverDocTargetVersion} provides several connectors by default, in
+   OpenIDM ${docTargetVersion} provides several connectors by default, in
    the <literal>path/to/openidm/connectors</literal> directory. Additional
    connectors can be downloaded from the <link
    xlink:href="http://forgerock.com/download-stack/"
@@ -1567,7 +1567,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
   </para>
   <para>
    This section describes the connectors that are supported for use with OpenIDM
-   ${serverDocTargetVersion}, and provides instructions for installing and
+   ${docTargetVersion}, and provides instructions for installing and
    configuring these connectors. For instructions on building connector
    configurations interactively, see <xref linkend="connector-wiz"/>.
   </para>
@@ -3058,7 +3058,7 @@ Properties:
     run Groovy scripts on any external resource.
    </para>
    <para>
-    The Groovy connector is bundled with OpenIDM ${serverDocTargetVersion}, in
+    The Groovy connector is bundled with OpenIDM ${docTargetVersion}, in
     the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
     Sample scripted connector implementations are included in the JAR.
    </para>

@@ -30,6 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'>
+
  <title>Configuring Synchronization</title>
  <indexterm>
   <primary>Synchronization</primary>
@@ -1507,7 +1508,7 @@ $ <userinput>curl \
   <para>
    The format of the query can be any query type that is supported by the
    resource, and can include additional parameters, if applicable. OpenIDM
-   ${serverDocTargetVersion} supports the following query types.
+   ${docTargetVersion} supports the following query types.
   </para>
   <itemizedlist>
    <para>
