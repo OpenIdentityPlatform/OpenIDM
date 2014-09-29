@@ -1,0 +1,89 @@
+<form action="" class="form center no-margin" method="post" onsubmit="return false" id="propertyEditForm" autocomplete="off">
+    <fieldset>  
+        <div id="mappingDialogTabs">
+            <ul>
+                <li><a href="#Property_List">{{t "templates.mapping.propertyEdit.propertyListHeader"}}</a></li>
+                <li><a href="#Transformation_Script">{{t "templates.mapping.propertyEdit.transformationHeader"}}</a></li>
+                <li class="conditionScript"><a href="#Condition_Script">{{t "templates.mapping.propertyEdit.conditionalUpdateHeader"}}</a></li>
+                <li><a href="#Default_Values">{{t "templates.mapping.propertyEdit.defaultValuesHeader"}}</a></li>
+            </ul>
+            <div id="Property_List">
+                <div class="field">
+                    <label>{{t "templates.mapping.propertyEdit.propertyListLabel"}}</label><br/><br/>
+                    <input autocomplete="off" name="source" value="{{property.source}}"/>
+                    <input type="submit" class="button" value="{{t "common.form.update"}}"/>
+
+                    <div class="validation-message"></div>
+
+                    <div id="arrayAssociationTabs" style="display:none">
+                        <ul>
+                            <li><a href="#arrayAssociations">{{t "templates.mapping.propertyEdit.valueMapping"}}</a></li>
+                            <li><a href="#valuePrecedence">{{t "templates.mapping.propertyEdit.valuePrecedence"}}</a></li>
+                        </ul>
+                        <div class="arrayAssociations" id="arrayAssociations">
+                                <label>{{t "templates.mapping.target"}}</label><label>{{t "templates.mapping.source"}}</label>
+                                <ul></ul>
+                        </div>
+                        <div id="valuePrecedence">
+                                <label>{{t "templates.mapping.propertyEdit.valuePrecedenceNote"}}</label>
+                                <ul></ul>
+                        </div>
+                    </div>
+                    <!-- <span class="error">x</span> -->
+                </div>
+            </div>
+            <div id="Transformation_Script">
+                <div class="field">
+                    <label>{{t "templates.mapping.propertyEdit.transformationSciptLabel"}}</label><br/><br/>
+
+
+                    <label style="display:inline" for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label> 
+                    <input type="text" id="currentSourceDisplay" readonly value="{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}"><br>
+                    <br/>
+                    <textarea name="transformation_script" rows="10" style="width:600px;" placeholder='source.givenName.toLowerCase() + "." + source.sn.toLowerCase()' >{{property.transform.source}}</textarea>
+                    <br/>
+                    <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
+                    <!-- <span class="error">x</span> -->
+                    <div id="script_output" class="script_output">
+                        <label style="display:inline" for="exampleResult">{{t "templates.mapping.propertyEdit.exampleResult"}}:</label>
+                        <input type="text" id="exampleResult" readonly value="" style="width:350px">
+                    </div>
+                    <div class="validation-message script_output"></div>
+                </div>
+
+                <br clear="both">
+                    <p>
+                        {{t "templates.mapping.propertyEdit.transformScriptNote"}}
+                    </p>
+            </div>
+            <div id="Condition_Script">
+                <div class="field">
+                    <label>{{t "templates.mapping.propertyEdit.conditionSciptLabel"}}  {{property.target}}</label><br/>
+                    <br/>
+                    <textarea name="condition_script" rows="10" style="width:600px;" placeholder='object.{{#if property.source}}{{property.source}}{{else}}mail{{/if}} !== null' >{{property.condition.source}}</textarea>
+                    <br/>
+                    <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
+                    <div id="condition_script_output" class="script_output">
+                        <label style="display:inline" for="conditionResult">{{t "templates.mapping.propertyEdit.conditionScriptAction"}} {{sampleUserFullName}}:</label>
+                        <span id="conditionResult"></span>
+                    </div>
+                    <div class="validation-message script_output"></div>
+                </div>
+
+                <br clear="both">
+                    <p>
+                        {{t "templates.mapping.propertyEdit.conditionScriptNote"}}
+                    </p>
+            </div>
+            <div id="Default_Values">
+                <div class="field">
+                    <label>{{t "templates.mapping.propertyEdit.defaultValuesLabel"}}</label><br/><br/>
+                    <input autocomplete="off" name="default" style="width:300px;" value="{{property.default}}"/>
+                    <input type="submit" class="button" value="{{t "common.form.update"}}"/>
+                    <span class="ok" id="default_desc" style="display:none"></span>
+                    <!-- <span class="error">x</span> -->
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>

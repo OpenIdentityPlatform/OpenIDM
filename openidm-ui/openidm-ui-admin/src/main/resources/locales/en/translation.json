@@ -65,6 +65,11 @@
             },
             "AuthenticationMessages" : {
                 "saveSuccessful" : "Authentication configuration has been saved."
+            },
+            "MappingMessages" : {
+                "mappingSaveSuccess": "Mapping successfully updated",
+                "newMappingAdded": "New Mapping successfully created",
+                "mappingDeleted": "Mapping successfully deleted"
             }
         },
         "AppConfiguration" : {
@@ -81,6 +86,7 @@
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
                     "resources" : "Resources",
+                    "mapping" : "Mapping",
                     "authentication": "Authentication"
                 }
             }
@@ -437,6 +443,56 @@
                     "badBaseContext" : "Bad Base Context(s)"
                 }
             }
+        },
+        "mapping": {
+            "mappings": "Mappings",
+            "source": "Source",
+            "target": "Target",
+            "editMapping": "Edit Mapping (__name__)",
+            "addMapping": "Add Mapping",
+            "saveNewMapping": "Save New Mapping",
+            "deleteMapping": "Delete Mapping",
+            "properties": "Properties",
+            "property": "Property",
+            "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed",
+            "noMappingsDefined": "No Mappings Defined",
+            "addProperty": "Add Property",
+            "sampleSource": "Sample Source",
+            "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
+            "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
+            "validPropertyRequired": "You must select a valid property name.",
+            "invalidScript": "You cannot save a transformation script containing errors.",
+            "invalidConditionScript": "You cannot save a condition script containing errors.",
+            "completeSourceObject": "Complete Source Object",
+            "changesPending": "Changes Pending",
+            "noPropertiesMapped": "No Properties Mapped",
+            "conditionScriptApplied": "Conditional update script applied",
+            "mappingExists": "Mapping for this target property already exists",
+            "allPropertiesMapped": "*All target properties have been mapped",
+            "propertyEdit": {
+                "title": "Target Property: __property__",
+                "valueMapping": "Value Mapping",
+                "valuePrecedence": "Value Precedence",
+                "valuePrecedenceNote": "Since the values mapped may result in multiple values, sort them here to establish which should take precedence (the first value matched will be used).",
+                "propertyListLabel": "Enter or select the source property that you need",
+                "propertyListHeader": "Property List",
+                "transformationHeader": "Transformation Script",
+                "conditionalUpdateHeader": "Conditional Update Script",
+                "defaultValuesHeader": "Default Values",
+                "transformationSciptLabel": "Enter a transformation script for complex properties",
+                "conditionSciptLabel": "Enter a conditional update script for",
+                "defaultValuesLabel": "Set a default value for this property mapping",
+                "conditionScriptAction": "Action for user",
+                "exampleResult": "Example result",
+                "currentSourceValue": "Current value for &quot;source&quot;",
+                "transformScriptNote": "Use JavaScript code above to perform advanced mapping operations.<br>This script will be processed for each source object that is mapped, to calculate it's value for this property.<br>The result of the final statement in the script will be used as the value for this property.<br>This script has the &quot;source&quot; variable available to it as input.<br>The value for the &quot;source&quot; variable depends on how you have defined the attribute mapping in the &quot;Attribute List&quot; tab.<br>If you haven't selected any value in the &quot;Property List&quot; tab, then &quot;source&quot; will be the complete source object with properties for each directory property.<br>If you have selected a value in &quot;Property List&quot;, then &quot;source&quot; will be that value.",
+                "conditionScriptNote": "Use JavaScript code above to prevent target data from being updated in certain conditions.<br/>This script will be processed for each source object that is mapped.<br/>If the result is true or if there is no script the property will be updated, otherwise updates will not be sent to the target.<br/>This script has the &quot;object&quot; variable available to it as a global.<br/>The &quot;object&quot; variable represents the complete target record with properties for each source property mapping."
+            },
+            "propertyAdd": {
+                "title": "Choose Target Property",
+                "listLabel": "Property:",
+                "choicePrompt": "Choose One"
+            }
         }
     },
     "common" : {
@@ -480,6 +536,7 @@
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
+            "showAllItems" : "Show All Items",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",

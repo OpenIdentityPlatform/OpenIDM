@@ -83,6 +83,18 @@ define("config/messages/AdminMessages", [
         "authSaveSuccess" : {
             msg: "config.messages.AuthenticationMessages.saveSuccessful",
             type: "info"
+        },
+        "mappingSaveSuccess" : {
+            msg: "config.messages.MappingMessages.mappingSaveSuccess",
+            type: "info"
+        },
+        "newMappingAdded" : {
+            msg: "config.messages.MappingMessages.newMappingAdded",
+            type: "info"
+        },
+        "mappingDeleted" : {
+            msg: "config.messages.MappingMessages.mappingDeleted",
+            type: "info"
         }
     };
 

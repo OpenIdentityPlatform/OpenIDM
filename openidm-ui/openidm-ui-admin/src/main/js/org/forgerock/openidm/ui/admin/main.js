@@ -28,6 +28,8 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./MandatoryPasswordChangeDialog",
 	
 	"./delegates/ConnectorDelegate",
+    "./delegates/SyncDelegate",
+    "./delegates/SessionStorageDelegate",
 
 	"./ResourcesView",
 	"./connector/AddEditConnectorView",
@@ -40,8 +42,16 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ConnectorUtils",
     "./util/ScriptEditor",
     "./util/ScriptDialog",
+    "./util/AutoCompleteUtils",
 
     "./objectTypes/ObjectTypesDialog",
 
-    "./authentication/AuthenticationView"
+    "./authentication/AuthenticationView",
+    
+    "./mapping/MappingListView",
+    "./mapping/AddMappingView",
+    "./mapping/EditMappingView",
+    "./mapping/PropertiesView",
+    "./mapping/AddPropertyMappingDialog",
+    "./mapping/EditPropertyMappingDialog"
 ]);

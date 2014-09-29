@@ -22,41 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+/*global $, define, _, sessionStorage, window */
 
-#footer {
-	height:60px;
-	margin-top:-60px;
-	color:@light-font-color;
-	background-color: #5d6871;
-}
+define("org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate", [], function() {
 
-.menubar {
-	margin-bottom:0px;
-}
-
-.menubar .menu {
-	background-image:none; 
-}
-
-body {
-	background-image:none;
-}
-
-button:disabled
-{
-  cursor:default;
-}
-
-#content {
-  padding-bottom:75px;
-}
-
-.overflow-visible {
-    overflow: visible;
-}
-
-.script_output {
-    width:550px;
-    height:20px;
-    float:left;
-}
+    var obj = {};
+    
+    obj.get = function(i){
+        return JSON.parse(sessionStorage.getItem(i));
+    };
+    
+    obj.set = function(i, o){
+        sessionStorage.setItem(i, JSON.stringify(o));
+    };
+    
+    return obj;
+});

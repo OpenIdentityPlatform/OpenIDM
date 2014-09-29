@@ -1,0 +1,40 @@
+{
+    "name": "",
+    "source": "",
+    "target": "",
+    "properties": [],
+    "policies" : [
+        {
+            "situation" : "CONFIRMED",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "FOUND",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "ABSENT",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "AMBIGUOUS",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "MISSING",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "SOURCE_MISSING",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "UNQUALIFIED",
+            "action" : "ASYNC"
+        },
+        {
+            "situation" : "UNASSIGNED",
+            "action" : "ASYNC"
+        }
+    ]
+}
