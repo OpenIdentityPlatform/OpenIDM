@@ -70,6 +70,41 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "authentication/",
             forceUpdate: true
+        },
+        "mappingListView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/MappingListView",
+            role: "ui-admin",
+            url: "mapping/",
+            forceUpdate: true
+        },
+        "editMappingView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/EditMappingView",
+            role: "ui-admin",
+            url: /^mapping\/edit\/(.+)\/$/,
+            pattern: "mapping/edit/?/",
+            forceUpdate: true
+        },
+        "addMappingView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
+            role: "ui-admin",
+            url: "mapping/add/",
+            forceUpdate: true
+        },
+        "editMappingProperty" : {
+            base: "editMappingView",
+            dialog: "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
+            role: "ui-admin",
+            url: /mapping\/(.+?)\/property\/(.+?)$/, 
+            pattern: "mapping/?/property/?",
+            forceUpdate: true
+        },
+        "addMappingProperty" : {
+            base: "editMappingView",
+            dialog: "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
+            role: "ui-admin",
+            url: /mapping\/(.+?)\/property\/_new$/, 
+            pattern: "mapping/?/property/_new",
+            forceUpdate: true
         }
     };
 

@@ -1,0 +1,28 @@
+var 
+map = {},
+precedence = [],
+highestPrecedenceFound = precedence.length,
+i,j,insensitiveSource;
+
+if (source !== undefined && source !== null) {
+    // look through each source value
+    for (i=0;i<source.length;i++) {
+        insensitiveSource = source[i].toLowerCase().replace(/\s*(^|$|,|=)\s*/g, "$1");
+        // if we have a (case-and-whitespace insensitive) match in our map for this source
+        if (map[insensitiveSource]) {
+            
+            // see if there is a higher-precedence entry available 
+            // than whatever we already might have
+            for (j=0;j<highestPrecedenceFound;j++) {
+                if (precedence[j] === map[insensitiveSource]) {
+                    
+                    // we found a higher precedence entry!
+                    highestPrecedenceFound = j;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+precedence[highestPrecedenceFound] || null;

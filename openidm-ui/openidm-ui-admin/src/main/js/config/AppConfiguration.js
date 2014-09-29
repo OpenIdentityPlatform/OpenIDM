@@ -122,6 +122,12 @@ define("config/AppConfiguration", [
                                         "name": "config.AppConfiguration.Navigation.links.authentication",
                                         "icon": "glyph-icon-star",
                                         "inactive": false
+                                    },
+                                    "mapping": {
+                                        "url": "#mapping/",
+                                        "name": "config.AppConfiguration.Navigation.links.mapping",
+                                        "icon": "glyph-icon-resize-horizontal",
+                                        "inactive": false
                                     }
                                 }
                             }
