@@ -1,0 +1,31 @@
+<h1 id="syncTitle">{{t "templates.sync.syncTitle"}} - {{mappingName}}</h1>
+
+<div class="sync-input-body">
+    <form id="syncForm" class="form clearfix" autocomplete="off">
+        <fieldset id="sessionModuleForm">
+            <legend><span>{{t "templates.sync.syncTitle"}}</span></legend>
+            <div class="group-body">
+                <h3>{{t "templates.sync.currentPolicy"}}: <span id="policyPatternName"></span></h3>
+                <p id="policyPatternDesc"></p>
+                <div class="group-field-block group-lead">
+                </div>
+
+                <div class="float-right form-button-bar">
+                    <input type="button" class="button" id="situationalPolicyEditorButton" value="{{t "templates.sync.modifySituationalPolicies"}}" />
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset id="syncWidget">
+            <legend><span>{{t "templates.sync.schedules"}}</span></legend>
+            <div class="group-body">
+                <div id="schedules"></div>
+                <div id="addNew">
+                    <h3>
+                        <span>{{t "templates.sync.addReconciliationSchedule"}}</span>
+                    </h3>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

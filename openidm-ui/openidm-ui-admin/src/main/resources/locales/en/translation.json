@@ -70,6 +70,12 @@
                 "mappingSaveSuccess": "Mapping successfully updated",
                 "newMappingAdded": "New Mapping successfully created",
                 "mappingDeleted": "Mapping successfully deleted"
+            },
+            "SyncMessages" : {
+                "policySaveSuccessful" : "The situational policy has been saved.",
+                "scheduleCreated" : "A new schedule has been created.",
+                "scheduleDeleted" : "The schedule has been deleted.",
+                "scheduleSaved" : "The schedule was successfully saved."
             }
         },
         "AppConfiguration" : {
@@ -190,6 +196,36 @@
             "variableValue" : "Variable Value",
             "javascript" : "Javascript",
             "groovy" : "Groovy"
+        },
+        "sync": {
+            "syncTitle": "Sync Configuration",
+            "situationalPolicy": "Situational Policy",
+            "currentPolicy": "Current Policy",
+            "modifySituationalPolicies": "Modify Situational Policies",
+            "schedules": "Schedules",
+            "addReconciliationSchedule": "Add Reconciliation Schedule"
+        },
+        "scheduler": {
+            "scheduler": "Scheduler",
+            "enabled": "Enabled",
+            "basicCron": "Basic Cron",
+            "advanced": "Advanced",
+            "complex": "Your expression is too complex for the editor, simplify to use the editor.",
+            "persisted": "Persisted",
+            "misfirePolicy": "Misfire Policy",
+            "fireAndProceed": "Fire and proceed",
+            "doNothing": "Do Nothing",
+            "deleteSchedule": "Delete Schedule",
+            "saveSchedule": "Save Changes",
+            "reconciliation": "Reconciliation",
+            "liveSync": "LiveSync"
+        },
+        "situationalPolicies": {
+            "currentPolicy": "Current Policy",
+            "policies": "Policies",
+            "situation": "Situation",
+            "starDef": "indicates an action that is the default for a situation",
+            "dialogTitle": "Situational Policy Configuration"
         },
         "auth": {
             "errorsmsg": "Please address the errors in the Authentication modules before proceeding to save.",

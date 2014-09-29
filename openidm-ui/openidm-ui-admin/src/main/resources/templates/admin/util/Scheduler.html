@@ -1,0 +1,44 @@
+<div class="schedulerBody">
+
+    <h3>{{t "templates.scheduler.scheduler"}} - {{scheduleType}}</h3>
+
+    {{#if recon}}
+    <div class="tabs">
+        <ul>
+            <li><a href="#{{id}}_basic">{{t "templates.scheduler.basicCron"}}</a></li>
+            <li><a href="#{{id}}_advanced">{{t "templates.scheduler.advanced"}}</a></li>
+        </ul>
+        <div id="{{id}}_basic">
+            <div class="cronField"></div>
+        </div>
+        <div id="{{id}}_advanced">
+            <input type="text" class="complexExpression"/>
+            <span class="advancedText">{{t "templates.scheduler.complex"}}</span>
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="group-field-block"v>
+        <label for="enabled" class="light">{{t "templates.scheduler.enabled"}}</label>
+        <input type="checkbox" name="enabled" value="true" class="enabled"/>
+    </div>
+
+    <div class="group-field-block">
+        <label for="persisted" class="light">{{t "templates.scheduler.persisted"}}</label>
+        <input type="checkbox" name="persisted" value="false" class="persisted"/>
+    </div>
+
+    <div class="group-field-block misfirePolicyBlock misfireHidden">
+        <label for="misfirePolicy" class="light">{{t "templates.scheduler.misfirePolicy"}}</label>
+        <select name="misfirePolicy" class="misfirePolicy">
+            <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
+            <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
+        </select>
+    </div>
+
+    <div class="float-right form-button-bar">
+        <input type="button" class="button deleteSchedule" value="{{t "templates.scheduler.deleteSchedule"}}" />
+        <input type="button" class="button saveSchedule" value="{{t "templates.scheduler.saveSchedule"}}" />
+    </div>
+
+</div>
