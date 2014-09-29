@@ -541,10 +541,10 @@
 
    <para>
     The <literal>eventTypes</literal> configuration specifies what events
-    OpenIDM writes to audit logs. "OpenIDM supports the following event types:
+    OpenIDM writes to audit logs. OpenIDM supports the following event types:
     access, activity, and reconciliation. You can even configure custom
     audit data filtering and reconciliation, as described in
-    <xref linkend="audit-filtering" />" The filter for actions under activity
+    <xref linkend="audit-filtering" />. The filter for actions under activity
     logging shows the actions on managed or system objects for which OpenIDM
     writes to the activity log.
    </para>
