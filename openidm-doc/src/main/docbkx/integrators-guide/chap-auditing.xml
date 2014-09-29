@@ -542,7 +542,7 @@
    <para>
     The <literal>eventTypes</literal> configuration specifies what events
     OpenIDM writes to audit logs. OpenIDM supports the following event types:
-    access, activity, and reconciliation. You can even configure custom
+    access, activity, sync, and reconciliation. You can even configure custom
     audit data filtering and reconciliation, as described in
     <xref linkend="audit-filtering" />. The filter for actions under activity
     logging shows the actions on managed or system objects for which OpenIDM
@@ -983,21 +983,6 @@ return request.content.entryType == 'summary' &amp;&amp;
    The script must return <literal>true</literal> to include the log entry;
    <literal>false</literal> to exclude it.
   </para>
-
-  <para>
-   Alternatively, you can leave out null items in audit output, with a filter
-   for null items, such as:
-  </para>
-
-  <programlisting language="javascript">
-{
-   "eventTypes" : {
-      ...
-      "recon" : {
-         "filter" : {"ignore":[]}
-      }
-   },
-}</programlisting>
 
  </section>
 
