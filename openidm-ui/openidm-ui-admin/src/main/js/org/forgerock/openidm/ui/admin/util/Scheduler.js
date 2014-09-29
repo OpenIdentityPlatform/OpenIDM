@@ -92,11 +92,11 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     if (args.invokeService && args.invokeService === "sync") {
 
                         this.$el.find(".tabs").tabs({
-                            activate: function(event, ui) {
+                            activate: _.bind(function(event, ui) {
                                 if (this.cron && this.$el.find(".tabs").tabs("option", "active") === 1) {
                                     this.$el.find(".complexExpression").val(this.cron.cron("convertCronVal", this.cron.cron("value")));
                                 }
-                            }
+                            }, this)
                         });
 
                         this.cron = this.$el.find(".cronField").cron();
