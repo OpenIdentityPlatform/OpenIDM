@@ -1,0 +1,111 @@
+{
+    "Read-only": {
+        "policies" :[
+            {
+                "situation" : "CONFIRMED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "FOUND",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "FOUND_ALREADY_LINKED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "ABSENT",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "AMBIGUOUS",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "MISSING",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "UNQUALIFIED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "TARGET_IGNORED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "SOURCE_IGNORED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "LINK_ONLY",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "ALL_GONE",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "UNASSIGNED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "SOURCE_MISSING",
+                "action" : "ASYNC"
+            }
+        ],
+        "description":  "This is the default for new mappings"
+    },
+
+    "Default Actions": {
+        "policies" :[
+            {
+               "situation" : "CONFIRMED",
+               "action" : "UPDATE",
+               "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC", "UPDATE"]
+            }, {
+               "situation" : "FOUND",
+               "action" : "UPDATE",
+               "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC", "UPDATE"]
+            }, {
+               "situation" : "FOUND_ALREADY_LINKED",
+               "action" : "EXCEPTION",
+                "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "ABSENT",
+               "action" : "CREATE",
+               "options" : ["CREATE", "EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "AMBIGUOUS",
+               "action" : "EXCEPTION",
+               "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "MISSING",
+               "action" : "EXCEPTION",
+               "options" : ["EXCEPTION", "CREATE", "UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "UNQUALIFIED",
+               "action" : "DELETE",
+               "options" : ["DELETE", "UNLINK", "EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "TARGET_IGNORED",
+               "action" : "IGNORE",
+               "options" : ["IGNORE", "DELETE", "UNLINK", "EXCEPTION", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "SOURCE_IGNORED",
+               "action" : "IGNORE",
+               "options" : ["IGNORE", "EXCEPTION", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "LINK_ONLY",
+               "action" : "EXCEPTION",
+               "options" : ["EXCEPTION", "UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "ALL_GONE",
+               "action" : "IGNORE",
+               "options" : ["IGNORE", "EXCEPTION", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "UNASSIGNED",
+               "action" : "EXCEPTION",
+               "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }, {
+               "situation" : "SOURCE_MISSING",
+               "action" : "EXCEPTION",
+               "options" : ["EXCEPTION", "DELETE", "UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"]
+            }
+        ],
+        "description":  "These are the default actions for a given situation."
+    },
+
+    "Custom": {
+        "policies" :[],
+        "description":  "User defined situational policies."
+    }
+}

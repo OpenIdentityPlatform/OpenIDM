@@ -1,0 +1,254 @@
+.sync-input-body {
+
+  #addNew {
+    border: dashed 1px #999;
+    color: #bbb;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #5a646d;
+      color: #5a646d;
+    }
+  }
+  fieldset {
+    border: 1px #ddd solid;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 5px;
+    background-color: white;
+
+    &:not(:first-child) {
+      margin-top: 15px;
+    }
+  }
+
+  legend {
+    height: 25px;
+    padding: 5px 5px 0px 5px;
+    background-color: #80b7ab;
+    border: 2px solid #5fa595;
+    cursor: pointer;
+    margin-left: 10px;
+    color: white;
+
+    &:hover {
+      background-color: lighten(#80b7ab, @button-hover-lightness);
+    }
+
+    span {
+      margin-right: 10px;
+      width: 170px;
+      display: inline-block;
+      text-overflow: ellipsis;
+    }
+  }
+
+  form {
+    &.form {
+      fieldset {
+        .group-lead {
+          padding-top: 0px;
+          margin-top: 15px;
+        }
+        .group-note-lead {
+          padding-top: 0px;
+          margin-top: 10px;
+        }
+      }
+      .group-field-block {
+        padding: 0px 0px 0px 10px;
+        margin-top: 0px;
+
+        label {
+          display: block;
+          width: 200px;
+          text-align: left;
+          padding-bottom: 0px;
+          font-size: 13px;
+        }
+
+        select, input {
+          padding: 0 5px;
+          height: 24px;
+          font-size: 13px;
+        }
+
+        select {
+          width: 262px;
+        }
+
+        .note {
+          font-size: 14px;
+          font-weight: bold;
+        }
+      }
+
+      .no-validation-block {
+        margin-bottom: 10px;
+      }
+
+      .field {
+        margin-bottom: 0px;
+      }
+
+      .group-field-buttons button {
+        margin-bottom: 5px;
+      }
+
+      .group-actions-block {
+        margin-top: 15px;
+      }
+    }
+  }
+  input[type="text"]:disabled,
+  select:disabled {
+    color: #bbb;
+    opacity: .8;
+  }
+
+  .group-field-block {
+    .add-btn {
+      margin-left: 0px;
+
+      span {
+        display: inline-block;
+        width: 140px;
+      }
+    }
+  }
+
+  .filter {
+    font-style: italic;
+    color: #888;
+  }
+
+  .form-size-s {
+    width: 250px;
+  }
+
+  .outside-element .form-size-m {
+    width: 620px;
+  }
+
+  .inline .inline-right {
+    margin-right: 10px;
+  }
+
+  .group-body {
+    color: #5a646d;
+    margin: 10px;
+    background-color: #fff;
+
+    .group > h3 {
+      i {
+        &:hover {
+        }
+      }
+    }
+
+    .group {
+      & > h3 {
+        height: 28px;
+        margin: -1px 0 0;
+        padding: 0;
+        border-radius: 0;
+        border: none;
+        border-top: 1px solid #5a646d;
+        border-bottom: 1px solid #5a646d;
+        background: none;
+        background-color: #fff;
+        color: #5a646d;
+      }
+    }
+  }
+}
+
+
+
+#situationPolicyDialog {
+  padding: 10px;
+
+  #patternDescription {
+    display: inline-block;
+    margin: 0 0 10px 10px;
+  }
+  &>p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    padding: 0;
+  }
+
+  label {
+    width: initial;
+    font-size: 13px;
+  }
+  .group-field-block {
+    padding: 0;
+    margin-top: 0px;
+    width: 100%;
+  }
+
+  fieldset {
+    border: 1px #ddd solid;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 5px;
+    background-color: white;
+
+    label {
+      display: block;
+      padding: 3px 10px 7px 0;
+      text-align: right;
+      width: 170px;
+    }
+
+    select {
+      padding: 0 5px;
+      height:24px;
+      font-size: 13px;
+      width:180px;
+    }
+  }
+
+  legend {
+    height: 25px;
+    padding: 5px 5px 0px 5px;
+    background-color: #80b7ab;
+    border: 2px solid #5fa595;
+    cursor: pointer;
+    margin-left: 10px;
+    color: white;
+
+    &:hover {
+      background-color: lighten(#80b7ab, @button-hover-lightness);
+    }
+
+    span {
+      margin-right: 10px;
+      width: 170px;
+      display: inline-block;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .group-body {
+    color: #5a646d;
+    margin: 10px;
+    background-color: #fff;
+  }
+
+  #situationCopy {
+    display: none;
+  }
+  .situationRow {
+    .situation{}
+    .action{
+      select {
+        font-family: "FontAwesome";
+      }
+    }
+  }
+
+}

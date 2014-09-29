@@ -43,6 +43,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ScriptEditor",
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
+    "./util/Scheduler",
 
     "./objectTypes/ObjectTypesDialog",
 
@@ -53,5 +54,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./mapping/EditMappingView",
     "./mapping/PropertiesView",
     "./mapping/AddPropertyMappingDialog",
-    "./mapping/EditPropertyMappingDialog"
+    "./mapping/EditPropertyMappingDialog",
+
+    "./sync/SyncView",
+    "./sync/SituationPolicyDialog"
 ]);

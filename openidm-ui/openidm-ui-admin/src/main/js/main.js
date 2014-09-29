@@ -37,6 +37,8 @@ require.config({
         jquery: "libs/jquery-1.11.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
+        cron: "libs/jquery-cron-r2427",
+        gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
@@ -66,6 +68,9 @@ require.config({
         },
         jsonEditor: {
             exports: "jsonEditor"
+        },
+        cron: {
+            exports: "cron"
         },
         jqueryui: {
             deps: ["jquery"],
@@ -110,6 +115,8 @@ require([
     "spin",
     "jqgrid",
     "jqueryui",
+    "cron",
+    "gentleSelect",
     "xdate",
     "moment",
     "doTimeout",
@@ -125,8 +132,27 @@ require([
     "AuthnDelegate",
     "ThemeManager",
     "config/main"
-], function(a, b, c, d, e, g, h, i, j, k, l, m, n, jsonEditor, i18n, constants, eventManager) {
-    eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+], function(
+    less,
+    underscore,
+    backbone,
+    form2js,
+    js2form,
+    spin,
+    jqgrid,
+    jqueryui,
+    cron,
+    gentleSelect,
+    xdate,
+    moment,
+    doTimeout,
+    handlebars,
+    i18next,
+    jsonEditor,
+    i18n,
+    constants,
+    eventManager) {
+        eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 
 

@@ -105,6 +105,13 @@ define("config/routes/AdminRoutesConfig", [
             url: /mapping\/(.+?)\/property\/_new$/, 
             pattern: "mapping/?/property/_new",
             forceUpdate: true
+        },
+        "syncView" : {
+            view: "org/forgerock/openidm/ui/admin/sync/SyncView",
+            role: "ui-admin",
+            url: /^sync\/(.+)\/$/,
+            pattern: "sync/?/",
+            forceUpdate: true
         }
     };
 

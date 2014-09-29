@@ -95,6 +95,22 @@ define("config/messages/AdminMessages", [
         "mappingDeleted" : {
             msg: "config.messages.MappingMessages.mappingDeleted",
             type: "info"
+        },
+        "syncPolicySaveSuccess" : {
+            msg: "config.messages.SyncMessages.policySaveSuccessful",
+            type: "info"
+        },
+        "scheduleCreated" : {
+            msg: "config.messages.SyncMessages.scheduleCreated",
+            type: "info"
+        },
+        "scheduleSaved" : {
+            msg: "config.messages.SyncMessages.scheduleSaved",
+            type: "info"
+        },
+        "scheduleDeleted" : {
+            msg: "config.messages.SyncMessages.scheduleDeleted",
+            type: "info"
         }
     };
 
