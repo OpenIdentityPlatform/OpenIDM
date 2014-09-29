@@ -30,7 +30,11 @@ enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true
 
 if (request.resourceName.indexOf("policy/") !== 0 && enforce !== "false") {
     if (request.method === "create") {
-        fullResourcePath = request.resourceName + "/" + (request.newResourceId !== null ? request.newResourceId : "*")
+        if (request.resourceName === "") {
+            fullResourcePath = request.newResourceId !== null ? request.newResourceId : "*";
+        } else {
+            fullResourcePath = request.resourceName + "/" + (request.newResourceId !== null ? request.newResourceId : "*");
+        }
     } else {
         fullResourcePath = request.resourceName;
     }
