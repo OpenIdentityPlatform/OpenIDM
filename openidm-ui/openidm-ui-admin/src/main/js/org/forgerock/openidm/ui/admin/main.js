@@ -25,16 +25,16 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/admin/main", [
-	"./MandatoryPasswordChangeDialog",
-	
-	"./delegates/ConnectorDelegate",
+    "./MandatoryPasswordChangeDialog",
+    
+    "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
     "./delegates/SessionStorageDelegate",
 
-	"./ResourcesView",
-	"./connector/AddEditConnectorView",
+    "./ResourcesView",
+    "./connector/AddEditConnectorView",
     "./connector/ConnectorTypeAbstractView",
-	"./connector/ConnectorTypeView",
+    "./connector/ConnectorTypeView",
     "./connector/ConnectorRegistry",
 
     "./managed/AddEditManagedView",
