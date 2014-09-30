@@ -22,18 +22,34 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define, _, sessionStorage, window */
+/*global $, define, _, sessionStorage, localStorage, window */
 
-define("org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate", [], function() {
+define("org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate", [], function() {
 
     var obj = {};
     
-    obj.get = function(i){
-        return JSON.parse(sessionStorage.getItem(i));
+    obj.get = function(item, useLocalStorage){
+        var storage = sessionStorage;
+        if(useLocalStorage) {
+            storage = localStorage;
+        }
+        return JSON.parse(storage.getItem(item));
     };
     
-    obj.set = function(i, o){
-        sessionStorage.setItem(i, JSON.stringify(o));
+    obj.set = function(item, newObj, useLocalStorage){
+        var storage = sessionStorage;
+        if(useLocalStorage) {
+            storage = localStorage;
+        }
+        storage.setItem(item, JSON.stringify(newObj));
+    };
+    
+    obj.remove = function(item, useLocalStorage){
+        var storage = sessionStorage;
+        if(useLocalStorage) {
+            storage = localStorage;
+        }
+        storage.removeItem(item);
     };
     
     return obj;

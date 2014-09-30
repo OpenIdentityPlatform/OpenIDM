@@ -32,9 +32,9 @@ define("org/forgerock/openidm/ui/admin/mapping/EditMappingView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
-    "org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
-    ], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, PropertiesView, sessionStorageDelegate, connectorDelegate) {
+    ], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, PropertiesView, browserStorageDelegate, connectorDelegate) {
 
     var EditMappingView = AdminAbstractView.extend({
         template: "templates/admin/mapping/EditMappingTemplate.html",
@@ -46,15 +46,15 @@ define("org/forgerock/openidm/ui/admin/mapping/EditMappingView", [
         },
         data: {},
         setCurrentMapping: function(mappingObj){
-            sessionStorageDelegate.set('currentMapping',mappingObj);
+            browserStorageDelegate.set('currentMapping',mappingObj);
             return mappingObj;
         },
         currentMapping: function(){
-            return sessionStorageDelegate.get('currentMapping');
+            return browserStorageDelegate.get('currentMapping');
         },
         checkChanges: function () {
             var currentProperties = this.currentMapping().properties,
-                changedProperties = sessionStorageDelegate.get(this.currentMapping().name + "_Properties") || currentProperties,
+                changedProperties = browserStorageDelegate.get(this.currentMapping().name + "_Properties") || currentProperties,
                 changesPending = !_.isEqual(currentProperties,changedProperties);
             
             if(changesPending) {
@@ -77,7 +77,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditMappingView", [
                     this.data.mapping = _.filter(sync.mappings,function(m){ return m.name === args[0];})[0];
                     this.setCurrentMapping($.extend({},true,this.data.mapping));
                     this.buildAvailableObjectsMap().then(_.bind(function(availableObjects){
-                        sessionStorageDelegate.set(this.currentMapping().name + "_AvailableObjects", availableObjects);
+                        browserStorageDelegate.set(this.currentMapping().name + "_AvailableObjects", availableObjects);
                         this.data.pageTitle = $.t("templates.mapping.editMapping",{name: this.data.mapping.name});
                         this.parentRender(_.bind(function () {
                             $('#mappingTabs').tabs();
@@ -96,11 +96,11 @@ define("org/forgerock/openidm/ui/admin/mapping/EditMappingView", [
             var syncMappings;
 
             syncMappings = _.map(this.data.syncConfig.mappings,_.bind(function(m){
-                var propertyChanges = sessionStorageDelegate.get(this.currentMapping().name + "_Properties");
+                var propertyChanges = browserStorageDelegate.get(this.currentMapping().name + "_Properties");
                 if(m.name === this.currentMapping().name){
                     if(propertyChanges){
                         m.properties = propertyChanges;
-                        sessionStorage.removeItem(this.currentMapping().name + "_Properties");
+                        browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
                     }
                 }
                 return m;
@@ -125,7 +125,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditMappingView", [
         },
         clearChanges: function(e){
             e.preventDefault();
-            sessionStorage.removeItem(this.currentMapping().name + "_Properties");
+            browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
             this.render([this.currentMapping().name]);
         },
         buildAvailableObjectsMap: function(){

@@ -505,6 +505,7 @@
             "conditionScriptApplied": "Conditional update script applied",
             "mappingExists": "Mapping for this target property already exists",
             "allPropertiesMapped": "*All target properties have been mapped",
+            "numRepresentativeProps":"Number of representative properties",
             "propertyEdit": {
                 "title": "Target Property: __property__",
                 "valueMapping": "Value Mapping",
