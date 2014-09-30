@@ -1597,6 +1597,75 @@ $ <userinput>curl \
             },
             "runTargetPhase" : false,
    ...  </programlisting>
+
+  <section xml:id="recon-query-optimization">
+   <title>Improving Reconciliation Query Performance</title>
+   <para>
+    By default, reconciliation source and target queries make a read call to
+    every record on the source and target systems, to determine candidates for
+    reconciliation. On slow source or target systems, these frequent calls can
+    incur a substantial performance cost.
+   </para>
+   <para>
+    To improve query performance in these situations, you can preload the entire
+    result set into memory on the source or target system, or on both systems.
+    Subsequent queries are made against the data in memory, rather than the data
+    on the remote system. For this optimization to work, the entire result set
+    must fit into the available memory on the system for which it is enabled.
+   </para>
+   <para>
+    The optimization works by defining a <literal>sourceQuery</literal> or
+    <literal>targetQuery</literal> in the synchronization mapping that returns
+    not just the ID, but the complete object. The query must be predefined in
+    the repository configuration, and specified by its
+    <literal>queryId</literal>.
+   </para>
+   <para>
+    The following example loads the full result set into memory during the
+    source phase of the reconciliation. The example uses the predefined query,
+    <literal>query-all</literal>, which returns the full object:
+   </para>
+   <programlisting language="javascript">"mappings" : [
+    {
+        "name" : "systemXmlfileAccounts_managedUser",
+        "source" : "system/xmlfile/account",
+        "target" : "managed/user",
+        "sourceQuery" : {
+            "queryId" : "query-all"
+        },
+    ...</programlisting>
+   <para>
+    You can explicitly state that the query has returned the complete object by
+    setting <literal>sourceQueryFullEntry</literal> or
+    <literal>targetQueryFullEntry</literal> to <literal>true</literal> in the
+    mapping. If these properties are not set, OpenIDM automatically attempts to
+    detect what has been returned. The auto-detection mechanism assumes that
+    a result set that includes two or more fields per object (apart from the
+    <literal>_id</literal> and <literal>rev</literal> fields) contains the
+    complete object. If <literal>sourceQueryFullEntry</literal> is
+    <literal>true</literal>, the source query result includes all the details
+    necessary to pre-load the source objects. If
+    <literal>sourceQueryFullEntry</literal> is <literal>false</literal>, OpenIDM
+    uses only the IDs from the source query result. If the complete source
+    object is required, the source object is queried on demand. The same logic
+    applies for the target query.
+   </para>
+   <para>
+    The following excerpt of the synchronization mapping file indicates that
+    the full objects are returned and that OpenIDM should not autodetect the
+    result set.
+   </para>
+   <programlisting language="javascript">"mappings" : [
+    {
+        "name" : "systemXmlfileAccounts_managedUser",
+        "source" : "system/xmlfile/account",
+        "target" : "managed/user",
+        "sourceQueryFullEntry" : true,
+        "sourceQuery" : {
+            "queryId" : "query-all"
+        },
+    ...</programlisting>
+  </section>
  </section>
 
  <section xml:id="recon-by-id">
