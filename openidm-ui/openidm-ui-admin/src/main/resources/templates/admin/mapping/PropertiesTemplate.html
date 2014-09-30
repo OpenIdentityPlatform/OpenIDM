@@ -1,10 +1,11 @@
 <div class="float-left">
     <input type="button" class="addProperty button" value="{{t "templates.mapping.addProperty"}}" />
-    <span id="allPropertiesMapped" style="display:none;padding:20px;">{{t "templates.mapping.allPropertiesMapped"}}</span>
 </div>
-<!-- <fieldset class="float-right">
+<fieldset class="float-right">
+    <label for="numRepresentativeProps" class="inline">{{t "templates.mapping.numRepresentativeProps"}}:</label> <input type="text" class="small-text-input" id="numRepresentativeProps" value="{{numRepresentativeProps}}">
     <label for="findSampleSource" class="inline">{{t "templates.mapping.sampleSource"}}:</label> <input type="text" id="findSampleSource" value="{{sampleSource}}">
-</fieldset> -->
+</fieldset>
 <div style="margin-top: 45px;">
+    <span id="allPropertiesMapped" style="display:none;">{{t "templates.mapping.allPropertiesMapped"}}</span>
     <table id="mappingTable"></table>
 </div>

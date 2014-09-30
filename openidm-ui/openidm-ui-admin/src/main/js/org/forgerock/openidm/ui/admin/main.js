@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
-    "./delegates/SessionStorageDelegate",
+    "./delegates/BrowserStorageDelegate",
 
     "./ResourcesView",
     "./connector/AddEditConnectorView",

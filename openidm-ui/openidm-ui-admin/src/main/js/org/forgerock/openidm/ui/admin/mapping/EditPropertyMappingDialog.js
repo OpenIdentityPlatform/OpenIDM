@@ -16,11 +16,11 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
-    "org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompletUtils",
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/addon/display/placeholder"
-], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, sessionStorageDelegate, autoCompleteUtils, codeMirror, placeHolder) {
+], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, codeMirror, placeHolder) {
     var EditPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogEditTemplate.html",
         data: {
@@ -178,7 +178,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             }
             
             var formContent = form2js(this.el),
-                mappingProperties = sessionStorageDelegate.get(this.data.mappingName + "_Properties"),
+                mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties"),
                 target = this.property,
                 propertyObj = _.chain(mappingProperties)
                                     .flatten()
@@ -188,7 +188,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             // in the case when our property isn't currently found in the sync config...
             if (!propertyObj) {
                 propertyObj = {"target": this.property};
-                _.find(sessionStorageDelegate.get("currentMapping"), function (o) { return o.name === this.data.mappingName; })
+                _.find(browserStorageDelegate.get("currentMapping"), function (o) { return o.name === this.data.mappingName; })
                  .properties
                  .push(propertyObj);
             }
@@ -242,7 +242,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 return p;
             });
             
-            sessionStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
+            browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
             
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingView", args: [this.data.mappingName]});
         },
@@ -260,10 +260,10 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             this.data.mappingName = params[0];
             this.property = params[1];
             
-            currentProperties = sessionStorageDelegate.get(this.data.mappingName + "_Properties") || sessionStorageDelegate.get("currentMapping").properties;
+            currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
             this.data.currentProperties = currentProperties;
             
-            sessionStorageDelegate.set(this.data.mappingName + "_Properties",currentProperties);
+            browserStorageDelegate.set(this.data.mappingName + "_Properties",currentProperties);
             
             this.data.property = _.find(currentProperties, _.bind(function (p) { return p.target === this.property; }, this));
 
@@ -347,7 +347,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             
             this.showTransformSample();
 
-            this.data.availableSourceProps = sessionStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
+            this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
             
             if(this.data.availableSourceProps){
                 autoCompleteUtils.selectionSetup($("input[name='source']:last", this.$el), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));

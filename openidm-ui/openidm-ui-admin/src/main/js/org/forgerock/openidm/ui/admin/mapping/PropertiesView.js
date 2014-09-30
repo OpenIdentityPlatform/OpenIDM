@@ -31,8 +31,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate"
-    ], function(AbstractView, eventManager, conf, UIUtils, constants, sessionStorageDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate"
+    ], function(AbstractView, eventManager, conf, UIUtils, constants, browserStorageDelegate) {
 
     var PropertiesView = AbstractView.extend({
         template: "templates/admin/mapping/PropertiesTemplate.html",
@@ -41,7 +41,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         events: {
             "click .addProperty": "addProperty",
             "click .removePropertyBtn": "removeProperty",
-            "click .attrTabBtn": "openPropertyEditTab"
+            "click .attrTabBtn": "openPropertyEditTab",
+            "keyup #numRepresentativeProps": "resetNumRepresentativeProps"
         },
         addProperty: function (e) {
             e.preventDefault();
@@ -52,8 +53,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             e.preventDefault();
             
             UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
-                var mapProps = sessionStorageDelegate.get(this.parent.currentMapping().name + "_Properties") || this.data.mapProps;
-                sessionStorageDelegate.set(this.parent.currentMapping().name + "_Properties",_.reject(mapProps, function (p) { return p.target === $(e.target).attr('target'); }));
+                var mapProps = browserStorageDelegate.get(this.parent.currentMapping().name + "_Properties") || this.data.mapProps;
+                browserStorageDelegate.set(this.parent.currentMapping().name + "_Properties",_.reject(mapProps, function (p) { return p.target === $(e.target).attr('target'); }));
                 this.parent.checkChanges();
                this.render(this.parent);
             },this));
@@ -73,9 +74,19 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 $("[href=#Default_Values]").click();
             }
         },
+        resetNumRepresentativeProps: function(e){
+            var num = parseInt($(e.target).val(), 10);
+            
+            e.preventDefault();
+            
+            if(num && num <= this.parent.currentMapping().properties.length){
+                browserStorageDelegate.set(this.parent.currentMapping().name + "_numRepresentativeProps", num,true);
+            }
+            this.render(this.parent);
+        },
         loadMappingPropertiesGrid: function() {
             var _this = this,
-                mapProps = sessionStorageDelegate.get(this.parent.currentMapping().name + "_Properties") || sessionStorageDelegate.get("currentMapping").properties,
+                mapProps = browserStorageDelegate.get(this.parent.currentMapping().name + "_Properties") || browserStorageDelegate.get("currentMapping").properties,
                 sampleSource = conf.globalData.sampleSource || {},
                 gridFromMapProps = function (props) {
                     return _.chain(props)
@@ -267,12 +278,22 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         $('#mappingTable').addRowData("blankRow", {"required":true,"target":$.t("templates.mapping.noPropertiesMapped"), "default":"", "script":"", "hasConditionScript":false});
                         _this.parent.$el.find("#findSampleSource").parent().hide();
                    }
+                   
+                    _this.setNumRepresentativePropsLine();
                 }
             }).jqGrid('sortableRows',{
                 update: function(ev,ui){
                     var item = ui.item[0],
-                        index = item.rowIndex;
-                        
+                        oldIndex = _.pluck(mapProps,"target").indexOf(item.id),
+                        newIndex = item.rowIndex - 1;
+                        mapProps.splice(newIndex, 0, mapProps.splice(oldIndex, 1)[0]);
+
+                        browserStorageDelegate.set(_this.parent.currentMapping().name + "_Properties", mapProps);
+                        _this.setNumRepresentativePropsLine();
+                        _this.parent.checkChanges();
+                },
+                start: function(){
+                    $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width","");
                 }
             });
         },
@@ -280,7 +301,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             var _this = this,
                 availableProps;
             
-            availableProps = sessionStorageDelegate.get(this.parent.currentMapping().name + "_AvailableObjects").target.properties || [];
+            availableProps = browserStorageDelegate.get(this.parent.currentMapping().name + "_AvailableObjects").target.properties || [];
             
             if(!availableProps.length || _.difference(availableProps,_.pluck(_this.data.mapProps,"target")).length) {
                 _this.$el.find('.addProperty').removeProp('disabled');
@@ -292,6 +313,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         },
         render: function(parent, callback) {
             this.parent = parent;
+            //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
+            this.data.numRepresentativeProps = browserStorageDelegate.get(this.parent.currentMapping().name + "_numRepresentativeProps",true) || 4;
             
             this.parentRender(_.bind(function () {
                 this.loadMappingPropertiesGrid();
@@ -300,6 +323,9 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                     callback();
                 }
             }, this));
+        },
+        setNumRepresentativePropsLine: function(){
+            $("#mappingTable", this.$el).find("tr:eq(" + this.data.numRepresentativeProps + ") td").css("border-bottom-width","10px");
         }
     });
 

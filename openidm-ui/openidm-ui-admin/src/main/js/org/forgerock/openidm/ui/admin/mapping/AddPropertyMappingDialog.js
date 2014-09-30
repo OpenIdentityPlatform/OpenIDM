@@ -13,9 +13,9 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/SessionStorageDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompletUtils"
-], function(AbstractView, conf, uiUtils, eventManager, constants, sessionStorageDelegate, autoCompleteUtils) {
+], function(AbstractView, conf, uiUtils, eventManager, constants, browserStorageDelegate, autoCompleteUtils) {
     var AddPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogAddTemplate.html",
         data: {
@@ -30,7 +30,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
         
         formSubmit: function (event) {
             var property = $(":input[name=propertyList]",this.$el).val(),
-                mappingProperties = sessionStorageDelegate.get(this.data.mappingName + "_Properties");
+                mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties");
             
             event.preventDefault();
             
@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 
                 mappingProperties.push({target: property});
 
-                sessionStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
+                browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
                 
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingView", args: [this.data.mappingName]});
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, property]});
@@ -78,11 +78,11 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
         getAvailableTargetProps: function(){
             var availableProps;
             
-            this.data.currentProperties = sessionStorageDelegate.get(this.data.mappingName + "_Properties") || sessionStorageDelegate.get("currentMapping").properties;
+            this.data.currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
             
-            sessionStorageDelegate.set(this.data.mappingName + "_Properties", this.data.currentProperties);
+            browserStorageDelegate.set(this.data.mappingName + "_Properties", this.data.currentProperties);
             
-            availableProps = sessionStorageDelegate.get(this.data.mappingName + "_AvailableObjects").target.properties || [];
+            availableProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").target.properties || [];
             
             return _.reject(availableProps, _.bind(function(p){
                 return _.contains(_.pluck(this.data.currentProperties,"target"), p);
