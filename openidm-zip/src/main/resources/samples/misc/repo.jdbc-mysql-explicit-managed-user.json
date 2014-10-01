@@ -18,8 +18,8 @@
             "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
             "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey=CONCAT('/', ${field}) AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
             "get-users-of-direct-role" : "select obj.fullobject from ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id  INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id where objtype.objecttype = ${_resource} AND prop.propKey LIKE '/roles/%' AND prop.propValue = ${role}",
-            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
-            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )",
@@ -34,10 +34,10 @@
         "explicitTables" : {
             "get-users-of-direct-role" : "select objectid from ${_dbSchema}.${_table} where find_in_set(${role},replace(substring(roles,2,(length(roles) - 2)),'\"',''))",
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-            "for-internalcredentials" : "select * FROM openidm.internaluser WHERE objectid = ${uid}",      
+            "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
             "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
             "get-by-field-value" : "call ${_dbSchema}.byFieldValue('${_dbSchema}','${_table}',${field},${value}, 'userName,firstId,secondId')",
-            "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",        
+            "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",
             
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${username} and accountStatus = 'active'",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
