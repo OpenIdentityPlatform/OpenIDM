@@ -201,10 +201,8 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>
-      Action performed on that entry, such as <literal>"create"</literal>. See
-      the section on <link xlink:href="integrators-guide#audit-eventtypes"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Event
-      Types</citetitle></link> for a list of possible actions.</para>
+      Action performed on that entry, such as <literal>"create"</literal>.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -542,11 +540,9 @@
    <para>
     The <literal>eventTypes</literal> configuration specifies what events
     OpenIDM writes to audit logs. OpenIDM supports the following event types:
-    access, activity, sync, and reconciliation. You can even configure custom
-    audit data filtering and reconciliation, as described in
-    <xref linkend="audit-filtering" />. The filter for actions under activity
-    logging shows the actions on managed or system objects for which OpenIDM
-    writes to the activity log.
+    access, activity, synchronization, and reconciliation. The filter for
+    actions under activity logging shows the actions on managed or system
+    objects for which OpenIDM writes to the activity log.
    </para>
 
    <variablelist>
@@ -672,6 +668,7 @@
    <literal>true</literal> in the audit log. Fields are listed in 
    comma-separated format, for example:</para>
    <screen>"passwordFields" : [ "password", "username" ]</screen>
+
   </section>
 
   <section xml:id="audit-logto">
@@ -925,8 +922,8 @@ mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
 
   <para>
    With OpenIDM, you can collect large amounts of data on each transaction,
-   subdivided in several different event types: access, activity,
-   reconciliation, and synchronization.
+   subdivided in several different <literal>eventTypes</literal>: access,
+   activity, reconciliation, and synchronization.
   </para>
 
   <para>
