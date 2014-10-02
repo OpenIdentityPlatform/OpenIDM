@@ -50,6 +50,10 @@
             </releases>
         </repository>
     </repositories>
+    <properties>
+        <!-- If we release this project, we need to include the Forgerock binary license -->
+        <include.binary.license>${project.build.directory}</include.binary.license>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -657,41 +661,6 @@
                     <scope>compile</scope>
                 </dependency>
             </dependencies>
-        </profile>
-        <profile>
-            <id>get-forgerock-binary-license</id>
-            <activation>
-                <property>
-                   <name>forgerock.license.url</name>
-                </property>
-            </activation>
-            <build>
-               <plugins>
-                  <plugin>
-                     <!-- The svn export command doesn't work fine with maven-scm-plugin, it works well with the exec-maven-plugin -->
-                     <groupId>org.codehaus.mojo</groupId>
-                     <artifactId>exec-maven-plugin</artifactId>
-                     <version>1.3.2</version>
-                     <executions>
-                        <execution>
-                           <id>getLicenseFromSVN</id>
-                           <goals>
-                              <goal>exec</goal>
-                           </goals>
-                           <phase>prepare-package</phase>
-                        </execution>
-                     </executions>
-                     <configuration>
-                        <executable>svn</executable>
-                        <arguments>
-                           <argument>export</argument>
-                           <argument>${forgerock.license.url}</argument>
-                           <argument>${project.build.directory}/license.txt</argument>
-                        </arguments>
-                     </configuration>
-                  </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 </project>
