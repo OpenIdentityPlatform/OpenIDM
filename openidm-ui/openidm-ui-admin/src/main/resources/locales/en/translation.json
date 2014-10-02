@@ -274,6 +274,7 @@
             "csvfile_CSVFileConnector":"CSV Connector",
             "databasetable_DatabaseTableConnector":"Database Connector",
             "ldap_LdapConnector":"LDAP Connector",
+            "salesforce_Salesforce":"Salesforce Connector",
             "connectorName" : "Connector Name",
             "connectorEnabled" : "Enabled",
             "connectorType" : "Connector Type",
@@ -478,6 +479,16 @@
                     "invalidCredentials" : "Invalid Username or Password",
                     "badBaseContext" : "Bad Base Context(s)"
                 }
+            },
+            "salesforce" : {
+                "connectTimeout" : "Connect Timeout",
+                "loginUrl" : "Login URL",
+                "idleCheckInterval" : "Idle Check Interval",
+                "refreshToken" : "Refresh Token",
+                "clientSecret" : "Client Secret",
+                "clientId" : "Client ID",
+                "instanceUrl" : "Instance URL",
+                "version" : "API Version"
             }
         },
         "mapping": {

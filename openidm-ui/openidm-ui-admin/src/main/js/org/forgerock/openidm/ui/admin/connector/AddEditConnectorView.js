@@ -104,12 +104,14 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 } else {
                     this.data.editState = true;
 
+                    // FIXME support multiple provisioners based on systemType
                     ConfigDelegate.readEntity("provisioner.openicf/" +args[0]).then(_.bind(function(data){
                         var tempVersion;
 
                         data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
                         this.data.connectorName = data.name;
                         this.data.connectorType = data.connectorRef.connectorName;
+                        this.data.systemType = data.connectorRef.systemType;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
                         this.data.addEditSubmitTitle = $.t("templates.connector.updateButtonTitle");
@@ -316,13 +318,13 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
             if(this.data.editState) {
-                ConfigDelegate.updateEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.updateEntity("provisioner." + this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
                     _.delay(function () {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);
                 }, this));
             } else {
-                ConfigDelegate.createEntity("provisioner.openicf/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.createEntity("provisioner." + this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
                     _.delay(function() {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);

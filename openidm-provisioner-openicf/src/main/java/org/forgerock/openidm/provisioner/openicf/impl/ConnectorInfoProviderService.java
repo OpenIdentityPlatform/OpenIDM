@@ -143,7 +143,7 @@ import org.slf4j.LoggerFactory;
             policy = ReferencePolicy.DYNAMIC) })
 public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConnectorConfigurationHelper {
     /**
-     * Setup logging for the {@link OpenICFProvisionerService}.
+     * Setup logging for the {@link ConnectorInfoProviderService}.
      */
     private final static Logger logger = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
 
@@ -151,6 +151,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public static final String DEFAULT_CONNECTORS_LOCATION = "connectors";
     public static final String PROPERTY_OPENICF_CONNECTOR_URL = "connectorsLocation";
     public static final String PID = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider";
+    private static final String SYSTEM_TYPE_OPENICF = "openicf";
 
     // Private
     private Map<String, Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler>> remoteFrameworkConnectionInfo =
@@ -429,6 +430,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     // ----- Implementation of ConnectorConfigurationHelper interface
 
     /**
+     * {@inheritDoc}
+     */
+    public String getSystemType() {
+        return SYSTEM_TYPE_OPENICF;
+    }
+
+    /**
      * Validates that the connectorRef is defined in the connector configuration
      * @param params connector configuration
      * @return true if connectorRef is not null and configurationProperties is null; false otherwise
@@ -447,21 +455,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     private boolean isGenerateFullConfig(JsonValue params) {
         return !params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull()
                 && !params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public JsonValue configure(JsonValue params) throws ResourceException {
-        if (params.size() == 0) {
-            return getAvailableConnectors();
-        } else if (isGenerateConnectorCoreConfig(params)) {
-            return generateConnectorCoreConfig(params);
-        } else if (isGenerateFullConfig(params)) {
-            return generateConnectorFullConfig(params);
-        } else {
-            return new JsonValue(new HashMap<String, Object>());
-        }
     }
 
     /**

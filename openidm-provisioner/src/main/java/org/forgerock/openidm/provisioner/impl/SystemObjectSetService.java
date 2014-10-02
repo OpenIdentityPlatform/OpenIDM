@@ -71,12 +71,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.forgerock.json.fluent.JsonValue.array;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
+import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.SYSTEM_TYPE;
+
 
 /**
- * SystemObjectSetService implement the {@link SingletonResourceProvider}.
- *
- * @author $author$
- * @version $Revision$ $Date$
+ * SystemObjectSetService is a {@link SingletonResourceProvider} to manage provisioner/connector configuration
+ * and to dispatch liveSync to the correct provisioner implementation.
  */
 @Component(name = "org.forgerock.openidm.provisioner",
         policy = ConfigurationPolicy.IGNORE,
@@ -117,7 +124,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         createFullConfig;
 
         private static Set<SystemAction> requiringConnectorConfigurationHelper = EnumSet.of(
-                createConfiguration, availableConnectors, createCoreConfig, createFullConfig);
+                createConfiguration, createCoreConfig, createFullConfig);
 
         /** Checks to see that ConnectorConfigurationHelper is available */
         boolean requiresConnectorConfigurationHelper() {
@@ -175,8 +182,20 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         return connectionFactory;
     }
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
-    private ConnectorConfigurationHelper connectorConfigurationHelper;
+    @Reference(referenceInterface = ConnectorConfigurationHelper.class,
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            bind = "bindConnectorConfigurationHelper",
+            unbind = "unbindConnectorConfigurationHelper",
+            policy = ReferencePolicy.DYNAMIC)
+    private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<String, ConnectorConfigurationHelper>();
+
+    protected void bindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) throws ResourceException {
+        connectorConfigurationHelpers.put(helper.getSystemType(), helper);
+    }
+
+    protected void unbindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) {
+        connectorConfigurationHelpers.remove(helper.getSystemType());
+    }
 
     /**
      * Cryptographic service.
@@ -191,12 +210,28 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             final JsonValue content = request.getContent();
             final JsonValue id = content.get("id");
             final SystemAction action = request.getActionAsEnum(SystemAction.class);
-            if (action.requiresConnectorConfigurationHelper() && null == connectorConfigurationHelper) {
+            final ConnectorConfigurationHelper helper = connectorConfigurationHelpers.get(
+                    content.get(CONNECTOR_REF).get(SYSTEM_TYPE).asString());
+
+            if (action.requiresConnectorConfigurationHelper() && connectorConfigurationHelpers.isEmpty()) {
                 throw new ServiceUnavailableException("The required service is not available");
             }
             switch (action) {
             case createConfiguration:
-                handler.handleResult(connectorConfigurationHelper.configure(cryptoService.decryptIfNecessary(content)));
+                //  Multi phase configuration event calls this to generate the response for the next phase.
+                if (content.size() == 0) {
+                    // Stage 1 : list available connectors
+                    handler.handleResult(getAvailableConnectors());
+                } else if (isGenerateConnectorCoreConfig(content)) {
+                    // Stage 2: generate basic configuration
+                    handler.handleResult(helper.generateConnectorCoreConfig(cryptoService.decryptIfNecessary(content)));
+                } else if (isGenerateFullConfig(content)) {
+                    // Stage 3: generate/validate full configuration
+                    handler.handleResult(helper.generateConnectorFullConfig(cryptoService.decryptIfNecessary(content)));
+                } else {
+                    // illegal request ??
+                    handler.handleResult(json(object()));
+                }
                 break;
             case testConfig:
                 JsonValue config = content;
@@ -212,11 +247,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             case test:
                 ps = locateServiceForTest(id);
                 if (ps != null) {
-                    handler.handleResult(new JsonValue(ps.getStatus()));
+                    handler.handleResult(new JsonValue(ps.getStatus(context)));
                 } else {
                     List<Object> list = new ArrayList<Object>();
                     for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-                        list.add(entry.getValue().getStatus());
+                        list.add(entry.getValue().getStatus(context));
                     }
                     handler.handleResult(new JsonValue(list));
                 }
@@ -235,15 +270,16 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 handler.handleResult(liveSync(source, Boolean.valueOf(params.get("detailedFailure").asString())));
                 break;
             case availableConnectors:
-                handler.handleResult(connectorConfigurationHelper.getAvailableConnectors());
+                // stage 1 - direct action to get available connectors
+                handler.handleResult(getAvailableConnectors());
                 break;
             case createCoreConfig:
-                handler.handleResult(connectorConfigurationHelper.generateConnectorCoreConfig(
-                        cryptoService.decryptIfNecessary(content)));
+                // stage 2 - direct action to create core configuration
+                handler.handleResult(helper.generateConnectorCoreConfig(cryptoService.decryptIfNecessary(content)));
                 break;
             case createFullConfig:
-                handler.handleResult(connectorConfigurationHelper.generateConnectorFullConfig(
-                        cryptoService.decryptIfNecessary(content)));
+                // state 3 - direct action to create full configuration
+                handler.handleResult(helper.generateConnectorFullConfig(cryptoService.decryptIfNecessary(content)));
                 break;
             default:
                 handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));
@@ -257,6 +293,41 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         } catch (Exception e) {
             handler.handleError(new InternalServerErrorException(e));
         }
+    }
+
+    /**
+     * Validates that the connectorRef is defined in the connector configuration
+     *
+     * @param requestConfig connector configuration
+     * @return true if connectorRef is not null and configurationProperties is null; false otherwise
+     */
+    private boolean isGenerateConnectorCoreConfig(JsonValue requestConfig) {
+        return !requestConfig.get(CONNECTOR_REF).isNull()
+                && !requestConfig.get(CONNECTOR_REF).get(CONNECTOR_NAME).isNull()
+                && requestConfig.get(CONFIGURATION_PROPERTIES).isNull();
+    }
+
+    /**
+     * Validates that connectorRef and configurationProperties inside the connector configuration are both not null
+     *
+     * @param requestConfig connector configuration
+     * @return true if both connectorRef and configurationProperties are not null; false otherwise
+     */
+    private boolean isGenerateFullConfig(JsonValue requestConfig) {
+        return !requestConfig.get(CONNECTOR_REF).isNull()
+                && !requestConfig.get(CONNECTOR_REF).get(CONNECTOR_NAME).isNull()
+                && !requestConfig.get(CONFIGURATION_PROPERTIES).isNull();
+    }
+
+    private JsonValue getAvailableConnectors() throws ResourceException {
+        JsonValue availableConnectors = json(array());
+        for (Map.Entry<String, ConnectorConfigurationHelper> helperEntry : connectorConfigurationHelpers.entrySet()) {
+            for (JsonValue connectorRef : helperEntry.getValue().getAvailableConnectors().get(CONNECTOR_REF)) {
+                connectorRef.put(SYSTEM_TYPE, helperEntry.getKey());
+                availableConnectors.add(connectorRef.getObject());
+            }
+        }
+        return json(object(field(CONNECTOR_REF, availableConnectors.getObject())));
     }
 
     @Override
