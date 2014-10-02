@@ -24,14 +24,11 @@
  * $Id$
  */
 
-package org.forgerock.openidm.provisioner.openicf.impl;
+package org.forgerock.openidm.provisioner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
-import org.identityconnectors.common.StringUtil;
 
 /**
  * SimpleSystemIdentifier class helps to match the id against the name of the
@@ -39,8 +36,8 @@ import org.identityconnectors.common.StringUtil;
  * <p/>
  * Matching id pattern: system/{@code name}/*
  *
- * @author $author$
- * @version $Revision$ $Date$
+ * @author @Laszlo Hordos
+ * @author brmiller
  */
 public class SimpleSystemIdentifier implements SystemIdentifier {
 
@@ -49,7 +46,7 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     public SimpleSystemIdentifier(JsonValue configuration) throws JsonValueException {
         name = configuration.get("name").required().expect(String.class).asString().trim();
 
-        if (StringUtil.isBlank(name)) {
+        if (StringUtils.isBlank(name)) {
             throw new JsonValueException(configuration, "Failed to determine system name from configuration.");
         }
         if (!StringUtils.isAlphanumeric(name)) {

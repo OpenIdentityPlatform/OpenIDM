@@ -32,20 +32,24 @@ import org.forgerock.json.resource.ResourceException;
  * to validate connector configurations as well as check which connectors are available for configuration.
  * After each phase of generated configuration the user can customize the properties generated and have
  * them validated.
- *
- * @author $author$
- * @version $Revision$ $Date$
  */
 public interface ConnectorConfigurationHelper {
+
+    /** configuration property that describes the connector's meta-data */
+    static final String CONNECTOR_REF = "connectorRef";
+    /** configuration property that holds the actual connector configuration (passed to the connector) */
+    static final String CONFIGURATION_PROPERTIES = "configurationProperties";
+    /** the connector name (within connectorRef) */
+    static final String CONNECTOR_NAME = "connectorName";
+    /** the system (provisioner) type (within connectorRef) */
+    static final String SYSTEM_TYPE = "systemType";
+
     /**
-     * Multi phase configuration event calls this to generate the response for
-     * the next phase.
+     * Return the system type that is used to manage configuration/connectors created by this configuration helper.
      *
-     * @param params
-     * @return
-     * @throws ResourceException
+     * @return the configuration system type.
      */
-    public JsonValue configure(JsonValue params) throws ResourceException;
+    public String getSystemType();
 
     /**
      * Test the given configuration.

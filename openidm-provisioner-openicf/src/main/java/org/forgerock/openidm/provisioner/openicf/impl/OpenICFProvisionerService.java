@@ -111,6 +111,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
+import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
 import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -776,7 +777,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     break;
 
                 case test:
-                    handleTestAction(request, handler);
+                    handleTestAction(context, request, handler);
                     break;
 
                 case livesync:
@@ -958,8 +959,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         handler.handleResult(result);
     }
 
-    private void handleTestAction(ActionRequest request, ResultHandler<JsonValue> handler) {
-        handler.handleResult(new JsonValue(getStatus()));
+    private void handleTestAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        handler.handleResult(new JsonValue(getStatus(context)));
     }
 
     private void handleLiveSyncAction(final ServerContext context, final ActionRequest request, final ResultHandler<JsonValue> handler)
@@ -1896,9 +1897,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * "ok": false
      * }}
      *
+     * @param context the ServerContext of the request requesting the status
      * @return a Map of the current status of a connector
      */
-    public Map<String, Object> getStatus() {
+    public Map<String, Object> getStatus(ServerContext context) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         JsonValue jv = new JsonValue(result);
         boolean ok = false;

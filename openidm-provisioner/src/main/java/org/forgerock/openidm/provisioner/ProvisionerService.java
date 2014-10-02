@@ -28,13 +28,13 @@ package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 
 import java.util.Map;
 
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Minimum behavior for a provisioner used to provision resources to external sources.
  */
 public interface ProvisionerService {
 
@@ -43,7 +43,7 @@ public interface ProvisionerService {
      * <p/>
      * The service which refers to this service instance can distinguish between multiple instances by this value.
      *
-     * @return
+     * @return the provisioner's system identifier
      */
     public SystemIdentifier getSystemIdentifier();
 
@@ -52,9 +52,10 @@ public interface ProvisionerService {
      * </p/>
      * TODO Provide a sample object
      *
-     * @return
+     * @param context the request's ServerContext in case the status report operation needs to perform a router request
+     * @return the provisioner's status
      */
-    public Map<String, Object> getStatus();
+    public Map<String, Object> getStatus(ServerContext context);
     
     /**
      * Tests a configuration for a connector.
