@@ -27,7 +27,8 @@
                     "**/openidm-quartz-fragment*.jar",
                     "**/openidm-config*.jar",
                     "**/openidm-crypto*.jar",
-                    "**/snappy-java*.jar"
+                    "**/snappy-java*.jar",
+                    "**/openidm-httpclient-fragment*.jar"
                 ],
                 "start-level":3,
                 "action":"install.start"
@@ -83,7 +84,8 @@
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
                     "**/openidm-scheduler*.jar",
-                    "**/groovy-all*.jar"
+                    "**/groovy-all*.jar",
+                    "**/openidm-httpclient-fragment*.jar"
                 ]
             },
             {

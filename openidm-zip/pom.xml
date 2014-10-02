@@ -198,6 +198,11 @@
             <artifactId>openidm-cluster</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-httpclient-fragment</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -325,6 +330,10 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
             <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient</artifactId>
@@ -522,6 +531,29 @@
             <version>1.3.0</version>
             <type>js</type>
         </dependency>
+
+        <!-- scriptedrest2dj sample Groovy dependencies -->
+        <dependency>
+            <groupId>org.apache.ivy</groupId>
+            <artifactId>ivy</artifactId>
+            <version>2.4.0-rc1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+            <artifactId>http-builder</artifactId>
+            <version>0.7.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>openidm-${project.version}</finalName>
