@@ -186,8 +186,6 @@ public class SchedulerService implements RequestHandler {
         RepoJobStore.setServerContext(null);
     }
     
-    
-    
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
@@ -235,12 +233,6 @@ public class SchedulerService implements RequestHandler {
 
     public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
         synchronized (CONFIG_SERVICE_LOCK) {
-            boolean update = false;
-            if (configMap.containsKey(service.getJobName())) {
-                logger.debug("Updating Schedule");
-                configMap.put(service.getJobName(), service);
-                update = true;
-            }
             logger.debug("Registering new ScheduleConfigService");
             configMap.put(service.getJobName(), service);
             if (!started) {
@@ -248,7 +240,7 @@ public class SchedulerService implements RequestHandler {
             } else {
                 logger.debug("Adding schedule {}", service.getJobName());
                 try {
-                    addSchedule(service.getScheduleConfig(), service.getJobName(), update);
+                    addSchedule(service.getScheduleConfig(), service.getJobName(), true);
                 } catch (ObjectAlreadyExistsException e) {
                     logger.debug("Job {} already scheduled", service.getJobName());
                 }
@@ -301,15 +293,9 @@ public class SchedulerService implements RequestHandler {
      */
     public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update)
             throws SchedulerException, ParseException, ObjectAlreadyExistsException {
-        Scheduler scheduler = null;
-
         try {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
-                scheduler = getScheduler(scheduleConfig);
-                JobDetail existingJob = scheduler.getJobDetail(jobName, GROUP_NAME);
-                boolean exists = existingJob != null;
-
                 // Determine the schedule class based on whether the job has concurrent execution enabled/disabled
                 Class scheduleClass = null;
                 if (scheduleConfig.getConcurrentExecution()) {
@@ -318,33 +304,22 @@ public class SchedulerService implements RequestHandler {
                     scheduleClass = StatefulSchedulerServiceJob.class;
                 }
 
-                // Check if the new or updated job is disabled
-                /*if (!scheduleConfig.getEnabled()) {
-                    logger.info("Schedule {} is disabled", jobName);
-                    if (jobExists(jobName, scheduleConfig.getPersisted()) &&
-                            scheduler.deleteJob(jobName, GROUP_NAME)) {
-                        logger.debug("Schedule was deleted from scheduler");
-                    }
-                    return false;
-                }*/
-
-                // Attempt to add the scheduler
-                if (scheduler != null && scheduleConfig.getCronSchedule() != null
+                // Attempt to add the schedule
+                if (scheduleConfig.getCronSchedule() != null
                         && scheduleConfig.getCronSchedule().length() > 0) {
                     JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
-                    job.setVolatility(scheduleConfig.getPersisted());
+                    job.setVolatility(scheduleConfig.isPersisted());
                     job.setJobDataMap(createJobDataMap(scheduleConfig));
                     Trigger trigger = createTrigger(scheduleConfig, jobName);
+                    final Scheduler scheduler = scheduleConfig.isPersisted() ? persistentScheduler : inMemoryScheduler;
 
                     if (update) {
-                        if (exists) {
-                            // Update the job by first deleting it, then scheduling the new version
-                            scheduler.deleteJob(jobName, GROUP_NAME);
-                        }
+                        // Update the job by first deleting it, then scheduling the new version
+                        deleteSchedule(jobName);
                     }
 
                     // check if it is enabled
-                    if (scheduleConfig.getEnabled()) {
+                    if (scheduleConfig.isEnabled()) {
                         // Set to non-durable so that jobs won't persist after last firing
                         job.setDurability(false);
                         // Schedule the Job (with trigger)
@@ -376,6 +351,20 @@ public class SchedulerService implements RequestHandler {
         }
 
         return true;
+    }
+    
+    /**
+     * Deletes a schedule from the scheduler
+     * 
+     * @throws SchedulerException 
+     */
+    public void deleteSchedule(String jobName) throws SchedulerException {
+        if (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
+            inMemoryScheduler.deleteJob(jobName, GROUP_NAME);
+        }
+        if (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
+            persistentScheduler.deleteJob(jobName, GROUP_NAME);
+        }
     }
 
     /**
@@ -436,20 +425,6 @@ public class SchedulerService implements RequestHandler {
     }
 
     /**
-     * Returns the Scheduler corresponding to whether the supplied schedule configuration is persistent.
-     *
-     * @param scheduleConfig    The schedule configuration
-     * @return                  The Scheduler
-     * @throws SchedulerException
-     */
-    private Scheduler getScheduler(ScheduleConfig scheduleConfig) throws SchedulerException {
-        if (scheduleConfig.getPersisted()) {
-            return persistentScheduler;
-        }
-        return inMemoryScheduler;
-    }
-
-    /**
      * Determines if a job already exists.
      *
      * @param jobName       The name of the job
@@ -457,12 +432,10 @@ public class SchedulerService implements RequestHandler {
      * @return              True if the job exists, false otherwise
      * @throws SchedulerException
      */
-    private boolean jobExists(String jobName, boolean persisted) throws SchedulerException {
-        if (!persisted) {
-            return (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null);
-        } else {
-            return (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null);
-        }
+    private boolean jobExists(String jobName) throws SchedulerException {
+        final boolean existsInMemory = inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null;
+        final boolean existsInPersistent = persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null;
+        return existsInMemory || existsInPersistent;
     }
 
     @Override
@@ -473,19 +446,23 @@ public class SchedulerService implements RequestHandler {
                     : trimTrailingSlash(request.getNewResourceId()); // is the trim necessary?
             Map<String, Object> object = request.getContent().asMap();
             object.put("_id", id);
+            
+            if (jobExists(id)) {
+                throw new ConflictException("Schedule already exists");
+            }
 
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
             // Check defaults
-            if (scheduleConfig.getEnabled() == null) {
+            if (scheduleConfig.isEnabled() == null) {
                 scheduleConfig.setEnabled(true);
             }
-            if (scheduleConfig.getPersisted() == null) {
+            if (scheduleConfig.isPersisted() == null) {
                 scheduleConfig.setPersisted(true);
             }
 
             addSchedule(scheduleConfig, id, false);
-            handler.handleResult(new Resource(id, null, new JsonValue(object)));
+            handler.handleResult(new Resource(id, null, getSchedule(request.getResourceName())));
         } catch (ParseException e) {
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ObjectAlreadyExistsException e) {
@@ -505,10 +482,8 @@ public class SchedulerService implements RequestHandler {
             if (request.getResourceNameObject().isEmpty()) {
                 throw new BadRequestException("Empty resourceId");
             }
-            // Get the scheduler containing the scheduler
-            Scheduler scheduler = getScheduler(request.getResourceName());
             // Get the schedule
-            JsonValue schedule = getSchedule(scheduler, request.getResourceName());
+            JsonValue schedule = getSchedule(request.getResourceName());
             // Handle the result
             handler.handleResult(new Resource(request.getResourceName(), null, schedule));
         } catch (SchedulerException e) {
@@ -535,12 +510,12 @@ public class SchedulerService implements RequestHandler {
 
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
-            if (!jobExists(request.getResourceName(), scheduleConfig.getPersisted())) {
+            if (!jobExists(request.getResourceName())) {
                 throw new NotFoundException();
             } else {
                 // Update the Job
                 addSchedule(scheduleConfig, request.getResourceName(), true);
-                handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+                handler.handleResult(new Resource(request.getResourceName(), null, getSchedule(request.getResourceName())));
             }
         } catch (ParseException e) {
             handler.handleError(new BadRequestException(e.getMessage(), e));
@@ -561,12 +536,13 @@ public class SchedulerService implements RequestHandler {
             if (request.getResourceNameObject().isEmpty()) {
                 throw new BadRequestException("Empty resourceId");
             }
-            // Get the scheduler containing the scheduler
-            Scheduler scheduler = getScheduler(request.getResourceName());
+            if (!jobExists(request.getResourceName())) {
+                throw new NotFoundException();
+            }
             // Get the schedule
-            JsonValue schedule = getSchedule(scheduler, request.getResourceName());
+            JsonValue schedule = getSchedule(request.getResourceName());
             // Delete the schedule
-            scheduler.deleteJob(request.getResourceName(), GROUP_NAME);
+            deleteSchedule(request.getResourceName());
             // Handle the result
             handler.handleResult(new Resource(request.getResourceName(), null, schedule));
         } catch (JsonException e) {
@@ -643,7 +619,7 @@ public class SchedulerService implements RequestHandler {
             if ("create".equals(action)) {
                 String id = UUID.randomUUID().toString();
                 params.put("_id", id);
-                if (jobExists(id, true) || jobExists(id, false)) {
+                if (jobExists(id)) {
                     throw new BadRequestException("Schedule already exists");
                 }
                 CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
@@ -732,37 +708,26 @@ public class SchedulerService implements RequestHandler {
     /**
      * Returns a JsonValue representation of a schedule with the supplied name from the supplied scheduler.
      * 
-     * @param scheduler the scheduler containing the scheduler
-     * @param name the name of the scheduler
+     * @param scheduleName the name of the scheduler
      * @return the JsonValue representation of the schedule
      * @throws SchedulerException
      * @throws ResourceException
      */
-    private JsonValue getSchedule(Scheduler scheduler, String name) throws SchedulerException, ResourceException {
-        JobDetail job = scheduler.getJobDetail(name, GROUP_NAME);
-        JobDataMap dataMap = job.getJobDataMap();
-        ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
-        Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
-        resultMap.put("_id", name);
-        return new JsonValue(resultMap);
-    }
-    
-    /**
-     * Returns the scheduler containing the schedule with the supplied name.
-     * 
-     * @param scheduleName the name of the schedule
-     * @return the Scheduler
-     * @throws SchedulerException
-     * @throws NotFoundException
-     */
-    private Scheduler getScheduler(String scheduleName) throws SchedulerException, NotFoundException {
-        if (jobExists(scheduleName, true)) {
-            return persistentScheduler;
-        } else if (jobExists(scheduleName, false)) {
-            return inMemoryScheduler;
+    private JsonValue getSchedule(String scheduleName) throws SchedulerException, ResourceException {
+        Scheduler scheduler = null;
+        if (inMemoryScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
+            scheduler = inMemoryScheduler;
+        } else if (persistentScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
+            scheduler = persistentScheduler;
         } else {
             throw new NotFoundException("Schedule does not exist");
         }
+        JobDetail job = scheduler.getJobDetail(scheduleName, GROUP_NAME);
+        JobDataMap dataMap = job.getJobDataMap();
+        ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
+        Map<String, Object> resultMap = (Map<String, Object>) config.getConfig().getObject();
+        resultMap.put("_id", scheduleName);
+        return new JsonValue(resultMap);
     }
 
     private JsonValue parseStringified(String stringified) {
