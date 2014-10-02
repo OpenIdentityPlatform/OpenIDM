@@ -1616,22 +1616,22 @@ $ <userinput>curl \
    <para>
     The optimization works by defining a <literal>sourceQuery</literal> or
     <literal>targetQuery</literal> in the synchronization mapping that returns
-    not just the ID, but the complete object. The query must be predefined in
-    the repository configuration, and specified by its
-    <literal>queryId</literal>.
+    not just the ID, but the complete object.
    </para>
    <para>
-    The following example loads the full result set into memory during the
-    source phase of the reconciliation. The example uses the predefined query,
-    <literal>query-all</literal>, which returns the full object:
+    The following example query loads the full result set into memory during the
+    source phase of the reconciliation. The example uses a common filter
+    expression, called with the <literal>_queryFilter</literal> keyword. The
+    query returns the complete object for all entries that include a
+    <literal>uid</literal> (<literal>uid sw ""</literal>).
    </para>
    <programlisting language="javascript">"mappings" : [
     {
-        "name" : "systemXmlfileAccounts_managedUser",
-        "source" : "system/xmlfile/account",
+        "name" : "systemLdapAccounts_managedUser",
+        "source" : "system/ldap/account",
         "target" : "managed/user",
         "sourceQuery" : {
-            "queryId" : "query-all"
+            "_queryFilter" : "uid sw \"\""
         },
     ...</programlisting>
    <para>
@@ -1657,12 +1657,12 @@ $ <userinput>curl \
    </para>
    <programlisting language="javascript">"mappings" : [
     {
-        "name" : "systemXmlfileAccounts_managedUser",
-        "source" : "system/xmlfile/account",
+        "name" : "systemLdapAccounts_managedUser",
+        "source" : "system/ldap/account",
         "target" : "managed/user",
         "sourceQueryFullEntry" : true,
         "sourceQuery" : {
-            "queryId" : "query-all"
+            "_queryFilter" : "uid sw \"\""
         },
     ...</programlisting>
   </section>
