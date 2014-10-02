@@ -489,16 +489,21 @@ class ObjectMapping {
      * @param target the target object to create.
      * @throws SynchronizationException
      */
-    private void updateTargetObject(Context context, JsonValue target) throws SynchronizationException {
+    private void updateTargetObject(Context context, JsonValue target, String targetId) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_UPDATE_TARGET, target, null);
         try {
-            String id = LazyObjectAccessor.qualifiedId(targetObjectSet,
-                    target.get("_id").required().asString());
-            LOGGER.trace("Update target object {}", id);
-            UpdateRequest ur = Requests.newUpdateRequest(id, target);
+            final String id = target.get("_id").required().asString();
+            final String fullId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
+            if (!targetId.equals(id)) {
+                throw new SynchronizationException("target '_id' has changed");
+            }
+            LOGGER.trace("Update target object {}", fullId);
+            UpdateRequest ur = Requests.newUpdateRequest(fullId, target);
             ur.setRevision(target.get("_rev").asString());
             service.getConnectionFactory().getConnection().update(context, ur);
             measure.setResult(target);
+        } catch (SynchronizationException se) {
+            throw se;
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
         } catch (ResourceException ose) {
@@ -1545,7 +1550,7 @@ class ObjectMapping {
                                     applyMappings(getSourceObject(), oldValue, getTargetObject(), oldTarget);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     if (JsonPatch.diff(oldTarget, getTargetObject()).size() > 0) { // only update if target changes
-                                        updateTargetObject(context, getTargetObject());
+                                        updateTargetObject(context, getTargetObject(), targetId);
                                     }
                                 }
                                 break; // terminate UPDATE
