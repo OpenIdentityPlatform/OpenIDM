@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -25,9 +25,12 @@
 
 package org.forgerock.openidm.scheduler;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import javax.xml.bind.DatatypeConverter;
@@ -147,27 +150,25 @@ public class ScheduleConfig {
     }
 
     public JsonValue getConfig() {
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put(SchedulerService.SCHEDULE_ENABLED, getEnabled());
-        map.put(SchedulerService.SCHEDULE_PERSISTED, getPersisted());
-        map.put(SchedulerService.SCHEDULE_MISFIRE_POLICY, getMisfirePolicy());
-        map.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, getCronSchedule());
-        map.put(SchedulerService.SCHEDULE_TYPE, getScheduleType());
-        map.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, getInvokeService());
-        map.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, getInvokeContext());
-        map.put(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL, getInvokeLogLevel());
-        map.put(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone());
-        map.put(SchedulerService.SCHEDULE_START_TIME, getStartTime());
-        map.put(SchedulerService.SCHEDULE_END_TIME, getEndTime());
-        map.put(SchedulerService.SCHEDULE_CONCURRENT_EXECUTION, getConcurrentExecution());
-        return new JsonValue(map);
+        return json(object(field(SchedulerService.SCHEDULE_ENABLED, isEnabled()),
+                field(SchedulerService.SCHEDULE_PERSISTED, isPersisted()),
+                field(SchedulerService.SCHEDULE_MISFIRE_POLICY, getMisfirePolicy()),
+                field(SchedulerService.SCHEDULE_CRON_SCHEDULE, getCronSchedule()),
+                field(SchedulerService.SCHEDULE_TYPE, getScheduleType()),
+                field(SchedulerService.SCHEDULE_INVOKE_SERVICE, getInvokeService()),
+                field(SchedulerService.SCHEDULE_INVOKE_CONTEXT, getInvokeContext()),
+                field(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL, getInvokeLogLevel()),
+                field(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone()),
+                field(SchedulerService.SCHEDULE_START_TIME, getStartTime()),
+                field(SchedulerService.SCHEDULE_END_TIME, getEndTime()),
+                field(SchedulerService.SCHEDULE_CONCURRENT_EXECUTION, getConcurrentExecution())));
     }
 
-    public Boolean getEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
     
-    public Boolean getPersisted() {
+    public Boolean isPersisted() {
         return persisted;
     }
     
