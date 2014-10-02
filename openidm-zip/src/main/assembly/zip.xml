@@ -229,6 +229,22 @@
             </includes>
             <outputDirectory>/openidm/samples/sample3</outputDirectory>
         </fileSet>
+        <!-- Setup scriptedrest2dj  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-scriptedrest.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/scriptedrest2dj/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
+        </fileSet>
         <!-- Setup Sample4  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
@@ -759,6 +775,18 @@
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>net.sf.kxml:kxml2</exclude>
                 <exclude>xmlpull:xmlpull</exclude-->
+                <!-- Exclude sample scriptedrest2dj dependencies -->
+                <exclude>commons-beanutils:commons-beanutils</exclude>
+                <exclude>commons-collections:commons-collections</exclude>
+                <exclude>commons-lang:commons-lang</exclude>
+                <exclude>commons-logging:commons-logging</exclude>
+                <exclude>net.sf.ezmorph:ezmorph</exclude>
+                <exclude>org.codehaus.groovy.modules.http-builder:http-builder</exclude>
+                <exclude>net.sf.json-lib:json-lib</exclude>
+                <exclude>net.sourceforge.nekohtml:nekohtml</exclude>
+                <exclude>xerces:xercesImpl</exclude>
+                <exclude>xml-apis:xml-apis</exclude>
+                <exclude>xml-resolver:xml-resolver</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -875,5 +903,24 @@
                 </includes>
             </unpackOptions>
         </dependencySet>
+
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/lib</outputDirectory>
+            <includes>
+                <include>commons-beanutils:commons-beanutils</include>
+                <include>commons-collections:commons-collections</include>
+                <include>commons-lang:commons-lang</include>
+                <include>commons-logging:commons-logging</include>
+                <include>net.sf.ezmorph:ezmorph</include>
+                <include>org.codehaus.groovy.modules.http-builder:http-builder</include>
+                <include>net.sf.json-lib:json-lib</include>
+                <include>net.sourceforge.nekohtml:nekohtml</include>
+                <include>xerces:xercesImpl</include>
+                <include>xml-apis:xml-apis</include>
+                <include>xml-resolver:xml-resolver</include>
+            </includes>
+        </dependencySet>
+
     </dependencySets>
 </assembly>

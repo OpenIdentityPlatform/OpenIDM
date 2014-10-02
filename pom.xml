@@ -305,6 +305,7 @@
         <module>openidm-enhanced-config</module>
         <module>openidm-external-email</module>
         <module>openidm-external-rest</module>
+        <module>openidm-httpclient-fragment</module>
         <module>openidm-httpcontext</module>
         <module>openidm-infoservice</module>
         <module>openidm-customendpoint</module>
@@ -615,12 +616,12 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient-osgi</artifactId>
-                <version>4.2.4</version>
+                <version>4.3.5</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore-osgi</artifactId>
-                <version>4.2.4</version>
+                <version>4.3.2</version>
             </dependency>
 
             <!-- Core OSGi -->
