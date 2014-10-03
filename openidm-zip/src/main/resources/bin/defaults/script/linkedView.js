@@ -64,7 +64,7 @@ exports.fetch = function (resourceName) {
                 return e;
             }
         },
-        syncConfig = openidm.read("config/sync"),
+        syncConfig = openidm.read("config/sync") || {},
         currentResource = {},
         resourceParts = resourceName.match(/(.*)\/(.*?)$/), // ["component/id", "component", "id"]
 
