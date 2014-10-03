@@ -267,6 +267,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     };
 
                     ConnectorDelegate.detailsConnector(connectorRef).then(_.bind(function(connectorDefaults){
+                        this.data.systemType = connectorDefaults.connectorRef.systemType;
                         this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
 
                         this.connectorTypeRef.render({"connectorType": connectorTemplate, "animate": true, "connectorDefaults": connectorDefaults}, _.bind(function(){
@@ -466,4 +467,3 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
     return new AddEditConnectorView();
 });
-
