@@ -1,0 +1,239 @@
+
+#resourceMappingBody {
+  width:960px;
+}
+
+.mapping-body {
+  height: 425px;
+}
+
+.mapping-resource-body {
+  width:425px;
+  height:365px;
+  display:inline-block;
+
+  h4 {
+    margin-bottom:10px;
+  }
+}
+
+.mapping-body {
+  .mapping-swap-holder {
+    position: relative;
+    top: 140px;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 7px;
+  }
+
+  .mapping-swap {
+    width: 50px;
+    height: 35px;
+  }
+}
+
+.mapping-swap-holder p {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.mapping-resource {
+  border:1px solid #ddd;
+  height:270px;
+  width:425px;
+
+  hr {
+    border-top: 1px solid #ddd;
+  }
+
+  .mapping-resource-empty {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+  }
+
+  .mapping-resource-empty .mapping-resource-empty-details {
+    position: relative;
+    top: 90px;
+  }
+
+  .mapping-resource-details {
+    background-color:white;
+    height:100%;
+    width:100%;
+  }
+}
+
+.mapping-resource-details {
+  .resource-info {
+    text-align: center;
+    padding-bottom: 40px;
+    padding-top: 60px;
+  }
+
+  .object-type-name{
+    color:#bbb;
+    display:inline-block;
+    margin-right:10px;
+  }
+}
+
+.mapping-resource-body .select-resource {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  margin-top:15px;
+}
+
+.add-mapping {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.mapping-create-body {
+  text-align:center;
+  clear:both;
+}
+
+/*
+  Mapping List View
+*/
+
+#mappingName {
+  width:315px;
+  margin-bottom:15px;
+}
+
+#mappingConfigHolder{
+  clear:both;
+
+  .mapping-body {
+    height:103px;
+  }
+
+  .mapping-body p {
+    padding-bottom:5px;
+  }
+}
+
+.mapping-config-body {
+  height:188px;
+  cursor:pointer;
+  width:965px;
+  border:1px solid #ddd;
+  margin-bottom:15px;
+  background-color:white;
+  box-shadow: rgba(0, 0, 0, 0.0470588) 0px 1px 1px 0px;
+
+  .mapping-icon {
+    display: inline-block;
+    height:68px;
+    width:60px;
+    padding:25px 10px 10px 10px;
+    float:left;
+  }
+}
+
+.left-icon {
+  margin-left:25px;
+}
+
+.mapping-target,
+.mapping-source {
+  padding:24px 0px 10px 10px;
+  display:inline-block;
+  float:left;
+  width:367px;
+}
+
+.mapping-source {
+  border-right: 1px solid #ccc;
+}
+
+.mapping-bottom-bar {
+  border-top:1px solid #ccc;
+  height:55px;
+}
+
+.mapping-arrow {
+  position: relative;
+  top:50px;
+}
+
+.arrow-box {
+  position: relative;
+  background: #fff;
+  float:left;
+  right:1px;
+}
+
+.arrow-box:after, .arrow-box:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.arrow-box:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #fff;
+  border-width: 20px;
+  margin-top: -20px;
+}
+.arrow-box:before {
+  border-color: rgba(0, 0, 0, 0);
+  border-left-color: #ddd;
+  border-width: 21px;
+  margin-top: -21px;
+}
+
+.arrow-box .fa-arrow-right {
+  position: absolute;
+  z-index: 50;
+  bottom: -6px;
+}
+
+.mapping-header {
+  color:#777;
+  font-weight:700;
+  font-size:16px;
+}
+
+.mapping-title {
+  color:#2A2F32;
+  font-size:21px;
+  font-weight:700;
+}
+
+.mapping-top-bar {
+  height:20px;
+  border-bottom:1px solid #ccc;
+  padding:10px;
+  background-color:#eee;
+}
+
+.edit-button,
+.delete-button {
+  margin-top:5px;
+}
+
+.edit-button {
+  margin-right:10px;
+}
+
+.icon-button span{
+  margin-right:10px;
+}
+
+#noMappingsDefined{
+  clear:both;
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  margin-top:15px;
+}

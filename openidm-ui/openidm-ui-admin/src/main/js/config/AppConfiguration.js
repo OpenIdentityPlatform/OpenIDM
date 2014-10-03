@@ -46,7 +46,7 @@ define("config/AppConfiguration", [
                 {
                     moduleClass: "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
                     configuration: {
-                        "org.identityconnectors.ldap.LdapConnector" : "org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView"
+                        "org.identityconnectors.ldap.LdapConnector_1.1" : "org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView"
                     }
                 },
                 {

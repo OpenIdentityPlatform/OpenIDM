@@ -1,10 +1,42 @@
 <div class="float-left">
     <h3>{{t "templates.mapping.mappings"}}</h3>
 </div>
-<div class="float-right">
-    <input type="button" class="button" id="addMapping" value="{{t 'templates.mapping.addMapping'}}"/>
+<div class="add-mapping-button float-right">
+    <a href="#resources/open"><button type="button" class="icon-button button" id="addMapping"><span>{{t 'templates.mapping.addMapping'}}</span><i class="fa fa-lg fa-plus"></i></button></a>
 </div>
-<br/><br/><br/>
-<div id="noMappingsDefined" style="display:none;">{{t "templates.mapping.noMappingsDefined"}}</div>
-<table id="MappingListGrid"></table>
 
+{{#if mappingConfig.length}}
+<div id="mappingConfigHolder">
+    {{#each mappingConfig}}
+    <div class="mapping-config-body">
+        <div class="mapping-top-bar">
+            {{name}}
+        </div>
+        <div class="mapping-body">
+            <span class="mapping-icon"><i class="fa fa-4x {{sourceIcon}}"></i></span>
+            <div class="mapping-source">
+                <p class="mapping-header">Source</p>
+                <p class="mapping-title">{{source}}</p>
+                <p>{{sourceType}}</p>
+            </div>
+            <div class="mapping-arrow">
+                <div class="arrow-box">
+                    <i class="fa fa-arrow-right"></i>
+                </div>
+            </div>
+            <span class="mapping-icon left-icon"><i class="fa fa-4x {{targetIcon}}"></i></span>
+            <div class="mapping-target">
+                <p class="mapping-header">Target</p>
+                <p class="mapping-title">{{target}}</p>
+                <p>{{targetType}}</p>
+            </div>
+        </div>
+        <div class="mapping-bottom-bar">
+            <a href="#mapping/edit/{{name}}/"><button type="button"  name="" class="button icon-button pull-right edit-button"><span>Edit</span><i class="fa fa-lg fa-pencil"></i></button></a>
+            <button type="button"  name="" class="button icon-button pull-right delete-button"><span>Delete</span><i class="fa fa-lg fa-times-circle-o"></i></button>
+        </div>
+    </div>
+    {{/each}}
+</div>
+{{/if}}
+<div id="noMappingsDefined" {{#if mappingConfig}}style="display:none;"{{/if}}>{{t "templates.mapping.noMappingsDefined"}}</div>
