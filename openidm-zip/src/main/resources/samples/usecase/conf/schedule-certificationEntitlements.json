@@ -7,7 +7,7 @@
     "invokeContext": {
         "script": {
             "type": "text/javascript",
-            "file": "script/certification.js"
+            "file": "script/certificationEntitlements.js"
         }
     }
 }

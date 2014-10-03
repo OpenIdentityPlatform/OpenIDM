@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="certification" name="Certification process">
+        <startEvent id="start" activiti:initiator="startUserId" />
+        <sequenceFlow sourceRef="start" targetRef="readUserData"/>
+
+        <scriptTask id="readUserData" name="Prepare Task" scriptFormat="groovy">
+            <script><![CDATA[ 
+                user = openidm.read('managed/user/' + userId);
+                userName = user.userName;
+                givenName = user.givenName;
+                sn = user.sn;
+                mail = user.mail;
+                department = user.department;
+                params = [ _queryId: 'getManager', userId: userId];
+                candidateManagers = openidm.query('endpoint/getusermanager', params).result;
+                
+                availableRoles = openidm.query('managed/role', [_queryId:'query-all-ids']).result;
+                roles = [];
+                availableRoles.each {
+                    roles.push([rid:'managed/role/' + it._id, name:it._id, dynamic:false, actualManaged:false, newManaged:false]);
+                }
+                
+                user.effectiveRoles.each {
+                    role = roles.find {e -> e.rid.equals(it)};
+                    if (role != null) {
+                        role.dynamic = !user.roles.contains(it);
+                        role.actualManaged = true;
+                        role.newManaged = true;
+                    }
+                }
+                
+                execution.setVariable('userName', userName);  
+                execution.setVariable('givenName', givenName);
+                execution.setVariable('sn', sn);
+                execution.setVariable('mail', mail);
+                execution.setVariable('department', department);
+                execution.setVariable('candidateManagers', candidateManagers);
+                execution.setVariable('roles', roles);
+                execution.setVariable('availableRoles', availableRoles);
+                
+                decisionOptions = [ 'change':'Change', 'certify':'Certify', 'escalate':'Escalate'];
+                execution.setVariable('decisionOptions', decisionOptions);
+                
+                ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="readUserData" targetRef="managerApproval"/>
+        
+        <userTask id="managerApproval" name="Role Status Check" activiti:candidateUsers="${candidateManagers}" activiti:formKey="certificationRolesForm.xhtml">
+            <extensionElements>
+                <activiti:taskListener event="assignment" expression="${execution.setVariable('assignedManager', task.assignee)}" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="managerApproval" targetRef="managerDecisionMadeGateway"/>
+        
+        <exclusiveGateway id="managerDecisionMadeGateway" name="Manager Decision Made" default="endProcess"/>
+        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="changeDecisionOptions">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='escalate'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow sourceRef="managerDecisionMadeGateway" targetRef="patchManagedUser">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='change'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <scriptTask id="changeDecisionOptions"  scriptFormat="groovy">
+            <script>
+                newdecisionOptions = [ 'change':'Change' , 'certify':'Certify'];
+                execution.setVariable('decisionOptions', newdecisionOptions);
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="changeDecisionOptions" targetRef="administratorApproval"/>
+        
+        <userTask id="administratorApproval" name="Access Status Check" activiti:assignee="superadmin" activiti:formKey="certificationRolesForm.xhtml">
+        </userTask>
+        <exclusiveGateway id="adminDecisionMadeGateway" name="Administrator Decision Made"  default="endEscalation"/>
+        <sequenceFlow sourceRef="administratorApproval" targetRef="adminDecisionMadeGateway"/>
+        
+        <scriptTask id="patchManagedUser" scriptFormat="groovy">
+            <script><![CDATA[
+                availableRoles.each {
+                    role = roles.find {e -> e.name.equals(it._id)};
+                    role.newManaged = execution.hasVariable(it._id+'_newManaged') || role.dynamic;
+ 	 	        }
+                
+                user = openidm.read('managed/user/' + userId);
+                newManagedRoles = user.roles.findAll {it.startsWith('openidm-')}.toList();
+                roles.each {
+                    if (it.newManaged && !it.dynamic) {
+                        newManagedRoles.push(it.rid);
+                    }
+                }
+                
+                patchParams = [[operation:'replace', field: 'roles', value : newManagedRoles]];
+                openidm.patch('managed/user/'+userId, null, patchParams);
+                ]]>
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="patchManagedUser" targetRef="sendAcceptNotification"/>
+        
+        <scriptTask id="sendAcceptNotification" scriptFormat="groovy">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+                requestDate = formatUTC.format(new Date());
+                
+                def requesterNotification = [
+                "receiverId": userId,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : requestDate,
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : "Your system access was reviewed by your manager"
+                ];
+                
+                openidm.create('repo/ui/notification/', null, requesterNotification);
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="sendAcceptNotification" targetRef="end"/>
+        
+        <sequenceFlow sourceRef="adminDecisionMadeGateway" targetRef="patchManagedUser">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='change'} ]]>
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow id ="endProcess" sourceRef="managerDecisionMadeGateway" targetRef="end"/>
+        <sequenceFlow id ="endEscalation" sourceRef="adminDecisionMadeGateway" targetRef="end"/>
+        
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>

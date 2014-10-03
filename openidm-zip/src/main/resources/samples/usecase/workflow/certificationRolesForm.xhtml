@@ -1,0 +1,100 @@
+
+<style>
+#targetLinking fieldset {
+       margin-top: 0;
+}
+#targetLinking .group-field {
+       float: left !important;
+       width: 100%;
+}
+#targetLinking .field label {
+       text-align: left;
+}
+#targetLinking .field input,#targetLinking .field select {
+       clear: both;
+}
+#targetLinking .field .validation-message {
+       clear: none !important;
+       margin-left: 20px !important;
+       float: left !important;
+}
+
+input.readonlyTextbox {
+        border: 0px;
+        width: 10px;
+}
+</style>
+
+<h2 class="header">Access Status Check</h2>
+<fieldset>
+    <div class="fields">
+        <div class="field">
+            <label>UserName</label> 
+            <input type="text" value="{{variables.userName}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Family Name</label> 
+            <input type="text" value="{{variables.sn}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Given Name</label> 
+            <input type="text" value="{{variables.givenName}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Email</label> 
+            <input type="text" value="{{variables.mail}}" readonly/> 
+        </div>
+        <div class="field">
+            <label>Department</label> 
+            <input type="text" value="{{variables.department}}" readonly/> 
+        </div>
+        
+        <table>
+        <thead>
+            <th>Role name</th>
+            <th colspan="2">Managed user</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td></td>
+                <td>Current value</td>
+                <td>New value</td>
+            </tr>
+        
+        {{#each variables.roles}}
+            <tr>
+                <td>{{name}}</td>
+                <td>
+                    {{#if actualManaged}}
+                    <input type="text" value="x" readonly class="readonlyTextbox">
+                    {{else}}
+                    <input type="text" value="-" readonly class="readonlyTextbox">
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if actualManaged}}
+                        {{#if dynamic}}
+                            <input type="text" value="x" readonly class="readonlyTextbox">
+                        {{else}}
+                            <input type="checkbox" checked name="{{name}}_newManaged">
+                        {{/if}}
+                    {{else}}
+                        {{#if dynamic}}
+                            <input type="text" value="-" readonly class="readonlyTextbox">
+                        {{else}}
+                            <input type="checkbox" name="{{name}}_newManaged">
+                        {{/if}}
+                    {{/if}}
+                </td>
+            </tr>
+        {{/each}}
+        
+        </tbody>
+    </table>
+    <div class="field">  
+        <label class="light">Certification result:</label> 
+        {{select  variables.decisionOptions "decision" "0" ""  }}
+    </div>
+        
+    </div>
+</fieldset>
