@@ -660,12 +660,15 @@
                 <include>conf/process-access.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-certification.json</include>
+                <include>conf/schedule-certificationEntitlements.json</include>
                 <include>conf/system.properties</include>
                 <include>conf/workflow.json</include>
                 <include>script/certification.js</include>
+                <include>script/certificationEntitlements.js</include>
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
-                <include>workflow/certification.bpmn20.xml</include>
+                <include>script/roles/effectiveRoles.js</include>
+                <include>workflow/certification*bar</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
         </fileSet>

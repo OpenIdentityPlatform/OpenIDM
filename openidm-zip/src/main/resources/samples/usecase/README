@@ -303,45 +303,110 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
             if this use case is started after the initial reconciliation then pick e.g. user.5.
             If users are created e.g. by using sample2 that user can be used here as well.
 
-Usecase5 - Certification workflow
-    In this use case we have a scheduled task fetching all the managed users and starting a certification workflow
-    for all of them.
+Usecase5 - Certification workflows
+    In this use case we have two scheduled tasks starting certification workflows.
+    
+    One of them is fetching all the managed users and starts a certification workflow
+    for all of them. This workflow shows the roles assigned to the managed users.
+    The other scheduler is fetching all the managed roles and starts a certification workflow
+    for all of them. This workflow shows the assignments of the managed roles.
+
+    There are four roles defined for this sample based on the departments.
+    Each user has a dynamic role by default: the role corresponding to the department the user belongs to.
 
     1. Start OpenIDM with the configuration for usecase5.
 
     $ cd /path/to/openidm
     $ ./startup.sh -p samples/usecase/usecase5
 
-    2. The scheduled task can be triggered by enabling the scheduled task in the 
+    2. Add the following four roles to OpenIDM by running these curl commands:
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Human Resources department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=cisco_vpn,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Human Resources"}' \
+        "http://localhost:8080/openidm/managed/role/human-resources"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Production Planning department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com","CN=radius_dialin,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Production Planning"}' \
+        "http://localhost:8080/openidm/managed/role/production-planning"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Sales and Distribution department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Sales and Distribution"}' \
+        "http://localhost:8080/openidm/managed/role/sales-distribution"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{"properties":{"description":"Role for Treasury and Payments department"},
+           "assignments":{"ad1":{"attributes":[{"value":
+           ["CN=intranet,DC=example,DC=com"],
+           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Treasury and Payments"}' \
+        "http://localhost:8080/openidm/managed/role/treasury-payments"
+
+    3. The scheduled user certification can be triggered by enabling the scheduled task in the 
         samples/usecase/usecase5/conf/schedule-certification.json file.
 
-    3. Log in to the UI as user.0 (default password is 'Passw0rd').
+    4. Log in to the UI as user.0 (default password is 'Passw0rd').
 
-    4. Click on the Certification process task appearing on UI as task in the group queue
+    5. Click on the Role Status Check process task appearing on UI as task in the group queue
         and assign the user task to user.0 (select 'Assign it to me'). The task appears now in 'My tasks'.
 
-    5. Click on the 'Details' button of the 'Access Status Check' task.
-        - 'Access to Business system:' and 'Access to Project system:' fields can be modified.
-        Those reflect the content of the 'accounts' field of the managed user being certified.
+    6. Click on the 'Details' button of the 'Role Status Check' task.
+        On the UI a list of available roles defined in OpenIDM is visible:
+        - The values of the first column show if the role is currently assigned to the managed user.
+        - The values of the second column show if the role will be assigned to the managed user once the certification process is completed.
+            If the role is dynamic  (assigned to the user based on the department the user belongs to)
+            then the value is readonly.
 
-    6. Complete the task by clicking on 'Complete' button after selecting the Decision.
-        The decision can be
-        - Certify: no action will be taken, the certified user is not modified and the workflow terminates.
-        - Change: a new user task is created and assigned to systemadmin user.
+    7. Complete the task by clicking on 'Complete' button after selecting the appropriate roles
+        by choosing one of the following options:
+        - Change: the user will be updated based on the values of the second column.
+        - Certify: the user will not be updated.
+        - Escalate: the manager can't decide so the certification task will be assigned to superadmin.
+            In this case log out and log in as superadmin. The user task assigned to superadmin has the same
+            elements as the one described here (apart of the 'Escalate' option).
 
-    7. If 'Change' was selected in the previous step log in to the UI as systemadmin.
+    8. The scheduled role certification can be triggered by enabling the scheduled task in the 
+        samples/usecase/usecase5/conf/schedule-certificationEntitlements.json file.
 
-    8. Click on the 'Details' button of the 'Access Status Check' task.
-        - 'Access to Business system:' and 'Access to Project system:' fields can be modified.
+    9. Log in to the UI as systemadmin (default password is 'Passw0rd').
 
-    9. Complete the task by clicking on 'Complete' button after selecting the Decision.
-        The decision can be
-        - Accept: the user being certified is updated by the actual values of the access fields
-            and a notification is sent to the user about the change
-            (visible on the UI after log in with the appropriate user).
-        - Reject: the user being certified will not be modified and a notification is sent to the manager
-            about the certification change request being rejected by systemadmin.
+    10. Click on the 'Details' button of one of the Entitlements Status Check tasks.
+        The name, id and description of the role is shown on the UI.
+        Below that the assignment and the attribute belonging to the role are shown as a table.
+        Here the 'Value' field is editable: after clicking on the text new lines can be added and deleted
+        by pushing 'Enter' while typing. Note that this attribute in OpenIDM is multivalued, so
+        the separation of the values in this list is done based on the new lines of this UI field.
 
+    11. Once the 'Value' field contains the required values click on 'Complete' 
+        after choosing one of the following options:
+        - Certify: the role will not be updated
+        - Update: the role will be updated by using the new 'Value'
 
 Usecase6 - Password change reminder
     In this use case we use TaskScanner to trigger a password change reminder workflow.

@@ -32,11 +32,44 @@
                         "key" : "openidm-sym-default"
                     },
                     "scope" : "private"
+                },
+                {
+                    "name" : "effectiveRoles",
+                    "type" : "virtual",
+                    "onRetrieve" : {
+                        "type" : "text/javascript",
+                        "file" : "roles/effectiveRoles.js",
+                        "rolesPropName" : "roles"
+                    }
+                },
+                {
+                    "name" : "effectiveAssignments",
+                    "type" : "virtual",
+                    "onRetrieve" : {
+                        "type" : "text/javascript",
+                        "file" : "roles/effectiveAssignments.js",
+                        "effectiveRolesPropName" : "effectiveRoles"
+                    }
                 }
             ]
         },
         {
             "name" : "group"
+        },
+        {
+            "name" : "role",
+            "postCreate" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            },
+            "postUpdate" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            },
+            "postDelete" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            }
         }
     ]
 }
