@@ -1,0 +1,78 @@
+<h3>{{t "templates.mapping.createNewMapping"}}</h3>
+<div class="mapping-body">
+    <div id="mappingSource" class="mapping-resource-body pull-left">
+        <h4>Source</h4>
+        <div class="mapping-resource">
+            <div class="mapping-resource-empty">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle fa-4x"></i>
+                    <div>{{t "templates.mapping.noResourceSelected"}}</div>
+                </div>
+            </div>
+            <div style="display:none;" class="mapping-resource-details">
+                <div class="resource-info">
+                    <span class="resource-type-icon"><i class="fa fa-paper-plane fa-4x"></i></span>
+                    <p class="resource-type-name"></p>
+                </div>
+                <hr />
+                <div class="resource-status-body">
+                    <p class="resource-given-name"></p>
+
+                    <p class="resource-object-type">
+                        <span class="object-type-name">{{t "templates.mapping.noObjectType"}}</span>
+                        <select style="display:none;" class="resource-object-type-select"></select>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <button disabled="true" type="button" class="select-resource button">{{t "templates.mapping.selectAnotherResource"}}</button>
+    </div>
+
+    <div class="mapping-swap-holder pull-left">
+        <button type="button" class="mapping-swap button"><i class="fa fa-lg fa-exchange"></i></button>
+        <p>Swap</p>
+    </div>
+
+    <div id="mappingTarget" class="mapping-resource-body pull-left">
+        <h4>Target</h4>
+        <div class="mapping-resource">
+            <div class="mapping-resource-empty">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle fa-4x"></i>
+                    <div>{{t "templates.mapping.noResourceSelected"}}</div>
+                </div>
+            </div>
+            <div style="display:none;" class="mapping-resource-details">
+                <div class="resource-info">
+                    <span class="resource-type-icon"><i class="fa fa-paper-plane fa-4x"></i></span>
+                    <p class="resource-type-name"></p>
+                </div>
+                <hr />
+                <div class="resource-status-body">
+                    <p class="resource-given-name"></p>
+                    <p class="resource-object-type">
+                        <span class="object-type-name">{{t "templates.mapping.noObjectType"}}</span>
+                        <select style="display:none;" class="resource-object-type-select"></select>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <button disabled="true" type="button" class="select-resource button">{{t "templates.mapping.selectAnotherResource"}}</button>
+    </div>
+    <div class="mapping-create-body">
+        <button id="createMapping" disabled="true" type="button" class="add-mapping button">{{t "templates.mapping.createMapping"}}</button>
+        <p>{{t "templates.mapping.createMappingMessage"}}</p>
+    </div>
+</div>
+
+<div style="display:none;" id="saveMappingDialog">
+    <p>{{t "templates.mapping.saveMappingMessage"}}</p>
+    <label>{{t "templates.mapping.mappingName"}}</label>
+    <input id="mappingName" type="text" name="mappingName" value="" required autofocus>
+    <label>{{t "templates.mapping.linkedMapping"}}</label>
+    <select disabled="true" id="mappingLinked" name="mappingLinked" >
+        <option value="none">{{t "templates.mapping.noLinkedMapping"}}</option>
+    </select>
+</div>

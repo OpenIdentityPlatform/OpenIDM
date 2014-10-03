@@ -30,7 +30,7 @@
   border:1px solid #ddd;
   float:left;
   margin-right:15px;
-  height:225px;
+  height:250px;
   width:220px;
   text-align:center;
   background-color:white;
@@ -53,15 +53,18 @@
 
 .resource-tools {
   height:15px;
+  margin-bottom:10px;
 }
 
 .resource-tools .resource-edit {
   margin-left:10px;
+  margin-right:10px;
 }
 
 .resource-tools .resource-edit,
 .resource-tools .resource-delete {
   cursor:pointer;
+  margin-top:10px;
 }
 
 .resource-tools .resource-edit:hover,
@@ -83,12 +86,12 @@
 	Resource type information
 */
 .resource-type-body {
-  padding:10px;
+  padding:0px;
   color:#5d6871;
 }
 
 .resource-info {
-  padding:35px 0px 5px 0px;
+  padding:35px 0px 15px 0px;
 }
 
 .managed-type .resource-info {
@@ -106,6 +109,12 @@
 
 .resource-given-name,
 .resource-type-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resource-objecttype {
+  color:#bbb;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -128,16 +137,45 @@
   border-top: 1px solid #ddd;
 }
 
+.resource-tools .add-resource-button {
+  webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -o-border-radius: 0px;
+  border-radius: 0px;
+  margin:0px;
+  height: 40px;
+}
+
 /*
   Resource Status details
 */
 .resource-status-body {
   padding: 3px 10px 10px 3px;
   text-align:left;
-}
 
-.resource-status-body p{
-  padding:0px 0px 5px 10px;
+  p {
+    padding:0px 0px 5px 10px;
+  }
+
+  .resource-given-name {
+    padding-bottom:0px;
+    font-weight: bold;
+    font-size:14px;
+  }
+
+  .resource-status {
+    font-size:14px;
+    padding-top:10px;
+  }
+
+  .resource-objecttype {
+    font-size:11px;
+    color:#bbb;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
 }
 
 .resource-unavailable {
@@ -301,12 +339,6 @@ form.form .group-field-block .inline input[type='checkbox'] {
   float:right;
 }
 
-.resource-input-body form.form form.form .group-field-block .small-outside-element .ssl-radio {
-  width:125px;
-  position:relative;
-  bottom:8px;
-}
-
 .resource-input-body form.form .inline .error {
   float:none;
 }
@@ -321,6 +353,12 @@ form.form .group-field-block .outside-element .inline {
 
 form.form .group-field-block .small-outside-element .inline {
   width:310px;
+}
+
+.resource-input-body form.form .group-field-block .small-outside-element .ssl-radio {
+  width:125px;
+  position:relative;
+  bottom:8px;
 }
 
 form.form .group-field-block .small-outside-element div.validation-message {

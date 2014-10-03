@@ -24,14 +24,17 @@
 
 /*global define*/
 
+
 define("org/forgerock/openidm/ui/admin/main", [
     "./MandatoryPasswordChangeDialog",
-    
+
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
     "./delegates/BrowserStorageDelegate",
 
     "./ResourcesView",
+    "./MapResourceView",
+    
     "./connector/AddEditConnectorView",
     "./connector/ConnectorTypeAbstractView",
     "./connector/ConnectorTypeView",
@@ -48,7 +51,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./objectTypes/ObjectTypesDialog",
 
     "./authentication/AuthenticationView",
-    
+
     "./mapping/MappingListView",
     "./mapping/AddMappingView",
     "./mapping/EditMappingView",

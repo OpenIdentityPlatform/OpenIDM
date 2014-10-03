@@ -144,7 +144,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                 this.$el.find("#connectorErrorMessage").show();
                             }
 
-                            this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName);
+                            this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName +"_" +this.data.currentMainVersion);
 
                             this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName +"_" +this.data.currentMainVersion, "animate": true, "connectorDefaults": data}, _.bind(function(){
                                 validatorsManager.validateAllFields(this.$el);

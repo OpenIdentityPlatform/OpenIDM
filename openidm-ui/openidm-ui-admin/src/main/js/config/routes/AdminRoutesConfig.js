@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -30,14 +30,15 @@ define("config/routes/AdminRoutesConfig", [
         "mandatoryPasswordChangeDialog" : {
             base: "resourcesView",
             dialog: "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
-            url: "dashboard/change_password/",
+            url: "resources/change_password/",
             role: "ui-admin"
         },
         "resourcesView" : {
             view: "org/forgerock/openidm/ui/admin/ResourcesView",
             role: "ui-admin",
-            url: "resources/",
-            forceUpdate: true
+            defaults : [""],
+            url: /^resources\/(.*)$/,
+            pattern: "resources/?"
         },
         "editConnectorView" : {
             view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
@@ -94,7 +95,7 @@ define("config/routes/AdminRoutesConfig", [
             base: "editMappingView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
             role: "ui-admin",
-            url: /mapping\/(.+?)\/property\/(.+?)$/, 
+            url: /mapping\/(.+?)\/property\/(.+?)$/,
             pattern: "mapping/?/property/?",
             forceUpdate: true
         },
@@ -102,7 +103,7 @@ define("config/routes/AdminRoutesConfig", [
             base: "editMappingView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
             role: "ui-admin",
-            url: /mapping\/(.+?)\/property\/_new$/, 
+            url: /mapping\/(.+?)\/property\/_new$/,
             pattern: "mapping/?/property/_new",
             forceUpdate: true
         },
