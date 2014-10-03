@@ -22,10 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-@Grapes([
-        @Grab(group = 'org.codehaus.groovy.modules.http-builder', module = 'http-builder', version = '0.7.1'),
-        @Grab(group = 'commons-io', module = 'commons-io', version = '2.4')]
-)
 import groovyx.net.http.RESTClient
 import org.apache.http.client.HttpClient
 import org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConfiguration

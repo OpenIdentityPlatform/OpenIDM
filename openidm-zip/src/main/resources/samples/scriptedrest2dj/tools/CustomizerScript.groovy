@@ -22,9 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-@Grapes([
-        @Grab(group = 'org.codehaus.groovy.modules.http-builder', module = 'http-builder', version = '0.7.1')]
-)
 import groovyx.net.http.RESTClient
 import groovyx.net.http.StringHashMap
 import org.apache.http.HttpHost
