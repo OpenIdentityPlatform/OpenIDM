@@ -176,7 +176,7 @@
             "editTitle" : "Edit Managed Object",
             "managedObjectName" : "Managed Object Name",
             "managedProperties" : "Managed Properties",
-            "managedPropertyMessage" : "If you have special managed object property add them below. Not all properties need to be added, only those with special functionality.",
+            "managedPropertyMessage" : "If you have specific managed object properties add them below. Not all properties need to be added, only those with special functionality.",
             "addProperty" : "Add Property",
             "encrypted" : "Encrypted",
             "private" : "Private",
