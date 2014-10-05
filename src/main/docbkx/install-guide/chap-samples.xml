@@ -3184,9 +3184,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
    OpenICF ${openicfBundleVersion} provides a new Google Apps Connector that
    enables you to interact with Google's web applications. The Google Apps
    connector is not bundled with OpenIDM, but is available as a separate
-   download, with a subscription. When you have downloaded the Google Apps
-   Connector jar, copy it to the <filename>/path/to/openid/connectors</filename>
-   directory.
+   download, with a subscription.
   </para>
   <para>
    This sample demonstrates the creation of users and groups on an external
