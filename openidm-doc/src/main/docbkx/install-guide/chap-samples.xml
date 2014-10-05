@@ -821,9 +821,18 @@ $ ./startup.sh -p samples/sample2d</screen>
   <para>
    OpenICF 1.4 introduces a new, generic Groovy Connector. The Groovy Connector
    is a scripted connector that enables you to run Groovy scripts on any
-   external resource. To make use of the Groovy connector for any given
-   implementation, specific Groovy scripts must be created.
+   external resource.
   </para>
+  <note>
+   <para>
+    The Groovy connector is not a complete connector, in the traditional sense.
+    Rather, it is a framework within which you must write your own Groovy
+    scripts to address the requirements of your implementation. Specific scripts
+    are provided with the samples that demonstrate how the Groovy connector
+    can be used. These scripts can not be used "as is" in your deployment, but
+    are a good starting point on which to base your customization.
+   </para>
+  </note>
   <para>
    This sample demonstrates a Scripted SQL implementation of the Groovy
    Connector in which an instance of the Scripted SQL framework is made to work
@@ -3161,6 +3170,895 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
     -->
    </itemizedlist>
 
+  </section>
+
+ </section>
+
+ <section xml:id="sample-google-connector">
+  <title>Sample GoogleApps - Connecting to Google With the Google Apps Connector</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Google Apps Connector</secondary>
+  </indexterm>
+  <para>
+   OpenICF ${openicfBundleVersion} provides a new Google Apps Connector that
+   enables you to interact with Google's web applications. The Google Apps
+   connector is not bundled with OpenIDM, but is available as a separate
+   download, with a subscription. When you have downloaded the Google Apps
+   Connector jar, copy it to the <filename>/path/to/openid/connectors</filename>
+   directory.
+  </para>
+  <para>
+   This sample demonstrates the creation of users and groups on an external
+   Google system, using OpenIDM's REST interface.
+  </para>
+
+  <section xml:id="google-apps-">
+   <title>Before You Start</title>
+   <para>
+    This sample requires that you have a Google Apps account. Obtaining a Google
+    Apps account is described in the <link xlink:show="new"
+    xlink:href="https://support.google.com/a/answer/53926?hl=en">Google
+    documentation</link>. The sample uses OAuth2 to authorize the connection to
+    the Google service. This authorization mechanism requires that you obtain a
+    refresh token from Google. The following steps indicate how to obtain the
+    refresh token. <!--TODO these steps will be replaced by a process in our
+    Admin UI - update this procedure at that point-->
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Log in to your Google Apps Admin Console (at
+      <literal>https://www.google.com/a/<replaceable>domain-name</replaceable></literal>)
+      and verify that the following APIs are enabled:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Admin SDK API
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        Enterprise License Manager API
+       </para>
+      </listitem>
+     </itemizedlist>
+    </step>
+    <step>
+     <para>
+      Use the OAuth 2.0 Installed Application flow to obtain a
+      <filename>client_secrets.json</filename> file. For more information
+      about the OAuth 2.0 Installed Application flow, see the corresponding
+      <link xlink:show="new"
+      xlink:href="https://developers.google.com/maps-engine/documentation/oauth/installedapplication">Google
+      documentation</link>.
+     </para>
+    </step>
+    <step>
+     <para>
+      Download the Google Admin Directory API client library
+      (<link xlink:show="new"
+      xlink:href="https://developers.google.com/resources/api-libraries/download/admin/directory_v1/java">google-api-services-admin-directory_v1-rev42-java-1.19.0.zip</link>)
+      and extract it to a writeable directory.
+     </para>
+     <screen><userinput>$ unzip ~/Downloads/google-api-services-admin-directory_v1-rev42-java-1.19.0.zip -d /path/to</userinput>
+<computeroutput>Archive:  ~/Downloads/google-api-services-admin-directory_v1-rev42-java-1.19.0.zip
+   creating: /path/to/admin/
+ extracting: /path/to/admin/google-api-services-admin-directory_v1-rev42-1.19.0.jar
+ extracting: /path/to/admin/google-api-services-admin-directory_v1-rev42-1.19.0-javadoc.jar
+...</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Download the Google Apps connector jar and copy it to the
+      <literal>admin</literal> directory, created in the previous step.
+     </para>
+     <screen><userinput>$ cp ~/Downloads/googleapps-connector-${openicfBundleVersion}.jar /path/to/admin</userinput></screen>
+    </step>
+    <step>
+     <para>
+      Change to the <literal>admin</literal> directory and run the following
+      command on the <filename>client_secrets.json</filename> file that you
+      obtained earlier in this procedure.
+     </para>
+     <screen><userinput>$ cd admin/
+$ java -jar googleapps-connector-1.4.0.0-SNAPSHOT.jar /path/to/client_secrets.json</userinput>
+<computeroutput>Please open the following address in your browser:
+https://accounts.google.com/o/oauth2/auth?
+access_type=offline
+...</computeroutput></screen>
+     <para>
+      This command opens the default browser, and loads a screen on which you
+      authorize consent to access the Google Apps account.
+     </para>
+     <tip>
+      <para>
+       If you have recently created your Google Apps account, it might take some
+       time (often two hours or more) to synchronize the data required for this
+       access request to work.
+      </para>      
+     </tip>
+    </step>
+    <step>
+     <para>
+      When you have authorized consent, the browser returns a code. Copy and
+      paste the code into the terminal from which you ran the original command.
+     </para>
+     <screen><computeroutput>Attempting to open that address in the default browser now...
+Please enter code:</computeroutput><userinput>XXXXXXXX</userinput></screen>
+     <para>
+      A response similar to the following is returned:
+     </para>
+     <screen><computeroutput>{
+    "clientId" : "5x4x3x4x0x8x-cxlx3xsxcx8xixlxmx3x0xrxgx7x6x3x.apps.googleusercontent.com",
+    "clientSecret" : "0xhx9xrx8xdxqx9xDxjxUx3x",
+    "refreshToken" : "1x7xmxfx_yxuxNxUxFxjxVxVxkxXx3XxHxMxYxzx5xcxI"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Use the information in this response to edit the
+      <literal>"configurationProperties"</literal> in the Google Apps
+      provisioner configuration file
+      (<filename>samples/google-connector/conf/provisioner.openicf-google.json</filename>).
+      For example:
+     </para>
+     <programlisting language="javascript">"configurationProperties": {
+    "domain": "example.com",
+    "clientId": "5x4x3x4x0x8x-cxlx3xsxcx8xixlxmx3x0xrxgx7x6x3x.apps.googleusercontent.com",
+    "clientSecret": "0xhx9xrx8xdxqx9xDxjxUx3x",
+    "refreshToken": "1x7xmxfx_yxuxNxUxFxjxVxVxkxXx3XxHxMxYxzx5xcxI"
+},   </programlisting>
+    </step>
+   </procedure>
+  </section>
+
+  <section xml:id="running-the-google-apps-sample">
+   <title>Running the Google Apps Sample</title>
+   <procedure>
+    <step>
+     <para>
+      To run the sample, start OpenIDM with the configuration for the Google
+      Apps Connector.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ ./startup.sh -p samples/google-connector</userinput>
+<computeroutput>Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/samples/google-connector/conf/boot/boot.properties
+OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
+-> OpenIDM ready</computeroutput>
+     </screen>
+    </step>
+    <step>
+     <para>
+      To verify the connector configuration, check the status of the Google Apps
+      connector as follows:
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/google?_action=test"</userinput>
+<computeroutput>{
+    "name":"google",
+    "enabled":true,
+    "config":"config/provisioner.openicf/google",
+    "connectorRef": {
+        "connectorName":"org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
+        "bundleName":"org.forgerock.openicf.connectors.googleapps-connector",
+        "bundleVersion":"1.4.0.0-SNAPSHOT"
+    },
+    "ok":true
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      To test that the connector is working, create, update, and read a user and
+      group entry on the Google resource, over REST.
+     </para>
+     <para>
+      The following command creates an entry for user <literal>Sam Carter</literal>:
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "__NAME__": "samcarter@example.com",
+  "__PASSWORD__"  : "password",
+  "givenName" : "Sam",
+  "familyName": "Carter",
+  "agreedToTerms": true,
+  "changePasswordAtNextLogin" : false
+ }' \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__?_action=create" \
+</userinput>
+<computeroutput>{
+    "phones":null,
+    "givenName":"Sam",
+    "familyName":"Carter",
+    "thumbnailPhotoUrl":null,
+    "addresses":null,
+    "__NAME__":"samcarter@example.com",
+    "changePasswordAtNextLogin":false,
+    "suspensionReason":null,
+    "aliases":null,
+    "customerId":"Cwev45or",
+    "isDelegatedAdmin":false,
+    "lastLoginTime":["1970-01-01T00:00:00.000Z"],
+    "agreedToTerms":true,
+    "deletionTime":null,
+    "isAdmin":false,
+    "creationTime":["2014-09-23T18:54:19.000Z"],
+    "ims":null,
+    "organizations":null,
+    "ipWhitelisted":false,
+    "fullName":"Sam Carter",
+    "includeInGlobalAddressList":true,
+    "isMailboxSetup":false,
+    "externalIds":null,
+    "suspended":false,
+    "nonEditableAliases":null,
+    "orgUnitPath":"/",
+    "relations":null,
+    "emails": [
+        {
+            "address":"samcarter@example.com",
+            "primary":true
+        }
+    ],
+    "_id":"101643010677712061243",
+    "_rev":"\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/RfZOwrjqrpRsO6PCGNfEp2H00Ds\""
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Update the user's phone number by sending a PUT request with the updated
+      data, and specifying the user ID in the request, for example:
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "__NAME__": "samcarter@example.com",
+  "__PASSWORD__"  : "password",
+  "givenName" : "Sam",
+  "familyName": "Carter",
+  "agreedToTerms": true,
+  "changePasswordAtNextLogin" : false
+  "phones" :
+   [
+    {
+     "value": "1234567890",
+     "type": "home"
+    },
+    {
+     "value": "0987654321",
+     "type":"work"
+    }
+   ]
+  }' \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/101643010677712061243"</userinput></screen>
+     <para>
+      The response returns the complete user object, with the updated phone
+      numbers.
+     </para>
+    </step>
+    <step>
+     <para>
+      Read the user entry from the Google resource:
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-None-Match" : "*" \
+ --request GET \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/101643010677712061243"</userinput>
+<computeroutput>{
+    "phones":
+        [
+            {"value":"1234567890","type":"home"},
+            {"value":"0987654321","type":"work"}
+        ],
+    "givenName":"Sam",
+    "familyName":"Carter",
+...
+    "_id":"101643010677712061243",
+    "_rev":"\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/RfZOwrjqrpRsO6PCGNfEp2H00Ds\""
+}</computeroutput>     </screen>
+    </step>
+    <step>
+     <para>
+      Create a group entry on the Google resource.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "__NAME__": "testGroup@example.com",
+  "__DESCRIPTION__": "Group used for google-connector sample.",
+  "name": "TestGroup"
+ }' \
+ "https://localhost:8443/openidm/system/google/__GROUP__?_action=create"
+ </userinput>
+<computeroutput>{
+ "__DESCRIPTION__": "Group used for google-connector sample.",
+ "directMembersCount": 0,
+ "nonEditableAliases": null,
+ "aliases": null,
+ "adminCreated": true,
+ "name": "TestGroup",
+ "__NAME__": "testGroup@example.com",
+ "_id": "03oy7u291s3qw1i",
+ "_rev": "\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/8JZsrHGxtdaH4sF8vgzLiPmPqFs\""
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Add the user Sam Carter, that you created previously, to the test group.
+      Include the <literal>_id</literal> that was generated in the user creation
+      step in the request URL.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "groupKey" : "03oy7u291s3qw1i",
+  "role": "MEMBER",
+  "__NAME__": "samcarter@example.com",
+  "email": "samcarter@example.com",
+  "type": "MEMBER"
+ }' \
+ "https://localhost:8443/openidm/system/google/Member/101643010677712061243"
+ </userinput>
+<computeroutput>{
+    "role": "MEMBER",
+    "type": "USER",
+    "email": "samcarter@example.com",
+    "__NAME__": "03oy7u291s3qw1i/samcarter@example.com",
+    "groupKey": "109384837631312225274",
+    "_id": "014ykbeg40r6x06/samcarter@example.com",
+    "_rev": "\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/GiZLiMKb3U62M58IabSzPKAVIOE\""
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Read the group entry by specifying the group <literal>_id</literal> in the
+      request URL. Notice that the group has one member
+      (<literal>"directMembersCount": 1</literal>).
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/google/__GROUP__/03oy7u291s3qw1i"
+ </userinput>
+<computeroutput>{
+    "__DESCRIPTION__": "Group used for google-connector sample.",
+    "directMembersCount": 1,
+    "nonEditableAliases": [
+        "googleAppsTestGroup@example.com.test-google-a.com"
+    ],
+    "aliases": null,
+    "adminCreated": true,
+    "name": "TestGroup",
+    "__NAME__": "testGroup@example.com",
+    "_id": "03oy7u291s3qw1i",
+    "_rev": "\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/WcZC54etzuPtruE7uByf9NQ82Ow\""
+}</computeroutput></screen>
+    </step>
+    <!--TODO Can we add a step here to check the user's group membership? -->
+    <step>
+     <para>
+      Delete the group entry.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json"
+ --request DELETE \
+ "https://localhost:8443/openidm/system/google/__GROUP__/03oy7u291s3qw1i"
+ </userinput>
+<computeroutput>{
+    "_id": "03oy7u291s3qw1i"
+}</computeroutput></screen>
+     <para>
+      The delete request returns the group ID.
+     </para>
+    </step>
+    <!--TODO Can we add a step here to check the user's group membership again
+    now that the group has been deleted? -->
+    <step>
+     <para>
+      Delete the user Sam Carter, to return the Google system to its original
+      state.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/101643010677712061243" </userinput>
+<computeroutput>{
+    "_id":"101643010677712061243"
+}</computeroutput></screen>
+    </step>
+    <!--TODO Do we not want to show some kind of recon process here? -->
+   </procedure>
+  </section>
+ </section>
+
+ <section xml:id="sample-scripted-rest">
+  <title>Sample ScriptedRest to OpenDJ - Scripted REST Implementation of Groovy Connector 1.4.0.0</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Scripted REST Connector</secondary>
+  </indexterm>
+  <para>
+   OpenICF 1.4 introduces a new, generic Groovy Connector. The Groovy Connector
+   is a scripted connector that enables you to run Groovy scripts on any
+   external resource.
+  </para>
+  <note>
+   <para>
+    The Groovy Connector is not a complete connector, in the traditional sense.
+    Rather, it is a framework within which you must write your own Groovy
+    scripts to address the requirements of your implementation. Specific scripts
+    are provided within the samples that demonstrate how the Groovy connector
+    can be used. These scripts can not be used "as is" in your deployment, but
+    are a good starting point on which to base your customization.
+   </para>
+  </note>
+  <para>
+   This sample demonstrates a Scripted REST implementation of the Groovy
+   Connector in which the Groovy scripts interact with OpenDJ's REST API.
+   </para>
+   <para>
+    The Groovy connector is bundled with OpenIDM ${docTargetVersion}, in
+    the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
+  </para>
+  <para>
+   The connector configuration file for this sample
+   (<filename>sample/scriptedrest2dj/conf/provisioner.openicf-scriptedsql.json</filename>)
+   indicates the Scripted REST implementation of the Groovy connector as follows:
+  </para>
+  <programlisting language="javascript">{
+    "name" : "scriptedrest",
+    "connectorRef" : {
+        "connectorHostRef" : "#LOCAL",
+        "connectorName" : "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
+        "bundleName" : "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion" : "[1.4.0.0,1.4.2.0)"
+    },
+...  </programlisting>
+  <para>
+   The Groovy scripts required for the sample are located in the
+   <filename>sample/scriptedrest2dj/tools</filename> directory. You will need to
+   customize these scripts to address the requirements of your specific
+   deployment, however, the sample scripts are a good starting point on which to
+   base your customization.
+  </para>
+
+  <section xml:id="sample-scripted-rest-opendj">
+   <title>Setting Up OpenDJ</title>
+   <para>
+    This sample assumes an OpenDJ server, running on the localhost. Follow these
+    steps to install and configure an OpenDJ instance.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Download and extract the OpenDJ zip archive.
+     </para>
+     <para>
+      Find a link to the OpenDJ download page from the <link xlink:show="new"
+      xlink:href="http://forgerock.com/download-stack/" />.
+     </para>
+    </step>
+    <step>
+     <para>
+      Install OpenDJ using the graphical interface, as follows:
+     </para>
+     <screen><userinput>$ cd opendj
+$ ./setup</userinput>
+<computeroutput>Launching graphical setup...</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      The sample assumes the following configuration:
+     </para>
+     <itemizedlist>
+      <listitem>
+       <para>
+        The server is installed on the localhost.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The server listens for LDAP connections on port 1389.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The administration connector port is 4444.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The root user DN is <literal>cn=Directory Manager</literal>.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        The root user password is <literal>password</literal>.
+       </para>
+      </listitem>
+     </itemizedlist>
+     <mediaobject>
+      <alt>OpenDJ Graphical Setup</alt>
+      <imageobject>
+       <imagedata fileref="images/dj-setup.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Configure the OpenDJ server for replication.
+     </para>
+     <para>
+      To enable live sync, this server must be configured for replication, even
+      if it does not actually participate in a replication topology. The easiest
+      way to configure replication, is to select the relevant option during the
+      install process.
+     </para>
+     <mediaobject>
+      <alt>OpenDJ Setup - Configuring the Server for Replication</alt>
+      <imageobject>
+       <imagedata fileref="images/dj-replication.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Use the sample base DN, <literal>dc=example,dc=com</literal> and import
+      the data required for the sample from the LDIF file
+      <filename>/path/to/openidm/samples/scriptedrest2dj/data/ldap.ldif</filename>.
+     </para>
+     <mediaobject>
+      <alt>OpenDJ Setup - Configuring a Base DN</alt>
+      <imageobject>
+       <imagedata fileref="images/dj-basedn.png" format="PNG"/>
+      </imageobject>
+     </mediaobject>
+    </step>
+    <step>
+     <para>
+      Accept the defaults for the remainder of the setup.
+     </para>
+     <para>
+      Complete the setup and select to start the server when the configuration
+      is complete.
+     </para>
+    </step>
+    <step>
+     <para>
+      Using the <literal>dsconfig</literal> command, enable OpenDJ's HTTP
+      connection handler.
+     </para>
+     <screen><userinput>$ cd /path/to/opendj/bin
+$ ./dsconfig set-connection-handler-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --handler-name "HTTP Connection Handler" \
+ --set enabled:true \
+ --set listen-port:8090 \
+ --no-prompt \
+ --trustAll</userinput>
+     </screen>
+    </step>
+    <step>
+     <para>
+      Enable the OpenDJ HTTP access log.
+     </para>
+     <screen><userinput>$ ./dsconfig set-log-publisher-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --publisher-name "File-Based HTTP Access Logger" \
+ --set enabled:true \
+ --no-prompt \
+ --trustAll</userinput></screen>
+    </step>
+    <step>
+     <para>
+      To configure the mapping between JSON resources and LDAP entries, copy the
+      the configuration file for the HTTP connection handler
+      (<filename>/path/to/openidm/samples/scriptedrest2dj/data/http-config.json</filename>)
+      to OpenDJ's configuration directory.
+     </para>
+     <screen><userinput>$ cd /path/to/opendj
+$ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json config/</userinput></screen>
+    </step>
+    <step>
+     <para>
+      Restart OpenDJ for the configuration change to take effect.
+     </para>
+     <screen><userinput>$ cd /path/to/opendj/bin
+$ ./stop-ds --restart</userinput>
+<computeroutput>Stopping Server...</computeroutput></screen>
+    </step>
+   </procedure>
+   <para>
+    OpenDJ is now configured for this sample.
+   </para>
+  </section>
+
+  <section xml:id="sample-scripted-rest-running">
+   <title>Running the Sample</title>
+   <para>
+    This section illustrates the basic CRUD operations on users and groups using
+    the Scripted REST connector and the OpenDJ REST API. Note that the power of
+    the Groovy connector is in the associated Groovy scripts, and their
+    application in your specific deployment. The scripts provided with this
+    sample are specific to the sample and customization of the scripts is
+    required.
+   </para>
+   <procedure>
+    <step>
+     <para>
+      Start OpenIDM with the configuration for the scripted REST sample.
+     </para>
+     <screen><userinput>$ cd /path/to/openidm
+$ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
+    </step>
+    <step>
+     <para>
+      Check the connector configuration is correct by obtaining the status of
+      the connector, over REST.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ "https://localhost:8443/openidm/system/scriptedrest?_action=test"</userinput>
+<computeroutput>{
+  "ok": true,
+  "connectorRef": {
+    "bundleVersion": "[1.4.0.0,1.4.2.0)",
+    "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+    "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector"
+  },
+  "objectTypes": [
+    "group",
+    "account"
+  ],
+  "config": "config/provisioner.openicf/scriptedrest",
+  "enabled": true,
+  "name": "scriptedrest"
+}</computeroutput>
+     </screen>
+    </step>
+    <step>
+     <para>
+      Create a group entry on the OpenDJ server.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "_id" : "group1"
+ }' \
+ "https://localhost:8443/openidm/system/scriptedrest/group?_action=create"</userinput>
+<computeroutput>{
+    "_id": "group1",
+    "cn": "group1",
+    "members": null,
+    "lastModified": null,
+    "created": "2014-09-24T17:34:27Z",
+    "displayName": "group2"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Create a user entry on the OpenDJ server.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "givenName" : "Steven",
+   "familyName" : "Carter",
+   "emailAddress" : "scarter@example.com",
+   "telephoneNumber" : "444-444-4444",
+   "password" : "Passw0rd",
+   "displayName" : "Steven.Carter",
+   "uid" : "scarter"
+ }' \
+ https://localhost:8443/openidm/system/scriptedrest/account?_action=create</userinput>
+<computeroutput>{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": null,
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:35:46Z",
+    "telephoneNumber": "444-444-4444"
+}</computeroutput></screen>
+     <para>
+      Notice that at this stage, the user is not a member of any group.
+     </para>
+    </step>
+    <step>
+     <para>
+      Update Steven Carter's entry, by modifying his telephone number.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+   "givenName" : "Steven",
+   "familyName" : "Carter",
+   "emailAddress" : "scarter@example.com",
+   "telephoneNumber" : "555-555-5555",
+   "password" : "Passw0rd",
+   "displayName" : "Steven.Carter",
+   "uid" : "scarter"
+ }' \
+ https://localhost:8443/openidm/system/scriptedrest/account/scarter</userinput>
+<computeroutput>{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": null,
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:35:46Z",
+    "telephoneNumber": "555-555-5555"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Add Steven Carter to the group you created previously, by updating the
+      group entry.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+ "_id" : "group1",
+ "members" : [{"_id" : "scarter"}]
+ }' \
+ https://localhost:8443/openidm/system/scriptedrest/group/group1</userinput>
+<computeroutput>{
+    "_id": "group1",
+    "cn": "group1",
+    "members": [
+        {
+            "displayName": "Steven.Carter",
+            "_id": "scarter"
+        }
+    ],
+    "lastModified": "2014-09-24T17:31:42Z",
+    "created": "2014-09-24T17:27:37Z",
+    "displayName": "group1"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Read Steven Carter's entry, to verify that he is now a member of group1.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ https://localhost:8443/openidm/system/scriptedrest/account/scarter</userinput>
+<computeroutput>{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": [
+        {
+            "_id": "group1"
+        }
+    ],
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:31:04Z",
+    "telephoneNumber": "555-555-5555"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Read the group entry to verify its members.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ https://localhost:8443/openidm/system/scriptedrest/group/group1</userinput>
+<computeroutput>{
+    "_id": "group1",
+    "cn": "group1",
+    "members": [
+        {
+            "displayName": "Steven.Carter",
+            "_id": "scarter"
+            }
+    ],
+    "lastModified": "2014-09-24T17:31:42Z",
+    "created": "2014-09-24T17:27:37Z",
+    "displayName": "group1"
+}</computeroutput></screen>
+    </step>
+    <step>
+     <para>
+      Delete the user and group entries, returning the OpenDJ server to its
+      initial state.
+     </para>
+     <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ https://localhost:8443/openidm/system/scriptedrest/account/scarter</userinput>
+<computeroutput>{
+    "_id": "scarter"
+}</computeroutput>
+<userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ https://localhost:8443/openidm/system/scriptedrest/group/group1</userinput>
+<computeroutput>{
+    "_id": "group1"
+}</computeroutput>
+     </screen>
+    </step>
+   </procedure>
   </section>
 
  </section>
