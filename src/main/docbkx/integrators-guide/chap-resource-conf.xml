@@ -3060,8 +3060,25 @@ Properties:
    <para>
     The Groovy connector is bundled with OpenIDM ${docTargetVersion}, in
     the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
-    Sample scripted connector implementations are included in the JAR.
    </para>
+   <para>
+    Sample Groovy connector implementations are provided in the <link
+    xlink:show="new"
+    xlink:href="install-guide#chap-samples"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Samples</citetitle></link>
+    chapter of the <citetitle>Installation Guide</citetitle>.
+   </para>
+   <note>
+    <para>
+     The Groovy connector is not a complete connector, in the traditional sense.
+     Rather, it is a framework within which you must write your own Groovy
+     scripts to address the requirements of your implementation. Specific scripts
+     are provided with the samples that demonstrate how the Groovy connector
+     can be used. These scripts can not be used "as is" in your deployment, but
+     are a good starting point on which to base your customization.
+    </para>
+   </note>
+
   </section>
 
   <section xml:id="powershell-connector">
