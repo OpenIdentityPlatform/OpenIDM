@@ -81,6 +81,10 @@ define([
 
                     QUnit.equal(adminUserProfileView.$el.find("#linkedViewSelect option").length, 1, "Linked Resource properly loaded");
 
+                    adminUserProfileView.reloadData();
+
+                    QUnit.equal($("[name=roles]:checked").val(), "openidm-authorized", "Role remains checked after form reloaded");
+
                     QUnit.start();
 
                 });
