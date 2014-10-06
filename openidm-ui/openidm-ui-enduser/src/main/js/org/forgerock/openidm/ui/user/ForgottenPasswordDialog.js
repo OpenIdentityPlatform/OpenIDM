@@ -126,7 +126,7 @@ define("org/forgerock/openidm/ui/user/ForgottenPasswordDialog", [
                 
                 if (typeof(msg) === "undefined") {
                     validatorsManager.bindValidators(this.$el.find('#fgtnPasswordDiv'), userDelegate.baseEntity + "/" + this.$el.find("input[name=_id]").val(), _.bind(function () {
-                        this.$el.trigger("onValidate");
+                        validatorsManager.validateAllFields(this.$el.find('#fgtnPasswordDiv'));
                         this.$el.find("#fgtnPasswordDiv").slideDown();
                         this.$el.find(".dialogActions input[type=submit]").show();
                         this.$el.find("input[name=submitAnswer]").css('visibility','hidden');
