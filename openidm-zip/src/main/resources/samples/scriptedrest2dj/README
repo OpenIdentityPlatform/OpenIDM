@@ -64,9 +64,8 @@ Setup OpenDJ:
     7. Copy the http-config.json file located in the data folder to the opendj/config directory.
         $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json opendj/config
 
-    7. Restart OpenDJ.
-        $ opendj/bin/stop-ds
-        $ opendj/bin/start-ds
+    8. Restart OpenDJ.
+        $ opendj/bin/stop-ds --restart
 
 OpenIDM Instructions:
 
@@ -239,6 +238,6 @@ OpenIDM Instructions:
           "_id": "group1"
         }
 
-This shows the basic CRUD operations on user and groups using ScriptedREST and the OpenDJ rest2ldap API. To read
+This shows the basic CRUD operations on users and groups using ScriptedREST and the OpenDJ rest2ldap API. To read
 more documentation on the groovy scriptedrest connector and for help with customization please see
 http://openicf.forgerock.org/connectors/groovy-connector-1.4.0.0/doc/groovy-connector-1.4.0.0/index.html
