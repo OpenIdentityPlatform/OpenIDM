@@ -3637,7 +3637,7 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
   </para>
   <para>
    The connector configuration file for this sample
-   (<filename>sample/scriptedrest2dj/conf/provisioner.openicf-scriptedsql.json</filename>)
+   (<filename>samples/scriptedrest2dj/conf/provisioner.openicf-scriptedsql.json</filename>)
    indicates the Scripted REST implementation of the Groovy connector as follows:
   </para>
   <programlisting language="javascript">{
@@ -3651,7 +3651,7 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
 ...  </programlisting>
   <para>
    The Groovy scripts required for the sample are located in the
-   <filename>sample/scriptedrest2dj/tools</filename> directory. You will need to
+   <filename>samples/scriptedrest2dj/tools</filename> directory. You will need to
    customize these scripts to address the requirements of your specific
    deployment, however, the sample scripts are a good starting point on which to
    base your customization.
