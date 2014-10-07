@@ -443,7 +443,7 @@ public class SchedulerService implements RequestHandler {
         try {
             String id = request.getNewResourceId() == null
                     ? UUID.randomUUID().toString()
-                    : trimTrailingSlash(request.getNewResourceId()); // is the trim necessary?
+                    : request.getNewResourceId();
             Map<String, Object> object = request.getContent().asMap();
             object.put("_id", id);
             
@@ -462,7 +462,7 @@ public class SchedulerService implements RequestHandler {
             }
 
             addSchedule(scheduleConfig, id, false);
-            handler.handleResult(new Resource(id, null, getSchedule(request.getResourceName())));
+            handler.handleResult(new Resource(id, null, getSchedule(id)));
         } catch (ParseException e) {
             handler.handleError(new BadRequestException(e.getMessage(), e));
         } catch (ObjectAlreadyExistsException e) {
@@ -645,13 +645,6 @@ public class SchedulerService implements RequestHandler {
         } catch (Throwable t) {
             handler.handleError(ResourceUtil.adapt(t));
         }
-    }
-
-    private String trimTrailingSlash(String id) {
-        if (id.endsWith("/")) {
-            return id.substring(0, id.length()-1);
-        }
-        return id;
     }
 
     public void initPersistentScheduler(ComponentContext compContext) throws SchedulerException {
