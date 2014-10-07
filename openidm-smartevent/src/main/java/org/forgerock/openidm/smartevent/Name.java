@@ -25,8 +25,10 @@
 package org.forgerock.openidm.smartevent;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+
+import org.forgerock.guava.common.cache.CacheBuilder;
+import org.forgerock.guava.common.cache.CacheLoader;
+import org.forgerock.guava.common.cache.LoadingCache;
 
 import org.forgerock.openidm.smartevent.core.DisabledPublisher;
 import org.forgerock.openidm.smartevent.core.DisruptorReferringPublisher;
@@ -62,9 +64,17 @@ public class Name {
      * DISRUPTOR uses a non-blocking library with a ring buffer 
      */
     enum PublisherType {BLOCKING, DISRUPTOR};
-     
+
     // Holds the event stringified name to the Name instance mapping
-    static ConcurrentMap<String, Name> names = new ConcurrentHashMap<String, Name>();
+    static LoadingCache<String, Name> names = CacheBuilder.newBuilder()
+            .maximumSize(Integer.valueOf(System.getProperty("openidm.smartevent.maxevents", "1000")))
+            .build(
+                    new CacheLoader<String, Name>() {
+                        @Override
+                        public Name load(String key) throws Exception {
+                            return new Name(key);
+                        }
+                    });
 
     /**
      * Stringified version of the event name
@@ -108,18 +118,7 @@ public class Name {
      * @return the event Name object representing the requested event type
      */
     public final static Name get(String stringifiedName) {
-        Name aName = names.get(stringifiedName);
-        if (aName == null) {
-            aName = new Name(stringifiedName);
-            // Ensure first create/insert wins
-            // (Because of avoiding locking, multiple could create and try to
-            // insert this concurrently)
-            Name existing = names.putIfAbsent(stringifiedName, aName);
-            if (existing != null) {
-                aName = existing;
-            }
-        }
-        return aName;
+        return names.getUnchecked(stringifiedName);
     }
 
     /**
@@ -202,7 +201,7 @@ public class Name {
      */
     public final static Map<String, Name> getAllNames() {
         // TODO: consider making/wrapping as immutable
-        return names;
+        return names.asMap();
     }
 
     /**
