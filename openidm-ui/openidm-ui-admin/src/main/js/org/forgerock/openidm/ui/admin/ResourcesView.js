@@ -60,18 +60,9 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
             $.when(connectorPromise, managedPromise, repoCheckPromise).then(_.bind(function(connectors, managedObjects, configFiles){
                 _.each(connectors[0], _.bind(function(connector){
-                    if(_.isUndefined(connector.error)) {
-                        connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
-                        connector.displayObjectType = connector.objectTypes.join(",");
-                        connector.cleanUrlName = connector.config.split("/")[2];
-                        connector.editable = true;
-                    } else {
-                        //Temp code for handling a bad connector until a better method of testing valid connectors is developed
-                        connector.displayName = $.t("templates.connector.connectorNameUnknown");
-                        connector.cleanUrlName = connector.name;
-                        connector.editable = false;
-                        connector.errorMessage = $.t("templates.connector.connectorError");
-                    }
+                    connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
+                    connector.displayObjectType = connector.objectTypes.join(",");
+                    connector.cleanUrlName = connector.config.split("/")[2];
                 }, this));
 
                 this.data.currentConnectors = connectors[0];
@@ -94,6 +85,11 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
         resourceRender: function(callback) {
             this.parentRender(_.bind(function(){
+                if(this.$el.find(".resource-unavailable").length !== 0) {
+                    this.$el.find(".resource-unavailable").tooltip({
+                        tooltipClass: "resource-error-tooltip"
+                    });
+                }
 
                 MapResourceView.render({
                     "removeCallback": _.bind(function(){
@@ -104,10 +100,10 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                             this.$el.find(".add-resource-button").prop("disabled", true);
                         }
                     }, this)}, _.bind(function(){
-                        if(this.openMapping) {
-                            this.displayMapping(true, false);
-                        }
-                    }, this));
+                    if(this.openMapping) {
+                        this.displayMapping(true, false);
+                    }
+                }, this));
 
                 if (callback) {
                     callback();
