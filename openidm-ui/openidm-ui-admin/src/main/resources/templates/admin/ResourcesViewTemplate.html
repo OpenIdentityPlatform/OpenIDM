@@ -7,11 +7,10 @@
     <div data-resource-type="connector" data-connector-title="{{cleanUrlName}}" class="resource-body">
         <div class="resource-type-body">
             <div class="resource-tools">
-                <button type="button" class="pull-left button add-resource-button"><i class="fa fa-lg fa-plus"></i></button>
-
-                {{#if editable}}
-                <a href="#connectors/edit/{{cleanUrlName}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
+                {{#if ok}}
+                    <button type="button" class="pull-left button add-resource-button"><i class="fa fa-lg fa-plus"></i></button>
                 {{/if}}
+                <a href="#connectors/edit/{{cleanUrlName}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
                 <span class="pull-right resource-delete connector-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
             </div>
             <div class="resource-info">
@@ -26,7 +25,7 @@
             {{#if ok}}
             <p class="resource-status resource-available"><i class="fa fa-check-circle-o "></i> {{t "templates.connector.activeState"}}</p>
             {{else}}
-            <p title="{{errorMessage}}" class="resource-status resource-unavailable"><i class="fa fa-times-circle"></i> {{t "templates.connector.errorState"}}</p>
+            <p title="{{error}}" class="resource-status resource-unavailable"><i class="fa fa-times-circle"></i> {{t "templates.connector.errorState"}}</p>
             {{/if}}
         </div>
     </div>
