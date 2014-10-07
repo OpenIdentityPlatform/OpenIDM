@@ -41,6 +41,11 @@
             <version>3.0.1</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons.guava</groupId>
+            <artifactId>forgerock-guava-cache</artifactId>
+            <version>18.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
