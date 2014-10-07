@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, ContentFlow */
+/*global define, $, _ */
 
 /**
  * @author mbilski
@@ -30,14 +30,15 @@
 define("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog", [
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function(Dialog, validatorsManager, conf, eventManager, constants) {
-    var EnterOldPasswordDialog = Dialog.extend({    
+], function(Dialog, validatorsManager, validatorsUtils, conf, eventManager, constants) {
+    var EnterOldPasswordDialog = Dialog.extend({
         contentTemplate: "templates/user/EnterOldPasswordDialog.html",
         
-        data: {         
+        data: {
             width: 800,
             height: 200
         },
@@ -54,24 +55,47 @@ define("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog", [
             if(event) {
                 event.preventDefault();
             }
-            
-            if(validatorsManager.formValidated(this.$el)) {   
+
+            if(validatorsManager.formValidated(this.$el)) {
                 conf.setProperty('passwords', {
                     password: this.$el.find("input[name=oldPassword]").val()
                 });
-                
-                this.close();                
+
+                this.close();
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "changeSecurityData"});
             }
         },
         
-        render: function() {
+        render: function(args, callback) {
             this.actions = [];
             this.addAction($.t("common.form.continue"), "submit");
             
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el); 
-            }, this));            
+                validatorsManager.bindValidators(this.$el);
+                if (callback) {
+                    callback();
+                }
+            }, this));
+        },
+
+        // overrides the default implementation in AbstractView
+        onValidate: function(event, input, msg, validatorType) {
+
+            if (msg === "inProgress") {
+                return;
+            }
+
+            this.$el.find(".input-validation-message").show();
+            validatorsUtils.showValidation(input, this.$el);
+            if (msg) {
+                input.parents('.separate-message').addClass('invalid');
+                input.addClass('invalid');
+            } else {
+                input.parents('.separate-message').removeClass('invalid');
+                input.removeClass('invalid');
+            }
+            
+            input.parents('.separate-message').children("div.validation-message:first").attr("for", input.attr('id')).html(msg ? msg : '');
         }
     }); 
     

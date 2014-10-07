@@ -35,7 +35,8 @@ define([
     "text!templates/common/LoginBaseTemplate.html",
     "text!templates/common/LoginTemplate.html",
     "text!templates/common/NavigationTemplate.html",
-    "text!templates/common/FooterTemplate.html"
+    "text!templates/common/FooterTemplate.html",
+    "text!templates/common/DialogTemplate.html"
 ], function () {
 
     /* an unfortunate need to duplicate the file names here, but I haven't
@@ -52,7 +53,8 @@ define([
             "templates/common/LoginBaseTemplate.html",
             "templates/common/LoginTemplate.html",
             "templates/common/NavigationTemplate.html",
-            "templates/common/FooterTemplate.html"
+            "templates/common/FooterTemplate.html",
+            "templates/common/DialogTemplate.html"
         ],
         deps = arguments;
 
