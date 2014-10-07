@@ -32,8 +32,9 @@ define([
     "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
     "org/forgerock/openidm/ui/user/delegates/SiteIdentificationDelegate",
     "./mocks/siteIdentification",
-    "./mocks/adminUserView"
-], function (sinon, conf, LoginView, LinkedView, usersView, adminUserProfileView, siteIdentificationDelegate, siteIdentificationMocks, adminUserViewMock) {
+    "./mocks/adminUserView",
+    "./mocks/oldPassword"
+], function (sinon, conf, LoginView, LinkedView, usersView, adminUserProfileView, siteIdentificationDelegate, siteIdentificationMocks, adminUserViewMock, oldPasswordMock) {
 
     return {
         executeAll: function (server) {
@@ -89,6 +90,33 @@ define([
 
                 });
 
+            });
+
+            QUnit.asyncTest("Change password dialog", function () {
+                var oldPasswordDialog = require("org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog");
+                oldPasswordMock(server);
+
+                oldPasswordDialog.render([], function () {
+
+                    var userDelegate = require("UserDelegate");
+                    sinon.stub(userDelegate, "checkCredentials", function (value, successCallback, errorCallback) {
+                        if (value === "testpassword") {
+                            successCallback();
+                        } else {
+                            errorCallback("Incorrect");
+                        }
+                    });
+
+                    oldPasswordDialog.$el.find("input[name=oldPassword]").val("test").trigger("change");
+                    QUnit.equal(oldPasswordDialog.$el.find("input[name=oldPassword]").attr('data-validation-status'), 'error', 'Old password field should be disabled following incorrect password value');
+                    QUnit.equal(oldPasswordDialog.$el.find("input[type=submit]").prop('disabled'), false, 'Submit button for form should still be enabled after validation failed');
+
+                    oldPasswordDialog.$el.find("input[name=oldPassword]").val("testpassword").trigger("change");
+                    QUnit.equal(oldPasswordDialog.$el.find("input[name=oldPassword]").attr('data-validation-status'), 'ok', 'Old password field should be enabled following correct password value');
+
+
+                    QUnit.start();
+                })
             });
         }
     };
