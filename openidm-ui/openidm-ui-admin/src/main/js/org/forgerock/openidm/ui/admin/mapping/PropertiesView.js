@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
                 var mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
                 browserStorageDelegate.set(this.mapping.name + "_Properties",_.reject(mapProps, function (p) { return p.target === $(e.target).attr('target'); }));
-                this.checkChanges();
+                MappingBaseView.checkChanges();
                this.render([this.mapping.name]);
             },this));
         },
@@ -296,7 +296,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                         browserStorageDelegate.set(_this.mapping.name + "_Properties", mapProps);
                         _this.setNumRepresentativePropsLine();
-                        _this.checkChanges();
+                        MappingBaseView.checkChanges();
                 },
                 start: function(){
                     $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width","");
