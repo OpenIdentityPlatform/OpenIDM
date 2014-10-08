@@ -29,11 +29,16 @@ define("org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate", [], fu
     var obj = {};
     
     obj.get = function(item, useLocalStorage){
-        var storage = sessionStorage;
+        var storage = sessionStorage,
+            jsonString;
+        
         if(useLocalStorage) {
             storage = localStorage;
         }
-        return JSON.parse(storage.getItem(item));
+        
+        jsonString = storage.getItem(item);
+        
+        return (jsonString !== "undefined") ? JSON.parse(jsonString) : false;
     };
     
     obj.set = function(item, newObj, useLocalStorage){

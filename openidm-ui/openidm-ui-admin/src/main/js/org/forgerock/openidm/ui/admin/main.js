@@ -31,6 +31,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
     "./delegates/BrowserStorageDelegate",
+    "./delegates/SearchDelegate",
 
     "./ResourcesView",
     "./MapResourceView",
@@ -53,8 +54,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./authentication/AuthenticationView",
 
     "./mapping/MappingListView",
-    "./mapping/AddMappingView",
-    "./mapping/EditMappingView",
+    "./mapping/MappingBaseView",
     "./mapping/PropertiesView",
     "./mapping/AddPropertyMappingDialog",
     "./mapping/EditPropertyMappingDialog",

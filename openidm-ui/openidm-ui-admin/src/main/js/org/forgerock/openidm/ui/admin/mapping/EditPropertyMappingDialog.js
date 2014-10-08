@@ -33,12 +33,12 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             "change :input[name=source]": "updateProperty",
             "change :input": "validateMapping",
             "change :input[name=transformation_script]": "showTransformSample",
-            "keyup :input[name=transformation_script]":  function(e){
+            "blur :input[name=transformation_script]":  function(e){
                 this.validateMapping(e);
                 this.showTransformSample(e);
             },
             "change :input[name=condition_script]": "showCondition",
-            "keyup :input[name=condition_script]": function(e){
+            "blur :input[name=condition_script]": function(e){
                 this.validateMapping(e);
                 this.showCondition(e);
             },
@@ -244,7 +244,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             
             browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
             
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingView", args: [this.data.mappingName]});
+            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [this.data.mappingName]});
         },
         close: function () {
             if(this.currentDialog) {
@@ -279,13 +279,14 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             
             this.currentDialog.dialog({
                 title: settings.title,
+                position: ['center',25],
                 modal: true,
                 resizable: true,
                 bgiframe: true,
                 width:'850px',
                 dialogClass: "overflow-visible",
                 close: _.bind(function(){
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingView", args: [this.data.mappingName]});
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [this.data.mappingName]});
                 }, this),
                 open: function(){
 
@@ -316,18 +317,11 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 }
             }
             
-            $('#mappingDialogTabs', this.$el).css('width','830px').tabs({ 
-                active: selectedTab,
-                activate: function (e, ui) {
-                    $(':input:first', ui.newPanel).focus();
-                }
-            });
-            $('#mappingDialogTabs [aria-expanded="true"] :input:first', this.$el).focus();
-            
 
             this.transform_script_editor = codeMirror.fromTextArea(this.$el.find("[name=transformation_script]")[0], {
                 lineNumbers: true,
-                mode: "javascript"
+                mode: "javascript",
+                autofocus: true
             });
             
             this.transform_script_editor.on("changes", _.bind(function() {
@@ -337,13 +331,23 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             
             this.conditional_script_editor = codeMirror.fromTextArea(this.$el.find("[name=condition_script]")[0], {
                 lineNumbers: true,
-                mode: "javascript"
+                mode: "javascript",
+                autofocus: true
             });
             
             this.conditional_script_editor.on("changes", _.bind(function() {
                 this.conditional_script_editor.save();
                 this.$el.find("[name=condition_script]").trigger("blur");
             }, this));
+            
+            $('#mappingDialogTabs', this.$el).css('width','830px').tabs({ 
+                active: selectedTab,
+                activate: function (e, ui) {
+                    $(':input:first', ui.newPanel).focus();
+                    $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                }
+            });
+            $('#mappingDialogTabs [aria-expanded="true"] :input:first', this.$el).focus();
             
             this.showTransformSample();
 
@@ -355,34 +359,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             
             $("input[name='source']", this.$el).on('change autocompleteclose', function (e, initialRender) {
                 var val = $(this).val(),
-                    sourceVal = (_this.data.availableSourceProps) ? _this.data.availableSourceProps[val] : "",
                     isValid;
-                
-                if (sourceVal) {
-
-                    $("input[type=submit]", _this.$el).prop("disabled", false);
-                    $("#Property_List .validation-message", _this.$el).text("");
-
-                    data.sourceVal = sourceVal;
-                    
-                    if (val !== _this.data.property.source) {
-                        _this.data.property.source = val;
-                        if (sourceVal.type === "array"){
-                            $('[name=transformation_script]', _this.$el).val('null');
-                            if(!_this.data.property.transform){
-                                _this.data.property.transform = {};
-                            }
-                            _this.data.property.transform.source = null;
-                        }
-                    }
-                    $("#arrayAssociationTabs", _this.$el).hide();
-                    if($('[name=transformation_script]', _this.$el).val() === "null"){
-                        $('[name=transformation_script]', _this.$el).val('');
-                    }
-                } else {
-                    val = "";
-                    data.sourceVal = null;
-                }
 
                 if (val) { 
                     $("#currentSourceDisplay", _this.$el).val(val);

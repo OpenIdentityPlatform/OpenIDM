@@ -78,21 +78,15 @@ define("config/routes/AdminRoutesConfig", [
             url: "mapping/",
             forceUpdate: true
         },
-        "editMappingView" : {
-            view: "org/forgerock/openidm/ui/admin/mapping/EditMappingView",
+        "mappingView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
             role: "ui-admin",
-            url: /^mapping\/edit\/(.+)\/$/,
-            pattern: "mapping/edit/?/",
-            forceUpdate: true
-        },
-        "addMappingView" : {
-            view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
-            role: "ui-admin",
-            url: "mapping/add/",
+            url: /^mapping\/([^\/]+)\/$/,
+            pattern: "mapping/?/",
             forceUpdate: true
         },
         "editMappingProperty" : {
-            base: "editMappingView",
+            base: "mappingView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
             role: "ui-admin",
             url: /mapping\/(.+?)\/property\/(.+?)$/,
@@ -100,7 +94,7 @@ define("config/routes/AdminRoutesConfig", [
             forceUpdate: true
         },
         "addMappingProperty" : {
-            base: "editMappingView",
+            base: "mappingView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
             role: "ui-admin",
             url: /mapping\/(.+?)\/property\/_new$/,

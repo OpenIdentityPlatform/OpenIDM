@@ -25,9 +25,8 @@
 /*global define*/
 
 define("config/AppConfiguration", [
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, eventManager) {
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(constants) {
     var obj = {
             moduleDefinition: [
                 {
@@ -127,7 +126,21 @@ define("config/AppConfiguration", [
                                         "url": "#mapping/",
                                         "name": "config.AppConfiguration.Navigation.links.mapping",
                                         "icon": "glyph-icon-resize-horizontal",
-                                        "inactive": false
+                                        "inactive": false,
+                                        "urls": {
+                                            "properties": {
+                                                "url": "#mapping/",
+                                                "name": "templates.mapping.properties",
+                                                "icon": "glyph-icon-th-list",
+                                                "inactive": false
+                                            },
+                                            "sync": {
+                                                "url": "#sync/",
+                                                "name": "templates.sync.sync",
+                                                "icon": "glyph-icon-time",
+                                                "inactive": false
+                                            }
+                                        }
                                     }
                                 }
                             }

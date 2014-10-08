@@ -174,7 +174,62 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
             tempMapping = {
                 "target" : this.targetDetails.saveName,
                 "source" : this.sourceDetails.saveName,
-                "name" : $("#mappingName").val()
+                "name" : $("#mappingName").val(),
+                "properties": [],
+                "policies" : [
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "ABSENT"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "ALL_GONE"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "AMBIGUOUS"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "CONFIRMED"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "FOUND"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "FOUND_ALREADY_LINKED"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "LINK_ONLY"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "MISSING"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "SOURCE_IGNORED"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "SOURCE_MISSING"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "TARGET_IGNORED"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "UNASSIGNED"
+                    },
+                    {
+                        "action" : "ASYNC",
+                        "situation" : "UNQUALIFIED"
+                    }
+                ]
             };
 
             if($("#mappingLinked").val() !== "none") {
