@@ -65,6 +65,14 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
             type: "POST"
         });
     };
+
+    obj.connectorDefault = function(name, type) {
+        return $.ajax({
+            dataType: "json",
+            type: "GET",
+            url: "/admin/templates/admin/connector/configs/" +type +"/" +name +".json"
+        });
+    };
     
     return obj;
 });

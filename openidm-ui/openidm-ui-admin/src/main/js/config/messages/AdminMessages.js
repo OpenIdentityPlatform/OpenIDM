@@ -80,6 +80,14 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.ManagedObjectMessages.saveSuccessful",
             type: "info"
         },
+        "objectTypeLoaded" : {
+            msg: "config.messages.ObjectTypeMessages.objectSuccessfullyLoaded",
+            type: "info"
+        },
+        "objectTypeFailedToLoad" : {
+            msg: "config.messages.ObjectTypeMessages.objectFailedToLoad",
+            type: "error"
+        },
         "authSaveSuccess" : {
             msg: "config.messages.AuthenticationMessages.saveSuccessful",
             type: "info"

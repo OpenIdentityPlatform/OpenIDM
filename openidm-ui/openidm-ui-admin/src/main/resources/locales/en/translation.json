@@ -63,6 +63,10 @@
                 "deleteManagedFail" : "Error deleting managed object unable to remove managed object",
                 "saveSuccessful" : "Managed Object has been saved."
             },
+            "ObjectTypeMessages" : {
+                "objectSuccessfullyLoaded" : "Object type Successfully Loaded",
+                "objectFailedToLoad" : "Object type Failed To Load"
+            },
             "AuthenticationMessages" : {
                 "saveSuccessful" : "Authentication configuration has been saved."
             },
@@ -301,7 +305,9 @@
                 "deleteObjectTypes": "Delete Selected ObjectTypes",
                 "addNewObjecttype": "Add a new object type",
                 "deleteObject": "Delete Object",
-                "saveObject": "Save Object"
+                "saveObject": "Save Object",
+                "objectTypeConfigs" : "Object Type Configs",
+                "changeConfiguration" : "<p>Are you sure you want to change your LDAP Object Type to a default or saved configuration?</p><p>Please note making this change will cause any unsaved or custom changes to be lost.</p>"
             },
             "errorMessages": {
                 "unknownHost" : "Unknown Host",

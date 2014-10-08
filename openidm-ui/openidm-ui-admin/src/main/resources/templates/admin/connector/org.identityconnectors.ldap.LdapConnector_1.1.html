@@ -67,7 +67,7 @@
                     <div class="separate-message outside-element">
                         <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                         <div class="inline">
-                            <button type="button" field_type="baseContext" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                            <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                             <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
                             <span></span>
                         </div>
@@ -80,7 +80,7 @@
                 <div class="separate-message outside-element">
                     <label class="light">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                     <div class="inline">
-                        <button type="button" field_type="baseContext" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                        <button type="button" field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                         <input class="form-size-m" data-validator-event="keyup blur" data-validator="required" autocomplete="off" field_type="baseContext" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
                         <span></span>
                     </div>
@@ -107,7 +107,7 @@
                         <div class="separate-message outside-element">
                             <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                             <div class="inline">
-                                <button type="button" field_type="accountObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                                <button type="button" field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                                 <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value="{{value}}"/>
                                 <span></span>
                             </div>
@@ -120,7 +120,7 @@
                     <div class="separate-message outside-element">
                         <label class="light">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                         <div class="inline">
-                            <button type="button" field_type="accountObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                            <button type="button" field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                             <input data-validator-event="keyup blur" data-validator="required" class="form-size-m" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="user" value=""/>
                             <span></span>
                         </div>
@@ -135,7 +135,7 @@
     <legend><span>{{t "templates.connector.ldapConnector.addGroupTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
         <div class="group-field-block group-lead no-validation-block">
-            <label title="Group Filter" class="light">Group Filter</label>
+            <label class="light">Group Filter</label>
             <input autocomplete="off" class="filter form-size-l" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
         </div>
         <div id="groupObjectClassesWrapper">
@@ -148,8 +148,8 @@
                         <div class="separate-message outside-element">
                             <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                             <div class="inline">
-                                <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                                <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value="{{value}}"/>
+                                <button type="button" field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                                <input data-validator-event="keyup blur" data-validator="required"  class="form-size-m" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="group" value="{{value}}"/>
                                 <span></span>
                             </div>
                             <div class="validation-message"></div>
@@ -161,8 +161,8 @@
                     <div class="separate-message outside-element">
                         <label class="light">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                         <div class="inline">
-                            <button type="button" field_type="groupObjectClasses" title="" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
-                            <input class="form-size-m" autocomplete="off" type="text" name="connectorDefaults/configurationProperties/groupObjectClasses[]" placeholder="group" value=""/>
+                            <button type="button" field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+                            <input class="form-size-m" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="group" value=""/>
                             <span></span>
                         </div>
                         <div class="validation-message"></div>
