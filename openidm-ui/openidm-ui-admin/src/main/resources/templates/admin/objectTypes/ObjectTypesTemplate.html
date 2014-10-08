@@ -1,4 +1,14 @@
 <div class="selectPanel">
+    {{#if defaultConfigs}}
+    <div class="object-config-selector">
+        <label for="selectObjectConfig" class="light">{{t "templates.connector.objectTypes.objectTypeConfigs"}}</label>
+        <select data-type="{{defaultConfigs.0.type}}" id="selectObjectConfig" required>
+            {{#each defaultConfigs}}
+                <option value="{{fileName}}">{{displayName}}</option>
+            {{/each}}
+        </select>
+    </div>
+    {{/if}}
     <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only json-editor-btn-edit" id="newObjectType"><span class="ui-button-text">{{t "templates.connector.objectTypes.addNewObjecttype"}}</span></button>
     <select id="objectTypesList" name="objectTypesList" multiple></select>
 </div>

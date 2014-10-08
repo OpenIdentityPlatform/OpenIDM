@@ -1,0 +1,631 @@
+{
+    "_id" : "RACFLDAP",
+    "name" : "RACFLDAP",
+    "connectorRef" :
+    {
+        "connectorHostRef" : "#LOCAL",
+        "bundleName" : "org.forgerock.openicf.connectors.mainframe.openicf-racf-connector",
+        "bundleVersion" : "1.1.0.0-EA",
+        "connectorName" : "org.identityconnectors.racf.RacfConnector"
+    },
+    "producerBufferSize" : 100,
+    "connectorPoolingSupported" : true,
+    "poolConfigOption" :
+    {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "resultsHandlerConfig" :
+    {
+        "enableNormalizingResultsHandler":true,
+        "enableFilteredResultsHandler":false,
+        "enableCaseInsensitiveFilter":true,
+        "enableAttributesToGetSearchResultsHandler":true
+    },
+    "operationTimeout" :
+    {
+        "SYNC" : -1,
+        "SCHEMA" : -1,
+        "GET" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "AUTHENTICATE" : -1,
+        "VALIDATE" : -1,
+        "SEARCH" : -1,
+        "TEST" : -1,
+        "DELETE" : -1,
+        "CREATE" : -1,
+        "UPDATE" : -1
+    },
+    "configurationProperties" :
+    {
+        "hostNameOrIpAddr" : "racf.example.com",
+        "hostPortNumber" : 389,
+        "suffix" : "dc=example,dc=com",
+        "ldapUserName" : "racfid=RACFADMIN,profiletype=user,dc=example,dc=com",
+        "ldapPassword" : "xxxxxx",
+        "useSsl" : false,
+        "userObjectClasses" : [ "racfUser", "racfUserOmvsSegment", "racfOperparmSegment", "racfUserOvmSegment", "racfProxySegment", "SAFTsoSegment", "racfWorkAttrSegment" ],
+        "userQueries" : [ "(racfid=*)" ],
+        "groupQueries" : [ "(racfid=*)" ],
+        "groupObjectClasses" : [ "racfGroup", "racfGroupOvmSegment", "racfGroupOmvsSegment" ],
+        "segmentNames" : [ "ACCOUNT.RACF", "ACCOUNT.TSO", "ACCOUNT.OMVS", "ACCOUNT.CICS" ]
+    },
+    "syncFailureHandler" : 
+    {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" :
+    {
+        "group" :
+        {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "RacfGroup",
+            "type" : "object",
+            "nativeType" : "RacfGroup",
+            "properties" :
+            {
+                "racfId" :
+                {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "racfAuthorizationDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfAuthorizationDate",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfOwner" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOwner",
+                    "nativeType" : "string"
+                },
+                "racfInstallationData" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfInstallationData",
+                    "nativeType" : "string"
+                },
+                "racfDatasetModel" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfDatasetModel",
+                    "nativeType" : "string"
+                },
+                "racfSuperiorGroup" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfSuperiorGroup",
+                    "nativeType" : "string"
+                },
+                "racfGroupNoTermUAC" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfGroupNoTermUAC",
+                    "nativeType" : "string",
+                    "enum" : [ "TERMUACC","NOTERMUACC" ]
+                },
+                "racfSubGroupName" :
+                {
+                    "type" : "array",
+                    "items" :
+                    {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "racfSubGroupName",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfGroupUniversal" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfGroupUniversal",
+                    "nativeType" : "string"
+                },
+                "racfOvmGroupId" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOvmGroupId",
+                    "nativeType" : "string"
+                },
+                "racfOmvsGroupId" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsGroupId",
+                    "nativeType" : "string"
+                },
+                "racfOmvsGroupIdKeyword" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsGroupIdKeyword",
+                    "nativeType" : "string",
+                    "enum" : ["SHARED","AUTOGID"]
+                }
+            }
+        },
+        "account" :
+        {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" :
+            {
+                "racfId" :
+                {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "racfDefaultGroup" :
+                {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "racfDefaultGroup",
+                    "nativeType" : "string"
+                },
+                "racfOwner" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOwner",
+                    "nativeType" : "string"
+                },
+                "racfInstallationData" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfInstallationData",
+                    "nativeType" : "string"
+                },
+                "racfDatasetModel" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfDatasetModel",
+                    "nativeType" : "string"
+                },
+                "racfAuthorizationDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfAuthorizationDate",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfAttributes" :
+                {
+                    "type" : "array",
+                    "items" :
+                    {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "racfAttributes",
+                    "nativeType" : "string"
+                },
+                "racfPasswordChangeDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfPasswordChangeDate",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfPasswordInterval" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfPasswordInterval",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfProgrammerName" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfProgrammerName",
+                    "nativeType" : "string"
+                },
+                "racfLastAccess" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfLastAccess",
+                    "nativeType" : "string",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                },
+                "racfSecurityLabel" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfSecurityLabel",
+                    "nativeType" : "string"
+                },
+                "racfSecurityCategoryList" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfSecurityCategoryList",
+                    "nativeType" : "string"
+                },
+                "racfRevokeDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfRevokeDate",
+                    "nativeType" : "string"
+                },
+                "racfResumeDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfResumeDate",
+                    "nativeType" : "string"
+                },
+                "racfLogonDays" :
+                {
+                    "type" : "array",
+                    "items" :
+                    {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "racfLogonDays",
+                    "nativeType" : "string"
+                },
+                "racfLogonTime" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfLogonTime",
+                    "nativeType" : "string"
+                },
+                "racfClassName" :
+                {
+                    "type" : "array",
+                    "items" :
+                    {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "racfClassName",
+                    "nativeType" : "string"
+                },
+                "racfConnectGroupName" :
+                {
+                    "type" : "array",
+                    "items" :
+                    {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "racfConnectGroupName",
+                    "nativeType" : "string"
+                },
+                "racfConnectGroupAuthority" : {
+                    "type" : "string",
+                    "nativeName" : "racfConnectGroupAuthority",
+                    "nativeType" : "string"
+                },
+                "racfConnectGroupUACC" : {
+                    "type" : "string",
+                    "nativeName" : "racfConnectGroupUACC",
+                    "nativeType" : "string"
+                },
+                "racfSecurityLevel" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfSecurityLevel",
+                    "nativeType" : "string"
+                },
+                "racfPassPhrase" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfPassPhrase",
+                    "nativeType" : "string"
+                },
+                "racfPassPhraseChangeDate" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfPassPhraseChangeDate",
+                    "nativeType" : "string"
+                },
+                "SAFAccountNumber" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFAccountNumber",
+                    "nativeType" : "string"
+                },
+                "SAFDestination" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFDestination",
+                    "nativeType" : "string"
+                },
+                "SAFHoldClass" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFHoldClass",
+                    "nativeType" : "string"
+                },
+                "SAFJobClass" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFJobClass",
+                    "nativeType" : "string"
+                },
+                "SAFMessageClass" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFMessageClass",
+                    "nativeType" : "string"
+                },
+                "SAFDefaultLoginProc" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFDefaultLoginProc",
+                    "nativeType" : "string"
+                },
+                "SAFLogonSize" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFLogonSize",
+                    "nativeType" : "integer"
+                },
+                "SAFMaximumRegionSize" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFMaximumRegionSize",
+                    "nativeType" : "integer"
+                },
+                "SAFDefaultSysoutClass" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFDefaultSysoutClass",
+                    "nativeType" : "string"
+                },
+                "SAFUserData" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFUserData",
+                    "nativeType" : "string"
+                },
+                "SAFDefaultUnit" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFDefaultUnit",
+                    "nativeType" : "string"
+                },
+                "SAFTsoSecurityLabel" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFTsoSecurityLabel",
+                    "nativeType" : "string"
+                },
+                "SAFDefaultCommand" :
+                {
+                    "type" : "string",
+                    "nativeName" : "SAFDefaultCommand",
+                    "nativeType" : "string"
+                },
+                "racfOperatorClass" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOperatorClass",
+                    "nativeType" : "string"
+                },
+                "racfOperatorIdentification" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOperatorIdentification",
+                    "nativeType" : "string"
+                },
+                "racfOperatorPriority" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOperatorPriority",
+                    "nativeType" : "string"
+                },
+                "racfOperatorReSignon" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOperatorReSignon",
+                    "nativeType" : "string"
+                },
+                "racfRslKey" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfRslKey",
+                    "nativeType" : "string"
+                },
+                "racfTerminalTimeout" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfTerminalTimeout",
+                    "nativeType" : "string"
+                },
+                "racfTslKey" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfTslKey",
+                    "nativeType" : "string"
+                },
+                "racfOmvsUid" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsUid",
+                    "nativeType" : "string"
+                },
+                "racfOmvsHome" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsHome",
+                    "nativeType" : "string"
+                },
+                "racfOmvsInitialProgram" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsInitialProgram",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumAddressSpaceSize" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumAddressSpaceSize",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumCPUTime" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumCPUTime",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumFilesPerProcess" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumFilesPerProcess",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumMemoryMapArea" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumMemoryMapArea",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumProcessesPerUID" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumProcessesPerUID",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMaximumThreadsPerProcess" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMaximumThreadsPerProcess",
+                    "nativeType" : "string"
+                },
+                "racfOmvsMemoryLimit" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsMemoryLimit",
+                    "nativeType" : "string"
+                },
+                "racfOmvsSharedMemoryMaximum" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsSharedMemoryMaximum",
+                    "nativeType" : "string"
+                },
+                "racfOmvsUidKeyword" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOmvsUidKeyword",
+                    "nativeType" : "string"
+                },
+                "racfOvmUid" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOvmUid",
+                    "nativeType" : "string"
+                },
+                "racfOvmHome" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOvmHome",
+                    "nativeType" : "string"
+                },
+                "racfOvmInitialProgram" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOvmInitialProgram",
+                    "nativeType" : "string"
+                },
+                "racfOvmFileSystemRoot" :
+                {
+                    "type" : "string",
+                    "nativeName" : "racfOvmFileSystemRoot",
+                    "nativeType" : "string"
+                },
+                "password" :
+                {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__PASSWORD__",
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "flags" :
+                    [
+                    "NOT_READABLE",
+                    "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "passwordExpired" :
+                {
+                    "type" : "boolean",
+                    "nativeName" : "__PASSWORD_EXPIRED__",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags" :
+                    [
+                    "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "enable" :
+                {
+                    "type" : "boolean",
+                    "nativeName" : "fakeEnabled",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                },
+                "enableRO" :
+                {
+                    "type" : "boolean",
+                    "nativeName" : "__ENABLE__",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags" :
+                    [
+                    "NOT_CREATABLE",
+                    "NOT_UPDATEABLE"
+                    ]
+                }
+            }
+        }
+    },
+    "operationOptions" :
+    {
+        "DELETE" :
+        {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+        "UPDATE" :
+        {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+        "CREATE" :
+        {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        }
+    }
+}

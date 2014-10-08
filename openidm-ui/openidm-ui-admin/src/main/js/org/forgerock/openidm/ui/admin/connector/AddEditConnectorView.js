@@ -271,11 +271,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
 
                         this.connectorTypeRef.render({"connectorType": connectorTemplate, "animate": true, "connectorDefaults": connectorDefaults}, _.bind(function(){
-                            this.$el.find("#connectorForm").tooltip({
-                                position: { my: "left+15 center", at: "right center" },
-                                track:true
-                            });
-
                             validatorsManager.validateAllFields(this.$el);
                         }, this));
                     }, this));
@@ -457,7 +452,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         },
 
         addEditObjectType: function() {
-            objectTypesDialog.render(this.data.userDefinedObjectType ||this.data.objectType, _.bind(this.saveObjectType, this));
+            objectTypesDialog.render(this.data.userDefinedObjectType ||this.data.objectType, this.getProvisioner(), _.bind(this.saveObjectType, this));
         },
 
         saveObjectType: function(newObjectType) {
