@@ -61,7 +61,11 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
             $.when(connectorPromise, managedPromise, repoCheckPromise).then(_.bind(function(connectors, managedObjects, configFiles){
                 _.each(connectors[0], _.bind(function(connector){
                     connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
-                    connector.displayObjectType = connector.objectTypes.join(",");
+
+                    if(connector.objectTypes) {
+                        connector.displayObjectType = connector.objectTypes.join(",");
+                    }
+
                     connector.cleanUrlName = connector.config.split("/")[2];
                 }, this));
 
