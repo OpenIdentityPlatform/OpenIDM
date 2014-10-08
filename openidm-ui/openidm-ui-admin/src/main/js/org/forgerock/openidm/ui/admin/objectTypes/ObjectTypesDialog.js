@@ -397,7 +397,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                                     "nativeType": {
                                         "title": "Native Type",
                                         "type": "string",
-                                        "enum": ["string", "object", "array", "number", "boolean", "null", "undefined"],
+                                        "enum": ["string", "object", "array", "number", "boolean", "null", "undefined", "JAVA_TYPE_GUARDEDSTRING"],
                                         "required": true,
                                         "default": "string"
                                     },
@@ -431,10 +431,8 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                                     "type": "string"
                                 },
                                 "values": {
-                                    "type": "array",
                                     "title": "Property Value",
-                                    "description": "Below, when adding an value type of object you must click on 'Object Properties' button to specify key names",
-                                    "items": {}
+                                    "description": "Below, when adding an value type of object you must click on 'Object Properties' button to specify key names"
                                 }
                             }
                         }
@@ -447,8 +445,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
          * Converts a provided object from JSON-Editor structure to an ObjectType format
          */
         get_OT_format: function(objectType) {
-            var OT_value = _.omit(objectType,["objectName", "properties"]),
-                tempProperty;
+            var OT_value = _.omit(objectType,["objectName", "properties"]);
 
             OT_value.properties = {};
 
@@ -462,11 +459,6 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
 
                 if (property.customProperties && property.customProperties.length > 0) {
                     _(property.customProperties).each(function(customProperty){
-                        // For custom properties
-                        tempProperty = {};
-                        if (customProperty.values.length === 1) {
-                            customProperty.values = customProperty.values[0];
-                        }
                         OT_value.properties[property.propertyName][customProperty.propertyName] = customProperty.values;
                     });
                 }
@@ -501,7 +493,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                     tempProperty.nativeName = property.nativeName;
                     tempProperty.nativeType = property.nativeType;
                     tempProperty.required = property.required || false;
-                    tempProperty.customProperties = key;
+                    tempProperty.customProperties = [];
 
                     // Any additional properties are added to the customProperties object
                     _(_.omit(property,["type", "nativeName", "nativeType", "required"])).each(function(customProperty, key){
@@ -510,9 +502,10 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                             "values": customProperty
                         });
                     });
-                    customProperties = [];
 
                     tempProperty.customProperties = customProperties;
+                    customProperties = [];
+
                     properties.push(tempProperty);
                 });
                 jsonEditorFormat.properties = properties;
