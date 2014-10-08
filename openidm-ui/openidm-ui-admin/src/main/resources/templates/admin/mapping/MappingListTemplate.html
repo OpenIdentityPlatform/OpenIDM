@@ -1,3 +1,6 @@
+<style>
+    #submenu { display: none; }
+</style>
 <div class="float-left">
     <h3>{{t "templates.mapping.mappings"}}</h3>
 </div>
@@ -13,9 +16,9 @@
             {{name}}
         </div>
         <div class="mapping-body">
-            <span class="mapping-icon"><i class="fa fa-4x {{sourceIcon}}"></i></span>
+            <span class="mapping-icon"><i class="fa fa-2x {{sourceIcon}}"></i></span>
             <div class="mapping-source">
-                <p class="mapping-header">Source</p>
+                <p class="mapping-header">{{t "templates.mapping.source"}}</p>
                 <p class="mapping-title">{{source}}</p>
                 <p>{{sourceType}}</p>
             </div>
@@ -24,16 +27,16 @@
                     <i class="fa fa-arrow-right"></i>
                 </div>
             </div>
-            <span class="mapping-icon left-icon"><i class="fa fa-4x {{targetIcon}}"></i></span>
+            <span class="mapping-icon left-icon"><i class="fa fa-2x {{targetIcon}}"></i></span>
             <div class="mapping-target">
-                <p class="mapping-header">Target</p>
+                <p class="mapping-header">{{t "templates.mapping.target"}}</p>
                 <p class="mapping-title">{{target}}</p>
                 <p>{{targetType}}</p>
             </div>
         </div>
         <div class="mapping-bottom-bar">
-            <a href="#mapping/edit/{{name}}/"><button type="button"  name="" class="button icon-button pull-right edit-button"><span>Edit</span><i class="fa fa-lg fa-pencil"></i></button></a>
-            <button type="button"  name="" class="button icon-button pull-right delete-button"><span>Delete</span><i class="fa fa-lg fa-times-circle-o"></i></button>
+            <a href="#mapping/{{name}}/"><button type="button"  name="" class="button icon-button pull-right edit-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button></a>
+            <button type="button"  name="" class="button icon-button pull-right delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
         </div>
     </div>
     {{/each}}

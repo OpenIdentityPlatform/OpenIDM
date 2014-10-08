@@ -202,6 +202,7 @@
             "groovy" : "Groovy"
         },
         "sync": {
+            "sync": "Sync",
             "syncTitle": "Sync Configuration",
             "situationalPolicy": "Situational Policy",
             "currentPolicy": "Current Policy",
@@ -503,7 +504,7 @@
             "target": "Target",
             "createMappingDialog" : "Create Mapping",
             "noObjectType" : "No Object Type",
-            "editMapping": "Edit Mapping (__name__)",
+            "editMapping": "Edit Mapping",
             "addMapping": "Add Mapping",
             "saveNewMapping": "Save New Mapping",
             "createNewMapping": "Create a New Mapping",
@@ -529,6 +530,8 @@
             "invalidConditionScript": "You cannot save a condition script containing errors.",
             "completeSourceObject": "Complete Source Object",
             "changesPending": "Changes Pending",
+            "clearChanges": "Clear Changes",
+            "saveProperties": "Save Properties",
             "noPropertiesMapped": "No Properties Mapped",
             "conditionScriptApplied": "Conditional update script applied",
             "mappingExists": "Mapping for this target property already exists",
@@ -583,6 +586,7 @@
             "continue" : "Continue",
             "back" : "Back",
             "delete" : "Delete",
+            "edit" : "Edit",
             "details" : "Details",
             "pleaseSelect" : "Please Select",
             "addUser" : "Add user",

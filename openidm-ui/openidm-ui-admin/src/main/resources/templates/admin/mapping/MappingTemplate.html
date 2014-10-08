@@ -1,0 +1,32 @@
+<div class="changesPending box-shadow round ui-state-highlight" style="margin: 10px 5px;"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>{{t "templates.mapping.changesPending"}}</div>
+<div id="mappingConfigHolder">
+    <div class="mapping-config-body">
+        <div class="mapping-top-bar">
+            {{mapping.name}}
+        </div>
+        <div class="mapping-body">
+            <span class="mapping-icon"><i class="fa fa-2x {{sourceIcon}}"></i></span>
+            <div class="mapping-source">
+                <p class="mapping-header">{{t "templates.mapping.source"}}</p>
+                <p class="mapping-title">{{mapping.source}}</p>
+                <p>{{sourceType}}</p>
+            </div>
+            <div class="mapping-arrow">
+                <div class="arrow-box">
+                    <i class="fa fa-arrow-right"></i>
+                </div>
+            </div>
+            <span class="mapping-icon left-icon"><i class="fa fa-2x {{targetIcon}}"></i></span>
+            <div class="mapping-target">
+                <p class="mapping-header">{{t "templates.mapping.target"}}</p>
+                <p class="mapping-title">{{mapping.target}}</p>
+                <p>{{targetType}}</p>
+            </div>
+        </div>
+        <div class="mapping-bottom-bar">
+            <button type="button" id="updateMappingButton"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.saveProperties"}}</span><i class="fa fa-lg fa-save"></i></button>
+            <button type="button" id="clearChanges"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.clearChanges"}}</span><i class="fa fa-lg fa-refresh"></i></button>
+        </div>
+    </div>
+</div>
+<div id="mappingContent"></div>

@@ -44,7 +44,7 @@
                     <br/>
                     <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
                     <!-- <span class="error">x</span> -->
-                    <div id="script_output" class="script_output">
+                    <div id="script_output" class="script_output offset10">
                         <label style="display:inline" for="exampleResult">{{t "templates.mapping.propertyEdit.exampleResult"}}:</label>
                         <input type="text" id="exampleResult" readonly value="" style="width:350px">
                     </div>
@@ -63,7 +63,7 @@
                     <textarea name="condition_script" rows="10" style="width:600px;" placeholder='object.{{#if property.source}}{{property.source}}{{else}}mail{{/if}} !== null' >{{property.condition.source}}</textarea>
                     <br/>
                     <input type="submit" class="button float-right" value="{{t "common.form.update"}}"/>
-                    <div id="condition_script_output" class="script_output">
+                    <div id="condition_script_output" class="script_output offset10">
                         <label style="display:inline" for="conditionResult">{{t "templates.mapping.propertyEdit.conditionScriptAction"}} {{sampleUserFullName}}:</label>
                         <span id="conditionResult"></span>
                     </div>
