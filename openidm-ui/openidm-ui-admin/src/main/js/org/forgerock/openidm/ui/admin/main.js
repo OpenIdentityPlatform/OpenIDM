@@ -31,6 +31,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",
     "./delegates/BrowserStorageDelegate",
+    "./delegates/ExternalAccessDelegate",
     "./delegates/SearchDelegate",
 
     "./ResourcesView",

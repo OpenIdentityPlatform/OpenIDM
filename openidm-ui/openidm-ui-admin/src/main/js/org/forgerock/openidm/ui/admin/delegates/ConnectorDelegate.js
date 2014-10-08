@@ -34,7 +34,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
 
     obj.availableConnectors = function() {
         return obj.serviceCall({
-            url: "?_action=CREATECONFIGURATION", 
+            url: "?_action=CREATECONFIGURATION",
             type: "POST"
 
         });
@@ -57,11 +57,11 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
         };
 
         return this.detailsConnector(connectorParams, errorHandlers);
-    }; 
+    };
 
     obj.currentConnectors = function() {
         return obj.serviceCall({
-            url: "?_action=test", 
+            url: "?_action=test",
             type: "POST"
         });
     };
@@ -73,10 +73,6 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
             url: "/admin/templates/admin/connector/configs/" +type +"/" +name +".json"
         });
     };
-    
+
     return obj;
 });
-
-
-
-

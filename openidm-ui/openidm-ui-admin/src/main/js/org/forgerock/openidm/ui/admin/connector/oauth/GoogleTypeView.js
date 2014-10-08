@@ -22,28 +22,22 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/* css basic configuration */
-@import "common/config.less";
+/*global define, $, _, Handlebars, form2js, window */
 
-/* helpers, functions, columns */
-@import "common/helpers.less";
+define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
+    "org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView",
+    "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate"
+], function(AbstractOAuthView, ExternalAccessDelegate) {
 
-/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
-@import "common/layout.less";
+    var GoogleTypeView = AbstractOAuthView.extend({
 
-/* specific css used in specific modules */
-@import "config/adminConfig.less";
-@import "config/adminStyle.less";
-@import "config/objectTypes.less";
-@import "config/authenticationView.less";
-@import "common/forms.less";
-@import "config/resourcesView.less";
-@import "config/mappingView.less";
-@import "config/connectorView.less";
-@import "config/scriptEditor.less";
-@import "config/scheduler.less";
-@import "config/syncConfig.less";
-@import "config/cronGentleSelect.less";
-@import "codemirror/codemirror.css";
-@import "fontawesome/less/font-awesome.less";
+        getToken: function(mergedResult, oAuthCode) {
+            return ExternalAccessDelegate.getToken(mergedResult.configurationProperties.clientSecret,
+                mergedResult.configurationProperties.clientId, oAuthCode,
+                window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
+                "https://accounts.google.com/o/oauth2/token");
+        }
+    });
 
+    return new GoogleTypeView();
+});

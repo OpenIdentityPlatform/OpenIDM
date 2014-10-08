@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js */
+/*global define, $, _, Handlebars, form2js, window */
 
 define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
@@ -59,7 +59,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         template: "templates/admin/connector/AddEditConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
-            "click #addEditConnector": "formSubmit",
             "onValidate": "onValidate",
             "click #connectorForm fieldset legend" : "sectionHideShow",
             "click .error-box .close-button" : "closeError",
@@ -71,13 +70,22 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "change .postRetryAction": "postRetryActionChange",
             "blur #connectorName" : "updateLiveSyncObjects"
         },
+        data: {
+
+        },
         connectorTypeRef: null,
         connectorList: null,
+        oAuthConnector: false,
+        oAuthReturned: false,
 
         render: function(args, callback) {
             this.data = {};
             this.data.versionDisplay = {};
             this.data.currentMainVersion = null;
+            this.oAuthConnector = false;
+            this.oAuthReturned = false;
+            this.connectorTypeRef = null;
+            this.connectorList = null;
             this.postActionBlockScript = null;
             this.name = null;
             this.objectTypes = null;
@@ -166,6 +174,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         }, this);
 
                         this.parentRender(_.bind(function() {
+                            var urlArgs = window.location.hash;
+
                             switch (data.syncFailureHandler.maxRetries) {
                                 case 0:
                                     this.$el.find(".retryOptions").val("0").change();
@@ -203,12 +213,33 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                             this.connectorTypeRef = ConnectorRegistry.getConnectorModule(data.connectorRef.connectorName +"_" +this.data.currentMainVersion);
 
-                            this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName +"_" +this.data.currentMainVersion, "animate": true, "connectorDefaults": data}, _.bind(function(){
-                                validatorsManager.validateAllFields(this.$el);
+                            if (urlArgs.match(/code=/)) {
+                                this.oAuthCode = urlArgs.match(/code=([^&]+)/)[1];
+                                this.oAuthReturned = true;
+                            } else {
+                                this.oAuthReturned = false;
+                            }
 
-                                //Set the current newest version incase there is a range
-                                this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
-                            }, this));
+                            this.connectorTypeRef.render({"connectorType": data.connectorRef.connectorName +"_" +this.data.currentMainVersion,
+                                    "animate": true,
+                                    "connectorDefaults": data,
+                                    "oAuthReturned" : this.oAuthReturned,
+                                    "editState" : this.data.editState,
+                                    "systemType" : this.data.systemType },
+                                _.bind(function(){
+                                    validatorsManager.validateAllFields(this.$el);
+
+                                    if(this.connectorTypeRef.oAuthConnector) {
+                                        this.oAuthConnector = true;
+                                    } else {
+                                        this.oAuthConnector = false;
+                                    }
+
+                                    this.setSubmitFlow();
+
+                                    //Set the current newest version incase there is a range
+                                    this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
+                                }, this));
 
                             this.setupLiveSync();
 
@@ -222,6 +253,23 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 }
 
             }, this));
+        },
+
+        setSubmitFlow: function() {
+            this.$el.find("#addEditConnector").unbind("click");
+
+            if(this.oAuthConnector) {
+                this.$el.find("#addEditObjectType").hide();
+
+                if(this.oAuthReturned || this.connectorTypeRef.data.connectorDefaults.configurationProperties.refreshToken !== null) {
+                    this.$el.find("#addEditConnector").bind("click", _.bind(this.formSubmit, this));
+                } else {
+                    this.$el.find("#addEditConnector").bind("click", _.bind(this.oAuthFormSubmit, this));
+                }
+            } else {
+                this.$el.find("#addEditObjectType").show();
+                this.$el.find("#addEditConnector").bind("click", _.bind(this.formSubmit, this));
+            }
         },
 
         addLiveSync: function(schedule) {
@@ -527,12 +575,26 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.data.systemType = connectorDefaults.connectorRef.systemType;
                         this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
 
-                        this.connectorTypeRef.render({"connectorType": connectorTemplate, "animate": true, "connectorDefaults": connectorDefaults}, _.bind(function(){
-                            validatorsManager.validateAllFields(this.$el);
-                        }, this));
+                        this.connectorTypeRef.render({"connectorType": connectorTemplate,
+                                "animate": true,
+                                "connectorDefaults": connectorDefaults,
+                                "oAuthReturned" : false,
+                                "editState" : this.data.editState,
+                                "systemType" : this.data.systemType },
+                            _.bind(function(){
+                                if(this.connectorTypeRef.oAuthConnector) {
+                                    this.oAuthConnector = true;
+                                } else {
+                                    this.oAuthConnector = false;
+                                }
+
+                                this.setSubmitFlow();
+
+                                validatorsManager.validateAllFields(this.$el);
+                            }, this));
                     }, this));
                 } else {
-                    //Set the bundle version on a minor version change so it SAVES
+                    //Set the bundle version on a minor version change so it saves
                     this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = selectedValue[1];
                 }
             }
@@ -591,22 +653,48 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             }
         },
 
+        oAuthFormSubmit: function(event) {
+            event.preventDefault();
+            var mergedResult = this.getProvisioner();
+
+            this.connectorTypeRef.submitOAuth(mergedResult);
+        },
 
         validate: function(event) {
             event.preventDefault();
 
             var mergedResult = this.getProvisioner();
 
-            ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (result) {
+            ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (testResult) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestPass");
 
-                    if(!this.data.editState) {
-                        this.objectTypes = result.objectTypes;
-                        this.updateLiveSyncObjects();
+                    if(this.oAuthReturned) {
+                        this.connectorTypeRef.getToken(mergedResult, this.oAuthCode).then(
+                            _.bind(function(tokenResult){
+                                this.$el.find("#clientRefreshToken").val(tokenResult.refresh_token);
+
+                                if(!this.data.editState) {
+                                    this.objectTypes = testResult.objectTypes;
+                                    this.updateLiveSyncObjects();
+                                }
+
+                                this.userDefinedObjectType = null;
+                                this.$el.find("#addEditObjectType").prop('disabled', false);
+                                this.$el.find("#addEditConnector").prop('disabled', false);
+
+                                this.oAuthReturned = false;
+                            }, this));
+                    } else {
+                        if(!this.data.editState) {
+                            this.objectTypes = testResult.objectTypes;
+                            this.updateLiveSyncObjects();
+                        }
+
+                        this.userDefinedObjectType = null;
+                        this.$el.find("#addEditObjectType").prop('disabled', false);
+                        this.$el.find("#addEditConnector").prop('disabled', false);
                     }
 
-                    this.$el.find("#addEditObjectType").prop('disabled', false);
-                    this.$el.find("#addEditConnector").prop('disabled', false);
                 }, this), _.bind(function(result) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
