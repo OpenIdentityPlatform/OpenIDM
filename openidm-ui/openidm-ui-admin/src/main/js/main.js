@@ -37,8 +37,8 @@ require.config({
         jquery: "libs/jquery-1.11.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
         jqgrid: "libs/jquery.jqGrid-4.5.4-min",
-        cron: "libs/jquery-cron-r2427",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
+        cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-1.3.0-min",
@@ -70,7 +70,10 @@ require.config({
             exports: "jsonEditor"
         },
         cron: {
-            exports: "cron"
+            deps: ["jquery"]
+        },
+        gentleSelect: {
+            deps: ["jquery"]
         },
         jqueryui: {
             deps: ["jquery"],
@@ -81,7 +84,7 @@ require.config({
         },
         jqgrid: {
             deps: ["jqueryui", "i18nGrid"]
-        }, 
+        },
         xdate: {
             exports: "xdate"
         },
@@ -115,8 +118,8 @@ require([
     "spin",
     "jqgrid",
     "jqueryui",
-    "cron",
     "gentleSelect",
+    "cron",
     "xdate",
     "moment",
     "doTimeout",
@@ -141,8 +144,8 @@ require([
     spin,
     jqgrid,
     jqueryui,
-    cron,
     gentleSelect,
+    cron,
     xdate,
     moment,
     doTimeout,
@@ -152,7 +155,7 @@ require([
     i18n,
     constants,
     eventManager) {
-        eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+    eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 
 

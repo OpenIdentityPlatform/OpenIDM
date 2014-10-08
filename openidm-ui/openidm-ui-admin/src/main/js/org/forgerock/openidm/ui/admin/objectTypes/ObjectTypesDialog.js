@@ -146,6 +146,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
             JSONEditor.defaults.options.theme = 'jqueryui';
 
             this.currentObjectTypeLoaded = "savedConfig";
+            this.defaultObjectType = $.extend(true, {}, defaultObjectType);
             this.callback = callback;
             this.currentDialog = $('<div id="objectTypesForm"></div>');
             this.setElement(this.currentDialog);
@@ -160,9 +161,9 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
             btns[$.t('templates.connector.objectTypes.saveObjectType')] = function() {
                 if (callback) {
                     _this.saveObjectType();
-                    callback(_this.objectTypes);
                     _this.editor.destroy();
                     $("#objectTypesForm").dialog('close');
+                    callback(_this.objectTypes);
                 }
             };
 
@@ -198,8 +199,8 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                             parseInt($("#objectTypesList").css("marginBottom"), 10) - 1
                     );
 
-                    if (_.size(defaultObjectType) > 0) {
-                        this.loadObjectTypeData(defaultObjectType);
+                    if (_.size(this.defaultObjectType) > 0) {
+                        this.loadObjectTypeData(this.defaultObjectType);
                     }
                 }, this),
                 "replace"

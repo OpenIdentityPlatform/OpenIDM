@@ -1,11 +1,18 @@
 #schedules {
+  &.no-validation-block {
+    margin: 0 10px;
+  }
   .schedulerBody{
     background: white;
     padding: 10px;
     border: 1px solid #5a646d;
-    font-size: 13px;
+    font-size: 17px;
+    margin: 10px 0;
 
     .group-field-block {
+      padding: 0;
+    }
+    .group-field-block-inline {
       padding: 10px 15px 0 0;
       margin: 5px 0;
       display: inline-block;
@@ -13,7 +20,7 @@
 
       label {
         width: initial;
-        padding: 4px;
+        padding: 4px 4px 4px 0;
       }
 
       select, input {
@@ -26,7 +33,7 @@
         width: 140px;
       }
     }
-    .misfireHidden {
+    .fieldHidden {
       display: none;
     }
     input[type="checkbox"] {
