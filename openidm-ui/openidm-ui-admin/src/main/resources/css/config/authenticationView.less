@@ -167,6 +167,12 @@
     }
 
     .group {
+      .ui-accordion-header {
+        cursor: ns-resize;
+        i{
+          cursor: pointer;
+        }
+      }
       & > h3 {
         height: 28px;
         margin: -1px 0 0;
@@ -196,7 +202,8 @@
         .authModuleTitle {
           position: absolute;
           left: 70px;
-          padding-top: 0px;
+          line-height: 13px;
+          padding-top: 7px;
         }
 
         .authModuleDisabled {
@@ -245,6 +252,10 @@
       width: 880px;
     }
     .authenticationModules {
+      * {
+        font-size: 13px;
+      }
+
       select {
         display: block;
       }

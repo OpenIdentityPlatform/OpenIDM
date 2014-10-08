@@ -1,8 +1,6 @@
+{{#if recon}}
 <div class="schedulerBody">
-
     <h3>{{t "templates.scheduler.scheduler"}} - {{scheduleType}}</h3>
-
-    {{#if recon}}
     <div class="tabs">
         <ul>
             <li><a href="#{{id}}_basic">{{t "templates.scheduler.basicCron"}}</a></li>
@@ -18,27 +16,48 @@
     </div>
     {{/if}}
 
-    <div class="group-field-block"v>
-        <label for="enabled" class="light">{{t "templates.scheduler.enabled"}}</label>
-        <input type="checkbox" name="enabled" value="true" class="enabled"/>
-    </div>
+    {{#if liveSync}}
+    <div class="schedulerBody" id="{{sourceCleaned}}">
 
-    <div class="group-field-block">
-        <label for="persisted" class="light">{{t "templates.scheduler.persisted"}}</label>
-        <input type="checkbox" name="persisted" value="false" class="persisted"/>
-    </div>
+        <h3>{{scheduleType}} {{t "templates.scheduler.scheduler"}} - {{source}}</h3>
 
-    <div class="group-field-block misfirePolicyBlock misfireHidden">
-        <label for="misfirePolicy" class="light">{{t "templates.scheduler.misfirePolicy"}}</label>
-        <select name="misfirePolicy" class="misfirePolicy">
-            <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
-            <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
-        </select>
-    </div>
+        <div class="group-field-block group-lead no-validation-block">
+            <div class="schedule">
+            <span class='cron-block cron-block-nseconds'>
+                {{t "templates.scheduler.fireEvery"}}<select class="liveSyncSchedule"></select>
+                <span class='cron-block'>{{t "templates.scheduler.seconds"}}</span>
+            </span>
+            </div>
+        </div>
+        {{/if}}
 
-    <div class="float-right form-button-bar">
-        <input type="button" class="button deleteSchedule" value="{{t "templates.scheduler.deleteSchedule"}}" />
-        <input type="button" class="button saveSchedule" value="{{t "templates.scheduler.saveSchedule"}}" />
-    </div>
+        <div class="group-field-block-inline no-validation-block">
+            <label class="light">{{t "templates.scheduler.enabled"}}</label>
+            <input type="checkbox" value="true" class="enabled"/>
+        </div>
 
-</div>
+        <div class="group-field-block-inline no-validation-block">
+            <label class="light">{{t "templates.scheduler.persisted"}}</label>
+            <input type="checkbox" value="false" class="persisted"/>
+        </div>
+
+        <div class="group-field-block-inline misfirePolicyBlock fieldHidden no-validation-block">
+            <label class="light">{{t "templates.scheduler.misfirePolicy"}}</label>
+            <select class="misfirePolicy">
+                <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
+                <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
+            </select>
+        </div>
+
+        <div class="float-right form-button-bar">
+            <input type="button" class="button deleteSchedule" value="{{t "templates.scheduler.deleteSchedule"}}" />
+            {{#if add}}
+            <input type="button" class="button addSchedule" value="{{t "templates.scheduler.addSchedule"}}" />
+            <input type="button" class="button fieldHidden saveSchedule" value="{{t "templates.scheduler.saveSchedule"}}" />
+
+            {{else}}
+            <input type="button" class="button saveSchedule" value="{{t "templates.scheduler.saveSchedule"}}" />
+            {{/if}}
+        </div>
+
+    </div>

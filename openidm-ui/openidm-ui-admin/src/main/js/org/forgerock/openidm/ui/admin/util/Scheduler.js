@@ -39,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                 "keyup .complexExpression": "expressionChange",
                 "change .persisted": "persistedChange",
                 "click .saveSchedule": "saveSchedule",
+                "click .addSchedule": "addSchedule",
                 "click .deleteSchedule": "deleteSchedule"
             },
             data: {
@@ -54,25 +55,30 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
              *          enabled - boolean
              *          schedule - quartz string
              *          persisted - boolean
-             *          misfirePolicy - enum "fireAndProceed" or "doNothing"
+             *          misfirePolicy - enum "fireAndProceed" or "doNothing",
              *      }
              *      invokeService -  enum "sync" for recon or "provisioner" for livesync
              *      scheduleId,
              *      onDelete - called on delete of this widget
+             *      source
+             *      addFunction
              *  }
              */
             render: function (args, callback) {
+                var defaultCronValue, i;
+
                 this.element = args.element;
                 this.defaults = args.defaults || null;
 
-                args.invokeService = args.invokeService.split(".");
-                args.invokeService = $(args.invokeService).last()[0];
+                this.invokeService = args.invokeService.split(".");
+                this.invokeService = $(this.invokeService).last()[0];
 
-                if (args.invokeService && args.invokeService === "sync") {
+                if (this.invokeService && this.invokeService === "sync") {
                     this.data.recon = true;
                     this.data.scheduleType = $.t("templates.scheduler.reconciliation");
 
-                } else if (args.invokeService && args.invokeService === "provisioner") {
+                } else if (this.invokeService && this.invokeService === "provisioner") {
+                    this.data.liveSync = true;
                     this.data.scheduleType = $.t("templates.scheduler.liveSync");
 
                 } else {
@@ -88,9 +94,18 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     this.onDelete = args.onDelete;
                 }
 
-                this.parentRender(_.bind(function() {
-                    if (args.invokeService && args.invokeService === "sync") {
+                if (args.source) {
+                    this.source = this.data.source = args.source;
+                    this.data.sourceCleaned = this.source.split("/").join("");
+                }
 
+                if (args.newSchedule) {
+                    this.newSchedule = args.newSchedule;
+                    this.data.add = true;
+                }
+
+                this.parentRender(_.bind(function() {
+                    if (this.invokeService && this.invokeService === "sync") {
                         this.$el.find(".tabs").tabs({
                             activate: _.bind(function(event, ui) {
                                 if (this.cron && this.$el.find(".tabs").tabs("option", "active") === 1) {
@@ -100,7 +115,7 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                         });
 
                         this.cron = this.$el.find(".cronField").cron();
-                        var defaultCronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.defaults.schedule));
+                        defaultCronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.defaults.schedule));
 
                         if (defaultCronValue === false) {
                             this.$el.find(".tabs" ).tabs({ active: 1 });
@@ -110,6 +125,31 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                         } else {
                             this.$el.find(".advancedText").hide();
                         }
+                    } else if (this.invokeService && this.invokeService === "provisioner") {
+                        for (i = 1; i < 60; i++) {
+                            if (60 % i === 0) {
+                                this.$el.find('.liveSyncSchedule').append("<option value='" + i + "'>" + i + "</option>");
+                            }
+                        }
+
+                        if (this.defaults.liveSyncSeconds) {
+                            this.defaults.liveSyncSeconds = this.defaults.liveSyncSeconds.substr(this.defaults.liveSyncSeconds.indexOf("/") + 1);
+                            this.defaults.liveSyncSeconds = this.defaults.liveSyncSeconds.substr(0, this.defaults.liveSyncSeconds.indexOf("*") - 1);
+                            this.defaults.liveSyncSeconds = parseInt(this.defaults.liveSyncSeconds, 10);
+
+                            this.$el.find(".liveSyncSchedule").val(this.defaults.liveSyncSeconds);
+                        }
+
+                        this.$el.find('.liveSyncSchedule').gentleSelect({
+                            title: "(n) seconds",
+                            columns: 3,
+                            itemWidth: 20,
+                            openSpeed: 400,
+                            closeSpeed: 400,
+                            openEffect: "slide",
+                            closeEffect: "slide",
+                            hideOnMouseOut: true
+                        });
                     }
 
                     if (this.defaults.enabled) {
@@ -145,7 +185,7 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
             },
 
             persistedChange: function() {
-                this.$el.find(".misfirePolicyBlock").toggleClass('misfireHidden', !this.$el.find(".persisted").is(":checked"));
+                this.$el.find(".misfirePolicyBlock").toggleClass('fieldHidden', !this.$el.find(".persisted").is(":checked"));
             },
 
             saveSchedule: function() {
@@ -154,10 +194,12 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                     schedule.misfirePolicy = this.$el.find(".misfirePolicy").val();
                     schedule.persisted = this.$el.find(".persisted").is(":checked");
 
-                    if (this.data.scheduleType === $.t("templates.scheduler.reconciliation") && this.$el.find(".tabs").tabs("option", "active") === 1) {
+                    if (this.data.scheduleType === "Reconciliation" && this.$el.find(".tabs").tabs("option", "active") === 1) {
                         schedule.schedule = this.$el.find(".complexExpression").val();
-                    } else {
+                    } else if(this.data.scheduleType === "Reconciliation") {
                         schedule.schedule = this.cron.cron("convertCronVal", this.cron.cron("value"));
+                    } else if(this.data.scheduleType === "LiveSync") {
+                        schedule.schedule = "0/" + this.$el.find(".liveSyncSchedule").val() + " * * * * ?";
                     }
 
                     SchedulerDelegate.saveSchedule(this.scheduleId, schedule).then(_.bind(function(){
@@ -166,12 +208,42 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                 }, this));
             },
 
+            addSchedule: function() {
+                if (this.newSchedule) {
+                    SchedulerDelegate.addSchedule({
+                        "type": "cron",
+                        "invokeService": this.invokeService,
+                        "schedule": "0/" + this.$el.find(".liveSyncSchedule").val() + " * * * * ?",
+                        "persisted": this.$el.find(".persisted").is(":checked"),
+                        "misfirePolicy": this.$el.find(".misfirePolicy").val(),
+                        "enabled": this.$el.find(".enabled").is(":checked"),
+                        "invokeContext": {
+                            "action": "liveSync",
+                            "source": this.source
+                        }
+                    }).then(_.bind(function(newSchedule) {
+                        this.$el.find(".addSchedule").hide();
+                        this.$el.find(".saveSchedule").show();
+
+                        // Set global variables
+                        this.scheduleId = newSchedule._id;
+
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleCreated");
+                    }, this));
+                }
+            },
+
             deleteSchedule: function() {
-                SchedulerDelegate.deleteSchedule(this.scheduleId).then(_.bind(function() {
+                if (this.$el.find(".saveSchedule:visible").length > 0) {
+                    SchedulerDelegate.deleteSchedule(this.scheduleId).then(_.bind(function () {
+                        this.$el.find(".schedulerBody").remove();
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleDeleted");
+                        this.onDelete(this.scheduleId, this.source);
+                    }, this));
+                } else {
                     this.$el.find(".schedulerBody").remove();
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleDeleted");
-                    this.onDelete();
-                }, this));
+                    this.onDelete(this.scheduleId, this.source);
+                }
             }
         });
 

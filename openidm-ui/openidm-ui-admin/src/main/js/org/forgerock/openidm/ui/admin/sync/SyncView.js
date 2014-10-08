@@ -38,41 +38,69 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         template: "templates/admin/sync/SyncTemplate.html",
         events: {
             "click #situationalPolicyEditorButton": "configureSituationalPolicy",
-            "click #addNew": "addReconciliation"
+            "click #addNew": "addReconciliation",
+            "click .saveLiveSync": "saveLiveSync"
         },
         mapping: null,
         allPatterns: {},
         pattern: "",
 
         render: function (args, callback) {
-            var schedules = [];
+            var schedules = [], seconds = "";
 
             ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
+                this.sync = data;
                 this.mapping = _(data.mappings).findWhere({name: args[0]});
-                this.data.mappingName = args[0];
+                this.data.mappingName = this.mappingName = args[0];
 
                 this.parentRender(_.bind(function() {
+                    if (this.mapping.hasOwnProperty("enableSync")) {
+                        this.$el.find(".liveSyncEnabled").prop('checked', this.mapping.enableSync);
+                    } else {
+                        this.$el.find(".liveSyncEnabled").prop('checked', true);
+                    }
+
                     SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
                         _(schedules.result).each(function (scheduleId) {
                             SchedulerDelegate.specificSchedule(scheduleId._id).then(_.bind(function (schedule) {
-
+                                // There is a liveSync Scheduler and it is enabled and the source matches the source of the mapping
                                 if (schedule.invokeService.indexOf("provisioner") >= 0 && schedule.enabled && schedule.invokeContext.source === this.mapping.source) {
-                                    console.log("ENABLE DISABLE LIVESYNC");
+                                    seconds = schedule.schedule.substr(schedule.schedule.indexOf("/") + 1);
+                                    seconds = seconds.substr(0, seconds.indexOf("*") - 1);
 
-                                } else if (schedule.invokeService.indexOf("sync") >= 0) {
-                                    Scheduler.generateScheduler({
-                                        "element": $("#schedules"),
-                                        "defaults": {
-                                            enabled: schedule.enabled,
-                                            schedule: schedule.schedule,
-                                            persisted: schedule.persisted,
-                                            misfirePolicy: schedule.misfirePolicy
-                                        },
-                                        "onDelete": this.reconDeleted,
-                                        "invokeService": schedule.invokeService,
-                                        "scheduleId": scheduleId._id
-                                    });
-                                    this.$el.find("#addNew").hide();
+                                    this.$el.find(".noLiveSyncMessage").hide();
+                                    this.$el.find(".systemObjectMessage").show();
+                                    this.$el.find(".managedSourceMessage").hide();
+                                    this.$el.find(".liveSyncSeconds").text(seconds);
+
+                                    // This is a recon schedule
+                                } else if (schedule.invokeService.indexOf("sync") >= 0  ) {
+                                    // The mapping is of a managed object
+                                    if (this.mapping.source.indexOf("managed/") >= 0) {
+                                        this.$el.find(".noLiveSyncMessage").hide();
+                                        this.$el.find(".systemObjectMessage").hide();
+                                        this.$el.find(".managedSourceMessage").show();
+                                    } else {
+                                        this.$el.find(".noLiveSyncMessage").show();
+                                        this.$el.find(".systemObjectMessage").hide();
+                                        this.$el.find(".managedSourceMessage").hide();
+                                    }
+
+                                    if (schedule.invokeContext.mapping === this.mappingName) {
+                                        Scheduler.generateScheduler({
+                                            "element": $("#schedules"),
+                                            "defaults": {
+                                                enabled: schedule.enabled,
+                                                schedule: schedule.schedule,
+                                                persisted: schedule.persisted,
+                                                misfirePolicy: schedule.misfirePolicy
+                                            },
+                                            "onDelete": this.reconDeleted,
+                                            "invokeService": schedule.invokeService,
+                                            "scheduleId": scheduleId._id
+                                        });
+                                        this.$el.find("#addNew").hide();
+                                    }
                                 }
                             }, this));
                         }, this);
@@ -87,6 +115,18 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
                 }, this));
 
             }, this));
+        },
+
+        saveLiveSync: function() {
+            _.each(this.sync.mappings, function(map, key) {
+                if (map.name === this.mappingName) {
+                    this.sync.mappings[key].enableSync = this.$el.find(".liveSyncEnabled").prop("checked");
+                }
+            }, this);
+
+            ConfigDelegate.updateEntity("sync", this.sync).then(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "syncLiveSyncSaveSuccess");
+            });
         },
 
         reconDeleted: function() {

@@ -5,6 +5,7 @@
         <fieldset>
             <legend><span>{{t "common.form.generalDetails"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
             <div class="group-body">
+
                 <div class="group-field-block group-lead">
                     <div class="separate-message">
                         <label for="connectorName" class="light">{{t "templates.connector.connectorName"}}</label>
@@ -41,6 +42,53 @@
 
         <div class="connector-details-body" id="connectorDetails">
         </div>
+
+
+        <fieldset id="liveSync">
+            <legend><span>{{t "templates.connector.liveSync.title"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+
+            <div class="group-body">
+                <div class="group-field-block no-validation-block">
+                    <label class="light">{{t "templates.connector.liveSync.liveSyncFailure"}}</label>
+                    <select class="form-size-m retryOptions">
+                        <option value="0">{{t "templates.connector.liveSync.doNotReattempt"}}</option>
+                        <option value="-1">{{t "templates.connector.liveSync.retryIndefinitely"}}</option>
+                        <option value="*" selected>{{t "templates.connector.liveSync.specificAmount"}}</option>
+                    </select>
+                </div>
+
+                <div class="group-field-block retryBlock no-validation-block">
+                    <label for="syncFailureHandler.maxRetries" class="light">{{t "templates.connector.liveSync.retryAttempts"}}</label>
+                    <input type="text" name="syncFailureHandler.maxRetries" value="5" class="form-size-s maxRetries"/>
+                </div>
+
+                <div class="group-field-block postActionBlock no-validation-block">
+                    <label for="syncFailureHandler.postRetryAction" class="light">{{t "templates.connector.liveSync.action"}}</label>
+                    <select name="syncFailureHandler.postRetryAction" class="form-size-m postRetryAction">
+                        <option value="logged-ignore">logged-ignore</option>
+                        <option value="dead-letter-queue">dead-letter-queue</option>
+                        <option value="script">script</option>
+                    </select>
+
+                    <div class="script fieldHidden"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset id="liveSync">
+            <legend><span>{{t "templates.connector.liveSync.schedules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+
+            <p class="nameFieldMessage">{{t "templates.connector.liveSync.noName"}}</p>
+
+            <div class="group-body">
+                <div class="group-field-block no-validation-block">
+                    <label class="light">{{t "templates.connector.liveSync.addLiveSync"}}</label>
+                    <select class="form-size-m sources"></select>
+                    <button type="button" class="addLiveSync button add-btn"><span>{{t "templates.scheduler.addSchedule"}}</span><i class="fa fa-lg fa-plus"></i></button>
+                </div>
+                <div id="schedules" class="no-validation-block"></div>
+            </div>
+        </fieldset>
 
         <div style="display:none;" id="connectorErrorMessage" class="float-left error-box">
             <p class="error-message"></p>

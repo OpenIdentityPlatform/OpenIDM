@@ -79,7 +79,8 @@
                 "policySaveSuccessful" : "The situational policy has been saved.",
                 "scheduleCreated" : "A new schedule has been created.",
                 "scheduleDeleted" : "The schedule has been deleted.",
-                "scheduleSaved" : "The schedule was successfully saved."
+                "scheduleSaved" : "The schedule was successfully saved.",
+                "liveSyncSaved": "The LiveSync state has been saved."
             }
         },
         "AppConfiguration" : {
@@ -208,7 +209,14 @@
             "currentPolicy": "Current Policy",
             "modifySituationalPolicies": "Modify Situational Policies",
             "schedules": "Schedules",
-            "addReconciliationSchedule": "Add Reconciliation Schedule"
+            "addReconciliationSchedule": "Add Reconciliation Schedule",
+            "enableLiveSync": "Enable LiveSync for this mapping",
+            "managedObjects": "Incremental changes from the source will automatically be synced to the target system.",
+            "systemObjects1": "Incremental changes from the source system will be synced to the target system every ",
+            "systemObjects2": "seconds.",
+            "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature.",
+            "liveSyncEnabled": "LiveSync schedule is enabled.",
+            "liveSyncDisabled": "LiveSync schedule is not enabled."
         },
         "scheduler": {
             "scheduler": "Scheduler",
@@ -223,7 +231,10 @@
             "deleteSchedule": "Delete Schedule",
             "saveSchedule": "Save Changes",
             "reconciliation": "Reconciliation",
-            "liveSync": "LiveSync"
+            "liveSync": "LiveSync",
+            "fireEvery": "Fire every",
+            "seconds": "second(s)",
+            "addSchedule": "Add Schedule"
         },
         "situationalPolicies": {
             "currentPolicy": "Current Policy",
@@ -299,6 +310,19 @@
             "activeState" : "Active",
             "errorState" : "Error",
             "baseTitle" : "Base Connector Details",
+            "liveSync": {
+                "title": "LiveSync Options",
+                "liveSyncFailure": "LiveSync Failure Options",
+                "doNotReattempt": "Do not re-attempt",
+                "retryIndefinitely": "Retry indefinitely",
+                "specificAmount": "Retry a specific amount of times",
+                "retryAttempts": "LiveSync retry attempt",
+                "action": "Action to perform after retry attempts",
+                "schedules": "LiveSync Schedules",
+                "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
+                "addLiveSync": "Add a LiveSync Scheduler for:"
+
+            },
             "objectTypes": {
                 "saveObjectType": "Save ObjectType and Close",
                 "discardEdits": "Discard Changes and Close",

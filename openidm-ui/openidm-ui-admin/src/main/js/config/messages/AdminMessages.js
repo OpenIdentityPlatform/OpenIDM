@@ -119,6 +119,10 @@ define("config/messages/AdminMessages", [
         "scheduleDeleted" : {
             msg: "config.messages.SyncMessages.scheduleDeleted",
             type: "info"
+        },
+        "syncLiveSyncSaveSuccess": {
+            msg: "config.messages.SyncMessages.liveSyncSaved",
+            type: "info"
         }
     };
 

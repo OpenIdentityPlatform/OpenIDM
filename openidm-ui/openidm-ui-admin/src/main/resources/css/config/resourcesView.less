@@ -26,6 +26,10 @@
   General resources Display
 */
 
+.fieldHidden {
+  display: none;
+}
+
 .resource-body {
   border:1px solid #ddd;
   float:left;
@@ -381,6 +385,53 @@ form.form .group-field-block div.validation-message {
 
 form.form .error-size-s div.validation-message {
   width:495px;
+}
+
+
+/**
+  LiveSync
+*/
+
+#liveSync {
+  .nameFieldMessage {
+    color: @color-error;
+    padding:0;
+    margin: 10px;
+  }
+  .sources {
+    margin-right: 15px;
+  }
+  .script {
+    label {
+      display: none;
+    }
+    .group-field-block {
+      padding: 0;
+    }
+
+    .event-hook-empty {
+      margin: 10px 0 0;
+    }
+    .event-hook-body {
+      margin-top:5px;
+    }
+  }
+  .gentleselect-label {
+    margin: 0 5px;
+  }
+
+  .addNew {
+    border: dashed 1px #999;
+    color: #bbb;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #5a646d;
+      color: #5a646d;
+    }
+  }
 }
 
 /**
