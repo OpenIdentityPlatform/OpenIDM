@@ -1,0 +1,390 @@
+
+/*
+	Connector Add/Edit
+*/
+
+.form-button-bar {
+  height:35px;
+  margin-top:15px;
+}
+
+.resource-input-body form.form .group-field-block label {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding-bottom: 0px;
+}
+
+input[type="text"]:disabled,
+select:disabled,
+textarea:disabled {
+  color: #bbb;
+  opacity: .8;
+  background-color:#eee;
+}
+
+.clean-btn {
+  background-color:#fff;
+  border:none;
+  vertical-align: top;
+  margin-top: 30px;
+  cursor:pointer;
+}
+
+.node .clean-btn {
+  margin-top:5px;
+}
+
+.clean-btn:hover {
+  color:#5e887f;
+}
+
+.resource-input-body form.form .group-field-block {
+  padding:0px 0px 0px 10px;
+  margin-top:0px;
+}
+
+.resource-input-body form.form .no-validation-block {
+  margin-bottom:10px;
+}
+
+.resource-input-body form.form .field {
+  margin-bottom:0px;
+}
+
+.resource-input-body form.form .group-field-buttons button {
+  margin-bottom: 5px;
+}
+
+.resource-input-body form.form .group-field-block .note {
+  font-size:14px;
+  font-weight:bold;
+}
+
+.resource-input-body .form-size-s {
+  width:260px;
+}
+
+.resource-input-body .form-size-m {
+  width:500px;
+}
+
+.resource-input-body .outside-element .form-size-m {
+  width:620px;
+}
+
+.resource-input-body .form-size-l {
+  width:900px;
+}
+
+form.form .group-field-block .inline label.label-size-s  {
+  width:80px;
+}
+
+form.form .group-field-block .inline input[type='checkbox'] {
+  position:relative;
+  top:10px;
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+
+.inline .inline-right {
+  margin-right:10px;
+}
+
+.resource-input-body fieldset {
+  border: 1px #ddd solid;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 5px;
+  background-color: white;
+  margin-top:15px;
+}
+
+.resource-input-body fieldset.connector-closed-group {
+  height:40px;
+}
+
+.resource-input-body form.form fieldset .group-lead{
+  padding-top:0px;
+  margin-top:15px;
+}
+
+.resource-input-body form.form fieldset .group-note-lead{
+  padding-top:0px;
+  margin-top:10px;
+}
+
+.resource-input-body legend{
+  height:25px;
+  padding:5px 5px 0px 5px;
+  background-color:#80b7ab;
+  border:2px solid #5fa595;
+  cursor:pointer;
+  margin-left:10px;
+  color:white;
+}
+
+.resource-input-body legend:hover{
+  background-color:lighten(#80b7ab, @button-hover-lightness);
+}
+
+.resource-input-body legend span{
+  margin-right:10px;
+  width: 170px;
+  display: inline-block;
+  text-overflow: ellipsis;
+}
+
+.resource-input-body .filter {
+  font-style:italic;
+  color:#888;
+}
+
+.resource-input-body form.form .group-actions-block {
+  margin-top:15px;
+}
+
+.resource-input-body form.form .error {
+  text-align: left;
+  padding-left: 5px;
+  padding-top: 5px;
+  float:right;
+}
+
+.resource-input-body form.form form.form .group-field-block .small-outside-element .ssl-radio {
+  width:125px;
+  position:relative;
+  bottom:8px;
+}
+
+.resource-input-body form.form .inline .error {
+  float:none;
+}
+
+form.form .group-field-block .outside-element div.validation-message {
+  width: 668px;
+}
+
+form.form .group-field-block .outside-element .inline {
+  width:690px;
+}
+
+form.form .group-field-block .small-outside-element .inline {
+  width:310px;
+}
+
+form.form .group-field-block .small-outside-element div.validation-message {
+  width: 280px;
+}
+
+form.form .group-field-block div.validation-message {
+  display:block;
+  float:none;
+  width: 920px;
+}
+
+form.form .error-size-s div.validation-message {
+  width:495px;
+}
+
+/**
+  Connerctor Error Display
+*/
+
+.error-box {
+  width:958px;
+  height:25px;
+  background-color:#f2dede;
+  margin-top:15px;
+  padding: 5px 10px 5px 10px;
+  color:#a94442;
+  border:#ebccd1 solid 2px;
+  padding: 3px 0px 0px 0px;
+}
+
+.error-box .error-message {
+  float:left;
+  width:920px;
+  padding: 2px 0px 0px 5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.error-box .close-button {
+  float: right;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 14px;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  filter: alpha(opacity=20);
+  opacity: .2;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding:0px;
+}
+
+.error-box .close-button:hover {
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+
+/**
+  Filter Dialog Styles
+*/
+
+.filter-form .filter {
+  padding: 10px 10px 10px 10px;
+  background-color:white;
+  border: 1px solid #ddd;
+  height:18px;
+}
+
+.filter-form .clean-btn {
+  vertical-align:middle;
+  background-color:#f9f9f9;
+  font-size:15px;
+}
+
+.filter-form .group-actions-block {
+  margin-top:15px;
+}
+
+.filter-form .node select {
+  font-size:13px;
+  margin-top:10px;
+  height:30px;
+}
+
+.connector-details-body .inline-link {
+  vertical-align:top;
+  padding-top:30px;
+  width:80px;
+}
+
+.certificate {
+  width: 600px;
+  height: 400px;
+  margin-top:15px;
+  font-family: monospace !important;
+}
+
+.ui-dialog .ui-dialog-content {
+  padding-left:5px;
+}
+
+.ui-dialog .ui-dialog-buttonpane{
+  padding-bottom:0px;
+  padding-right:0px;
+}
+
+.ui-dialog .error {
+  float: right;
+  margin-right: 15px;
+}
+
+div.ui-dialog .group-field-block div.validation-message {
+  width:605px;
+}
+
+/*
+  Shared Add/Edit
+*/
+
+form.form .group-field-block .inline-medium {
+  width:335px;
+}
+
+form.form .group-field-block .inline-small {
+  width:auto;
+  position: relative;
+  bottom:8px;
+}
+
+.resource-input-body form.form .group-field-block .inline-label {
+  width:auto;
+}
+
+form.form .group-field-block .inline .remove-btn {
+  float:left;
+  margin-top:5px;
+}
+
+form.form .small-field-block .invalid div.validation-message {
+  width:308px;
+}
+
+/*
+  OAuth styles
+*/
+
+#secretId {
+  height: 200px;
+  width: 892px;
+  float: left;
+}
+
+/*
+  Managed Objects Add/Edit
+*/
+
+.managed-property .group-field-block {
+  margin-left:20px;
+}
+
+.group-field-block .select-button-form {
+  margin-right:15px;
+}
+
+
+/**
+  LiveSync
+*/
+
+#liveSync {
+  .nameFieldMessage {
+    color: @color-error;
+    padding:0;
+    margin: 10px;
+  }
+  .sources {
+    margin-right: 15px;
+  }
+  .script {
+    label {
+      display: none;
+    }
+    .group-field-block {
+      padding: 0;
+    }
+
+    .event-hook-empty {
+      margin: 10px 0 0;
+    }
+    .event-hook-body {
+      margin-top:5px;
+    }
+  }
+  .gentleselect-label {
+    margin: 0 5px;
+  }
+
+  .addNew {
+    border: dashed 1px #999;
+    color: #bbb;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #5a646d;
+      color: #5a646d;
+    }
+  }
+}
+
+.fieldHidden {
+  display: none;
+}

@@ -288,9 +288,10 @@
             "scriptedsql_ScriptedSQLConnector":"SQL Connector",
             "xml_XMLConnector":"XML Connector",
             "csvfile_CSVFileConnector":"CSV Connector",
+            "googleapps_GoogleAppsConnector" : "Google Connector",
+            "salesforce_Salesforce":"Salesforce Connector",
             "databasetable_DatabaseTableConnector":"Database Connector",
             "ldap_LdapConnector":"LDAP Connector",
-            "salesforce_Salesforce":"Salesforce Connector",
             "connectorName" : "Connector Name",
             "connectorEnabled" : "Enabled",
             "connectorType" : "Connector Type",
@@ -520,6 +521,14 @@
                 "clientId" : "Client ID",
                 "instanceUrl" : "Instance URL",
                 "version" : "API Version"
+            },
+            "oAuthGeneral" : {
+                "base" : "Base OAuth Details",
+                "clientSecret": "Client Secret",
+                "clientId" : "Client Id"
+            },
+            "google": {
+
             }
         },
         "mapping": {
