@@ -322,7 +322,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
                 this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
                  
-                 if(conf.globalData.sampleSource){
+                 if(conf.globalData.sampleSource && this.mapping.properties.length){
                      this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
                  }
                  this.parentRender(_.bind(function () {
