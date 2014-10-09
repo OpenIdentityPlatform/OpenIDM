@@ -19,6 +19,7 @@ package org.forgerock.openidm.jaspi.modules;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.jaspi.runtime.JaspiRuntime;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryFilter;
@@ -257,10 +258,8 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
             throws AuthException {
 
-        Map<String, Object> messageInfoParams = messageInfo.getMap();
-
         // Add this properties so the AuditLogger knows whether to log the client IP in the header.
-        messageInfoParams.put(IDMAuthenticationAuditLogger.LOG_CLIENT_IP_HEADER_KEY, logClientIPHeader);
+        setClientIPAddress(messageInfo);
 
         final AuthStatus authStatus = authModule.validateRequest(messageInfo, clientSubject, serviceSubject);
 
@@ -331,6 +330,24 @@ public class IDMJaspiModuleWrapper implements ServerAuthModule {
         }
 
         return authStatus;
+    }
+
+    private void setClientIPAddress(MessageInfo messageInfo) {
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        String ipAddress;
+        if (logClientIPHeader == null) {
+            ipAddress = request.getRemoteAddr();
+        } else {
+            ipAddress = request.getHeader(logClientIPHeader);
+            if (ipAddress == null) {
+                ipAddress = request.getRemoteAddr();
+            }
+        }
+        getContextMap(messageInfo).put("ipAddress", ipAddress);
+    }
+
+    private Map<String, Object> getContextMap(MessageInfo messageInfo) {
+        return (Map<String, Object>) messageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
     }
 
     /**

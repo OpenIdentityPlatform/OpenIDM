@@ -19,15 +19,14 @@ package org.forgerock.openidm.jaspi.config;
 import org.forgerock.auth.common.DebugLogger;
 import org.forgerock.jaspi.logging.JaspiAuditLogger;
 import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
+import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
-import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,15 +42,10 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
      */
     INSTANCE;
 
-    private final Logger logger = LoggerFactory.getLogger(JaspiRuntimeConfigurationFactory.class);
-
     public static final String MODULE_CONFIG_ENABLED = "enabled";
-    private static final String CONFIG_AUDIT_LOGGER = "auditLogger";
-
 
     private JsonValue moduleConfiguration;
     private DebugLogger debugLogger;
-    private JaspiAuditLogger auditLogger;
 
     /**
      * Constructs the instance of the JaspiRuntimeConfigurationFactory.
@@ -82,29 +76,29 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
     }
 
     /**
+     * Gets the AuditApi instance that the Jaspi Runtime will use to perform auditing.
+     *
+     * @return An instance of a {@code AuditApi}.
+     */
+    public static AuditApi getAuditApi() {
+        return new JaspiAuditApi();
+    }
+
+    /**
      * Sets the module configuration for the Jaspi Runtime to use.
      * <p>
      * Takes the given Json configuration and processes it to check for enabled/disabled modules and resolves
      * IDM auth module aliases to class names, prior to configuring the Jaspi runtime.
      *
      * @param moduleConfiguration The module configuration json.
-     * @param authnFilterHelper The OSGiAuthnFilterHelper to provide OSGi dependencies.
      * @throws Exception If there is an error when constructing the Audit Logger for the Jaspi Runtime.
      */
-    void setModuleConfiguration(final JsonValue moduleConfiguration, OSGiAuthnFilterHelper authnFilterHelper)
-            throws Exception {
+    void setModuleConfiguration(final JsonValue moduleConfiguration) throws Exception {
 
         final JsonValue moduleConfig = new JsonValue(moduleConfiguration);
 
         JsonValue serverAuthContext = moduleConfig.get(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY)
                 .required();
-        String auditLoggerClassName = serverAuthContext.get(CONFIG_AUDIT_LOGGER).asString();
-
-        if (auditLoggerClassName == null) {
-            setAuditLogger(new IDMAuthenticationAuditLogger(authnFilterHelper));
-        } else {
-            setAuditLogger(constructAuditLogger(auditLoggerClassName));
-        }
 
         if (serverAuthContext.isDefined(ModuleConfigurationFactory.SESSION_MODULE_KEY)) {
             JsonValue sessionModuleConfig = serverAuthContext.get(ModuleConfigurationFactory.SESSION_MODULE_KEY);
@@ -183,52 +177,11 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
     }
 
     /**
-     * Given a class name of a JaspiAuditLogger, will construct an instance of it.
-     *
-     * @param className The class name of the Audit Logger.
-     * @param <T> The type of the Audit Logger.
-     * @return An instance of the Jaspi Audit Logger.
-     * @throws Exception If there is an error constructing the Audit Logger.
-     */
-    @SuppressWarnings("unchecked")
-    private <T extends JaspiAuditLogger> T constructAuditLogger(String className) throws Exception {
-        try {
-            final Class<?> cls = Class.forName(className);
-            return (T) cls.getConstructor().newInstance();
-        } catch (ClassNotFoundException e) {
-            logger.error("Failed to construct Audit Logger instance", e);
-            throw e;
-        } catch (InvocationTargetException e) {
-            logger.error("Failed to construct Audit Logger instance", e);
-            throw e;
-        } catch (InstantiationException e) {
-            logger.error("Failed to construct Audit Logger instance", e);
-            throw e;
-        } catch (NoSuchMethodException e) {
-            logger.error("Failed to construct Audit Logger instance", e);
-            throw e;
-        } catch (IllegalAccessException e) {
-            logger.error("Failed to construct Audit Logger instance", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Sets the Audit Logger for the Jaspi Runtime.
-     *
-     * @param auditLogger The Audit Logger instance.
-     */
-    private void setAuditLogger(final JaspiAuditLogger auditLogger) {
-        this.auditLogger = auditLogger;
-    }
-
-    /**
      * Clears the store module configuration and logger instances.
      */
     void clear() {
         moduleConfiguration = new JsonValue(new HashMap<String, Object>());
         debugLogger = new JaspiDebugLogger();
-        auditLogger = null;
     }
 
     /**
@@ -252,6 +205,6 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
      */
     @Override
     public JaspiAuditLogger getAuditLogger() {
-        return auditLogger;
+        return null;
     }
 }

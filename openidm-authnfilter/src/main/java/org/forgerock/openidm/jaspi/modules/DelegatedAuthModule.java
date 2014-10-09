@@ -29,6 +29,7 @@ import java.security.Principal;
 import java.util.Map;
 
 import org.forgerock.jaspi.exceptions.JaspiAuthException;
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
 import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder;
@@ -128,8 +129,8 @@ public class DelegatedAuthModule implements ServerAuthModule {
         try {
             logger.debug("DelegatedAuthModule: Delegating call to remote authentication");
 
-            if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)
-                    || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), securityContextMapper)) {
+            if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)
+                    || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)) {
 
                 logger.debug("DelegatedAuthModule: Authentication successful");
 
@@ -151,8 +152,8 @@ public class DelegatedAuthModule implements ServerAuthModule {
         }
     }
 
-    private boolean authenticate(Credential credential, SecurityContextMapper securityContextMapper)
-            throws AuthException {
+    private boolean authenticate(Credential credential, MessageInfo messageInfo,
+            SecurityContextMapper securityContextMapper) throws AuthException {
 
         if (!credential.isComplete()) {
             logger.debug("Failed authentication, missing or empty headers");
@@ -167,6 +168,7 @@ public class DelegatedAuthModule implements ServerAuthModule {
                     authnFilterHelper.getRouter().createServerContext());
         } catch (ResourceException e) {
             logger.debug("Failed delegated authentication of {} on {}.", credential.username, queryOnResource, e);
+            messageInfo.getMap().put(AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
             if (e.isServerError()) { // HTTP server-side error
                 throw new JaspiAuthException(
                         "Failed delegated authentication of " + credential.username + " on " + queryOnResource, e);
