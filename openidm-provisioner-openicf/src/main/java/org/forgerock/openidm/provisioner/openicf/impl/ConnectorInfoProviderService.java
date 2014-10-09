@@ -432,7 +432,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public String getSystemType() {
+    public String getProvisionerType() {
         return SYSTEM_TYPE_OPENICF;
     }
 
