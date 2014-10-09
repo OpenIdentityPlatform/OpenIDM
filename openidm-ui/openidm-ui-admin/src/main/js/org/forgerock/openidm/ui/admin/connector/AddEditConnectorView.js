@@ -141,16 +141,16 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     }, this));
                 } else {
                     var splitDetails = args[0].split("_");
-                    this.data.editState = true;
 
+                    this.data.editState = true;
                     this.data.systemType = splitDetails[0];
+                    this.data.connectorName = this.name = splitDetails[1];
 
                     // FIXME support multiple provisioners based on systemType
                     ConfigDelegate.readEntity(this.data.systemType +"/" +splitDetails[1]).then(_.bind(function(data){
                         var tempVersion;
 
                         data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
-                        this.data.connectorName = this.name = data.name;
                         this.data.connectorType = data.connectorRef.connectorName;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
@@ -635,18 +635,25 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
         formSubmit: function(event) {
             event.preventDefault();
-            var mergedResult = this.getProvisioner();
+            var mergedResult = this.getProvisioner(),
+                urlName;
+
+            if(this.data.connectorName) {
+                urlName = this.data.connectorName;
+            } else {
+                urlName = mergedResult.name;
+            }
 
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
             if(this.data.editState) {
-                ConfigDelegate.updateEntity(this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.updateEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
                     _.delay(function () {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);
                 }, this));
             } else {
-                ConfigDelegate.createEntity(this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.createEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
                     _.delay(function() {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);

@@ -70,6 +70,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                     splitConfig = connector.config.split("/");
 
                     connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
+                    connector.cleanEditName = splitConfig[2];
                 }, this));
 
                 this.data.currentConnectors = connectors[0];
