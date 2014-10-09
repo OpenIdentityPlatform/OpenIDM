@@ -38,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
             var urlBack = window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
                 builtUrl = this.$el.find("#OAuthurl").val()
                     +"?scope=email%20profile"
-                    +"&state=" +name
+                    +"&state=" +this.data.systemType +"_" +name
                     +"&redirect_uri=" +urlBack
                     +"&response_type=code"
                     +"&client_id=" +id
@@ -56,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
 
             mergedResult.configurationProperties.domain = window.location.protocol+"//"+window.location.host;
 
-            ConfigDelegate.createEntity("provisioner." +this.data.systemType +"/" + mergedResult.name, mergedResult).then(_.bind(function () {
+            ConfigDelegate.createEntity(this.data.systemType +"/" + mergedResult.name, mergedResult).then(_.bind(function () {
                 window.location = url;
             }, this));
         },

@@ -140,16 +140,18 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         }
                     }, this));
                 } else {
+                    var splitDetails = args[0].split("_");
                     this.data.editState = true;
 
+                    this.data.systemType = splitDetails[0];
+
                     // FIXME support multiple provisioners based on systemType
-                    ConfigDelegate.readEntity("provisioner.openicf/" +args[0]).then(_.bind(function(data){
+                    ConfigDelegate.readEntity(this.data.systemType +"/" +splitDetails[1]).then(_.bind(function(data){
                         var tempVersion;
 
                         data.connectorRef.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(data.connectorRef.connectorName));
                         this.data.connectorName = this.name = data.name;
                         this.data.connectorType = data.connectorRef.connectorName;
-                        this.data.systemType = data.connectorRef.systemType;
                         this.data.enabled = data.enabled;
                         this.data.addEditTitle = $.t("templates.connector.editTitle");
                         this.data.addEditSubmitTitle = $.t("templates.connector.updateButtonTitle");
@@ -204,7 +206,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
                             validatorsManager.bindValidators(this.$el);
 
-                            $("#connectorType").val(this.data.connectorType +"_" +data.connectorRef.bundleVersion);
+                            $("#connectorType").val(this.data.connectorType +"_" +data.connectorRef.bundleVersion +"_" +this.data.systemType);
 
                             if(this.data.rangeFound) {
                                 this.$el.find("#connectorErrorMessage .alert-message .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range" : this.data.oldVersion, "version" : data.connectorRef.bundleVersion}));
@@ -563,6 +565,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 //Checking to ensure we don't reload the page if a minor version is changed
                 if(this.data.currentMainVersion === null || (parseFloat(this.data.currentMainVersion) !== parseFloat(mainVersion)) || this.data.connectorType !==  selectedValue[0]) {
                     this.data.connectorType = selectedValue[0];
+                    this.data.systemType = selectedValue[2];
                     this.data.currentMainVersion = this.findMainVersion(connectorData.bundleVersion);
 
                     connectorTemplate = connectorData.connectorName +"_" +mainVersion;
@@ -572,7 +575,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     };
 
                     ConnectorDelegate.detailsConnector(connectorRef).then(_.bind(function(connectorDefaults){
-                        this.data.systemType = connectorDefaults.connectorRef.systemType;
                         this.connectorTypeRef = ConnectorRegistry.getConnectorModule(connectorTemplate);
 
                         this.connectorTypeRef.render({"connectorType": connectorTemplate,
@@ -621,7 +623,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 connectorData.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.getScriptHook().script};
             }
 
-            //Add a dummy object type here for now until we have the creator
             connectorData.configurationProperties.readSchema = false;
             connectorData.objectTypes = {};
 
@@ -639,13 +640,13 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
             if(this.data.editState) {
-                ConfigDelegate.updateEntity("provisioner." + this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.updateEntity(this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
                     _.delay(function () {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);
                 }, this));
             } else {
-                ConfigDelegate.createEntity("provisioner." + this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
+                ConfigDelegate.createEntity(this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
                     _.delay(function() {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                     }, 1500);

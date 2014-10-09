@@ -46,7 +46,8 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         render: function(args, callback) {
             var connectorPromise,
                 managedPromise,
-                repoCheckPromise;
+                repoCheckPromise,
+                splitConfig;
 
             if(args[0] === "open") {
                 this.openMapping  = true;
@@ -66,7 +67,9 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                         connector.displayObjectType = connector.objectTypes.join(",");
                     }
 
-                    connector.cleanUrlName = connector.config.split("/")[2];
+                    splitConfig = connector.config.split("/");
+
+                    connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
                 }, this));
 
                 this.data.currentConnectors = connectors[0];
