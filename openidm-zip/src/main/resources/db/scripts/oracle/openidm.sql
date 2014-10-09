@@ -213,7 +213,7 @@ PROMPT Creating Table configobjectproperties ...
 CREATE TABLE configobjectproperties (
   configobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
-  proptype VARCHAR2(32 CHAR),
+  proptype VARCHAR2(255 CHAR),
   propvalue VARCHAR2(4000 CHAR)
 );
 

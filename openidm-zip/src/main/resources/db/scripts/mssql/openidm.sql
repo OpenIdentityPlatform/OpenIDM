@@ -188,7 +188,7 @@ BEGIN
 CREATE  TABLE [openidm].[configobjectproperties] (
   configobjects_id NUMERIC(19,0) NOT NULL ,
   propkey NVARCHAR(255) NOT NULL ,
-  proptype NVARCHAR(32) NULL ,
+  proptype NVARCHAR(255) NULL ,
   propvalue NVARCHAR(MAX) NULL ,
   CONSTRAINT fk_configobjectproperties_configobjects
     FOREIGN KEY (configobjects_id)

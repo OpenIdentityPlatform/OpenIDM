@@ -98,6 +98,7 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 
@@ -598,6 +599,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         params.putAll(request.getAdditionalParameters());
         params.put(QUERY_ID, request.getQueryId());
         params.put(QUERY_EXPRESSION, request.getQueryExpression());
+        params.put(QUERY_FILTER, request.getQueryFilter());
         params.put(PAGE_SIZE, request.getPageSize());
         params.put(PAGED_RESULTS_OFFSET, request.getPagedResultsOffset());
 
@@ -898,7 +900,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             JsonValue defaultTableProps = json(object(
                     field("mainTable", "configobjects"),
                     field("propertiesTable", "configobjectproperties"),
-                    field("searchableDefault", Boolean.FALSE)));
+                    field("searchableDefault", Boolean.TRUE)));
 
             GenericTableHandler defaultConfigHandler =
                     getGenericTableHandler(databaseType, defaultTableProps, dbSchemaName,

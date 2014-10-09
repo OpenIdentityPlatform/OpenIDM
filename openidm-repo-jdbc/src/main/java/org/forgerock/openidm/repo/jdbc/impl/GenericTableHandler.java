@@ -46,6 +46,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
@@ -53,6 +54,7 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +65,37 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
+
+    private static final QueryFilterVisitor<String, Map<String, Object>> QUERY_FILTER_VISITOR =
+            new SQLQueryFilterVisitor<Map<String, Object>>() {
+                // key/value number for each key/value placeholder
+                int objectNumber = 0;
+                @Override
+                public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+                    ++objectNumber;
+                    String key = "k"+objectNumber;
+                    String value = "v"+objectNumber;
+                    objects.put(key, field.toString());
+                    objects.put(value, valueAssertion);
+                    return "(EXISTS "
+                            + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                            +          "WHERE prop.${_mainTable}_id = obj.id "
+                            +            "AND prop.propKey = ${" + key + "} "
+                            +            "AND prop.propValue " + operand + " ${" + value + "} "
+                            + "))";
+                }
+
+                @Override
+                public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+                    ++objectNumber;
+                    String key = "k" + objectNumber;
+                    objects.put(key, field.toString());
+                    return "(EXISTS "
+                            + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                            +          "WHERE prop.${_mainTable}_id = obj.id "
+                            +            "AND prop.propKey = ${" + key + "}))";
+                }
+            };
 
     SQLExceptionHandler sqlExceptionHandler;
 
@@ -120,9 +153,9 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new TableQueries(new GenericQueryResultMapper());
+        queries = new TableQueries(mainTableName, propTableName, dbSchemaName, QUERY_FILTER_VISITOR, new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
-        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, commandsConfig, queryMap);
+        queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
         // TODO: Consider taking into account DB meta-data rather than just configuration
         //DatabaseMetaData metadata = connection.getMetaData();
@@ -727,7 +760,7 @@ class GenericTableConfig {
         tableConfig.required();
         cfg.mainTableName = tableConfig.get("mainTable").required().asString();
         cfg.propertiesTableName = tableConfig.get("propertiesTable").required().asString();
-        cfg.searchableDefault = tableConfig.get("searchableDefault").defaultTo(Boolean.TRUE).asBoolean().booleanValue();
+        cfg.searchableDefault = tableConfig.get("searchableDefault").defaultTo(Boolean.TRUE).asBoolean();
         cfg.properties = GenericPropertiesConfig.parse(tableConfig.get("properties"));
 
         return cfg;

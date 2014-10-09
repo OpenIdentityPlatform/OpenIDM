@@ -107,7 +107,7 @@ CREATE INDEX fk_configobjects_objecttypes ON openidm.configobjects (objecttypes_
 CREATE TABLE openidm.configobjectproperties (
   configobjects_id BIGINT NOT NULL,
   propkey VARCHAR(255) NOT NULL,
-  proptype VARCHAR(32) DEFAULT NULL,
+  proptype VARCHAR(255) DEFAULT NULL,
   propvalue TEXT,
   CONSTRAINT fk_configobjectproperties_configobjects FOREIGN KEY (configobjects_id) REFERENCES openidm.configobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

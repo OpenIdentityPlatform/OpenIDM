@@ -29,7 +29,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.util.Iterables;
+import org.forgerock.util.promise.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +49,42 @@ public class TokenHandler {
     final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);
     
     // The OpenIDM query token is of format ${token-name}
-    Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
+    private static final Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
+
+    /** {@link Function} to trim leading dot from orient object name */
+    private static final Function<String, String, NeverThrowsException> TRIM_LEADING_DOT =
+            new Function<String, String, NeverThrowsException>() {
+                @Override
+                public String apply(String object) throws NeverThrowsException {
+                    return object.startsWith(".")
+                            ? object.substring(1)
+                            : object;
+                }
+            };
+    /** {@link Function} to convert json-pointer path-element to orient field */
+    private static final Function<String, String, NeverThrowsException> JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD =
+            new Function<String, String, NeverThrowsException>() {
+                @Override
+                public String apply(String path) throws NeverThrowsException {
+                    // numeric path elements are actually array-indices - add brackets
+                    return (path.matches("[0-9]+"))
+                            ? "[" + path + "]"
+                            : path;
+                }
+            };
+
+    /** {@link Function} to convert JsonPointer to dot-notation orient object name */
+    private static final Function<String, String, NeverThrowsException> JSON_POINTER_TO_DOT_NOTATION =
+            new Function<String, String, NeverThrowsException>() {
+                @Override
+                public String apply(String jsonPointer) throws NeverThrowsException {
+                    return TRIM_LEADING_DOT.apply(
+                            StringUtils.join(
+                                    Iterables.from(Arrays.asList(jsonPointer.split("/")))
+                                            .map(JSON_POINTER_PATH_ELEMENT_TO_ORIENT_FIELD),
+                                    "."));
+                }
+            };
 
     /**
      * Replaces a query string with tokens of format ${token-name} with the values from the
@@ -105,12 +144,7 @@ public class TokenHandler {
                         // Leave replacement unquoted
                     } else if (tokenPrefix.equals(PREFIX_DOTNOTATION)) {
                         // Convert Json Pointer to OrientDB dot notation
-                        String dotDelimited = replacement.toString().replace('/', '.');
-                        if (dotDelimited.startsWith(".")) {
-                            replacement = dotDelimited.substring(1);
-                        } else {
-                            replacement = dotDelimited;
-                        }
+                        replacement = JSON_POINTER_TO_DOT_NOTATION.apply(replacement.toString());
                     }
                 } else {
                     // Default is single quoted string replacement
@@ -153,13 +187,12 @@ public class TokenHandler {
                 tokenPrefix = tokenKeyParts[0];
                 tokenKey = tokenKeyParts[1];
             }
+            matcher.appendReplacement(buf, "");
             if (tokenPrefix != null && tokenPrefix.equals(PREFIX_DOTNOTATION)) {
-                throw new PrepareNotSupported("Prepared query not supported for params with dotnotation conversion");
-            }
-            if (tokenKey != null && tokenKey.length() > 0) {
+                buf.append(JSON_POINTER_TO_DOT_NOTATION.apply(tokenKey));
+            } else if (tokenKey != null && tokenKey.length() > 0) {
                 // OrientDB token is of format :token-name
                 String newToken = ":" + tokenKey;
-                matcher.appendReplacement(buf, "");
                 buf.append(newToken);
             }
         }

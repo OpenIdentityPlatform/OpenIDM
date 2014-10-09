@@ -97,7 +97,7 @@ CREATE INDEX IF NOT EXISTS `openidm`.`fk_configobjects_objecttypes` ON `openidm`
 CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `configobjects_id` BIGINT UNSIGNED NOT NULL ,
   `propkey` VARCHAR(255) NOT NULL ,
-  `proptype` VARCHAR(32) NULL ,
+  `proptype` VARCHAR(255) NULL ,
   `propvalue` TEXT NULL ,
   `partpropvalue` varchar AS left(propvalue, 255),
   CONSTRAINT `fk_configobjectproperties_configobjects`
