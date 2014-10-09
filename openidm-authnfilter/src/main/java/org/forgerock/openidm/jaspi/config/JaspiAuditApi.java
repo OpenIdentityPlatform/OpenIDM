@@ -11,86 +11,74 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2014 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.jaspi.config;
 
-import org.forgerock.auth.common.AuditRecord;
-import org.forgerock.auth.common.AuthResult;
-import org.forgerock.jaspi.logging.JaspiAuditLogger;
-import org.forgerock.jaspi.runtime.JaspiRuntime;
+import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
-import org.forgerock.json.resource.servlet.SecurityContextFactory;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Creates audit entries for each authentication attempt.
- *
- * @author Phill Cunnington
  */
-public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
+public class JaspiAuditApi implements AuditApi {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuthenticationAuditLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JaspiAuditApi.class);
 
     private static final DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
-    public static final String LOG_CLIENT_IP_HEADER_KEY = "logClientIPHeader";
 
     private final OSGiAuthnFilterHelper authnFilterHelper;
 
-    public IDMAuthenticationAuditLogger(OSGiAuthnFilterHelper authnFilterHelper) {
-        this.authnFilterHelper = authnFilterHelper;
+    public JaspiAuditApi() {
+        this.authnFilterHelper = OSGiAuthnFilterBuilder.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void audit(AuditRecord<MessageInfo> auditRecord) {
+    public void audit(JsonValue auditMessage) {
+        List<String> principals = auditMessage.get("principal").asList(String.class);
+        String username = "";
+        if (principals != null && !principals.isEmpty()) {
+            username = principals.get(0);
+        }
+        String userId = auditMessage.get("context").get("id").asString();
+        List<String> roles = auditMessage.get("context").get("roles").asList(String.class);
+        String ipAddress = auditMessage.get("context").get("ipAddress").asString();
+        boolean status = "SUCCESSFUL".equalsIgnoreCase(auditMessage.get("result").asString());
+        String requestId = auditMessage.get("requestId").asString();
+        String sessionId = auditMessage.get("sessionId").asString();
 
-        MessageInfo messageInfo = auditRecord.getAuditObject();
-
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        Map<String, Object> messageInfoParams = messageInfo.getMap();
-        Map<String, Object> map = (Map<String, Object>) messageInfoParams.get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT);
-
-        String username = (String) messageInfoParams.get(SecurityContextFactory.ATTRIBUTE_AUTHCID);
-        String userId = (String) map.get(SecurityContext.AUTHZID_ID);
-        List<String> roles = (List<String>) map.get(SecurityContext.AUTHZID_ROLES);
-
-        boolean status = AuthResult.SUCCESS.equals(auditRecord.getAuthResult());
-        String logClientIPHeader = (String) messageInfoParams.get(LOG_CLIENT_IP_HEADER_KEY);
-        logAuthRequest(request, username, userId, roles, status, logClientIPHeader);
+        logAuthRequest(ipAddress, username, userId, roles, status, requestId, sessionId);
     }
 
     /**
      * Logs the authentication request.
      *
-     * @param request The HttpServletRequest that made the authentication request.
+     * @param ipAddress The ip address of the client that made the authentication request.
      * @param username The username of the user that made the authentication request.
      * @param userId The user id of the user that made the authentication request.
      * @param roles The roles of the user that made the authentication request.
      * @param status The status of the authentication request, either true for success or false for failure.
-     * @param logClientIPHeader Whether to log the client IP in the header.
+     * @param requestId The unique ID of the request.
+     * @param sessionId The unique ID of the session.
      */
-    protected void logAuthRequest(HttpServletRequest request, String username, String userId, List<String> roles,
-            boolean status, String logClientIPHeader) {
+    protected void logAuthRequest(String ipAddress, String username, String userId, List<String> roles,
+            boolean status, String requestId, String sessionId) {
         try {
             JsonValue entry = new JsonValue(new HashMap<String, Object>());
             entry.put("timestamp", DATE_UTIL.now());
@@ -99,20 +87,10 @@ public class IDMAuthenticationAuditLogger implements JaspiAuditLogger {
             entry.put("principal", username);
             entry.put("userid", userId);
             entry.put("roles", roles);
-            // check for header sent by load balancer for IPAddr of the client
-            String ipAddress;
-            if (logClientIPHeader == null) {
-                ipAddress = request.getRemoteAddr();
-            } else {
-                ipAddress = request.getHeader(logClientIPHeader);
-                if (ipAddress == null) {
-                    ipAddress = request.getRemoteAddr();
-                }
-            }
             entry.put("ip", ipAddress);
             if (authnFilterHelper.getRouter() != null) {
                 // TODO We need Context!!!
-                CreateRequest createRequest = Requests.newCreateRequest("/audit/access", entry);
+                CreateRequest createRequest = Requests.newCreateRequest("audit/access", entry);
                 ServerContext ctx = authnFilterHelper.getRouter().createServerContext();
                 authnFilterHelper.getConnectionFactory().getConnection().create(ctx, createRequest);
             } else {

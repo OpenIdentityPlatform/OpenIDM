@@ -213,7 +213,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
             logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
             return;
         }
-        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig, this);
+        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig);
     }
 
     /**
@@ -230,6 +230,7 @@ public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {
         Map<String, String> initParams = new HashMap<String, String>();
         initParams.put("module-configuration-factory-class", JaspiRuntimeConfigurationFactory.class.getName());
         initParams.put("logging-configurator-class", JaspiRuntimeConfigurationFactory.class.getName());
+        initParams.put("audit-api-class", JaspiRuntimeConfigurationFactory.class.getName());
 
         List<String> urlPatterns = new ArrayList<String>();
         urlPatterns.add("/openidm/*");

@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import org.forgerock.jaspi.runtime.AuditTrail;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
@@ -30,12 +31,11 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -161,12 +161,16 @@ public class DelegatedAuthModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> auditInfoMap = new HashMap<String, Object>();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
                 Matchers.<ServerContext>anyObject())).willReturn(true);
@@ -186,12 +190,16 @@ public class DelegatedAuthModuleTest {
         MessageInfo messageInfo = mock(MessageInfo.class);
         Subject clientSubject = new Subject();
         Subject serviceSubject = new Subject();
+        Map<String, Object> messageInfoMap = new HashMap<String, Object>();
+        Map<String, Object> auditInfoMap = new HashMap<String, Object>();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         given(messageInfo.getRequestMessage()).willReturn(request);
         given(request.getHeader("X-OpenIDM-Username")).willReturn("USERNAME");
         given(request.getHeader("X-OpenIDM-Password")).willReturn("PASSWORD");
+        given(messageInfo.getMap()).willReturn(messageInfoMap);
+        messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
         given(authenticator.authenticate(eq("USERNAME"), eq("PASSWORD"),
                 Matchers.<ServerContext>anyObject())).willReturn(false);

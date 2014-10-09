@@ -24,7 +24,6 @@ import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
-import org.forgerock.openidm.jaspi.modules.IDMAuthenticationAuditLogger;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -32,11 +31,7 @@ import org.testng.annotations.Test;
 
 import javax.security.auth.message.MessageInfo;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 public class JaspiRuntimeConfigurationFactoryTest {
 
@@ -62,7 +57,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         fail();
@@ -79,49 +74,10 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         fail();
-    }
-
-    @Test
-    public void setModuleConfigurationShouldSetDefaultAuditLogger() throws Exception {
-
-        //Given
-        JsonValue moduleConfiguration = JsonValue.json(
-            JsonValue.object(JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
-            )))
-        );
-
-        //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
-
-        //Then
-        assertTrue(IDMAuthenticationAuditLogger.class
-                .isAssignableFrom(configurationFactory.getAuditLogger().getClass()));
-    }
-
-    @Test
-    public void setModuleConfigurationShouldSetCustomAuditLogger() throws Exception {
-
-        //Given
-        JsonValue moduleConfiguration = JsonValue.json(
-            JsonValue.object(
-                JsonValue.field(ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY, JsonValue.object(
-                    JsonValue.field("auditLogger", TestJaspiAuditLogger.class.getName()),
-                    JsonValue.field(ModuleConfigurationFactory.AUTH_MODULES_KEY, JsonValue.array())
-                ))
-            )
-        );
-
-        //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
-
-        //Then
-        assertTrue(TestJaspiAuditLogger.class
-                .isAssignableFrom(configurationFactory.getAuditLogger().getClass()));
     }
 
     @Test
@@ -140,7 +96,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         assertFalse(configurationFactory.getConfiguration()
@@ -165,7 +121,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -194,7 +150,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -222,7 +178,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         JsonValue sessionModuleConfig = configurationFactory.getConfiguration()
@@ -255,7 +211,7 @@ public class JaspiRuntimeConfigurationFactoryTest {
         );
 
         //When
-        configurationFactory.setModuleConfiguration(moduleConfiguration, mock(OSGiAuthnFilterHelper.class));
+        configurationFactory.setModuleConfiguration(moduleConfiguration);
 
         //Then
         JsonValue authModuleConfig = configurationFactory.getConfiguration()
