@@ -645,6 +645,7 @@
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
             "showAllItems" : "Show All Items",
+            "warning" : "Warning",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",
