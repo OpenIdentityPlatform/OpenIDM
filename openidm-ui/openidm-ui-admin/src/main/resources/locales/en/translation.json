@@ -218,6 +218,11 @@
             "liveSyncEnabled": "LiveSync schedule is enabled.",
             "liveSyncDisabled": "LiveSync schedule is not enabled."
         },
+        "correlation": {
+            "correlation": "Correlation",
+            "defaultRules": "Default Association Rules",
+            "userAssociationManagment": "User Association Management"
+        },
         "scheduler": {
             "scheduler": "Scheduler",
             "enabled": "Enabled",

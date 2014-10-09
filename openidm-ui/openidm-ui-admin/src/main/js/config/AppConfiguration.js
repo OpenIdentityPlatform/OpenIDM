@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -133,6 +133,12 @@ define("config/AppConfiguration", [
                                                 "url": "#mapping/",
                                                 "name": "templates.mapping.properties",
                                                 "icon": "glyph-icon-th-list",
+                                                "inactive": false
+                                            },
+                                            "correlation": {
+                                                "url": "#correlation/",
+                                                "name": "templates.correlation.correlation",
+                                                "icon": "fa fa-random",
                                                 "inactive": false
                                             },
                                             "sync": {

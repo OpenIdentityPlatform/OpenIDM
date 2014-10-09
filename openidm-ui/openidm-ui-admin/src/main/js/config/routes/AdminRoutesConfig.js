@@ -108,6 +108,13 @@ define("config/routes/AdminRoutesConfig", [
             url: /^sync\/(.+)\/$/,
             pattern: "sync/?/",
             forceUpdate: true
+        },
+        "correlationView" : {
+            view: "org/forgerock/openidm/ui/admin/sync/CorrelationView",
+            role: "ui-admin",
+            url: /^correlation\/(.+)\/$/,
+            pattern: "correlation/?/",
+            forceUpdate: true
         }
     };
 

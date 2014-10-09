@@ -28,7 +28,20 @@ define("org/forgerock/openidm/ui/admin/util/AdminAbstractView", [
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(AbstractView) {
     var AdminAbstractView = AbstractView.extend({
-        baseTemplate: "templates/admin/AdminBaseTemplate.html"
+        baseTemplate: "templates/admin/AdminBaseTemplate.html",
+
+        sectionHideShow: function(event) {
+            var clickedEle = event.target;
+
+            if($(clickedEle).not("legend")){
+                clickedEle = $(clickedEle).closest("legend");
+            }
+
+            $(clickedEle).find("i").toggleClass("fa-plus-square-o");
+            $(clickedEle).find("i").toggleClass("fa-minus-square-o");
+
+            $(clickedEle).parent().find(".group-body").slideToggle("slow");
+        }
     });
 
     return AdminAbstractView;
