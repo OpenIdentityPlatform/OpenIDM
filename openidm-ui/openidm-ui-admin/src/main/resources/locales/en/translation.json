@@ -634,6 +634,7 @@
             "createdAt" : "Created at",
             "generalDetails" : "General Details",
             "search" : "Search",
+            "settings": "Settings",
             "submit" : "Submit",
             "actions" : "Actions",
             "complete" : "Complete",
