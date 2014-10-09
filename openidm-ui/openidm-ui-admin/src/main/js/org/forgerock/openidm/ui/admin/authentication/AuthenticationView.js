@@ -35,6 +35,8 @@ define("org/forgerock/openidm/ui/admin/authentication/AuthenticationView", [
 
     var AuthenticationView = AdminAbstractView.extend({
         template: "templates/admin/authentication/AuthenticationTemplate.html",
+        element: "#authenticationContainer",
+        noBaseTemplate: true,
         events: {
             "click .edit": "toggleModule",
             "click .trash": "trashModule",

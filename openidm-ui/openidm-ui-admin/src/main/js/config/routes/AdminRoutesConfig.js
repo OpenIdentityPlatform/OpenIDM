@@ -73,6 +73,12 @@ define("config/routes/AdminRoutesConfig", [
             url: "authentication/",
             forceUpdate: true
         },
+        "settingsView" : {
+            view: "org/forgerock/openidm/ui/admin/settings/SettingsView",
+            role: "ui-admin",
+            url: "settings/",
+            forceUpdate: true
+        },
         "mappingListView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/MappingListView",
             role: "ui-admin",
