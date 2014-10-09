@@ -26,16 +26,19 @@
 
 define("org/forgerock/openidm/ui/admin/sync/SyncView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
     "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog"
-], function(AdminAbstractView, eventManager, constants, ConfigDelegate, SchedulerDelegate, Scheduler, SituationPolicyDialog) {
+], function(AdminAbstractView, MappingBaseView, eventManager, constants, ConfigDelegate, SchedulerDelegate, Scheduler, SituationPolicyDialog) {
 
     var SyncView = AdminAbstractView.extend({
         template: "templates/admin/sync/SyncTemplate.html",
+        element: "#mappingContent",
+        noBaseTemplate: true,
         events: {
             "click #situationalPolicyEditorButton": "configureSituationalPolicy",
             "click #addNew": "addReconciliation",
@@ -47,10 +50,9 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
 
         render: function (args, callback) {
             var schedules = [], seconds = "";
-
-            ConfigDelegate.readEntity("sync").then(_.bind(function(data) {
-                this.sync = data;
-                this.mapping = _(data.mappings).findWhere({name: args[0]});
+            MappingBaseView.render(args,this).then(_.bind(function(){
+                this.sync = MappingBaseView.data.syncConfig;
+                this.mapping = MappingBaseView.currentMapping();
                 this.data.mappingName = this.mappingName = args[0];
 
                 this.parentRender(_.bind(function() {
@@ -113,8 +115,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
 
                     this.setCurrentPolicyType();
                 }, this));
-
-            }, this));
+             }, this));
         },
 
         saveLiveSync: function() {
