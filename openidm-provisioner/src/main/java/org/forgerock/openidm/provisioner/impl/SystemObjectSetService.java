@@ -78,7 +78,6 @@ import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
-import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.SYSTEM_TYPE;
 
 
 /**
@@ -102,6 +101,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     public static final String ROUTER_PREFIX =  "/system";
 
+    /** the system (provisioner) type (within connectorRef) */
+    private static final String SYSTEM_TYPE = "systemType";
+
+    /** systemType prefix prepended per connectorRef list */
+    private static final String PROVISIONER_PREFIX = "provisioner";
+
     /**
      * Actions supported on this resource provider
      */
@@ -115,20 +120,43 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         /** Test an existing connector configuration */
         testConfig,
         /** Multi phase configuration event calls this to generate the response */
-        createConfiguration,
+        createConfiguration {
+            /**
+             * ConnectorConfigurationHelper is required if there is request content
+             */
+            @Override
+            boolean requiresConnectorConfigurationHelper(JsonValue requestContent) {
+                return requestContent != null && requestContent.size() > 0;
+            }
+        },
         /** List the connector [types] available in the system */
         availableConnectors,
         /** Generates the core configuration for a connector */
-        createCoreConfig,
+        createCoreConfig {
+            /**
+             * ConnectorConfigurationHelper is required always
+             */
+            @Override
+            boolean requiresConnectorConfigurationHelper(JsonValue requestContent) {
+                return true;
+            }
+        },
         /** Generates the full configuration for a connector */
-        createFullConfig;
+        createFullConfig {
+            /**
+             * ConnectorConfigurationHelper is required always
+             */
+            @Override
+            boolean requiresConnectorConfigurationHelper(JsonValue requestContent) {
+                return true;
+            }
+        };
 
-        private static Set<SystemAction> requiringConnectorConfigurationHelper = EnumSet.of(
-                createConfiguration, createCoreConfig, createFullConfig);
-
-        /** Checks to see that ConnectorConfigurationHelper is available */
-        boolean requiresConnectorConfigurationHelper() {
-            return requiringConnectorConfigurationHelper.contains(this);
+        /**
+         * Checks to see that ConnectorConfigurationHelper is needed - default to false
+         */
+        boolean requiresConnectorConfigurationHelper(JsonValue requestContent) {
+            return false;
         }
 
         private static Set<SystemAction> liveSyncActions = EnumSet.of(activeSync, liveSync);
@@ -190,11 +218,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<String, ConnectorConfigurationHelper>();
 
     protected void bindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) throws ResourceException {
-        connectorConfigurationHelpers.put(helper.getSystemType(), helper);
+        connectorConfigurationHelpers.put(helper.getProvisionerType(), helper);
     }
 
     protected void unbindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) {
-        connectorConfigurationHelpers.remove(helper.getSystemType());
+        connectorConfigurationHelpers.remove(helper.getProvisionerType());
     }
 
     /**
@@ -210,12 +238,17 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             final JsonValue content = request.getContent();
             final JsonValue id = content.get("id");
             final SystemAction action = request.getActionAsEnum(SystemAction.class);
-            final ConnectorConfigurationHelper helper = connectorConfigurationHelpers.get(
-                    content.get(CONNECTOR_REF).get(SYSTEM_TYPE).asString());
+            String provisionerType = null;
 
-            if (action.requiresConnectorConfigurationHelper() && connectorConfigurationHelpers.isEmpty()) {
-                throw new ServiceUnavailableException("The required service is not available");
+            if (action.requiresConnectorConfigurationHelper(content)) {
+                provisionerType = getProvisionerType(content.get(CONNECTOR_REF).get(CONNECTOR_NAME).asString());
+                if (provisionerType == null || !connectorConfigurationHelpers.containsKey(provisionerType)) {
+                    throw new ServiceUnavailableException("The required service is not available");
+                }
             }
+
+            final ConnectorConfigurationHelper helper = connectorConfigurationHelpers.get(provisionerType);
+
             switch (action) {
             case createConfiguration:
                 //  Multi phase configuration event calls this to generate the response for the next phase.
@@ -295,6 +328,17 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         }
     }
 
+    private String getProvisionerType(String connectorName) throws ResourceException {
+        for (Map.Entry<String, ConnectorConfigurationHelper> entry : connectorConfigurationHelpers.entrySet()) {
+            for (JsonValue connectorRef : entry.getValue().getAvailableConnectors().get(CONNECTOR_REF)) {
+                if (connectorRef.get(CONNECTOR_NAME).asString().equals(connectorName)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Validates that the connectorRef is defined in the connector configuration
      *
@@ -323,11 +367,21 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         JsonValue availableConnectors = json(array());
         for (Map.Entry<String, ConnectorConfigurationHelper> helperEntry : connectorConfigurationHelpers.entrySet()) {
             for (JsonValue connectorRef : helperEntry.getValue().getAvailableConnectors().get(CONNECTOR_REF)) {
-                connectorRef.put(SYSTEM_TYPE, helperEntry.getKey());
+                connectorRef.put(SYSTEM_TYPE, getSystemType(helperEntry.getKey()));
                 availableConnectors.add(connectorRef.getObject());
             }
         }
         return json(object(field(CONNECTOR_REF, availableConnectors.getObject())));
+    }
+
+    /**
+     * The system type is comprised by the prefix "provisioner." and the provionser's type; e.g. openicf
+     *
+     * @param provisionerType the provisioner type
+     * @return the system type
+     */
+    private String getSystemType(String provisionerType) {
+        return new StringBuilder(PROVISIONER_PREFIX).append(".").append(provisionerType).toString();
     }
 
     @Override

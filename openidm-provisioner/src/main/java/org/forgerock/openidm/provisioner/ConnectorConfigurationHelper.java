@@ -41,15 +41,13 @@ public interface ConnectorConfigurationHelper {
     static final String CONFIGURATION_PROPERTIES = "configurationProperties";
     /** the connector name (within connectorRef) */
     static final String CONNECTOR_NAME = "connectorName";
-    /** the system (provisioner) type (within connectorRef) */
-    static final String SYSTEM_TYPE = "systemType";
 
     /**
-     * Return the system type that is used to manage configuration/connectors created by this configuration helper.
+     * Return the provisioner type that is used to manage configuration/connectors created by this configuration helper.
      *
      * @return the configuration system type.
      */
-    public String getSystemType();
+    public String getProvisionerType();
 
     /**
      * Test the given configuration.
