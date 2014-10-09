@@ -61,5 +61,9 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./mapping/EditPropertyMappingDialog",
 
     "./sync/SyncView",
-    "./sync/SituationPolicyDialog"
+    "./sync/SituationPolicyDialog",
+    "./sync/CorrelationView",
+    "./sync/AnalysisView",
+    "./sync/CorrelationQueryView"
+
 ]);

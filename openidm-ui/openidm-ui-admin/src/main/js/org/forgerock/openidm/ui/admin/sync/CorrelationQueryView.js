@@ -22,49 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-.fa {
-  background-image:none;
-}
+/*global define, $*/
 
-#footer {
-  height:60px;
-  margin-top:-60px;
-  color:@light-font-color;
-  background-color: #5d6871;
-}
+define("org/forgerock/openidm/ui/admin/sync/CorrelationQueryView", [
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function(AdminAbstractView, eventManager, constants, ConfigDelegate) {
+    var CorrelationQueryView = AdminAbstractView.extend({
+        template: "templates/admin/sync/CorrelationQueryTemplate.html",
+        element: "#correlationQueryView",
+        noBaseTemplate: true,
+        events: {},
+        data: {},
+        dataModel: {},
 
-.menubar {
-  margin-bottom:0px;
-}
+        render: function(args) {
+            this.parentRender(function () {
 
-.menubar .menu {
-  background-image:none;
-}
+            });
+        }
+    });
 
-body {
-  background-image:none;
-}
-
-button:disabled
-{
-  cursor:default;
-}
-
-#content {
-  padding-bottom:75px;
-}
-
-.overflow-visible {
-  overflow: visible;
-}
-
-.script_output {
-  width:550px;
-  height:20px;
-  float:left;
-}
-
-input[type=text].small-text-input {
-  width:20px;
-  margin-right:15px;
-}
+    return new CorrelationQueryView();
+});
