@@ -157,7 +157,6 @@ public class ObjectClassInfoHelper {
     }
 
 
-    //TODO throw-catch exceptions if type is not match
     public Attribute filterAttribute(JsonPointer field, Object valueAssertion) {
       if (field.size() != 1){
           throw new IllegalArgumentException("Only one level JsonPointer supported");
@@ -169,7 +168,8 @@ public class ObjectClassInfoHelper {
               return ai.build(valueAssertion);
           }
        }
-       return null;
+       throw new IllegalArgumentException("Attribute " + attributeName +
+               " does not exist as part of " + objectClass);
     }
 
     /**
