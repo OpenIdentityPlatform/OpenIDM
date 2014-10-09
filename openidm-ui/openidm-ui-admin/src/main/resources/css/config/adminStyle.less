@@ -22,27 +22,40 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+
+/*
+  Our version of FontAwesome is older and missing this
+*/
+.fa-icon() {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome; // shortening font declaration
+  font-size: inherit; // can't have font-size inherit on line above, so need to override
+  text-rendering: auto; // optimizelegibility throws things off #1094
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .fa {
   background-image:none;
 }
 
 #footer {
-  height:60px;
-  margin-top:-60px;
-  color:@light-font-color;
-  background-color: #5d6871;
+	height:60px;
+	margin-top:-60px;
+	color:@light-font-color;
+	background-color: #5d6871;
 }
 
 .menubar {
-  margin-bottom:0px;
+	margin-bottom:0px;
 }
 
 .menubar .menu {
-  background-image:none;
+	background-image:none; 
 }
 
 body {
-  background-image:none;
+	background-image:none;
 }
 
 button:disabled
@@ -55,16 +68,123 @@ button:disabled
 }
 
 .overflow-visible {
-  overflow: visible;
+    overflow: visible;
 }
 
 .script_output {
-  width:550px;
-  height:20px;
-  float:left;
+    width:550px;
+    height:20px;
+    float:left;
 }
 
 input[type=text].small-text-input {
-  width:20px;
-  margin-right:15px;
+    width:20px;
+    margin-right:15px;
+}
+
+/**
+  Alert Box Display
+*/
+
+.alert-box {
+  width: 962px;
+  height:25px;
+  margin-bottom:5px;
+  border:black solid 2px;
+  padding: 3px 0px 0px 0px;
+
+  .alert-message {
+    width:920px;
+    padding: 2px 0px 0px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    float:left;
+  }
+
+  .fa {
+    margin-right:10px;
+  }
+
+  .message-type {
+    font-weight:bold;
+    margin-right:10px;
+  }
+
+  .close-button {
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 14px;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding:0px;
+    margin-right: 5px;
+  }
+
+  .close-button:hover {
+    filter: alpha(opacity=50);
+    opacity: .5;
+  }
+
+}
+
+.alert-box.error-message {
+  background-color:#f2dede;
+  color:#a94442;
+  border-color:#ebccd1;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-cogs;
+    }
+  }
+}
+
+.alert-box.warning-message {
+  background-color:#fcf8e3;
+  color:#8a6d3b;
+  border-color:#faebcc;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-warning;
+    }
+  }
+}
+
+.alert-box.success-message {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-check-square;
+    }
+  }
+}
+
+.alert-box.info-message {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+
+  .alert-message-icon {
+    .fa-icon();
+
+    &:before {
+      content:@fa-var-comment-o;
+    }
+  }
 }

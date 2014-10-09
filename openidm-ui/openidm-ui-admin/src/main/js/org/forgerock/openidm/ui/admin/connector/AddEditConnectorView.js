@@ -61,7 +61,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "change #connectorType" : "loadConnectorTemplate",
             "onValidate": "onValidate",
             "click #connectorForm fieldset legend" : "sectionHideShow",
-            "click .error-box .close-button" : "closeError",
+            "click .alert-message .close-button": "closeError",
             "click #addEditObjectType": "addEditObjectTypes",
             "click #validateConnector": "validate",
             "change input" : "disableButtons",
@@ -207,7 +207,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                             $("#connectorType").val(this.data.connectorType +"_" +data.connectorRef.bundleVersion);
 
                             if(this.data.rangeFound) {
-                                this.$el.find("#connectorErrorMessage .error-message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range" : this.data.oldVersion, "version" : data.connectorRef.bundleVersion}));
+                                this.$el.find("#connectorErrorMessage .alert-message .message").html($.t("config.messages.ConnectorMessages.connectorVersionChange", {"range" : this.data.oldVersion, "version" : data.connectorRef.bundleVersion}));
                                 this.$el.find("#connectorErrorMessage").show();
                             }
 
@@ -732,7 +732,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
-            this.$el.find("#connectorErrorMessage .error-message").html(this.parseErrorMessage(error.message));
+            this.$el.find("#connectorErrorMessage .alert-message .message").html(this.parseErrorMessage(error.message));
             this.$el.find("#connectorErrorMessage").show();
         },
 

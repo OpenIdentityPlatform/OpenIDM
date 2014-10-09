@@ -90,8 +90,12 @@
             </div>
         </fieldset>
 
-        <div style="display:none;" id="connectorErrorMessage" class="float-left error-box">
-            <p class="error-message"></p>
+        <div style="display:none;" id="connectorErrorMessage" class="float-left alert-box warning-message">
+            <p class="alert-message">
+                <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+                <span class="message"></span>
+            </p>
+
             <button type="button" class="close-button" data-dismiss="alert">
                 <span>×</span>
             </button>
