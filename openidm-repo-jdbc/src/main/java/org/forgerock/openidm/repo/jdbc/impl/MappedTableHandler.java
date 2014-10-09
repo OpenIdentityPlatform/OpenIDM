@@ -43,6 +43,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -52,6 +53,7 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.util.Accessor;
 import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
@@ -72,7 +74,8 @@ public class MappedTableHandler implements TableHandler {
     String dbSchemaName;
 
     final LinkedHashMap<String, Object> rawMappingConfig;
-    Mapping explicitMapping;
+    final Mapping explicitMapping;
+    private final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
 
     // The json pointer (used as names) of the properties to replace the ?
     // tokens in the prepared statement,
@@ -112,7 +115,25 @@ public class MappedTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new TableQueries(new ExplicitQueryResultMapper(explicitMapping));
+        queryFilterVisitor =
+                new SQLQueryFilterVisitor<Map<String, Object>>() {
+                    // value number for each value placeholder
+                    int objectNumber = 0;
+                    @Override
+                    public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+                        ++objectNumber;
+                        String value = "v"+objectNumber;
+                        objects.put(value, valueAssertion);
+                        return explicitMapping.getDbColumnName(field) + " " + operand + " ${" + value + "}";
+                    }
+
+                    @Override
+                    public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+                        return explicitMapping.getDbColumnName(field) + " IS NOT NULL";
+                    }
+                };
+
+        queries = new TableQueries(tableName, null, dbSchemaName, queryFilterVisitor, new ExplicitQueryResultMapper(explicitMapping));
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
@@ -609,6 +630,15 @@ class Mapping {
         }
         return set;
     }
+
+    public String getDbColumnName(JsonPointer fieldName) {
+        for (ColumnMapping column : columnMappings) {
+            if (column.isJsonPointer(fieldName)) {
+                return column.dbColName;
+            }
+        }
+        throw new IllegalArgumentException("Unknown object field: " + fieldName.toString());
+    }
 }
 
 /**
@@ -647,6 +677,10 @@ class ColumnMapping {
             dbColName = dbColMappingConfig.asString();
             dbColType = TYPE_STRING;
         }
+    }
+
+    public boolean isJsonPointer(JsonPointer fieldPointer) {
+        return objectColPointer.equals(fieldPointer);
     }
 
     public String toString() {

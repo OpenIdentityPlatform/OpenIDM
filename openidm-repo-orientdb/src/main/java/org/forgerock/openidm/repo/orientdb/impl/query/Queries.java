@@ -27,10 +27,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
+import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -54,6 +58,25 @@ import org.slf4j.LoggerFactory;
 public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryRequest, List<ODocument>> {
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
+
+    private static final QueryFilterVisitor<String, Map<String, String>> QUERY_FILTER_VISITOR =
+            new SQLQueryFilterVisitor<Map<String, String>>() {
+                int objectNumber = 0;
+                @Override
+                public String visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {
+                    ++objectNumber;
+                    String value = "v"+objectNumber;
+                    objects.put(field.toString(), field.toString());
+                    objects.put(value, String.valueOf(valueAssertion));
+                    return "${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "} ";
+                }
+
+                @Override
+                public String visitPresentFilter(Map<String, String> objects, JsonPointer field) {
+                    objects.put(field.toString(), field.toString());
+                    return "${dotnotation:" + field.toString() + "} IS NOT NULL";
+                }
+            };
 
     public Queries() {
         super(new HashMap<String, QueryInfo<OSQLSynchQuery<ODocument>>>());
@@ -89,6 +112,19 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         return new OSQLSynchQuery<ODocument>(queryString);
     }
 
+    private QueryInfo<OSQLSynchQuery<ODocument>> findQueryInfo(String type, Map<String, String> params,
+            String queryId, String queryExpression, QueryFilter filter) {
+        if (filter == null) {
+            return findQueryInfo(type, queryId, queryExpression);
+        }
+
+        String filterQuery = "SELECT * FROM ${unquoted:_resource} WHERE "
+                + filter.accept(QUERY_FILTER_VISITOR, params);
+
+        // treat the query created by the filter as a queryExpression
+        return findQueryInfo(type, queryId, filterQuery);
+    }
+
     /**
      * Execute a query, either a pre-configured query by using the query ID, or a query expression passed as 
      * part of the params.
@@ -109,14 +145,19 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         params.put(QueryConstants.RESOURCE_NAME, OrientDBRepoService.typeToOrientClassName(type));
         params.putAll(getPagingParameters(request));
 
-        if (request.getQueryId() == null && request.getQueryExpression() == null) {
-            throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
+        if (request.getQueryId() == null
+                && request.getQueryExpression() == null
+                && request.getQueryFilter() == null) {
+            throw new BadRequestException("Either "
+                    + QueryConstants.QUERY_ID
+                    + ", " + QueryConstants.QUERY_EXPRESSION
+                    + ", or " + QueryConstants.QUERY_FILTER
                     + " to identify/define a query must be passed in the parameters. " + params);
         }
 
         final QueryInfo<OSQLSynchQuery<ODocument>> queryInfo;
         try {
-            queryInfo = findQueryInfo(type, request.getQueryId(), request.getQueryExpression());
+            queryInfo = findQueryInfo(type, params, request.getQueryId(), request.getQueryExpression(), request.getQueryFilter());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("The passed identifier " + request.getQueryId()
                     + " does not match any configured queries on the OrientDB repository service.");

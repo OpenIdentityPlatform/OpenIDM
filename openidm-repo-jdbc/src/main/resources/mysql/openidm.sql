@@ -118,7 +118,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `configobjects_id` BIGINT UNSIGNED NOT NULL ,
   `propkey` VARCHAR(255) NOT NULL ,
-  `proptype` VARCHAR(32) NULL ,
+  `proptype` VARCHAR(255) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
   INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,

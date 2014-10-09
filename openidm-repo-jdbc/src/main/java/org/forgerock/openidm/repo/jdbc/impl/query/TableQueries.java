@@ -29,6 +29,7 @@ import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
 
 import java.io.IOException;
@@ -40,12 +41,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
@@ -147,14 +151,23 @@ public class TableQueries {
     }
 
     /** Configured queries */
-    ConfiguredQueries queries = new ConfiguredQueries();
+    final ConfiguredQueries queries = new ConfiguredQueries();
 
     /** Configured commands */
-    ConfiguredQueries commands = new ConfiguredQueries();
+    final ConfiguredQueries commands = new ConfiguredQueries();
 
-    QueryResultMapper resultMapper;
+    final String mainTableName;
+    final String propTableName;
+    final String dbSchemaName;
+    final QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor;
+    final QueryResultMapper resultMapper;
 
-    public TableQueries(QueryResultMapper resultMapper) {
+    public TableQueries(String mainTableName, String propTableName, String dbSchemaName,
+            QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, QueryResultMapper resultMapper) {
+        this.mainTableName = mainTableName;
+        this.propTableName = propTableName;
+        this.dbSchemaName = dbSchemaName;
+        this.queryFilterVisitor = queryFilterVisitor;
         this.resultMapper = resultMapper;
     }
 
@@ -281,15 +294,18 @@ public class TableQueries {
         params.put(PAGED_RESULTS_OFFSET, offsetParam);
         params.put(PAGE_SIZE, pageSizeParam);
 
+        QueryFilter queryFilter = (QueryFilter) params.get(QUERY_FILTER);
         String queryExpression = (String) params.get(QUERY_EXPRESSION);
         String queryId = (String) params.get(QUERY_ID);
-        if (queryId == null && queryExpression == null) {
-            throw new BadRequestException("Either " + QUERY_ID + " or " + QUERY_EXPRESSION
-                    + " to identify/define a query must be passed in the parameters. " + params);
+        if (queryId == null && queryExpression == null && queryFilter == null) {
+            throw new BadRequestException("Either " + QUERY_ID + ", " + QUERY_EXPRESSION + ", or "
+                    + QUERY_FILTER + " to identify/define a query must be passed in the parameters. " + params);
         }
         final PreparedStatement foundQuery;
         try {
-            if (queryExpression != null) {
+            if (queryFilter != null) {
+                foundQuery = parseQueryFilter(con, queryFilter);
+            } else if (queryExpression != null) {
                 foundQuery = resolveInlineQuery(con, queryExpression, params);
             } else if (queries.queryIdExists(queryId)) {
                 foundQuery = queries.getQuery(con, queryId, type, params);
@@ -397,6 +413,37 @@ public class TableQueries {
     }
 
     /**
+     * Resolves a query filter.
+     *
+     * @param con
+     *            The db connection
+     * @param filter
+     *            the query filter to parse
+     * @return A resolved statement
+     */
+    PreparedStatement parseQueryFilter(Connection con, QueryFilter filter)
+            throws SQLException, ResourceException {
+        Map<String, Object> replacementTokens = new LinkedHashMap<String, Object>();
+        String rawQuery = "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj WHERE "
+                + filter.accept(queryFilterVisitor, replacementTokens);
+
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put("_mainTable", mainTableName);
+        replacements.put("_propTable", propTableName);
+        replacements.put("_dbSchema", dbSchemaName);
+        TokenHandler tokenHandler = new TokenHandler();
+        // Replace the table name tokens.
+        String tempQueryString = tokenHandler.replaceSomeTokens(rawQuery, replacements);
+
+        // Convert to ? for prepared statement, populate token replacement info
+        List<String> tokenNames = tokenHandler.extractTokens(tempQueryString);
+        String queryString = tokenHandler.replaceTokens(tempQueryString, "?", PREFIX_LIST);
+
+        QueryInfo queryInfo = new QueryInfo(queryString, tokenNames);
+        return resolveQuery(queryInfo, con, replacementTokens);
+    }
+
+    /**
      * Resolves a full query expression Currently does not support token
      * replacement
      *
@@ -435,7 +482,7 @@ public class TableQueries {
      * @param con
      *            the db connection
      * @param params
-     *            the paramters passed to query
+     *            the parameters passed to query
      * @return the resolved query
      * @throws SQLException
      *             if resolving the query failed
@@ -521,14 +568,6 @@ public class TableQueries {
      * Success to set the queries does not mean they are valid as some can only
      * be validated at query execution time.
      *
-     * @param mainTableName
-     *            name of the table containing the object identifier and all
-     *            related info
-     * @param propTableName
-     *            name of the table holding individual properties for searching
-     *            and indexing
-     * @param dbSchemaName
-     *            the database scheme the table is in
      * @param queriesConfig
      *            queries configured in configuration (files)
      * @param defaultQueryMap
@@ -537,7 +576,7 @@ public class TableQueries {
      *
      *            query details
      */
-    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName,
+    public void setConfiguredQueries(
             JsonValue queriesConfig, JsonValue commandsConfig, Map<QueryDefinition, String> defaultQueryMap) {
         Map<String, String> replacements = new HashMap<String, String>();
         replacements.put("_mainTable", mainTableName);
