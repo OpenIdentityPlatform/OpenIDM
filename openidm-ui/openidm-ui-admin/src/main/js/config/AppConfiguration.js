@@ -114,19 +114,19 @@ define("config/AppConfiguration", [
                                     "connectors": {
                                         "url": "#resources/",
                                         "name": "config.AppConfiguration.Navigation.links.resources",
-                                        "icon": "glyph-icon-star",
+                                        "icon": "fa fa-cogs",
                                         "inactive": false
                                     },
                                     "mapping": {
                                         "url": "#mapping/",
                                         "name": "config.AppConfiguration.Navigation.links.mapping",
-                                        "icon": "glyph-icon-resize-horizontal",
+                                        "icon": "fa fa-map-marker",
                                         "inactive": false,
                                         "urls": {
                                             "properties": {
                                                 "url": "#mapping/",
                                                 "name": "templates.mapping.properties",
-                                                "icon": "glyph-icon-th-list",
+                                                "icon": "fa fa-list",
                                                 "inactive": false
                                             },
                                             "correlation": {
@@ -138,7 +138,7 @@ define("config/AppConfiguration", [
                                             "sync": {
                                                 "url": "#sync/",
                                                 "name": "templates.sync.sync",
-                                                "icon": "glyph-icon-time",
+                                                "icon": "fa fa-clock-o",
                                                 "inactive": false
                                             }
                                         }
