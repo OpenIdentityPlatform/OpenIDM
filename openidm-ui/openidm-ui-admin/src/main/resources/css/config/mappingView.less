@@ -4,7 +4,7 @@
 }
 
 .mapping-body {
-  height: 425px;
+  height: 325px;
 }
 
 .mapping-resource-body {
@@ -91,6 +91,10 @@
   display: block;
 }
 
+.add-mapping-button {
+    margin-bottom: 10px;
+}
+
 .mapping-create-body {
   text-align:center;
   clear:both;
@@ -107,6 +111,7 @@
 
 #mappingConfigHolder{
   clear:both;
+  margin-top: 15px;
 
   .mapping-body {
     height:80px;
@@ -118,8 +123,6 @@
 }
 
 .mapping-config-body {
-  height:158px;
-  cursor:pointer;
   width:965px;
   border:1px solid #ddd;
   margin-bottom:15px;
@@ -133,6 +136,11 @@
     padding:25px 30px 10px 30px;
     float:left;
   }
+}
+
+.mapping-config-body:hover {
+    border-color: #888;
+    cursor:pointer;
 }
 
 .left-icon {
@@ -153,7 +161,14 @@
 
 .mapping-bottom-bar {
   border-top:1px solid #ccc;
-  height:55px;
+  height:40px;
+  padding-right: 8px;
+  
+  div.inline{
+    padding-left:15px;
+    margin-top: 10px;
+    font-style: italic;
+  }
 }
 
 .mapping-arrow {
@@ -210,20 +225,9 @@
   font-weight:700;
 }
 
-.mapping-top-bar {
-  height:20px;
-  border-bottom:1px solid #ccc;
-  padding:7px;
-  background-color:#eee;
-}
-
 .edit-button,
 .delete-button {
   margin-top:5px;
-}
-
-.edit-button {
-  margin-right:10px;
 }
 
 .icon-button span{
@@ -236,4 +240,8 @@
   font-size:20px;
   font-weight:bold;
   margin-top:15px;
+}
+
+input.addProperty {
+    margin-left: 0px;
 }

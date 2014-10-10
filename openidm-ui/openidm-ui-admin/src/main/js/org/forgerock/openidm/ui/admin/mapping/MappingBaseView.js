@@ -32,16 +32,23 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/commons/ui/common/components/Navigation"
-    ], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, connectorDelegate, nav) {
+    ], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
         events: {
             "click #updateMappingButton": "saveMapping",
             "onValidate": "onValidate",
-            "click #clearChanges": "clearChanges"
+            "click #clearChanges": "clearChanges",
+            "click .mapping-config-body": "mappingList"
+        },
+        mappingList: function(e){
+            e.preventDefault();
+            
+            if(!$(e.target).closest("button").hasClass("icon-button")){
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
+            }
         },
         data: {},
         setSubmenu: function(){
@@ -91,26 +98,21 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.data.syncConfig = sync;
                 this.data.mapping = _.filter(sync.mappings,function(m){ return m.name === args[0];})[0];
                 this.setCurrentMapping($.extend({},true,this.data.mapping));
-                this.buildAvailableObjectsMap().then(_.bind(function(availableObjects){
-                    browserStorageDelegate.set(this.currentMapping().name + "_AvailableObjects", availableObjects);
-                    
-                    this.data.targetType = this.syncType(this.data.mapping.target);
-                    
-                    this.data.targetIcon = (this.data.targetType === "managed") ? "fa-database" : "fa-paper-plane";
+                
+                this.data.targetType = this.syncType(this.data.mapping.target);
+                this.data.targetIcon = (this.data.targetType === "managed") ? "fa-database" : "fa-paper-plane";
 
-                    this.data.sourceType = this.syncType(this.data.mapping.source);
+                this.data.sourceType = this.syncType(this.data.mapping.source);
+                this.data.sourceIcon = (this.data.sourceType === "managed") ? "fa-database" : "fa-paper-plane";
+                
+                this.parentRender(_.bind(function () {
+                    this.setSubmenu();
+                    this.checkChanges();
                     
-                    this.data.sourceIcon = (this.data.sourceType === "managed") ? "fa-database" : "fa-paper-plane";
-                    
-                    this.parentRender(_.bind(function () {
-                        this.setSubmenu();
-                       
-                        this.checkChanges();
-                        prom.resolve();
-                        if(callback){
-                            callback();
-                        }
-                    }, this));
+                    prom.resolve();
+                    if(callback){
+                        callback();
+                    }
                 }, this));
             }, this));
             
@@ -141,59 +143,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             e.preventDefault();
             browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
             this.child.render([this.currentMapping().name]);
-        },
-        buildAvailableObjectsMap: function(){
-            var sourceProm = $.Deferred(),
-                targetProm = $.Deferred(),
-                currentConnectors = connectorDelegate.currentConnectors(),
-                managedConfig = configDelegate.readEntity("managed");
-            
-            return $.when(currentConnectors, managedConfig).then(_.bind(function(currConnectors, managed){
-                
-                _.map(managed.objects,_.bind(function(o){
-                    if(this.currentMapping().source === "managed/" + o.name){
-                        sourceProm.resolve({ name: o.name, fullName: "managed/" + o.name });
-                    }
-                    if(this.currentMapping().target === "managed/" + o.name){
-                        targetProm.resolve({ name: o.name, fullName: "managed/" + o.name });
-                    }
-                }, this));
-
-                if(!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")){
-                    _(currConnectors[0])
-                        .each(function(connector){
-                            _.each(connector.objectTypes, function(objType){
-                                var objTypeMap = {
-                                        name: connector.name,
-                                        fullName: "system/" + connector.name + "/" + objType
-                                    },
-                                    getProps = function(){
-                                        return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector){
-                                            return _.keys(connector.objectTypes[objType].properties).sort();
-                                        });
-                                    };
-                                
-                                if(this.currentMapping().source === objTypeMap.fullName){
-                                    getProps().then(function(props){
-                                        objTypeMap.properties = props;
-                                        sourceProm.resolve(objTypeMap);
-                                    });
-                                }
-                                if(this.currentMapping().target === objTypeMap.fullName){
-                                    getProps().then(function(props){
-                                        objTypeMap.properties = props;
-                                        targetProm.resolve(objTypeMap);
-                                    });
-                                }
-                            }, this);
-                        }, this);
-                }
-                
-                return $.when(sourceProm,targetProm).then(function(source,target){
-                    return { source: source, target: target};
-                });
-                
-            }, this));
         }
     });
 
