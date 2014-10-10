@@ -337,7 +337,7 @@ public class ScriptedFilter implements CrossCutFilter<ScriptedFilter.ScriptState
                         + onResponse.getRight().getName());
             }
             Script script = populateScript(scriptEntry, context, state.request);
-            script.put("response", resource);
+            script.put("response", resource.getContent());
             try {
                 state.state = script.eval();
             } catch (Throwable t) {
