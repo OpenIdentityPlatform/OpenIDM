@@ -245,6 +245,22 @@
             </includes>
             <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
         </fileSet>
+        <!-- Setup scriptedcrest2dj  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-scriptedcrest.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/scriptedcrest2dj/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
+        </fileSet>
         <!-- Setup Sample4  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
@@ -790,6 +806,7 @@
                 <exclude>xerces:xercesImpl</exclude>
                 <exclude>xml-apis:xml-apis</exclude>
                 <exclude>xml-resolver:xml-resolver</exclude>
+                <exclude>org.apache.httpcomponents:httpcore-nio</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -922,6 +939,7 @@
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
                 <include>xml-resolver:xml-resolver</include>
+                <include>org.apache.httpcomponents:httpcore-nio</include>
             </includes>
         </dependencySet>
 
