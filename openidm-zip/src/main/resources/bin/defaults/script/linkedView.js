@@ -89,17 +89,9 @@ exports.fetch = function (resourceName) {
                         .value(),
 
         // all links found referring to this id
-        firstIdLinks = openidm.query("repo/link", {
-            "_queryId": "get-by-field-value", 
-            "field" : "firstId",
-            "value" : id
-        }),
-        secondIdLinks = openidm.query("repo/link", {
-            "_queryId": "get-by-field-value", 
-            "field" : "secondId",
-            "value" : id
-        }),
-        allLinks = firstIdLinks.result.concat(secondIdLinks.result);
+        allLinks = openidm.query("repo/link", {
+            "_queryFilter": 'firstId eq "'+id+'" or secondId eq "'+id+'"'
+        });
 
         try {
             currentResource = openidm.read(resourceName, null, context.current);
@@ -108,7 +100,7 @@ exports.fetch = function (resourceName) {
         }
 
         return _.extend(currentResource, {
-            "linkedTo": _(allLinks)
+            "linkedTo": _(allLinks.result)
 
                 // Need to verify that these links we are processing are one of those we know relates to the given resourceName
                 // it's possible that the link queries above found results for id values which happen to match the one provided, but
