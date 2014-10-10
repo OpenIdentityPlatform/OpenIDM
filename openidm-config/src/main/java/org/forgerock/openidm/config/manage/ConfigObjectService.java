@@ -24,6 +24,10 @@
 
 package org.forgerock.openidm.config.manage;
 
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -65,6 +69,10 @@ import org.forgerock.json.resource.ResourceName;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.cluster.ClusterEvent;
+import org.forgerock.openidm.cluster.ClusterEventListener;
+import org.forgerock.openidm.cluster.ClusterEventType;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
@@ -97,13 +105,39 @@ import org.slf4j.LoggerFactory;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*")
 })
 @Service
-public class ConfigObjectService implements RequestHandler {
+public class ConfigObjectService implements RequestHandler, ClusterEventListener {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
 
+    final static String EVENT_LISTENER_ID = "config";
+    final static String EVENT_RESOURCE_NAME = "resourceName";
+    final static String EVENT_RESOURCE_ID = "resourceId";
+    final static String EVENT_RESOURCE_OBJECT = "obj";
+    final static String EVENT_RESOURCE_ACTION = "action";
+    
+    enum ConfigAction {
+        CREATE, UPDATE, DELETE;
+    }
+
     @Reference
     ConfigurationAdmin configAdmin;
+    
+    /**
+     * The ClusterManagementService used for sending and receiving cluster events
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    ClusterManagementService clusterManagementService;
 
+    public void bindClusterManagementService(final ClusterManagementService clusterManagementService) {
+        this.clusterManagementService = clusterManagementService;
+        this.clusterManagementService.register(EVENT_LISTENER_ID, this);
+    }
+
+    public void unbindClusterManagementService(final ClusterManagementService clusterManagementService) {
+        this.clusterManagementService.unregister(EVENT_LISTENER_ID);
+        this.clusterManagementService = null;
+    }
+    
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
@@ -195,7 +229,9 @@ public class ConfigObjectService implements RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             JsonValue content = request.getContent();
-            create(request.getResourceNameObject(), request.getNewResourceId(), content.asMap());
+            create(request.getResourceNameObject(), request.getNewResourceId(), content.asMap(), false);
+            // Create and send the ClusterEvent for the created configuration 
+            sendClusterEvent(ConfigAction.CREATE, request.getResourceNameObject(), request.getNewResourceId(), content.asMap());
             Resource resource = new Resource(request.getNewResourceId(), null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -219,7 +255,7 @@ public class ConfigObjectService implements RequestHandler {
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    public void create(ResourceName resourceName, String id, Map<String, Object> obj) throws ResourceException {
+    public void create(ResourceName resourceName, String id, Map<String, Object> obj, boolean allowExisting) throws ResourceException {
         logger.debug("Invoking create configuration {} {} {}", new Object[] { resourceName.toString(), id, obj });
         if (id == null || id.length() == 0) {
             throw new BadRequestException("The passed identifier to create is null");
@@ -237,7 +273,7 @@ public class ConfigObjectService implements RequestHandler {
                 String qualifiedPid = ConfigBootstrapHelper.qualifyPid(parsedId.pid);
                 config = configAdmin.getConfiguration(qualifiedPid, null);
             }
-            if (config.getProperties() != null) {
+            if (config.getProperties() != null && !allowExisting) {
                 throw new PreconditionFailedException("Can not create a new configuration with ID "
                         + parsedId + ", configuration for this ID already exists.");
             }
@@ -271,6 +307,8 @@ public class ConfigObjectService implements RequestHandler {
             String rev = request.getRevision();
             JsonValue content = request.getContent();
             update(request.getResourceNameObject(), rev, content.asMap());
+            // Create and send the ClusterEvent for the updated configuration 
+            sendClusterEvent(ConfigAction.UPDATE, request.getResourceNameObject(), null, content.asMap());
             Resource resource = new Resource(request.getResourceName(), null, content);
             handler.handleResult(resource);
         } catch (ResourceException e) {
@@ -338,7 +376,10 @@ public class ConfigObjectService implements RequestHandler {
             ResultHandler<Resource> handler) {
         try {
             String rev = request.getRevision();
-            Resource resource = new Resource(request.getResourceName(), null, delete(request.getResourceNameObject(), rev));
+            JsonValue result = delete(request.getResourceNameObject(), rev);
+            // Create and send the ClusterEvent for the deleted configuration 
+            sendClusterEvent(ConfigAction.DELETE, request.getResourceNameObject(), null, null);
+            Resource resource = new Resource(request.getResourceName(), null, result);
             handler.handleResult(resource);
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -364,7 +405,8 @@ public class ConfigObjectService implements RequestHandler {
             throw new BadRequestException("The passed identifier to delete is null");
         }
         try {
-            Configuration config = findExistingConfiguration(new ParsedId(resourceName));
+            ParsedId parsedId = new ParsedId(resourceName);
+            Configuration config = findExistingConfiguration(parsedId);
             if (config == null) {
                 throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not delete the configuration.");
             }
@@ -378,6 +420,7 @@ public class ConfigObjectService implements RequestHandler {
             }
             config.delete();
             logger.debug("Deleted configuration for {}", resourceName.toString());
+            
             return value;
         } catch (ResourceException ex) {
             throw ex;
@@ -453,6 +496,60 @@ public class ConfigObjectService implements RequestHandler {
     protected void deactivate(ComponentContext context) {
         logger.debug("Deactivating configuration management service");
     }
+
+    @Override
+    public boolean handleEvent(ClusterEvent event) {
+        switch (event.getType()) {
+        case CUSTOM:
+            try {
+                JsonValue details = event.getDetails();
+                ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
+                ResourceName resourceName = ResourceName.valueOf(details.get(EVENT_RESOURCE_NAME).asString());
+                String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
+                Map<String, Object> obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT).asMap();
+                switch (action) {
+                case CREATE:
+                    create(resourceName, id, obj, true);
+                    break;
+                case UPDATE:
+                    update(resourceName, null, obj);
+                    break;
+                case DELETE:
+                    delete(resourceName, null);
+                    break;
+                }
+            } catch (Exception e) {
+                logger.error("Error handling cluster event: " + e.getMessage(), e);
+                return false;
+            }
+        default:
+            return true;
+        }
+    }
+    
+    /**
+     * Creates and sends a ClusterEvent representing a config operation for a specified resource
+     * 
+     * @param action The action that was performed on the resource (create, update, or delete)
+     * @param name The resource name
+     * @param id The new resource id (used for create)
+     * @param obj The resource object (used for create and update)
+     */
+    private void sendClusterEvent(ConfigAction action, ResourceName name, String id, Map<String, Object> obj) {
+        if (clusterManagementService != null && clusterManagementService.isEnabled()) {
+            JsonValue details = json(object(
+                    field(EVENT_RESOURCE_ACTION, action.toString()),
+                    field(EVENT_RESOURCE_NAME, name.toString()),
+                    field(EVENT_RESOURCE_ID, id),
+                    field(EVENT_RESOURCE_OBJECT, obj)));
+            ClusterEvent event = new ClusterEvent(
+                    ClusterEventType.CUSTOM, 
+                    clusterManagementService.getInstanceId(),
+                    EVENT_LISTENER_ID,
+                    details);
+            clusterManagementService.sendEvent(event);
+        }
+    }
 }
 
 class ParsedId {
@@ -499,6 +596,15 @@ class ParsedId {
             instanceAlias = id;
         }
     }
+    
+    public ParsedId(JsonValue parsedIdMap) {
+        JsonValue value = parsedIdMap.get("pid");
+        pid = value.isNull() ? null : value.asString();
+        value = parsedIdMap.get("factoryPid");
+        factoryPid = value.isNull() ? null : value.asString();
+        value = parsedIdMap.get("instanceAlias");
+        instanceAlias = value.isNull() ? null : value.asString();
+    }
 
     /**
      * @return is this ID represents a managed factory configuration, or false if it is a managed service configuraiton
@@ -524,5 +630,11 @@ class ParsedId {
         return isFactoryConfig()
                 ? (factoryPid + "-" + instanceAlias)
                 : pid;
+    }
+    
+    public JsonValue toJsonValue() {
+        return json(object(field("pid", pid),
+                field("factoryPid", factoryPid),
+                field("instanceAlias", instanceAlias)));
     }
 }

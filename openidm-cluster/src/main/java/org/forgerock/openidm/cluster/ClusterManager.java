@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 20132-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,6 +23,10 @@
  *
  */
 package org.forgerock.openidm.cluster;
+
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -98,12 +102,17 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     /**
      * Query ID for querying failed instances
      */
-    private static final String QUERY_FAILED_INSTANCE = "query-cluster-instances";
+    private static final String QUERY_FAILED_INSTANCE = "query-cluster-failed-instances";
     
     /**
      * Query ID for querying all instances
      */
-    private static final String QUERY_INSTANCES = "query-all";
+    private static final String QUERY_INSTANCES = "query-cluster-instances";
+    
+    /**
+     * Query ID for getting pending cluster events
+     */
+    private static final String QUERY_EVENTS = "query-cluster-events";
 
     /**
      * Resource name when issuing requests over the router
@@ -111,9 +120,14 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private static final ResourceName REPO_RESOURCE_CONTAINER = new ResourceName("repo", "cluster", "states");     
     
     /**
-     * Resource name when issuing requests directly with the Repository Service
+     * Resource name when issuing cluster state requests directly with the Repository Service
      */
-    private static final ResourceName RESOURCE_CONTAINER = new ResourceName("cluster", "states"); 
+    private static final ResourceName STATES_RESOURCE_CONTAINER = new ResourceName("cluster", "states");    
+    
+    /**
+     * Resource name when issuing cluster event requests directly with the Repository Service
+     */
+    private static final ResourceName EVENTS_RESOURCE_CONTAINER = new ResourceName("cluster", "events"); 
 
     /**
      * The instance ID
@@ -388,16 +402,33 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private void updateInstanceState(String instanceId, InstanceState instanceState)
             throws ResourceException {
         synchronized (repoLock) {
-            ResourceName resourceName = RESOURCE_CONTAINER.child(instanceId);
+            ResourceName resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
             UpdateRequest updateRequest = Requests.newUpdateRequest(resourceName.toString(), new JsonValue(instanceState.toMap()));
             updateRequest.setRevision(instanceState.getRevision());
             repoService.update(updateRequest);
         }
     }
+    
+    /**
+     * Gets a list of all instances in the cluster
+     * 
+     * @return a list of Map objects representing each instance in the cluster
+     * @throws ResourceException
+     */
+    private List<Map<String, Object>> getInstances() throws ResourceException {
+        List<Map<String, Object>> instanceList = new ArrayList<Map<String, Object>>();
+        QueryRequest queryRequest = Requests.newQueryRequest(STATES_RESOURCE_CONTAINER.toString())
+                .setQueryId(QUERY_INSTANCES);
+        List<Resource> results = repoService.query(queryRequest);
+        for (Resource resource : results) {
+            instanceList.add(getInstanceMap(resource.getContent()));
+        }
+        return instanceList;
+    }
 
     private InstanceState getInstanceState(String instanceId) throws ResourceException {
         synchronized (repoLock) {
-            ResourceName resourceName = RESOURCE_CONTAINER.child(instanceId);
+            ResourceName resourceName = STATES_RESOURCE_CONTAINER.child(instanceId);
             return new InstanceState(instanceId, getOrCreateRepo(resourceName.toString()));
         }
     }
@@ -530,7 +561,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     private Map<String, InstanceState> findFailedInstances() {
         Map<String, InstanceState> failedInstances = new HashMap<String, InstanceState>();
         try {
-            QueryRequest queryRequest = Requests.newQueryRequest(RESOURCE_CONTAINER.toString());
+            QueryRequest queryRequest = Requests.newQueryRequest(STATES_RESOURCE_CONTAINER.toString());
             queryRequest.setQueryId(QUERY_FAILED_INSTANCE);
             String time = InstanceState.pad(System.currentTimeMillis() - clusterConfig.getInstanceTimeout());
             queryRequest.setAdditionalParameter(InstanceState.PROP_TIMESTAMP_LEASE, time);
@@ -593,9 +624,8 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         }
 
         // Then, attempt recovery
-        boolean success =
-                sendEventToListeners(new ClusterEvent(ClusterEventType.RECOVERY_INITIATED,
-                        instanceId));
+        ClusterEvent recoveryEvent = new ClusterEvent(ClusterEventType.RECOVERY_INITIATED, instanceId);
+        boolean success = sendEventToListeners(recoveryEvent);
 
         if (success) {
             logger.info("Instance {} recovered successfully", instanceId);
@@ -640,6 +670,89 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         return success;
     }
 
+    @Override
+    public void sendEvent(ClusterEvent event) {
+        try {
+            // Loop through instances, creating a pending event for each instance in the cluster
+            for (Map<String, Object> instanceMap : getInstances()) {
+                String instanceId = (String) instanceMap.get("instanceId");
+                if (!instanceId.equals(this.instanceId)) {
+                    JsonValue newEvent = json(object(
+                            field("type", "event"),
+                            field("instanceId", instanceId),
+                            field("event", event.toJsonValue().getObject())));
+                    CreateRequest createRequest = Requests.newCreateRequest(EVENTS_RESOURCE_CONTAINER.toString(), newEvent);
+                    Resource result = repoService.create(createRequest);
+                    logger.debug("Creating cluster event {}", result.getId());
+                }
+            }
+        } catch (ResourceException e) {
+            logger.error("Error sending cluster event " + event.toJsonValue(), e);
+        }
+    }
+    
+    /**
+     * Finds and processes any pending cluster events for this node.  The event will then 
+     * be deleting if the processing was successful.
+     */
+    private void processPendingEvents() {
+        try {
+            // Find all pending cluster events for this instance
+            logger.debug("Querying cluster events");
+            QueryRequest queryRequest = Requests.newQueryRequest(EVENTS_RESOURCE_CONTAINER.toString());
+            queryRequest.setQueryId(QUERY_EVENTS);
+            queryRequest.setAdditionalParameter("instanceId", instanceId);
+            List<Resource> results = repoService.query(queryRequest);
+            // Loop through results, processing each event
+            for (Resource resource : results) {
+                logger.debug("Found pending cluster event {}", resource.getId());
+                JsonValue eventMap = resource.getContent().get("event");
+                ClusterEvent event = new ClusterEvent(eventMap);
+                boolean success = false;
+                String listenerId = event.getListenerId();
+                // Check if a listener ID is specified
+                if (listenerId != null) {
+                    // Send the event to the corresponding listener
+                    ClusterEventListener listener = listeners.get(listenerId);
+                    if (listener != null) {
+                        success = listener.handleEvent(event);
+                    } else {
+                        logger.warn("No listener {} available to recieve event {}", listenerId, event.toJsonValue());
+                        success = true;
+                    }
+                } else {
+                    // Send event to all listeners
+                    success = sendEventToListeners(event);
+                }
+                // If the event was successfully processed, delete it
+                if (success) {
+                    try {
+                        logger.debug("Deleting cluster event {}", resource.getId());
+                        DeleteRequest deleteRequest = Requests.newDeleteRequest(EVENTS_RESOURCE_CONTAINER.toString(), resource.getId());
+                        deleteRequest.setRevision(resource.getRevision());
+                        repoService.delete(deleteRequest);
+                    } catch (ResourceException e) {
+                        logger.error("Error deleting cluster event " + resource.getId(), e);
+                    }
+                }
+            }
+        } catch (ResourceException e) {
+            logger.error("Error processing cluster events", e);
+        }
+    }
+
+    private void deleteEvent(JsonValue eventMap) {
+        String eventId = eventMap.get("_id").asString();
+        try {
+            logger.debug("Deleting cluster event {}", eventId);
+            DeleteRequest deleteRequest = Requests.newDeleteRequest(EVENTS_RESOURCE_CONTAINER.toString(), eventId);
+            deleteRequest.setRevision(eventMap.get("_rev").asString());
+            repoService.delete(deleteRequest);
+        } catch (ResourceException e) {
+            logger.error("Error deleting cluster event " + eventId, e);
+        }
+    }
+
     /**
      * A thread for managing this instance's lease and detecting cluster events.
      */
@@ -668,10 +781,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                             if (!failed) {
                                 logger.debug("This instance has failed");
                                 failed = true;
-                                // Notify listeners that this instance has
-                                // failed
-                                sendEventToListeners(new ClusterEvent(
-                                        ClusterEventType.INSTANCE_FAILED, instanceId));
+                                // Notify listeners that this instance has failed
+                                ClusterEvent failedEvent = new ClusterEvent(ClusterEventType.INSTANCE_FAILED, instanceId);
+                                sendEventToListeners(failedEvent);
                                 // Set current state to null
                                 currentState = null;
                             }
@@ -683,16 +795,18 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
                         // If transitioning to a "running" state, send events
                         if (state.getState() == InstanceState.STATE_RUNNING) {
-                            if (currentState == null
-                                    || currentState.getState() != InstanceState.STATE_RUNNING) {
-                                sendEventToListeners(new ClusterEvent(
-                                        ClusterEventType.INSTANCE_RUNNING, instanceId));
+                            if (currentState == null || currentState.getState() != InstanceState.STATE_RUNNING) {
+                                ClusterEvent runningEvent = new ClusterEvent(ClusterEventType.INSTANCE_RUNNING, instanceId);
+                                sendEventToListeners(runningEvent);
                             }
                         }
 
-                        // set current state
+                        // Set current state
                         currentState = state;
 
+                        // Check for pending cluster events
+                        processPendingEvents();
+                        
                         // Find failed instances
                         logger.debug("Finding failed instances");
                         Map<String, InstanceState> failedInstances = findFailedInstances();

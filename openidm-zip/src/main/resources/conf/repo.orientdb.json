@@ -28,7 +28,10 @@
         "get-notifications-for-user-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
         "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "scan-tasks-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL",
-        "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
+        
+        "query-cluster-failed-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
+        "query-cluster-instances" : "SELECT * FROM cluster_states",
+        "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
 
         "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
         "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
@@ -186,6 +189,15 @@
                 ]
             },
             "cluster_states" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "cluster_events" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
