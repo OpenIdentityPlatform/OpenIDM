@@ -1680,14 +1680,15 @@ class ObjectMapping {
             boolean result = false;
             if (hasSourceObject() || sourceObjectOverride != null) { // must have a source object to be valid
                 if (validSource != null) {
-                    Map<String, Object> scope = new HashMap<String, Object>();
-                    if (sourceObjectOverride != null) {
-                        scope.put("source", sourceObjectOverride.asMap());
-                    } else {
-                        // TODO: This forced load into memory is necessary until we can do on demand get in script engine
-                        JsonValue sourceValue = getSourceObject();
-                        scope.put("source", null != sourceValue ? sourceValue.getObject() : null);
+                    final JsonValue sourceObject = (sourceObjectOverride != null)
+                            ? sourceObjectOverride
+                            : getSourceObject();
+                    if (sourceObject == null) {
+                        throw new SynchronizationException("Source object " + getSourceObjectId() + " no longer exists");
                     }
+                    
+                    Map<String, Object> scope = new HashMap<String, Object>();
+                    scope.put("source", sourceObject.asMap());
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
