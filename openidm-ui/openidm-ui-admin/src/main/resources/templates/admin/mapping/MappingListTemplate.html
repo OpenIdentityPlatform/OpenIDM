@@ -1,9 +1,6 @@
 <style>
     #submenu { display: none; }
 </style>
-<div class="float-left">
-    <h3>{{t "templates.mapping.mappings"}}</h3>
-</div>
 <div class="add-mapping-button float-right">
     <a href="#resources/open"><button type="button" class="icon-button button" id="addMapping"><span>{{t 'templates.mapping.addMapping'}}</span><i class="fa fa-lg fa-plus"></i></button></a>
 </div>
@@ -11,10 +8,7 @@
 {{#if mappingConfig.length}}
 <div id="mappingConfigHolder">
     {{#each mappingConfig}}
-    <div class="mapping-config-body">
-        <div class="mapping-top-bar">
-            {{name}}
-        </div>
+    <div class="mapping-config-body" mapping="{{name}}">
         <div class="mapping-body">
             <span class="mapping-icon"><i class="fa fa-2x {{sourceIcon}}"></i></span>
             <div class="mapping-source">
@@ -35,7 +29,8 @@
             </div>
         </div>
         <div class="mapping-bottom-bar">
-            <a href="#mapping/{{name}}/"><button type="button"  name="" class="button icon-button pull-right edit-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button></a>
+            <div class="inline">{{name}}</div>
+            <button type="button"  name="" class="button icon-button pull-right edit-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
             <button type="button"  name="" class="button icon-button pull-right delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
         </div>
     </div>

@@ -36,7 +36,15 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
         template: "templates/admin/mapping/MappingListTemplate.html",
         events: {
             "click #addMapping": "addMapping",
-            "click .delete-button" : "deleteMapping"
+            "click .delete-button" : "deleteMapping",
+            "click .mapping-config-body": "mappingDetail"
+        },
+        mappingDetail: function(e){
+            e.preventDefault();
+            
+            if(!$(e.target).closest("button").hasClass("delete-button")){
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
+            }
         },
         render: function(args, callback) {
             var errorCallback = _.bind(function(){
@@ -76,13 +84,15 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                         }, this),
                         stop: _.bind(function(event, ui){
                             var stopIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item),
+                                tempRemoved;
+                            
+                            if(this.startIndex !== stopIndex){
                                 tempRemoved = this.cleanConfig.splice(this.startIndex, 1);
-
-                            this.cleanConfig.splice(stopIndex, 0, tempRemoved[0]);
-
-                            configDelegate.updateEntity("sync", {"mappings":this.cleanConfig}).then(_.bind(function() {
-                                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                            }, this));
+                                this.cleanConfig.splice(stopIndex, 0, tempRemoved[0]);
+                                configDelegate.updateEntity("sync", {"mappings":this.cleanConfig}).then(_.bind(function() {
+                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                                }, this));
+                            }
 
                         }, this)
                     });
