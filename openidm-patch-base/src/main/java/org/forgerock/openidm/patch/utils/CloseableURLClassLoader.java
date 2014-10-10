@@ -49,7 +49,6 @@ public class CloseableURLClassLoader extends URLClassLoader {
     /**
      * Close the CLassLoader and any associated resources including open JAR Files.
      */
-    @Override
     public void close() {
         Set<String> jarNames = getOpenJarFiles(this);
         cleanupJarFileFactory(jarNames);
