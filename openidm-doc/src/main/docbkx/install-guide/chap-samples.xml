@@ -3208,7 +3208,10 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
      <para>
       Log in to your Google Apps Admin Console (at
       <literal>https://www.google.com/a/<replaceable>domain-name</replaceable></literal>)
-      and verify that the following APIs are enabled:
+     </para>
+     <para>
+      Navigate to <literal>https://code.google.com/apis/console/</literal>
+      and enable the following APIs:
      </para>
      <itemizedlist>
       <listitem>
