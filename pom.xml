@@ -332,6 +332,7 @@
         <module>openidm-ui</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
+        <module>openidm-patch-base</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
     </modules>
@@ -774,6 +775,11 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
                 <version>1.7R4_1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-configuration</artifactId>
+                <version>1.9_1</version>
             </dependency>
 
             <dependency>
