@@ -44,7 +44,11 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>javax.naming</Import-Package>
+                        <Import-Package>
+                            javax.naming,
+                            javax.naming.ldap,
+                            javax.naming.directory
+                        </Import-Package>
                         <Fragment-Host>org.apache.httpcomponents.httpclient;bundle-version=4.3.5</Fragment-Host>
                     </instructions>
                 </configuration>
