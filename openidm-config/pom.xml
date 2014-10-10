@@ -50,6 +50,11 @@
             <artifactId>openidm-router</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-cluster</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>

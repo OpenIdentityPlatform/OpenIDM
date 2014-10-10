@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -45,6 +45,13 @@ public interface ClusterManagementService {
      * @param listenerId the listener's ID
      */
     public void unregister(String listenerId);
+    
+    /**
+     * Sends a ClusterEvent to the other nodes in the cluster.
+     * 
+     * @param event the event to publish
+     */
+    public void sendEvent(ClusterEvent event);
     
     /**
      * Renews the Cluster Management Service's recovery lease. This should

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -37,13 +37,17 @@ public enum ClusterEventType {
     RECOVERY_INITIATED,
     
     /**
-     * A instance has failed
+     * This instance has failed
      */
     INSTANCE_FAILED,
     
     /**
-     * A instance is up and running
+     * This instance is up and running
      */
-    INSTANCE_RUNNING
+    INSTANCE_RUNNING,
     
+    /**
+     * A custom event specific to registered applications
+     */
+    CUSTOM
 }
