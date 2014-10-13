@@ -36,7 +36,6 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
-        <openicf.framework.version>1.4.0.0</openicf.framework.version>
     </properties>
     <dependencies>
         <dependency>
@@ -135,7 +134,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>groovy-connector</artifactId>
-            <version>1.4.0.0</version>
+            <version>${openicf.groovyconnector.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -202,17 +201,17 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>xml-connector</artifactId>
-                                    <version>1.1.0.1</version>
+                                    <version>${openicf.xmlconnector.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>csvfile-connector</artifactId>
-                                    <version>1.1.0.1</version>
+                                    <version>${openicf.csvconnector.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0</version>
+                                    <version>${openicf.groovyconnector.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
@@ -233,7 +232,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>1.4.0.0</version>
+                                    <version>${openicf.groovyconnector.version}</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                 </artifactItem>
