@@ -85,27 +85,27 @@ define("config/routes/AdminRoutesConfig", [
             url: "mapping/",
             forceUpdate: true
         },
-        "mappingView" : {
+        "propertiesView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/PropertiesView",
             role: "ui-admin",
-            url: /^mapping\/([^\/]+)\/$/,
-            pattern: "mapping/?/",
+            url: /^properties\/([^\/]+)\/$/,
+            pattern: "properties/?/",
             forceUpdate: true
         },
         "editMappingProperty" : {
-            base: "mappingView",
+            base: "propertiesView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog",
             role: "ui-admin",
-            url: /mapping\/(.+?)\/property\/(.+?)$/,
-            pattern: "mapping/?/property/?",
+            url: /property\/(.+?)\/(.+?)$/,
+            pattern: "property/?/?",
             forceUpdate: true
         },
         "addMappingProperty" : {
-            base: "mappingView",
+            base: "propertiesView",
             dialog: "org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog",
             role: "ui-admin",
-            url: /mapping\/(.+?)\/property\/_new$/,
-            pattern: "mapping/?/property/_new",
+            url: /property\/(.+?)\/_new$/,
+            pattern: "property/?/_new",
             forceUpdate: true
         },
         "syncView" : {

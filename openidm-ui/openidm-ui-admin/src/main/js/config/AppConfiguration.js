@@ -124,7 +124,7 @@ define("config/AppConfiguration", [
                                         "inactive": false,
                                         "urls": {
                                             "properties": {
-                                                "url": "#mapping/",
+                                                "url": "#properties/",
                                                 "name": "templates.mapping.properties",
                                                 "icon": "fa fa-list",
                                                 "inactive": false
