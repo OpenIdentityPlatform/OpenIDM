@@ -133,7 +133,7 @@
    </variablelist>
   </section>
 
-  <section xml:id="script-sequenze">
+  <section xml:id="script-sequence">
     <title>Script Execution Sequence</title>
     
     <para>All "onRequest" and "onResponse" scripts are executed in sequence. 
