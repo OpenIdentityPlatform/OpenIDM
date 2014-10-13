@@ -41,7 +41,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
 
                 browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
                 
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [this.data.mappingName]});
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editMappingProperty", args: [this.data.mappingName, property]});
             }
         },
@@ -119,7 +119,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddPropertyMappingDialog", [
                 width:'850px',
                 dialogClass: "overflow-visible",
                 close: _.bind(function(){
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [this.data.mappingName]});
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
                 },this),
                 open: function(){
 

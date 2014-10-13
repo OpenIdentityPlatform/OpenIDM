@@ -43,7 +43,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             e.preventDefault();
             
             if(!$(e.target).closest("button").hasClass("delete-button")){
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
             }
         },
         render: function(args, callback) {
