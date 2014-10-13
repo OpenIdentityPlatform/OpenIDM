@@ -409,12 +409,12 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>1.4.0.0</version>
+            <version>${openicf.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>icfl-over-slf4j</artifactId>
-            <version>1.4.0.0</version>
+            <version>${openicf.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

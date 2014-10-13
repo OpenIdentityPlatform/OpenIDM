@@ -4,7 +4,7 @@
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector",
         "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
-        "bundleVersion": "[1.4.0.0,1.4.2.0)"
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
     },
     "poolConfigOption": {
         "maxObjects": 10,
