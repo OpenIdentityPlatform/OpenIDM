@@ -341,8 +341,17 @@
      <term>postAction</term>
      <listitem>
       <para>script object, optional</para>
-      <para>Specifies the action to perform after the previously specified 
-      action has completed.</para>
+      <para>
+       Specifies the action to perform after the previously specified action has
+       completed.
+      </para>
+      <note>
+       <para>
+        No <literal>postAction</literal> script is triggered if the
+        <literal>action</literal> is either <literal>IGNORE</literal> or
+        <literal>ASYNC</literal>.
+       </para>
+      </note>
      </listitem>
     </varlistentry>
    </variablelist>
