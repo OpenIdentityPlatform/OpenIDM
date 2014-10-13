@@ -170,7 +170,7 @@ var httpAccessConfig =
         },
 
         // This rule is primarily controlled by the ownDataOnly function - that will only allow 
-        // access to the endpoint from which the user orignates 
+        // access to the endpoint from which the user originates 
         // (For example a managed/user with the _id of bob will only be able to access managed/user/bob)
         {   
             "pattern"   : "*",
