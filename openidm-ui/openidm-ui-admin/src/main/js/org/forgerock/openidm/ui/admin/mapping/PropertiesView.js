@@ -433,7 +433,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             
             var syncMappings;
 
-            syncMappings = _.map(this.data.syncConfig.mappings,_.bind(function(m){
+            syncMappings = _.map(MappingBaseView.data.syncConfig.mappings,_.bind(function(m){
                 var propertyChanges = browserStorageDelegate.get(this.currentMapping().name + "_Properties");
                 if(m.name === this.currentMapping().name){
                     if(propertyChanges){
@@ -445,7 +445,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             }, this));
             
             configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
-                this.render([this.data.mapping.name]);
+                this.render([this.currentMapping().name]);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
             }, this));
         }
