@@ -2317,6 +2317,15 @@ javax.net.ssl.trustStore=/path/to/openidm/security/truststore
     ADSI .dll files.
    </para>
    <para>
+    In general, the generic LDAP connector has better performance than the
+    Active Directory connector. Unfortunately, Active Directory has some
+    limitations when you use the LDAP connector, and the LDAP connector might
+    therefore not be suitable in all Active Directory deployments. However, if
+    your deployment can use the LDAP connector, it is preferable to do so.
+   </para>
+   <!--TODO Gael Allioux is writing up a note comparing the two connectors -
+   include this content here when it is complete -->
+   <para>
     Before you configure the Active Directory Connector, make sure that the
     .NET Connector Server is installed, configured and started, and that OpenIDM
     has been configured to use the Connector Server. For more information, see
