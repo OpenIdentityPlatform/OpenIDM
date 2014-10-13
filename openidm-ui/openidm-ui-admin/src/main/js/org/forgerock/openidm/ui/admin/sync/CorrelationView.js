@@ -51,15 +51,22 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
         dataModel: {},
 
         render: function (args, callback) {
-            MappingBaseView.render(args,this).then(_.bind(function(){
-                this.dataModel.sync = MappingBaseView.data.syncConfig;
-                this.dataModel.mapping = MappingBaseView.currentMapping();
-                this.dataModel.mappingName = this.mappingName = args[0];
+            MappingBaseView.render(args,_.bind(function(){
+                this.loadData(args, callback);
+            }, this));
+        },
+        loadData: function(args, callback){
+            this.dataModel.sync = MappingBaseView.data.syncConfig;
+            this.dataModel.mapping = MappingBaseView.currentMapping();
+            this.dataModel.mappingName = this.mappingName = args[0];
 
-                this.parentRender(_.bind(function () {
-                    AnalysisView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
-                    CorrelationQueryView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
-                }, this));
+            this.parentRender(_.bind(function () {
+                AnalysisView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
+                CorrelationQueryView.render({sync: this.dataModel.sync, mapping: this.dataModel.mapping, mappingName: this.dataModel.mappingName});
+                MappingBaseView.moveSubmenu();
+                if(callback){
+                    callback();
+                }
             }, this));
         }
     });

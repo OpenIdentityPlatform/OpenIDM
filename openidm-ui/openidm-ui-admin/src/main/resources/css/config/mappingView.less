@@ -245,3 +245,34 @@
 input.addProperty {
     margin-left: 0px;
 }
+
+#submenu { display:none; }
+#submenuClone {
+    margin-bottom: 15px;
+    border-left: 0px;
+    border-right: 0px;
+    
+    li.active {
+        border-bottom: 5px solid @color-active;
+    }
+    
+    li a {
+        text-decoration: none;
+        color: @inactive-menu-color;
+        font-weight: bold;
+    }
+    
+    li a:hover, .active a {
+        .rounded-corners(5px);
+        background-color: transparent;
+    }
+    
+    li a:hover {
+        background-color: transparent;
+        color: @color-active;
+    }
+}
+
+.changesPending{
+    margin-top: 15px;
+}

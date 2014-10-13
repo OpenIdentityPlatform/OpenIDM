@@ -33,8 +33,10 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate"
-    ], function(AdminAbstractView, MappingBaseView, eventManager, conf, UIUtils, constants, browserStorageDelegate, searchDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SearchDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+    ], function(AdminAbstractView, MappingBaseView, eventManager, conf, UIUtils, constants, browserStorageDelegate, searchDelegate, connectorDelegate, configDelegate) {
 
     var PropertiesView = AdminAbstractView.extend({
         template: "templates/admin/mapping/PropertiesTemplate.html",
@@ -44,12 +46,39 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             "click .addProperty": "addProperty",
             "click .removePropertyBtn": "removeProperty",
             "click .attrTabBtn": "openPropertyEditTab",
-            "keyup #numRepresentativeProps": "resetNumRepresentativeProps"
+            "keyup #numRepresentativeProps": "resetNumRepresentativeProps",
+            "click #updateMappingButton": "saveMapping",
+            "click #clearChanges": "clearChanges"
+        },
+        currentMapping: function(){
+            return MappingBaseView.currentMapping();
+        },
+        checkChanges: function () {
+            var currentProperties = this.currentMapping().properties,
+                changedProperties = browserStorageDelegate.get(this.currentMapping().name + "_Properties") || currentProperties,
+                changesPending = !_.isEqual(currentProperties,changedProperties);
+            
+            if(changesPending) {
+                this.$el.find("#updateMappingButton").prop('disabled', false);
+                this.$el.find("#clearChanges").prop('disabled', false);
+                this.$el.find(".changesPending").show();
+            }
+            else {
+                this.$el.find("#updateMappingButton").prop('disabled', true);
+                this.$el.find("#clearChanges").prop('disabled', true);
+                this.$el.find(".changesPending").hide();
+            }
+            
         },
         addProperty: function (e) {
             e.preventDefault();
 
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "addMappingProperty", args: [this.mapping.name]});
+        },
+        clearChanges: function(e){
+            e.preventDefault();
+            browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
+            this.render([this.currentMapping().name]);
         },
         removeProperty: function (e) {
             e.preventDefault();
@@ -57,7 +86,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             UIUtils.jqConfirm($.t("templates.mapping.confirmRemoveProperty",{property: $(e.target).attr('target')}),_.bind(function(){
                 var mapProps = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
                 browserStorageDelegate.set(this.mapping.name + "_Properties",_.reject(mapProps, function (p) { return p.target === $(e.target).attr('target'); }));
-                MappingBaseView.checkChanges();
+                this.checkChanges();
                this.render([this.mapping.name]);
             },this));
         },
@@ -296,7 +325,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
 
                         browserStorageDelegate.set(_this.mapping.name + "_Properties", mapProps);
                         _this.setNumRepresentativePropsLine();
-                        MappingBaseView.checkChanges();
+                        _this.checkChanges();
                 },
                 start: function(){
                     $("#mappingTable", _this.$el).find("tr td").css("border-bottom-width","");
@@ -317,25 +346,108 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             }
         },
         render: function(args, callback) {
-            MappingBaseView.render(args,this).then(_.bind(function(){
-                this.mapping = MappingBaseView.currentMapping();
-                //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
-                this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
-                 
-                 if(conf.globalData.sampleSource && this.mapping.properties.length){
-                     this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
-                 }
+            MappingBaseView.render(args,_.bind(function(){
+                this.loadData(args, callback);
+            }, this));
+        },
+        loadData: function(args,callback){
+            this.mapping = this.currentMapping();
+            //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
+            this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
+             
+             if(conf.globalData.sampleSource && this.mapping.properties.length){
+                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
+             }
+             
+             this.buildAvailableObjectsMap().then(_.bind(function(availableObjects){
+                 browserStorageDelegate.set(this.currentMapping().name + "_AvailableObjects", availableObjects);
                  this.parentRender(_.bind(function () {
                      this.loadMappingPropertiesGrid();
                      this.checkAvailableProperties();
+                     this.checkChanges();
+                     MappingBaseView.moveSubmenu();
                      if(callback){
                          callback();
                      }
                  }, this));
              }, this));
-        },
+         },
         setNumRepresentativePropsLine: function(){
             $("#mappingTable", this.$el).find("tr:eq(" + this.data.numRepresentativeProps + ") td").css("border-bottom-width","10px");
+        },
+        buildAvailableObjectsMap: function(){
+            var sourceProm = $.Deferred(),
+                targetProm = $.Deferred(),
+                currentConnectors = connectorDelegate.currentConnectors(),
+                managedConfig = configDelegate.readEntity("managed");
+            
+            return $.when(currentConnectors, managedConfig).then(_.bind(function(currConnectors, managed){
+                
+                _.map(managed.objects,_.bind(function(o){
+                    if(this.currentMapping().source === "managed/" + o.name){
+                        sourceProm.resolve({ name: o.name, fullName: "managed/" + o.name });
+                    }
+                    if(this.currentMapping().target === "managed/" + o.name){
+                        targetProm.resolve({ name: o.name, fullName: "managed/" + o.name });
+                    }
+                }, this));
+
+                if(!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")){
+                    _.chain(currConnectors[0])
+                        .each(function(connector){
+                            _.each(connector.objectTypes, function(objType){
+                                var objTypeMap = {
+                                        name: connector.name,
+                                        fullName: "system/" + connector.name + "/" + objType
+                                    },
+                                    getProps = function(){
+                                        return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector){
+                                            return _.keys(connector.objectTypes[objType].properties).sort();
+                                        });
+                                    };
+                                
+                                if(this.currentMapping().source === objTypeMap.fullName){
+                                    getProps().then(function(props){
+                                        objTypeMap.properties = props;
+                                        sourceProm.resolve(objTypeMap);
+                                    });
+                                }
+                                if(this.currentMapping().target === objTypeMap.fullName){
+                                    getProps().then(function(props){
+                                        objTypeMap.properties = props;
+                                        targetProm.resolve(objTypeMap);
+                                    });
+                                }
+                            }, this);
+                        }, this);
+                }
+                
+                return $.when(sourceProm,targetProm).then(function(source,target){
+                    return { source: source, target: target};
+                });
+                
+            }, this));
+        },
+        saveMapping: function(event) {
+            event.preventDefault();
+            
+            var syncMappings;
+
+            syncMappings = _.map(this.data.syncConfig.mappings,_.bind(function(m){
+                var propertyChanges = browserStorageDelegate.get(this.currentMapping().name + "_Properties");
+                if(m.name === this.currentMapping().name){
+                    if(propertyChanges){
+                        m.properties = propertyChanges;
+                        browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
+                    }
+                }
+                return m;
+            }, this));
+            
+            configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
+                this.render([this.data.mapping.name]);
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+            }, this));
         }
     });
 
