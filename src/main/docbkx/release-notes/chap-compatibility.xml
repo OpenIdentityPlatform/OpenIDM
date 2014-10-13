@@ -384,7 +384,7 @@ openidm.create('managed/user", null, <replaceable>user-object</replaceable>)
         includes correlation queries on system objects.
        </para>
        <para>
-        For example, the following query in OpenIDM ${docTargetVersion}:
+        For example, the following query in OpenIDM 2.1.0:
        </para>
 <programlisting>'query': { 'Equals': { 'field' : 'employeeType', 'values': ['Permanent'] } }</programlisting>
        <para>
