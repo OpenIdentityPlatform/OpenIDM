@@ -3360,6 +3360,12 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
       To test that the connector is working, create, update, and read a user and
       group entry on the Google resource, over REST.
      </para>
+     <note>
+      <para>
+       When creating resources for Google, note that the equals
+       (<literal>=</literal>) character cannot be used in any attribute value.
+      </para>
+     </note>
      <para>
       The following command creates an entry for user <literal>Sam Carter</literal>:
      </para>
