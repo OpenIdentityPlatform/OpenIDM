@@ -1,3 +1,9 @@
+<div class="changesPending alert-box warning-message" style="display:none;">
+    <div class="alert-message">
+        <i class="fa alert-message-icon"></i><span class="message-type">{{t "common.form.warning" }}!</span>
+        <span class="message">{{t "templates.mapping.changesPending"}}</span>
+    </div>
+</div>
 <div class="float-left">
     <input type="button" class="addProperty button" value="{{t "templates.mapping.addProperty"}}" />
 </div>
@@ -11,4 +17,6 @@
 <div>
     <span id="allPropertiesMapped" style="display:none;">{{t "templates.mapping.allPropertiesMapped"}}</span>
     <table id="mappingTable"></table>
+    <button type="button" id="updateMappingButton"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.saveProperties"}}</span><i class="fa fa-lg fa-save"></i></button>
+    <button type="button" id="clearChanges"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.clearChanges"}}</span><i class="fa fa-lg fa-refresh"></i></button>
 </div>

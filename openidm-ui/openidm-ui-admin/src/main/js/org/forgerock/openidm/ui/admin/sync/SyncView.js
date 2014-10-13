@@ -49,74 +49,82 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         pattern: "",
 
         render: function (args, callback) {
-            var schedules = [], seconds = "";
-            MappingBaseView.render(args,this).then(_.bind(function(){
-                this.sync = MappingBaseView.data.syncConfig;
-                this.mapping = MappingBaseView.currentMapping();
-                this.data.mappingName = this.mappingName = args[0];
-
-                this.parentRender(_.bind(function() {
-                    if (this.mapping.hasOwnProperty("enableSync")) {
-                        this.$el.find(".liveSyncEnabled").prop('checked', this.mapping.enableSync);
-                    } else {
-                        this.$el.find(".liveSyncEnabled").prop('checked', true);
-                    }
-
-                    SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
-                        _(schedules.result).each(function (scheduleId) {
-                            SchedulerDelegate.specificSchedule(scheduleId._id).then(_.bind(function (schedule) {
-                                // There is a liveSync Scheduler and it is enabled and the source matches the source of the mapping
-                                if (schedule.invokeService.indexOf("provisioner") >= 0 && schedule.enabled && schedule.invokeContext.source === this.mapping.source) {
-                                    seconds = schedule.schedule.substr(schedule.schedule.indexOf("/") + 1);
-                                    seconds = seconds.substr(0, seconds.indexOf("*") - 1);
-
-                                    this.$el.find(".noLiveSyncMessage").hide();
-                                    this.$el.find(".systemObjectMessage").show();
-                                    this.$el.find(".managedSourceMessage").hide();
-                                    this.$el.find(".liveSyncSeconds").text(seconds);
-
-                                    // This is a recon schedule
-                                } else if (schedule.invokeService.indexOf("sync") >= 0  ) {
-                                    // The mapping is of a managed object
-                                    if (this.mapping.source.indexOf("managed/") >= 0) {
-                                        this.$el.find(".noLiveSyncMessage").hide();
-                                        this.$el.find(".systemObjectMessage").hide();
-                                        this.$el.find(".managedSourceMessage").show();
-                                    } else {
-                                        this.$el.find(".noLiveSyncMessage").show();
-                                        this.$el.find(".systemObjectMessage").hide();
-                                        this.$el.find(".managedSourceMessage").hide();
-                                    }
-
-                                    if (schedule.invokeContext.mapping === this.mappingName) {
-                                        Scheduler.generateScheduler({
-                                            "element": $("#schedules"),
-                                            "defaults": {
-                                                enabled: schedule.enabled,
-                                                schedule: schedule.schedule,
-                                                persisted: schedule.persisted,
-                                                misfirePolicy: schedule.misfirePolicy
-                                            },
-                                            "onDelete": this.reconDeleted,
-                                            "invokeService": schedule.invokeService,
-                                            "scheduleId": scheduleId._id
-                                        });
-                                        this.$el.find("#addNew").hide();
-                                    }
-                                }
-                            }, this));
-                        }, this);
-                    }, this));
-
-
-                    if ($("#schedules .schedulerBody").length === 0) {
-                        this.$el.find("#addNew").show();
-                    }
-
-                    this.setCurrentPolicyType();
-                }, this));
-             }, this));
+            MappingBaseView.render(args,_.bind(function(){
+                this.loadData(args, callback);
+            }, this));
         },
+        loadData: function(args, callback){
+            var schedules = [], seconds = "";
+            this.sync = MappingBaseView.data.syncConfig;
+            this.mapping = MappingBaseView.currentMapping();
+            this.data.mappingName = this.mappingName = args[0];
+
+            this.parentRender(_.bind(function() {
+                MappingBaseView.moveSubmenu();
+                if (this.mapping.hasOwnProperty("enableSync")) {
+                    this.$el.find(".liveSyncEnabled").prop('checked', this.mapping.enableSync);
+                } else {
+                    this.$el.find(".liveSyncEnabled").prop('checked', true);
+                }
+
+                SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
+                    _(schedules.result).each(function (scheduleId) {
+                        SchedulerDelegate.specificSchedule(scheduleId._id).then(_.bind(function (schedule) {
+                            // There is a liveSync Scheduler and it is enabled and the source matches the source of the mapping
+                            if (schedule.invokeService.indexOf("provisioner") >= 0 && schedule.enabled && schedule.invokeContext.source === this.mapping.source) {
+                                seconds = schedule.schedule.substr(schedule.schedule.indexOf("/") + 1);
+                                seconds = seconds.substr(0, seconds.indexOf("*") - 1);
+
+                                this.$el.find(".noLiveSyncMessage").hide();
+                                this.$el.find(".systemObjectMessage").show();
+                                this.$el.find(".managedSourceMessage").hide();
+                                this.$el.find(".liveSyncSeconds").text(seconds);
+
+                                // This is a recon schedule
+                            } else if (schedule.invokeService.indexOf("sync") >= 0  ) {
+                                // The mapping is of a managed object
+                                if (this.mapping.source.indexOf("managed/") >= 0) {
+                                    this.$el.find(".noLiveSyncMessage").hide();
+                                    this.$el.find(".systemObjectMessage").hide();
+                                    this.$el.find(".managedSourceMessage").show();
+                                } else {
+                                    this.$el.find(".noLiveSyncMessage").show();
+                                    this.$el.find(".systemObjectMessage").hide();
+                                    this.$el.find(".managedSourceMessage").hide();
+                                }
+
+                                if (schedule.invokeContext.mapping === this.mappingName) {
+                                    Scheduler.generateScheduler({
+                                        "element": $("#schedules"),
+                                        "defaults": {
+                                            enabled: schedule.enabled,
+                                            schedule: schedule.schedule,
+                                            persisted: schedule.persisted,
+                                            misfirePolicy: schedule.misfirePolicy
+                                        },
+                                        "onDelete": this.reconDeleted,
+                                        "invokeService": schedule.invokeService,
+                                        "scheduleId": scheduleId._id
+                                    });
+                                    this.$el.find("#addNew").hide();
+                                }
+                            }
+                        }, this));
+                    }, this);
+                }, this));
+
+
+                if ($("#schedules .schedulerBody").length === 0) {
+                    this.$el.find("#addNew").show();
+                }
+
+                this.setCurrentPolicyType();
+                
+                if(callback){
+                    callback();
+                }
+            }, this));
+         },
 
         saveLiveSync: function() {
             _.each(this.sync.mappings, function(map, key) {

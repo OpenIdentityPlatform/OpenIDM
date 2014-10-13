@@ -38,9 +38,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
         events: {
-            "click #updateMappingButton": "saveMapping",
-            "onValidate": "onValidate",
-            "click #clearChanges": "clearChanges",
             "click .mapping-config-body": "mappingList"
         },
         mappingList: function(e){
@@ -59,6 +56,13 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             },this));
             nav.reload();
         },
+        moveSubmenu: function(){
+            var submenuClone = $("#submenu").clone(true);
+            
+            $("#submenu").remove();
+            submenuClone.attr("id","submenuClone");
+            submenuClone.insertBefore("#mappingContent", this.$el).show();
+        },
         setCurrentMapping: function(mappingObj){
             browserStorageDelegate.set('currentMapping',mappingObj);
             return mappingObj;
@@ -66,33 +70,13 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         currentMapping: function(){
             return browserStorageDelegate.get('currentMapping');
         },
-        checkChanges: function () {
-            var currentProperties = this.currentMapping().properties,
-                changedProperties = browserStorageDelegate.get(this.currentMapping().name + "_Properties") || currentProperties,
-                changesPending = !_.isEqual(currentProperties,changedProperties);
-            
-            if(changesPending) {
-                this.$el.find("#updateMappingButton").prop('disabled', false);
-                this.$el.find("#clearChanges").prop('disabled', false);
-                this.$el.find(".changesPending").show();
-            }
-            else {
-                this.$el.find("#updateMappingButton").prop('disabled', true);
-                this.$el.find("#clearChanges").prop('disabled', true);
-                this.$el.find(".changesPending").hide();
-            }
-            
-        },
         syncType: function(type) {
             var tempType = type.split("/");
 
             return (tempType[0] === "managed") ? "managed" : tempType[1];
         },
-        render: function(args, child, callback) {
-            var prom = $.Deferred(),
-                syncConfig = configDelegate.readEntity("sync");
-            
-            this.child = child;
+        render: function(args, callback) {
+            var syncConfig = configDelegate.readEntity("sync");
             
             syncConfig.then(_.bind(function(sync){
                 this.data.syncConfig = sync;
@@ -107,16 +91,11 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 
                 this.parentRender(_.bind(function () {
                     this.setSubmenu();
-                    this.checkChanges();
-                    
-                    prom.resolve();
                     if(callback){
                         callback();
                     }
                 }, this));
             }, this));
-            
-            return prom;
         },
         saveMapping: function(event) {
             event.preventDefault();
@@ -138,11 +117,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.child.render([this.data.mapping.name]);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
             }, this));
-        },
-        clearChanges: function(e){
-            e.preventDefault();
-            browserStorageDelegate.remove(this.currentMapping().name + "_Properties");
-            this.child.render([this.currentMapping().name]);
         }
     });
 
