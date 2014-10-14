@@ -351,7 +351,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     try {
                         APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
                         operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
-                                config);
+                                config, cryptoService);
                         try {
                             // TODO Iterate over the supported type and register
                             boolean allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
@@ -389,7 +389,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                     "OpenICF connector jsonConfiguration has errors and the service can not be initiated.", e);
                         }
 
-                        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, config);
+                        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, config, cryptoService);
 
                         final ConnectorFacade facade = facadeFactory.newInstance(config);
 
@@ -1953,7 +1953,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             ConnectorFacade facade = null;
             try {
                 OperationHelperBuilder ohb = new OperationHelperBuilder(testIdentifier.getName(), config,
-                        connectorInfo.createDefaultAPIConfiguration());
+                        connectorInfo.createDefaultAPIConfiguration(), cryptoService);
                 ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
                 facade = connectorFacadeFactory.newInstance(ohb.getRuntimeAPIConfiguration());
             } catch (Exception e) {

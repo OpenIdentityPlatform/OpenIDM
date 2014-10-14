@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -54,9 +54,10 @@ public class OperationHelperBuilder {
     private Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers;
     private String systemName;
 
-    public OperationHelperBuilder(String system, JsonValue jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws JsonValueException {
+    public OperationHelperBuilder(String system, JsonValue jsonConfiguration,
+                                  APIConfiguration defaultAPIConfiguration, CryptoService cryptoService) throws JsonValueException {
         runtimeAPIConfiguration = (APIConfigurationImpl) defaultAPIConfiguration;
-        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration);
+        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration, cryptoService);
         supportedObjectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
         operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
         this.systemName = Assertions.blankChecked(system, "systemName");

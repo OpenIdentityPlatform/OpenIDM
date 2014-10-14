@@ -62,6 +62,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import static org.forgerock.json.fluent.JsonValue.field;
@@ -69,12 +70,14 @@ import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.fluent.JsonValue.object;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
@@ -251,6 +254,12 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     @Reference(referenceInterface = ConnectorFacadeFactory.class,
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC)
     private ConnectorFacadeFactory connectorFacadeFactory = null;
+
+    /**
+     * Cryptographic service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected CryptoService cryptoService = null;
 
     /**
      * ConnectorEventPublisher service.
@@ -482,7 +491,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
             }
             return ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info
-                    .createDefaultAPIConfiguration(), params.copy());
+                    .createDefaultAPIConfiguration(), params.copy(), cryptoService);
+        } catch (JsonCryptoException e) {
+            throw new InternalServerErrorException(e);
         } catch (JsonValueException e) {
             throw new BadRequestException(e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -504,7 +515,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
             }
             APIConfiguration configuration = info.createDefaultAPIConfiguration();
-            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
+            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration, cryptoService);
             return new JsonValue(createSystemConfiguration(configuration, false));
         } catch (JsonValueException e) {
             throw new BadRequestException(e.getMessage(), e);
@@ -525,7 +536,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         + ref.getConnectorKey());
             }
             APIConfiguration configuration = info.createDefaultAPIConfiguration();
-            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
+            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration, cryptoService);
             testConnector(configuration);
         } catch (ResourceException e) {
             throw e;
@@ -751,7 +762,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) {
+    public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) throws ResourceException {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
         if (null == facade && null != connectorInfoManager) {
@@ -782,8 +793,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 connectorReference = new ConnectorReference(connectorInfo.getConnectorKey());
             }
             ConnectorUtil.setConnectorReference(connectorReference, jsonConfiguration);
-            ConnectorUtil.createSystemConfigurationFromAPIConfiguration(configuration,
-                    jsonConfiguration);
+            try {
+                ConnectorUtil.createSystemConfigurationFromAPIConfiguration(configuration,
+                        jsonConfiguration, cryptoService);
+            } catch (JsonCryptoException e) {
+                logger.debug("Error decrypting configuration", e);
+                throw new InternalServerErrorException(e);
+            }
+
             if (validate && facade.getSupportedOperations().contains(TestApiOp.class)) {
                 facade.test();
             }
