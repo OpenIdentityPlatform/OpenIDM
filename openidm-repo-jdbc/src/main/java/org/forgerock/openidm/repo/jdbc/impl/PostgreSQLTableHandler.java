@@ -24,20 +24,78 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-
+import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.QueryFilterVisitor;
+import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.util.Iterables;
+import org.forgerock.util.promise.Function;
+import org.forgerock.util.promise.NeverThrowsException;
+
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * Postgres-specific generic table handler.
  */
 public class PostgreSQLTableHandler extends GenericTableHandler {
 
+    private static final QueryFilterVisitor<String, Map<String, Object>> JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR =
+            new SQLQueryFilterVisitor<Map<String, Object>>() {
+                // value number for each value placeholder
+                int objectNumber = 0;
+
+                /**
+                 * Convenience method to generate the json_extract_path_text fragment:
+                 *
+                 * <pre><blockquote>
+                 *  json_extract_path_text(obj.fullobject, ${p1}, ${p2}, {$p3} ...)
+                 * </blockquote></pre>
+                 *
+                 * where ${pn} are placeholders for the JsonPointer path elements.
+                 */
+                private String jsonExtractPathOnField(JsonPointer field, final Map<String, Object> objects) {
+                    return "json_extract_path_text(obj.fullobject, "
+                        + StringUtils.join(
+                                Iterables.from(Arrays.asList(field.toArray()))
+                                .map(new Function<String, String, NeverThrowsException>() {
+                                    @Override
+                                    public String apply(String jsonPath) throws NeverThrowsException {
+                                        ++objectNumber;
+                                        String placeholder = "p" + objectNumber;
+                                        objects.put(placeholder, jsonPath);
+                                        return "${" + placeholder + "}";
+                                    }
+                                }), ", ")
+                        + ")";
+                }
+
+                @Override
+                public String visitValueAssertion(Map<String, Object> objects, String operand, JsonPointer field, Object valueAssertion) {
+                    ++objectNumber;
+                    String value = "v"+objectNumber;
+                    objects.put(value, valueAssertion);
+                    return "(" + jsonExtractPathOnField(field, objects) + " " + operand + " ${" + value + "})";
+                }
+
+                @Override
+                public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
+                    return "(" + jsonExtractPathOnField(field, objects) + " IS NOT NULL)";
+                }
+            };
+
+    /**
+     * Construct a table handler for Postgres using Postgres-specific json-handling
+     *
+     * {@inheritDoc}
+     */
     public PostgreSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
+        super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize,
+                JSON_EXTRACT_PATH_QUERY_FILTER_VISITOR, sqlExceptionHandler);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
