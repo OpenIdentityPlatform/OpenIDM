@@ -49,6 +49,8 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -223,12 +225,12 @@ public class SecurityResourceProvider {
         if (cert instanceof X509Certificate) {
             Map<String, Object> issuer = new HashMap<String, Object>();
             X500Name name = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal((X509Certificate)cert));
-            issuer.put("C", name.getRDNs(BCStyle.C)[0].getFirst().getValue().toString());
-            issuer.put("ST", name.getRDNs(BCStyle.ST)[0].getFirst().getValue().toString());
-            issuer.put("L", name.getRDNs(BCStyle.L)[0].getFirst().getValue().toString());
-            issuer.put("OU", name.getRDNs(BCStyle.OU)[0].getFirst().getValue().toString());
-            issuer.put("O", name.getRDNs(BCStyle.O)[0].getFirst().getValue().toString());
-            issuer.put("CN", name.getRDNs(BCStyle.CN)[0].getFirst().getValue().toString()); 
+            addAttributeToIssuer(issuer, name, "C", BCStyle.C);
+            addAttributeToIssuer(issuer, name, "ST", BCStyle.ST);
+            addAttributeToIssuer(issuer, name, "L", BCStyle.L);
+            addAttributeToIssuer(issuer, name, "OU", BCStyle.OU);
+            addAttributeToIssuer(issuer, name, "O", BCStyle.O);
+            addAttributeToIssuer(issuer, name, "CN", BCStyle.CN);
             content.put("issuer", issuer);
             content.put("notBefore", ((X509Certificate)cert).getNotBefore());
             content.put("notAfter", ((X509Certificate)cert).getNotAfter());
@@ -622,5 +624,21 @@ public class SecurityResourceProvider {
      */
     private CryptoService getCryptoService() {
         return CryptoServiceFactory.getInstance();
+    }
+    
+    /**
+     * Adds an attribute to an issuer map object if it exists in the supplied X500Name object.
+     * 
+     * @param issuer The issuer to add to
+     * @param name The X500Name object
+     * @param attribute the name of the attribute
+     * @param oid the ASN1ObjectIdentifier corresponding to the attribute
+     * @throws Exception
+     */
+    private void addAttributeToIssuer(Map<String, Object> issuer, X500Name name, String attribute, ASN1ObjectIdentifier oid) throws Exception {
+        RDN [] rdns = name.getRDNs(oid);
+        if (rdns != null && rdns.length > 0) {
+            issuer.put(attribute, rdns[0].getFirst().getValue().toString());
+        } 
     }
 }
