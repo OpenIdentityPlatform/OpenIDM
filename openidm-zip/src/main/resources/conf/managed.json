@@ -58,6 +58,10 @@
             "postDelete" : {
                 "type" : "text/javascript",
                 "file" : "roles/update-users-of-role.js"
+            },
+            "onDelete" : {
+                "type" : "text/javascript",
+                "file" : "roles/onDelete-roles.js"
             }
         }
     ]
