@@ -135,7 +135,33 @@ public class GenericTableHandler implements TableHandler {
         return queries.queryIdExists(queryId);
     }
 
+    /**
+     * Create a generic table handler using a QueryFilterVisitor that uses generic object property tables to process
+     * query filters.
+     *
+     * @param tableConfig the table config
+     * @param dbSchemaName the schem name
+     * @param queriesConfig a map of named queries
+     * @param commandsConfig a map of named commands
+     * @param maxBatchSize the maximum batch size
+     * @param sqlExceptionHandler a handler for SQLExceptions
+     */
     public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
+        this(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, QUERY_FILTER_VISITOR, sqlExceptionHandler);
+    }
+
+    /**
+     * Create a generic table handler.
+     *
+     * @param tableConfig the table config
+     * @param dbSchemaName the schem name
+     * @param queriesConfig a map of named queries
+     * @param commandsConfig a map of named commands
+     * @param maxBatchSize the maximum batch size
+     * @param queryFilterVisitor the {@link QueryFilterVisitor} for converting a query filter to an SQL statement
+     * @param sqlExceptionHandler a handler for SQLExceptions
+     */
+    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, int maxBatchSize, QueryFilterVisitor<String, Map<String, Object>> queryFilterVisitor, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
 
         this.mainTableName = cfg.mainTableName;
@@ -153,7 +179,7 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new TableQueries(mainTableName, propTableName, dbSchemaName, QUERY_FILTER_VISITOR, new GenericQueryResultMapper());
+        queries = new TableQueries(mainTableName, propTableName, dbSchemaName, queryFilterVisitor, new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 

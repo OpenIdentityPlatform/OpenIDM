@@ -314,8 +314,16 @@ public class TableQueries {
                         + " does not match any configured queries on the JDBC repository service.");
             }
         } catch (SQLException ex) {
+            final String queryDescription;
+            if (queryFilter != null) {
+                queryDescription = queryFilter.toString();
+            } else if (queryExpression != null) {
+                queryDescription = queryExpression;
+            } else {
+                queryDescription = queries.getQueryInfo(queryId).getQueryString();
+            }
             throw new InternalServerErrorException("DB reported failure preparing query: "
-                    + (queryExpression != null ? queryExpression : queries.getQueryInfo(queryId).getQueryString())
+                    + queryDescription
                     + " with params: " + params + " error code: " + ex.getErrorCode()
                     + " sqlstate: " + ex.getSQLState() + " message: " + ex.getMessage(), ex);
         }
