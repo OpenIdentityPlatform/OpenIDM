@@ -1,5 +1,11 @@
 {
     "name" : "ad",
+    "connectorRef" : {
+        "connectorHostRef" : "#LOCAL",
+        "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+        "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
+        "bundleVersion" : "[1.4.0.0,2.0.0.0)"
+    },
     "configurationProperties" : {
         "host" : "",
         "port" : "389",
@@ -49,12 +55,6 @@
         "blockSize" : 100,
         "maintainLdapGroupMembership" : false,
         "respectResourcePasswordPolicyChangeAfterReset" : false
-    },    
-    "connectorRef" : {
-        "connectorHostRef" : "#LOCAL",
-        "connectorName" : "org.identityconnectors.ldap.LdapConnector",
-        "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion" : "[1.1.0.1,1.1.2.0)"
     },
     "poolConfigOption" : {
         "maxObjects" : 10,
@@ -236,7 +236,7 @@
                         "NOT_CREATABLE",
                         "NOT_UPDATEABLE"
                     ]
-                },                
+                },
                 "dn" : {
                     "type" : "string",
                     "required" : true,
