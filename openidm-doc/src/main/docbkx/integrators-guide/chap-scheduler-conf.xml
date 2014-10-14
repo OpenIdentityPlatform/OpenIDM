@@ -369,7 +369,7 @@ openidm.scheduler.execute.persistent.schedules=true
     "invokeContext": {
         "script": {
             "type": "text/javascript",
-            "source": "java.lang.System.out.println('Hello World');"
+            "source": "console.log('Hello World');"
         }
     }
 }</programlisting>
