@@ -225,12 +225,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         connectorConfigurationHelpers.remove(helper.getProvisionerType());
     }
 
-    /**
-     * Cryptographic service.
-     */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private CryptoService cryptoService;
-
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
         try {
@@ -257,10 +251,10 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     handler.handleResult(getAvailableConnectors());
                 } else if (isGenerateConnectorCoreConfig(content)) {
                     // Stage 2: generate basic configuration
-                    handler.handleResult(helper.generateConnectorCoreConfig(cryptoService.decryptIfNecessary(content)));
+                    handler.handleResult(helper.generateConnectorCoreConfig(content));
                 } else if (isGenerateFullConfig(content)) {
                     // Stage 3: generate/validate full configuration
-                    handler.handleResult(helper.generateConnectorFullConfig(cryptoService.decryptIfNecessary(content)));
+                    handler.handleResult(helper.generateConnectorFullConfig(content));
                 } else {
                     // illegal request ??
                     handler.handleResult(json(object()));
@@ -308,11 +302,11 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 break;
             case createCoreConfig:
                 // stage 2 - direct action to create core configuration
-                handler.handleResult(helper.generateConnectorCoreConfig(cryptoService.decryptIfNecessary(content)));
+                handler.handleResult(helper.generateConnectorCoreConfig(content));
                 break;
             case createFullConfig:
                 // state 3 - direct action to create full configuration
-                handler.handleResult(helper.generateConnectorFullConfig(cryptoService.decryptIfNecessary(content)));
+                handler.handleResult(helper.generateConnectorFullConfig(content));
                 break;
             default:
                 handler.handleError(new BadRequestException("Unsupported actionId: " + request.getAction()));

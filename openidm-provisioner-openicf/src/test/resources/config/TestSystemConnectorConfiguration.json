@@ -63,16 +63,12 @@
             5373.89
          ],
          "floatValue":2343.56,
-         "guardedByteArrayArrayValue":[
-            "Passw0rd1",
-            "Passw0rd2"
-         ],
-         "guardedByteArrayValue":"Passw0rd",
-         "guardedStringArrayValue":[
+         "ByteArrayValue":"Passw0rd",
+         "StringArrayValue":[
             "Password3",
             "Password4"
          ],
-         "guardedStringValue":"Password",
+         "StringValue":"Password",
          "intArrayValue":[
             -2147483648,
             2147483647

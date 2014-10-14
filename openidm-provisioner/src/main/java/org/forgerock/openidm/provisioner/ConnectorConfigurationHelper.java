@@ -71,6 +71,9 @@ public interface ConnectorConfigurationHelper {
     /**
      * Generate the core configuration
      *
+     * The implementer of this method must ensure proper encryption/decryption
+     * of private properties according to the schema definition.
+     *
      * @param params connector configuration
      * @return core connector configuration
      * @throws ResourceException
@@ -79,6 +82,9 @@ public interface ConnectorConfigurationHelper {
 
     /**
      * Generate the full configuration
+     *
+     * The implementer of this method must ensure proper encryption/decryption
+     * of private properties according to the schema definition.
      *
      * @param params connector configuration
      * @return full connector configuration

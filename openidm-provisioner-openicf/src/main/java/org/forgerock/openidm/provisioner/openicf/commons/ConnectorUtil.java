@@ -24,10 +24,14 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.identityconnectors.common.Base64;
 import org.identityconnectors.common.pooling.ObjectPoolConfiguration;
@@ -51,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+import static org.forgerock.json.fluent.JsonValue.json;
 import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
@@ -366,15 +371,14 @@ public class ConnectorUtil {
      * @param target
      * @throws IllegalArgumentException
      */
-    public static void setConfigurationProperties(ConfigurationProperties source, Map<String, Object> target) {
+    public static void setConfigurationProperties(ConfigurationProperties source, Map<String, Object> target, CryptoService cryptoService) throws JsonCryptoException{
         for (String propertyName : source.getPropertyNames()) {
             ConfigurationProperty configurationProperty = source.getProperty(propertyName);
-            target.put(propertyName, convertFromConfigurationProperty(configurationProperty));
+            target.put(propertyName, convertFromConfigurationProperty(configurationProperty, cryptoService));
         }
     }
 
-
-    private static Object convertFromConfigurationProperty(ConfigurationProperty configurationProperty) {
+    private static Object convertFromConfigurationProperty(ConfigurationProperty configurationProperty, CryptoService cryptoService) throws JsonCryptoException{
         Object sourceValue = configurationProperty.getValue();
         if (sourceValue == null) {
             return null;
@@ -400,10 +404,23 @@ public class ConnectorUtil {
                 for (int i = 0; i < length; i++) {
                     Object item = Array.get(sourceValue, i);
                     Object newValue = coercedTypeCasting(item, Object.class);
+                    if (sourceType.isAssignableFrom(GuardedString.class)
+                            || sourceType.isAssignableFrom(GuardedByteArray.class)) {
+                        newValue = cryptoService.encrypt(json(newValue),
+                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
+                                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
+                        .getObject();
+                    }
                     values.add(newValue);
                 }
                 result = values;
             }
+        } else if (configurationProperty.getType().equals(GuardedString.class)
+                || configurationProperty.getType().equals(GuardedByteArray.class)) {
+            result = cryptoService.encrypt(json(coercedTypeCasting(configurationProperty.getValue(), String.class)),
+                        ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
+                        IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
+                    .getObject();
         } else {
             result = coercedTypeCasting(sourceValue, Object.class);
         }
@@ -411,7 +428,8 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureConfigurationProperties(JsonValue source, ConfigurationProperties target) throws JsonValueException {
+    public static void  configureConfigurationProperties(JsonValue source, ConfigurationProperties target,
+            CryptoService cryptoService) throws JsonValueException {
         source.required();
         if (null != target) {
             List<String> configPropNames = target.getPropertyNames();
@@ -439,6 +457,11 @@ public class ConnectorUtil {
                         propertyValue = Array.newInstance(targetBaseType, 1);
                         Array.set(propertyValue, 0, coercedTypeCasting(e.getValue(), targetBaseType));
                     }
+                } else if (property.isConfidential()
+                        || property.getType().equals(GuardedString.class)
+                        || property.getType().equals(GuardedByteArray.class)) {
+                    propertyValue = coercedTypeCasting(cryptoService.decrypt(source.get(e.getKey())), targetType);
+
                 } else {
                     propertyValue = coercedTypeCasting(e.getValue(), targetType);
                 }
@@ -448,7 +471,9 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureDefaultAPIConfiguration(JsonValue source, APIConfiguration target) throws JsonValueException {
+    public static void configureDefaultAPIConfiguration(
+                JsonValue source, APIConfiguration target, CryptoService cryptoService)
+            throws JsonValueException {
         JsonValue poolConfigOption = source.get(OPENICF_POOL_CONFIG_OPTION);
         if (poolConfigOption.isMap()) {
             configureObjectPoolConfiguration(poolConfigOption, target.getConnectorPoolConfiguration());
@@ -462,19 +487,21 @@ public class ConnectorUtil {
             configureTimeout(operationTimeout, target);
         }
         JsonValue configurationProperties = source.get(OPENICF_CONFIGURATION_PROPERTIES);
-        configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());
+        configureConfigurationProperties(configurationProperties, target.getConfigurationProperties(), cryptoService);
         if (source.isDefined(BUFFER_SIZE)) {
             target.setProducerBufferSize(source.get(BUFFER_SIZE).required().asInteger());
         }
     }
 
-    public static JsonValue createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {
+    public static JsonValue createSystemConfigurationFromAPIConfiguration(
+                APIConfiguration source, JsonValue target, CryptoService cryptoService)
+            throws JsonCryptoException {
         target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));
         target.put(OPENICF_RESULTSHANDLER_CONFIG_OPTION, getResultsHandlerConfiguration(source.getResultsHandlerConfiguration()));
         target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));
         Map<String, Object> configurationProperties = new LinkedHashMap<String, Object>();
         target.put(OPENICF_CONFIGURATION_PROPERTIES, configurationProperties);
-        setConfigurationProperties(source.getConfigurationProperties(), configurationProperties);
+        setConfigurationProperties(source.getConfigurationProperties(), configurationProperties, cryptoService);
         return target;
     }
 

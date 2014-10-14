@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,10 +25,9 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.forgerock.util.encode.Base64;
@@ -50,10 +49,17 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Sample Class Doc.
@@ -87,13 +93,59 @@ public class ConnectorUtilTest {
         return factory.newInstance(runtimeAPIConfiguration);
     }
 
+    @Test
+    public void testConfigureConfigurationProperties() {
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+
+        /**
+         *  Values from runtimeAPIConfigurations to mock
+         */
+        JsonValue password = json("Password");
+        JsonValue passw0rd = json("Passw0rd");
+        JsonValue password1 = json("Passw0rd1");
+        JsonValue password2 = json("Passw0rd2");
+        JsonValue password3 = json("Password3");
+        JsonValue password4 = json("Password4");
+
+        try {
+            /**
+             * Used so that if refEq() is not one of the mocked out cases,
+             * an empty object will be returned instead of NPE
+             */
+            when(cryptoServiceMock.encrypt(any(JsonValue.class), anyString(), anyString())).thenReturn(json(object()));
+
+            when(cryptoServiceMock.encrypt(refEq(password) , anyString(), anyString())).thenReturn(json("..encrypted.."));
+            when(cryptoServiceMock.encrypt(refEq(passw0rd) , anyString(), anyString())).thenReturn(json("..encrypted0.."));
+            when(cryptoServiceMock.encrypt(refEq(password1) , anyString(), anyString())).thenReturn(json("..encrypted1.."));
+            when(cryptoServiceMock.encrypt(refEq(password2) , anyString(), anyString())).thenReturn(json("..encrypted2.."));
+            when(cryptoServiceMock.encrypt(refEq(password3) , anyString(), anyString())).thenReturn(json("..encrypted3.."));
+            when(cryptoServiceMock.encrypt(refEq(password4) , anyString(), anyString())).thenReturn(json("..encrypted4.."));
+
+            ConnectorUtil.setConfigurationProperties(runtimeAPIConfiguration.getConfigurationProperties(), result, cryptoServiceMock);
+            JsonValue jsonResult = new JsonValue(result);
+            assertThat(jsonResult.get("guardedByteArrayArrayValue").isList()).isTrue();
+            assertThat(jsonResult.get("guardedByteArrayValue").asString()).isEqualTo("..encrypted0..");
+            assertThat(jsonResult.get("guardedByteArrayArrayValue").get(0).asString()).isEqualTo("..encrypted1..");
+            assertThat(jsonResult.get("guardedByteArrayArrayValue").get(1).asString()).isEqualTo("..encrypted2..");
+            assertThat(jsonResult.get("guardedStringValue").asString()).isEqualTo("..encrypted..");
+            assertThat(jsonResult.get("guardedStringArrayValue").get(0).asString()).isEqualTo("..encrypted3..");
+            assertThat(jsonResult.get("guardedStringArrayValue").get(1).asString()).isEqualTo("..encrypted4..");
+
+        } catch (JsonCryptoException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     //@Test
     public void testGetConfiguration() throws Exception {
         JsonValue target = new JsonValue(new LinkedHashMap<String, Object>());
-        ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target);
+        ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target, null);
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
-        ConnectorUtil.configureDefaultAPIConfiguration(new JsonValue(target), clonedConfiguration);
+        ConnectorUtil.configureDefaultAPIConfiguration(new JsonValue(target), clonedConfiguration, null);
         //Assert.assertEquals(clonedConfiguration, runtimeAPIConfiguration);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -104,7 +156,7 @@ public class ConnectorUtilTest {
     @Test
     public void testGetAPIConfiguration() throws Exception {
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
-        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration);
+        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration, null);
         Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(), "\"enableFilteredResultsHandler\":false");
     }
 
