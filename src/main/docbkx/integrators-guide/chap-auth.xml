@@ -29,7 +29,8 @@
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'>
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Managing Authentication, Authorization and Role-Based Access Control</title>
  <indexterm>
   <primary>Authentication</primary>
@@ -348,6 +349,184 @@
  ... 
  </programlisting>
 
+  <section xml:id="openidm-auth-kerberos">
+   <title>Kerberos Configuration Examples </title>
+
+   <para>
+    This section assumes that you have an active Kerberos server acting as
+    a Key Distribution Center (KDC). If you're running Active Directory in your
+    deployment, that service includes a Kerberos KDC by default.
+   </para>
+
+   <para>
+    To take advantage of a Kerberos KDC, you need to do two things: first
+    include at least the <literal>IWA</literal> and possibly the
+    <literal>PASSTHROUGH</literal> modules in the
+    <filename>authentication.json</filename> file. Second, modify the
+    <filename>system.properties</filename> file to take advantage of the
+    noted modules.
+   </para>
+
+   <para>
+    For <literal>IWA</literal>, based on Integrated Windows Authentication,
+    this section assumes you have configured an LDAP connector for an Active
+    Directory server. To confirm, identify the following mapping source in the
+    <filename>sync.json</filename> configuration file:
+   </para>
+
+   <screen>system/ad/account</screen>
+
+   <para>
+    You could then include the following code block in the
+    <filename>authentication.json</filename> file. Include appropriate
+    values for the <literal>kerberosRealm</literal> and
+    <literal>kerberosServerName</literal>. For a list of definitions, see the
+    following section: <link xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#kerberos-definitions" xlink:show="new">
+    <citetitle>Kerberos Definitions</citetitle></link>.
+   </para>
+
+   <programlisting language="javascript">"authModules" : [
+    ...
+    {
+        "name" : "IWA",
+        "properties": {
+            "servicePrincipal" : "",
+            "keytabFileName" : "security/name.HTTP.keytab",
+            "kerberosRealm" : "",
+            "kerberosServerName" : "",
+            "queryOnResource" : "system/ad/account",
+            "propertyMapping" : {
+                "authenticationId" : "sAMAccountName",
+                "groupMembership" : "memberOf"
+            },
+            "groupRoleMapping" : { "openidm-admin": [ ] },
+            "groupComparisonMethod": "ldap",
+            "defaultUserRoles" : [
+                "openidm-authorized"
+            ]
+        },
+        "enabled" : true
+    }
+   </programlisting>
+
+   <para>
+    To grant different roles to users who are authenticated through the
+    <literal>IWA</literal> module, list them with their
+    <literal>groupRoleMapping</literal>.
+   </para>
+
+   <para>
+    You could pair the <literal>IWA</literal> module with the
+    <literal>PASSTHROUGH</literal> module. When paired, a failure in the
+    <literal>IWA</literal> module allows users to revert to forms-based
+    authentication.
+   </para>
+
+   <para>
+    You could add the <literal>PASSTHROUGH</literal> module as follows, in the
+    <filename>authentication.json</filename> file:
+   </para>
+
+   <programlisting language="javascript"> ...
+    {
+        "name" : "PASSTHROUGH",
+        "properties": {
+            "queryOnResource" : "system/AD/account",
+            "propertyMapping" : {
+                "authenticationId" : "sAMAccountName",
+                "groupMembership" : "memberOf" },
+            "groupRoleMapping" : { "openidm-admin": [ ] },
+            "groupComparisonMethod": "ldap",
+            "defaultUserRoles" : [
+                "openidm-authorized"
+            ]
+        },
+        "enabled" : true
+    }
+... </programlisting>
+
+   <para>
+    Once you have included at least the <literal>IWA</literal> module,
+    edit the <filename>system.properties</filename> file. Include the following
+    entry to point to a JAAS configuration file. Substitute if desired for
+    <filename>gssapi_jaas.conf</filename>
+   </para>
+
+   <screen>
+java.security.auth.login.config=/path/to/openidm/conf/gssapi_jaas.conf
+   </screen>
+
+   <para>
+    In the <filename>gssapi_jaas.conf</filename> file, include the following
+    information related to the LDAP connector:
+   </para>
+
+   <programlisting language="javascript">
+org.identityconnectors.ldap.LdapConnector {
+    com.sun.security.auth.module.Krb5LoginModule required client=TRUE
+    principal="bjensen@EXAMPLE.COM" useKeyTab=true keyTab="/path/to/bjensen.keytab";
+};
+   </programlisting>
+
+   <xinclude:include href="../shared/kerberos-definitions.xml" />
+
+  </section>
+
+ </section>
+
+ <section xml:id="supported-auth-modules">
+  <title>Supported Authentication Modules</title>
+
+  <variablelist>
+   <para>
+    OpenIDM supports a variety of modules, including those available from the
+    Common Authentication Framework (CAF). The CAF modules available to
+    OpenIDM include <literal>OPENAM_SESSION</literal>,
+    <literal>IWA</literal>, and <literal>OPENID_CONNECT</literal>. OpenIDM also
+    provides two additional authentication modules, <literal>DELEGATED</literal>
+    and <literal>CLIENT_CERT</literal>.
+   </para>
+
+   <para>
+    OpenIDM evaluates authentication modules in the order in which they are
+    placed in the <filename>authentication.json</filename> file.
+   </para>
+
+   <varlistentry>
+    <term>JWT_SESSION</term>
+    <listitem>
+     <para>
+      The JSON Web Token session authentication module, which includes session
+      For more information
+      on this common authentication module, see the <link xlink:show="new"
+      xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
+      <citetitle>Class JwtSessionModule</citetitle></link> Javadoc.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>CLIENT_CERT</term>
+    <listitem>
+     <para>
+      Module for users who authenticate with a client certificate.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>DELEGATED</term>
+    <listitem>
+     <para>
+      Module that validates client requests by passing through to an OpenICF
+      connector. For OpenIDM ${docTargetVersion}, this is an alias for
+      <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
+      <literal>PASSTHROUGH</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
  </section>
 
  <section xml:id="passthrough-auth">
@@ -474,52 +653,6 @@
       matches the AD attribute used for account names. The associated
       <literal>managedUserLink</literal> is
       <literal>systemAdAccounts_managedUser</literal>.
-     </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
-
- </section>
-
- <section xml:id="supported-auth-modules">
-  <title>Supported Authentication Modules</title>
-
-  <variablelist>
-   <para>
-    OpenIDM supports a variety of modules, including those available from the
-    Common Authentication Framework. OpenIDM also provides
-    two additional authentication modules, <literal>DELEGATED</literal> and
-    <literal>CLIENT_CERT</literal>.
-   </para>
-
-   <varlistentry>
-    <term>JWT_SESSION</term>
-    <listitem>
-     <para>
-      The JSON Web Token session authentication module. For more information
-      on this common authentication module, see the <link xlink:show="new"
-      xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
-      <citetitle>Class JwtSessionModule</citetitle></link> Javadoc.
-     </para>
-    </listitem>
-   </varlistentry>
-
-   <varlistentry>
-    <term>CLIENT_CERT</term>
-    <listitem>
-     <para>
-      Module for users who authenticate with a client certificate.
-     </para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>DELEGATED</term>
-    <listitem>
-     <para>
-      Module that validates client requests by passing through to an OpenICF
-      connector. For OpenIDM ${docTargetVersion}, this is an alias for
-      <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
-      <literal>PASSTHROUGH</literal>.
      </para>
     </listitem>
    </varlistentry>
