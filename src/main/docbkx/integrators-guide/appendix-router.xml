@@ -164,7 +164,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             ],
             "onRequest" : {
                 "type" : "text/javascript",
-                "source" : "java.lang.System.out.println('requestFilter 1');"
+                "source" : "console.log('requestFilter 1');"
             }
         },
         {
@@ -174,7 +174,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             ],
             "onResponse" : {
                 "type" : "text/javascript",
-                "source" : "java.lang.System.out.println('responseFilter 1');"
+                "source" : "console.log('responseFilter 1');"
             }
         },
         {
@@ -184,7 +184,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             ],
             "onRequest" : {
                 "type" : "text/javascript",
-                "source" : "java.lang.System.out.println('requestFilter 2');"
+                "source" : "console.log('requestFilter 2');"
             }
         },
         {
@@ -194,7 +194,7 @@ client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
             ],
             "onResponse" : {
                 "type" : "text/javascript",
-                "source" : "java.lang.System.out.println('responseFilter 2');"
+                "source" : "console.log('responseFilter 2');"
             }
         }
     ]
