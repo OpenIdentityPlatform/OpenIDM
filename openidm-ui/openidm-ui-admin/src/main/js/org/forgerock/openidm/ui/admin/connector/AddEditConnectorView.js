@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "click .alert-message .close-button": "closeError",
             "click #addEditObjectType": "addEditObjectTypes",
             "click #validateConnector": "validate",
-            "change input" : "disableButtons",
+            "keypress input" : "disableButtons",
             "click .addLiveSync" : "addLiveSync",
             "change .retryOptions": "retryOptionChanged",
             "change .postRetryAction": "postRetryActionChange",
@@ -123,7 +123,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 if(args.length === 0) {
                     this.data.editState = false;
                     this.data.connectorName = "";
-                    this.data.addEditTitle = $.t("templates.connector.addTitle");
+                    this.data.addEditTitle = $.t("templates.connector.addConnectorTitle");
                     this.data.addEditSubmitTitle = $.t("templates.connector.addButtonTitle");
                     this.data.addEditObjectTypeTitle = $.t("templates.connector.addObjectTypeTitle");
                     this.data.addEditSubmitTitle = $.t("common.form.add");
