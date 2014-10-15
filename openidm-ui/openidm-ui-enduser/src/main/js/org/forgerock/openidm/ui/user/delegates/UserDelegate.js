@@ -50,7 +50,7 @@ define("UserDelegate", [
         obj.usersCallback = successCallback;
         obj.numberOfUsers = 0;
 
-        return obj.serviceCall({url: "?_queryId=query-all&fields=*", success: function(data) {
+        return obj.serviceCall({url: "?_queryId=query-all", success: function(data) {
             if(successCallback) {
                 obj.users = data.result;
                 successCallback(data.result);
