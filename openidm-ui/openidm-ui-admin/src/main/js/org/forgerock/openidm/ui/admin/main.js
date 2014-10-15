@@ -54,6 +54,7 @@ define("org/forgerock/openidm/ui/admin/main", [
 
     "./authentication/AuthenticationView",
 
+    "./mapping/AddMappingView",
     "./mapping/MappingListView",
     "./mapping/MappingBaseView",
     "./mapping/PropertiesView",

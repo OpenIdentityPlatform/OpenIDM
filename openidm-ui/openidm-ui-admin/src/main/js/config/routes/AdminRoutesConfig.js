@@ -36,9 +36,7 @@ define("config/routes/AdminRoutesConfig", [
         "resourcesView" : {
             view: "org/forgerock/openidm/ui/admin/ResourcesView",
             role: "ui-admin",
-            defaults : [""],
-            url: /^resources\/(.*)$/,
-            pattern: "resources/?"
+            url: "resources/"
         },
         "editConnectorView" : {
             view: "org/forgerock/openidm/ui/admin/connector/AddEditConnectorView",
@@ -77,6 +75,12 @@ define("config/routes/AdminRoutesConfig", [
             view: "org/forgerock/openidm/ui/admin/settings/SettingsView",
             role: "ui-admin",
             url: "settings/",
+            forceUpdate: true
+        },
+        "addMappingView" : {
+            view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",
+            role: "ui-admin",
+            url: "mapping/add/",
             forceUpdate: true
         },
         "mappingListView" : {

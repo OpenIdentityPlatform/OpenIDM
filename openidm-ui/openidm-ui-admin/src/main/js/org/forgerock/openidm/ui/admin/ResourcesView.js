@@ -32,28 +32,20 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/MapResourceView"
-], function(AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate, MapResourceView) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function(AdminAbstractView, eventManager, constants, router, ConnectorDelegate, uiUtils, connectorUtils, ConfigDelegate) {
     var ResourcesView = AdminAbstractView.extend({
         template: "templates/admin/ResourcesViewTemplate.html",
         events: {
             "click .connector-delete": "deleteConnections",
-            "click .managed-delete": "deleteManaged",
-            "click .add-resource-button" : "addResourceMapping"
+            "click .managed-delete": "deleteManaged"
         },
-        openMapping: false,
+        addMappingView: false,
         render: function(args, callback) {
             var connectorPromise,
                 managedPromise,
                 repoCheckPromise,
                 splitConfig;
-
-            if(args[0] === "open") {
-                this.openMapping  = true;
-            } else {
-                this.openMapping  = false;
-            }
 
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
@@ -62,10 +54,6 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
             $.when(connectorPromise, managedPromise, repoCheckPromise).then(_.bind(function(connectors, managedObjects, configFiles){
                 _.each(connectors[0], _.bind(function(connector){
                     connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
-
-                    if(connector.objectTypes) {
-                        connector.displayObjectType = connector.objectTypes.join(",");
-                    }
 
                     splitConfig = connector.config.split("/");
 
@@ -98,20 +86,6 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                         tooltipClass: "resource-error-tooltip"
                     });
                 }
-
-                MapResourceView.render({
-                    "removeCallback": _.bind(function(){
-                        this.$el.find(".add-resource-button").prop("disabled", false);
-                    }, this),
-                    "addCallback" : _.bind(function(source, target){
-                        if(source && target) {
-                            this.$el.find(".add-resource-button").prop("disabled", true);
-                        }
-                    }, this)}, _.bind(function(){
-                    if(this.openMapping) {
-                        this.displayMapping(true, false);
-                    }
-                }, this));
 
                 if (callback) {
                     callback();
@@ -163,58 +137,6 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
                     });
             },this), "340px");
-        },
-
-        addResourceMapping: function(event) {
-            this.displayMapping(true, true, _.bind(function(){
-                var resourceSelected = $(event.currentTarget).parents(".resource-body"),
-                    resourceType = resourceSelected.attr("data-resource-type"),
-                    resourceData = null,
-                    resourceLocation = null;
-
-                if(resourceType === "connector") {
-                    resourceLocation = this.$el.find("#resourceConnectorContainer .resource-body").index(resourceSelected);
-                    resourceData = this.data.currentConnectors[resourceLocation];
-                    resourceData.resourceType = "connector";
-                } else {
-                    resourceLocation = this.$el.find("#resourceManagedContainer .resource-body").index(resourceSelected);
-                    resourceData = this.data.currentManagedObjects[resourceLocation];
-                    resourceData.resourceType = "managed";
-                }
-
-                MapResourceView.addMapping(resourceData);
-            }, this));
-        },
-
-        displayMapping: function(open, animation, callback) {
-            if(open) {
-                if(!this.$el.find("#resourceMappingBody").is(':visible')) {
-                    if(animation) {
-                        $("#resourceMappingBody").slideDown("slow", function () {
-                            if (callback) {
-                                callback();
-                            }
-                        });
-                    } else {
-
-                        $("#resourceMappingBody").show(0, function() {
-                            if (callback) {
-                                callback();
-                            }
-                        });
-                    }
-                } else {
-                    if(callback) {
-                        callback();
-                    }
-                }
-            } else {
-                if(animation) {
-                    this.$el.find("#resourceMappingBody").slideUp("slow");
-                } else {
-                    this.$el.find("#resourceMappingBody").hide();
-                }
-            }
         }
     });
 

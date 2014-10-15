@@ -47,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         resourceAddRef: null,
         targetAddRef: null,
         mappingList: null,
+        syncExist: true,
 
         render: function(args, callback) {
 
@@ -65,15 +66,27 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
             this.addCallback = args.addCallback;
 
             ConfigDelegate.readEntity("sync").then(_.bind(function(sync) {
-                this.mappingList = sync.mappings;
-                this.parentRender(_.bind(function(){
+                    this.mappingList = sync.mappings;
+                    this.syncExist = true;
+                    this.parentRender(_.bind(function(){
 
-                    if (callback) {
-                        callback();
-                    }
+                        if (callback) {
+                            callback();
+                        }
 
+                    }, this));
+                }, this),
+                _.bind(function(){
+                    this.mappingList = [];
+                    this.syncExist = false;
+                    this.parentRender(_.bind(function(){
+
+                        if (callback) {
+                            callback();
+                        }
+
+                    }, this));
                 }, this));
-            }, this));
         },
         addMapping: function(mappingObj) {
             if(!this.sourceAdded) {
@@ -238,15 +251,28 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
 
             completeMapping.mappings.push(tempMapping);
 
-            ConfigDelegate.updateEntity("sync", completeMapping).then(_.bind(function() {
+            //Need this check incase fresh IDM is started and no sync file is created yet
+            if(this.syncExist) {
+                ConfigDelegate.updateEntity("sync", completeMapping).then(_.bind(function() {
 
-                if(callback) {
-                    callback();
-                }
+                    if(callback) {
+                        callback();
+                    }
 
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
-            }, this));
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
+                }, this));
+            } else {
+                ConfigDelegate.createEntity("sync", completeMapping).then(_.bind(function() {
+
+                    if(callback) {
+                        callback();
+                    }
+
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
+                }, this));
+            }
         },
         findLinkedMapping: function() {
             var linksFound = _.filter(this.mappingList, function(mapping) {
@@ -386,7 +412,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
             this.$el.find("#"+id +" .select-resource").prop("disabled", false);
         },
         selectAnotherResource: function(event) {
-            var targetId = $(event.currentTarget).parent().prop("id");
+            var targetId = $(event.currentTarget).parents(".mapping-resource-body").prop("id");
 
             this.setEmpty(targetId);
         },
