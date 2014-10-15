@@ -2724,7 +2724,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
  </section>
 
  <section xml:id="more-sample-openam">
-  <title>Sample OpenAM - Configuring Authentication Management for OpenIDM</title>
+  <title>Sample - Configuring Authentication Management With OpenAM</title>
    <indexterm>
     <primary>Samples</primary>
     <secondary>Sample OpenAM - Authentication Management for OpenIDM</secondary>
@@ -3175,7 +3175,7 @@ Based on the presence of a shared SSO token, any application secured by OpenAM
  </section>
 
  <section xml:id="sample-google-connector">
-  <title>Sample GoogleApps - Connecting to Google With the Google Apps Connector</title>
+  <title>Sample - Connecting to Google With the Google Apps Connector</title>
   <indexterm>
    <primary>Samples</primary>
    <secondary>Google Apps Connector</secondary>
@@ -3613,7 +3613,7 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
  </section>
 
  <section xml:id="sample-scripted-rest">
-  <title>Sample ScriptedRest to OpenDJ - Scripted REST Implementation of Groovy Connector 1.4.0.0</title>
+  <title>Sample - Using the Groovy Connector With Scripted REST to Connect to OpenDJ</title>
   <indexterm>
    <primary>Samples</primary>
    <secondary>Scripted REST Connector</secondary>
