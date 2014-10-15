@@ -38,8 +38,8 @@ For example, in CREST to do a create request you would do the following.
 CreateRequest request = Requests.newCreateRequest(objectClassInfo.resourceContainer, new JsonValue(user))
 Resource resource = connection.create(new RootContext(), request)
 
-This will create a formatted create REST request and do the HTTP request based on that format. With a generic REST API
-the groovy script will need to manually build a HTTP request based off of some defined REST API. This manual creation
+This will create a formatted create REST request and do the HTTP request based on that format. With a generic REST API,
+the groovy script will need to manually build an HTTP request based on some defined REST API. This manual creation
 would require setting the method, path, content and other HTTP request properties to make the REST call.
 
 Setup OpenDJ:
@@ -286,5 +286,5 @@ OpenIDM Instructions:
         }
 
 This shows the basic CRUD operations on user and groups using Scripted CREST and the OpenDJ rest2ldap API. To read
-more documentation on the Groovy ScriptedCEST connector and for help with customization please see
+more documentation on the Groovy ScriptedCREST connector and for help with customization please see
 http://openicf.forgerock.org/connectors/groovy-connector-1.4.0.0/doc/groovy-connector-1.4.0.0/index.html
