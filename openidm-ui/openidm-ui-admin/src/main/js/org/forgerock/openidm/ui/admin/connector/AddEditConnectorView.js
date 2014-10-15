@@ -178,20 +178,22 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         this.parentRender(_.bind(function() {
                             var urlArgs = window.location.hash;
 
-                            switch (data.syncFailureHandler.maxRetries) {
-                                case 0:
-                                    this.$el.find(".retryOptions").val("0").change();
-                                    break;
-                                case -1:
-                                    this.$el.find(".retryOptions").val("-1").change();
-                                    break;
-                                default:
-                                    this.$el.find(".retryOptions").val("*").change();
-                                    this.$el.find(".maxRetries").val(data.syncFailureHandler.maxRetries);
-                                    break;
+                            if (data.syncFailureHandler && _.has(data.syncFailureHandler, "maxRetries")) {
+                                switch (data.syncFailureHandler.maxRetries) {
+                                    case 0:
+                                        this.$el.find(".retryOptions").val("0").change();
+                                        break;
+                                    case -1:
+                                        this.$el.find(".retryOptions").val("-1").change();
+                                        break;
+                                    default:
+                                        this.$el.find(".retryOptions").val("*").change();
+                                        this.$el.find(".maxRetries").val(data.syncFailureHandler.maxRetries);
+                                        break;
+                                }
                             }
 
-                            if (_.has(data.syncFailureHandler.postRetryAction, "script")) {
+                            if (data.syncFailureHandler && _.has(data.syncFailureHandler.postRetryAction, "script")) {
                                 this.$el.find(".postRetryAction").val("script");
                                 this.postActionBlockScript = ScriptEditor.generateScriptEditor({
                                     "element": this.$el.find(".postActionBlock .script"),
@@ -200,7 +202,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                                     "scriptData": data.syncFailureHandler.postRetryAction.script
                                 });
                                 this.$el.find(".postActionBlock .script").show();
-                            } else {
+                            } else if (data.syncFailureHandler) {
                                 this.$el.find(".postRetryAction").val(data.syncFailureHandler.postRetryAction);
                             }
 
