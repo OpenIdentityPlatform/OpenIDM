@@ -58,6 +58,11 @@
             <artifactId>openidm-repo</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>

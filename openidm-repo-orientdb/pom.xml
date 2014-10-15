@@ -64,7 +64,12 @@
             <artifactId>openidm-smartevent</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- OrientDB --> 
         <dependency>
             <groupId>com.orientechnologies</groupId>

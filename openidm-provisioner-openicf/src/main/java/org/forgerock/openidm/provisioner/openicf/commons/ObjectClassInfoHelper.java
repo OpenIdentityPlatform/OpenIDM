@@ -158,18 +158,23 @@ public class ObjectClassInfoHelper {
 
 
     public Attribute filterAttribute(JsonPointer field, Object valueAssertion) {
-      if (field.size() != 1){
-          throw new IllegalArgumentException("Only one level JsonPointer supported");
-      }
+        if (field.size() != 1) {
+            throw new IllegalArgumentException("Only one level JsonPointer supported");
+        }
         String attributeName = field.leaf();
 
-       for (AttributeInfoHelper ai: attributes){
-          if (ai.getName().equals(attributeName)) {
-              return ai.build(valueAssertion);
-          }
-       }
-       throw new IllegalArgumentException("Attribute " + attributeName +
-               " does not exist as part of " + objectClass);
+        // OPENIDM-2385 - map _id to the Uid attribute containing valueAssertion
+        if (Resource.FIELD_CONTENT_ID.equals(attributeName)) {
+            return new Uid(String.valueOf(valueAssertion));
+        }
+
+        for (AttributeInfoHelper ai: attributes){
+            if (ai.getName().equals(attributeName)) {
+                return ai.build(valueAssertion);
+            }
+        }
+
+        throw new IllegalArgumentException("Attribute " + attributeName + " does not exist as part of " + objectClass);
     }
 
     /**

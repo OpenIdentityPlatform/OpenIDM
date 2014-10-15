@@ -34,6 +34,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.Iterables;
 import org.forgerock.util.promise.Function;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -78,12 +79,21 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
                     ++objectNumber;
                     String value = "v"+objectNumber;
                     objects.put(value, valueAssertion);
-                    return "(" + jsonExtractPathOnField(field, objects) + " " + operand + " ${" + value + "})";
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        return "(obj.objectid " + operand + " ${" + value + "})";
+                    } else {
+                        return "(" + jsonExtractPathOnField(field, objects) + " " + operand + " ${" + value + "})";
+                    }
                 }
 
                 @Override
                 public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-                    return "(" + jsonExtractPathOnField(field, objects) + " IS NOT NULL)";
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        // NOT NULL enforced by the schema
+                        return "(obj.objectid IS NOT NULL)";
+                    } else {
+                        return "(" + jsonExtractPathOnField(field, objects) + " IS NOT NULL)";
+                    }
                 }
             };
 
