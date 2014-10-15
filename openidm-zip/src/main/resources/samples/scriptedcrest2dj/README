@@ -78,8 +78,7 @@ Setup OpenDJ:
         $ cp /path/to/openidm/samples/scriptedcrest2dj/data/http-config.json opendj/config
 
     8. Restart OpenDJ.
-        $ opendj/bin/stop-ds
-        $ opendj/bin/start-ds
+        $ opendj/bin/stop-ds --restart
 
 OpenIDM Instructions:
 
