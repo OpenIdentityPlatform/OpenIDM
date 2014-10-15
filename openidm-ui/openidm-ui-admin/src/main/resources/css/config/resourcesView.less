@@ -25,20 +25,41 @@
 /*
   General resources Display
 */
+.connector-help {
+  float:left;
+  padding-top:10px;
+}
+
+.connector-help h4{
+  margin-bottom:5px;
+  color:#5fa595;
+}
+
+.connector-help p {
+  width:360px;
+}
+
+.card-holder {
+  clear:both;
+}
 
 .resource-body {
-  border:1px solid #ddd;
+  border:2px solid #ddd;
   float:left;
   margin-right:15px;
-  height:250px;
+  height:210px;
   width:220px;
   text-align:center;
   background-color:white;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
-.resource-container h3 {
-  margin-top:10px;
+.resource-container {
+  clear:both;
+  height: 250px;
+}
+
+.resource-container h4 {
   line-height:18px;
 }
 
@@ -52,19 +73,14 @@
 }
 
 .resource-tools {
-  height:15px;
-  margin-bottom:10px;
-}
-
-.resource-tools .resource-edit {
-  margin-left:10px;
-  margin-right:10px;
+  height:30px;
 }
 
 .resource-tools .resource-edit,
 .resource-tools .resource-delete {
   cursor:pointer;
   margin-top:10px;
+  margin-right:10px;
 }
 
 .resource-tools .resource-edit:hover,
@@ -72,14 +88,12 @@
   color:#5e887f;
 }
 
-.resource-body a,
-.content a.add-resource-link{
+.resource-body a {
   color:#5d6871;
 }
 
-.resource-container {
-  clear:both;
-  padding-top:5px;
+a.add-resource-link .add-resource-body:hover {
+  border-color:#bbb;
 }
 
 /*
@@ -91,15 +105,16 @@
 }
 
 .resource-info {
-  padding:35px 0px 15px 0px;
-}
-
-.managed-type .resource-info {
-  padding:65px 0px 5px 0px;
+  padding:10px 0px 15px 0px;
 }
 
 .add-resource-body .resource-info {
-  padding-top:75px;
+  padding-top:65px;
+}
+
+.add-resource-body .resource-info,
+.add-resource-body .resource-info .fa {
+  color:#5fa595;
 }
 
 .resource-info span {
@@ -107,21 +122,31 @@
   margin-bottom:10px;
 }
 
-.resource-given-name,
-.resource-type-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.resource-info .fa {
+  color:#bbb;
 }
 
-.resource-objecttype {
+.resource-type-name,
+.resource-object-type {
+  font-weight: bold;
+  font-size: 12px;
   color:#bbb;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.resource-type-name {
+  padding-bottom:0px;
+}
+
+.resource-object-type {
+  font-weight:normal;
 }
 
 .resource-given-name {
-  font-weight: bold;
-  font-size: 12px;
+  font-size:15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-bottom:5px;
+  font-weight:bold;
 }
 
 .resource-input-body .group-field-block .add-btn {
@@ -133,50 +158,11 @@
   width:140px;
 }
 
-.resource-body hr {
-  border-top: 1px solid #ddd;
-}
-
-.resource-tools .add-resource-button {
-  webkit-border-radius: 0px;
-  -moz-border-radius: 0px;
-  -ms-border-radius: 0px;
-  -o-border-radius: 0px;
-  border-radius: 0px;
-  margin:0px;
-  height: 40px;
-}
-
-/*
-  Resource Status details
-*/
-.resource-status-body {
-  padding: 3px 10px 10px 3px;
-  text-align:left;
-
-  p {
-    padding:0px 0px 5px 10px;
-  }
-
-  .resource-given-name {
-    padding-bottom:0px;
-    font-weight: bold;
-    font-size:14px;
-  }
-
-  .resource-status {
-    font-size:14px;
-    padding-top:18px;
-  }
-
-  .resource-objecttype {
-    font-size:11px;
-    color:#bbb;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: 10px;
-  }
-
+.resource-status {
+  float:left;
+  font-size:14px;
+  margin-top:10px;
+  margin-left:10px;
 }
 
 .resource-unavailable {
@@ -193,4 +179,35 @@
   color:#a94442;
   border:#ebccd1 solid 2px;
   background-image:none;
+}
+
+/*
+  Add Mapping Resource Styles
+*/
+
+.resource-body hr {
+  border-top: 1px solid #ddd;
+  margin:0px;
+}
+
+.add-resource-button {
+  margin:0px;
+  position: relative;
+  width:200px;
+  top:5px;
+  right:2px;
+}
+
+.none-editable-resources .resource-info {
+  padding-top: 25px;
+  padding-bottom: 5px;
+  height:136px;
+}
+
+.resource-status-body {
+  height:40px;
+}
+
+.resource-status-body  .fa {
+  margin-right:10px;
 }

@@ -75,7 +75,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
                 if(args.length === 0) {
                     this.data.addEditSubmitTitle = $.t("common.form.add");
-                    this.data.addEditTitle = $.t("templates.managed.addTitle");
+                    this.data.addEditTitle = $.t("templates.managed.addManagedTitle");
                     this.data.currentManagedObject = {};
                     this.data.addState = true;
 
