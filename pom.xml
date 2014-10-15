@@ -300,7 +300,7 @@
         <pubDate />
         <publicationDate>${pubDate}</publicationDate>
 
-        <frDocPluginVersion>2.1.4</frDocPluginVersion>
+        <frDocPluginVersion>2.1.5</frDocPluginVersion>
 
 	       <!-- Doc Branding -->
 	       <brandingGroupId>org.forgerock.commons</brandingGroupId>
