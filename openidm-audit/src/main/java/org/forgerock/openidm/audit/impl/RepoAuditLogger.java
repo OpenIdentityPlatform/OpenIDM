@@ -91,7 +91,6 @@ public class RepoAuditLogger extends AbstractAuditLogger implements AuditLogger 
     public Map<String, Object> read(ServerContext context, String type, String id) throws ResourceException {
         Map<String, String> params = new HashMap<String, String>();
         params.put("_queryId", "query-all");
-        params.put("fields", "*");
         Map<String, Object> result = new HashMap<String, Object>();
 
         List<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();

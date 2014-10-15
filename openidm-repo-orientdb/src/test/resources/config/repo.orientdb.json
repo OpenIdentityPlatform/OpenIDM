@@ -6,7 +6,7 @@
         "get-by-field-value":"select * FROM ${_resource} WHERE ${field} = :value",
         "get-users-of-role":"select userName FROM ${_resource} WHERE roles CONTAINS( :role )",
         "query-all-ids":"select _openidm_id from ${_resource}",
-        "query-all":"select ${fields} from ${_resource}",
+        "query-all":"select * from ${_resource}",
         "links-for-firstId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND firstId = :firstId",
         "links-for-secondId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND secondId = :secondId",
         "links-for-linkType":"SELECT * FROM ${_resource} WHERE linkType = :linkType",

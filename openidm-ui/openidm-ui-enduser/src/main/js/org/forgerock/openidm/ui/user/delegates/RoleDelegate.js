@@ -34,7 +34,7 @@ define("org/forgerock/openidm/ui/user/delegates/RoleDelegate", [
     obj.getAllRoles = function () {
         var promise = $.Deferred();
         obj.serviceCall({
-            "url": "?_queryId=query-all&fields=*"
+            "url": "?_queryId=query-all"
         }).then(
             function (qry) {
                 qry.result = _.map(qry.result, function (r) { 
