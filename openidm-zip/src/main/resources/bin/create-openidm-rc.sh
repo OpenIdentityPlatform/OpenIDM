@@ -26,7 +26,10 @@ JAVA_BIN=${JAVA_BIN}
 OPENIDM_HOME=${OPENIDM_HOME}
 OPENIDM_USER=${OPENIDM_USER}
 OPENIDM_PID_FILE=\$OPENIDM_HOME/.openidm.pid
-OPENIDM_OPTS="-Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
+OPENIDM_OPTS="${OPENIDM_OPTS}"
+
+# Only set OPENIDM_OPTS if not already set
+[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="${openidm.options} -Dfile.encoding=UTF-8"
 
 cd \${OPENIDM_HOME}
 

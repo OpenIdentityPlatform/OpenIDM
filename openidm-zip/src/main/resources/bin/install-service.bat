@@ -17,9 +17,14 @@ shift
 goto setArgs
 :doneSetArgs
 
+rem Only set OPENIDM_OPTS if not already set
+if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
+set OPENIDM_OPTS=${openidm.options} -Dfile.encoding=UTF-8
+:noOpenIDMOpts
+
 rem set SERVER_START_PARAMS="-c;bin/launcher.json"
 set CP=bin/launcher.jar;bin/felix.jar
-set JAVA_OPTS_SERVICE=-Xmx1024m;-Xms1024m;-Djava.util.logging.config.file=conf\logging.properties;-Dlogback.configurationFile=conf\logging-config.xml;
+set JAVA_OPTS_SERVICE=%OPENIDM_OPTS%-Djava.util.logging.config.file=conf\logging.properties;-Dlogback.configurationFile=conf\logging-config.xml;
 rem Enable debugging uncomment the line below
 set JAVA_OPTS_SERVICE=%JAVA_OPTS_SERVICE%-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005;
 
