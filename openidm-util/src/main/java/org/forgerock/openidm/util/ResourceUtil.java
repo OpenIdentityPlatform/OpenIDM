@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
@@ -38,6 +39,7 @@ import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.RouterContext;
@@ -46,11 +48,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 /**
- * A NAME does ...
+ * Resource utilities.
  *
  * @author Laszlo Hordos
+ * @author brmiller
  */
 public class ResourceUtil {
+
+    /** The name of the field in the resource content which contains the resource ID as a JsonPointer. */
+    public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(Resource.FIELD_CONTENT_ID);
 
     /**
      * {@code ResourceUtil} instances should NOT be constructed in standard

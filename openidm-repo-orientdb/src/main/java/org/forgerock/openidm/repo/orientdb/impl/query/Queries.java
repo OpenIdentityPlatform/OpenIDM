@@ -33,11 +33,13 @@ import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.util.ResourceUtil;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -66,14 +68,22 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                 public String visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {
                     ++objectNumber;
                     String value = "v"+objectNumber;
-                    objects.put(field.toString(), field.toString());
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
+                    } else {
+                        objects.put(field.toString(), field.toString());
+                    }
                     objects.put(value, String.valueOf(valueAssertion));
                     return "${dotnotation:" + field.toString() + "} " + operand + " ${" + value + "} ";
                 }
 
                 @Override
                 public String visitPresentFilter(Map<String, String> objects, JsonPointer field) {
-                    objects.put(field.toString(), field.toString());
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        objects.put(field.toString(), DocumentUtil.ORIENTDB_PRIMARY_KEY);
+                    } else {
+                        objects.put(field.toString(), field.toString());
+                    }
                     return "${dotnotation:" + field.toString() + "} IS NOT NULL";
                 }
             };

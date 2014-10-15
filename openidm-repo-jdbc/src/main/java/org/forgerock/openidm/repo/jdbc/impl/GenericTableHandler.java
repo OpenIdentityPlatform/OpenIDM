@@ -55,6 +55,7 @@ import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,25 +76,36 @@ public class GenericTableHandler implements TableHandler {
                     ++objectNumber;
                     String key = "k"+objectNumber;
                     String value = "v"+objectNumber;
-                    objects.put(key, field.toString());
-                    objects.put(value, valueAssertion);
-                    return "(EXISTS "
-                            + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                            +          "WHERE prop.${_mainTable}_id = obj.id "
-                            +            "AND prop.propKey = ${" + key + "} "
-                            +            "AND prop.propValue " + operand + " ${" + value + "} "
-                            + "))";
+
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        objects.put(value, valueAssertion);
+                        return "(obj.objectid " + operand + " ${" + value + "})";
+                    } else {
+                        objects.put(key, field.toString());
+                        objects.put(value, valueAssertion);
+                        return "(EXISTS "
+                                + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                                +          "WHERE prop.${_mainTable}_id = obj.id "
+                                +            "AND prop.propKey = ${" + key + "} "
+                                +            "AND prop.propValue " + operand + " ${" + value + "} "
+                                + "))";
+                    }
                 }
 
                 @Override
                 public String visitPresentFilter(Map<String, Object> objects, JsonPointer field) {
-                    ++objectNumber;
-                    String key = "k" + objectNumber;
-                    objects.put(key, field.toString());
-                    return "(EXISTS "
-                            + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
-                            +          "WHERE prop.${_mainTable}_id = obj.id "
-                            +            "AND prop.propKey = ${" + key + "}))";
+                    if (ResourceUtil.RESOURCE_FIELD_CONTENT_ID_POINTER.equals(field)) {
+                        // NOT NULL is enforced by the schema
+                        return "(obj.objectid IS NOT NULL)";
+                    } else {
+                        ++objectNumber;
+                        String key = "k" + objectNumber;
+                        objects.put(key, field.toString());
+                        return "(EXISTS "
+                                + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
+                                +          "WHERE prop.${_mainTable}_id = obj.id "
+                                +            "AND prop.propKey = ${" + key + "}))";
+                    }
                 }
             };
 
