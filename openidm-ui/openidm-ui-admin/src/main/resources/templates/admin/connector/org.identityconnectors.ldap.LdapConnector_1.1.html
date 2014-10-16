@@ -56,7 +56,7 @@
 
 <fieldset>
     <legend><span>{{t "templates.connector.ldapConnector.baseContextTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
-    <div class="group-body" id="baseContextWrapper">
+    <div class="group-body connector-array-component" id="baseContextWrapper">
         <div class="group-field-block group-note-lead">
             <p class="note">{{t "templates.connector.ldapConnector.baseContextNote"}}</p>
             <button type="button" field_type="baseContext" id="addBaseContextButton" name="addBaseContextButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.baseContextAdd"}}</span><i class="fa fa-lg fa-plus"></i></button>
@@ -97,7 +97,7 @@
             <label class="light">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
             <input autocomplete="off" class="filter form-size-l" type="text" id="accountSearchFilter" name="configurationProperties.accountSearchFilter" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" />
         </div>
-        <div id="accountObjectClassesWrapper">
+        <div class="connector-array-component" id="accountObjectClassesWrapper">
             <div class="group-field-block group-field-buttons">
                 <button type="button" field_type="accountObjectClasses" id="addAccountObjectClassesButton" name="addAccountObjectClassesButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.addAccountObjectClasses"}}</span><i class="fa fa-lg fa-plus"></i></button>
             </div>
@@ -138,7 +138,7 @@
             <label class="light">Group Filter</label>
             <input autocomplete="off" class="filter form-size-l" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
         </div>
-        <div id="groupObjectClassesWrapper">
+        <div class="connector-array-component" id="groupObjectClassesWrapper">
             <div class="group-field-block">
                 <button type="button" field_type="groupObjectClasses" id="addGroupObjectClassesButton" name="addGroupObjectClassesButton" class="button add-btn"><span>{{t "templates.connector.ldapConnector.addGroupObjectClasses"}}</span><i class="fa fa-lg fa-plus"></i></button>
             </div>

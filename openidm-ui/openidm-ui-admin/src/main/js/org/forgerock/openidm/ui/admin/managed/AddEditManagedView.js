@@ -73,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
                 this.data.managedObjects = managedObjects;
 
-                if(args.length === 0) {
+                if(args.length === 0 || args[0] === null) {
                     this.data.addEditSubmitTitle = $.t("common.form.add");
                     this.data.addEditTitle = $.t("templates.managed.addManagedTitle");
                     this.data.currentManagedObject = {};

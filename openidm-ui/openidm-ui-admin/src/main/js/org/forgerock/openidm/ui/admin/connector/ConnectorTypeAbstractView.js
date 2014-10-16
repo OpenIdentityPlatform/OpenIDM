@@ -48,12 +48,70 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
                     $("#connectorDetails").show();
                 }
 
+                this.fieldButtonCheck();
+
                 validatorsManager.bindValidators(this.$el);
 
                 if(callback){
                     callback();
                 }
             }, this));
+        },
+
+        fieldButtonCheck: function() {
+            var arrayComponents = $(".connector-array-component");
+
+            _.each(arrayComponents, function(component){
+                if($(component).find(".remove-btn").length === 1) {
+                    $(component).find(".remove-btn").hide();
+                } else {
+                    $(component).find(".remove-btn").show();
+                }
+            }, this);
+        },
+
+        addField: function (event){
+            event.preventDefault();
+
+            var clickedEle = event.target,
+                field_type,
+                field;
+
+            if($(clickedEle).not("button")){
+                clickedEle = $(clickedEle).closest("button");
+            }
+
+            field_type = $(clickedEle).attr('field_type');
+            field = $(clickedEle).parent().next().clone();
+            field.find('input[type=text]').val('');
+
+            $('#' + field_type + 'Wrapper').append(field);
+            $('#' + field_type + 'Wrapper').find('.remove-btn').show();
+
+            validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
+            validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
+        },
+
+        removeField: function (event){
+            event.preventDefault();
+
+            var clickedEle = event.target,
+                field_type;
+
+            if($(clickedEle).not("button")){
+                clickedEle = $(clickedEle).closest("button");
+            }
+
+            field_type = $(clickedEle).attr('field_type');
+
+            $(clickedEle).parents(".group-field-block").remove();
+
+            if($('#' + field_type + 'Wrapper').find('.field').size() === 1){
+                $('#' + field_type + 'Wrapper').find('.remove-btn').hide();
+            }
+
+            validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
+            validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
         }
     });
 

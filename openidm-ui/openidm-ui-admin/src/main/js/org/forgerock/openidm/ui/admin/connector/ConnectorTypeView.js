@@ -28,7 +28,10 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeView", [
     "org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView"
 ], function(ConnectorTypeAbstractView) {
     var ConnectorTypeView = ConnectorTypeAbstractView.extend({
-
+        events : {
+            "click .add-btn": "addField",
+            "click .remove-btn": "removeField"
+        }
     });
 
     return new ConnectorTypeView();
