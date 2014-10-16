@@ -226,15 +226,16 @@ orientdb&gt; </screen>
    </orderedlist>
 
    <para>
-    When you start OpenIDM with the
-    <command>./startup.sh -p samples/sample1</command>,
-    that sets <literal>&amp;{launcher.project.location}</literal> to a value of
-    <literal>samples/sample1</literal>. As seen shortly, the
-    configuration files use that variable.
+    When you start OpenIDM with the <literal>-p</literal> project variable
+    (<command>./startup.sh -p samples/sample1</command>), the
+    <literal>&amp;{launcher.project.location}</literal> is set to a value of
+    <literal>samples/sample1</literal>. The configuration files use this,
+    as shown in the following sections.
    </para>
 
-   <para>The following configuration files play important roles in this
-   sample.</para>
+   <para>
+    The following configuration files play important roles in this sample.
+   </para>
 
    <varlistentry>
     <term><filename>samples/sample1/conf/provisioner.openicf-xml.json</filename></term>
@@ -256,7 +257,8 @@ orientdb&gt; </screen>
      <link xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Connecting to External Resources</citetitle></link> in
-     the <citetitle>Integrator's Guide</citetitle>.</para>
+     the <citetitle>Integrator's Guide</citetitle>.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
