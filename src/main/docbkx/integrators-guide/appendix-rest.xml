@@ -1941,4 +1941,30 @@ Content-Length: 89
 
     </section>
 
+ <!--TODO Fix for OPENIDM-2339
+ <section xml:id="CRESTvsREST">
+  <title>Differences between the CREST API and a Generic REST API</title>
+  <para>
+   The main difference between a CREST-based REST API and a generic REST API is
+   that CREST is that the CREST API is inherently recognizable by all ForgeRock
+   products. As such, you can leverage CREST resources in your scripts, to
+   create CREST requests.
+  </para>
+  <para>
+   For example, to write a <literal>CREATE</literal> request in CREST, you
+   might use a Groovy script similar to the following:
+  </para>
+  <programlisting>
+CreateRequest request = Requests.newCreateRequest(objectClassInfo.resourceContainer, new JsonValue(user))
+Resource resource = connection.create(new RootContext(), request)
+  </programlisting>
+  <para>
+   The preceding code excerpt creates a <emphasis>formatted</emphasis> create
+   REST request, and does the HTTP request based on that format. With a generic
+   REST API, the corresponding Groovy script would need to build an HTTP request
+   manually, based on some defined REST API. This manual creation would require
+   setting the method, path, content and other HTTP request properties to make
+   the REST call.
+ </section> -->
+
 </appendix>
