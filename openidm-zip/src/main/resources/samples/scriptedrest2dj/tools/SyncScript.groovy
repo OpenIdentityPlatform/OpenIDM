@@ -49,8 +49,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
         uri.query = [
                 _queryFilter: 'true',
                 _fields     : '_id',
-                _sortKeys   : '-_id',
-                _pageSize   : '1'
+                _sortKeys   : '-_id'
         ]
 
         response.success = { resp, json ->
