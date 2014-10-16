@@ -985,6 +985,7 @@ class ObjectMapping {
         @Override
         public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context rootContext, Map<String, Link> allLinks, Collection<String> remainingIds)
                 throws SynchronizationException {
+            reconContext.checkCanceled();
             SourceSyncOperation op = new SourceSyncOperation();
             op.reconContext = reconContext;
             ReconEntry entry = new ReconEntry(op, name, rootContext, dateUtil);

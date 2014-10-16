@@ -248,6 +248,7 @@ public class ReconciliationService
             if (request.getResourceNameObject().isEmpty()) {
                 // operation on collection
                 if (ReconciliationService.ReconAction.isReconAction(request.getAction())) {
+                    String reconId;
                     try {
                         JsonValue mapping = paramsVal.get("mapping").required();
                         logger.debug("Reconciliation action of mapping {}", mapping);
@@ -258,9 +259,11 @@ public class ReconciliationService
                         } else {
                             waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                         }
-                        result.put("_id",  reconcile(ReconAction.valueOf(request.getAction()), mapping, waitForCompletion, paramsVal, request.getContent()));
+                        reconId = reconcile(ReconAction.valueOf(request.getAction()), mapping, waitForCompletion, paramsVal, request.getContent());
+                        result.put("_id",  reconId);
+                        result.put("state", reconRuns.get(reconId).getState());
                     } catch (SynchronizationException se) {
-                       throw new ConflictException(se);
+                        throw new ConflictException(se);
                     }
                 } else {
                     throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " + request.getAdditionalParameters());
@@ -294,10 +297,12 @@ public class ReconciliationService
     /**
      * {@inheritDoc}
      */
+    @Override
     public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams, JsonValue config)
             throws ResourceException {
 
         final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams, config);
+        addReconRun(reconContext);
         if (Boolean.TRUE.equals(synchronous)) {
             reconcile(reconContext);
         } else {
@@ -362,7 +367,6 @@ public class ReconciliationService
      * @throws SynchronizationException
      */
     private void reconcile(ReconciliationContext reconContext) throws SynchronizationException {
-        addReconRun(reconContext);
         try {
             reconContext.getObjectMapping().recon(reconContext); // throws SynchronizationException
         } catch (SynchronizationException ex) {
