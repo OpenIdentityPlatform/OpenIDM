@@ -4,7 +4,7 @@
         <div class="group-field-block group-lead">
             <div class="separate-message">
                 <label for="secret" class="light">{{t "templates.connector.oAuthGeneral.clientSecret"}}</label>
-                <input id="secret" {{#if oAuthReturned}}  data-validator-event="keyup blur" data-validator="required" {{else}} disabled="true" placeholder="*****" {{/if}} class="form-size-l" type="text" name="configurationProperties.clientSecret" value="" required>
+                <input id="secret" {{#if oAuthReturned}}  data-validator-event="keyup blur" data-validator="required" {{else}} placeholder="*****" {{/if}} class="form-size-l" type="text" name="configurationProperties.clientSecret" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
@@ -14,7 +14,7 @@
         <div class="group-field-block">
             <div class="separate-message">
                 <label for="secretId" class="light">{{t "templates.connector.oAuthGeneral.clientId"}}</label>
-                <textarea {{#if connectorDefaults.configurationProperties.refreshToken}} disabled="true" {{/if}} {{#if oAuthReturned}} disabled="true" {{/if}} id="secretId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
+                <textarea {{#if oAuthReturned}} disabled="true" {{/if}} id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
                 <span></span>
                 <div class="validation-message"></div>
             </div>

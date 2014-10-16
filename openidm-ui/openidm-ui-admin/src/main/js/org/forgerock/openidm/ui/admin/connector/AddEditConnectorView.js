@@ -64,7 +64,9 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             "click .alert-message .close-button": "closeError",
             "click #addEditObjectType": "addEditObjectTypes",
             "click #validateConnector": "validate",
-            "keypress input" : "disableButtons",
+            "change :input" : "setConnectorState",
+            "keyup :input" : "setConnectorState",
+            "paste :input" : "setConnectorState",
             "click .addLiveSync" : "addLiveSync",
             "change .retryOptions": "retryOptionChanged",
             "change .postRetryAction": "postRetryActionChange",
@@ -120,7 +122,12 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                     })
                     .value();
 
-                if(args.length === 0) {
+                if(args.length === 0 || args[0] === null) {
+
+                    this.data.versionDisplay = _.filter(this.data.versionDisplay, function(version){
+                        return version.versions[0].bundleName !== "org.forgerock.openicf.connectors.groovy-connector";
+                    }, this);
+
                     this.data.editState = false;
                     this.data.connectorName = "";
                     this.data.addEditTitle = $.t("templates.connector.addConnectorTitle");
@@ -265,10 +272,18 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             if(this.oAuthConnector) {
                 this.$el.find("#addEditObjectType").hide();
 
-                if(this.oAuthReturned || this.connectorTypeRef.data.connectorDefaults.configurationProperties.refreshToken !== null) {
+                if(this.oAuthReturned) {
                     this.$el.find("#addEditConnector").bind("click", _.bind(this.formSubmit, this));
                 } else {
-                    this.$el.find("#addEditConnector").bind("click", _.bind(this.oAuthFormSubmit, this));
+                    if(this.connectorTypeRef.data.connectorDefaults.configurationProperties.clientId !== this.$el.find("#clientId").val() ||
+                        this.$el.find("#secret").length === 0 ||
+                        this.$el.find("#secret").val().length > 0 ||
+                        this.connectorTypeRef.data.connectorDefaults.configurationProperties.refreshToken === null) {
+
+                        this.$el.find("#addEditConnector").bind("click", _.bind(this.oAuthFormSubmit, this));
+                    } else {
+                        this.$el.find("#addEditConnector").bind("click", _.bind(this.formSubmit, this));
+                    }
                 }
             } else {
                 this.$el.find("#addEditObjectType").show();
@@ -607,7 +622,11 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
         getProvisioner: function() {
             var connectorData,
                 connDetails = this.connectorTypeRef.data.connectorDefaults,
-                mergedResult = {};
+                mergedResult = {},
+                tempArrayObject,
+                tempName,
+                tempKeys,
+                arrayComponents = $(".connector-array-component");
 
             connectorData = form2js('connectorForm', '.', true);
 
@@ -629,6 +648,17 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             connectorData.objectTypes = {};
 
             $.extend(true, mergedResult, connDetails, connectorData);
+
+            //Added logic to ensure array parts correctly add and delete what is set
+            _.each(arrayComponents, function(component){
+                tempArrayObject = form2js($(component).prop("id"), ".", true);
+                tempKeys = _.keys(tempArrayObject.configurationProperties);
+
+                if(tempKeys.length) {
+                    mergedResult.configurationProperties[tempKeys[0]] = tempArrayObject.configurationProperties[tempKeys[0]];
+                }
+
+            }, this);
 
             mergedResult.objectTypes = this.userDefinedObjectTypes || this.objectTypes;
 
@@ -719,11 +749,6 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             );
         },
 
-        disableButtons: function() {
-            this.$el.find("#addEditObjectType").prop('disabled', true);
-            this.$el.find("#addEditConnector").prop('disabled', true);
-        },
-
         sectionHideShow: function(event) {
             var clickedEle = event.target;
 
@@ -810,6 +835,15 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
             });
 
             return err;
+        },
+
+        setConnectorState: function() {
+            this.$el.find("#addEditObjectType").prop('disabled', true);
+            this.$el.find("#addEditConnector").prop('disabled', true);
+
+            if(this.oAuthConnector) {
+                this.setSubmitFlow();
+            }
         },
 
         addEditObjectTypes: function() {

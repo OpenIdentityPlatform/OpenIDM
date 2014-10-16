@@ -40,10 +40,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
         },
 
         render: function(args, callback) {
-            var base = "templates/admin/connector/",
-                bcRemoveBtns,
-                aocRemoveBtns,
-                gocRemoveBtns;
+            var base = "templates/admin/connector/";
 
             $("#connectorDetails").hide();
 
@@ -58,31 +55,11 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     $("#connectorDetails").show();
                 }
 
-                bcRemoveBtns = $('#baseContextWrapper').find('.remove-btn');
-                aocRemoveBtns = $('#accountObjectClassesWrapper').find('.remove-btn');
-                gocRemoveBtns = $('#groupObjectClassesWrapper').find('.remove-btn');
-
-                if(bcRemoveBtns.size() === 1) {
-                    bcRemoveBtns.hide();
-                } else {
-                    bcRemoveBtns.show();
-                }
-
-                if(aocRemoveBtns.size() === 1) {
-                    aocRemoveBtns.hide();
-                } else {
-                    aocRemoveBtns.show();
-                }
-
-                if(gocRemoveBtns.size() === 1) {
-                    gocRemoveBtns.hide();
-                } else {
-                    gocRemoveBtns.show();
-                }
-
                 if(this.data.connectorDefaults.configurationProperties.ssl){
                     this.$el.find("#toggleCert").show();
                 }
+
+                this.fieldButtonCheck();
 
                 validatorsManager.bindValidators(this.$el, "config/provisioner.openicf/ldap", _.bind(function () {
                     validatorsManager.validateAllFields(this.$el);
@@ -92,50 +69,6 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                     callback();
                 }
             }, this));
-        },
-
-        addField: function (event){
-            event.preventDefault();
-
-            var clickedEle = event.target,
-                field_type,
-                field;
-
-            if($(clickedEle).not("button")){
-                clickedEle = $(clickedEle).closest("button");
-            }
-
-            field_type = $(clickedEle).attr('field_type');
-            field = $(clickedEle).parent().next().clone();
-            field.find('input[type=text]').val('');
-
-            $('#' + field_type + 'Wrapper').append(field);
-            $('#' + field_type + 'Wrapper').find('.remove-btn').show();
-
-            validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
-            validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
-        },
-
-        removeField: function (event){
-            event.preventDefault();
-
-            var clickedEle = event.target,
-                field_type;
-
-            if($(clickedEle).not("button")){
-                clickedEle = $(clickedEle).closest("button");
-            }
-
-            field_type = $(clickedEle).attr('field_type');
-
-            $(clickedEle).parents(".group-field-block").remove();
-
-            if($('#' + field_type + 'Wrapper').find('.field').size() === 1){
-                $('#' + field_type + 'Wrapper').find('.remove-btn').hide();
-            }
-
-            validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
-            validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
         },
 
         showFilterDialog: function (event) {
