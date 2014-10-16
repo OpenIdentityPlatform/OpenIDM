@@ -37,8 +37,8 @@
     "configurationProperties": {
         "domain": "",
         "clientId": "",
-        "clientSecret": "",
-        "refreshToken": ""
+        "clientSecret": null,
+        "refreshToken": null
     },
     "objectTypes": {
         "Member": {
