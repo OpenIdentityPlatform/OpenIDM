@@ -7,14 +7,14 @@
 /**
  * <pre>
  *  {
- *      "sobjects" : "/services/data/v28.0/sobjects",
- *      "licensing" : "/services/data/v28.0/licensing",
- *      "connect" : "/services/data/v28.0/connect",
- *      "search" : "/services/data/v28.0/search",
- *      "query" : "/services/data/v28.0/query",
- *      "tooling" : "/services/data/v28.0/tooling",
- *      "chatter" : "/services/data/v28.0/chatter",
- *      "recent" : "/services/data/v28.0/recent"
+ *      "sobjects" : "/services/data/v29.0/sobjects",
+ *      "licensing" : "/services/data/v29.0/licensing",
+ *      "connect" : "/services/data/v29.0/connect",
+ *      "search" : "/services/data/v29.0/search",
+ *      "query" : "/services/data/v29.0/query",
+ *      "tooling" : "/services/data/v29.0/tooling",
+ *      "chatter" : "/services/data/v29.0/chatter",
+ *      "recent" : "/services/data/v29.0/recent"
  *  }
  * </pre>
  */

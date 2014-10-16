@@ -50,7 +50,7 @@ public class SalesforceConnectionTest {
                 SalesforceConnection.mapper.convertValue(config.get("configurationProperties"),
                         SalesforceConfiguration.class);
 
-        Assert.assertEquals(Double.toString(configuration.getVersion()), "28.0",
+        Assert.assertEquals(Double.toString(configuration.getVersion()), "29.0",
                 "API Version is not match");
 
         Assert.assertTrue(configuration.getPredefinedQueries().containsKey("active-only"));
