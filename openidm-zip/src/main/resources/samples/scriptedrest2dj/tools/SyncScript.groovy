@@ -62,7 +62,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
 
 
         response.failure = { resp, json ->
-            return new ConnectException(json.message)
+            throw new ConnectException(json.message)
         }
     }
 
@@ -133,7 +133,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
                                 }
 
                                 response.failure = { getResp, error ->
-                                    return new ConnectException(error.message)
+                                    throw new ConnectException(error.message)
                                 }
                             }
 
@@ -143,7 +143,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
                 }
 
                 response.failure = { resp, json ->
-                    return new ConnectException(json.message)
+                    throw new ConnectException(json.message)
                 }
             }
             break;
@@ -208,7 +208,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
                                 }
 
                                 response.failure = { getResp, error ->
-                                    return new ConnectException(error.message)
+                                    throw new ConnectException(error.message)
                                 }
                             }
 
@@ -219,7 +219,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
 
 
                 response.failure = { resp, json ->
-                    return new ConnectException(json.message)
+                    throw new ConnectException(json.message)
                 }
             }
             break;
