@@ -174,7 +174,7 @@ public class ReconciliationContext {
      * May not take immediate effect in stopping the reconciliation logic.
      */
     public void cancel() {
-        stage = ReconStage.ACTIVE_CANCELING;
+        setStage(ReconStage.ACTIVE_CANCELING);
         canceled = true;
     }
 
@@ -371,6 +371,10 @@ public class ReconciliationContext {
      * @param newStage Sets the current state and stage in the reconciliation process
      */
     public void setStage(ReconStage newStage) {
+        // If the curent stage is one of COMPLETED, then simply return
+        if (this.stage.isComplete()) {
+            return;
+        }
         // If there is already a stage in progress, end it first
         if (this.stage != ReconStage.ACTIVE_INITIALIZED) {
             reconStat.endStage(this.stage);
