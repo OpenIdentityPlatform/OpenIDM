@@ -306,13 +306,15 @@ Usecase 4 - Orphan account detection and manual linking task started from reconc
 Usecase5 - Certification workflows
     In this use case we have two scheduled tasks starting certification workflows.
     
-    One of them is fetching all the managed users and starts a certification workflow
-    for all of them. This workflow shows the roles assigned to the managed users.
-    The other scheduler is fetching all the managed roles and starts a certification workflow
-    for all of them. This workflow shows the assignments of the managed roles.
+    One of them fetches all the managed users and starts a certification workflow
+    for every user. This workflow shows the roles assigned to the managed users.
+    The other scheduled task fetches all the managed roles and starts a certification
+    workflow for every role. This workflow shows the assignments of the managed
+    roles.
 
     There are four roles defined for this sample based on the departments.
-    Each user has a dynamic role by default: the role corresponding to the department the user belongs to.
+    Each user has a dynamic role by default: the role corresponding to the
+    department to which the user belongs.
 
     1. Start OpenIDM with the configuration for usecase5.
 
@@ -373,8 +375,12 @@ Usecase5 - Certification workflows
 
     4. Log in to the UI as user.0 (default password is 'Passw0rd').
 
-    5. Click on the Role Status Check process task appearing on UI as task in the group queue
-        and assign the user task to user.0 (select 'Assign it to me'). The task appears now in 'My tasks'.
+    5. Click on the Role Status Check process task under 'Tasks that are in my
+       group's queue'. A scheduled task has been started for each managed user.
+       With the default schedule, a new task will be started for each managed
+       user every minute. Choose one of the users, for example, user.1, and
+       select 'Assign to me' under the Actions column. The task now appears
+       under 'My tasks'.
 
     6. Click on the 'Details' button of the 'Role Status Check' task.
         On the UI a list of available roles defined in OpenIDM is visible:
@@ -391,8 +397,9 @@ Usecase5 - Certification workflows
             In this case log out and log in as superadmin. The user task assigned to superadmin has the same
             elements as the one described here (apart of the 'Escalate' option).
 
-    8. The scheduled role certification can be triggered by enabling the scheduled task in the 
-        samples/usecase/usecase5/conf/schedule-certificationEntitlements.json file.
+    8. The scheduled role certification can be triggered by enabling the scheduled
+       task in the samples/usecase/usecase5/conf/schedule-certificationEntitlements.json
+       file.
 
     9. Log in to the UI as systemadmin (default password is 'Passw0rd').
 
