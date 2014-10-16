@@ -717,7 +717,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                     if (listener != null) {
                         success = listener.handleEvent(event);
                     } else {
-                        logger.warn("No listener {} available to recieve event {}", listenerId, event.toJsonValue());
+                        logger.warn("No listener {} available to receive event {}", listenerId, event.toJsonValue());
                         success = true;
                     }
                 } else {

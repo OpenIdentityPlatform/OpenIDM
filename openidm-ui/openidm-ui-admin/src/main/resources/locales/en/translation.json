@@ -316,7 +316,7 @@
             "baseTitle" : "Base Connector Details",
             "resources" : "Resources",
             "resourcesHelpNoConnectorsTitle" : "You haven't created any connectors yet.",
-            "resourcesHelpNoConnectorsBody" : "To get started you first need to create a connector. Once you have more then one connector you'll be able to begin mapping objects from one system to another.",
+            "resourcesHelpNoConnectorsBody" : "To get started you first need to create a connector. Once you have more than one connector you'll be able to begin mapping objects from one system to another.",
             "whatIsAConnector" : "Connectors are external systems, databases, directory servers, and other sources of identity data to be managed and audited by the identity management system.",
             "whatIsAManagedObject" : "Managed Objects are an object that represents the identity-related data managed and stored by OpenIDM.",
             "addConnector" : "New Connector",
