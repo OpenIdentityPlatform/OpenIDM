@@ -15,14 +15,12 @@ import org.restlet.data.Form;
  *
  * @author $author$
  * @version $Revision$ $Date$
- * @see <a herf=
- *      "http://wiki.developerforce.com/page/Digging_Deeper_into_OAuth_2.0_on_Force.com"
- *      > Digging Deeper into OAuth 2.0 on Force.com</a>
+ * @see <a href="http://wiki.developerforce.com/page/Digging_Deeper_into_OAuth_2.0_on_Force.com">Digging Deeper into OAuth 2.0 on Force.com</a>
  */
 public class SalesforceConfiguration {
 
     private final static String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
-    public static final double API_VERSION = 28.0;
+    public static final double API_VERSION = 29.0;
 
     // Exposed configuration properties.
 
