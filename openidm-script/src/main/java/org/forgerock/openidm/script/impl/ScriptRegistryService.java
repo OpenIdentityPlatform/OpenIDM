@@ -26,6 +26,8 @@ package org.forgerock.openidm.script.impl;
 
 import java.io.File;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,6 +39,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -441,15 +444,36 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     @Override
     public ScriptEntry takeScript(JsonValue script) throws ScriptException {
-        // Check if "name" is missing and "file" is used instead
         JsonValue scriptConfig = script.clone();
         if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {
             JsonValue file = scriptConfig.get(SOURCE_FILE);
+            JsonValue source = scriptConfig.get(SourceUnit.ATTR_SOURCE);
+
             if (!file.isNull()) {
+                // If we do not have a name use the file.
                 scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());
+            } else if (!source.isNull()) {
+                /*
+                 * We assign a name here otherwise ScriptRegistryImpl.takeScript() assigns a random UUID.
+                 * This results in a newly created and cached class on every invocation.
+                 */
+                try {
+                    MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+                    // digest source AND type as we could have identical source for different types
+                    String type = scriptConfig.get(SourceUnit.ATTR_TYPE).asString();
+                    byte[] nameAndType = (source.asString() + type).getBytes();
+                    byte[] digest = md.digest(nameAndType);
+                    String name = DatatypeConverter.printHexBinary(digest);
+
+                    scriptConfig.put(SourceUnit.ATTR_NAME, name);
+                } catch (NoSuchAlgorithmException e) {
+                    // SHA-1 is a required implementation. This should never happen.
+                    logger.error("Could not get SHA-1 MessageDigest instance. This should be implemented on any standard JVM.", e);
+                }
             }
         }
-        
+
         return super.takeScript(scriptConfig);
     }
     
