@@ -1946,9 +1946,9 @@ Content-Length: 89
   <title>Differences between the CREST API and a Generic REST API</title>
   <para>
    The main difference between a CREST-based REST API and a generic REST API is
-   that CREST is that the CREST API is inherently recognizable by all ForgeRock
-   products. As such, you can leverage CREST resources in your scripts, to
-   create CREST requests.
+   that CREST is inherently recognizable by all ForgeRock products.
+   As such, you can leverage CREST resources in your scripts, to create
+   CREST requests.
   </para>
   <para>
    For example, to write a <literal>CREATE</literal> request in CREST, you
