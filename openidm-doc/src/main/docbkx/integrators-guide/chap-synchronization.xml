@@ -1601,17 +1601,18 @@ $ <userinput>curl \
   <section xml:id="recon-query-optimization">
    <title>Improving Reconciliation Query Performance</title>
    <para>
-    By default, reconciliation source and target queries make a read call to
-    every record on the source and target systems, to determine candidates for
-    reconciliation. On slow source or target systems, these frequent calls can
-    incur a substantial performance cost.
+    In most reconciliation configurations, source and target queries make a read
+    call to every record on the source and target systems, to determine
+    candidates for reconciliation. On slow source or target systems, these
+    frequent calls can incur a substantial performance cost.
    </para>
    <para>
     To improve query performance in these situations, you can preload the entire
     result set into memory on the source or target system, or on both systems.
-    Subsequent queries are made against the data in memory, rather than the data
-    on the remote system. For this optimization to work, the entire result set
-    must fit into the available memory on the system for which it is enabled.
+    Subsequent read queries on known IDs are made against the data in memory,
+    rather than the data on the remote system. For this optimization to be
+    effective, the entire result set must fit into the available memory on the
+    system for which it is enabled.
    </para>
    <para>
     The optimization works by defining a <literal>sourceQuery</literal> or
@@ -1635,20 +1636,33 @@ $ <userinput>curl \
         },
     ...</programlisting>
    <para>
-    You can explicitly state that the query has returned the complete object by
-    setting <literal>sourceQueryFullEntry</literal> or
-    <literal>targetQueryFullEntry</literal> to <literal>true</literal> in the
-    mapping. If these properties are not set, OpenIDM automatically attempts to
-    detect what has been returned. The auto-detection mechanism assumes that
-    a result set that includes two or more fields per object (apart from the
-    <literal>_id</literal> and <literal>rev</literal> fields) contains the
-    complete object. If <literal>sourceQueryFullEntry</literal> is
-    <literal>true</literal>, the source query result includes all the details
-    necessary to pre-load the source objects. If
-    <literal>sourceQueryFullEntry</literal> is <literal>false</literal>, OpenIDM
-    uses only the IDs from the source query result. If the complete source
-    object is required, the source object is queried on demand. The same logic
-    applies for the target query.
+    OpenIDM automatically attempts to detect what has been returned. The
+    auto-detection mechanism assumes that a result set that includes three or
+    more fields per object (apart from the <literal>_id</literal> and
+    <literal>rev</literal> fields) contains the complete object.
+   </para>
+   <para>
+    You can explicitly state whether a query is configured to return complete
+    objects by setting the value of <literal>sourceQueryFullEntry</literal> or
+    <literal>targetQueryFullEntry</literal> in the mapping. The setting of these
+    properties overrides the auto-detection mechanism.
+   </para>
+   <para>
+    Setting these properties to <literal>false</literal>, indicates that the
+    returned object is not the complete object. This might be required if a
+    query returns more than three fields of an object, but not the complete
+    object. Without this setting, the auto-detect logic would assume that the
+    complete object was being returned in this case. OpenIDM uses only the IDs
+    from this query result. If the complete object is required, the object is
+    queried on demand.
+   </para>
+   <para>
+    Setting these properties to <literal>true</literal> indicates that the
+    complete object is returned. This setting is typically required only for
+    very small objects, for which the number of returned fields does not reach
+    the threshold required for the auto-detection mechanism to assume that it is
+    a full object. In this case, the query result includes all the details
+    required to pre-load the full object.
    </para>
    <para>
     The following excerpt of the synchronization mapping file indicates that
