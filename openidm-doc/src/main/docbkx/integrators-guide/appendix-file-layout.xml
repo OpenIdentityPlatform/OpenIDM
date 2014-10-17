@@ -55,8 +55,7 @@
    <listitem>
     <para>
      OpenIDM audit log directory default location, created at run time, as
-     configured in
-     <filename>openidm/conf/audit.json</filename>
+     configured in <filename>openidm/conf/audit.json</filename>
     </para>
    </listitem>
   </varlistentry>
@@ -77,6 +76,12 @@
     </listitem>
   </varlistentry>
   <varlistentry>
+    <term><filename>openidm/audit/sync.csv</filename></term>
+    <listitem>
+     <para>Default OpenIDM synchronization audit log</para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
     <term><filename>openidm/bin/</filename></term>
     <listitem><para>OpenIDM core libraries and scripts</para></listitem>
   </varlistentry>  
@@ -93,9 +98,13 @@
   </varlistentry>
   <varlistentry>
     <term><filename>openidm/bin/defaults/script</filename></term>
-    <listitem><para>Default scripts required to run specific services. In general, you 
-    should not modify these scripts. Instead, add customized scripts to the 
-    <filename>openidm/script</filename> folder.</para></listitem>
+    <listitem>
+     <para>
+      Default scripts required to run specific services. In general, you should
+      not modify these scripts. Instead, add customized scripts to the
+      <filename>openidm/script</filename> folder.
+     </para>
+    </listitem>
   </varlistentry>
   <varlistentry>
     <term><filename>openidm/bin/defaults/script/audit/*.js</filename></term>
@@ -144,7 +153,7 @@
     <term><filename>openidm/bin/defaults/script/lib/*</filename></term>
     <listitem>
      <para>
-      Internal libraries required by certain OpenIDM javascripts
+      Internal libraries required by certain OpenIDM javascripts.
      </para>
     </listitem>
   </varlistentry>
