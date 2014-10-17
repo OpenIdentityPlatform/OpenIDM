@@ -3,10 +3,11 @@
   width: auto;
   margin: 0 !important;
   font-size: 12px;
+  float: right;
 }
 
 #objectTypesForm button {
-  margin-right:10px !important;
+  margin-left:10px !important;
 }
 
 #objectTypesForm {
@@ -55,7 +56,10 @@
 
 #objectTypesForm .objectTypeForm h3 > span {
   display: inline-block;
-  margin-right:15px;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #objectTypesForm .content {
@@ -71,6 +75,7 @@
   display: block;
   overflow: hidden;
   padding: 0 5px;
+  white-space: nowrap;
 }
 
 #objectTypesForm .form-control > select {
