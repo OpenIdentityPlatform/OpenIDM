@@ -26,14 +26,13 @@
 
 define("org/forgerock/openam/ui/user/login/RESTLoginHelper", [
     "./AuthNDelegate",
-    "UserDelegate",
     "org/forgerock/commons/ui/common/main/ViewManager",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/Constants"
-], function (authNDelegate, userDelegate, viewManager, AbstractConfigurationAware, router, conf, uiUtils, constants) {
+], function (authNDelegate, viewManager, AbstractConfigurationAware, router, conf, uiUtils, constants) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
@@ -52,7 +51,7 @@ define("org/forgerock/openam/ui/user/login/RESTLoginHelper", [
                     if (params.hasOwnProperty("callback_" + i)) {
                         populatedRequirements.callbacks[i].input[0].value = params["callback_" + i];
                     }
-                });       
+                });
             }
 
             authNDelegate
@@ -92,7 +91,7 @@ define("org/forgerock/openam/ui/user/login/RESTLoginHelper", [
     
     obj.getLoggedUser = function(successCallback, errorCallback) {
         try{
-            userDelegate.getProfile(successCallback, errorCallback, {"serverError": {status: "503"}, "unauthorized": {status: "401"}}, {});
+            authNDelegate.getProfile({"serverError": {status: "503"}, "unauthorized": {status: "401"}}, {}).then(successCallback, errorCallback);
         } catch(e) {
             console.log(e);
             errorCallback();

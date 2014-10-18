@@ -88,15 +88,6 @@
     }
 
 
-    try {
-        return openidm.action("external/rest", "call", proxyRequest);
-    }
-    catch (e) { 
-        throw { 
-            "code" : e.javaException.getCode(), 
-            "message" : e.javaException.getMessage(),
-            "detail" : e.javaException.getDetail()
-        };
-    }
+    return openidm.action("external/rest", "call", proxyRequest);
 
 }());

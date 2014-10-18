@@ -25,6 +25,7 @@
 /*global document, $, define, _, window */
 
 define("org/forgerock/openam/ui/user/login/AuthNDelegate", [
+    "AuthnDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -32,11 +33,13 @@ define("org/forgerock/openam/ui/user/login/AuthNDelegate", [
     "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/i18nManager"
-], function(constants, AbstractDelegate, configuration, eventManager, cookieHelper, router, i18nManager) {
+], function(idmAuthnDelegate, constants, AbstractDelegate, configuration, eventManager, cookieHelper, router, i18nManager) {
 
     var obj = new AbstractDelegate(constants.host + "/"+ constants.amContext + "/json/authenticate"),
         requirementList = [],
         knownAuth = {}; // to be used to keep track of the attributes associated with whatever requirementList contains
+
+    obj.getProfile = idmAuthnDelegate.getProfile;
 
     obj.begin = function () {
 
