@@ -336,6 +336,14 @@ public class SalesforceConfiguration {
         predefinedQueries.putAll(queries);
     }
 
+    public boolean queryIdExists(String queryId) {
+        return queryId != null && predefinedQueries.containsKey(queryId);
+    }
+
+    public String getQueryExpression(String queryId) {
+        return predefinedQueries.get(queryId);
+    }
+
     /**
      * {@inheritDoc}
      */

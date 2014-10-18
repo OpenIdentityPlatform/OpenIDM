@@ -23,6 +23,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -35,6 +36,8 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -63,6 +66,7 @@ import org.forgerock.openidm.provisioner.salesforce.internal.async.AsyncBatchRes
 import org.forgerock.openidm.provisioner.salesforce.internal.async.AsyncJobResourceProvider;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
+import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
@@ -71,6 +75,7 @@ import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.restlet.Response;
+import org.restlet.data.Method;
 import org.restlet.data.Parameter;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
@@ -154,8 +159,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
     private final ConcurrentMap<String, SObjectDescribe> schema = new ConcurrentHashMap<String, SObjectDescribe>();
 
-    private final QueryResource queryResource = new QueryResource();
-
     /* Internal routing objects to register and remove the routes. */
     private RouteEntry routeEntry;
 
@@ -229,9 +232,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         builder.withTemplate(system.concat("recent").toString())
                 .withCollectionResourceProvider(new GenericResourceProvider("recent"))
                 .buildNext();
-
-        builder.withTemplate(system.concat("query").toString()).withRequestHandler(
-                queryResource).buildNext();
 
         builder.withTemplate(system.concat("metadata/{metadataType}").toString())
                 .withCollectionResourceProvider(new MetadataResourceProvider(connection))
@@ -409,7 +409,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         logger.trace("Create sobjects/{} \n content: \n{}\n", type, create);
 
                         cr.getRequest().setEntity(new JacksonRepresentation<Map>(create.asMap()));
-                        cr.setMethod(org.restlet.data.Method.POST);
+                        cr.setMethod(Method.POST);
                         handleRequest(cr, true);
                         final Representation body = cr.getResponse().getEntity();
                         if (null != body && body instanceof EmptyRepresentation == false) {
@@ -459,7 +459,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 final String type = getPartition(context);
                 final ClientResource cr = getClientResource(type, resourceId);
                 try {
-                    cr.setMethod(org.restlet.data.Method.DELETE);
+                    cr.setMethod(Method.DELETE);
                     handleRequest(cr, true);
                     final JsonValue result;
                     final Representation body = cr.getResponse().getEntity();
@@ -500,30 +500,30 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         @Override
         public void queryCollection(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
+
             try {
+                final String type = getPartition(context);
+                final String queryExpression;
                 if (StringUtils.isNotBlank(request.getQueryId())) {
-
-                    String queryExpression = connection.getQueryExpression(request.getQueryId());
-                    if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())
-                            || null != queryExpression) {
-                        if (null == queryExpression) {
-                            String type = getPartition(context);
-                            queryExpression = "SELECT id FROM " + type;
-                        }
-
-                        if (executeQuery(handler, queryExpression)) {
-                            return;
-                        }
-
+                    if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
+                        queryExpression = "SELECT id FROM " + type;
+                    } else if (config.queryIdExists(request.getQueryId())) {
+                        queryExpression = config.getQueryExpression(request.getQueryId());
                     } else {
-                        handler.handleError(new BadRequestException("Unsupported QueryId"
-                                + request.getQueryId()));
+                        handler.handleError(new BadRequestException("Unsupported QueryId" + request.getQueryId()));
+                        return;
                     }
                 } else if (StringUtils.isNotBlank(request.getQueryExpression())) {
-                    queryResource.handleQuery(context, request, handler);
+                    queryExpression = request.getQueryExpression();
+                } else if (request.getQueryFilter() != null) {
+                    queryExpression = buildQueryExpressionFromQueryFilter(type, request.getQueryFilter());
                 } else {
-                    handler.handleError(new NotSupportedException("queryFilter is not yet supported"));
+                    handler.handleError(
+                            new BadRequestException("One of queryId, queryExpression, or queryFilter must be specified"));
+                    return;
                 }
+
+                executeQuery(handler, queryExpression);
             } catch (Throwable t) {
                 handler.handleError(ResourceUtil.adapt(t));
             }
@@ -629,7 +629,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 if (null == describe) {
                     final ClientResource cr = getClientResource(type, "describe");
                     try {
-                        cr.setMethod(org.restlet.data.Method.GET);
+                        cr.setMethod(Method.GET);
 
                         handleRequest(cr, true);
                         Representation body = cr.getResponse().getEntity();
@@ -659,6 +659,32 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         return describe;
     }
 
+    private static final QueryFilterVisitor<String, Void> SALESFORCE_QUERY_FILTER_VISITOR =
+            new SQLQueryFilterVisitor<Void>() {
+
+                @Override
+                public String visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
+                    if (field.size() != 1) {
+                        throw new IllegalArgumentException("Only one level JsonPointer supported");
+                    }
+                    return "(" + field.leaf() + " " + operand + " '" + String.valueOf(valueAssertion) + "')";
+                }
+
+                @Override
+                public String visitPresentFilter(Void parameters, JsonPointer field) {
+                    if (field.size() != 1) {
+                        throw new IllegalArgumentException("Only one level JsonPointer supported");
+                    }
+                    return "(" + field.leaf() + " IS NOT NULL)";
+                }
+            };
+
+    private String buildQueryExpressionFromQueryFilter(String type, QueryFilter queryFilter) {
+        // TODO use actual fields from "meta-data"
+        return "SELECT Id, UserName, FirstName, LastName FROM " + type + " WHERE "
+                + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null);
+    }
+
     private boolean executeQuery(QueryResultHandler handler, String queryExpression) throws ResourceException {
         Integer totalSize = null;
         JsonValue result = null;
@@ -670,37 +696,29 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         do {
             try {
                 if (null == result) {
-                    result =
-                            sendClientRequest(org.restlet.data.Method.GET, "query",
-                                    new Parameter("q", queryExpression));
+                    result = sendClientRequest(Method.GET, "query", new Parameter("q", queryExpression));
                 } else if (!result.get(NEXT_RECORDS_URL).isNull()) {
                     String url = result.get(NEXT_RECORDS_URL).asString();
-                    String queryValue =
-                            url.substring(url.indexOf("query/"), url.length());
+                    String queryValue = url.substring(url.indexOf("query/"), url.length());
                     if (OpenIDMisSmart) {
                         // TODO Use the OpenIDM to iterate over the pages
                         pagedResultsCookie = queryValue.substring(6);
                         // TODO Calculate the remainingPagedResults
-                        String pos =
-                                pagedResultsCookie.substring(pagedResultsCookie.indexOf('-') + 1);
-                        handler.handleResult(new QueryResult(pagedResultsCookie, totalSize
-                                - Integer.getInteger(pos)));
+                        String pos = pagedResultsCookie.substring(pagedResultsCookie.indexOf('-') + 1);
+                        handler.handleResult(new QueryResult(pagedResultsCookie, totalSize - Integer.getInteger(pos)));
                         return true;
                     }
-                    result = sendClientRequest(org.restlet.data.Method.GET, queryValue);
+                    result = sendClientRequest(Method.GET, queryValue);
                 } else {
                     break;
                 }
                 if (result != null) {
                     for (JsonValue record : result.get("records")) {
                         if (record.isDefined("Id")) {
-                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id")
-                                    .asString());
+                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id").asString());
                         }
-                        Resource resource =
-                                new Resource(record.get("Id").asString(), record.get(
-                                        REVISION_FIELD).asString(), record);
-                        handler.handleResource(resource);
+                        handler.handleResource(
+                                new Resource(record.get("Id").asString(), record.get(REVISION_FIELD).asString(), record));
                     }
                     if (totalSize == null) {
                         totalSize = result.get("totalSize").asInteger();
@@ -709,8 +727,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         break;
                     }
                 } else {
-                    throw new InternalServerErrorException(
-                            "Unexpected Salesforce service response: 'null'");
+                    throw new InternalServerErrorException("Unexpected Salesforce service response: 'null'");
                 }
             } catch (final IOException e) {
                 throw new InternalServerErrorException(e);
@@ -720,7 +737,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         return false;
     }
 
-    private JsonValue sendClientRequest(org.restlet.data.Method method, String id,
+    private JsonValue sendClientRequest(Method method, String id,
                                         Parameter... parameters) throws ResourceException, IOException {
 
         final ClientResource cr = getClientResource(id);
@@ -788,58 +805,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     private ClientResource getClientResource(String id) {
         return connection.getChild(id == null ? "services/data/" + connection.getVersion()
                 : "services/data/" + connection.getVersion() + "/" + id);
-    }
-
-    public class QueryResource implements RequestHandler {
-
-        public void handleQuery(ServerContext context, QueryRequest request,
-                QueryResultHandler handler) {
-            try {
-                if (StringUtils.isNotBlank(request.getQueryExpression())) {
-
-                    if (executeQuery(handler, request.getQueryExpression())) {
-                        return;
-                    }
-
-                } else {
-                    handler.handleError(new NotSupportedException(
-                            "queryId and queryFilter is not yet supported"));
-                }
-            } catch (Throwable t) {
-                handler.handleError(ResourceUtil.adapt(t));
-            }
-        }
-
-        public void handleAction(ServerContext context, ActionRequest request,
-                ResultHandler<JsonValue> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
-        public void handleCreate(ServerContext context, CreateRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
-        public void handleDelete(ServerContext context, DeleteRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
-        public void handlePatch(ServerContext context, PatchRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
-        public void handleRead(ServerContext context, ReadRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
-        public void handleUpdate(ServerContext context, UpdateRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupported(request);
-        }
-
     }
 
     class GenericResourceProvider implements CollectionResourceProvider {

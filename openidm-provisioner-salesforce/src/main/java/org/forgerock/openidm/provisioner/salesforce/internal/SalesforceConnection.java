@@ -326,10 +326,6 @@ public class SalesforceConnection extends ClientResource {
         }
     }
 
-    public String getQueryExpression(String queryId) {
-        return null != queryId ? configuration.getPredefinedQueries().get(queryId) : null;
-    }
-
     public ConnectorConfig getConnectorConfig(String api) throws ResourceException {
         if (StringUtils.isBlank(api)) {
             throw new IllegalArgumentException();
