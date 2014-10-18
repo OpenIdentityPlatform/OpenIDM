@@ -56,7 +56,7 @@ Configuring authentication is simple in most cases. Edit samples/openam/conf/aut
 
 Be sure to include "/openam" in the deployment url (or whatever servlet context you have configured OpenAM to run within).
 
-Note the list under groupRoleMapping->"openidm-admin". You can optionally add group values to this list, and any user which is a member of one of those groups will be granted the associated role (in this case, "openidm-admin"). It is recommended to do this, so that eventually you can disable the INTERNAL_USER auth module and rely exclusively upon OpenAM SSO tokens for access (see the "Provisioning Configuration" section below).
+Note the list under groupRoleMapping->"openidm-admin". You can optionally add group values to this list, and any user which is a member of one of those groups will be granted the associated role (in this case, "openidm-admin").
 
 If you are using SSL (as in the above HTTPS example) then you will need to make sure that the SSL certificate is trusted by OpenIDM. If your LDAP server's SSL certificate has not been provided by a well-known certificate authority, you may need to import this ssl certificate into OpenIDM's truststore. See the "[Accessing the Security Management Service](http://openidm.forgerock.org/doc/integrators-guide/index.html#security-management-service)" section of the Integrator's guide for more details.
 
@@ -92,8 +92,6 @@ Once configured, run this command to import the users from OpenDJ into managed/u
     curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
 
 At this point you may also wish to enable scheduled reconcilation and livesync, to ensure that OpenDJ and managed/user stay in sync with each other over time. Edit samples/openam/conf/schedule-recon.json and schedule-livesync.json, setting the "enabled" value within each to true. This will ensure that any changes to the user store which do not originate from OpenIDM will still be visible to OpenIDM.
-
-Also within samples/openam/conf/authentication.json, you can disable the INTERNAL_USER auth module by setting its "enabled" property to false. This will ensure that the only access to IDM is with a valid auth token. Be sure to execute the REST call listed above before disabling this module; otherwise that request will fail.
 
 ### Logging In
 
