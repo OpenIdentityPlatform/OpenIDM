@@ -4,7 +4,7 @@
  * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
  */
 
-package org.forgerock.openidm.provisioner.salesforce.internal.data;
+package org.forgerock.openidm.provisioner.salesforce;
 
 import java.awt.*;
 import java.util.HashSet;
@@ -31,13 +31,13 @@ import org.testng.annotations.Test;
 import com.google.inject.Inject;
 
 /**
- * A SalesforceRequestHandlerTest tests the Data API
+ * A SalesforceProvisionerServiceTest tests the Data API
  * http://wiki.developerforce.com/page/Data_Integration
  *
  * @author Laszlo Hordos
  */
 @Guice(modules = GuiceSalesforceModule.class)
-public class SalesforceRequestHandlerTest {
+public class SalesforceProvisionerServiceTest {
 
     @Inject
     @Nullable

@@ -34,7 +34,6 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilter;
 import org.forgerock.json.resource.QueryFilterVisitor;
@@ -42,7 +41,6 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -61,9 +59,6 @@ import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
-import org.forgerock.openidm.provisioner.salesforce.internal.async.AsyncBatchResourceProvider;
-import org.forgerock.openidm.provisioner.salesforce.internal.async.AsyncBatchResultResourceProvider;
-import org.forgerock.openidm.provisioner.salesforce.internal.async.AsyncJobResourceProvider;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
@@ -198,39 +193,12 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
         builder.withTemplate(system.toString()).withSingletonResourceProvider(this).buildNext();
 
-        builder.withTemplate(system.concat("sobjects/{partition}").toString())
+        // TODO register individual SObjectResourceProviders based on configured-object types
+        builder.withTemplate(system.concat("{partition}").toString())
                 .withCollectionResourceProvider(new SObjectResourceProvider()).buildNext();
 
-        builder.withTemplate(system.concat("async/job").toString())
-                .withCollectionResourceProvider(new AsyncJobResourceProvider(connection))
-                .buildNext();
-
-        builder.withTemplate(system.concat("async/job/{jobId}/batch").toString())
-                .withCollectionResourceProvider(new AsyncBatchResourceProvider(connection))
-                .buildNext();
-
-        builder.withTemplate(
-                system.concat("async/job/{jobId}/batch/{batchId}/result").toString())
-                .withCollectionResourceProvider(
-                        new AsyncBatchResultResourceProvider(connection)).buildNext();
-
-        builder.withTemplate(system.concat("licensing").toString())
-                .withCollectionResourceProvider(new GenericResourceProvider("licensing"))
-                .buildNext();
         builder.withTemplate(system.concat("connect").toString())
                 .withCollectionResourceProvider(new GenericResourceProvider("connect"))
-                .buildNext();
-        builder.withTemplate(system.concat("search").toString())
-                .withCollectionResourceProvider(new GenericResourceProvider("search"))
-                .buildNext();
-        builder.withTemplate(system.concat("tooling").toString())
-                .withCollectionResourceProvider(new GenericResourceProvider("tooling"))
-                .buildNext();
-        builder.withTemplate(system.concat("chatter").toString())
-                .withCollectionResourceProvider(new GenericResourceProvider("chatter"))
-                .buildNext();
-        builder.withTemplate(system.concat("recent").toString())
-                .withCollectionResourceProvider(new GenericResourceProvider("recent"))
                 .buildNext();
 
         builder.withTemplate(system.concat("metadata/{metadataType}").toString())
@@ -819,31 +787,25 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         public void readInstance(ServerContext serverContext, String instanceName,
                 ReadRequest readRequest, ResultHandler<Resource> resourceResultHandler) {
             try {
-
                 final ClientResource cr = getClientResource(type, instanceName);
                 try {
                     handleRequest(cr, true);
                     Representation body = cr.getResponse().getEntity();
                     if (null != body && body instanceof EmptyRepresentation == false) {
-                        JacksonRepresentation<Map> rep =
-                                new JacksonRepresentation<Map>(body, Map.class);
+                        JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
                         JsonValue result = new JsonValue(rep.getObject());
                         if (result.isDefined("Id")) {
-                            result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required()
-                                    .asString());
+                            result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required().asString());
                         }
-                        resourceResultHandler.handleResult(new Resource(
-                                result.get("Id").asString(), "", result));
+                        resourceResultHandler.handleResult(new Resource(result.get("Id").asString(), "", result));
                     } else {
-                        resourceResultHandler.handleError(new NotFoundException(
-                                "Resource not Found"));
+                        resourceResultHandler.handleError(new NotFoundException("Resource not Found"));
                     }
                 } finally {
                     if (null != cr) {
                         cr.release();
                     }
                 }
-
             } catch (Throwable t) {
                 resourceResultHandler.handleError(ResourceUtil.adapt(t));
             }
