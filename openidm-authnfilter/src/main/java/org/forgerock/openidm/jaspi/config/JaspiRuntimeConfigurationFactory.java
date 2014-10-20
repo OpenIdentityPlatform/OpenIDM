@@ -22,6 +22,7 @@ import org.forgerock.jaspi.logging.JaspiLoggingConfigurator;
 import org.forgerock.jaspi.runtime.AuditApi;
 import org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
 import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
 import org.slf4j.Logger;
@@ -143,6 +144,12 @@ public enum JaspiRuntimeConfigurationFactory implements ModuleConfigurationFacto
             String className = resolveAuthModuleClassName(moduleConfig.get("name").asString());
             moduleConfig.remove("name");
             moduleConfig.add("className", className);
+        }
+
+        JsonValue moduleProperties = moduleConfig.get("properties");
+        //decrypt/de-obfuscate keystore password
+        if (moduleProperties.isDefined("keystorePassword")) {
+            moduleProperties.put("keystorePassword", JettyPropertyUtil.getProperty("openidm.keystore.password", false));
         }
 
         // set the classname config so the actual auth module gets wrapped in a IDMJaspiModuleWrapper:
