@@ -423,8 +423,90 @@
   <varlistentry>
    <term><filename>openidm/db/</filename></term>
    <listitem>
-    <para>Internal repository files, including both OrientDB files and data
-    definition language scripts for JDBC based repositories such as MySQL</para>
+    <para>
+     Internal repository files, including OrientDB files and sample repository
+     configurations for JDBC-based repositories.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/db2</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     DB2 database.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/h2</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     H2 database, supported for Activiti engine.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/mssql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration, data definition language script, and
+     <literal>bnd</literal> file (for creating OSGi bundle) for configuring an
+     MS SQL repository. For more information, see <link
+     xlink:href="install-guide#repository-mssql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With MS SQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/mysql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language scripts for
+     configuring a MySQL repository. For more information, see <link
+     xlink:href="install-guide#repository-mysql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With MySQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/oracle</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration and data definition language script for
+     configuring an OracleDB repository. For more information, see <link
+     xlink:href="install-guide#repository-oracledb"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With Oracle Database</citetitle></link> in the
+     <citetitle>Installation Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/postgresql</filename></term>
+   <listitem>
+    <para>
+     Sample repository configuration, data definition language script, and
+     schema optimization scripts for configuring a PostgreSQL repository. For
+     more information, see <link
+     xlink:href="install-guide#repository-postgresql"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Set Up
+     OpenIDM With PostgreSQL</citetitle></link> in the <citetitle>Installation
+     Guide</citetitle>.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/db/util</filename></term>
+   <listitem>
+    <para>
+     Files required for support of OrientDB Studio.
+    </para>
    </listitem>
   </varlistentry>
   <varlistentry>

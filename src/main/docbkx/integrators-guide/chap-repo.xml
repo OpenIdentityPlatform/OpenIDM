@@ -54,10 +54,10 @@
    OpenIDM provides a specific configuration file for each supported JDBC
    repository, as well as example configurations for other repositories. These
    configuration files are located in
-   <filename>/path/to/openidm/samples/misc</filename> and are named
-   <filename>repo.jdbc-<replaceable>database</replaceable>.json</filename>. Copy
-   the configuration file for your specific database type to
-   <filename>/path/to/openidm/conf/repo.jdbc.json</filename>.
+   <filename>/path/to/openidm/db/<replaceable>database</replaceable></filename>
+   and are named <filename>repo.jdbc.json</filename>. Copy the configuration
+   file for your specific database type to
+   <filename>/path/to/openidm/conf/</filename>.
   </para>
   <para>
    The repository configuration file includes the connection details for the
@@ -643,7 +643,7 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
     managed objects, <emphasis>and</emphasis> to have an explicit mapping that
     overrides the default generic mapping in certain cases. The sample
     configuration provided in
-    <filename>/path/to/openidm/samples/misc/repo.jdbc-mysql-explicit-managed-user.json</filename>
+    <filename>/path/to/openidm/db/mysql/conf/repo.jdbc-mysql-explicit-managed-user.json</filename>
     has a generic mapping for managed objects, but an explicit mapping for
     managed user objects.
    </para>

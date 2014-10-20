@@ -106,11 +106,11 @@ $ rm repo.orientdb.json</screen>
   </step>
   <step>
    <para>
-    Copy <filename>openidm/samples/misc/repo.jdbc.json</filename> to the
+    Copy <filename>openidm/db/mysql/conf/repo.jdbc.json</filename> to the
     <filename>openidm/conf</filename> directory.
    </para>
-   <screen>$ cd /path/to/openidm/conf
-$ cp ../samples/misc/repo.jdbc.json .</screen>
+   <screen>$ cd /path/to/openidm
+$ cp db/mysql/conf/repo.jdbc.json conf/</screen>
   </step>
   <step>
    <indexterm>
@@ -121,7 +121,7 @@ $ cp ../samples/misc/repo.jdbc.json .</screen>
     Import the data definition language script for OpenIDM into MySQL.
    </para>
    <screen><userinput>$ cd /path/to/mysql
-$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/scripts/mysql/openidm.sql</userinput>
+$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/mysql/scripts/openidm.sql</userinput>
 <computeroutput>Enter password:
 $ </computeroutput></screen>
    <para>This step creates an <literal>openidm</literal> database for use
@@ -352,7 +352,7 @@ Id   State          Name
       <para>
        Select File > Open > File and navigate to the OpenIDM data definition
        language script
-       (<filename>path\to\openidm\db\scripts\mssql\openidm.sql</filename>).
+       (<filename>path\to\openidm\db\mssql\scripts\openidm.sql</filename>).
        Click Open to open the file.
       </para>
      </step>
@@ -424,12 +424,12 @@ Id   State          Name
        xlink:href="http://www.aqute.biz/Bnd/Bnd" />.
       </para>
       <para>
-       Copy the file to <filename>openidm\db\scripts\mssql</filename>.
+       Copy the file to <filename>openidm\db\mssql\scripts</filename>.
       </para>
      </step>
      <step>
       <para>
-       Your <filename>openidm\db\scripts\mssql</filename> directory should now
+       Your <filename>openidm\db\mssql\scripts</filename> directory should now
        contain the following files:
       </para>
        <screen>
@@ -441,7 +441,7 @@ Id   State          Name
        Bundle the two JAR files together with the following command:
       </para>
       <screen>
-C:\> cd \path\to\openidm\db\scripts\mssql
+C:\> cd \path\to\openidm\db\mssql\scripts
 ./> java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd sqljdbc4.jar
       </screen>
       <para>
@@ -476,20 +476,13 @@ C:\> cd \path\to\openidm\conf\
    <step>
     <para>
      Copy the repository configuration file for MS SQL
-     (<filename>openidm\samples\misc\repo.jdbc-mssql.json</filename>) to the
+     (<filename>openidm\db\mssql\conf\repo.jdbc.json</filename>) to the
      configuration directory.
     </para>
     <screen>
-C:\> cd \path\to\openidm\conf\
-.\> cp ..\samples\misc\repo.jdbc-mssql.json .
+C:\> cd \path\to\openidm
+.\> cp db\mssql\conf\repo.jdbc.json conf\
     </screen>
-   </step>
-   <step>
-    <para>
-     Rename the MS SQL repository configuration file to
-     <filename>repo.jdbc.json</filename>.
-    </para>
-    <screen>.\> ren repo.jdbc-mssql.json repo.jdbc.json</screen>
    </step>
    <step>
     <para>
@@ -566,9 +559,8 @@ Id   State          Name
   </para>
 
   <para>
-   You will need to import the OpenIDM schema using the data definition language
-   script found in
-   <filename>/path/to/openidm/db/scripts/oracle/openidm.sql</filename> using the
+   Import the OpenIDM schema using the data definition language script
+   (<filename>/path/to/openidm/db/oracle/scripts/openidm.sql</filename>), as the
    appropriate schema owner user.
   </para>
 
@@ -600,9 +592,9 @@ ROLES        openidm-reg
 -----------------------------------------------------------------------------</screen>
 
   <para>
-   Before you start OpenIDM, you should create an Oracle DB driver from
-   two separate jar files and set up the OpenIDM repository file for the
-   Oracle DB. To do so, take the following steps:
+   Before you start OpenIDM, create an Oracle DB driver from two separate jar
+   files and set up the OpenIDM repository configuration for Oracle DB, as
+   follows:
   </para>
 
   <step>
@@ -610,30 +602,30 @@ ROLES        openidm-reg
     from <link xlink:show="new"
     xlink:href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"
     >Oracle Technology Network</link> and place it in the
-    <filename>openidm/db/scripts/oracle</filename> directory.</para>
-   <screen>$ ls /path/to/openidm/db/scripts/oracle
-ojdbc6_g.jar
+    <filename>openidm/db/oracle/scripts</filename> directory.</para>
+   <screen>$ ls /path/to/openidm/db/oracle/scripts
+ojdbc6_g.jar    openidm.sql
    </screen>
   </step>
   <step>
    <para>
-    Create a bind file and edit it to match the version information
-    for your JDBC driver.
+    Create a bind file and edit it to match the version information for your
+    JDBC driver.
    </para>
    <para>
     You can use the sample bind file located in
-    <filename>openidm/db/scripts/mssql/</filename>. Copy the bind file
+    <filename>openidm/db/mssql/scripts</filename>. Copy the bind file
     to the same location as the JDBC driver.
    </para>
-    <screen>$ cd /path/to/openidm/db/scripts
-$ cp mssql/sqljdbc4.bnd oracle/
-$ ls oracle/
-ojdbc6_g.jar  sqljdbc4.bnd</screen>
+    <screen>$ cd /path/to/openidm/db
+$ cp mssql/scripts/sqljdbc4.bnd oracle/scripts
+$ ls oracle/scripts
+ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
    <para>
     The JDBC driver version information for your driver is located
     in the <literal>Specification-Version</literal> property in the
     MANIFEST file of the driver.</para>
-    <screen>$ cd /path/to/openidm/db/scripts/oracle
+    <screen>$ cd /path/to/openidm/db/oracle/scripts
 $ unzip -q -c ojdbc6_g.jar META-INF/MANIFEST.MF
 ...
 Specification-Vendor: Sun Microsystems Inc.
@@ -664,15 +656,15 @@ Bundle-Version: ${version}</screen>
     Place the <literal>bnd</literal> Java archive file in the same
     directory as the JDBC driver, and the bind file.
    </para>
-   <screen>$ ls /path/to/openidm/db/scripts/oracle/
-biz.aQute.bnd.jar  ojdbc6_g.jar  sqljdbc4.bnd</screen>
+   <screen><userinput>$ ls /path/to/openidm/db/oracle/scripts</userinput>
+biz.aQute.bnd.jar    ojdbc6_g.jar    openidm.sql    sqljdbc4.bnd</screen>
   </step>
   <step>
    <para>
-    Change to the directory in which the three files are located and
-    run the following command to create the OSGi bundle.
+    Change to the directory in which the script files are located and run the
+    following command to create the OSGi bundle.
    </para>
-   <screen>$ cd /path/to/openidm/db/scripts/oracle/
+   <screen>$ cd /path/to/openidm/db/oracle/scripts
 $ java -jar biz.aQute.bnd.jar wrap -properties sqljdbc4.bnd ojdbc6_g.jar
 Dec 10, 2013 9:53:28 AM java.util.prefs.FileSystemPreferences$1 run
 INFO: Created user preferences directory.
@@ -680,8 +672,8 @@ ojdbc6_g 984 0</screen>
    <para>
     A new <literal>.bar</literal> file has now been created.
    </para>
-   <screen>$ ls
-biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  sqljdbc4.bnd</screen>
+   <screen><userinput>$ ls</userinput>
+biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  openidm.sql  sqljdbc4.bnd</screen>
   </step>
   <step>
    <para>Move the <literal>.bar</literal> file to the
@@ -700,12 +692,11 @@ biz.aQute.bnd.jar  ojdbc6_g.bar  ojdbc6_g.jar  sqljdbc4.bnd</screen>
   </step>
   <step>
    <para>Copy the OracleDB configuration file
-   (<filename>openidm/samples/misc/repo.jdbc-oracle.json</filename>) to the
-   configuration directory and rename the file
-    <filename>repo.jdbc.json</filename>.
+   (<filename>openidm/db/oracle/conf/repo.jdbc.json</filename>) to the
+   configuration directory.
    </para>
-   <screen>$ cd /path/to/openidm/conf
-$ cp ../samples/misc/repo.jdbc-oracle.json repo.jdbc.json</screen>
+   <screen>$ cd /path/to/openidm
+$ cp db/oracle/conf/repo.jdbc.json conf/</screen>
   </step>
   <step>
    <para>
@@ -822,7 +813,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
    <step>
     <para>
      OpenIDM includes a script
-     (<filename>path/to/openidm/db/scripts/postgresql/createuser.pgsql</filename>)
+     (<filename>path/to/openidm/db/postgresql/scripts/createuser.pgsql</filename>)
      that sets up an <literal>openidm</literal> database and user, with a
      default password of <literal>openidm</literal>. The script also grants the
      appropriate permissions.
@@ -831,7 +822,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
      Edit this script if you want to change the password of the
      <literal>openidm</literal> user, for example:
     </para>
-    <screen><userinput>$ more /path/to/openidm/db/scripts/postgresql/createuser.pgsql</userinput>
+    <screen><userinput>$ more /path/to/openidm/db/postgresql/scripts/createuser.pgsql</userinput>
 <computeroutput>create user openidm with password 'mypassword';
 create database openidm encoding 'utf8' owner openidm;
 grant all privileges on database openidm to openidm;</computeroutput></screen>
@@ -840,7 +831,7 @@ grant all privileges on database openidm to openidm;</computeroutput></screen>
     <para>
      Execute the <literal>createuser.pgsql</literal> script as follows:
     </para>
-    <screen><userinput>$ psql &lt; /path/to/openidm/db/scripts/postgresql/createuser.pgsql</userinput>
+    <screen><userinput>$ psql &lt; /path/to/openidm/db/postgresql/scripts/createuser.pgsql</userinput>
 <computeroutput>CREATE ROLE
 CREATE DATABASE
 GRANT</computeroutput></screen>
@@ -850,7 +841,7 @@ GRANT</computeroutput></screen>
      Execute the <literal>openidm.pgsql</literal> script as the new
      <literal>openidm</literal> user that you created in the first step.
     </para>
-    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/scripts/postgresql/openidm.pgsql</userinput>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/postgresql/scripts/openidm.pgsql</userinput>
 <computeroutput>
 CREATE SCHEMA
 CREATE TABLE
@@ -879,11 +870,11 @@ CREATE INDEX</computeroutput></screen>
    <step>
     <para>
      Copy the PostgreSQL repository configuration file
-     (<filename>samples/misc/repo.jdbc-postgres.json</filename>) to the
-     configuration directory, and rename it <filename>repo.jdbc.json</filename>.
+     (<filename>openidm/db/postgres/conf/repo.jdbc.json</filename>) to the
+     configuration directory.
     </para>
     <screen><userinput>$ cd /path/to/openidm
-$ cp samples/misc/repo.jdbc-postgres.json conf/repo.jdbc.json</userinput></screen>
+$ cp db/postgres/conf/repo.jdbc.json conf/</userinput></screen>
    </step>
    <step>
     <para>
@@ -930,7 +921,7 @@ $ cp samples/misc/repo.jdbc-postgres.json conf/repo.jdbc.json</userinput></scree
      required indexes. The file includes extensive comments on the indexes
      that are being created.
     </para>
-    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/scripts/postgresql/default_schema_optimization.pgsql</userinput>
+    <screen><userinput>$ psql -U openidm &lt; /path/to/openidm/db/postgresql/scripts/default_schema_optimization.pgsql</userinput>
 <computeroutput>CREATE INDEX
 CREATE INDEX
 CREATE INDEX
