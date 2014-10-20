@@ -334,7 +334,7 @@
    <programlisting language="javascript">
 {
   "bundleName"       : "org.forgerock.openicf.connectors.xml-connector",
-  "bundleVersion"    : "${openicfBundleVersion}",
+  "bundleVersion"    : "${openicf.xmlconnector.version}",
   "connectorName"    : "org.forgerock.openicf.connectors.xml.XMLConnector",
   "connectorHostRef" : "host"
 }</programlisting>
@@ -1587,7 +1587,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
         "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion": "${openicfBundleVersion}",
+        "bundleVersion": "${openicf.xmlconnector.version}",
         "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
 }</programlisting>
@@ -1742,7 +1742,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
      "connectorRef" : {
          "connectorHostRef" : "xml",
          "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-         "bundleVersion" : "<?eval ${openicfBundleVersion}?>",
+         "bundleVersion" : "${openicf.xmlconnector.version}",
          "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
      },
      "configurationProperties" : {
@@ -1764,7 +1764,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
        </listitem>
        <listitem>
         <para>
-         The <filename>bundleVersion : <?eval ${openicfBundleVersion}?></filename>
+         The <literal>bundleVersion : ${openicf.xmlconnector.version}</literal>
          must be exactly the same as the version of the XML connector that you
          are using. If you specify a range here, the XML connector version must
          be included in this range.
@@ -1886,7 +1886,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.identityconnectors.ldap.LdapConnector",
         "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion": "${openicfBundleVersion}"
+        "bundleVersion": "${openicf.ldapconnector.version}"
     }
 }</programlisting>
    <para>
@@ -2417,7 +2417,7 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
       "connectorHostRef" : "dotnet",
       "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
       "bundleName" : "ActiveDirectory.Connector",
-      "bundleVersion" : "1.4.0.0"
+      "bundleVersion" : "${openicf.framework.version}"
    },          ...
 "configurationProperties" :
    {
@@ -2835,7 +2835,7 @@ Properties:
     "connectorHostRef": "#LOCAL",
     "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
     "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
-    "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    "bundleVersion": "${openicf.csvconnector.version}"
   }
 }</programlisting>
 
@@ -3061,32 +3061,31 @@ Properties:
   </section>
 
   <section xml:id="groovy-connector">
-   <title>Groovy Connector</title>
+   <title>Groovy Connector Toolkit</title>
    <para>
-    The Groovy connector is a generic scripted connector that enables you to
-    run Groovy scripts on any external resource.
+    OpenICF 1.4 introduces a generic Groovy Connector Toolkit that enables you
+    to run a Groovy script for any OpenICF operation, such as search, update,
+    create, and so forth, on any external resource.
    </para>
    <para>
-    The Groovy connector is bundled with OpenIDM ${docTargetVersion}, in
-    the JAR <filename>openidm/connectors/groovy-connector-1.4.0.0.jar</filename>.
+    The Groovy Connector Toolkit is not a complete connector, in the traditional
+    sense. Rather, it is a framework within which you must write your own Groovy
+    scripts to address the requirements of your implementation. Specific scripts
+    are provided within these samples, which demonstrate how the Groovy Connector
+    Toolkit can be used. These scripts cannot be used "as is" in your deployment,
+    but are a good starting point on which to base your customization.
    </para>
    <para>
-    Sample Groovy connector implementations are provided in the <link
-    xlink:show="new"
-    xlink:href="install-guide#chap-samples"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Samples</citetitle></link>
-    chapter of the <citetitle>Installation Guide</citetitle>.
+    The Groovy Connector Toolkit is bundled with OpenIDM ${docTargetVersion}, in
+    the JAR <filename>openidm/connectors/groovy-connector-${openicf.groovyconnector.version}.jar</filename>.
    </para>
-   <note>
-    <para>
-     The Groovy connector is not a complete connector, in the traditional sense.
-     Rather, it is a framework within which you must write your own Groovy
-     scripts to address the requirements of your implementation. Specific scripts
-     are provided with the samples that demonstrate how the Groovy connector
-     can be used. These scripts can not be used "as is" in your deployment, but
-     are a good starting point on which to base your customization.
-    </para>
-   </note>
+   <para>
+    Sample implementations are provided in <link xlink:show="new"
+    xlink:href="install-guide#samples-groovy-connector-toolkit"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using the Groovy
+    Connector Toolkit to Create Scripted Connectors</citetitle></link>in the
+    <citetitle>Installation Guide</citetitle>.
+   </para>
 
   </section>
 
@@ -3170,59 +3169,116 @@ Properties:
  "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
 
   <itemizedlist>
-   <para>Available connectors are installed in
-   <filename>openidm/connectors</filename>. OpenIDM bundles the following
-   connectors.</para>
-   <listitem><para>csv file</para></listitem>
-   <listitem><para>database table</para></listitem>
-   <listitem><para>ldap</para></listitem>
-   <listitem><para>scripted groovy</para></listitem>
-   <listitem><para>scripted sql</para></listitem>
-   <listitem><para>xml</para></listitem>
+   <para>
+    Available connectors are installed in <filename>openidm/connectors</filename>.
+    OpenIDM ${docTargetVersion} bundles the following connectors:
+   </para>
+   <listitem>
+    <para>CSV File Connector</para>
+   </listitem>
+   <listitem>
+    <para>Database Table Connector</para>
+   </listitem>
+   <listitem>
+    <para>GoogleApps Connector</para>
+   </listitem>
+   <listitem>
+    <para>
+     Scripted Groovy Connector Toolkit, which includes the following
+     sample implementations:
+    </para>
+    <itemizedlist>
+     <listitem>
+      <para>Scripted SQL Connector</para>
+     </listitem>
+     <listitem>
+      <para>Scripted CREST Connector</para>
+     </listitem>
+     <listitem>
+      <para>Scripted REST Connector</para>
+     </listitem>
+    </itemizedlist>
+   </listitem>
+   <listitem>
+    <para>LDAP Connector</para>
+   </listitem>
+   <listitem>
+    <para>XML Connector</para>
+   </listitem>
   </itemizedlist>
 
-  <para>The command above therefore should return the following output.</para>
+  <para>
+   The preceding command therefore returns the following output:
+  </para>
 
   <programlisting xml:id="step1-return" language="javascript">{
   "connectorRef": [
     {
-      "bundleVersion": "1.1.0.1",
+      "bundleVersion": "${openicf.csvconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
       "displayName": "CSV File Connector",
       "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     {
-      "bundleVersion": "1.1.0.0",
+      "bundleVersion": "${openicf.dbtableconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.databasetable-connector",
       "displayName": "Database Table Connector",
       "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector"
     },
     {
-      "bundleVersion": "1.4.0.0",
+      "bundleVersion": "${openicf.googleconnector.version}",
+      "systemType": "provisioner.openicf",
+      "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
+      "displayName": "GoogleApps Connector",
+      "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector"
+    },
+    {
+      "bundleVersion": "${openicf.groovyconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
       "displayName": "Scripted Poolable Groovy Connector",
       "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedPoolableConnector"
     },
     {
-      "bundleVersion": "1.4.0.0",
+      "bundleVersion": "${openicf.groovyconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
       "displayName": "Scripted Groovy Connector",
       "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector"
     },
     {
-      "bundleVersion": "1.1.1.3",
+      "bundleVersion": "${openicf.groovyconnector.version}",
+      "systemType": "provisioner.openicf",
+      "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+      "displayName": "Scripted CREST Connector",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector"
+    },
+    {
+      "bundleVersion": "${openicf.groovyconnector.version}",
+      "systemType": "provisioner.openicf",
+      "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+      "displayName": "Scripted SQL Connector",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
+    },
+    {
+      "bundleVersion": "${openicf.groovyconnector.version}",
+      "systemType": "provisioner.openicf",
+      "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+      "displayName": "Scripted REST Connector",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector"
+    },
+    {
+      "bundleVersion": "${openicf.ldapconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
       "displayName": "LDAP Connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
     {
-      "bundleVersion": "1.1.1.0",
-      "bundleName": "org.forgerock.openicf.connectors.scriptedsql-connector",
-      "displayName": "Scripted SQL",
-      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
-    },
-    {
-      "bundleVersion": "1.1.0.1",
+      "bundleVersion": "${openicf.xmlconnector.version}",
+      "systemType": "provisioner.openicf",
       "bundleName": "org.forgerock.openicf.connectors.xml-connector",
       "displayName": "XML Connector",
       "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
@@ -3246,7 +3302,7 @@ Properties:
  {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
  "displayName": "XML Connector",
  "bundleName": "org.forgerock.openicf.connectors.xml-connector",
- "bundleVersion": "1.1.0.1"}
+ "bundleVersion": "${openicf.xmlconnector.version}"}
  }' \
  "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</userinput></screen>
   <para>
@@ -3288,7 +3344,7 @@ Properties:
    "xmlFilePath": null
   },
   "connectorRef": {
-    "bundleVersion": "1.1.0.1",
+    "bundleVersion": "${openicf.xmlconnector.version}",
     "bundleName": "org.forgerock.openicf.connectors.xml-connector",
     "displayName": "XML Connector",
     "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
@@ -3351,7 +3407,7 @@ Properties:
     "maxObjects": 10
   },
   "connectorRef": {
-    "bundleVersion": "1.1.0.1",
+    "bundleVersion": "${openicf.xmlconnector.version}",
     "bundleName": "org.forgerock.openicf.connectors.xml-connector",
     "displayName": "XML Connector",
     "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
@@ -3416,7 +3472,7 @@ Properties:
   {
     "config": "config/provisioner.openicf/ldap",
     "connectorRef": {
-      "bundleVersion": "[1.1.0.1,1.1.2.0)",
+      "bundleVersion": "${openicf.ldapconnector.version}",
       "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
@@ -3426,7 +3482,7 @@ Properties:
   {
     "config": "config/provisioner.openicf/ad",
     "connectorRef": {
-      "bundleVersion": "[1.1.0.1,1.1.2.0)",
+      "bundleVersion": "${openicf.ldapconnector.version}",
       "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
@@ -3453,7 +3509,7 @@ Properties:
 <computeroutput>{
   "config": "config/provisioner.openicf/ldap",
   "connectorRef": {
-    "bundleVersion": "[1.1.0.1,1.1.2.0)",
+    "bundleVersion": "${openicf.ldapconnector.version}",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
@@ -3491,7 +3547,7 @@ Properties:
     "name" : "xmlfile",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion" : "1.1.0.1",
+        "bundleVersion" : "${openicf.xmlconnector.version}",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     },
     "producerBufferSize" : 100,
