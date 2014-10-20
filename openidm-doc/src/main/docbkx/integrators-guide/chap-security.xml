@@ -880,10 +880,14 @@ $ <userinput>cli.sh encrypt newpwd</userinput>
     </screen>
    </step>
    <step>
-    <para>Replace the user object in the
-    <filename>openidm/db/scripts/mysql/openidm.sql</filename> script before
-    setting up MySQL as a repository for OpenIDM.</para>
-    <para>Alternatively, replace the user in the internal user table.</para>
+    <para>
+     Replace the user object in the
+     <filename>openidm/db/<replaceable>database</replaceable>/scripts/openidm.sql</filename>
+     script before setting up your JDBC repository for OpenIDM.
+    </para>
+    <para>
+     Alternatively, replace the user in the internal user table.
+    </para>
    </step>
   </procedure>
  </section>
