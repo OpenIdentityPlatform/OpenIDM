@@ -86,7 +86,7 @@ def emailAddressAIB = new AttributeInfoBuilder("emailAddress", String.class);
 emailAddressAIB.setMultiValued(false);
 
 // members
-def membersAIB = new AttributeInfoBuilder("members", List.class);
+def membersAIB = new AttributeInfoBuilder("members", String.class);
 membersAIB.setMultiValued(true);
 
 // groups
