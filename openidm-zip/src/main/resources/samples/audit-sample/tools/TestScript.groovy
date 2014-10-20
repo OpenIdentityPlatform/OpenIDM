@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,16 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 import groovy.sql.Sql;
-import groovy.sql.DataSet;
+import org.identityconnectors.common.logging.Log;
 
+import java.sql.Connection;
 // Parameters:
 // The connector sends the following:
 // connection: handler to the SQL connection
 // action: a string describing the action ("TEST" here)
 // log: a handler to the Log facility
 
-log.info("Entering "+action+" Script");
-def sql = new Sql(connection);
+def sql = new Sql(connection as Connection);
+def log = log as Log;
+
+log.info("Entering Test Script");
 
 // a relatively-cheap query to run on start up to ensure database connectivity
 sql.eachRow("select * from auditrecon limit 1", { } );

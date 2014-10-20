@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,7 +22,11 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 import groovy.sql.Sql;
-import groovy.sql.DataSet;
+
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+
+import java.sql.Connection;
 
 // Parameters:
 // The connector sends us the following:
@@ -38,70 +42,77 @@ import groovy.sql.DataSet;
 
 // log.info("Entering {0} Script for {1} with attributes {2}", action, objectClass, attributes);
 
-def sql = new Sql(connection);
+def sql = new Sql(connection as Connection);
 //Create must return UID. Let's return the name for now.
 
+def auditrecon = new ObjectClass("auditrecon");
+def auditactivity = new ObjectClass("auditactivity");
+def auditaccess = new ObjectClass("auditaccess");
+
+//convert attributes to map
+Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
+for (Attribute attribute : attributes) {
+    attributeMap.put(attribute.getName(), attribute);
+}
+
 switch ( objectClass ) {
-    case "auditrecon":
+    case auditrecon:
     sql.execute("INSERT INTO auditrecon (objectid,entrytype,rootactionid,activity,message,reconciling,reconid,situation,sourceobjectid,status,targetobjectid,ambiguoustargetobjectids,activitydate,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             id, // objectid
-            attributes.get("entrytype")?.get(0),
-            attributes.get("rootactionid")?.get(0),
-            attributes.get("activity")?.get(0),
-            attributes.get("message")?.get(0),
-            attributes.get("reconciling")?.get(0),
-            attributes.get("reconid")?.get(0),
-            attributes.get("situation")?.get(0),
-            attributes.get("sourceobjectid")?.get(0),
-            attributes.get("status")?.get(0),
-            attributes.get("targetobjectid")?.get(0),
-            attributes.get("ambiguoustargetobjectids")?.get(0),
-            attributes.get("activitydate")?.get(0),
-            attributes.get("actionid")?.get(0),
-            attributes.get("exceptiondetail")?.get(0),
-            attributes.get("mapping")?.get(0),
-            attributes.get("messagedetail")?.get(0)
+            attributeMap.get("entrytype")?.getValue()?.get(0),
+            attributeMap.get("rootactionid")?.getValue()?.get(0),
+            attributeMap.get("activity")?.getValue()?.get(0),
+            attributeMap.get("message")?.getValue()?.get(0),
+            attributeMap.get("reconciling")?.getValue()?.get(0),
+            attributeMap.get("reconid")?.getValue()?.get(0),
+            attributeMap.get("situation")?.getValue()?.get(0),
+            attributeMap.get("sourceobjectid")?.getValue()?.get(0),
+            attributeMap.get("status")?.getValue()?.get(0),
+            attributeMap.get("targetobjectid")?.getValue()?.get(0),
+            attributeMap.get("ambiguoustargetobjectids")?.getValue()?.get(0),
+            attributeMap.get("activitydate")?.getValue()?.get(0),
+            attributeMap.get("actionid")?.getValue()?.get(0),
+            attributeMap.get("exceptiondetail")?.getValue()?.get(0),
+            attributeMap.get("mapping")?.getValue()?.get(0),
+            attributeMap.get("messagedetail")?.getValue()?.get(0)
         ]);
-    sql.commit();
     break
 
-    case "auditactivity":
+    case auditactivity:
     sql.execute("INSERT INTO auditactivity (objectid,activityid,activitydate,activity,message,subjectid,subjectrev,rootactionid,parentactionid,requester,subjectbefore,subjectafter,status,changedfields,passwordchanged) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             id, // objectid
-            attributes.get("activityid")?.get(0),
-            attributes.get("activitydate")?.get(0),
-            attributes.get("activity")?.get(0),
-            attributes.get("message")?.get(0),
-            attributes.get("subjectid")?.get(0),
-            attributes.get("subjectrev")?.get(0),
-            attributes.get("rootactionid")?.get(0),
-            attributes.get("parentactionid")?.get(0),
-            attributes.get("requester")?.get(0),
-            attributes.get("subjectbefore")?.get(0),
-            attributes.get("subjectafter")?.get(0),
-            attributes.get("status")?.get(0),
-            attributes.get("changedfields")?.get(0),
-            attributes.get("passwordchanged")?.get(0)
+            attributeMap.get("activityid")?.getValue()?.get(0),
+            attributeMap.get("activitydate")?.getValue()?.get(0),
+            attributeMap.get("activity")?.getValue()?.get(0),
+            attributeMap.get("message")?.getValue()?.get(0),
+            attributeMap.get("subjectid")?.getValue()?.get(0),
+            attributeMap.get("subjectrev")?.getValue()?.get(0),
+            attributeMap.get("rootactionid")?.getValue()?.get(0),
+            attributeMap.get("parentactionid")?.getValue()?.get(0),
+            attributeMap.get("requester")?.getValue()?.get(0),
+            attributeMap.get("subjectbefore")?.getValue()?.get(0),
+            attributeMap.get("subjectafter")?.getValue()?.get(0),
+            attributeMap.get("status")?.getValue()?.get(0),
+            attributeMap.get("changedfields")?.getValue()?.get(0),
+            attributeMap.get("passwordchanged")?.getValue()?.get(0)
         ]);
-    sql.commit();
     break
 
-    case "auditaccess":
+    case auditaccess:
 
     sql.execute("INSERT INTO auditaccess (objectid,activity,ip,principal,roles,status,activitydate,userid) values (?,?,?,?,?,?,?,?)",
         [
             id,
-            attributes.get("activity")?.get(0),
-            attributes.get("ip")?.get(0),
-            attributes.get("principal")?.get(0),
-            attributes.get("roles")?.join(','),
-            attributes.get("status")?.get(0),
-            attributes.get("activitydate")?.get(0),
-            attributes.get("userid")?.get(0)
+            attributeMap.get("activity")?.getValue()?.get(0),
+            attributeMap.get("ip")?.getValue()?.get(0),
+            attributeMap.get("principal")?.getValue()?.get(0),
+            attributeMap.get("roles")?.getValue()?.join(','),
+            attributeMap.get("status")?.getValue()?.get(0),
+            attributeMap.get("activitydate")?.getValue()?.get(0),
+            attributeMap.get("userid")?.getValue()?.get(0)
         ]);
-    sql.commit();
     break
 
     default:

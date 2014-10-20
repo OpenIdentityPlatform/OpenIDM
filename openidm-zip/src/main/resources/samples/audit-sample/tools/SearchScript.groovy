@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,7 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 import groovy.sql.Sql;
-import groovy.sql.DataSet;
+
+import java.sql.Connection;
+
+import org.identityconnectors.framework.common.objects.AttributeUtil;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
+import org.identityconnectors.framework.common.objects.filter.Filter;
 
 // Parameters:
 // The connector sends the following:
@@ -56,39 +63,24 @@ import groovy.sql.DataSet;
 // log.debug("Entering {0} Script for {1} with qeury {2} and options {3}",
 //         action, objectClass, query, options);
 
-def sql = new Sql(connection);
-def result = []
+def sql = new Sql(connection as Connection);
+def result = [];
 def where = "";
+def filter = filter as Filter;
 
-if (query != null) {
-    // Need to handle the __UID__ in queries
-    // all audit tables have id as 'objectid'
-    if (query.get("left").equalsIgnoreCase("__UID__"))
-        query.put("left", "objectid");
+def auditrecon = new ObjectClass("auditrecon");
+def auditactivity = new ObjectClass("auditactivity");
+def auditaccess = new ObjectClass("auditaccess");
 
-    // We can use Groovy template engine to generate our custom SQL queries
-    def engine = new groovy.text.SimpleTemplateEngine();
+if (filter instanceof EqualsFilter && ((EqualsFilter) filter).getAttribute().is(Uid.NAME)) {
+    //This is a Read
 
-    def whereTemplates = [
-        CONTAINS:' WHERE $left ${not ? "NOT " : ""}LIKE "%$right%"',
-        ENDSWITH:' WHERE $left ${not ? "NOT " : ""}LIKE "%$right"',
-        STARTSWITH:' WHERE $left ${not ? "NOT " : ""}LIKE "$right%"',
-        EQUALS:' WHERE $left ${not ? "<>" : "="} "$right"',
-        GREATERTHAN:' WHERE $left ${not ? "<=" : ">"} "$right"',
-        GREATERTHANOREQUAL:' WHERE $left ${not ? "<" : ">="} "$right"',
-        LESSTHAN:' WHERE $left ${not ? ">=" : "<"} "$right"',
-        LESSTHANOREQUAL:' WHERE $left ${not ? ">" : "<="} "$right"'
-    ]
-
-    def wt = whereTemplates.get(query.get("operation"));
-    def binding = [left:query.get("left"),right:query.get("right"),not:query.get("not")];
-    def template = engine.createTemplate(wt).make(binding);
-    where = template.toString();
-//     log.debug("Search WHERE clause is: "+ where)
+    def id = AttributeUtil.getStringValue(((EqualsFilter) filter).getAttribute());
+    where = " WHERE objectid = ${id}";
 }
 
 switch ( objectClass ) {
-    case "auditrecon":
+    case auditrecon:
     sql.eachRow("SELECT * FROM auditrecon" + where,
             { result.add(
                 [
@@ -114,7 +106,7 @@ switch ( objectClass ) {
             } );
     break
 
-    case "auditactivity":
+    case auditactivity:
     sql.eachRow("SELECT * FROM auditactivity" + where,
             { result.add(
                 [
@@ -138,11 +130,11 @@ switch ( objectClass ) {
             } );
     break
 
-    case "auditaccess":
+    case auditaccess:
     sql.eachRow("SELECT * FROM auditaccess" + where, 
             { result.add(
                 [
-                __UID__:it.objectid,,
+                __UID__:it.objectid,
                 __NAME__:it.objectid, // Name is required by OpenICF connector
                 activity:it.activity,
                 ip:it.ip,

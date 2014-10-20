@@ -1,8 +1,8 @@
 {
     "name" : "auditdb",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.scriptedsql-connector",
-        "bundleVersion" : "1.1.1.0",
+        "bundleName" : "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion" : "[1.4.0.0,2.0.0.0)",
         "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,
@@ -29,19 +29,17 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "host" : "localhost",
-        "port" : "3306",
-        "user" : "root",
+        "username" : "root",
         "password" : "password",
-        "database" : "audit",
-        "autoCommit" : false,
+        "driverClassName" : "com.mysql.jdbc.Driver",
+        "url" : "jdbc:mysql://localhost:3306/audit",
+        "autoCommit" : true,
         "reloadScriptOnExecution" : false,
         "jdbcDriver" : "com.mysql.jdbc.Driver",
-        "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/audit",
-        "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
-        "createScriptFileName" : "&{launcher.project.location}/tools/CreateScript.groovy",
-        "testScriptFileName" : "&{launcher.project.location}/tools/TestScript.groovy",
-        "searchScriptFileName" : "&{launcher.project.location}/tools/SearchScript.groovy"
+        "classpath" : ["&{launcher.project.location}/tools"],
+        "createScriptFileName" : "CreateScript.groovy",
+        "testScriptFileName" : "TestScript.groovy",
+        "searchScriptFileName" : "SearchScript.groovy"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,
