@@ -1,6 +1,6 @@
 Audit Sample - Show extended audit capability
 ---------------------------------------------
-Copyright (c) 2013 ForgeRock AS
+Copyright (c) 2013-2014 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
@@ -63,6 +63,10 @@ $ curl -k -u "openidm-admin:openidm-admin" "https://localhost:8443/openidm/manag
 
 
 Inspect the MySQL database:
+
+mysql> use audit;
+
+Will use the audit database.
 
 mysql> select * from auditaccess;
 
