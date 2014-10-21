@@ -1,1 +1,80 @@
-<h1>Correlation Query Template</h1>
+<div>
+    <input type="radio" name="queryType" id="noCorrelationQueryRadio" class="queryType" value="none" checked="checked">
+    <span class="queryTypeTitle">{{t "templates.correlation.noQuery"}}</span>
+</div>
+
+<div>
+    <input type="radio" name="queryType" id="expressionTreeQueryRadio" value="expression" class="queryType">
+    <span class="queryTypeTitle">{{t "templates.correlation.expressionBuilder"}}</span>
+    <div class="expressionTree queryContainer">
+        <p>{{t "templates.correlation.query.correlationDescription"}}</p>
+
+        <ul>
+            <li index="{{#if isAny}}any{{else}}all{{/if}}" class="node">
+                {{#expressionDisplay expressionTree fieldNames}}
+
+                <select>
+                    {{#each types}}
+                    <option {{#if selected}} selected{{/if}} value="{{value}}">{{label}}</option>
+                    {{/each}}
+                </select>
+
+                <button class="button remove object" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>
+                <button class="button add" title="{{t "templates.correlation.query.addTitle"}}"><i class="fa fa-lg fa-plus"></i></button>
+
+                <ul class="expressionMenu">
+                    <li>
+                        <a class="parentMenuChoice">{{t "templates.correlation.query.addField"}}</a>
+                        <ul>
+                            {{#each filteredFieldNames}}
+                            <li><a href="#" class="addField">{{.}}</a></li>
+                            {{/each}}
+                        </ul>
+                    </li>
+                    <li><a class="addGroup">{{t "templates.correlation.query.addGroup"}}</a></li>
+                </ul>
+
+
+                {{#if expressionTree.length}}
+                <ul>
+                    {{#each expressionTree}}
+                    {{#if isObject}}
+                    <li index="{{index}}" class="node">
+                        <div index="{{#if isAny}}any{{else}}all{{/if}}" class="node">
+                            {{{expressionDisplay req fieldNames}}}
+                        </div>
+                    </li>
+                    {{else}}
+                    <li field="{{req}}" index="{{index}}" class="node">
+                        {{req}}
+                        {{#if notLast}}
+                        {{../../../term}}
+                        {{/if}}
+                        <button class="button remove" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>
+
+                    </li>
+                    {{/if}}
+                    {{/each}}
+                </ul>
+                {{/if}}
+                {{/expressionDisplay}}
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div>
+    <input type="radio" name="queryType" id="scriptQueryRadio" value="script" class="queryType">
+    <span class="queryTypeTitle">{{t "templates.correlation.script"}}</span>
+    <div class="queryScript queryContainer"></div>
+</div>
+
+<div style="" id="correlationQueryError" class="float-left alert-box warning-message">
+    <p class="alert-message">
+        <i class="fa alert-message-icon"></i><span class="message-type">{{t "templates.correlation.warning"}}!</span>
+        <span class="message">{{t "templates.correlation.specify"}}</span>
+    </p>
+</div>
+
+<input type="submit" class="saveCorrelationQuery button" value="{{t "common.form.save"}}"/>

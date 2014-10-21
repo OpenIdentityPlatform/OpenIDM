@@ -80,7 +80,8 @@
                 "scheduleCreated" : "A new schedule has been created.",
                 "scheduleDeleted" : "The schedule has been deleted.",
                 "scheduleSaved" : "The schedule was successfully saved.",
-                "liveSyncSaved": "The LiveSync state has been saved."
+                "liveSyncSaved": "The LiveSync state has been saved.",
+                "correlationQuerySaved": "The correlation query has been saved."
             }
         },
         "AppConfiguration" : {
@@ -219,8 +220,24 @@
         },
         "correlation": {
             "correlation": "Correlation",
-            "defaultRules": "Default Association Rules",
-            "userAssociationManagment": "User Association Management"
+            "associationRules": "Association Rules",
+            "dataAssociationManagment": "Data Association Management",
+            "noQuery": "No Correlation Query",
+            "expressionBuilder": "Expression Builder",
+            "script": "Script",
+            "warning": "Warning",
+            "specify": "You must specify a script or an expression.",
+            "query": {
+                "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
+                "correlationAny": "Any of the below fields",
+                "correlationAll": "All of the below fields",
+                "addField": "Add Field",
+                "addGroup": "Add Group",
+                "and": "AND",
+                "or": "OR",
+                "removeTitle": "Remove this item",
+                "addTitle": "Add new field or group item"
+            }
         },
         "scheduler": {
             "scheduler": "Scheduler",

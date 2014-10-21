@@ -68,6 +68,10 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 this.data.setScript = null;
             }
 
+            if (args.saveCallback) {
+                this.saveCallback = args.saveCallback;
+            }
+
             btns = [
                 {
                     id:"scriptDialogCancel",
@@ -81,6 +85,11 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                     text: $.t('common.form.ok'),
                     click: _.bind(function() {
                         this.generateScript();
+
+                        if (this.saveCallback) {
+                            this.saveCallback();
+                        }
+
                         this.currentDialog.dialog('close');
                     }, this)
                 }
