@@ -160,7 +160,10 @@
     <title>To Create a Role Definition</title>
 
     <para>
-     The following REST call creates a relatively complex role:
+     The following REST call creates a role definition that assigns the value
+     <literal>"CN=employees,O=corp"</literal> to the
+     <literal>ldapGroups</literal> attribute on the <literal>ldap</literal>
+     system:
     </para>
 
     <screen>$ <userinput>curl \
@@ -171,15 +174,32 @@
  --header "If-None-Match: *" \
  --request PUT \
  --data '{
- "properties":{"description":"an example role"},
- "assignments":{"ldap":{"attributes":[
- {"name":"cns",
- "assignmentOperation":"mergeWithTarget",
- "unassignmentOperation":"removeFromTarget",
- "value":["CN=employees,O=corp"]}],
- "onAssignment": {"file":"roles/onAssignment_ldap.js","type":"text/javascript"},
- "onUnassignment":{"file":"roles/onUnassignment_ldap.js",
- "type":"text/javascript"}}}}' \
+  "properties": {
+    "description": "an example role"
+  },
+  "assignments": {
+    "ldap": {
+      "attributes": [
+        {
+          "name": "ldapGroups",
+          "assignmentOperation": "mergeWithTarget",
+          "unassignmentOperation": "removeFromTarget",
+          "value": [
+            "CN=employees,O=corp"
+          ]
+        }
+      ],
+      "onAssignment": {
+        "file": "roles\/onAssignment_ldap.js",
+        "type": "text\/javascript"
+      },
+      "onUnassignment": {
+        "file": "roles\/onUnassignment_ldap.js",
+        "type": "text\/javascript"
+      }
+    }
+  }
+}' \
  "https://localhost:8443/openidm/managed/role/newrole"</userinput>
  <computeroutput>
  {
@@ -187,7 +207,7 @@
      "ldap": {
        "attributes": [
          {
-           "name": "cns",
+           "name": "ldapGroups",
            "unassignmentOperation": "removeFromTarget",
            "assignmentOperation": "mergeWithTarget",
            "value": [
@@ -316,7 +336,7 @@ $ curl \
           "assignedThrough" : "managed/role/newrole",
           "assignmentOperation" : "mergeWithTarget",
           "unassignmentOperation" : "removeFromTarget",
-          "name" : "cns"
+          "name" : "ldapGroups"
         } ]
       }
     },
@@ -450,7 +470,7 @@ $ curl \
          "value" : [ "CN=employees,O=corp" ],
          "assignmentOperation" : "mergeWithTarget",
          "unassignmentOperation" : "removeFromTarget",
-         "name" : "cns"
+         "name" : "ldapGroups"
        } ]
      }
    },
@@ -498,7 +518,7 @@ $ curl \
          "ad": {
              "attributes": [
                  {
-                     "name": "cns",
+                     "name": "adSystems",
                      "value": [
                          "CN=fileshare,O=corp",
                          "CN=desktop,O=corp",
@@ -512,7 +532,7 @@ $ curl \
          "ldap": {
              "attributes": [
                  {
-                     "name": "cns",
+                     "name": "ldapGroups",
                      "value": [
                          "CN=employees,O=corp"
                      ],
@@ -803,7 +823,7 @@ $ curl \
                    "CN=employees,O=corp"
                 ],
                 "operation":"replaceTarget",
-                "name":"cns",
+                "name":"ldapGroups",
                 "assignedThrough":"managed/role/sample-role"
              },
              {
@@ -823,7 +843,7 @@ $ curl \
                    "CN=intranet,O=corp"
                 ],
                 "operation":"replaceTarget",
-                "name":"cns",
+                "name":"adSystems",
                 "assignedThrough":"managed/role/sample-role"
              }
           ]
@@ -869,7 +889,7 @@ $ curl \
     "ldap": {
       "attributes": [
         {
-          "name": "cns",
+          "name": "ldapSystems",
           "value": [
             "cn=printers,ou=Groups,dc=example,dc=com",
             "cn=intranet,ou=Groups,dc=example,dc=com"
@@ -886,7 +906,7 @@ $ curl \
     "ldap": {
       "attributes": [
         {
-          "name": "cns",
+          "name": "ldapSystems",
           "operation": "replaceTarget",
           "value": [
             "cn=printers,ou=Groups,dc=example,dc=com",
@@ -985,7 +1005,7 @@ $ curl \
       "attributes": [
         {
           "assignedThrough": "managed/role/ldap",
-          "name": "cns",
+          "name": "ldapSystems",
           "operation": "replaceTarget",
           "value": [
             "cn=printers,ou=Groups,dc=example,dc=com",
@@ -1131,7 +1151,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
          "ad": {
              "attributes": [
                  {
-                     "name": "cns",
+                     "name": "adSystems",
                      "value": [
                          "CN=fileshare,O=corp",
                          "CN=desktop,O=corp",
