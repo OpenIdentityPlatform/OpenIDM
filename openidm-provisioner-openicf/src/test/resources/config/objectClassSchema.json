@@ -1,0 +1,730 @@
+{
+    "__ALL__": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__ALL__",
+        "type": "object",
+        "nativeType": "__ALL__"
+    },
+    "ALL_FAIL": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__ALL__",
+        "type": "object",
+        "nativeType": "__ALL__",
+        "properties": {
+            "name": {
+                "type": "string",
+                "nativeName": "nativeName",
+                "nativeType": "string"
+            }
+        }
+    },
+    "__GROUP__": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__GROUP__",
+        "type": "object",
+        "nativeType": "__GROUP__",
+        "properties": {
+            "__DESCRIPTION__": {
+                "type": "string",
+                "nativeName": "__DESCRIPTION__",
+                "nativeType": "string"
+            },
+            "__NAME__": {
+                "type": "string",
+                "required": true,
+                "nativeName": "__NAME__",
+                "nativeType": "string"
+            }
+        }
+    },
+    "__ACCOUNT__": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__ACCOUNT__",
+        "type": "object",
+        "nativeType": "__ACCOUNT__",
+        "properties": {
+            "lastModified": {
+                "type": "string",
+                "nativeName": "lastModified",
+                "nativeType": "string",
+                "flags": ["NOT_CREATABLE", "NOT_UPDATEABLE", "NOT_RETURNED_BY_DEFAULT"]
+            },
+            "__DESCRIPTION__": {
+                "type": "string",
+                "nativeName": "__DESCRIPTION__",
+                "nativeType": "string"
+            },
+            "createDate": {
+                "type": "string",
+                "nativeName": "createDate",
+                "nativeType": "string",
+                "flags": ["NOT_CREATABLE", "NOT_UPDATEABLE"]
+            },
+            "sureName": {
+                "type": "string",
+                "nativeName": "sureName",
+                "nativeType": "string"
+            },
+            "__CURRENT_PASSWORD__": {
+                "type": "string",
+                "nativeName": "__CURRENT_PASSWORD__",
+                "nativeType": "JAVA_TYPE_GUARDEDSTRING",
+                "flags": ["NOT_READABLE", "NOT_RETURNED_BY_DEFAULT"]
+            },
+            "__NAME__": {
+                "type": "string",
+                "required": true,
+                "nativeName": "__NAME__",
+                "nativeType": "string"
+            },
+            "userName": {
+                "type": "string",
+                "required": true,
+                "nativeName": "userName",
+                "nativeType": "string"
+            },
+            "email": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "string"
+                },
+                "required": true,
+                "nativeName": "email",
+                "nativeType": "string"
+            },
+            "groups": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "string"
+                },
+                "nativeName": "groups",
+                "nativeType": "string"
+            },
+            "active": {
+                "type": "boolean",
+                "nativeName": "active",
+                "nativeType": "boolean"
+            },
+            "sortKey": {
+                "type": "integer",
+                "required": true,
+                "nativeName": "sortKey",
+                "nativeType": "integer"
+            }
+        }
+    },
+    "__TEST__": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__TEST__",
+        "type": "object",
+        "nativeType": "__TEST__",
+        "properties": {
+            "attributebooleanMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "boolean",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                },
+                "nativeName": "attributebooleanMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+            },
+            "attributeBooleanMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "boolean",
+                    "nativeType": "boolean"
+                },
+                "nativeName": "attributeBooleanMultivalue",
+                "nativeType": "boolean"
+            },
+            "attributeDoubleMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_DOUBLE"
+                },
+                "nativeName": "attributeDoubleMultivalue",
+                "nativeType": "JAVA_TYPE_DOUBLE"
+            },
+            "attributeStringMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "string"
+                },
+                "nativeName": "attributeStringMultivalue",
+                "nativeType": "string"
+            },
+            "attributedoubleMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+                },
+                "nativeName": "attributedoubleMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+            },
+            "attributeBigIntegerMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_BIGINTEGER"
+                },
+                "nativeName": "attributeBigIntegerMultivalue",
+                "nativeType": "JAVA_TYPE_BIGINTEGER"
+            },
+            "attributeBigDecimal": {
+                "type": "number",
+                "nativeName": "attributeBigDecimal",
+                "nativeType": "JAVA_TYPE_BIGDECIMAL"
+            },
+            "attributeint": {
+                "type": "integer",
+                "nativeName": "attributeint",
+                "nativeType": "JAVA_TYPE_INT"
+            },
+            "attributeIntegerMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "nativeType": "integer"
+                },
+                "nativeName": "attributeIntegerMultivalue",
+                "nativeType": "integer"
+            },
+            "attributeByteMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "nativeName": "attributeByteMultivalue",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attribute": {
+                "type": "string",
+                "nativeName": "attribute",
+                "nativeType": null
+            },
+            "attributecharMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_CHAR"
+                },
+                "nativeName": "attributecharMultivalue",
+                "nativeType": "JAVA_TYPE_CHAR"
+            },
+            "attributeLongMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_LONG"
+                },
+                "nativeName": "attributeLongMultivalue",
+                "nativeType": "JAVA_TYPE_LONG"
+            },
+            "attributelongMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+                },
+                "nativeName": "attributelongMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+            },
+            "attributeMapMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "nativeType": "object"
+                },
+                "nativeName": "attributeMapMultivalue",
+                "nativeType": "object"
+            },
+            "attributeInteger": {
+                "type": "integer",
+                "nativeName": "attributeInteger",
+                "nativeType": "integer"
+            },
+            "attributeboolean": {
+                "type": "boolean",
+                "nativeName": "attributeboolean",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+            },
+            "attributeBoolean": {
+                "type": "boolean",
+                "nativeName": "attributeBoolean",
+                "nativeType": "boolean"
+            },
+            "attributeFloatMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_FLOAT"
+                },
+                "nativeName": "attributeFloatMultivalue",
+                "nativeType": "JAVA_TYPE_FLOAT"
+            },
+            "attributeBigDecimalMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_BIGDECIMAL"
+                },
+                "nativeName": "attributeBigDecimalMultivalue",
+                "nativeType": "JAVA_TYPE_BIGDECIMAL"
+            },
+            "attributefloatMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+                },
+                "nativeName": "attributefloatMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+            },
+            "attributefloat": {
+                "type": "number",
+                "nativeName": "attributefloat",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+            },
+            "attributeFloat": {
+                "type": "number",
+                "nativeName": "attributeFloat",
+                "nativeType": "JAVA_TYPE_FLOAT"
+            },
+            "attributeGuardedString": {
+                "type": "string",
+                "nativeName": "attributeGuardedString",
+                "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+            },
+            "attributeMap": {
+                "type": "object",
+                "nativeName": "attributeMap",
+                "nativeType": "object"
+            },
+            "attributeGuardedByteArrayMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+                },
+                "nativeName": "attributeGuardedByteArrayMultivalue",
+                "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+            },
+            "attributeLong": {
+                "type": "number",
+                "nativeName": "attributeLong",
+                "nativeType": "JAVA_TYPE_LONG"
+            },
+            "attributelong": {
+                "type": "number",
+                "nativeName": "attributelong",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+            },
+            "attributeCharacter": {
+                "type": "string",
+                "nativeName": "attributeCharacter",
+                "nativeType": "JAVA_TYPE_CHARACTER"
+            },
+            "attributeCharacterMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_CHARACTER"
+                },
+                "nativeName": "attributeCharacterMultivalue",
+                "nativeType": "JAVA_TYPE_CHARACTER"
+            },
+            "attributeGuardedByteArray": {
+                "type": "string",
+                "nativeName": "attributeGuardedByteArray",
+                "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+            },
+            "attributeBigInteger": {
+                "type": "number",
+                "nativeName": "attributeBigInteger",
+                "nativeType": "JAVA_TYPE_BIGINTEGER"
+            },
+            "attributechar": {
+                "type": "string",
+                "nativeName": "attributechar",
+                "nativeType": "JAVA_TYPE_CHAR"
+            },
+            "attributeByteArrayMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+                },
+                "nativeName": "attributeByteArrayMultivalue",
+                "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+            },
+            "attributeByte": {
+                "type": "number",
+                "nativeName": "attributeByte",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attributedouble": {
+                "type": "number",
+                "nativeName": "attributedouble",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+            },
+            "attributeDouble": {
+                "type": "number",
+                "nativeName": "attributeDouble",
+                "nativeType": "JAVA_TYPE_DOUBLE"
+            },
+            "attributeGuardedStringMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+                },
+                "nativeName": "attributeGuardedStringMultivalue",
+                "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+            },
+            "__NAME__": {
+                "type": "string",
+                "required": true,
+                "nativeName": "__NAME__",
+                "nativeType": "string"
+            },
+            "attributeString": {
+                "type": "string",
+                "nativeName": "attributeString",
+                "nativeType": "string"
+            },
+            "attributeByteMultivalued": {
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "nativeName": "attributeByteMultivalued",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attributeByteArray": {
+                "type": "array",
+                "nativeName": "attributeByteArray",
+                "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+            },
+            "attributeintMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "nativeType": "JAVA_TYPE_INT"
+                },
+                "nativeName": "attributeintMultivalue",
+                "nativeType": "JAVA_TYPE_INT"
+            }
+        }
+    },
+    "CUSTOM" : {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "CUSTOM",
+        "type": "object",
+        "nativeType": "CUSTOM",
+        "properties": {
+            "attributebooleanMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "boolean",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                },
+                "nativeName": "attributebooleanMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+            },
+            "attributeBooleanMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "boolean",
+                    "nativeType": "boolean"
+                },
+                "nativeName": "attributeBooleanMultivalue",
+                "nativeType": "boolean"
+            },
+            "attributeDoubleMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_DOUBLE"
+                },
+                "nativeName": "attributeDoubleMultivalue",
+                "nativeType": "JAVA_TYPE_DOUBLE"
+            },
+            "attributeStringMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "string"
+                },
+                "nativeName": "attributeStringMultivalue",
+                "nativeType": "string"
+            },
+            "attributedoubleMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+                },
+                "nativeName": "attributedoubleMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+            },
+            "attributeBigIntegerMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_BIGINTEGER"
+                },
+                "nativeName": "attributeBigIntegerMultivalue",
+                "nativeType": "JAVA_TYPE_BIGINTEGER"
+            },
+            "attributeBigDecimal": {
+                "type": "number",
+                "nativeName": "attributeBigDecimal",
+                "nativeType": "JAVA_TYPE_BIGDECIMAL"
+            },
+            "attributeint": {
+                "type": "integer",
+                "nativeName": "attributeint",
+                "nativeType": "JAVA_TYPE_INT"
+            },
+            "attributeIntegerMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "nativeType": "integer"
+                },
+                "nativeName": "attributeIntegerMultivalue",
+                "nativeType": "integer"
+            },
+            "attributeByteMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "nativeName": "attributeByteMultivalue",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attribute": {
+                "type": "string",
+                "nativeName": "attribute",
+                "nativeType": null
+            },
+            "attributecharMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_CHAR"
+                },
+                "nativeName": "attributecharMultivalue",
+                "nativeType": "JAVA_TYPE_CHAR"
+            },
+            "attributeLongMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_LONG"
+                },
+                "nativeName": "attributeLongMultivalue",
+                "nativeType": "JAVA_TYPE_LONG"
+            },
+            "attributelongMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+                },
+                "nativeName": "attributelongMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+            },
+            "attributeMapMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "nativeType": "object"
+                },
+                "nativeName": "attributeMapMultivalue",
+                "nativeType": "object"
+            },
+            "attributeInteger": {
+                "type": "integer",
+                "nativeName": "attributeInteger",
+                "nativeType": "integer"
+            },
+            "attributeboolean": {
+                "type": "boolean",
+                "nativeName": "attributeboolean",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+            },
+            "attributeBoolean": {
+                "type": "boolean",
+                "nativeName": "attributeBoolean",
+                "nativeType": "boolean"
+            },
+            "attributeFloatMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_FLOAT"
+                },
+                "nativeName": "attributeFloatMultivalue",
+                "nativeType": "JAVA_TYPE_FLOAT"
+            },
+            "attributeBigDecimalMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_BIGDECIMAL"
+                },
+                "nativeName": "attributeBigDecimalMultivalue",
+                "nativeType": "JAVA_TYPE_BIGDECIMAL"
+            },
+            "attributefloatMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "number",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+                },
+                "nativeName": "attributefloatMultivalue",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+            },
+            "attributefloat": {
+                "type": "number",
+                "nativeName": "attributefloat",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_FLOAT"
+            },
+            "attributeFloat": {
+                "type": "number",
+                "nativeName": "attributeFloat",
+                "nativeType": "JAVA_TYPE_FLOAT"
+            },
+            "attributeGuardedString": {
+                "type": "string",
+                "nativeName": "attributeGuardedString",
+                "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+            },
+            "attributeMap": {
+                "type": "object",
+                "nativeName": "attributeMap",
+                "nativeType": "object"
+            },
+            "attributeGuardedByteArrayMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+                },
+                "nativeName": "attributeGuardedByteArrayMultivalue",
+                "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+            },
+            "attributeLong": {
+                "type": "number",
+                "nativeName": "attributeLong",
+                "nativeType": "JAVA_TYPE_LONG"
+            },
+            "attributelong": {
+                "type": "number",
+                "nativeName": "attributelong",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_LONG"
+            },
+            "attributeCharacter": {
+                "type": "string",
+                "nativeName": "attributeCharacter",
+                "nativeType": "JAVA_TYPE_CHARACTER"
+            },
+            "attributeCharacterMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_CHARACTER"
+                },
+                "nativeName": "attributeCharacterMultivalue",
+                "nativeType": "JAVA_TYPE_CHARACTER"
+            },
+            "attributeGuardedByteArray": {
+                "type": "string",
+                "nativeName": "attributeGuardedByteArray",
+                "nativeType": "JAVA_TYPE_GUARDEDBYTEARRAY"
+            },
+            "attributeBigInteger": {
+                "type": "number",
+                "nativeName": "attributeBigInteger",
+                "nativeType": "JAVA_TYPE_BIGINTEGER"
+            },
+            "attributechar": {
+                "type": "string",
+                "nativeName": "attributechar",
+                "nativeType": "JAVA_TYPE_CHAR"
+            },
+            "attributeByteArrayMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+                },
+                "nativeName": "attributeByteArrayMultivalue",
+                "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+            },
+            "attributeByte": {
+                "type": "number",
+                "nativeName": "attributeByte",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attributedouble": {
+                "type": "number",
+                "nativeName": "attributedouble",
+                "nativeType": "JAVA_TYPE_PRIMITIVE_DOUBLE"
+            },
+            "attributeDouble": {
+                "type": "number",
+                "nativeName": "attributeDouble",
+                "nativeType": "JAVA_TYPE_DOUBLE"
+            },
+            "attributeGuardedStringMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+                },
+                "nativeName": "attributeGuardedStringMultivalue",
+                "nativeType": "JAVA_TYPE_GUARDEDSTRING"
+            },
+            "__NAME__": {
+                "type": "string",
+                "required": true,
+                "nativeName": "__NAME__",
+                "nativeType": "string"
+            },
+            "attributeString": {
+                "type": "string",
+                "nativeName": "attributeString",
+                "nativeType": "string"
+            },
+            "attributeByteMultivalued": {
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "nativeName": "attributeByteMultivalued",
+                "nativeType": "JAVA_TYPE_BYTE"
+            },
+            "attributeByteArray": {
+                "type": "array",
+                "nativeName": "attributeByteArray",
+                "nativeType": "JAVA_TYPE_BYTE_ARRAY"
+            },
+            "attributeintMultivalue": {
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "nativeType": "JAVA_TYPE_INT"
+                },
+                "nativeName": "attributeintMultivalue",
+                "nativeType": "JAVA_TYPE_INT"
+            }
+        }
+    }
+}

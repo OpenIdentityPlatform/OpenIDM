@@ -46,14 +46,7 @@
             "$schema": "http://json-schema.org/draft-03/schema",
             "id": "__ALL__",
             "type": "object",
-            "nativeType": "__ALL__",
-            "properties": {
-                "attribute": {
-                    "type": "string",
-                    "nativeName": "attribute",
-                    "nativeType": null
-                }
-            }
+            "nativeType": "__ALL__"
         },
         "group": {
             "$schema": "http://json-schema.org/draft-03/schema",

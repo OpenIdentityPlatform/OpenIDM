@@ -33,13 +33,8 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.schema.validator.Constants;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
-import org.identityconnectors.common.CollectionUtil;
-import org.identityconnectors.common.StringUtil;
-import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
@@ -49,12 +44,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
 
-/**
- *
- * @author Laszlo Hordos
- */
 public class ObjectClassInfoHelper {
 
     /**
@@ -69,49 +66,26 @@ public class ObjectClassInfoHelper {
     private final JsonValue properties;
 
     /**
-     * Create a custom object class.
-     *
-     * @param schema string representation for the name of the object class.
-     * @throws IllegalArgumentException when objectClass is null
-     * @throws org.forgerock.json.fluent.JsonValueException
-     *
+     * Creates a new {@link ObjectClassInfoHelper}.
+     * @param objectClass the {@link ObjectClass} to create the helper for.
+     * @param nameAttribute the name attribute for the {@link ObjectClass}.
+     * @param attributes the set of attributes for the {@link ObjectClass}.
+     * @param attributesReturnedByDefault the  attributes to return by default for the {@link ObjectClass}.
+     * @param properties the properties of the {@link ObjectClass}.
      */
-    public ObjectClassInfoHelper(JsonValue schema) {
-        //Expect ObjectClass
-        objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
-
-        //Expect Properties Map
-        properties = schema.get(Constants.PROPERTIES).required().expect(Map.class);
-        Set<String> propertyNames = properties.keys();
-
-        Set<AttributeInfoHelper> attributes0 = new HashSet<AttributeInfoHelper>(propertyNames.size());
-        Set<String> defaultAttributes = new HashSet<String>(propertyNames.size());
-        String __NAME__ = null;
-
-        for (String propertyName : propertyNames) {
-            AttributeInfoHelper helper = new AttributeInfoHelper(propertyName, false, properties.get(propertyName));
-            if (helper.getAttributeInfo().getName().equals(Name.NAME)) {
-                __NAME__ = propertyName;
-            }
-            if (helper.getAttributeInfo().isReturnedByDefault()) {
-                defaultAttributes.add(helper.getAttributeInfo().getName());
-            }
-            attributes0.add(helper);
-        }
-        //TODO Should we throw exceptions or ??
-        if (null == __NAME__) {
-            logger.warn("Required __NAME__ attribute definition is not configured. The CREATE operation will be disabled");
-            //throw new IllegalArgumentException("Required __NAME__ attribute is not configured");
-        }
-        nameAttribute = __NAME__;
-        attributes = Collections.unmodifiableSet(attributes0);
-        attributesReturnedByDefault = CollectionUtil.newReadOnlySet(defaultAttributes);
+    ObjectClassInfoHelper(ObjectClass objectClass, String nameAttribute, Set<AttributeInfoHelper> attributes,
+        Set<String> attributesReturnedByDefault, JsonValue properties) {
+        this.objectClass = objectClass;
+        this.nameAttribute= nameAttribute;
+        this.attributes = attributes;
+        this.attributesReturnedByDefault = attributesReturnedByDefault;
+        this.properties = properties;
     }
 
     /**
-     * Get a new newBuilder of the {@link org.identityconnectors.framework.common.objects.ObjectClass} for this schema.
+     * Get the {@link org.identityconnectors.framework.common.objects.ObjectClass} for this Helper.
      *
-     * @return new newBuilder of {@link org.identityconnectors.framework.common.objects.ObjectClass}
+     * @return {@link org.identityconnectors.framework.common.objects.ObjectClass} of this Helper
      */
     public ObjectClass getObjectClass() {
         return objectClass;

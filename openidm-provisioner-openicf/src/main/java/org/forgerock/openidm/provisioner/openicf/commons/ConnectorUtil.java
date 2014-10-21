@@ -598,7 +598,7 @@ public class ConnectorUtil {
         JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
         Map<String, ObjectClassInfoHelper> result = new HashMap<String, ObjectClassInfoHelper>(objectTypes.expect(Map.class).asMap().size());
         for (String objectType : objectTypes.keys()) {
-            result.put(objectType, new ObjectClassInfoHelper(objectTypes.get(objectType)));
+            result.put(objectType, ObjectClassInfoHelperFactory.createObjectClassInfoHelper(objectTypes.get(objectType)));
         }
         return result;
     }
