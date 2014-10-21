@@ -1614,7 +1614,7 @@ $ ./startup.sh -p samples/scriptedrest2dj/</userinput></screen>
 <computeroutput>{
   "ok": true,
   "connectorRef": {
-    "bundleVersion": "[1.4.0.0,1.4.2.0)",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
     "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector"
   },
@@ -4325,7 +4325,7 @@ OpenIDM version "3.1.0-SNAPSHOT" (revision: 0) null null
     "connectorRef": {
         "connectorName":"org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
         "bundleName":"org.forgerock.openicf.connectors.googleapps-connector",
-        "bundleVersion":"1.4.0.0-SNAPSHOT"
+        "bundleVersion":"[1.4.0.0,2.0.0.0)"
     },
     "ok":true
 }</computeroutput></screen>

@@ -389,6 +389,13 @@
        </para>
       </listitem>
      </itemizedlist>
+     <para>
+      When a range of versions is specified, OpenIDM uses the latest connector
+      that is available within that range. If your project requires a specific
+      connector version, you must explicitly state the version in your
+      provisioner configuration file, or constrain the range to address only the
+      version that you need.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -1886,7 +1893,7 @@ connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=</programlisting>
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.identityconnectors.ldap.LdapConnector",
         "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion": "${openicf.ldapconnector.version}"
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
     }
 }</programlisting>
    <para>
@@ -2417,7 +2424,7 @@ $ cp samples/provisioners/provisioner.openicf-ad.json conf/</screen>
       "connectorHostRef" : "dotnet",
       "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
       "bundleName" : "ActiveDirectory.Connector",
-      "bundleVersion" : "${openicf.framework.version}"
+      "bundleVersion" : "[1.4.0.0,2.0.0.0)"
    },          ...
 "configurationProperties" :
    {
