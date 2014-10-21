@@ -327,30 +327,30 @@ $ ./startup.sh -p samples/sample2</screen>
    <secondary>Sample 2b - LDAP two way</secondary>
   </indexterm>
 
-  <para>Like sample 2, sample 2b also connects to an external LDAP
-  server.</para>
-
-  <para>Unlike sample 2, however, sample 2b has two mappings configured, one
-  from the LDAP server to the OpenIDM repository, and the other from the
-  OpenIDM repository to the LDAP server.</para>
+  <para>
+   Like sample 2, sample 2b connects to an external LDAP server. However,
+   sample 2b has two mappings configured, one from the LDAP server to the
+   OpenIDM repository, and the other from the OpenIDM repository to the LDAP
+   server.
+  </para>
 
   <section xml:id="external-ldap-config-2b">
    <title>External LDAP Configuration</title>
-   <para>Configure the LDAP server as for sample 2,
-   <xref linkend="external-ldap-config-2" />. The LDAP user must have write
-   access to create users from OpenIDM on the LDAP server.</para>
-
    <para>
-    When configuring the LDAP server, be sure to import the appropriate
-    LDIF file, in this case,
-    <filename>/path/to/openidm/samples/sample2b/data/Example.ldif</filename>
+    Configure the LDAP server as for sample 2,
+    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
+    access to create users from OpenIDM on the LDAP server. When you configure
+    the LDAP server, import the appropriate LDIF file
+    (<filename>/path/to/openidm/samples/sample2b/data/Example.ldif).</filename>
    </para>
   </section>
 
   <section xml:id="install-sample2b">
    <title>Install the Sample</title>
-   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
-   then start OpenIDM with the configuration for sample 2b.</para>
+   <para>
+    Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, then
+    start OpenIDM with the configuration for sample 2b.
+   </para>
    
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample2b</screen>
@@ -370,13 +370,11 @@ $ ./startup.sh -p samples/sample2b</screen>
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>
-    The reconciliation operation returns a reconciliation run ID, and the status
-    of the operation.
+    The reconciliation operation returns a reconciliation run ID and the status
+    of the operation. Reconciliation creates user objects from LDAP in the
+    OpenIDM repository, assigning the new objects random unique IDs. To list
+    user objects by ID, run a query over the REST interface.
    </para>
-
-   <para>With the configuration of sample 2b, OpenIDM creates user objects from
-   LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
-   objects by ID, run a query over the REST interface.</para>
    <screen>
 $ curl \
  --cacert self-signed.crt \
@@ -406,9 +404,10 @@ $ curl \
 ],
  }</programlisting>
 
-   <para>To retrieve the user, log into the UI, on an URI such as
-    <literal>https://localhost:8443/openidmui</literal> as the administrative
-    user
+   <para>
+    To retrieve the user record, log into the UI, on an URI such as
+    <literal>https://localhost:8443/openidmui</literal>, as the administrative
+    user.
    </para>
 
    <para>
