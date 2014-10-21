@@ -21,7 +21,8 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-import groovy.sql.Sql;
+import groovy.sql.Sql
+import org.identityconnectors.framework.common.objects.SearchResult;
 
 import java.sql.Connection;
 
@@ -30,38 +31,6 @@ import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-
-// Parameters:
-// The connector sends the following:
-// connection: handler to the SQL connection
-// objectClass: a String describing the Object class (access, activity, recon)
-// action: a string describing the action ("SEARCH" here)
-// log: a handler to the Log facility
-// options: a handler to the OperationOptions Map
-// query: a handler to the Query Map
-//
-// The Query map describes the filter used.
-//
-// query = [ operation: "CONTAINS", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "ENDSWITH", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "STARTSWITH", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "EQUALS", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "GREATERTHAN", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "GREATERTHANOREQUAL", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "LESSTHAN", left: attribute, right: "value", not: true/false ]
-// query = [ operation: "LESSTHANOREQUAL", left: attribute, right: "value", not: true/false ]
-// query = null : then we assume we fetch everything
-//
-// AND and OR filter just embed a left/right couple of queries.
-// query = [ operation: "AND", left: query1, right: query2 ]
-// query = [ operation: "OR", left: query1, right: query2 ]
-//
-// Returns: A list of Maps. Each map describing one row.
-// !!!! Each Map must contain a '__UID__' and '__NAME__' attribute.
-// This is required to build a ConnectorObject.
-
-// log.debug("Entering {0} Script for {1} with qeury {2} and options {3}",
-//         action, objectClass, query, options);
 
 def sql = new Sql(connection as Connection);
 def result = [];
@@ -76,81 +45,82 @@ if (filter instanceof EqualsFilter && ((EqualsFilter) filter).getAttribute().is(
     //This is a Read
 
     def id = AttributeUtil.getStringValue(((EqualsFilter) filter).getAttribute());
-    where = " WHERE objectid = ${id}";
+    where = " WHERE objectid = '${id}'";
 }
 
 switch ( objectClass ) {
     case auditrecon:
-    sql.eachRow("SELECT * FROM auditrecon" + where,
-            { result.add(
-                [
-                __UID__:it.objectid,
-                __NAME__:it.objectid, // Name is required by OpenICF connector
-                entrytype:it.entrytype,
-                rootactionid:it.rootactionid,
-                activity:it.activity,
-                message:it.message,
-                reconciling:it.reconciling,
-                reconid:it.reconid,
-                situation:it.situation,
-                sourceobjectid:it.sourceobjectid,
-                status:it.status,
-                targetobjectid:it.targetobjectid,
-                ambiguoustargetobjectids:it.ambiguoustargetobjectids,
-                activitydate:it.activitydate,
-                actionid:it.actionid,
-                exceptiondetail:it.exceptiondetail,
-                mapping:it.mapping,
-                messagedetail:it.messagedetail
-                ] )
-            } );
+        sql.eachRow("SELECT * FROM auditrecon" + where,
+            { row ->
+                handler {
+                    uid row.objectid
+                    id row.objectid // Name is required by OpenICF connector
+                    attribute 'entrytype', row.entrytype
+                    attribute 'rootactionid', row.rootactionid
+                    attribute 'activity', row.activity
+                    attribute 'message', row.message
+                    attribute 'reconciling', row.reconciling
+                    attribute 'reconid', row.reconid
+                    attribute 'situation', row.situation
+                    attribute 'sourceobjectid', row.sourceobjectid
+                    attribute 'status:', row.status
+                    attribute 'targetobjectid', row.targetobjectid
+                    attribute 'ambiguoustargetobjectids', row.ambiguoustargetobjectids
+                    attribute 'activitydate', row.activitydate
+                    attribute 'actionid', row.actionid
+                    attribute 'exceptiondetail', row.exceptiondetail
+                    attribute 'mapping', row.mapping
+                    attribute 'messagedetail', row.messagedetail
+                }
+            }
+        );
     break
 
     case auditactivity:
-    sql.eachRow("SELECT * FROM auditactivity" + where,
-            { result.add(
-                [
-                __UID__:it.objectid,
-                __NAME__:it.objectid, // Name is required by OpenICF connector
-                activityid:it.activityid,
-                activitydate:it.activitydate,
-                activity:it.activity,
-                message:it.message,
-                subjectid:it.subjectid,
-                subjectrev:it.subjectrev,
-                rootactionid:it.rootactionid,
-                parentactionid:it.parentactionid,
-                requester:it.requester,
-                subjectbefore:it.subjectbefore,
-                subjectafter:it.subjectafter,
-                status:it.status,
-                changedfields:it.changedfields,
-                passwordchanged:it.passwordchanged
-                ] )
-            } );
+        sql.eachRow("SELECT * FROM auditactivity" + where,
+            { row ->
+                handler {
+                    uid row.objectid
+                    id row.objectid // Name is required by OpenICF connector
+                    attribute 'activityid', row.activityid
+                    attribute 'activitydate', row.activitydate
+                    attribute 'activity', row.activity
+                    attribute 'message', row.message
+                    attribute 'subjectid', row.subjectid
+                    attribute 'subjectrev', row.subjectrev
+                    attribute 'rootactionid', row.rootactionid
+                    attribute 'parentactionid', row.parentactionid
+                    attribute 'requester', row.requester
+                    attribute 'subjectbefore', row.subjectbefore
+                    attribute 'subjectafter', row.subjectafter
+                    attribute 'status', row.status
+                    attribute 'changedfields', row.changedfields
+                    attribute 'passwordchanged', row.passwordchanged
+                }
+            }
+        );
     break
 
     case auditaccess:
-    sql.eachRow("SELECT * FROM auditaccess" + where, 
-            { result.add(
-                [
-                __UID__:it.objectid,
-                __NAME__:it.objectid, // Name is required by OpenICF connector
-                activity:it.activity,
-                ip:it.ip,
-                principal:it.principal,
-                roles:it.roles?.tokenize(','),
-                status:it.status,
-                activitydate:it.activitydate,
-                userid:it.userid
-                ] )
-            } );
+        sql.eachRow("SELECT * FROM auditaccess" + where,
+            { row ->
+                handler {
+                    uid row.objectid
+                    id row.objectid // Name is required by OpenICF connector
+                    attribute 'activity', row.activity
+                    attribute 'ip', row.ip
+                    attribute 'principal', row.principal
+                    attribute 'roles', row.roles?.tokenize(',')
+                    attribute 'status', row.status
+                    attribute 'activitydate', row.activitydate
+                    attribute 'userid', row.userid
+                }
+            }
+        );
     break
 
     default:
     log.warn("Didn't match objectClass " + objectClass);
 }
 
-// log.debug("Returning {0}", result);
-
-return result;
+return new SearchResult();
