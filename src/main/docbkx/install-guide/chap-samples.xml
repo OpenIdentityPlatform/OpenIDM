@@ -241,7 +241,10 @@ $ ./startup.sh -p samples/sample2</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
 
    <note>
     <para>
@@ -366,7 +369,10 @@ $ ./startup.sh -p samples/sample2b</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
 
    <para>With the configuration of sample 2b, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -561,7 +567,10 @@ $ ./startup.sh -p samples/sample2c</screen>
  --request POST \
   "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</userinput></screen>
 
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
 
    <para>With the configuration of sample 2c, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -756,7 +765,10 @@ $ ./startup.sh -p samples/sample2d</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapGroups_managedGroup"</userinput></screen>
  
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
 
    <para>With the configuration of sample 2d, OpenIDM creates group objects from
    LDAP in OpenIDM. To list group objects by ID, run a query over the REST interface.</para>
@@ -1050,10 +1062,14 @@ OpenIDM version "${docTargetVersion}" (revision: 0) null null
 --header "Content-Type: application/json" \
 --request POST \
 "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</userinput>
-<computeroutput>{"_id":"179d3685-c850-4f30-a9ca-c6e37fe3f25d"}</computeroutput></screen>
+<computeroutput>{
+  "state": "ACTIVE",
+  "_id": "985ee939-fbe1-4607-a757-00b404b4ef77"
+}</computeroutput></screen>
      <para>
-      The reconciliation operation returns an <literal>_id</literal> and creates
-      the five users from the MySQL database in the OpenIDM repository.
+      The reconciliation operation returns a reconciliation run ID and the
+      status of the operation, and creates the five users from the MySQL
+      database in the OpenIDM repository.
      </para>
     </step>
     <step>
@@ -3130,9 +3146,14 @@ $ ./startup.sh -p samples/sample6</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemAdAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
-
-    <screen>{"_id":"9ece3807-08c3-4ec6-87fb-a6a2d0c71cee"}</screen>
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
+    <screen>{
+  "state": "ACTIVE",
+  "_id": "985ee939-fbe1-4607-a757-00b404b4ef77"
+}</screen>
 
     <para>
      The reconciliation operation synchronizes the data in the AD deployment
@@ -3481,8 +3502,10 @@ $ ./startup.sh -p samples/sample8</screen>
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</userinput></screen>
 
-   <para>Successful reconciliation returns a reconciliation run ID.</para>
-
+   <para>
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
+   </para>
    <para>Notice the log messages displayed on the OpenIDM (Felix) console.
    The following example omits timestamps and so forth to show only the message
    strings.</para>
@@ -3546,10 +3569,15 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
  --header "Content-Type: application/json" \
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</userinput></screen>
-         <para>Successful reconciliation returns a reconciliation run ID.</para>
-         <para>The reconciliation starts an approval workflow for each ABSENT 
-         user. These approval workflows (named <literal>managedUserApproval</literal>) 
-         wait for the request to be approved by an administrator.</para>         
+         <para>
+          The reconciliation operation returns a reconciliation run ID, and the
+          status of the operation.
+         </para>
+         <para>
+          Reconciliation starts an approval workflow for each ABSENT user. These
+          approval workflows (named <literal>managedUserApproval</literal>)
+          wait for the request to be approved by an administrator.
+         </para>
        </listitem>
        
        <listitem>
@@ -4021,9 +4049,9 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
  --header "Content-Type: application/json" \
  --request POST \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
-
    <para>
-    Successful reconciliation returns a reconciliation run ID.
+    The reconciliation operation returns a reconciliation run ID, and the status
+    of the operation.
    </para>
 
   </section>
