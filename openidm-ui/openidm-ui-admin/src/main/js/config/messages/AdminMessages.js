@@ -123,6 +123,10 @@ define("config/messages/AdminMessages", [
         "syncLiveSyncSaveSuccess": {
             msg: "config.messages.SyncMessages.liveSyncSaved",
             type: "info"
+        },
+        "correlationQuerySaveSuccess": {
+            msg: "config.messages.SyncMessages.correlationQuerySaved",
+            type: "info"
         }
     };
 

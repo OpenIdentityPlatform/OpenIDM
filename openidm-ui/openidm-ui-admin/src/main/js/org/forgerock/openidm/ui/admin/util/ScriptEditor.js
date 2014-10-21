@@ -64,6 +64,12 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
                     this.deleteElement = args.deleteElement;
                 }
 
+                if (args.saveCallback) {
+                    this.saveCallback = args.saveCallback;
+                } else {
+                    this.saveCallback = _.noop;
+                }
+
                 this.parentRender(function() {
                     if(callback) {
                         callback();
@@ -72,7 +78,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             },
 
             editScriptHook: function() {
-                ScriptDialog.render({"element":this.element, "eventName":this.data.eventName, "scriptData":this.data.scriptData, setScript: _.bind(this.setScriptHook, this)});
+                ScriptDialog.render({"element":this.element, "eventName":this.data.eventName, "scriptData":this.data.scriptData, setScript: _.bind(this.setScriptHook, this), saveCallback: this.saveCallback});
             },
 
             deleteScriptHook: function() {
@@ -89,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             },
 
             addScriptHook: function() {
-                ScriptDialog.render({"element":this.element, "eventName":this.data.eventName, "scriptData":null, setScript: _.bind(this.setScriptHook, this)});
+                ScriptDialog.render({"element":this.element, "eventName":this.data.eventName, "scriptData":null, setScript: _.bind(this.setScriptHook, this), saveCallback: _.bind(this.saveCallback, this)});
             },
 
             setScriptHook: function(args) {
@@ -101,7 +107,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptEditor", [
             },
 
             clearScriptHook: function() {
-                this.render({"element":this.element, "eventName":this.data.eventNames});
+                this.render({"element":this.element, "eventName":this.data.eventName});
             },
 
             getEventName: function() {
