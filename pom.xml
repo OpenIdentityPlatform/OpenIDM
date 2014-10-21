@@ -277,9 +277,8 @@
         <openicf.ldapconnector.version>1.4.0.0-RC1</openicf.ldapconnector.version>
         <openicf.googleconnector.version>1.4.0.0-RC1</openicf.googleconnector.version>
         <openicf.groovyconnector.version>1.4.1.0-RC1</openicf.groovyconnector.version>
-
-        <provisioner.salesforcemodule.version></provisioner.salesforcemodule.version>
-
+        <salesforce.api.version>29</salesforce.api.version>
+        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.1-SNAPSHOT</provisioner.salesforcemodule.version>
 
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
