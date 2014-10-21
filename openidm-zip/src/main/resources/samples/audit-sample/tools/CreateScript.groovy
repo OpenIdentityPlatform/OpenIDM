@@ -34,7 +34,7 @@ import java.sql.Connection;
 // action: String correponding to the action ("CREATE" here)
 // log: a handler to the Log facility
 // objectClass: a String describing the Object class (recon, activity, access)
-// id: The entry identifier (OpenICF "Name" atribute. (most often matches the uid)
+// id: The entry identifier (OpenICF "Name" atribute. Most often matches the uid)
 // attributes: an Attribute Map, containg the <String> attribute name as a key
 // and the <List> attribute value(s) as value.
 // password: password string, clear text
