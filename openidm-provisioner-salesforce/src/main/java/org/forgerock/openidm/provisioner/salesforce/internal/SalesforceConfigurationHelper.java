@@ -11,16 +11,24 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
+import org.forgerock.openidm.provisioner.salesforce.internal.schema.SchemaHelper;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 
@@ -60,17 +68,23 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
             new JsonPointer("/" + CONFIGURATION_PROPERTIES + "/clientSecret"),
             new JsonPointer("/" + CONFIGURATION_PROPERTIES + "/refreshToken"));
 
+    /**
+     * Cryptographic service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected CryptoService cryptoService = null;
+
     @Activate
     void activate(ComponentContext context) throws Exception {
         connectorData = SalesforceConnectorInfo.getConnectorInfo(context.getBundleContext().getBundle());
         configurationProperties = json(object(
+                field("clientId", null),
+                field("clientSecret", null),
+                field("refreshToken", null),
+                field("instanceUrl", null),
+                field("loginUrl", null),
                 field("connectTimeout" , 120000),
-                field("loginUrl", ""),
                 field("idleCheckInterval", 10000),
-                field("refreshToken", ""),
-                field("clientSecret", ""),
-                field("clientId", ""),
-                field("instanceUrl", ""),
                 field("version", 29)
         ));
     }
@@ -125,8 +139,35 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
      */
     @Override
     public JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException {
-        // TODO More implementation?
-        return params;
+        // create an encrypted and a decrypted copy of the configuration
+        JsonValue encrypted = params.copy();
+        JsonValue decrypted = params.copy();
+        try {
+            for (JsonPointer property : PROPERTIES_TO_ENCRYPT) {
+                if (JsonCrypto.isJsonCrypto(params.get(property))) {
+                    decrypted.put(property, cryptoService.decrypt(params.get(property)).getObject());
+                    encrypted.put(property, params.get(property).getObject());
+                } else {
+                    decrypted.put(property, params.get(property).getObject());
+                    encrypted.put(property, cryptoService.encrypt(params.get(property),
+                            ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
+                            IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
+                        .getObject());
+                }
+            }
+        } catch (JsonCryptoException e) {
+            throw new InternalServerErrorException(e);
+        }
+
+        // use decrypted for validating/testing config
+        SalesforceConfiguration config = SalesforceConfiguration.parseConfiguration(decrypted.get("configurationProperties"));
+        config.validate();
+        SalesforceConnection connection = new SalesforceConnection(config);
+        connection.test();
+
+        // use encrypted for response
+        encrypted.put("objectTypes", SchemaHelper.getObjectSchema().getObject());
+        return encrypted;
     }
 
     // --- MetaDataProvider implementation

@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -61,6 +62,7 @@ import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
+import org.forgerock.openidm.provisioner.salesforce.internal.schema.SchemaHelper;
 import org.forgerock.openidm.repo.util.SQLQueryFilterVisitor;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
@@ -116,18 +118,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
     /** use null-object activity logger until/unless ConnectionFactory binder updates it */
     private ActivityLogger activityLogger = NullActivityLogger.INSTANCE;
-
-    private static final String[] OBJECT_TYPES = new String[] {
-            "User",
-            "Group",
-            "GroupMember",
-            "Organization",
-            "PermissionSet",
-            "PermissionSetAssignment",
-            "PermissionSetLicense",
-            "PermissionSetLicenseAssignment",
-            "Profile"
-    };
 
     /**
      * RouterRegistryService service.
@@ -185,7 +175,19 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
             throw ex;
         }
 
-        testConnection(true);
+        // Test the connection in a separate thread to not hold up the activate process
+        connection = new SalesforceConnection(config);
+        Executors.newSingleThreadExecutor().submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            testConnection(true);
+                        } catch (Exception e) {
+                            logger.warn("Couldn't test Salesforce connection - activating in incomplete state", e);
+                        }
+                    }
+                });
 
         ResourceName system = new ResourceName("system", systemIdentifier.getName());
 
@@ -227,7 +229,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
     private void testConnection(boolean ignoreResourceException) throws Exception {
         try {
-            connection = new SalesforceConnection(config);
             connection.test();
         } catch (ResourceException e) {
             // authenticate or the test throws this, temporary error
@@ -272,9 +273,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         jv.put("name", systemIdentifier.getName());
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.salesforce/" + factoryPid);
-        if (OBJECT_TYPES != null) {
-            jv.put("objectTypes", OBJECT_TYPES);
-        }
+        jv.put("objectTypes", SchemaHelper.getObjectSchema().keys());
 
         try {
             jv.put(ConnectorConfigurationHelper.CONNECTOR_REF,

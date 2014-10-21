@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.fluent.JsonValue;
 import org.restlet.data.Form;
 
 /**
@@ -73,7 +74,6 @@ public class SalesforceConfiguration {
      * Constructor
      */
     public SalesforceConfiguration() {
-
     }
 
     // Client authentication
@@ -386,6 +386,12 @@ public class SalesforceConfiguration {
         }
 
         return form;
+    }
+
+    static SalesforceConfiguration parseConfiguration(JsonValue config) {
+        return SalesforceConnection.mapper.convertValue(
+                config.required().expect(Map.class).asMap(),
+                SalesforceConfiguration.class);
     }
 
 }
