@@ -1,38 +1,6 @@
 <fieldset>
     <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
-        <div class="group-field-block group-lead">
-            <div class="separate-message">
-                <label for="connectTimeout" class="light">{{t "templates.connector.salesforce.connectTimeout"}}</label>
-                <input id="connectTimeout" class="form-size-l" data-validator="required" type="text" name="configurationProperties.connectTimeout" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.connectTimeout}}" required>
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="loginUrl" class="light">{{t "templates.connector.salesforce.loginUrl"}}</label>
-                <input id="loginUrl" class="form-size-l" data-validator="required" type="text" name="configurationProperties.loginUrl" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.loginUrl}}" required>
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="idleCheckInterval" class="light">{{t "templates.connector.salesforce.idleCheckInterval"}}</label>
-                <input id="idleCheckInterval" class="form-size-l" data-validator="required" type="text" name="configurationProperties.idleCheckInterval" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.idleCheckInterval}}" required>
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="group-field-block">
-            <div class="separate-message">
-                <label for="refreshToken" class="light">{{t "templates.connector.salesforce.refreshToken"}}</label>
-                <input id="refreshToken" class="form-size-l" data-validator="required" type="text" name="configurationProperties.refreshToken" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.refreshToken}}" required>
-                <span></span>
-                <div class="validation-message"></div>
-            </div>
-        </div>
         <div class="group-field-block">
             <div class="separate-message">
                 <label for="clientSecret" class="light">{{t "templates.connector.salesforce.clientSecret"}}</label>
@@ -51,8 +19,40 @@
         </div>
         <div class="group-field-block">
             <div class="separate-message">
+                <label for="refreshToken" class="light">{{t "templates.connector.salesforce.refreshToken"}}</label>
+                <input id="refreshToken" class="form-size-l" data-validator="required" type="text" name="configurationProperties.refreshToken" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.refreshToken}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
                 <label for="instanceUrl" class="light">{{t "templates.connector.salesforce.instanceUrl"}}</label>
                 <input id="instanceUrl" class="form-size-l" data-validator="required" type="text" name="configurationProperties.instanceUrl" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.instanceUrl}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="loginUrl" class="light">{{t "templates.connector.salesforce.loginUrl"}}</label>
+                <input id="loginUrl" class="form-size-l" data-validator="required" type="text" name="configurationProperties.loginUrl" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.loginUrl}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block group-lead">
+            <div class="separate-message">
+                <label for="connectTimeout" class="light">{{t "templates.connector.salesforce.connectTimeout"}}</label>
+                <input id="connectTimeout" class="form-size-l" data-validator="required" type="text" name="configurationProperties.connectTimeout" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.connectTimeout}}" required>
+                <span></span>
+                <div class="validation-message"></div>
+            </div>
+        </div>
+        <div class="group-field-block">
+            <div class="separate-message">
+                <label for="idleCheckInterval" class="light">{{t "templates.connector.salesforce.idleCheckInterval"}}</label>
+                <input id="idleCheckInterval" class="form-size-l" data-validator="required" type="text" name="configurationProperties.idleCheckInterval" data-validator-event="keyup blur" value="{{connectorDefaults.configurationProperties.idleCheckInterval}}" required>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
