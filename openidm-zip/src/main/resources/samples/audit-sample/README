@@ -17,7 +17,7 @@ The configuration files used in this sample are as follows:
     connector configuration.
 *   samples/audit-sample/conf/audit.json shows how to enable audit logging on the router.
 *   samples/audit-sample/data/sample_audit_db.mysql provides a sample schema DDL to create
-    the tables in the external mysql database.
+    the tables in the external MySQL database.
 *   samples/audit-samples/tools/ contains the Groovy scripts that allow the OpenICF
     ScriptedSQL connector to interface with the MySQL database.
 
