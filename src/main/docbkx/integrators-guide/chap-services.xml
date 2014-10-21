@@ -250,12 +250,12 @@ Stopping OpenIDM (454)</screen>
   <para>
    The <literal>"connectorName"</literal> must be the precise string from the
    connector configuration. If you need to specify multiple connector version
-   numbers, use a range instead, for example:
+   numbers, use a range of versions, for example:
   </para>
   <programlisting language="javascript">"connectorRef" : {
     "connectorName" : "org.identityconnectors.ldap.LdapConnector",
     "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-    "bundleVersion" : "[1.1.0.1,1.1.2.0)",
+    "bundleVersion" : "[1.4.0.0,2.0.0.0)",
     ...
   </programlisting>
   

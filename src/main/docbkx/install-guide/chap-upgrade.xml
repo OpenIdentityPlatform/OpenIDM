@@ -275,7 +275,7 @@ $ cp bin/default/script/access.js script/
     example:
    </para>
    <programlisting language="javascript">{
-    "bundleVersion": "1.1.1.3",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
     "displayName": "LDAP Connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
