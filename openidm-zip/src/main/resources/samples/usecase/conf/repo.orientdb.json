@@ -28,7 +28,10 @@
         "get-notifications-for-user-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
         "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "scan-tasks-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL",
-        "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
+
+        "query-cluster-failed-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
+        "query-cluster-instances" : "SELECT * FROM cluster_states",
+        "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
 
         "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
         "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
@@ -41,7 +44,12 @@
         "get-managed-users-filtered" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user LET $userNameLike = if((${userName} = ''), '%%', '${unquoted:userName}%'), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((${sn} = ''), '%%', '${unquoted:sn}%'), $givenNameLike = if((${givenName} = ''), '%%', '${unquoted:givenName}%') WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '') ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "get-managed-users-count" : "SELECT COUNT(*) AS total FROM managed_user",
         "get-managed-users-filtered-count" : "SELECT COUNT(*) AS total FROM managed_user LET $userNameLike = if((${userName} = ''), '%%', '${unquoted:userName}%'), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((${sn} = ''), '%%', '${unquoted:sn}%'), $givenNameLike = if((${givenName} = ''), '%%', '${unquoted:givenName}%') WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '')",
+        "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC",
         "get-managers-of-department" : "SELECT * FROM managed_user WHERE title = 'manager' AND department = ${department}"
+    },
+    "commands" : {
+        "purge-by-recon-expired" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND timestamp < ${timestamp}",
+        "purge-by-recon-ids-to-keep" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN [${list:reconIds}]"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -182,6 +190,15 @@
                 ]
             },
             "cluster_states" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "cluster_events" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
