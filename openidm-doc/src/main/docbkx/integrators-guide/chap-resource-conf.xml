@@ -3083,7 +3083,7 @@ Properties:
     Sample implementations are provided in <link xlink:show="new"
     xlink:href="install-guide#samples-groovy-connector-toolkit"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using the Groovy
-    Connector Toolkit to Create Scripted Connectors</citetitle></link>in the
+    Connector Toolkit to Create Scripted Connectors</citetitle></link> in the
     <citetitle>Installation Guide</citetitle>.
    </para>
 
