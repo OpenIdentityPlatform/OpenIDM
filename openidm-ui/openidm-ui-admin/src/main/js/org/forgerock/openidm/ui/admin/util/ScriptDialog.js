@@ -44,26 +44,31 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             "customValidate": "customValidate",
             "change .event-select" : "changeRenderMode"
         },
+        model : {
+            setScript: null,
+            scriptData: null,
+            noValidation: false,
+            disablePassedVariable: false,
+            placeHolder: null,
+            codeMirrorHeight: "240px",
+            codeMirrorWidth: "600px"
+        },
+
 
         render: function (args, callback) {
             var btns;
 
             this.data = {};
 
-            if(args.scriptData) {
-                this.data.scriptData = args.scriptData;
+            this.model = _.extend(this.model, args);
+
+            this.data = _.pick(this.model, "setScript", "scriptData");
+
+            if(this.model.scriptData) {
                 this.data.passedVariables = _.chain(args.scriptData)
                     .omit("file", "name", "source", "type")
                     .pairs()
                     .value();
-            } else {
-                this.data.scriptData = null;
-            }
-
-            if(args.setScript) {
-                this.data.setScript = args.setScript;
-            } else {
-                this.data.setScript = null;
             }
 
             if (args.saveCallback) {
@@ -127,6 +132,8 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                             mode: mode
                         });
 
+                        this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
+
                         this.cmBox.on("changes", _.bind(function() {
                             this.cmBox.save();
                             this.$el.find(".scriptSourceCode").trigger("blur");
@@ -147,7 +154,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 callback();
             }
         },
-        
+
         generateScript: function() {
             var currentSelection = this.$el.find("input[name=scriptType]:checked").val(),
                 scriptObject = {},
@@ -183,4 +190,3 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
 
     return new ScriptDialog();
 });
-
