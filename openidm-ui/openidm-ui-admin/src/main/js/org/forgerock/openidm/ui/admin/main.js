@@ -33,6 +33,7 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./delegates/BrowserStorageDelegate",
     "./delegates/ExternalAccessDelegate",
     "./delegates/SearchDelegate",
+    "./delegates/ReconDelegate",
 
     "./ResourcesView",
     "./MapResourceView",
@@ -50,6 +51,8 @@ define("org/forgerock/openidm/ui/admin/main", [
     "./util/ScriptDialog",
     "./util/AutoCompleteUtils",
     "./util/Scheduler",
+    "./util/ReconProgress",
+    "./util/MappingUtils",
 
     "./objectTypes/ObjectTypesDialog",
 

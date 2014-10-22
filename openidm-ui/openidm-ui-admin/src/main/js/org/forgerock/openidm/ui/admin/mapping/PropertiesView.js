@@ -346,6 +346,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             }
         },
         render: function(args, callback) {
+            MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
                 this.loadData(args, callback);
             }, this));
@@ -354,7 +355,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             this.mapping = this.currentMapping();
             //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
             this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
-             
+            
              if(conf.globalData.sampleSource && this.mapping.properties.length){
                  this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
              }
@@ -402,21 +403,21 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     },
                                     getProps = function(){
                                         return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector){
-                                            return _.keys(connector.objectTypes[objType].properties).sort();
+                                            return connector.objectTypes[objType].properties;
                                         });
                                     };
                                 
                                 if(this.currentMapping().source === objTypeMap.fullName){
                                     getProps().then(function(props){
-                                        objTypeMap.properties = props;
+                                        objTypeMap.properties = _.keys(props).sort();
                                         sourceProm.resolve(objTypeMap);
                                     });
                                 }
                                 if(this.currentMapping().target === objTypeMap.fullName){
-                                    getProps().then(function(props){
-                                        objTypeMap.properties = props;
+                                    getProps().then(_.bind(function(props){
+                                        objTypeMap.properties = _.keys(props).sort();
                                         targetProm.resolve(objTypeMap);
-                                    });
+                                    }, this));
                                 }
                             }, this);
                         }, this);
@@ -445,6 +446,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             }, this));
             
             configDelegate.updateEntity("sync", {"mappings" : syncMappings}).then(_.bind(function(){
+                delete MappingBaseView.data.mapping;
                 this.render([this.currentMapping().name]);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
             }, this));

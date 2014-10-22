@@ -98,7 +98,7 @@
                     "myTasks" : "My tasks",
                     "startProcess" : "Start process",
                     "resources" : "Resources",
-                    "mapping" : "Mapping",
+                    "mapping" : "Mappings",
                     "authentication": "Authentication"
                 }
             }
@@ -599,9 +599,21 @@
             "mappingListingTitle": "Mapping List",
             "addToMapping" : "Add To Mapping",
             "newMapping" : "New Mapping",
+            "syncNow": "Sync Now",
+            "stopSync": "Stop Sync",
+            "stoppingSync": "Stopping Sync",
+            "syncComplete": "Sync Complete Please Stand By...",
+            "pleaseStandBy": "Please Stand By",
+            "syncInProgress": "Sync in Progress",
+            "lastSyncCanceled": "Last Sync Canceled",
+            "inProgress": "In Progress",
+            "notYetSynced": "Not yet synced",
+            "syncStatus": "Sync Status",
+            "lastSynced": "Last Synced",
             "createMappingDialog" : "Create Mapping",
             "noObjectType" : "No Object Type",
             "editMapping": "Edit Mapping",
+            "addMapping": "Add Mapping",
             "saveNewMapping": "Save New Mapping",
             "createNewMapping": "Create a New Mapping",
             "deleteMapping": "Delete Mapping",
@@ -610,6 +622,7 @@
             "selectTargetResource" : "Select a target resource",
             "noConnectors" : "No Connectors Available",
             "noManagedObjects" : "No Managed Objects Available",
+            "noResourceSelected" : "No Resource Selected",
             "createMapping" : "Create Mapping",
             "createMappingMessage" : "Clicking this button will create a mapping between these two sources. ",
             "saveMappingMessage" : "Please enter a unique mapping name.",
@@ -659,6 +672,14 @@
                 "title": "Choose Target Property",
                 "listLabel": "Property:",
                 "choicePrompt": "Choose One"
+            },
+            "analysis": {
+                "analysis": "Analysis",
+                "syncSelectedRecord": "Sync Selected Record",
+                "all": "All",
+                "view": "View",
+                "allSituations": "ALL SITUATIONS",
+                "clickToAnalyze": " to start analyzing relationships between Source and Target data."
             }
         }
     },
@@ -805,7 +826,9 @@
             "taskDetails" : "Task Details",
             "myTasks" : "My tasks",
             "tasksList" : "Tasks list",
-            "processes" : "Processes"
+            "processes" : "Processes",
+            "starting": "Starting...",
+            "inProgress": "In Progress..."
         },
         "application" : {
             "applicationName" : "Application Name",

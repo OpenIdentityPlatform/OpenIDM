@@ -49,6 +49,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
         pattern: "",
 
         render: function (args, callback) {
+            MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
                 this.loadData(args, callback);
             }, this));
