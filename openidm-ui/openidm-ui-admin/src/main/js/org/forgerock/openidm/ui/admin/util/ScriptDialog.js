@@ -25,7 +25,7 @@
 /*global define, $, _, Handlebars, form2js, window */
 
 define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/admin/util/AbstractScriptEditor",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -33,10 +33,8 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/mode/groovy/groovy",
     "libs/codemirror/mode/javascript/javascript"
-], function(AbstractView, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode) {
-    var ScriptDialog= AbstractView.extend({
-        template: "templates/admin/util/ScriptDialog.html",
-        noBaseTemplate: true,
+], function(AbstractScriptEditor, constants, conf, uiUtils, validatorsManager, codeMirror, groovyMode, jsMode) {
+    var ScriptDialog= AbstractScriptEditor.extend({
         element: "#dialogs",
         events: {
             "onValidate": "onValidate",
@@ -124,14 +122,14 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                             mode = "javascript";
                         }
 
-                        this.cmBox = codeMirror.fromTextArea(this.$el.find("#scriptSourceCode")[0], {
+                        this.cmBox = codeMirror.fromTextArea(this.$el.find(".scriptSourceCode")[0], {
                             lineNumbers: true,
                             mode: mode
                         });
 
                         this.cmBox.on("changes", _.bind(function() {
                             this.cmBox.save();
-                            this.$el.find("#scriptSourceCode").trigger("blur");
+                            this.$el.find(".scriptSourceCode").trigger("blur");
                         }, this));
 
                         if(this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
@@ -149,56 +147,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
                 callback();
             }
         },
-
-        changeRenderMode : function(event) {
-            var mode = $(event.target).val();
-
-            if(mode === "text/javascript") {
-                mode = "javascript";
-            }
-
-            this.cmBox.setOption("mode", mode);
-        },
-
-        scriptSelect: function(event) {
-            event.preventDefault();
-
-            var targetEle = event.target,
-                filePath = this.$el.find("#scriptFilePath"),
-                sourceCode = this.$el.find("#scriptSourceCode");
-
-            if($(targetEle).val() === "inline-code") {
-                this.setSelectedScript(filePath, sourceCode);
-                this.cmBox.setOption("readOnly", "");
-                this.$el.find(".inline-code").toggleClass("code-mirror-disabled", false);
-                sourceCode.focus();
-            } else {
-                this.setSelectedScript(sourceCode, filePath);
-                this.cmBox.setOption("readOnly", "nocursor");
-                this.$el.find(".inline-code").toggleClass("code-mirror-disabled", true);
-                filePath.focus();
-            }
-        },
-
-        setSelectedScript: function(disabledScript, enabledScript) {
-            disabledScript.prop("disabled", true);
-            disabledScript.removeAttr("data-validator-event");
-            disabledScript.removeAttr("data-validation-status");
-            disabledScript.removeAttr("data-validator");
-            disabledScript.unbind("blur");
-            disabledScript.parent().find(".error").hide();
-            disabledScript.parent().find(".validation-message").hide();
-            disabledScript.toggleClass("invalid", false);
-
-            enabledScript.prop("disabled", false);
-            enabledScript.attr("data-validator-event","keyup blur");
-            enabledScript.attr("data-validator","required");
-
-
-            validatorsManager.bindValidators(this.$el);
-            validatorsManager.validateAllFields(this.$el);
-        },
-
+        
         generateScript: function() {
             var currentSelection = this.$el.find("input[name=scriptType]:checked").val(),
                 scriptObject = {},
@@ -221,35 +170,6 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
             if(this.data.setScript) {
                 this.data.setScript({"scriptObject":scriptObject, "hookType":currentSelection});
             }
-        },
-
-        addPassedVariable: function() {
-            var field,
-                inputs;
-
-            field = this.$el.find("#hiddenPassedVariable").clone();
-            field.removeAttr("id");
-
-            inputs = field.find('input[type=text]');
-            inputs.val("");
-            $(inputs).attr("data-validator-event","keyup blur");
-            $(inputs).attr("data-validator","bothRequired");
-
-            field.show();
-
-            this.$el.find('#passedVariablesHolder').append(field);
-
-            validatorsManager.bindValidators(this.$el);
-            validatorsManager.validateAllFields(this.$el);
-        },
-
-        deletePassedVariable: function(event) {
-            var clickedEle = $(event.target).parents(".passed-variable-block");
-
-            clickedEle.remove();
-
-            validatorsManager.bindValidators(this.$el);
-            validatorsManager.validateAllFields(this.$el);
         },
 
         customValidate: function () {

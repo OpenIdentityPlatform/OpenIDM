@@ -57,7 +57,9 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
             mergedResult.configurationProperties.domain = window.location.protocol+"//"+window.location.host;
 
             ConfigDelegate.createEntity(this.data.systemType +"/" + mergedResult.name, mergedResult).then(_.bind(function () {
-                window.location = url;
+                _.delay(function () {
+                    window.location = url;
+                }, 1500);
             }, this));
         },
 

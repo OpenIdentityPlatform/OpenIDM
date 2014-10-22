@@ -84,10 +84,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                 this.setCurrentMapping($.extend({},true,this.data.mapping));
                 
                 this.data.targetType = this.syncType(this.data.mapping.target);
-                this.data.targetIcon = (this.data.targetType === "managed") ? "fa-database" : "fa-paper-plane";
+                this.data.targetIcon = (this.data.targetType === "managed") ? "fa-database" : "fa-cubes";
 
                 this.data.sourceType = this.syncType(this.data.mapping.source);
-                this.data.sourceIcon = (this.data.sourceType === "managed") ? "fa-database" : "fa-paper-plane";
+                this.data.sourceIcon = (this.data.sourceType === "managed") ? "fa-database" : "fa-cubes";
                 
                 this.parentRender(_.bind(function () {
                     this.setSubmenu();
