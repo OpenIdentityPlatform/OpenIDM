@@ -1,1 +1,23 @@
-<h1>Analysis Template</h1>
+<div class="content-bg" style="border: none">
+    <div class="formContainer" id="reconContainer">
+
+        {{#if reconAvailable}}
+            {{t "templates.mapping.analysis.view"}}:
+            <select id="situationSelection">
+                <option value="{{allSituations}}">{{t "templates.mapping.analysis.allSituations"}}</option>
+                {{#each situationList}}
+                    <option value="{{key}}">{{key}} ({{value}})</option>
+                {{/each}}
+            </select>
+            <div id="analysisGridContainer">
+                <table class="recon-grid" id="analysisGrid"></table>
+                <div class="recon-pager" id="analysisGridGridPager"></div> 
+            </div>
+        {{else}}
+            <button id="doSyncButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
+                <span class="fa fa-clock-o"></span>
+                {{t "templates.mapping.syncNow"}}
+            </button> {{t "templates.mapping.analysis.clickToAnalyze"}}
+        {{/if}}
+    </div>
+</div>

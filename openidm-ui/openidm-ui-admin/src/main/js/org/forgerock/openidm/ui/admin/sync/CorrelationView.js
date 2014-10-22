@@ -51,6 +51,7 @@ define("org/forgerock/openidm/ui/admin/sync/CorrelationView", [
         dataModel: {},
 
         render: function (args, callback) {
+            MappingBaseView.child = this;
             MappingBaseView.render(args,_.bind(function(){
                 this.loadData(args, callback);
             }, this));
