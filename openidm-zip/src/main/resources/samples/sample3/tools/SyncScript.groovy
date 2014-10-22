@@ -62,18 +62,30 @@ switch (operation) {
         }
         switch (objectClass) {
             case ObjectClass.ACCOUNT:
-                sql.eachRow("select * from Users where timestamp > ${tstamp}", {
+                sql.eachRow("select * from users where timestamp > ${tstamp}", {
                     handler({
+                        def cararray = []
+                        def userid = row.id as Integer
+                        sql.eachRow("SELECT * FROM car WHERE users_id = ${userid}", {
+                            handler({
+                                cararray.add(object {
+                                    attribute 'year', it.year
+                                    attribute 'make', it.make
+                                    attribute 'model', it.model
+                                })
+                            })
+                        })
                         syncToken it.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
-                            id it.uid
-                            uid row.id as String
+                            id row.id as String
+                            uid it.uid
                             attribute 'uid', it.uid
                             attribute 'fullname', it.fullname
                             attribute 'firstname', it.firstname
                             attribute 'lastname', it.lastname
                             attribute 'email', it.email
+                            attribute 'cars', cararray
                             attribute 'organization', it.organization
                         }
                     })
@@ -81,29 +93,39 @@ switch (operation) {
                 break
 
             case ObjectClass.GROUP:
-                sql.eachRow("SELECT * FROM Groups where timestamp > ${tstamp}", {
+                sql.eachRow("SELECT * FROM groups where timestamp > ${tstamp}", {
                     handler({
+                        def groupid = row.id as Integer
+                        def userlist = []
+                        sql.eachRow("SELECT users_id FROM groups_users WHERE groups_id = ${groupid}", {
+                            handler({
+                                userlist.add(object {
+                                    attribute 'uid', it.users_id
+                                })
+                            })
+                        })
                         syncToken it.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
-                            id it.name
-                            uid row.id as String
+                            id row.id as String
+                            uid it.name
                             delegate.objectClass(ObjectClass.GROUP)
                             attribute 'gid', it.gid
                             attribute 'description', it.description
+                            attribute 'users', userlist
                         }
                     })
                 });
                 break
 
             case ORG:
-                sql.eachRow("SELECT * FROM Organizations where timestamp > ${tstamp}", {
+                sql.eachRow("SELECT * FROM organizations where timestamp > ${tstamp}", {
                     handler({
                         syncToken it.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
-                            id it.name
-                            uid row.id as String
+                            id row.id as String
+                            uid it.name
                             delegate.objectClass(ORG)
                             attribute 'description', it.description
                         }

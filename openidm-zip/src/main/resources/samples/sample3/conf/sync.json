@@ -24,6 +24,10 @@
                 {
                     "source" : "firstName",
                     "target" : "givenName"
+                },
+                {
+                    "source" : "cars",
+                    "target" : "cars"
                 }
             ],
             "policies" : [
@@ -70,6 +74,14 @@
                 "type" : "text/javascript",
                 "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
             },
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "logger.info(\"Creating new user in external repo\")"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "logger.info(\"Updating existing user in external repo\")"
+            },
             "properties" : [
                 {
                     "source" : "userName",
@@ -111,6 +123,10 @@
                     "source" : "organization",
                     "target" : "organization",
                     "default" : "IDM"
+                },
+                {
+                    "source" : "cars",
+                    "target" : "cars"
                 }
             ],
             "policies" : [

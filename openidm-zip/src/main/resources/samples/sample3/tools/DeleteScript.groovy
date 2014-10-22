@@ -51,15 +51,15 @@ assert uid != null
 
 switch (objectClass) {
     case ObjectClass.ACCOUNT:
-        sql.execute("DELETE FROM Users where id= ?", [uid.uidValue])
+        sql.execute("DELETE FROM users where id= ?", [uid.uidValue])
         break
 
     case ObjectClass.GROUP:
-        sql.execute("DELETE FROM Groups where id= ?", [uid.uidValue])
+        sql.execute("DELETE FROM groups where id= ?", [uid.uidValue])
         break
 
     case ORG:
-        sql.execute("DELETE FROM Organizations where id= ?", [uid.uidValue])
+        sql.execute("DELETE FROM organizations where id= ?", [uid.uidValue])
         break
 
     default:

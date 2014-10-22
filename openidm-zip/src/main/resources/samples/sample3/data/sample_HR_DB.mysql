@@ -1,52 +1,82 @@
-CREATE DATABASE IF NOT EXISTS HRDB CHARACTER SET utf8 COLLATE utf8_bin;
-USE HRDB;
+CREATE DATABASE IF NOT EXISTS hrdb CHARACTER SET utf8 COLLATE utf8_bin;
+USE hrdb;
 
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Groups;
-DROP TABLE IF EXISTS Organizations;
+DROP TABLE IF EXISTS car;
+DROP TABLE IF EXISTS groups_users;
+DROP TABLE IF EXISTS email;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS organizations;
 
-CREATE TABLE Users(
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE users(
+	id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	uid char(32) NOT NULL,
 	password char(128),
-	firstname varchar(32) NOT NULL default '',
-	lastname varchar(32) NOT NULL default '',
+	firstname varchar(32) NOT NULL DEFAULT '',
+	lastname varchar(32) NOT NULL DEFAULT '',
 	fullname varchar(32),
-	email varchar(32),
+	email varchar(128),
 	organization varchar(32),
-	timestamp TIMESTAMP default now()
+	timestamp timestamp DEFAULT now()
 );
 
-CREATE TABLE Groups(
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE car(
+    users_id int(11) NOT NULL,
+    year varchar(4) NOT NULL,
+    make varchar(32) NOT NULL,
+    model varchar(32) NOT NULL,
+    FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE groups(
+	id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	gid char(32) NOT NULL,
-	name varchar(32) NOT NULL default '',
+	name varchar(32) NOT NULL DEFAULT '',
 	description varchar(32),
-	timestamp TIMESTAMP default now()
+	timestamp timestamp DEFAULT now()
 );
 
-CREATE TABLE Organizations(
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	name varchar(32) NOT NULL default '',
-	description varchar(32),
-	timestamp TIMESTAMP default now()
+CREATE TABLE groups_users(
+    users_id int(11) NOT NULL,
+    groups_id int(11) NOT NULL,
+    FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (groups_id) REFERENCES groups(id) ON DELETE CASCADE
 );
 
-INSERT INTO Users 
+CREATE TABLE organizations(
+	id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	name varchar(32) NOT NULL DEFAULT '',
+	description varchar(32),
+	timestamp timestamp DEFAULT now()
+);
+
+INSERT INTO users
 ( uid, password, firstname, lastname, fullname, email, organization, timestamp )
 VALUES 
 ("bob",sha1("password1"),"Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP),
 ("rowley",sha1("password2"),"Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP),
-("louis",sha1("password3"),"Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP),
+("louis",sha1("password3"),"Louis", "Balfour","Louis Balfour","Louis.Balfor@example.com","SALES",CURRENT_TIMESTAMP),
 ("john",sha1("password4"),"John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP),
-("jdoe",sha1("password5"),"John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
+("jdoe",sha1("password5"),"John", "Doe","John Doe","John.Doe@example.com","ENG",CURRENT_TIMESTAMP);
 
-INSERT INTO Groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
-INSERT INTO Groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
+INSERT INTO car (users_id,year,make,model) VALUES
+(1,"1979","Ford","Pinto"),
+(2,"2013","BMW","328ci"),
+(2,"2010","Lexus","ES300"),
+(3,"2001","Chevrolet","Venture"),
+(4,"2009","Buick","LeSabre"),
+(4,"2011","Honda","Accord"),
+(5,"1987","Schwinn","Bicycle");
 
-INSERT INTO Organizations VALUES ("0","HR","HR organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("0","SALES","Sales organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("0","SUPPORT","Support organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("0","ENG","Engineering organization",CURRENT_TIMESTAMP);
+INSERT INTO groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
+INSERT INTO groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
 
-grant all on HRDB.* to root@'%' IDENTIFIED BY 'password';
+INSERT INTO groups_users (users_id, groups_id) SELECT id, 1 FROM users where organization='HR';
+INSERT INTO groups_users (users_id, groups_id) SELECT id, 2 FROM users where organization <> 'HR';
+
+INSERT INTO organizations VALUES ("0","HR","HR organization",CURRENT_TIMESTAMP);
+INSERT INTO organizations VALUES ("0","SALES","Sales organization",CURRENT_TIMESTAMP);
+INSERT INTO organizations VALUES ("0","SUPPORT","Support organization",CURRENT_TIMESTAMP);
+INSERT INTO organizations VALUES ("0","ENG","Engineering organization",CURRENT_TIMESTAMP);
+
+grant all on hrdb.* to root@'%' IDENTIFIED BY 'password';

@@ -32,7 +32,7 @@
         "username" : "root",
         "password" : "password",
         "driverClassName" : "com.mysql.jdbc.Driver",
-        "url" : "jdbc:mysql://localhost:3306/HRDB",
+        "url" : "jdbc:mysql://localhost:3306/hrdb",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
         "authenticateScriptFileName" : "AuthenticateScript.groovy",
@@ -47,6 +47,17 @@
             "&{launcher.project.location}/tools"
         ]
     },
+    "systemActions" : [
+        {
+            "scriptId" : "ResetDatabase",
+            "actions" : [
+                {
+                    "systemType" : ".*ScriptedSQLConnector",
+                    "actionType" : "Groovy",
+                    "actionFile" : "tools/ResetDatabaseScript.groovy" }
+            ]
+        }
+    ],
     "syncFailureHandler" : {
         "maxRetries" : 5,
         "postRetryAction" : "logged-ignore"
@@ -75,6 +86,17 @@
                     "required" : false,
                     "nativeName" : "description",
                     "nativeType" : "string"
+                },
+                "users" : {
+                    "type" : "array",
+                    "nativeName" : "users",
+                    "nativeType" : "object",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "uid" : "string"
+                        }
+                    }
                 }
             }
         },
@@ -114,6 +136,25 @@
                     "type" : "string",
                     "nativeName" : "email",
                     "nativeType" : "string"
+                },
+                "cars" : {
+                    "type" : "array",
+                    "nativeName" : "cars",
+                    "nativeType" : "object",
+                    "items" : {
+                        "type" : "object",
+                        "properties" : {
+                            "year" : {
+                                "type" : "string"
+                            },
+                            "make" : {
+                                "type" : "string"
+                            },
+                            "model" : {
+                                "type" : "string"
+                            }
+                        }
+                    }
                 },
                 "password" : {
                     "type" : "string",

@@ -40,9 +40,6 @@ def log = log as Log
 
 log.info("This is TestScript")
 
-// if the database connection isn't properly established, or if the 
-// schema hasn't been populated, this query will result in an error.
+// if the database connection isn't properly established this query will result in an error.
 // Errors thrown here will prevent the connector from being enabled.
-connection.execute("DESC Users");
-connection.execute("DESC Groups");
-connection.execute("DESC Organizations");
+connection.execute("show databases");
