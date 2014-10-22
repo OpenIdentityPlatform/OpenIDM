@@ -65,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                         }
                     });
 
-                    $("#exampleResult", this.$el).val(translatedProperty);
+                    $("#exampleResult", this.$el).val(translatedProperty[1]);
                 } else {
                     $("#exampleResult", this.$el).val("");
                 }
