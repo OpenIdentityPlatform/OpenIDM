@@ -132,7 +132,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                     script = "",
                                     object = {},
                                     hasConditionScript = false;
-                                
+
                                 if(typeof(prop.condition) === "object" && prop.condition.type === "text/javascript" &&
                                         typeof(prop.condition.source) === "string"){
                                         

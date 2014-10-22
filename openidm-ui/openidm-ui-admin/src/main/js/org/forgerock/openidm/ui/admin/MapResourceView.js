@@ -381,7 +381,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         displayDetails: function(id, details) {
             if(details.resourceType === "connector") {
-                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-paper-plane", true);
+                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-cubes", true);
                 this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-database", false);
 
                 this.$el.find("#"+id +" .resource-type-name").html(details.displayName);

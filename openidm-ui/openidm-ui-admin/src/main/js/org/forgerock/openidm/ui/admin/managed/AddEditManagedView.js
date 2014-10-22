@@ -211,7 +211,9 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
         },
 
         removeManagedScript: function(scriptObj) {
-            _.each(this.eventHooks, function(hook, index){
+            var tempHooks = _.clone(this.eventHooks);
+
+            _.each(tempHooks, function(hook, index){
                 if(hook.getEventName() === scriptObj.eventName) {
                     this.eventHooks.splice(index, 1);
                     this.$el.find("#managedScriptSelection").append("<option value='" +scriptObj.eventName +"'>" +scriptObj.eventName +"</option>");

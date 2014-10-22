@@ -110,14 +110,15 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
         deleteManaged: function(event) {
             var selectedItems = $(event.currentTarget).parents(".resource-body"),
-                promises = [];
+                promises = [],
+                tempManaged = _.clone(this.data.currentManagedObjects);
 
             uiUtils.jqConfirm($.t("templates.managed.managedDelete"), _.bind(function(){
-                _.each(this.data.currentManagedObjects, _.bind(function(managedObject, index){
+                _.each(tempManaged, function(managedObject, index){
                     if(managedObject.name === selectedItems.attr("data-managed-title")) {
                         this.data.currentManagedObjects.splice(index, 1);
                     }
-                }, this));
+                }, this);
 
                 if(this.data.currentRepo === "repo.orientdb") {
                     if(this.data.repoObject.dbStructure.orientdbClass["managed_"+selectedItems.attr("data-managed-title")] !== undefined){

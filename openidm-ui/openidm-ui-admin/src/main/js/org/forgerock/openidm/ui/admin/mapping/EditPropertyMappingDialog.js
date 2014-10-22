@@ -18,9 +18,8 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/delegates/BrowserStorageDelegate",
     "org/forgerock/openidm/ui/admin/util/AutoCompletUtils",
-    "libs/codemirror/lib/codemirror",
-    "libs/codemirror/addon/display/placeholder"
-], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, codeMirror, placeHolder) {
+    "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
+], function(AbstractView, syncDelegate, validatorsManager, conf, uiUtils, eventManager, constants, spinner, browserStorageDelegate, autoCompleteUtils, inlineScriptEditor) {
     var EditPropertyMappingDialog = AbstractView.extend({
         template: "templates/admin/mapping/PropertyMappingDialogEditTemplate.html",
         data: {
@@ -32,16 +31,6 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             "click input[type=submit]": "formSubmit",
             "change :input[name=source]": "updateProperty",
             "change :input": "validateMapping",
-            "change :input[name=transformation_script]": "showTransformSample",
-            "blur :input[name=transformation_script]":  function(e){
-                this.validateMapping(e);
-                this.showTransformSample(e);
-            },
-            "change :input[name=condition_script]": "showCondition",
-            "blur :input[name=condition_script]": function(e){
-                this.validateMapping(e);
-                this.showCondition(e);
-            },
             "onValidate": "onValidate"
         },
         updateProperty: function (e) {
@@ -51,97 +40,119 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             this.showTransformSample();
             this.showCondition();
         },
-        showTransformSample: function (e) {
+        showTransformSample: function () {
             var translatedProperty,
-                scriptEl = $(":input[name=transformation_script]", this.$el),
-                sampleValue = "";
-            
-            if (conf.globalData.sampleSource && this.data.property && scriptEl.length) {
+                scriptValue = null,
+                generatedScript = null;
 
-                // only passing in the script source to the translation function; default and simple association results purposely ignored.
-                translatedProperty = syncDelegate.translatePropertyToTarget(conf.globalData.sampleSource, {
-                    source: this.data.property.source,
-                    target: this.data.property.target,
-                    transform: {
-                        type: "text/javascript",
-                        source: scriptEl.val()
+            if (conf.globalData.sampleSource && this.data.property) {
+                if(this.transform_script_editor !== undefined) {
+                    generatedScript = this.transform_script_editor.generateScript();
+
+                    if(generatedScript && generatedScript.source && generatedScript.type === "text/javascript") {
+                        scriptValue = generatedScript.source;
                     }
-                });
-
-                $("#exampleResult", this.$el).val(translatedProperty[1]);
-                this.validateMapping();
-            }
-        },
-        showCondition: function (e) {
-            var conditionAction,
-                scriptEl = $(":input[name=condition_script]", this.$el),
-                sampleValue = "";
-
-            if (conf.globalData.sampleSource && this.data.property && scriptEl.length) {
-
-                conditionAction = syncDelegate.conditionAction(conf.globalData.sampleSource, {
-                    source: this.data.property.source,
-                    target: this.data.property.target,
-                    condition: {
-                        type: "text/javascript",
-                        source: scriptEl.val()
-                    }
-                });
-
-                $("#conditionResult", this.$el).text(conditionAction);
-                this.validateMapping();
-            }
-        },
-        
-        /*
-        // reads the translation script and parses out the values used for presenting the translation gui 
-        loadTransformConfig: function () {
-            var data = this.data;
-            
-            data.transformConfig = {
-                    "map": {},
-                    "precedence": []
-                };
-            
-            if (typeof(data.property.transform) === "object" && 
-                    data.property.transform.type === "text/javascript" &&
-                    typeof (data.property.transform.source) === "string") {
-                    
-                try {
-                    
-                    // the closure will attempt to contain variables defined within the transform script
-                    data.transformConfig = (function () { 
-                        var source = []; // dummy used in the evaluation of the transform script 
-                        eval(data.property.transform.source);
-                        // the transform source should define two variables: map and precedence.  If so, they will be exported, here:
-                        //return {"map": map, "precedence": precedence}; 
-                        return {"map": {}, "precedence": []}; 
-                    }());
-                    
-                } catch (e) {
-                    // unable to eval javascript apparently....
                 }
 
+                if(scriptValue) {
+                    // only passing in the script source to the translation function; default and simple association results purposely ignored.
+                    translatedProperty = syncDelegate.translatePropertyToTarget(conf.globalData.sampleSource, {
+                        source: this.data.property.source,
+                        target: this.data.property.target,
+                        transform: {
+                            type: "text/javascript",
+                            source: scriptValue
+                        }
+                    });
+
+                    $("#exampleResult", this.$el).val(translatedProperty);
+                } else {
+                    $("#exampleResult", this.$el).val("");
+                }
+                this.validateMapping();
             }
-            
+        },
+        showCondition: function () {
+            var conditionAction,
+                scriptValue = null,
+                generatedScript = null;
+
+            if (conf.globalData.sampleSource && this.data.property ) {
+
+                if(this.conditional_script_editor !== undefined) {
+                    generatedScript = this.conditional_script_editor.generateScript();
+
+                    if(generatedScript && generatedScript.source && generatedScript.type === "text/javascript") {
+                        scriptValue = generatedScript.source;
+                    }
+                }
+                if(scriptValue) {
+                    conditionAction = syncDelegate.conditionAction(conf.globalData.sampleSource, {
+                        source: this.data.property.source,
+                        target: this.data.property.target,
+                        condition: {
+                            type: "text/javascript",
+                            source: scriptValue
+                        }
+                    });
+
+                    $("#conditionResult", this.$el).text(conditionAction);
+                } else {
+                    $("#conditionResult", this.$el).text("");
+                }
+                this.validateMapping();
+            }
         },
 
-        // Used to fetch the script template and render it with the current values found from the data struct
-        updateTransformConfig : function () {
-            var data = this.data;
-            
-            return $.ajax({url:"templates/admin/mapping/ArrayTransformations.jstemplate", dataType:"text", cache:"true" }).then(_.bind(function (templateSrc) {
-                templateSrc = templateSrc.replace("map = {}", "map = " + JSON.stringify(data.transformConfig.map, null, 4));
-                templateSrc = templateSrc.replace(/precedence = \[\]/, "precedence = " + JSON.stringify(data.transformConfig.precedence, null, 4));
-                data.property.transform = {
-                    "type": "text/javascript",
-                    "source": templateSrc
-                };
-                $(":input[name='transformation_script']",this.$el).val(templateSrc).trigger("change");
-                this.loadTransformConfig();
-            }, this));
-        },*/
-        
+        /*
+         // reads the translation script and parses out the values used for presenting the translation gui
+         loadTransformConfig: function () {
+         var data = this.data;
+
+         data.transformConfig = {
+         "map": {},
+         "precedence": []
+         };
+
+         if (typeof(data.property.transform) === "object" &&
+         data.property.transform.type === "text/javascript" &&
+         typeof (data.property.transform.source) === "string") {
+
+         try {
+
+         // the closure will attempt to contain variables defined within the transform script
+         data.transformConfig = (function () {
+         var source = []; // dummy used in the evaluation of the transform script
+         eval(data.property.transform.source);
+         // the transform source should define two variables: map and precedence.  If so, they will be exported, here:
+         //return {"map": map, "precedence": precedence};
+         return {"map": {}, "precedence": []};
+         }());
+
+         } catch (e) {
+         // unable to eval javascript apparently....
+         }
+
+         }
+
+         },
+
+         // Used to fetch the script template and render it with the current values found from the data struct
+         updateTransformConfig : function () {
+         var data = this.data;
+
+         return $.ajax({url:"templates/admin/mapping/ArrayTransformations.jstemplate", dataType:"text", cache:"true" }).then(_.bind(function (templateSrc) {
+         templateSrc = templateSrc.replace("map = {}", "map = " + JSON.stringify(data.transformConfig.map, null, 4));
+         templateSrc = templateSrc.replace(/precedence = \[\]/, "precedence = " + JSON.stringify(data.transformConfig.precedence, null, 4));
+         data.property.transform = {
+         "type": "text/javascript",
+         "source": templateSrc
+         };
+         $(":input[name='transformation_script']",this.$el).val(templateSrc).trigger("change");
+         this.loadTransformConfig();
+         }, this));
+         },*/
+
         validateMapping: function () {
             var source = $("input[name='source']", this.$el).val(),
                 hasAvailableSourceProps = this.data.availableSourceProps && this.data.availableSourceProps.length,
@@ -154,10 +165,10 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     $("input[type=submit]", this.$el).prop("disabled", true);
                     el.text(message);
                 };
-            
+
             if (invalidSourceProp) {
                 disableSave(proplistValidationMessage, $.t("templates.mapping.validPropertyRequired"));
-                return false; 
+                return false;
             } else if ($("#exampleResult", this.$el).val() === "ERROR WITH SCRIPT") {
                 disableSave(transformValidationMessage, $.t("templates.mapping.invalidScript"));
                 return false;
@@ -176,53 +187,48 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
             if(event){
                 event.preventDefault();
             }
-            
+
             var formContent = form2js(this.el),
                 mappingProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties"),
                 target = this.property,
                 propertyObj = _.chain(mappingProperties)
-                                    .flatten()
-                                    .find(function (p) { return p.target === target; })
-                                    .value();
-            
+                    .flatten()
+                    .find(function (p) { return p.target === target; })
+                    .value();
+
             // in the case when our property isn't currently found in the sync config...
             if (!propertyObj) {
                 propertyObj = {"target": this.property};
                 _.find(browserStorageDelegate.get("currentMapping"), function (o) { return o.name === this.data.mappingName; })
-                 .properties
-                 .push(propertyObj);
+                    .properties
+                    .push(propertyObj);
             }
-            
+
             if (_.has(formContent, "source")) {
                 propertyObj.source = formContent.source;
 
-            } else {
-                propertyObj.source = "";
-                if (_.has(formContent, "transformation_script")) {
-                    propertyObj.source = "";
-                } else {
-                    delete propertyObj.source;
-                }
             }
 
-            if (_.has(formContent, "transformation_script")) {
-                propertyObj.transform = {
-                    "type": "text/javascript",
-                    "source": formContent.transformation_script
-                };
+            if(this.transform_script_editor !== undefined) {
+                propertyObj.transform = this.transform_script_editor.generateScript();
+
+                if(propertyObj.transform === null) {
+                    delete propertyObj.transform;
+                }
             } else {
                 delete propertyObj.transform;
             }
 
-            if (_.has(formContent, "condition_script")) {
-                propertyObj.condition = {
-                    "type": "text/javascript",
-                    "source": formContent.condition_script
-                };
+            if(this.conditional_script_editor !== undefined) {
+                propertyObj.condition = this.conditional_script_editor.generateScript();
+
+                if(propertyObj.transform === null) {
+                    delete propertyObj.condition;
+                }
             } else {
                 delete propertyObj.condition;
             }
-            
+
             if (_.has(formContent, "default")) {
                 if($('#default_desc', this.$el).text().length > 0){
                     propertyObj["default"] = $('#default_desc', this.$el).text();
@@ -230,20 +236,20 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 else{
                     propertyObj["default"] = formContent["default"];
                 }
-                
+
             } else {
                 delete propertyObj["default"];
             }
-            
+
             mappingProperties = _.map(mappingProperties,function(p){
                 if(p.target === propertyObj.target){
                     p = propertyObj;
                 }
                 return p;
             });
-            
+
             browserStorageDelegate.set(this.data.mappingName + "_Properties",mappingProperties);
-            
+
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [this.data.mappingName]});
         },
         close: function () {
@@ -259,12 +265,12 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
 
             this.data.mappingName = params[0];
             this.property = params[1];
-            
+
             currentProperties = browserStorageDelegate.get(this.data.mappingName + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
             this.data.currentProperties = currentProperties;
-            
+
             browserStorageDelegate.set(this.data.mappingName + "_Properties",currentProperties);
-            
+
             this.data.property = _.find(currentProperties, _.bind(function (p) { return p.target === this.property; }, this));
 
             settings = {
@@ -272,11 +278,11 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 "template": this.template,
                 "postRender": _.bind(this.loadData, this)
             };
-            
+
             this.currentDialog = $('<div id="propertyDialog"></div>');
             this.setElement(this.currentDialog);
             $('#dialogs').append(this.currentDialog);
-            
+
             this.currentDialog.dialog({
                 title: settings.title,
                 position: ['center',25],
@@ -290,95 +296,126 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                 }, this),
                 open: function(){
 
-                    uiUtils.renderTemplate(settings.template, $(this), 
-                                            _.extend(conf.globalData, _this.data), 
-                                            function () {
-                                                settings.postRender();
-                                                $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
-                                            }, "append");
+                    uiUtils.renderTemplate(settings.template, $(this),
+                        _.extend(conf.globalData, _this.data),
+                        function () {
+                            settings.postRender();
+                            $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
+                        }, "append");
                 }
             });
-        },        
+        },
         loadData: function() {
             var selectedTab = 0,
                 _this = this,
                 prop = this.data.property,
                 data = this.data,
                 availableObjects = [];
-            
+
             if (prop) {
                 if (typeof(prop.source) !== "undefined" && prop.source.length) {
                     selectedTab = 0;
                 } else if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
-                        typeof (prop.transform.source) === "string") {
+                    typeof (prop.transform.source) === "string") {
+                    this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
+                            "element": this.$el.find("#transformationScriptHolder"),
+                            "eventName": "",
+                            "noValidation": true,
+                            "scriptData": prop.transform,
+                            "disablePassedVariable": true,
+                            "onBlur" : _.bind(this.showTransformSample, this),
+                            "onChange" :  _.bind(this.showTransformSample, this),
+                            "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+                        },
+                        _.bind(this.showTransformSample, this));
+
                     selectedTab = 1;
                 } else if (typeof(prop["default"]) !== "undefined" && prop["default"].length) {
                     selectedTab = 3;
                 }
             }
-            
 
-            this.transform_script_editor = codeMirror.fromTextArea(this.$el.find("[name=transformation_script]")[0], {
-                lineNumbers: true,
-                mode: "javascript",
-                autofocus: true
-            });
-            
-            this.transform_script_editor.on("changes", _.bind(function() {
-                this.transform_script_editor.save();
-                this.$el.find("[name=transformation_script]").trigger("blur");
-            }, this));
-            
-            this.conditional_script_editor = codeMirror.fromTextArea(this.$el.find("[name=condition_script]")[0], {
-                lineNumbers: true,
-                mode: "javascript",
-                autofocus: true
-            });
-            
-            this.conditional_script_editor.on("changes", _.bind(function() {
-                this.conditional_script_editor.save();
-                this.$el.find("[name=condition_script]").trigger("blur");
-            }, this));
-            
-            $('#mappingDialogTabs', this.$el).css('width','830px').tabs({ 
+            $('#mappingDialogTabs', this.$el).css('width','830px').tabs({
                 active: selectedTab,
-                activate: function (e, ui) {
+                load: _.bind(function(e, ui){
+                    if(ui.tab[0].textContent === "Transformation Script") {
+                        this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
+                                "element": this.$el.find("#transformationScriptHolder"),
+                                "eventName": "",
+                                "noValidation": true,
+                                "scriptData": this.data.property.transform,
+                                "disablePassedVariable": true,
+                                "onBlur" : _.bind(this.showTransformSample, this),
+                                "onChange" :  _.bind(this.showTransformSample, this),
+                                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+                            },
+                            _.bind(this.showTransformSample, this));
+                    }
+                }, this),
+                activate: _.bind(function (e, ui) {
+                    if(ui.newTab[0].textContent === "Transformation Script") {
+                        this.transform_script_editor = inlineScriptEditor.generateScriptEditor({
+                                "element": this.$el.find("#transformationScriptHolder"),
+                                "eventName": "",
+                                "noValidation": true,
+                                "scriptData": prop.transform,
+                                "disablePassedVariable": true,
+                                "onBlur" : _.bind(this.showTransformSample, this),
+                                "onChange" :  _.bind(this.showTransformSample, this),
+                                "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
+                            },
+                            _.bind(this.showTransformSample, this));
+
+                    } else if(ui.newTab[0].textContent === "Conditional Update Script"){
+                        this.conditional_script_editor = inlineScriptEditor.generateScriptEditor({
+                                "element": this.$el.find("#conditionScriptHolder"),
+                                "eventName": "",
+                                "noValidation": true,
+                                "scriptData": prop.condition,
+                                "disablePassedVariable": true,
+                                "onBlur" : _.bind(this.showCondition, this),
+                                "onChange" :  _.bind(this.showCondition, this)
+                            },
+                            _.bind(this.showCondition, this));
+                    }
+
                     $(':input:first', ui.newPanel).focus();
                     $(_this.$el).dialog( "option", "position", { my: "center center", at: "center center", of: $(window) } );
-                }
+                }, this)
             });
+
             $('#mappingDialogTabs [aria-expanded="true"] :input:first', this.$el).focus();
-            
+
             this.showTransformSample();
 
             this.data.availableSourceProps = browserStorageDelegate.get(this.data.mappingName + "_AvailableObjects").source.properties || [];
-            
+
             if(this.data.availableSourceProps){
                 autoCompleteUtils.selectionSetup($("input[name='source']:last", this.$el), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
             }
-            
+
             $("input[name='source']", this.$el).on('change autocompleteclose', function (e, initialRender) {
                 var val = $(this).val(),
                     isValid;
 
-                if (val) { 
+                if (val) {
                     $("#currentSourceDisplay", _this.$el).val(val);
                 } else {
                     $("#currentSourceDisplay", _this.$el).val($.t("templates.mapping.completeSourceObject"));
                 }
 
                 isValid = _this.validateMapping();
-                
+
                 if(isValid && initialRender !== "true" && $('#propertyDialog').size() === 0){
                     _this.formSubmit();
                 }
             });
-            
+
             $("input[name='source']", this.$el).trigger('change', 'true');
-            
+
             spinner.hideSpinner();
         }
-    }); 
-    
+    });
+
     return new EditPropertyMappingDialog();
 });

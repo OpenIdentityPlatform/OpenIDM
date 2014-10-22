@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     if(sync.targetType === "managed") {
                         sync.targetIcon = "fa-database";
                     } else {
-                        sync.targetIcon = "fa-paper-plane";
+                        sync.targetIcon = "fa-cubes";
                     }
 
                     sync.sourceType = this.syncType(sync.source);
@@ -72,7 +72,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     if(sync.sourceType === "managed") {
                         sync.sourceIcon = "fa-database";
                     } else {
-                        sync.sourceIcon = "fa-paper-plane";
+                        sync.sourceIcon = "fa-cubes";
                     }
                 }, this);
 
