@@ -46,19 +46,21 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 onBlur: null,
                 onChange: null,
                 onFocus:null,
-                placeHolder: null
+                placeHolder: null,
+                codeMirrorHeight: "inherit",
+                codeMirrorWidth: "600px"
             },
 
             /*
-                Args takes several properties
+             Args takes several properties
 
-                scriptData - Set if you have script data from a previous save or want a default
-                eventName - Name to display
-                disablePassedVariable - Flag to turn on and off passed variables
-                onBlur - Blur event for code mirror
-                onChange - Change event for code mirror
-                onFocus - focus event for code mirror
-                placeHolder - A placeholder for code mirror
+             scriptData - Set if you have script data from a previous save or want a default
+             eventName - Name to display
+             disablePassedVariable - Flag to turn on and off passed variables
+             onBlur - Blur event for code mirror
+             onChange - Change event for code mirror
+             onFocus - focus event for code mirror
+             placeHolder - A placeholder for code mirror
              */
             render: function (args, callback) {
                 this.data.inlineEditor = true;
@@ -81,8 +83,11 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     this.cmBox = codeMirror.fromTextArea(this.$el.find(".scriptSourceCode")[0], {
                         lineNumbers: true,
                         autofocus: true,
+                        viewportMargin: Infinity,
                         mode: mode
                     });
+
+                    this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
 
                     this.cmBox.on("focus", _.bind(function(cm, changeObject) {
                         this.saveEvent(this.model.onFocus, cm, changeObject);
