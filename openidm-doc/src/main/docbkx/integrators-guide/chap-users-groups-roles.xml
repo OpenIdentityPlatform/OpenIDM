@@ -158,14 +158,14 @@
 
    <section xml:id="create-role-definition">
     <title>To Create a Role Definition</title>
-
     <para>
-     The following REST call creates a role definition that assigns the value
-     <literal>"CN=employees,O=corp"</literal> to the
+     To create a managed role definition, use a PUT request on the
+     <literal>openidm/managed/role</literal> context path, specifying the role
+     ID in the URL. The following request creates a role definition that assigns
+     the value <literal>"CN=employees,O=corp"</literal> to the
      <literal>ldapGroups</literal> attribute on the <literal>ldap</literal>
      system:
     </para>
-
     <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -238,15 +238,16 @@
      <xref linkend="sample-role-definition" />.
     </para>
 
-     <para>
-      Most of the examples in this guide use PUT to create client-assigned IDs
-      for resources, as it makes the examples easier to read. Sometimes you may
-      prefer to use POST to create server-assigned UUIDs. For more information,
-      see <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
-      xlink:href="integrators-guide#put-post-managed-objects">
-      <citetitle>Should You Use PUT or POST to Create A Managed Object?
-      </citetitle></link>
-     </para>
+    <para>
+     Most of the examples in this guide use PUT to create client-assigned IDs
+     for resources, as it makes the examples easier to read. Your deployment
+     might require you to use server-assigned UUIDs, in which case you should
+     use a POST request. For more information, see
+     <link xlink:role="http://docbook.org/xlink/role/olink" xlink:show="new"
+     xlink:href="integrators-guide#put-post-managed-objects">
+     <citetitle>Should You Use PUT or POST to Create A Managed Object?
+     </citetitle></link>
+    </para>
    </section>
 
    <section xml:id="listing-defined-roles">
@@ -279,14 +280,14 @@
    <section xml:id="assign-role-to-user">
     <title>To Assign a Role to a User</title>
     <para>
-     To assign a direct role to a user, you can update the user's entry over
-     REST, adding <literal>managed/role/<replaceable>role ID</replaceable></literal>
+     To assign a direct role to a user, update the user's entry over REST,
+     adding <literal>managed/role/<replaceable>role ID</replaceable></literal>
      to the user's <literal>"roles"</literal> attribute. The following example
      adds the <literal>ldap</literal> role, created previously, to user
-     <literal>bjensen</literal>.
+     <literal>bjensen</literal>, whose <literal>_id</literal> is
+     <literal>2e78fd22-a7cb-4585-9570-5f649e8abd25</literal>.
     </para>
-    <screen><userinput>
-$ curl \
+    <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
@@ -301,81 +302,125 @@ $ curl \
 
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"
+ "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"
     </userinput>
-    <computeroutput>
-{
-    "mail": "bjensen@example.com",
-    "sn": "Jensen",
-    "passwordAttempts": "0",
-    "address2": "",
-    "lastPasswordAttempt": "Thu Apr 10 2014 12:49:32 GMT+0200 (SAST)",
-    "givenName": "Barbara",
-    "city": "",
-    "country": "",
-    "_rev": "2",
-    "lastPasswordSet": "",
-    "postalCode": "",
-    "_id": "bjensen",
-    "description": "Created for OpenIDM",
-    "accountStatus": "active",
-    "telephoneNumber": "1-360-229-7105",
-    "roles": [ "openidm-authorized", "managed/role/newrole" ],
-    "effectiveAssignments" : {
-      "ldap" : {
-        "onUnassignment" : {
-          "type" : "text/javascript",
-          "file" : "roles/onUnassignment_ldap.js"
-        },
-        "onAssignment" : {
-          "type" : "text/javascript",
-          "file" : "roles/onAssignment_ldap.js"
-        },
-        "attributes" : [ {
-          "value" : [ "CN=employees,O=corp" ],
-          "assignedThrough" : "managed/role/newrole",
-          "assignmentOperation" : "mergeWithTarget",
-          "unassignmentOperation" : "removeFromTarget",
-          "name" : "ldapGroups"
-        } ]
+<computeroutput>{
+  "displayName": "Babara Jensen",
+  "stateProvince": "",
+  "userName": "bjensen",
+  "postalAddress": "",
+  "effectiveAssignments": {
+    "ldap": {
+      "attributes": [
+        {
+          "name": "ldapGroups",
+          "unassignmentOperation": "removeFromTarget",
+          "assignmentOperation": "mergeWithTarget",
+          "assignedThrough": "managed/role/newrole",
+          "value": [
+            "CN=employees,O=corp"
+          ]
+        }
+      ],
+      "onAssignment": {
+        "file": "roles/onAssignment_ldap.js",
+        "type": "text/javascript"
+      },
+      "onUnassignment": {
+        "file": "roles/onUnassignment_ldap.js",
+        "type": "text/javascript"
       }
-    },
-    "postalAddress": "",
-    "userName": "bjensen",
-    "stateProvince": "",
-    "displayName": "Babara Jensen"
+    }
+  },
+  "roles": [
+    "openidm-authorized",
+    "managed/role/newrole"
+  ],
+  "city": "",
+  "effectiveRoles": [
+    "openidm-authorized",
+    "managed/role/newrole"
+  ],
+  "givenName": "Barbara",
+  "lastPasswordAttempt": "Tue Oct 21 2014 16:01:22 GMT+0200 (SAST)",
+  "address2": "",
+  "passwordAttempts": "0",
+  "sn": "Jensen",
+  "mail": "bjensen@example.com",
+  "country": "",
+  "_rev": "2",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "_id": "2e78fd22-a7cb-4585-9570-5f649e8abd25",
+  "description": "Created for OpenIDM",
+  "accountStatus": "active",
+  "telephoneNumber": "1-360-229-7105"
 }</computeroutput>
     </screen>
     <para>
-     Note the dash (<literal>-</literal>) character appended to the field name,
-     within the <command>-data</command> option. This character specifies that
-     the command appends the role that you add to the existing roles for that
-     user. If you do not include the dash character, the request overwrites all
-     current values of the <literal>"roles"</literal> attribute.
+     Note the dash (<literal>-</literal>) character that is appended to the
+     field name in the <literal>data</literal> that is being sent. This
+     character specifies that the role should be added to the existing roles for
+     that user. If you do not include the dash character, the request overwrites
+     all current values of the <literal>"roles"</literal> attribute.
+    </para>
+   </section>
+
+   <section xml:id="query-role-membership">
+    <title>To Query Role Membership</title>
+    <para>
+     To return a list of all users who have a specific directly assigned role,
+     use the <literal>get-users-of-direct-role</literal> query, specifying the
+     role ID. It is not currently possible to query role membership for
+     indirect roles.
+    </para>
+    <para>
+     The following query returns all members of the <literal>"newrole"</literal>
+     role created previously. Currently that role has only one member,
+     <literal>bjensen</literal>, whose ID is
+     <literal>2e78fd22-a7cb-4585-9570-5f649e8abd25</literal>. The query returns
+     the complete user object.
     </para>
 
-    <para>
-     If you see a message such as "Object bjensen not found in managed/user",
-     you may need to substitute the <literal>_id</literal>, as output from the
-     <literal>query-all-ids</literal> query described in the
-     <link xlink:show="new" xlink:role="http://docbook.org//xlink/role/olink"
-      xlink:href="install-guide#run-sample2b"><citetitle>Running the Sample
-     </citetitle></link> section associated with Sample 2b. Take care when
-     configuring that sample, as it assumes that you have set up a running
-     instance of OpenDJ with specific data.
-    </para>
+    <screen><userinput>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=get-users-of-direct-role&amp;role=managed/role/newrole"
+     </userinput>
+<computeroutput>{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1,
+  "result": [
+    {
+      "effectiveAssignments": {
+        "ldap": {
+          "attributes": [
+            {
+              "name": "ldapGroups",
+...
+      "_id": "2e78fd22-a7cb-4585-9570-5f649e8abd25",
+      "_rev": "2",
+      "description": "Created for OpenIDM",
+      "accountStatus": "active"
+    }
+  ]
+}</computeroutput>
+    </screen>
    </section>
 
    <section xml:id="remove-role-assignment">
     <title>To Remove a Role Assignment</title>
-
     <para>
      To remove a role assignment from a user, simply replace that user's
      <literal>"roles"</literal> attribute with the array of roles that the user
      should have. The following example removes the <literal>newrole</literal>
-     role from user <literal>bjensen</literal>.
+     role from user <literal>bjensen</literal> by replacing the current value of
+     her <literal>"roles"</literal> attribute with its previous value
+     (<literal>"openidm-authorized"</literal>).
     </para>
-
     <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
@@ -392,58 +437,20 @@ $ curl \
         ]
     }
 ]' \
- "https://localhost:8443/openidm/managed/user/bjensen"</screen>
+ "https://localhost:8443/openidm/managed/user/2e78fd22-a7cb-4585-9570-5f649e8abd25"</screen>
     <para>
      In the role definition, you can specify what should happen when an
-     assignment of that role is removed.
+     assignment of that role is removed. For more information, see
+     <xref linkend="effective-roles-and-assignments" />.
     </para>
-   </section>
-
-   <section xml:id="query-role-membership">
-    <title>To Query Role Membership</title>
-    <para>
-     To return a list of all users who have a specific directly assigned role,
-     specify the role ID in the query on the <literal>managed/user</literal>
-     context path. It is not currently possible to query role membership for
-     indirect roles.
-    </para>
-    <para>
-     The following query returns all members of the <literal>"newrole"</literal>
-     role created previously. Currently that role has only one member,
-     <literal>bjensen</literal>.
-    </para>
-
-    <screen><userinput>$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- "https://localhost:8443/openidm/managed/user?_queryId=get-users-of-direct-role&amp;role=managed/role/newrole"
-     </userinput>
-     <computeroutput>{
-  "remainingPagedResults": -1,
-  "pagedResultsCookie": null,
-  "resultCount": 1,
-  "result": [
-    {
-      "_rev": "0",
-      "_id": "bjensen"
-    }
-  ]
-}</computeroutput>
-    </screen>
    </section>
 
    <section xml:id="delete-role-definition">
     <title>To Delete a Managed Role Definition</title>
     <para>
-     When a role definition is removed, an "unassignment" operation is triggered
-     for any attributes that have been assigned to a user indirectly through
-     that role.
-    </para>
-    <para>
-     The following sample command deletes the <literal>newrole</literal> role,
-     created previously.
+     To delete a role definition, send a DELETE request, specifying the role ID
+     in the URL. The following sample command deletes the
+     <literal>newrole</literal> role, created previously.
     </para>
     <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -452,36 +459,49 @@ $ curl \
  --header "Content-Type: application/json" \
  --request DELETE \
  "https://localhost:8443/openidm/managed/role/newrole"</userinput>
-     <computeroutput>
- {
-   "_id" : "newrole",
-   "_rev" : "2",
-   "assignments" : {
-     "ldap" : {
-       "onUnassignment" : {
-         "type" : "text/javascript",
-         "file" : "roles/onUnassignment_ldap.js"
-       },
-       "onAssignment" : {
-         "type" : "text/javascript",
-         "file" : "roles/onAssignment_ldap.js"
-       },
-       "attributes" : [ {
-         "value" : [ "CN=employees,O=corp" ],
-         "assignmentOperation" : "mergeWithTarget",
-         "unassignmentOperation" : "removeFromTarget",
-         "name" : "ldapGroups"
-       } ]
-     }
-   },
-   "properties" : {
-     "description" : "an example role"
-   }
- }
-</computeroutput>
+<computeroutput>{
+  "properties": {
+    "description": "an example role"
+  },
+  "assignments": {
+    "ldap": {
+      "attributes": [
+        {
+          "name": "ldapGroups",
+          "unassignmentOperation": "removeFromTarget",
+          "assignmentOperation": "mergeWithTarget",
+          "value": [
+            "CN=employees,O=corp"
+          ]
+        }
+      ],
+      "onAssignment": {
+        "file": "roles/onAssignment_ldap.js",
+        "type": "text/javascript"
+      },
+      "onUnassignment": {
+        "file": "roles/onUnassignment_ldap.js",
+        "type": "text/javascript"
+      }
+    }
+  },
+  "_rev": "1",
+  "_id": "newrole"
+}</computeroutput>
     </screen>
+    <note>
+     <para>
+      You cannot delete a role definition if that role is currently assigned to
+      a user. Attempting to delete an assigned role results in the following
+      error:
+     </para>
+     <screen>{
+  "message": "Cannot delete a role that is currently assigned",
+  "reason": "Conflict",
+  "code": 409
+}</screen>
+    </note>
    </section>
-
   </section>
 
   <section xml:id="effective-roles-and-assignments">
