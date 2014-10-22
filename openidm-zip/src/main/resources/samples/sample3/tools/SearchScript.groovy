@@ -29,6 +29,7 @@ import org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.AttributeBuilder
 import org.identityconnectors.framework.common.objects.ObjectClass
 import org.identityconnectors.framework.common.objects.OperationOptions
 import org.identityconnectors.framework.common.objects.SearchResult
@@ -94,7 +95,7 @@ def lastId
 if (filter != null) {
 
     def query = filter.accept(MapFilterVisitor.INSTANCE, null)
-    //Need to handle the __UID__ and __NAME__ in queries - this map has entries for each objectType, 
+    //Need to handle the __UID__ and __NAME__ in queries - this map has entries for each objectType,
     //and is used to translate fields that might exist in the query object from the ICF identifier
     //back to the real property name.
     def fieldMap = [
@@ -159,62 +160,147 @@ if (filter != null) {
 def resultCount = 0
 switch (objectClass) {
     case ObjectClass.ACCOUNT:
-        sql.eachRow("""
-        SELECT
-            id,
-            uid,
-            fullname,
-            firstname,
-            lastname,
-            email,
-            organization,
-            timestamp
-        FROM
-            Users
-        ${where}
-        ${orderBy}
-        ${limit}
-        """, whereParams, { row ->
-            handler {
-                uid row.id as String
-                id row.uid
-                attribute 'uid', row.uid
-                attribute 'fullname', row.fullname
-                attribute 'firstname', row.firstname
-                attribute 'lastname', row.lastname
-                attribute 'email', row.email
-                attribute 'organization', row.organization
+        def dataCollector = [ uid: "", cars: [] ]
+
+        def handleCollectedData = {
+            if (dataCollector.uid != "") {
+                handler {
+                    uid dataCollector.id
+                    id dataCollector.uid
+                    attribute 'uid', dataCollector.uid
+                    attribute 'fullname', dataCollector.fullname
+                    attribute 'firstname', dataCollector.firstname
+                    attribute 'lastname', dataCollector.lastname
+                    attribute 'email', dataCollector.email
+                    attribute 'organization', dataCollector.organization
+                    attributes AttributeBuilder.build('cars', dataCollector.cars)
+                }
+
             }
+        }
+
+        def statement = """
+            SELECT
+            u.id,
+            u.uid,
+            u.fullname,
+            u.firstname,
+            u.lastname,
+            u.email,
+            u.organization,
+            u.timestamp,
+            c.year,
+            c.make,
+            c.model
+            FROM
+            users u
+            LEFT OUTER JOIN
+            car c
+            ON c.users_id = u.id
+            ${where}
+            ${orderBy}
+            ${limit}
+        """
+
+        sql.eachRow(statement, whereParams, { row ->
+            if (dataCollector.uid != row.uid) {
+                // new user row, process what we've collected
+
+                handleCollectedData();
+
+                dataCollector = [
+                        id : row.id as String,
+                        uid : row.uid,
+                        fullname: row.fullname,
+                        firstname: row.firstname,
+                        lastname: row.lastname,
+                        email: row.email,
+                        organization: row.organization,
+                        cars : [ ]
+                ]
+            }
+
+            if (row.year) {
+                dataCollector.cars.add([
+                        year: row.year,
+                        make: row.make,
+                        model: row.model
+                ])
+            }
+
             lastTimestamp = row.timestamp
             lastId = row.id
             resultCount++
         });
+
+        handleCollectedData();
+
         break
 
     case ObjectClass.GROUP:
+
+        def dataCollector = [ gid: "", users: [] ]
+
+        def handleCollectedData = {
+            if (dataCollector.gid != "") {
+                handler {
+                    uid dataCollector.id
+                    id dataCollector.gid
+                    attribute 'gid', dataCollector.gid
+                    attribute 'name', dataCollector.name
+                    attribute 'description', dataCollector.description
+                    attributes AttributeBuilder.build('users', dataCollector.users)
+                }
+
+            }
+        }
+
         sql.eachRow("""
         SELECT
-            id,
-            uid,
-            gid,
-            description,
-            timestamp
+            g.id,
+            g.gid,
+            g.name,
+            g.description,
+            g.timestamp,
+            u.users_id
         FROM
-            Users
+            groups g
+        LEFT OUTER JOIN
+            groups_users u
+        ON
+            u.groups_id = g.id
         ${where}
         ${orderBy}
         ${limit}
         """, whereParams, { row ->
-            handler {
-                uid row.id as String
-                id row.name
-                attribute 'gid', row.gid
-                attribute 'description', row.description
+
+            if (dataCollector.gid != row.gid) {
+                // new user row, process what we've collected
+
+                handleCollectedData();
+
+                dataCollector = [
+                        id : row.id as String,
+                        gid : row.gid,
+                        name: row.name,
+                        description: row.description,
+                        users : [ ]
+                ]
             }
+
+            if (row.users_id) {
+                dataCollector.users.add([
+                        uid: row.users_id
+                ])
+            }
+
             lastTimestamp = row.timestamp
             lastId = row.id
             resultCount++
         });
+
+        handleCollectedData();
+
         break
 
     case ORG:
@@ -225,14 +311,14 @@ switch (objectClass) {
                 description,
                 timestamp
         FROM
-                Users
+                organizations
         ${where}
         ${orderBy}
         ${limit}
         """, whereParams, { row ->
             handler {
-                uid row.id as String
                 id row.name
+                uid row.id as String
                 attribute 'description', row.description
             }
             lastTimestamp = row.timestamp

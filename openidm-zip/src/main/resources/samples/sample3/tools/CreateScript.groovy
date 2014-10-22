@@ -41,7 +41,7 @@ def operation = operation as OperationType
 def createAttributes = new AttributesAccessor(attributes as Set<Attribute>)
 def configuration = configuration as ScriptedSQLConfiguration
 def connection = connection as Connection
-def name = id as String
+def uid = id as String
 def log = log as Log
 def objectClass = objectClass as ObjectClass
 def options = options as OperationOptions
@@ -55,37 +55,69 @@ def sql = new Sql(connection);
 
 switch (objectClass) {
     case ObjectClass.ACCOUNT:
-        def generatedKeys = sql.executeInsert("INSERT INTO Users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha1(?),?,?,?,?,?)",
+        def retUid
+        def generatedKeys = sql.executeInsert(
+                "INSERT INTO users (uid,password,firstname,lastname,fullname,email,organization) values (?,sha1(?),?,?,?,?,?)",
                 [
-                        name,
+                        uid,
                         createAttributes.hasAttribute("password") ? createAttributes.findString("firstname") : "",
                         createAttributes.hasAttribute("firstname") ? createAttributes.findString("firstname") : "",
                         createAttributes.hasAttribute("lastname") ? createAttributes.findString("lastname") : "",
                         createAttributes.hasAttribute("fullname") ? createAttributes.findString("fullname") : "",
                         createAttributes.hasAttribute("email") ? createAttributes.findString("email") : "",
                         createAttributes.hasAttribute("organization") ? createAttributes.findString("organization") : ""
-                ])
-        return new Uid(generatedKeys[0][0] as String)
+                ]
+        )
+        retUid = new Uid(generatedKeys[0][0] as String)
 
+        createAttributes.findList("cars").each {
+            sql.executeInsert(
+                    "INSERT INTO car (users_id,year,make,model) VALUES (?,?,?,?)",
+                    [
+                            generatedKeys[0][0] as Integer,
+                            it.year,
+                            it.make,
+                            it.model
+                    ]
+            )
+        }
+
+        return retUid
         break
 
     case ObjectClass.GROUP:
-        def generatedKeys = sql.executeInsert("INSERT INTO Groups (name,gid,description) values (?,?,?)",
+        def retUid
+        def generatedKeys = sql.executeInsert(
+                "INSERT INTO groups (name,gid,description) values (?,?,?)",
                 [
-                        name,
+                        uid,
                         createAttributes.hasAttribute("gid") ? createAttributes.findString("gid") : "",
                         createAttributes.hasAttribute("description") ? createAttributes.findString("description") : "",
-                ])
-        return new Uid(generatedKeys[0][0] as String)
+                ]
+        )
+        retUid = new Uid(generatedKeys[0][0] as String)
 
+        createAttributes.findList("users").each {
+            sql.executeInsert(
+                    "INSERT INTO groups_users (users_id,groups_id) SELECT id,? FROM users WHERE uid=?",
+                    [
+                            generatedKeys[0][0] as Integer,
+                            it.uid
+                    ]
+            )
+        }
+
+        return retUid
         break
 
     case ORG:
-        def generatedKeys = sql.executeInsert("INSERT INTO Organizations (name ,description) values (?,?)",
+        def generatedKeys = sql.executeInsert(
+                "INSERT INTO organizations (name ,description) values (?,?)",
                 [
-                        name,
+                        uid,
                         createAttributes.hasAttribute("description") ? createAttributes.findString("description") : ""
-                ])
+                ]
+        )
         return new Uid(generatedKeys[0][0] as String)
 
         break

@@ -47,9 +47,9 @@ builder.schema({
             lastname String.class, REQUIRED
             fullname String.class, REQUIRED
             email String.class, REQUIRED
+            cars ArrayList.class
             organization String.class, REQUIRED
         }
-
     }
     objectClass {
         type ObjectClass.GROUP_NAME
@@ -57,6 +57,7 @@ builder.schema({
             name String.class, REQUIRED
             gid String.class, REQUIRED
             description String.class, REQUIRED
+            users ArrayList.class
         }
     }
     objectClass {
@@ -66,5 +67,4 @@ builder.schema({
             description String.class, REQUIRED
         }
     }
-}
-)
+})

@@ -49,7 +49,7 @@ log.info("Entering " + operation + " Script");
 def sql = new Sql(connection);
 def authId = null;
 
-sql.eachRow("SELECT id FROM Users WHERE uid = ? AND password = sha1(?)", [username, SecurityUtil.decrypt(password)]) {
+sql.eachRow("SELECT id FROM users WHERE uid = ? AND password = sha1(?)", [username, SecurityUtil.decrypt(password)]) {
     authId = String.valueOf(it.id)
 }
 

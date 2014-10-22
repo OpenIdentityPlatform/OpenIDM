@@ -57,7 +57,7 @@ switch (operation) {
             case ObjectClass.ACCOUNT:
                 sql.executeUpdate("""
                         UPDATE 
-                            Users 
+                            users
                         SET 
                             fullname = ?,
                             firstname = ?,
@@ -79,14 +79,32 @@ switch (operation) {
                                 uid.uidValue
                         ]
                 );
+                sql.executeUpdate("DELETE FROM car WHERE users_id=?",
+                    [
+                            uid.uidValue
+                    ]
+                );
+                updateAttributes.findMap("cars").each {
+                    sql.executeInsert(
+                            "INSERT INTO car (users_id,year,make,model) VALUES (?,?,?,?)",
+                            [
+                                    uid.uidValue,
+                                    it.year,
+                                    it.make,
+                                    it.model
+                            ]
+                    )
+                };
+
                 break
 
             case ObjectClass.GROUP:
                 sql.executeUpdate("""
                         UPDATE 
-                            Groups 
+                            groups
                         SET
                             description = ?,
+                            name = ?,
                             gid = ?,
                             timestamp = now()
                         WHERE 
@@ -94,10 +112,26 @@ switch (operation) {
                         """,
                         [
                                 updateAttributes.findString("description"),
+                                updateAttributes.findString("name"),
                                 updateAttributes.findString("gid"),
                                 uid.uidValue
                         ]
                 );
+                sql.executeUpdate("DELETE FROM groups_users WHERE groups_id=?",
+                        [
+                                uid.uidValue
+                        ]
+                );
+                updateAttributes.findMap("users").each {
+                    sql.executeInsert(
+                            "INSERT INTO groups_users (users_id,groups_id) SELECT id,? FROM users WHERE uid=?",
+                            [
+                                    it.uid,
+                                    uid.uidValue
+                            ]
+                    )
+                }
+
                 break
 
             case ORG:
