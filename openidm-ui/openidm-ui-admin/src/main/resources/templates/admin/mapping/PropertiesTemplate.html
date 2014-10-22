@@ -17,6 +17,9 @@
 <div>
     <span id="allPropertiesMapped" style="display:none;">{{t "templates.mapping.allPropertiesMapped"}}</span>
     <table id="mappingTable"></table>
+    {{#if missingRequiredProperties}}
+    <button type="button" id="missingRequiredPropertiesButton"  name="" class="button icon-button pull-left edit-button"><span>{{t "common.form.add"}} {{t "templates.mapping.missingRequiredProperties"}} ({{missingRequiredProperties.length}})</span></button>
+    {{/if}}
     <button type="button" id="updateMappingButton"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.saveProperties"}}</span><i class="fa fa-lg fa-save"></i></button>
     <button type="button" id="clearChanges"  name="" class="button icon-button pull-right edit-button"><span>{{t "templates.mapping.clearChanges"}}</span><i class="fa fa-lg fa-refresh"></i></button>
 </div>

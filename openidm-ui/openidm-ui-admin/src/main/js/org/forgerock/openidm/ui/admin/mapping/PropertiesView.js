@@ -48,7 +48,8 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             "click .attrTabBtn": "openPropertyEditTab",
             "keyup #numRepresentativeProps": "resetNumRepresentativeProps",
             "click #updateMappingButton": "saveMapping",
-            "click #clearChanges": "clearChanges"
+            "click #clearChanges": "clearChanges",
+            "click #missingRequiredPropertiesButton": "addRequiredProperties"
         },
         currentMapping: function(){
             return MappingBaseView.currentMapping();
@@ -114,6 +115,29 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 browserStorageDelegate.set(this.mapping.name + "_numRepresentativeProps", num,true);
                 this.render([this.mapping.name]);
             }
+        },
+        checkMissingRequiredProperties: function(){
+            var props = browserStorageDelegate.get(this.mapping.name + "_Properties") || browserStorageDelegate.get("currentMapping").properties;
+            _.each(this.data.requiredProperties, function(reqProp){
+                if(!_.filter(props, function(p){ return p.target === reqProp; }).length){
+                    this.data.missingRequiredProperties.push(reqProp);
+                }
+            }, this);
+        },
+        addRequiredProperties: function(e){
+            var props = browserStorageDelegate.get(this.mapping.name + "_Properties") || this.data.mapProps;
+            
+            if(e){
+                e.preventDefault();
+            }
+            _.each(this.data.requiredProperties, function(reqProp){
+                if(!_.filter(props, function(p){ return p.target === reqProp; }).length){
+                    props.push({ target: reqProp });
+                }
+            });
+            
+            browserStorageDelegate.set(this.mapping.name + "_Properties", props);
+            this.render([this.mapping.name]);
         },
         loadMappingPropertiesGrid: function() {
             var _this = this,
@@ -355,13 +379,16 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
             this.mapping = this.currentMapping();
             //on the line below the hard-coded "4" is there because it seemed like a generally safe default number of properties to use for the purpose of displaying/searching sample source
             this.data.numRepresentativeProps = browserStorageDelegate.get(this.mapping.name + "_numRepresentativeProps",true) || 4;
-            
+            this.data.requiredProperties = [];
+            this.data.missingRequiredProperties = [];
+             
              if(conf.globalData.sampleSource && this.mapping.properties.length){
                  this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
              }
              
              this.buildAvailableObjectsMap().then(_.bind(function(availableObjects){
                  browserStorageDelegate.set(this.currentMapping().name + "_AvailableObjects", availableObjects);
+                 this.checkMissingRequiredProperties();
                  this.parentRender(_.bind(function () {
                      this.loadMappingPropertiesGrid();
                      this.checkAvailableProperties();
@@ -415,6 +442,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                                 }
                                 if(this.currentMapping().target === objTypeMap.fullName){
                                     getProps().then(_.bind(function(props){
+                                        this.data.requiredProperties = _.keys(_.omit(props, function(val) { return !val.required; }));
                                         objTypeMap.properties = _.keys(props).sort();
                                         targetProm.resolve(objTypeMap);
                                     }, this));
