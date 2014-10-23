@@ -45,6 +45,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -59,10 +60,14 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceName;
@@ -108,6 +113,10 @@ import org.slf4j.LoggerFactory;
 public class ConfigObjectService implements RequestHandler, ClusterEventListener {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
+    
+    final static QueryFilterVisitor<QueryFilter, Object> VISITOR = new ConfigQueryFilterVisitor<Object>();
+
+    final static String CONFIG_KEY = "jsonconfig";
 
     final static String EVENT_LISTENER_ID = "config";
     final static String EVENT_RESOURCE_NAME = "resourceName";
@@ -142,7 +151,6 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
-    private ComponentContext context;
     private ConfigCrypto configCrypto;
 
     @Override
@@ -190,16 +198,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         if (properties != null) {
                             alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
                         }
-                        String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
-                        String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
-                        // If there is an alias for factory config is available, make a nicer ID then the internal PID
-                        String id = factoryPid != null && alias != null
-                                ? factoryPid + "/" + alias
-                                : pid;
-
-                        configEntry.put("_id", id);
-                        configEntry.put("pid", pid);
-                        configEntry.put("factoryPid", factoryPid);
+                        
+                        configEntry.put("pid", ConfigBootstrapHelper.unqualifyPid(conf.getPid()));
+                        configEntry.put("factoryPid", ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid()));
                         configList.add(configEntry);
                     }
                 }
@@ -213,6 +214,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
                 result =  enhancedConfig.getConfiguration(props, resourceName.toString(), false);
+                result.put("_id", resourceName.toString());
                 logger.debug("Read configuration for service {}", resourceName);
             }
         } catch (ResourceException ex) {
@@ -277,7 +279,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 throw new PreconditionFailedException("Can not create a new configuration with ID "
                         + parsedId + ", configuration for this ID already exists.");
             }
-
+            
             Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, new JsonValue(obj));
             if (parsedId.isFactoryConfig()) {
                 dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, parsedId.instanceAlias); // The alias for the PID as understood by fileinstall
@@ -353,6 +355,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             if (existingConfig == null) {
                 throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not update the configuration.");
             }
+            
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonValue(obj));
             config.update(existingConfig);
             logger.debug("Updated existing configuration for {} with {}", resourceName.toString(), existingConfig);
@@ -438,10 +441,44 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handleQuery(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
-        final ResourceException e = new NotSupportedException("Query operations are not supported");
-        handler.handleError(e);
+    public void handleQuery(final ServerContext context, final QueryRequest request, final QueryResultHandler handler) {
+        logger.debug("Invoking query");
+        QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
+        QueryFilter filter = request.getQueryFilter();
+
+        queryRequest.setResourceName("repo/config");
+        if (filter != null) {
+            queryRequest.setQueryFilter(asConfigQueryFilter(filter));
+        }
+
+        try {
+            connectionFactory.getConnection().query(context, queryRequest, new QueryResultHandler() {
+                
+                @Override
+                public void handleError(ResourceException error) {
+                    handler.handleError(error);
+                }
+
+                @Override
+                public boolean handleResource(Resource resource) {
+                    JsonValue content = resource.getContent();
+                    JsonValue config = content.get(CONFIG_KEY).copy();
+                    String id = ConfigBootstrapHelper.getId(content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(), 
+                            content.get(ConfigBootstrapHelper.SERVICE_PID).asString(), 
+                            content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
+                    handler.handleResource(new Resource(id, null, config));
+                    return true;
+                }
+
+                @Override
+                public void handleResult(QueryResult result) {
+                    handler.handleResult(result);
+                }
+                
+            });
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        }
     }
 
     @Override
@@ -483,15 +520,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     @Activate
     protected void activate(ComponentContext context) {
         logger.debug("Activating configuration management service");
-        this.context = context;
         this.configCrypto = ConfigCrypto.getInstance(context.getBundleContext(), null);
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @param context TODO.
-     */
     @Deactivate
     protected void deactivate(ComponentContext context) {
         logger.debug("Deactivating configuration management service");
@@ -550,91 +581,197 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             clusterManagementService.sendEvent(event);
         }
     }
-}
-
-class ParsedId {
-    final static Logger logger = LoggerFactory.getLogger(ParsedId.class);
-
-    public String pid;
-    public String factoryPid;
-    public String instanceAlias;
-
-    public ParsedId(ResourceName resourceName) throws BadRequestException {
-        // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
-        ResourceName stripped = resourceName.toString().contains(" ")
-                ? ResourceName.valueOf(resourceName.toString().replaceAll(" ", "_"))
-                : resourceName;
-
-        switch (stripped.size()) {
-            case 2:
-                factoryPid = stripped.parent().toString();
-                instanceAlias = stripped.leaf();
-                break;
-
-            case 1:
-                pid = stripped.toString();
-                break;
-
-            default:
-                throw new BadRequestException("The passed resourceName has more than two parts");
-        }
-
-        if (null != factoryPid) {
-            logger.trace("Factory configuration pid: {} instance alias: {}", factoryPid, instanceAlias);
-        } else {
-            logger.trace("Managed service configuration pid: {}", pid);
-        }
+    
+    String getParsedId(String resourceName) throws ResourceException {
+        return new ParsedId(ResourceName.valueOf(resourceName)).toString();
     }
+    
+    boolean isFactoryConfig(String resourceName) throws ResourceException {
+        return new ParsedId(ResourceName.valueOf(resourceName)).isFactoryConfig();
+    }
+    
+    static QueryFilter asConfigQueryFilter(QueryFilter filter) {
+        return filter.accept(VISITOR, null);
+    }
+    
+    /**
+     * A {@link QueryFilterVisitor} implementation which modifies the {@link JsonPointer} fields by prepending them
+     * with the appropriate key where the full config object is located.
+     */
+    private static class ConfigQueryFilterVisitor<P> implements QueryFilterVisitor<QueryFilter, P> {
 
-    public ParsedId(ResourceName resourceName, String id) throws BadRequestException {
-        if (resourceName.isEmpty()) {
-            // single-instance config
-            pid = id;
-        } else {
-            // multi-instance config
-            factoryPid = resourceName.toString();
-            instanceAlias = id;
+        private final static String CONFIG_FACTORY_PID = "/" + ConfigBootstrapHelper.CONFIG_ALIAS;
+        private final static String SERVICE_FACTORY_PID = "/" + ConfigBootstrapHelper.SERVICE_FACTORY_PID;
+        private final static String SERVICE_PID = "/" + ConfigBootstrapHelper.SERVICE_PID;
+
+        @Override
+        public QueryFilter visitAndFilter(P parameter, List<QueryFilter> subFilters) {
+            return QueryFilter.and(visitQueryFilters(subFilters));
+        }
+
+        @Override
+        public QueryFilter visitBooleanLiteralFilter(P parameter, boolean value) {
+            return value ? QueryFilter.alwaysTrue() : QueryFilter.alwaysFalse();
+        }
+
+        @Override
+        public QueryFilter visitContainsFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.contains(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitEqualsFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.equalTo(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitExtendedMatchFilter(P parameter, JsonPointer field, String operator, Object valueAssertion) {
+            return QueryFilter.comparisonFilter(getConfigPointer(field), operator, valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitGreaterThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThan(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitGreaterThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThanOrEqualTo(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitLessThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThan(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitLessThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThanOrEqualTo(getConfigPointer(field), valueAssertion);
+        }
+
+        @Override
+        public QueryFilter visitNotFilter(P parameter, QueryFilter subFilter) {
+            return QueryFilter.not(subFilter.accept(new ConfigQueryFilterVisitor<Object>(), null));
+        }
+
+        @Override
+        public QueryFilter visitOrFilter(P parameter, List<QueryFilter> subFilters) {
+            return QueryFilter.or(visitQueryFilters(subFilters));
+        }
+
+        @Override
+        public QueryFilter visitPresentFilter(P parameter, JsonPointer field) {
+            return QueryFilter.present(getConfigPointer(field));
+        }
+
+        @Override
+        public QueryFilter visitStartsWithFilter(P parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.startsWith(getConfigPointer(field), valueAssertion);
+        }
+        
+        /**
+         * Visits each {@link QueryFilter} in a list of filters and returns a list of the
+         * visited filters.
+         * 
+         * @param subFilters a list of the filters to visit
+         * @return a list of visited filters
+         */
+        private List<QueryFilter> visitQueryFilters(List<QueryFilter> subFilters) {
+            List<QueryFilter> visitedFilters = new ArrayList<QueryFilter>();
+            for (QueryFilter filter : subFilters) {
+                visitedFilters.add(asConfigQueryFilter(filter));
+            }
+            return visitedFilters;
+        }
+
+        /**
+         * Prepends the fields in the configuration object with the key where the object is stored.  
+         * Will not modify fields outside of the configuration object.
+         * 
+         * @param field a {@link JsonPointer} representing the field to modify.
+         * @return a {@link JsonPointer} representing the modified field
+         */
+        private JsonPointer getConfigPointer(JsonPointer field) {
+            if (CONFIG_FACTORY_PID.equals(field.toString())
+                    || SERVICE_FACTORY_PID.equals(field.toString())
+                    || SERVICE_PID.equals(field.toString())) {
+                return field;
+            }
+            return new JsonPointer("/" + ConfigObjectService.CONFIG_KEY + field.toString());
         }
     }
     
-    public ParsedId(JsonValue parsedIdMap) {
-        JsonValue value = parsedIdMap.get("pid");
-        pid = value.isNull() ? null : value.asString();
-        value = parsedIdMap.get("factoryPid");
-        factoryPid = value.isNull() ? null : value.asString();
-        value = parsedIdMap.get("instanceAlias");
-        instanceAlias = value.isNull() ? null : value.asString();
-    }
-
     /**
-     * @return is this ID represents a managed factory configuration, or false if it is a managed service configuraiton
+     * A class for converting resource names and IDs to qualified PIDs that represent managed services.
      */
-    public boolean isFactoryConfig() {
-        return (instanceAlias != null);
-    }
+    private class ParsedId {
 
-    /**
-     * Get the qualified pid of the managed service or managed factory depending on the configuration represented
-     * Some APIs do not distinguish between single managed service PID and managed factory PID
-     *
-     * @return the qualified pid if this ID represents a managed service configuration, or the managed factory PID
-     *         if it represents a managed factory configuration
-     */
-    public String getPidOrFactoryPid() {
-        return isFactoryConfig()
-                ? ConfigBootstrapHelper.qualifyPid(factoryPid)
-                : ConfigBootstrapHelper.qualifyPid(pid);
-    }
+        public String pid;
+        public String factoryPid;
+        public String instanceAlias;
 
-    public String toString() {
-        return isFactoryConfig()
-                ? (factoryPid + "-" + instanceAlias)
-                : pid;
-    }
-    
-    public JsonValue toJsonValue() {
-        return json(object(field("pid", pid),
-                field("factoryPid", factoryPid),
-                field("instanceAlias", instanceAlias)));
+        public ParsedId(ResourceName resourceName) throws BadRequestException {
+            // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
+            ResourceName stripped = resourceName.toString().contains(" ")
+                    ? ResourceName.valueOf(resourceName.toString().replaceAll(" ", "_"))
+                    : resourceName;
+
+            switch (stripped.size()) {
+                case 2:
+                    factoryPid = stripped.parent().toString();
+                    instanceAlias = stripped.leaf();
+                    break;
+
+                case 1:
+                    pid = stripped.toString();
+                    break;
+
+                default:
+                    throw new BadRequestException("The passed resourceName has more than two parts");
+            }
+
+            if (null != factoryPid) {
+                logger.trace("Factory configuration pid: {} instance alias: {}", factoryPid, instanceAlias);
+            } else {
+                logger.trace("Managed service configuration pid: {}", pid);
+            }
+        }
+
+        public ParsedId(ResourceName resourceName, String id) throws BadRequestException {
+            if (resourceName.isEmpty()) {
+                // single-instance config
+                pid = id;
+            } else {
+                // multi-instance config
+                factoryPid = resourceName.toString();
+                instanceAlias = id;
+            }
+        }
+
+        /**
+         * @return is this ID represents a managed factory configuration, or false if it is a managed service configuraiton
+         */
+        public boolean isFactoryConfig() {
+            return (instanceAlias != null);
+        }
+
+        /**
+         * Get the qualified pid of the managed service or managed factory depending on the configuration represented
+         * Some APIs do not distinguish between single managed service PID and managed factory PID
+         *
+         * @return the qualified pid if this ID represents a managed service configuration, or the managed factory PID
+         *         if it represents a managed factory configuration
+         */
+        public String getPidOrFactoryPid() {
+            return isFactoryConfig()
+                    ? ConfigBootstrapHelper.qualifyPid(factoryPid)
+                    : ConfigBootstrapHelper.qualifyPid(pid);
+        }
+
+        public String toString() {
+            return isFactoryConfig()
+                    ? (factoryPid + "-" + instanceAlias)
+                    : pid;
+        }
     }
 }

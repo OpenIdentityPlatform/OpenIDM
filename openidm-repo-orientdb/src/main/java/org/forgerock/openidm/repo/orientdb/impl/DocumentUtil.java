@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -288,6 +288,9 @@ public class DocumentUtil  {
                             logger.trace("Setting primary key to {}", value);
                             result.field(ORIENTDB_PRIMARY_KEY, value);
                         }
+                    } else {
+                        logger.trace("Setting field {} to value {}", key, value);
+                        result.field(entry.getKey(), value);
                     }
                 } else if (key.equals(TAG_REV)) {
                     // OpenIDM revision to document version mapping
@@ -300,6 +303,9 @@ public class DocumentUtil  {
                                 result.setVersion(rev);
                             }
                         }
+                    } else {
+                        logger.trace("Setting field {} to value {}", key, value);
+                        result.field(entry.getKey(), value);
                     }
                 } else if (value instanceof Map) {
                     // TODO: consider if we should replace this with nested maps rather than nested ODocuments
