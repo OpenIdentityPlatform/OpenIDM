@@ -123,6 +123,7 @@ import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallbac
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
+import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncHandlerException;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
@@ -2103,6 +2104,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      */
                                     @SuppressWarnings("fallthrough")
                                     public boolean handle(SyncDelta syncDelta) {
+                                        boolean retry = false;
                                         try {
                                             // Q: are we going to encode ids?
                                             final String resourceId = syncDelta.getUid().getUidValue();
@@ -2173,12 +2175,26 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             syncFailure.put("objectType", objectType);
                                             syncFailure.put("uid", syncDelta.getUid().getUidValue());
                                             syncFailure.put("failedRecord", failedRecord[0]);
-                                            syncFailureHandler.invoke(syncFailure, e);
+                                            try {
+                                                syncFailureHandler.invoke(syncFailure, e);
+                                            } catch (SyncHandlerException ex) {
+                                                // Current contract of the failure handler is that throwing this exception indicates 
+                                                // that it should retry for this entry
+                                                retry = true;
+                                                logger.debug("Sync failure handler indicated to stop current change set processing until retry handling: {}", 
+                                                        ex.getMessage(), ex);
+                                            }
                                         }
 
-                                        // success (either by original sync or by failure handler)
-                                        lastToken[0] = syncDelta.getToken();
-                                        return true;
+                                        if (retry) {
+                                            // Stop the processing of this result set. Next retry will start again after last token.
+                                            return false; 
+                                        } else {
+                                            // success (either by original sync or by failure handler)
+                                            // Continue the processing of the rest of the result set
+                                            lastToken[0] = syncDelta.getToken();
+                                            return true;
+                                        }
                                     }
                                 }, operationOptionsBuilder.build());
                         if (syncToken != null) {
