@@ -200,7 +200,7 @@ public class HealthService implements HealthInfo, ClusterEventListener, ServiceT
      * Maximum time after framework start for required services to register to
      * consider the system startup as successful
      */
-    private long serviceStartMax = 10000;
+    private long serviceStartMax = 15000;
     /**
      * Services required to be registered for the system to consider itself
      * READY. Required services may be expressed as a regex, for example:

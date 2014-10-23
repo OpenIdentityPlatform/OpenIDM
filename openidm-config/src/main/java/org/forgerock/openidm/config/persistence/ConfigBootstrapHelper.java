@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.config.persistence;
 
 import java.io.File;
@@ -73,6 +74,10 @@ public class ConfigBootstrapHelper {
     public static final String OPENIDM_UI_FILEINSTALL_POLL = "openidm.ui.fileinstall.poll";
 
     public static final String FELIX_FILEINSTALL_PID = "org.apache.felix.fileinstall";
+    
+    public static final String CONFIG_ALIAS = "config__factory-pid";
+    public static final String SERVICE_PID = "service__pid";
+    public static final String SERVICE_FACTORY_PID = "service__factoryPid";
 
     // Filename prefix for repository configuration
     public static final String REPO_FILE_PREFIX = "repo.";
@@ -275,6 +280,25 @@ public class ConfigBootstrapHelper {
         } else {
             return qualifiedPid;
         }
+    }
+    
+
+
+    /**
+     * Construct the configurations's resource ID.
+     * 
+     * @param alias the config factory pid alias
+     * @param pid the service pid
+     * @param factoryPid the service factory pid
+     * @return the configuration's resource ID
+     */
+    public static String getId(String alias, String pid, String factoryPid) {
+        String unqualifiedPid = ConfigBootstrapHelper.unqualifyPid(pid);
+        String unqualifiedFactoryPid = ConfigBootstrapHelper.unqualifyPid(factoryPid);
+        // If there is an alias for factory config is available, make a nicer ID then the internal PID
+        return unqualifiedFactoryPid != null && alias != null
+                ? unqualifiedFactoryPid + "/" + alias
+                : unqualifiedPid;
     }
     
 }

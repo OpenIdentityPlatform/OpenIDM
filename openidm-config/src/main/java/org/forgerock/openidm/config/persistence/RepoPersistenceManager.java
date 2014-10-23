@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.felix.cm.PersistenceManager;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -47,6 +49,11 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.config.enhanced.InternalErrorException;
+import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.config.installer.JSONPrettyPrint;
+import org.forgerock.openidm.config.manage.ConfigObjectService;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -60,18 +67,21 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
 
     // The ID URI prefix for configuration
     private static final String CONFIG_CONTEXT_PREFIX = "config/";
-    
+
     // Meta-data when converting from array to list to enable later conversion to original form
     private static final String OPENIDM_ORIG_ARRAY = "_openidm_orig_array";
     private static final String OPENIDM_ORIG_ARRAY_TYPE = "_openidm_orig_array_type=";
-    
+
     private static final String BUNDLE_LOCATION = "service__bundleLocation";
     private static final String FELIX_FILEINSTALL_FILENAME = "felix__fileinstall__filename";
 
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
-    
+
+    private static JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
+    private static ObjectMapper mapper = new ObjectMapper();
+
     private BundleContext ctx;
-    
+
     /**
      * The Repository Service Accessor
      */
@@ -80,15 +90,15 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
 
     //Rapid development may require only memory store.
     private final boolean requireRepository = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
-    
+
     // Fall-back is in-memory store of configurations
     Map<String, Dictionary> tempStore = new HashMap<String, Dictionary>();
-    
+
     public RepoPersistenceManager(final BundleContext ctx) {
         this.ctx = ctx;
         logger.debug("Bootstrapping Repository Persistence Manager");
     }
-    
+
     /**
      * Handle the system notifying that it's ready to install configs.
      */
@@ -141,7 +151,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      */
     public boolean exists(String pid) {
         logger.debug("Config exists call for {}", pid);
-        
+
         boolean exists = false;
 
         if (isReady(0) && requireRepository) {
@@ -164,7 +174,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         } else {
             logger.debug("Entry exists for '{}'", pid);
         }
-       
+
         if (!exists) {
             logger.debug("Entry does not exist for '{}'", pid);
         }
@@ -186,14 +196,18 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     public Dictionary load(String pid) throws IOException {
         logger.debug("Config load call for {}", pid);
         Dictionary result = null;
-        
+
         try {
             if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
                 ReadRequest readRequest = Requests.newReadRequest(id);
                 Resource existing = repo.read(readRequest);
+                Map<String, Object> existingConfig = existing.getContent().asMap();
+                Object configMap = existingConfig.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
+                String configString = serializeConfig(configMap);
+                existingConfig.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, configString);
                 logger.debug("Config loaded {} {}", pid, existing);
-                result = mapToDict(existing.getContent().asMap());
+                result = mapToDict(existingConfig);
             } else if (!requireRepository) {
                 result = tempStore.get(pid);
                 if (result == null) {
@@ -207,7 +221,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             if (result == null) {
                 throw new IOException("No entry for " + pid + " exists.");
             }
-            
+
             logger.debug("Config loaded from temporary store {} {}", pid, result);
         } catch (ResourceException ex) {
             throw new IOException("Failed to load configuration in repository: " + ex.getMessage(), ex);
@@ -237,13 +251,13 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             java.util.Iterator memIter = tempStore.values().iterator();
             java.util.Iterator dbIter = null;
             List<String[]> returnedIds = new ArrayList<String[]>();
-            
+
             @Override
             public boolean hasMoreElements() {
                 boolean hasMore = false;
                 try {
                     hasMore = memIter.hasNext();
-                    
+
                     if (!hasMore) {
                         if (requireRepository && repo != null && dbIter == null) {
                             QueryRequest r = Requests.newQueryRequest("/config");
@@ -267,10 +281,10 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     logger.warn("Failure getting configuration dictionaries for hasMoreElements " + ex.getMessage(), ex);
                     throw new RuntimeException(ex);
                 }
-                
+
                 return hasMore;
             }
-            
+
             public Object nextElement() {
                 try {
                     if (memIter.hasNext()) {
@@ -303,17 +317,29 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      */
     public void store(String pid, Dictionary properties) throws IOException {
         logger.debug("Store call for {} {}", pid, properties);
-        
+
         // Store config handling settings in memory
         if (pid.startsWith("org.apache.felix.fileinstall")) {
             tempStore.put(pid, properties);
             return;
         }
-        
+
         try {
             if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
+
                 Map<String,Object> obj = dictToMap(properties);
+                JsonValue content = new JsonValue(obj);
+                String configResourceId = ConfigBootstrapHelper.getId(content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(), 
+                        content.get(ConfigBootstrapHelper.SERVICE_PID).asString(), 
+                        content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
+                String configString = (String)obj.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
+                Map<Object, Object> configMap = deserializeConfig(configString);
+                if (configMap != null) {
+                    configMap.put("_id", configResourceId);
+                }
+                obj.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, configMap);
+
                 Map<String,Object> existing = null;
                 try {
                     ReadRequest readRequest = Requests.newReadRequest(id);
@@ -323,7 +349,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 }
                 if (existing != null) {
                     String rev = (String) existing.get("_rev");
-                    
+
                     existing.remove("_rev");
                     existing.remove("_id");
                     obj.remove("_rev"); // beware, this means _id and _rev should not be in config file
@@ -367,7 +393,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             throw new IOException("Failed to store configuration in repository: " + ex.getMessage(), ex);
         }
     }
-    
+
     /**
      * Removes the <code>Dictionary</code> for the given <code>pid</code>. If
      * such a dictionary does not exist, this method has no effect.
@@ -415,7 +441,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             throw new IOException("Failed to delete configuration + " + pid + " in repository: " + ex.getMessage(), ex);
         }
     }
-     
+
     /**
      * Convert OSGi pid to an ID suitable for addressing the repository
      * @param pid the OSGi pid
@@ -427,7 +453,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
         return CONFIG_CONTEXT_PREFIX + pid;
     }
-    
+
     /**
      * Convert dictionary and contents to a Map, compatible with the JSON model.
      * Arrays are encoded with special meta-data entries marking their origin as array.
@@ -449,7 +475,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 putValue = new ArrayList((Vector) rawValue);
             } else if (rawValue instanceof Object[]) {
                 List convList = new ArrayList(Arrays.asList((Object[]) rawValue));
-                
+
                 // Add marker entries to mark this as coming from an array
                 convList.add(OPENIDM_ORIG_ARRAY); 
                 convList.add(OPENIDM_ORIG_ARRAY_TYPE + rawValue.getClass().getComponentType().getName());
@@ -460,7 +486,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
         return convert;
     }
-    
+
     /**
      * Convert the JSON model map and contents to types and contents 
      * compatible with OSGi configuration Dictionary
@@ -489,13 +515,13 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                         String typeListItem = null;
                         for (Object listItem : listToInspect) {
                             if (listItem instanceof String && ((String)listItem).startsWith(OPENIDM_ORIG_ARRAY_TYPE)) {
-                                
+
                                 typeListItem = (String) listItem;
                             }
                         }
                         String origType = typeListItem.substring(OPENIDM_ORIG_ARRAY_TYPE.length());
                         listToInspect.remove(typeListItem); // remove this marker/meta-data entry
-                        
+
                         try {
                             Class origArrayClazz = null; 
                             origArrayClazz = ctx.getBundle().loadClass(origType);
@@ -513,7 +539,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             return converted;
         }
     }
-    
+
     /*
      * Convert to a key (property name) compatible with storing in the repository
      * 
@@ -522,11 +548,31 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     String toEscapedKey(String rawKey) {
         return rawKey.replaceAll("\\.", "__");
     }
-    
+
     /*
      * Convert from encoded version for repository storage to the original key
      */
     String fromEscapedKey(String escapedKey) {
         return escapedKey.replaceAll("__", ".");
+    }
+
+    private String serializeConfig(Object configMap) throws InternalErrorException {
+        try {
+            ObjectWriter writer = prettyPrint.getWriter();
+            return writer.writeValueAsString(configMap);
+        } catch (Exception ex) {
+            throw new InternalErrorException("Failure in writing formatted and encrypted configuration " + ex.getMessage(), ex);
+        }
+    }
+
+    private Map<Object, Object> deserializeConfig(String configString) throws InvalidException {
+        try {
+            if (configString != null && configString.trim().length() > 0) {
+                return mapper.readValue(configString, Map.class);
+            }
+        } catch (Exception ex) {
+            throw new InvalidException("Configuration could not be parsed and may not be valid JSON : " + ex.getMessage(), ex);
+        }
+        return null;
     }
 }
