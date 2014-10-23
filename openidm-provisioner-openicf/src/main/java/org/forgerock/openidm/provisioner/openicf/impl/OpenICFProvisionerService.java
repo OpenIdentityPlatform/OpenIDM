@@ -1880,6 +1880,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * "name" : "ldap",
      * "enabled" : true,
      * "config" : "config/provisioner.openicf/ldap"
+     * "objectTypes":
+     * [
+     *  "group",
+     *  "account"
+     * ],
      * "connectorRef" :
      *  {
      *      "connectorName": "org.identityconnectors.ldap.LdapConnector",
@@ -1894,6 +1899,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * "name": "ldap",
      * "enabled": false,
      * "config": "config/provisioner.openicf/ldap",
+     * "objectTypes":
+     * [
+     *  "group",
+     *  "account"
+     * ],
+     * "connectorRef":
+     * {
+     *      "connectorName": "org.identityconnectors.ldap.LdapConnector",
+     *      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+     *      "bundleVersion": "[1.4.0.0,2.0.0.0)"
+     * },
      * "error": "connector not available",
      * "ok": false
      * }}
@@ -1910,8 +1926,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.openicf/" + factoryPid);
         jv.put("objectTypes", ConnectorUtil.getObjectTypes(jsonConfiguration).keySet());
-        if (connectorReference != null) {
-            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(connectorReference.getConnectorKey()));
+        if (ConnectorUtil.getConnectorReference(jsonConfiguration) != null) {
+            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF,
+                    ConnectorUtil.getConnectorKey(ConnectorUtil.getConnectorReference(jsonConfiguration).getConnectorKey()));
         }
 
         try {
