@@ -22,7 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-
 .authentication-input-body {
   fieldset {
     border: 1px #ddd solid;
@@ -72,6 +71,7 @@
       .group-field-block {
         padding: 0px 0px 0px 10px;
         margin-top: 0px;
+        display: block;
 
         label {
           display: block;
@@ -122,8 +122,8 @@
   }
   input[type="text"]:disabled,
   select:disabled {
-    color: #bbb;
-    opacity: .8;
+    color: #999;
+    opacity: 1;
   }
 
   .group-field-block {
@@ -158,6 +158,9 @@
     color: #5a646d;
     margin: 10px 10px 0;
     background-color: #fff;
+    width: 890px;
+    z-index: 1;
+    position: relative;
 
     .group > h3 {
       i {
@@ -271,6 +274,8 @@
         padding: 20px;
         margin: -1px 10px 10px 10px;
         cursor: pointer;
+        width: 848px;
+        z-index: 0;
 
         &:hover {
           border-color: #5a646d;
@@ -293,6 +298,26 @@
           padding: 0 !important;
           font-style: normal !important;
         }
+
+        &.advancedForm, &.basicForm {
+          &>div>h3{
+            margin: 10px 0 5px !important;
+            line-height: normal;
+            cursor: pointer;
+            span {
+              display: inline;
+            }
+          }
+
+          .advancedShowHide {
+            margin-right: 10px !important;
+          }
+        }
+
+        .container-defaultUserRoles input {
+          width: 576px !important;
+        }
+
         label, select, input {
           display: inline-block !important;
           margin: 0 !important;
@@ -306,7 +331,7 @@
         }
 
         label {
-          width: 200px;
+          width: 220px;
           margin-top: 10px !important;
           float: none;
           font-weight: normal !important;
@@ -379,8 +404,3 @@
     }
   }
 }
-.authentication-input-body .group-body{
-    width: 890px;
-}
-
-
