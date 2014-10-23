@@ -50,8 +50,14 @@
                         <i class="fa fa-chevron-up fa-2 up"></i>
                         <i class="fa fa-chevron-down fa-2 down"></i>
                     </h3>
+
                     <div class="content">
-                        <div class="form"></div>
+                        <label for="moduleType" class="light">{{t "templates.auth.moduleType"}}</label>
+                        <select id="moduleType" class="moduleType form-size-s" name="moduleType">
+                            <option value="choose">{{t "templates.auth.select"}}</option>
+                        </select>
+                        <div class="basicForm form"></div>
+                        <div class="advancedForm form"></div>
                     </div>
                 </div>
             </div>
