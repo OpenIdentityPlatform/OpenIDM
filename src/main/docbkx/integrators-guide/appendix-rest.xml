@@ -1163,7 +1163,7 @@ Content-Length: 89
         </para>
         <para>
          <literal>_action=test</literal> returns a list of all remote systems,
-         with their status.
+         with their status, and supported object types.
         </para>
         <para>
          <literal>_action=testConfig</literal> validates the connector
@@ -1274,6 +1274,17 @@ Content-Length: 89
 <computeroutput>[
   {
     "ok": true,
+    "connectorRef": {
+      "bundleVersion": "[1.4.0.0,2.0.0.0)",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
+    "objectTypes": [
+      "group",
+      "account"
+    ],
+    "config": "config/provisioner.openicf/ldap",
+    "enabled": true,
     "name": "ldap"
   }
 ]</computeroutput></screen>

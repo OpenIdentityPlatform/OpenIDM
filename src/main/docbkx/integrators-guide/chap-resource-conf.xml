@@ -3466,7 +3466,7 @@ Properties:
    To list the external systems that are connected to an OpenIDM instance, use
    the <literal>test</literal> action on the URL
    <literal>https://localhost:8443/openidm/system/</literal>. The following
-   example shows the connector configurations for two LDAP systems.
+   example shows the connector configuration for an external LDAP system.
   </para>
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -3477,24 +3477,19 @@ Properties:
  "https://localhost:8443/openidm/system?_action=test"</userinput>
 <computeroutput>[
   {
+    "ok": true,
+    "connectorRef": {
+      "bundleVersion": "[1.4.0.0,2.0.0.0)",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
+    "objectTypes": [
+      "group",
+      "account"
+    ],
     "config": "config/provisioner.openicf/ldap",
-    "connectorRef": {
-      "bundleVersion": "${openicf.ldapconnector.version}",
-      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-      "connectorName": "org.identityconnectors.ldap.LdapConnector"
-    },
-    "ok": true,
+    "enabled": true,
     "name": "ldap"
-  },
-  {
-    "config": "config/provisioner.openicf/ad",
-    "connectorRef": {
-      "bundleVersion": "${openicf.ldapconnector.version}",
-      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-      "connectorName": "org.identityconnectors.ldap.LdapConnector"
-    },
-    "ok": true,
-    "name": "ad"
   }
 ]</computeroutput></screen>
   <para>
@@ -3514,19 +3509,26 @@ Properties:
  --request POST \
  "https://localhost:8443/openidm/system/ldap?_action=test"</userinput>
 <computeroutput>{
-  "config": "config/provisioner.openicf/ldap",
+  "ok": true,
   "connectorRef": {
-    "bundleVersion": "${openicf.ldapconnector.version}",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
-  "ok": true,
+  "objectTypes": [
+    "group",
+    "account"
+  ],
+  "config": "config/provisioner.openicf/ldap",
+  "enabled": true,
   "name": "ldap"
 }</computeroutput></screen>
   <para>
-   If there is a problem with the connection, the request returns an error
-   message. In the following example, the LDAP server named
-   <literal>ldap</literal> is down.
+   If there is a problem with the connection, the <literal>"ok"</literal>
+   parameter returns <literal>false</literal>, with an indication of the error.
+   In the following example, the LDAP server named
+   <literal>ldap</literal>, running on <literal>localhost:1389</literal>, is
+   down.
   </para>
   <screen><userinput>$ curl \
  --cacert self-signed.crt \
@@ -3536,8 +3538,19 @@ Properties:
  --request POST \
  "https://localhost:8443/openidm/system/ldap?_action=test"</userinput>
 <computeroutput>{
-  "error": "javax.naming.CommunicationException: localhost:1389 [Root exception
-    is java.net.ConnectException: Connection refused]",
+  "ok": false,
+  "error": "localhost:1389",
+  "connectorRef": {
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
+    "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+    "connectorName": "org.identityconnectors.ldap.LdapConnector"
+  },
+  "objectTypes": [
+    "group",
+    "account"
+  ],
+  "config": "config/provisioner.openicf/ldap",
+  "enabled": true,
   "name": "ldap"
 }</computeroutput></screen>
   <para>
