@@ -10,26 +10,25 @@
             },
             "properties" : [
                 {
-                    "source" : "_id",
-                    "target" : "_id"
-                },
-                {
-                    "source" : "description",
-                    "target" : "description"
+                    "source" : "email",
+                    "target" : "mail"
                 },
                 {
                     "source" : "firstname",
                     "target" : "givenName"
                 },
                 {
-                    "source" : "email",
-                    "target" : "mail"
-                },
-                {
                     "source" : "lastname",
                     "target" : "sn"
                 },
                 {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },                {
                     "source" : "name",
                     "target" : "userName"
                 },
