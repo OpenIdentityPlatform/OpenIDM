@@ -145,10 +145,10 @@
     }
 
     for (i = 0; i<reconAudit.result.length; i++) {
-        if (reconAudit.result[i].sourceObjectId !== null) {
+        if (reconAudit.result[i].sourceObjectId !== null && reconAudit.result[i].sourceObjectId !== undefined) {
             reconAudit.result[i].sourceObject = sourceDataMap[reconAudit.result[i].sourceObjectId.replace(source + "/", "")];
         }
-        if (reconAudit.result[i].targetObjectId !== null) {
+        if (reconAudit.result[i].targetObjectId !== null && reconAudit.result[i].targetObjectId !== undefined) {
             reconAudit.result[i].targetObject = targetDataMap[reconAudit.result[i].targetObjectId.replace(target + "/", "")];
         }
         result.push(reconAudit.result[i]);
