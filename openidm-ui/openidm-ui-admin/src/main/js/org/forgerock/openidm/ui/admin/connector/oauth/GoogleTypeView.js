@@ -30,6 +30,14 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
 ], function(AbstractOAuthView, ExternalAccessDelegate) {
 
     var GoogleTypeView = AbstractOAuthView.extend({
+        getScopes: function() {
+            var googleScope = "https://www.googleapis.com/auth/admin.directory.group%20"
+                +"https://www.googleapis.com/auth/admin.directory.orgunit%20"
+                +"https://www.googleapis.com/auth/admin.directory.user%20"
+                +"https://www.googleapis.com/auth/apps.licensing";
+
+            return googleScope;
+        },
 
         getToken: function(mergedResult, oAuthCode) {
             return ExternalAccessDelegate.getToken(mergedResult.configurationProperties.clientSecret,
