@@ -28,7 +28,8 @@
                 {
                     "source" : "_id",
                     "target" : "_id"
-                },                {
+                },
+                {
                     "source" : "name",
                     "target" : "userName"
                 },
@@ -42,9 +43,9 @@
                 },
                 {
                     "source" : "roles",
-                    "transform": {
-                        "type": "text/javascript",
-                        "source": "source.split(',')"
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.split(',')"
                     },
                     "target" : "roles"
                 }
