@@ -31,8 +31,11 @@
         </div>
         <div class="mapping-bottom-bar">
             <div class="inline">{{name}}</div>
-            <button type="button"  name="" class="button icon-button pull-right edit-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
-            <button type="button"  name="" class="button icon-button pull-right delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
+            <div class="float-right">
+                {{t "templates.mapping.syncStatus"}}: <span id="{{name}}_syncStatus" class="syncStatus"></span>
+                <button type="button"  name="" class="button icon-button delete-button"><span>{{t "common.form.delete"}}</span><i class="fa fa-lg fa-times-circle-o"></i></button>
+                <button type="button"  name="" class="button icon-button"><span>{{t "common.form.edit"}}</span><i class="fa fa-lg fa-pencil"></i></button>
+            </div>
         </div>
     </div>
     {{/each}}

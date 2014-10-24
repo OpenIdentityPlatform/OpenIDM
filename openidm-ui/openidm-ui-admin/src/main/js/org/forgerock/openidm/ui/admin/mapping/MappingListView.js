@@ -29,8 +29,11 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function(AdminAbstractView, eventManager, configDelegate, constants, uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate"
+], function(AdminAbstractView, eventManager, configDelegate, constants, uiUtils, reconDelegate, dateUtil, syncDelegate) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
@@ -47,16 +50,15 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             }
         },
         render: function(args, callback) {
-            var errorCallback = _.bind(function(){
-                    configDelegate.createEntity("sync", { mappings: [] }).then(_.bind(function(){
-                        this.render(args, callback);
-                    },this));
-                },this),
-                syncConfig = configDelegate.readEntity("sync",null, errorCallback);
+            var syncConfig = syncDelegate.mappingDetails();
 
             syncConfig.then(_.bind(function(sync){
                 this.data.mappingConfig = sync.mappings;
-                this.cleanConfig = _.map(sync.mappings, _.clone);
+                this.cleanConfig = _.chain(sync.mappings)
+                                        .map(function(m){
+                                            return _.clone(_.omit(m,"recon"));
+                                        })
+                                        .value();
 
                 _.each(this.data.mappingConfig, function (sync){
                     sync.targetType = this.syncType(sync.target);
@@ -96,7 +98,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
                         }, this)
                     });
-
+                    
+                    this.showSyncStatus();
+                    
                     if(callback){
                         callback();
                     }
@@ -131,6 +135,23 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     selectedEl.remove();
                 }, this));
             }, this), "550px");
+        },
+        showSyncStatus: function(){
+            _.each(this.data.mappingConfig, function (sync){
+                var el = this.$el.find("#" + sync.name + "_syncStatus"),
+                    txt = $.t("templates.mapping.notYetSynced");
+                if(sync.recon){
+                    if(sync.recon.state === "CANCELED") {
+                        txt = $.t("templates.mapping.lastSyncCanceled");
+                    } else if(sync.recon.state === "ACTIVE") {
+                        txt = $.t("templates.mapping.inProgress");
+                    } else {
+                        txt = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(sync.recon.ended,"MMMM dd, yyyy HH:mm");
+                    }
+                }
+                
+                el.text(txt);
+            }, this);
         }
     });
 
