@@ -280,6 +280,10 @@
    </listitem>
   </varlistentry>
  </variablelist>
+  <para>
+   To run remotely, connector jar itself must be copied to the
+   <literal>openicf/bundles</literal> directory, on the remote machine.
+  </para>
  </section>
 
  <section xml:id="openicf-provisioner-conf">
