@@ -37,7 +37,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
         buildReturnUrl: function(id, name) {
             var urlBack = window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
                 builtUrl = this.$el.find("#OAuthurl").val()
-                    +"?scope=email%20profile"
+                    +"?scope="+this.getScopes()
                     +"&state=" +this.data.systemType +"_" +name
                     +"&redirect_uri=" +urlBack
                     +"&response_type=code"
@@ -48,7 +48,6 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
 
             return builtUrl;
         },
-
         submitOAuth: function(mergedResult) {
             var name = mergedResult.name,
                 id = mergedResult.configurationProperties.clientId,
