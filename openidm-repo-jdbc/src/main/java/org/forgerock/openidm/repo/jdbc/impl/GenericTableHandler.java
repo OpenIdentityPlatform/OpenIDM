@@ -86,8 +86,8 @@ public class GenericTableHandler implements TableHandler {
                         return "(EXISTS "
                                 + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
                                 +          "WHERE prop.${_mainTable}_id = obj.id "
-                                +            "AND prop.propKey = ${" + key + "} "
-                                +            "AND prop.propValue " + operand + " ${" + value + "} "
+                                +            "AND prop.propkey = ${" + key + "} "
+                                +            "AND prop.propvalue " + operand + " ${" + value + "} "
                                 + "))";
                     }
                 }
@@ -104,7 +104,7 @@ public class GenericTableHandler implements TableHandler {
                         return "(EXISTS "
                                 + "(SELECT * FROM ${_dbSchema}.${_propTable} prop "
                                 +          "WHERE prop.${_mainTable}_id = obj.id "
-                                +            "AND prop.propKey = ${" + key + "}))";
+                                +            "AND prop.propkey = ${" + key + "}))";
                     }
                 }
             };
