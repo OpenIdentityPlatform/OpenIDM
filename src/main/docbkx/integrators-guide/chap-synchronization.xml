@@ -1726,40 +1726,36 @@ $ <userinput>curl \
  <section xml:id="querying-recon-logs">
   <title>Querying the Reconciliation Audit Log</title>
   <para>
-     Reconciliation operations are logged in the file
-     <filename>/path/to/openidm/audit/recon.csv</filename> and in the
-     repository. You can read and query the reconciliation audit logs over the
-     REST interface, as outlined in the following examples.
+   Reconciliation operations are logged in the file
+   <filename>/path/to/openidm/audit/recon.csv</filename> and in the repository.
+   You can read and query the reconciliation audit logs over the REST interface,
+   as outlined in the following examples.
   </para>
-    <para>
-     By default all <literal>audit/recon</literal> query responses are formatted
-     based on the <literal>entryType</literal> of the entry. Fields that are not
-     required for the specific entry type are stripped away from the response.
-     For example, a <literal>summary</literal> entry would not need to include a
-     null <literal>targetObjectId</literal> field, as this would not add
-     information to a summary. You can specify that this auto-formatting be
-     disabled and return the full entry for all entry types. To disable entry
-     formatting, include <literal>formatted=false</literal> as a query parameter
-     in the request.
-    </para>
-    <para>
-     To return all reconciliation operations logged in the audit log, run a
-     RESTful GET on the <literal>audit/recon</literal> endpoint. For example:
-    </para>
-
-    <screen>$ <userinput>curl \
+  <para>
+   By default all <literal>audit/recon</literal> query responses are formatted
+   based on the <literal>entryType</literal> of the entry. Fields that are not
+   required for the specific entry type are stripped away from the response. For
+   example, a <literal>summary</literal> entry would not need to include a null
+   <literal>targetObjectId</literal> field, as this would not add information to
+   a summary. You can specify that this auto-formatting be disabled and return
+   the full entry for all entry types. To disable entry formatting, include
+   <literal>formatted=false</literal> as a query parameter in the request.
+  </para>
+  <para>
+   To return all reconciliation operations logged in the audit log, run a
+   RESTful GET on the <literal>audit/recon</literal> endpoint. For example:
+  </para>
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/recon"</userinput></screen>
-
-    <para>
-     The following code sample shows an extract of the audit log after the first
-     reconciliation operation in Sample 1.
-    </para>
-
-    <programlisting language="javascript">{
+  <para>
+   The following code sample shows an extract of the audit log after the first
+   reconciliation operation in Sample 1.
+  </para>
+  <programlisting language="javascript">{
   "entries": [
     {
       "mapping": "systemXmlfileAccounts_managedUser",
@@ -1870,34 +1866,31 @@ $ <userinput>curl \
       "messageDetail": null
     }
   ]
-}    </programlisting>
+} </programlisting>
 
-    <para>
-     Most of the fields in this audit log are self-explanatory. Each distinct
-     reconciliation operation is identified by its <literal>reconId</literal>.
-     Each entry in the log is identified by a unique <literal>_id</literal>. The
-     first log entry indicates the status for the complete reconciliation
-     operation. Successive entries indicate the status for each record affected
-     by the reconciliation.
-    </para>
-    <para>
-     To obtain information on a specific audit log entry, include its entry
-     <literal>_id</literal> in the URL. For example:
-    </para>
-
-    <screen>$ curl \
+  <para>
+   Most of the fields in this audit log are self-explanatory. Each distinct
+   reconciliation operation is identified by its <literal>reconId</literal>.
+   Each entry in the log is identified by a unique <literal>_id</literal>. The
+   first log entry indicates the status for the complete reconciliation
+   operation. Successive entries indicate the status for each record affected by
+   the reconciliation.
+  </para>
+  <para>
+   To obtain information on a specific audit log entry, include its entry
+   <literal>_id</literal> in the URL. For example:
+  </para>
+  <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/recon/fe250514-d3e1-477a-bb90-88bd4525d70b"</screen>
-
-    <para>
-     The following sample output shows the results of a read operation on a
-     specific reconciliation audit entry.
-    </para>
-
-    <programlisting language="javascript">{
+  <para>
+   The following sample output shows the results of a read operation on a
+   specific reconciliation audit entry.
+  </para>
+  <programlisting language="javascript">{
   "mapping": "systemXmlfileAccounts_managedUser",
   "targetObjectId": "managed/user/scarter",
   "sourceObjectId": "system/xmlfile/account/scarter",
@@ -1915,27 +1908,25 @@ $ <userinput>curl \
   "status": "SUCCESS",
   "message": null,
   "messageDetail": null
-}   </programlisting>
-
-    <para>
-     To query the audit log for a particular reconciliation operation, use the
-     <literal>audit-by-recon-id</literal> keyword, specifying the reconciliation
-     ID, as follows:
-    </para>
-
-    <screen><userinput>$ curl \
+} </programlisting>
+  <para>
+   To query the audit log for a particular reconciliation operation, use the
+   <literal>audit-by-recon-id</literal> keyword, specifying the reconciliation
+   ID, as follows:
+  </para>
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id&amp;reconId=&lt;reconID&gt;"</userinput></screen>
 
-    <para>
-     Output similar to the following is returned, for the specified
-     reconciliation operation:
-    </para>
+  <para>
+   Output similar to the following is returned, for the specified reconciliation
+   operation:
+  </para>
 
-    <programlisting language="javascript">{
+  <programlisting language="javascript">{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 4,
@@ -2051,29 +2042,25 @@ $ <userinput>curl \
     }
   ]
 }</programlisting>
-
-    <para>
-     To query the audit log for a specific reconciliation situation, use the
-     <literal>audit-by-recon-id-situation</literal> keyword, specifying the
-     reconciliation ID and the situation that you want to query. For example,
-     the following query returns all ABSENT records found during the specified
-     reconciliation operation:
-    </para>
-
-    <screen>$ <userinput>curl \
+  <para>
+   To query the audit log for a specific reconciliation situation, use the
+   <literal>audit-by-recon-id-situation</literal> keyword, specifying the
+   reconciliation ID and the situation that you want to query. For example, the
+   following query returns all ABSENT records found during the specified
+   reconciliation operation:
+  </para>
+  <screen>$ <userinput>curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/recon?_queryId=audit-by-recon-id-situation&amp;situation=ABSENT&amp;reconId=e5f3190d-41d9-4bea-907d-b287a9436a45"</userinput>
-    </screen>
-
-    <para>
-     Output similar to the following is returned, with one entry for each record
-     that matches the situation queried:
-    </para>
-
-    <programlisting language="javascript">{
+  </screen>
+  <para>
+   Output similar to the following is returned, with one entry for each record
+   that matches the situation queried:
+  </para>
+  <programlisting language="javascript">{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
   "resultCount": 2,
@@ -2118,30 +2105,29 @@ $ <userinput>curl \
     }
   ]
 }</programlisting>
+ </section>
 
-    <para>
-     The activity logs track all operations on internal (managed) and external
-     (system) objects. Entries in the activity log contain identifiers for the
-     reconciliation or synchronization action that triggered the activity, and
-     for the original caller and the relationships between related actions.
-    </para>
-
-    <para>
-     You can access the activity logs over REST with the following call:
-    </para>
-
-    <screen>$ curl \
+ <section xml:id="querying-activity-logs">
+  <title>Querying the Activity Audit Log</title>
+  <para>
+   The activity logs track all operations on internal (managed) and external
+   (system) objects. Entries in the activity log contain identifiers for the
+   reconciliation or synchronization action that triggered the activity, and
+   for the original caller and the relationships between related actions.
+  </para>
+  <para>
+   You can access the activity logs over REST with the following call:
+  </para>
+  <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/activity"</screen>
-
-    <para>
-     The following extract of the activity log shows the last entry in the log,
-     which was a password change for user bjensen.
-    </para>
-
+  <para>
+   The following extract of the activity log shows the last entry in the log,
+   which was a password change for user bjensen.
+  </para>
   <programlisting language="javascript">{
    "entries": [
    ...
@@ -2176,25 +2162,20 @@ $ <userinput>curl \
            "type": "x-simple-encryption"
          }
        },
-   ...
-  </programlisting>
-
-    <para>
-     To return activity information for a specific action, include the
-     <literal>_id</literal> of the action in the endpoint, for example:
-    </para>
-
-    <screen><?dbfo pgwide="1"?>$ curl \
+   ...</programlisting>
+  <para>
+   To return activity information for a specific action, include the
+   <literal>_id</literal> of the action in the endpoint, for example:
+  </para>
+  <screen><?dbfo pgwide="1"?>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/activity/22ef6d20-bd84-4267-9db8-745825a46ad1"</screen>
-
-    <para>
-     Results similar to the following are returned:
-    </para>
-
+  <para>
+   Results similar to the following are returned:
+  </para>
   <programlisting language="javascript">{
   "passwordChanged": true,
   "changedFields": [
@@ -2291,33 +2272,29 @@ $ <userinput>curl \
 "objectId": "managed/user/bjensen",
 "rev": "7",
 "rootActionId": "71ddeed8-9006-4578-b869-13e15a3ce6b5"
-}    </programlisting>
-
-    <para>
-     Each action in the activity log has a <literal>rootActionId</literal> and a
-     <literal>parentActionId</literal>. The <literal>rootActionId</literal> is
-     the ID that was assigned to the incoming or initiating request. The
-     <literal>parentActionId</literal> is the ID that is associated with the
-     overall action. So, for example, if an HTTP request invokes a script that
-     changes a user's password, the HTTP request is assigned the
-     <literal>rootActionId</literal> and the action taken by the script is
-     assigned the <literal>parentActionId</literal>. You can query the activity
-     log for the details of a specific action by including the
-     <literal>parentActionId</literal> in the query. For example:
-    </para>
-
-    <screen><userinput>$ curl \
+} </programlisting>
+  <para>
+   Each action in the activity log has a <literal>rootActionId</literal> and a
+   <literal>parentActionId</literal>. The <literal>rootActionId</literal> is the
+   ID that was assigned to the incoming or initiating request. The
+   <literal>parentActionId</literal> is the ID that is associated with the
+   overall action. So, for example, if an HTTP request invokes a script that
+   changes a user's password, the HTTP request is assigned the
+   <literal>rootActionId</literal> and the action taken by the script is
+   assigned the <literal>parentActionId</literal>. You can query the activity
+   log for the details of a specific action by including the
+   <literal>parentActionId</literal> in the query. For example:
+  </para>
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
  "https://localhost:8443/openidm/audit/activity?_queryId=audit-by-activity-parent-action&amp;parentActionId=0aaba292-1dd3-4e98-a0e2-04bec9ae5209"</userinput></screen>
-
-    <para>
-     The following sample output shows the result of a query that requests
-     details of the password change for bjensen.
-    </para>
-
+  <para>
+   The following sample output shows the result of a query that requests details
+   of the password change for bjensen.
+  </para>
   <programlisting language="javascript">{
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -2414,25 +2391,24 @@ $ <userinput>curl \
   "passwordChanged": true
   }
  ]
-}</programlisting>
+} </programlisting>
+  <note>
+   <para>
+    For audit logs in the repository, you can define custom queries using the
+    parameterized query mechanism. For more information, see the section on
+    <link xlink:href="integrators-guide#parameterized-queries"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized
+    Queries</citetitle></link>.
+   </para>
+  </note>
+  <para>
+   For more information about the entries in these logs, see the chapter that
+   covers <link xlink:href="integrators-guide#chap-auditing"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
+   Logs</citetitle></link>.
+  </para>
+ </section>
 
-    <note>
-     <para>
-      For audit logs in the repository, you can define custom queries using the
-      parameterized query mechanism. For more information, see the section on
-      <link xlink:href="integrators-guide#parameterized-queries"
-      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Parameterized
-      Queries</citetitle></link>.
-     </para>
-    </note>
-
-    <para>
-     For more information about the entries in these logs, see the chapter that
-     covers <link xlink:href="integrators-guide#chap-auditing"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
-     Logs</citetitle></link>.
-    </para>
-   </section>
 
   <section xml:id="livesync-retry-strategy">
    <title>Configuring the LiveSync Retry Policy</title>
