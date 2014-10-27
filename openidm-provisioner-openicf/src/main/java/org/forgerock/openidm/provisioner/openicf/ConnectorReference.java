@@ -47,15 +47,25 @@ public final class ConnectorReference {
         /**
          * Connector loaded with {@code LocalConnectorInfoManagerImpl}.
          */
-        LOCAL,
+        LOCAL(true),
         /**
          * Connector loaded with {@code OsgiConnectorInfoManagerImpl}.
          */
-        OSGI,
+        OSGI(true),
         /**
          * Connector loaded with {@code RemoteConnectorInfoManagerImpl}.
          */
-        REMOTE;
+        REMOTE(false);
+
+        private boolean local;
+
+        private ConnectorLocation(boolean local) {
+            this.local = local;
+        }
+
+        public boolean isLocal() {
+            return local;
+        }
     }
 
     private final ConnectorKey connectorKey;

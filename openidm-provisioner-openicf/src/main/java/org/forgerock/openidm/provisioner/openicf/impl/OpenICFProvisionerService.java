@@ -106,6 +106,7 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -345,10 +346,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
 
+            if (connectorReference.getConnectorLocation().isLocal()
+                    && connectorInfoProvider.findConnectorInfo(connectorReference) == null) {
+                // Not possible to satisfy the connector reference, bail out
+                throw new InvalidException("Connector not found: " + connectorReference.getConnectorKey());
+            }
+
             connectorFacadeCallback = new ConnectorFacadeCallback() {
                 @Override
                 public void addingConnectorInfo(ConnectorInfo connectorInfo,
-                        ConnectorFacadeFactory facadeFactory) {
+                                                ConnectorFacadeFactory facadeFactory) {
                     try {
                         APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
                         operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
@@ -424,8 +431,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         logger.info("OpenICF Provisioner Service component {} is activated{}",
                                 systemIdentifier.getName(),
                                 (null != connectorFacade.get()
-                                    ? "."
-                                    : " although the service is not available yet."));
+                                        ? "."
+                                        : " although the service is not available yet."));
                     }
                 }
 
@@ -448,8 +455,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             logger.info("OpenICF Provisioner Service component {} is activated{}", systemIdentifier.getName(),
                     (null != connectorFacade.get()
-                        ? "."
-                        : " although the service is not available yet."));
+                            ? "."
+                            : " although the service is not available yet."));
         } catch (Exception e) {
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
