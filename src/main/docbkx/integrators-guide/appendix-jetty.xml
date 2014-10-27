@@ -316,5 +316,75 @@
   </variablelist>
 
  </section>
+
+ <section xml:id="disabling-protocols">
+  <title>Disabling and Enabling Secure Protocols</title>
+
+  <para>
+   Secure communications are important. To that end, the embedded Jetty web
+   server enables a number of different protocols. To review the list of
+   enabled protocols, run the following commands:
+  </para>
+
+  <screen>$ <userinput>cd /path/to/openidm/logs
+$ grep Enabled openidm0.log.0</userinput>
+   <computeroutput>openidm0.log.0:INFO: Enabled Protocols [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2] of
+[SSLv2Hello, SSLv3, TLSv1, TLSv1.1, TLSv1.2]
+   </computeroutput>
+  </screen>
+
+  <para>
+   Note the difference between enabled and available protocols. Based on this
+   particular output, <literal>SSLv3</literal> is missing from the list of
+   enabled protocols. To see how this was done, open the
+   <filename>jetty.xml</filename> file in the /path/to/openidm/conf directory.
+   Note the <literal>"ExcludeProtocols"</literal> code block shown here:
+  </para>
+
+  <programlisting language="xml">...
+    &lt;Set name="ExcludeProtocols"&gt;
+        &lt;Array type="java.lang.String"&gt;
+            &lt;Item&gt;SSLv3&lt;/Item&gt;
+        &lt;/Array&gt;
+    &lt;/Set&gt;
+...</programlisting>
+
+  <note>
+   <para>
+    As noted in the following <link xlink:show="new"
+    xlink:href="https://www.openssl.org/~bodo/ssl-poodle.pdf">
+    <citetitle>Security Advisory</citetitle></link>, "SSL 3.0 [RFC6101] is
+    an obsolete and insecure protocol."
+   </para>
+  </note>
+
+  <para>
+   To exclude another protocol from the <literal>Enabled</literal> list, just
+   add it to the <literal>"ExcludeProtocols"</literal> XML block. For example,
+   if you included the following line in that XML block, your instance of
+   Jetty would also exclude TLSv1:
+  </para>
+
+  <programlisting language="xml">&lt;Item&gt;TLSv1&lt;/Item&gt;</programlisting>
+
+  <para>
+   You can reverse the process by removing the protocol from the
+   <literal>"ExcludeProtocols"</literal> block.
+  </para>
+
+  <para>
+   To see if certain protocols should be included in the
+   <literal>"ExcludeProtocols"</literal> block, review the current list of
+   <link xlink:show="new" xlink:href="https://forgerock.org/security-advisories/">
+   <citetitle>ForgeRock Security Advisories</citetitle></link>
+  </para>
+
+  <para>
+   For more information on Jetty configuration see the following document from
+   the developers of <link xlink:show="new"
+   xlink:href="http://www.eclipse.org/jetty/documentation/current/">
+   <citetitle>Jetty: The Definitive Reference</citetitle></link>
+  </para>
+ </section>
   
 </appendix>
