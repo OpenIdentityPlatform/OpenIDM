@@ -62,56 +62,54 @@ switch (operation) {
         }
         switch (objectClass) {
             case ObjectClass.ACCOUNT:
-                sql.eachRow("select * from users where timestamp > ${tstamp}", {
+                sql.eachRow("select * from users where timestamp > ${tstamp}", { row ->
+                    def cararray = []
+                    def userid = row.id as Integer
+                    sql.eachRow("SELECT * FROM car WHERE users_id = ${userid}", { car ->
+                        if (car.year) {
+                            cararray.add([
+                                    year: car.year,
+                                    make: car.make,
+                                    model: car.model
+                            ])
+                        }
+                    });
                     handler({
-                        def cararray = []
-                        def userid = row.id as Integer
-                        sql.eachRow("SELECT * FROM car WHERE users_id = ${userid}", {
-                            handler({
-                                cararray.add(object {
-                                    attribute 'year', it.year
-                                    attribute 'make', it.make
-                                    attribute 'model', it.model
-                                })
-                            })
-                        })
-                        syncToken it.timestamp.getTime()
+                        syncToken row.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
-                            id row.id as String
-                            uid it.uid
-                            attribute 'uid', it.uid
-                            attribute 'fullname', it.fullname
-                            attribute 'firstname', it.firstname
-                            attribute 'lastname', it.lastname
-                            attribute 'email', it.email
+                            id row.uid
+                            uid row.id as String
+                            attribute 'uid', row.uid
+                            attribute 'fullname', row.fullname
+                            attribute 'firstname', row.firstname
+                            attribute 'lastname', row.lastname
+                            attribute 'email', row.email
                             attribute 'cars', cararray
-                            attribute 'organization', it.organization
+                            attribute 'organization', row.organization
                         }
                     })
                 })
                 break
 
             case ObjectClass.GROUP:
-                sql.eachRow("SELECT * FROM groups where timestamp > ${tstamp}", {
+                sql.eachRow("SELECT * FROM groups where timestamp > ${tstamp}", { row ->
+                    def groupid = row.id as Integer
+                    def userlist = []
+                    sql.eachRow("SELECT users_id FROM groups_users WHERE groups_id = ${groupid}", { user ->
+                        userlist.add([
+                                uid: user.users_id
+                        ])
+                    })
                     handler({
-                        def groupid = row.id as Integer
-                        def userlist = []
-                        sql.eachRow("SELECT users_id FROM groups_users WHERE groups_id = ${groupid}", {
-                            handler({
-                                userlist.add(object {
-                                    attribute 'uid', it.users_id
-                                })
-                            })
-                        })
-                        syncToken it.timestamp.getTime()
+                        syncToken row.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
                             id row.id as String
-                            uid it.name
+                            uid row.name
                             delegate.objectClass(ObjectClass.GROUP)
-                            attribute 'gid', it.gid
-                            attribute 'description', it.description
+                            attribute 'gid', row.gid
+                            attribute 'description', row.description
                             attribute 'users', userlist
                         }
                     })
@@ -119,15 +117,15 @@ switch (operation) {
                 break
 
             case ORG:
-                sql.eachRow("SELECT * FROM organizations where timestamp > ${tstamp}", {
+                sql.eachRow("SELECT * FROM organizations where timestamp > ${tstamp}", { row ->
                     handler({
-                        syncToken it.timestamp.getTime()
+                        syncToken row.timestamp.getTime()
                         CREATE_OR_UPDATE()
                         object {
                             id row.id as String
-                            uid it.name
+                            uid row.name
                             delegate.objectClass(ORG)
-                            attribute 'description', it.description
+                            attribute 'description', row.description
                         }
                     })
                 });
@@ -144,14 +142,14 @@ switch (operation) {
 
         switch (objectClass) {
             case ObjectClass.ACCOUNT:
-                row = sql.firstRow("select timestamp from Users order by timestamp desc")
+                row = sql.firstRow("select max(timestamp) as timestamp from users")
                 break;
 
             case ObjectClass.GROUP:
-                row = sql.firstRow("select timestamp from Groups order by timestamp desc")
+                row = sql.firstRow("select max(timestamp) as timestamp from groups")
                 break;
             case ORG:
-                row = sql.firstRow("select timestamp from Organizations order by timestamp desc")
+                row = sql.firstRow("select max(timestamp) as timestamp from organizations")
                 break;
 
             default:
@@ -160,7 +158,7 @@ switch (operation) {
         }
 
         log.ok("Get Latest Sync Token script: last token is: " + row["timestamp"])
-        // We don't wanna return the java.sql.Timestamp, it is not a supported data type
+        // We don't want to return the java.sql.Timestamp, it is not a supported data type
         // Get the 'long' version
         return row["timestamp"].getTime();
 
