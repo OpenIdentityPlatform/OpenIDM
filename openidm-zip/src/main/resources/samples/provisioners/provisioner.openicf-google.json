@@ -468,7 +468,7 @@
                     "nativeName": "organizations",
                     "nativeType": "object"
                 },
-                "photo[": {
+                "photo": {
                     "type": "string",
                     "nativeName": "__PHOTO__",
                     "nativeType": "JAVA_TYPE_BYTE_ARRAY",
