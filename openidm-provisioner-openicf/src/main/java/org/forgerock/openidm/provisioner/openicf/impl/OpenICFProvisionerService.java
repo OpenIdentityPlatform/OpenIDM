@@ -117,6 +117,7 @@ import org.forgerock.openidm.provisioner.impl.SystemObjectSetService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
+import org.forgerock.openidm.provisioner.openicf.commons.AttributeMissingException;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
@@ -1483,6 +1484,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             } catch (ConnectorException e) {
                 handleConnectorException(context, request, e, null, null, null, null, handler, activityLogger);
             } catch (JsonValueException e) {
+                handler.handleError(new BadRequestException(e.getMessage(), e));
+            } catch (AttributeMissingException e) {
                 handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e.getMessage(), e));

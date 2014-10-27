@@ -148,7 +148,7 @@ public class ObjectClassInfoHelper {
             }
         }
 
-        throw new IllegalArgumentException("Attribute " + attributeName + " does not exist as part of " + objectClass);
+        throw new AttributeMissingException("Attribute " + attributeName + " does not exist as part of " + objectClass);
     }
 
     /**
