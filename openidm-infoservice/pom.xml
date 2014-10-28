@@ -27,7 +27,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>3.1.0-RC1-SNAPSHOT</version>
+        <version>3.1.0-RC1</version>
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-infoservice</artifactId>
