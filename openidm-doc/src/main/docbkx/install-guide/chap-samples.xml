@@ -295,7 +295,7 @@ $ ./startup.sh -p samples/sample2</screen>
 
    <para>
     You should now be able to review reconciled users in the UI. Point your
-    browser to <literal>https://localhost:8443/openidmui</literal>, log in as
+    browser to <literal>https://localhost:8443/openidmui<?linebreak?></literal>, log in as
     the <literal>openidm-admin</literal> user (with password
     <literal>openidm-admin</literal>), and navigate to the Users tab. Select the
     user whose profile information you want to see.
@@ -3735,13 +3735,13 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
   <para>
    This sample demonstrates how you can protect a deployment of OpenIDM with
    ForgeRock's <link xlink:show="new"
-   xlink:href="http://docs.forgerock.org/en/index.html?product=openam&amp;version=11.0.0">
+   xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
    <citetitle>OpenAM Access Management</citetitle></link> product.
   </para>
 
   <para>
    In this sample, you will use OpenIDM together with OpenAM and ForgeRock's
-   <link xlink:href="http://docs.forgerock.org/en/index.html?product=opendj&amp;version=2.6.0">
+   <link xlink:href="http://docs.forgerock.org/en/index.html?product=opendj">
    <citetitle>OpenDJ Directory Services</citetitle></link> product.
   </para>
 
@@ -3758,11 +3758,12 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
    second system, with a URL of <literal>openam.example.com</literal>.
   </para>
 
-  <!--TODO: update if/when OpenAM 11 is updated to work with this sample, ref
-   AME-4386 -->
+  <!--TODO: update if/when OpenAM 11 is updated to work with this sample,
+   ref AME-4386, or when OpenAM 12 is released. I'm hard-coding 12-SNAPSHOT,
+   to avoid adding AM info to the OpenIDM pom file. -->
   <note>
    <para>
-    At this time, this sample assumes that you have deployed OpenAM 12.
+    This sample assumes that you have deployed OpenAM 12-SNAPSHOT.
    </para>
   </note>
 
@@ -3803,18 +3804,28 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       <filename>openam.war</filename>.
      </para>
      <para>
+      Configure the OpenAM Java EE container to use a secure port such as 8443.
+     </para>
+     <para>
       When installing OpenAM, configure it to use the OpenDJ data store
       installed on <literal>openidm.example.com</literal>.
      </para>
      <para>
       This sample assumes that you will configure OpenAM-based Single Sign-On
       (SSO) as described in the OpenAM Administration Guide. For this sample,
-      you will need to configure <literal>.example.com</literal> as the sole
-      cookie domain as described in the following section of the noted OpenAM
-      Guide: <link xlink:show="new"
-      xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/admin-guide/index.html#configure-sso-one-domain">
-      <citetitle>Configure SSO on One Domain</citetitle></link>.
+      configure <literal>.example.com</literal> as the sole cookie domain as
+      described in the following section of the OpenAM Reference Guide:
+      <link xlink:show="new"
+      xlink:href="http://openam.forgerock.org/openam-documentation/openam-doc-source/doc/reference#system-platform-attrs">
+      <citetitle>System Configuration: Platform</citetitle></link>.
      </para>
+     <note>
+      <para>
+       When you configure OpenAM for this sample, you do not need to install a
+       Java EE agent. This sample uses the
+       <literal>OPENAM_SESSION</literal> module to protect OpenIDM.
+      </para>
+     </note>
     </listitem>
     <listitem>
      <para>
@@ -3836,13 +3847,6 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
     </listitem>
    </itemizedlist>
 
-   <note>
-    <para>
-     When you configure OpenAM for this sample, you do not need to install a
-     Java EE agent. This sample uses the  <literal>OPENAM_SESSION</literal>
-     module to protect OpenIDM.
-    </para>
-   </note>
    </section>
 
    <section xml:id="configure-openam-sample">
@@ -3969,7 +3973,12 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       </para>
 
       <para>
-       You will want to change the <literal>"localhost"</literal> entry to the
+       You should make sure that the following settings are consistent with the
+       way you've configured OpenDJ and OpenAM.
+      </para>
+
+      <para>
+       To that end, change the <literal>"localhost"</literal> entry to the
        URL where OpenDJ is installed. In this case, that URL is
        <literal>openidm.example.com</literal>. Depending on whether you want to
        set up communications over a regular or secure LDAP port, you might
@@ -4107,7 +4116,7 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
 
    <itemizedlist>
     <listitem>
-     <para><literal>Disable INTERNAL_USER by enabling LiveSync</literal></para>
+     <para><literal>Disable INTERNAL_USER when enabling LiveSync</literal></para>
      <para>
       To keep OpenDJ in sync with the OpenIDM managed/user database, you can
       enable scheduled reconciliation and LiveSync. To do so, edit the following
@@ -4122,9 +4131,16 @@ $ ./startup.sh -p samples/sample9</userinput></screen>
       see <xref linkend="more-sample6"/>.
      </para>
      <para>
+      You can take these steps while OpenIDM is running.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
       Execute the reconciliation command described earlier in the description
       for this sample.
      </para>
+    </listitem>
+    <listitem>
      <para>
       Once scheduled reconciliation and LiveSync are configured, you can then
       disable the <literal>INTERNAL_USER</literal> under
