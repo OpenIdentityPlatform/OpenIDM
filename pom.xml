@@ -22,8 +22,7 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock</groupId>
@@ -32,7 +31,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution.
@@ -256,9 +255,9 @@
         <commons.forgerock-script.version>1.4.0</commons.forgerock-script.version>
 
         <!-- OSGi bundles properties -->
-        <openidm.osgi.import.before.defaults/>
-        <openidm.osgi.import.defaults/>
-        <openidm.osgi.import.additional/>
+        <openidm.osgi.import.before.defaults />
+        <openidm.osgi.import.defaults />
+        <openidm.osgi.import.additional />
         <openidm.osgi.import>
             org.forgerock.openidm.*;provide:=true,
             org.forgerock.json.*,
@@ -273,7 +272,7 @@
         <openicf.xmlconnector.version>1.1.0.1</openicf.xmlconnector.version>
         <openicf.csvconnector.version>1.1.0.1</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.0</openicf.dbtableconnector.version>
-        <openicf.remoteconnectorserver.version></openicf.remoteconnectorserver.version>
+        <openicf.remoteconnectorserver.version />
         <openicf.ldapconnector.version>1.4.0.0-RC2</openicf.ldapconnector.version>
         <openicf.googleconnector.version>1.4.0.0-RC2</openicf.googleconnector.version>
         <openicf.groovyconnector.version>1.4.1.0-RC2</openicf.groovyconnector.version>
