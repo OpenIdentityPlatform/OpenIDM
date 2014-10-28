@@ -86,5 +86,24 @@ CREATE  TABLE IF NOT EXISTS `audit`.`auditaccess` (
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `audit`.`auditsync`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `audit`.`auditsync` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rootactionid` VARCHAR(255) NULL ,
+  `sourceobjectid` VARCHAR(511) NULL ,
+  `targetobjectid` VARCHAR(511) NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `activity` VARCHAR(24) NULL ,
+  `situation` VARCHAR(24) NULL ,
+  `status` VARCHAR(7) NULL ,
+  `message` TEXT NULL ,
+  `actionid` VARCHAR(255) NULL ,
+  `exceptiondetail` TEXT NULL ,
+  `mapping` TEXT NULL ,
+  `messagedetail` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
 
 grant all on audit.* to root@'%' IDENTIFIED BY 'password';

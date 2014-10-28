@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright (c) 2011 ForgeRock AS. All rights reserved.
+  Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
@@ -449,6 +449,9 @@
             <includes>
                 <include>**</include>
             </includes>
+            <excludes>
+                <exclude>conf/sync.json</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/audit-sample/conf</outputDirectory>
         </fileSet>
         <fileSet>

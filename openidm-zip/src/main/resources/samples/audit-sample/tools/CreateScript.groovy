@@ -48,6 +48,7 @@ def sql = new Sql(connection as Connection);
 def auditrecon = new ObjectClass("auditrecon");
 def auditactivity = new ObjectClass("auditactivity");
 def auditaccess = new ObjectClass("auditaccess");
+def auditsync = new ObjectClass("auditsync");
 
 //convert attributes to map
 Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
@@ -113,6 +114,26 @@ switch ( objectClass ) {
             attributeMap.get("activitydate")?.getValue()?.get(0),
             attributeMap.get("userid")?.getValue()?.get(0)
         ]);
+    break
+
+    case auditsync:
+
+        sql.execute("INSERT INTO auditsync (objectid,rootactionid,sourceobjectid,targetobjectid,activitydate,activity,situation,status,message,actionid,exceptiondetail,mapping,messagedetail) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                [
+                        id,
+                        attributeMap.get("rootactionid")?.getValue()?.get(0),
+                        attributeMap.get("sourceobjectid")?.getValue()?.get(0),
+                        attributeMap.get("targetobjectid")?.getValue()?.get(0),
+                        attributeMap.get("activitydate")?.getValue()?.get(0),
+                        attributeMap.get("activity")?.getValue()?.get(0),
+                        attributeMap.get("situation")?.getValue()?.get(0),
+                        attributeMap.get("status")?.getValue()?.get(0),
+                        attributeMap.get("message")?.getValue()?.get(0),
+                        attributeMap.get("actionid")?.getValue()?.get(0),
+                        attributeMap.get("exceptiondetail")?.getValue()?.get(0),
+                        attributeMap.get("mapping")?.getValue()?.get(0),
+                        attributeMap.get("messagedetail")?.getValue()?.get(0)
+                ]);
     break
 
     default:
