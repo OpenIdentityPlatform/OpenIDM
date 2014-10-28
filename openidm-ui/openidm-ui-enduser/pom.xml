@@ -22,13 +22,12 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>openidm-ui</artifactId>
     <groupId>org.forgerock.openidm</groupId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-RC1-SNAPSHOT</version>
   </parent>
 
   <artifactId>openidm-ui-enduser</artifactId>
@@ -313,14 +312,13 @@
                     </path>
                     
                     <copy todir="target/classes" overwrite="false">
-                      <fileset dir="target/dependency"/>
+                      <fileset dir="target/dependency" />
                     </copy>
                     <echo message="Running optimize." />
 
                     <property name="requirejs.dir" value="${basedir}/src/main/optimization" />
 
-                    <java classname="org.mozilla.javascript.tools.shell.Main"
-                      failonerror="true">
+                    <java classname="org.mozilla.javascript.tools.shell.Main" failonerror="true">
                       <classpath refid="class.path" />
                       <arg value="${requirejs.dir}/r.js" />
                       <arg value="-o" />
