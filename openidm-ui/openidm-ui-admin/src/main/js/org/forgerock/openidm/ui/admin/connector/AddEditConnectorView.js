@@ -389,9 +389,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
         updateLiveSyncObjects: function() {
             var objectTypes = [],
-                tempName = "",
-                curName = "",
-                sourcePieces = [];
+                curName = "";
 
             if (!this.data.editState) {
                 curName = this.$el.find("#connectorName").val();
@@ -419,12 +417,13 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 this.$el.find(".sources").empty();
 
                 if (objectTypes && _.size(objectTypes) > 0) {
+                    this.$el.find(".objectTypeFieldMessage").hide();
 
                     // For each schedule on the page
                     _.each(this.addedLiveSyncSchedules, function (source) {
                         // The schedule is not included in the livesync source list
                         if (_.indexOf(objectTypes, source) === -1) {
-                            $("#" + source.split("/").join("")).find(".deleteSchedule").click();
+                            this.$el.find("#" + source.split("/").join("")).find(".deleteSchedule").click();
                             this.addedLiveSyncSchedules.splice(_.indexOf(this.addLiveSyncScheduler, source), 1);
                         }
                     }, this);
@@ -440,10 +439,12 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                         }
                     }, this);
                 } else {
+                    this.$el.find(".objectTypeFieldMessage").show();
                     this.$el.find(".addLiveSync").prop('disabled', true);
                     this.$el.find(".sources").prop('disabled', true);
                 }
             } else {
+                this.$el.find(".objectTypeFieldMessage").hide();
                 this.$el.find(".addLiveSync").prop('disabled', true);
                 this.$el.find(".sources").prop('disabled', true);
                 this.$el.find(".nameFieldMessage").show();
@@ -571,6 +572,15 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
                 connectorRef;
 
             connectorData = _.findWhere(this.data.connectors, {"connectorName": selectedValue[0], "bundleVersion": selectedValue[1]});
+
+
+            // For each schedule on the page
+            _.each(this.addedLiveSyncSchedules, function (source) {
+                this.$el.find("#" + source.split("/").join("")).find(".deleteSchedule").click();
+                this.addedLiveSyncSchedules.splice(_.indexOf(this.addLiveSyncScheduler, source), 1);
+            }, this);
+            this.objectTypes = [];
+
 
             //If for some reason no connector data
             if(_.isUndefined(connectorData)) {
