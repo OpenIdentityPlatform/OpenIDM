@@ -10,7 +10,7 @@
             "CommonMessages" : {
                 "authenticationFailed" : "Login/password combination is invalid.",
                 "serviceUnavailable" : "Service unavailable",
-                "unknown" : "Unknown error. Please contact with administrator",
+                "unknown" : "Unknown error. Please contact administrator",
                 "loggedIn" : "You have been successfully logged in.",
                 "errorFetchingData" : "Error fetching user data",
                 "loggedOut" : "You have been logged out.",
@@ -382,6 +382,7 @@
                 "action": "Action to perform after retry attempts",
                 "schedules": "LiveSync Schedules",
                 "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
+                "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You may have to manually add objects after validating.",
                 "addLiveSync": "Add a LiveSync Scheduler for:"
 
             },

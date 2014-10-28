@@ -35,7 +35,7 @@
                         {{#each versionDisplay}}
                         <optgroup label="{{groupName}}">
                             {{#each versions}}
-                                <option value="{{connectorName}}_{{bundleVersion}}_{{systemType}}">{{displayName}} - {{bundleVersion}}</option>
+                            <option value="{{connectorName}}_{{bundleVersion}}_{{systemType}}">{{displayName}} - {{bundleVersion}}</option>
                             {{/each}}
                         </optgroup>
                         {{/each}}
@@ -83,6 +83,7 @@
             <legend><span>{{t "templates.connector.liveSync.schedules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
 
             <p class="nameFieldMessage">{{t "templates.connector.liveSync.noName"}}</p>
+            <p class="objectTypeFieldMessage">{{t "templates.connector.liveSync.noObjects"}}</p>
 
             <div class="group-body">
                 <div class="group-field-block no-validation-block">
