@@ -45,6 +45,8 @@ infoservice - a sample that shows how to use the configurable information servic
 
 misc - example configuration files
 
+powershell2AD - PowerShell connector sample for Active Directory
+
 provisioners - example provisioner configuration files for different connectors
 
 schedules - sample schedule configurations

@@ -28,3 +28,6 @@ provisioner.openicf-xml.json
  - sample8
  - sample9
  - audit-sample
+
+provisioner.openicf-ADPowerShell.json
+ - powershell2AD
