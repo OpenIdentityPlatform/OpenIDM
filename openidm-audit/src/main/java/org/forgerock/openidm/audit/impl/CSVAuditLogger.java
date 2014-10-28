@@ -289,7 +289,7 @@ public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {
         // Synchronize writes so that simultaneous writes don't corrupt the file
         synchronized (lock) {
             try {
-                AuditServiceImpl.preformatLogEntry(type, obj);
+                AuditServiceImpl.preformatLogEntry(obj);
                 createImpl(type, obj);
             } finally {
                 measure.end();
