@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global require, define*/
+/*global require, define, window */
 
 
 /**
@@ -97,7 +97,7 @@ require.config({
             exports: "handlebars"
         },
         i18next: {
-            deps: ["handlebars"],
+            deps: ["jquery", "handlebars"],
             exports: "i18next"
         },
         moment: {
@@ -111,12 +111,12 @@ require.config({
  * required synchronously
  */
 require([
-    "less",
+    "jquery",
     "underscore",
     "backbone",
+    "less",
     "form2js",
     "js2form",
-    "contentflow",
     "spin",
     "jqgrid",
     "jqueryui",
@@ -126,10 +126,11 @@ require([
     "handlebars",
     "i18next",
     "jsonEditor",
+    "contentflow",
     "org/forgerock/commons/ui/common/main/i18nManager",
-    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/main", 
+    "org/forgerock/openidm/ui/common/main",
     "org/forgerock/openidm/ui/user/main",
     "org/forgerock/openidm/ui/admin/main",
     "org/forgerock/commons/ui/user/main",
@@ -138,8 +139,34 @@ require([
     "UserDelegate",
     "ThemeManager",
     "config/main"
-], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, jsonEditor, i18n, constants, eventManager) {
+], function(
+    $,
+    _,
+    Backbone,
+    less,
+    form2js,
+    js2form,
+    spin,
+    jqgrid,
+    jqueryui,
+    xdate,
+    moment,
+    doTimeout,
+    handlebars,
+    i18next,
+    jsonEditor,
+    contentflow,
+    i18n,
+    constants,
+    eventManager) {
+
+    // Helpers for the code that hasn't been properly migrated to require these as explicit dependencies:
+    window.$ = $;
+    window._ = _;
+    window.Backbone = Backbone;
+
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
+
 });
 
 
