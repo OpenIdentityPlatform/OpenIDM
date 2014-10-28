@@ -40,4 +40,5 @@ log.info("Entering Test Script");
 sql.eachRow("select * from auditrecon limit 1", { } );
 sql.eachRow("select * from auditactivity limit 1", { } );
 sql.eachRow("select * from auditaccess limit 1", { } );
+sql.eachRow("select * from auditsync limit 1", { } );
 

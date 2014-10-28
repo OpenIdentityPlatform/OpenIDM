@@ -40,6 +40,7 @@ def filter = filter as Filter;
 def auditrecon = new ObjectClass("auditrecon");
 def auditactivity = new ObjectClass("auditactivity");
 def auditaccess = new ObjectClass("auditaccess");
+def auditsync = new ObjectClass("auditsync");
 
 if (filter instanceof EqualsFilter && ((EqualsFilter) filter).getAttribute().is(Uid.NAME)) {
     //This is a Read
@@ -118,6 +119,30 @@ switch ( objectClass ) {
             }
         );
     break
+
+    case auditsync:
+        sql.eachRow("SELECT * FROM auditsync" + where,
+            { row ->
+                handler {
+                    uid row.objectid
+                    id row.objectid
+                    attribute 'objectid', row.objectid
+                    attribute 'rootactionid', row.rootactionid
+                    attribute 'sourceobjectid', row.sourceobjectid
+                    attribute 'targetobjectid:', row.targetobjectid
+                    attribute 'activitydate', row.activitydate
+                    attribute 'activity', row.activity
+                    attribute 'situation', row.situation
+                    attribute 'status', row.status
+                    attribute 'message', row.message
+                    attribute 'actionid', row.actionid
+                    attribute 'exceptiondetail', row.exceptiondetail
+                    attribute 'mapping', row.mapping
+                    attribute 'messagedetail', row.messagedetail
+                }
+            }
+        );
+        break;
 
     default:
     log.warn("Didn't match objectClass " + objectClass);

@@ -16,6 +16,7 @@ The configuration files used in this sample are as follows:
 *   samples/audit-sample/conf/provisioner.openicf-scriptedsql.json shows the ScriptedSQL 
     connector configuration.
 *   samples/audit-sample/conf/audit.json shows how to enable audit logging on the router.
+*   samples/audit-sample/conf/sync.json shows the sync mappings between managed/user and system/xmlfile/accounts.
 *   samples/audit-sample/data/sample_audit_db.mysql provides a sample schema DDL to create
     the tables in the external MySQL database.
 *   samples/audit-samples/tools/ contains the Groovy scripts that allow the OpenICF
@@ -80,4 +81,6 @@ mysql> select * from auditrecon;
 
 You will see the recon logs consistent with the curl commands executed.
 
+mysql> select * from auditsync;
 
+You will see the sync logs consistent with the curl commands executed.
