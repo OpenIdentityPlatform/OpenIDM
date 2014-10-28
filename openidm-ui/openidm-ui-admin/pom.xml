@@ -27,7 +27,7 @@
     <parent>
         <artifactId>openidm-ui</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>3.1.0-RC2-SNAPSHOT</version>
+        <version>3.1.0-RC1-SNAPSHOT</version>
     </parent>
 
     <artifactId>openidm-ui-admin</artifactId>
