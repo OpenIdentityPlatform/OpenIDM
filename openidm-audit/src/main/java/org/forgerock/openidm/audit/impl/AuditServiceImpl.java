@@ -820,18 +820,16 @@ public class AuditServiceImpl implements AuditService {
         return configuredLoggers;
     }
 
-    public static void preformatLogEntry(String type, Map<String, Object> entryMap) {
-        if (type.equals(AuditServiceImpl.TYPE_RECON)) {
-            Object exception = entryMap.get("exception");
-            try {
-                if (exception == null) {
-                    entryMap.put("exception", "");
-                } else if (!(exception instanceof String)) {
-                    entryMap.put("exception", AuditServiceImpl.formatException((Exception) exception));
-                }
-            } catch (Exception e) {
-                logger.warn("Error formatting Exception: " + e);
+    public static void preformatLogEntry(Map<String, Object> entryMap) {
+        Object exception = entryMap.get("exception");
+        try {
+            if (exception == null) {
+                entryMap.put("exception", "");
+            } else if (!(exception instanceof String)) {
+                entryMap.put("exception", AuditServiceImpl.formatException((Exception) exception));
             }
+        } catch (Exception e) {
+            logger.warn("Error formatting Exception: " + e);
         }
     }
 

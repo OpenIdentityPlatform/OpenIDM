@@ -200,7 +200,7 @@ public class RouterAuditLogger extends AbstractAuditLogger implements AuditLogge
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, object, null);
 
         try {
-            AuditServiceImpl.preformatLogEntry(type, object);
+            AuditServiceImpl.preformatLogEntry(object);
             Map<String, Object> sanitized = sanitizeObject(object);
             CreateRequest request = Requests.newCreateRequest(getRouterLocation(type), new JsonValue(sanitized));
             connectionFactory.getConnection().create(createAuditContext(context), request);
