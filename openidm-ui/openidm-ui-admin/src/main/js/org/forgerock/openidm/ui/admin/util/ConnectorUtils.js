@@ -22,21 +22,144 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $*/
+/*global define, $, _*/
 
 define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
-
-], function () {
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function (ConnectorDelegate, ConfigDelegate) {
 
     var obj = {};
 
+    obj.iconListDefaults = {
+        "icons" : [
+            {
+                "type" : "org.identityconnectors.ldap.LdapConnector",
+                "iconClass" : "connector-icon-ldap",
+                "src" : "img/icon-ldap.png"
+            },
+            {
+                "type" : "org.forgerock.openicf.connectors.xml.XMLConnector",
+                "iconClass" : "connector-icon-xml",
+                "src": "img/icon-xml.png"
+            },
+            {
+                "type" : "org.forgerock.openidm.salesforce",
+                "iconClass" : "connector-icon-cloud",
+                "src": "img/icon-cloud.png"
+            },
+            {
+                "type" : "org.identityconnectors.databasetable.DatabaseTableConnector",
+                "iconClass" : "connector-icon-databasetable",
+                "src": "img/icon-db.png"
+            },
+            {
+                "type" : "org.forgerock.openicf.csvfile.CSVFileConnector",
+                "iconClass" : "connector-icon-csv",
+                "src": "img/icon-csv.png"
+            },
+            {
+                "type" : "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
+                "iconClass" : "connector-icon-cloud",
+                "src": "img/icon-cloud.png"
+            },
+            {
+                "type" : "org.forgerock.openidm.salesforce.Salesforce",
+                "iconClass" : "connector-icon-cloud",
+                "src": "img/icon-cloud.png"
+            },
+            {
+                "type" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
+                "iconClass" : "connector-icon-scriptedsql",
+                "src": "img/icon-scriptedsql.png"
+            },
+            {
+                "type" : "managedobject",
+                "iconClass" : "connector-icon-managedobject",
+                "src": "img/icon-managedobject.png"
+            }
+
+        ]
+    };
+
     obj.cleanConnectorName = function(name) {
         var clearName = name.split(".");
-            clearName = clearName[clearName.length - 2] + "_" +clearName[clearName.length - 1];
+        clearName = clearName[clearName.length - 2] + "_" +clearName[clearName.length - 1];
 
         return clearName;
     };
 
+    obj.getMappingDetails = function(sourceName, targetName) {
+        var iconList = obj.getIconList(),
+            currentConnectors = ConnectorDelegate.currentConnectors(),
+            deferred = $.Deferred(),
+            details = null;
+
+        $.when(iconList, currentConnectors).then(function(icons, connectors){
+            details = {};
+
+            if(targetName !== "managed") {
+                details.targetConnector = _.find(connectors, function (connector) {
+                    return connector.name === targetName;
+                }, this);
+
+                details.targetIcon = obj.getIcon(details.targetConnector.connectorRef.connectorName, icons);
+            } else {
+                details.targetConnector = null;
+                details.targetIcon = obj.getIcon("managedobject", icons);
+            }
+
+            if(sourceName !== "managed") {
+                details.sourceConnector = _.find(connectors, function (connector) {
+                    return connector.name === sourceName;
+                }, this);
+
+                details.sourceIcon = obj.getIcon(details.sourceConnector.connectorRef.connectorName, icons);
+            } else {
+                details.sourceConnector = null;
+                details.sourceIcon = obj.getIcon("managedobject", icons);
+            }
+
+            details.sourceName = sourceName;
+            details.targetName = targetName;
+
+            deferred.resolve(details);
+        });
+
+        return deferred;
+    };
+
+    obj.getIconList = function() {
+        var deferred = $.Deferred();
+
+        ConfigDelegate.readEntity("ui/icon-list").then(function(result){
+                deferred.resolve(result.icons);
+            },
+            _.bind(function(){
+                deferred.resolve(this.iconListDefaults.icons);
+
+                ConfigDelegate.createEntity("ui/icon-list", obj.iconListDefaults);
+            },this));
+
+        return deferred;
+    };
+
+    obj.getIcon = function (iconType, iconList) {
+        var foundIcon = null;
+
+        foundIcon = _.find(iconList, function(icon){
+            return icon.type === iconType;
+        });
+
+        if(foundIcon === null) {
+            foundIcon = {
+                "iconClass" : "connector-icon-default",
+                "src": "img/icon-default-01.png"
+            };
+        }
+
+        return foundIcon;
+    };
+
     return obj;
 });
-

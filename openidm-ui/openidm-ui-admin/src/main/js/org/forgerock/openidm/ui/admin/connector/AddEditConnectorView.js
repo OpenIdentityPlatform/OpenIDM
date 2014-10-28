@@ -678,6 +678,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddEditConnectorView", [
 
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
+            ConnectorDelegate.deleteCurrentConnectorsCache();
+
             if(this.data.editState) {
                 ConfigDelegate.updateEntity(this.data.systemType + "/" + urlName, mergedResult).then(_.bind(function () {
                     _.delay(function () {

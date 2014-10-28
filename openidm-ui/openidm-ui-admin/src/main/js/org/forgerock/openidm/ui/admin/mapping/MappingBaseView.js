@@ -36,8 +36,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/openidm/ui/admin/util/ReconProgress",
     "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate"
-    ], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, reconProgress, dateUtil, syncDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
+    "org/forgerock/openidm/ui/admin/util/ConnectorUtils"
+], function(AdminAbstractView, eventManager, validatorsManager, configDelegate, UIUtils, constants, browserStorageDelegate, nav, reconDelegate, reconProgress, dateUtil, syncDelegate, connectorUtils) {
 
     var MappingBaseView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -49,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         },
         mappingList: function(e){
             e.preventDefault();
-            
+
             if(!$(e.target).closest("button").hasClass("button") && !$(e.target).parent().hasClass("syncStatus")){
                 delete this.data.mapping;
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
@@ -60,9 +61,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
         },
         data: {},
         setSubmenu: function(){
-            _.each(nav.configuration.links.admin.urls.mapping.urls, _.bind(function(val){ 
+            _.each(nav.configuration.links.admin.urls.mapping.urls, _.bind(function(val){
                 var url = val.url.split("/")[0];
-                
+
                 val.url = url + "/" + this.currentMapping().name + "/";
             },this));
             nav.reload();
@@ -123,10 +124,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             //there are rare occasions when this.data.mapping exists but it has actually not been rendered yet hence the last condition
             if(!this.data.mapping || this.data.mapping.name !== args[0] || this.$el.find("#mappingContent").length === 0){
                 var syncConfig = syncDelegate.mappingDetails(args[0]);
-                
+
                 syncConfig.then(_.bind(function(sync){
                     var onReady;
-                    
+
                     onReady = _.bind(function(runningRecon){
                         this.parentRender(_.bind(function () {
                             this.setSubmenu();
@@ -139,43 +140,66 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                             }
                         }, this));
                     }, this);
-                    
+
                     this.data.syncConfig = { mappings: _.chain(sync.mappings)
-                                                            .map(function(m){
-                                                                return _.clone(_.omit(m,"recon"));
-                                                            })
-                                                            .value()
-                                           };
+                        .map(function(m){
+                            return _.clone(_.omit(m,"recon"));
+                        })
+                        .value()
+                    };
                     this.data.mapping = _.filter(sync.mappings,function(m){ return m.name === args[0];})[0];
                     this.setCurrentMapping($.extend({},true,this.data.mapping));
                     this.data.syncStatus = $.t("templates.mapping.notYetSynced");
                     this.data.syncCanceled = false;
-                    
+
                     this.data.targetType = this.syncType(this.data.mapping.target);
-                    this.data.targetIcon = (this.data.targetType === "managed") ? "fa-database" : "fa-cubes";
-    
                     this.data.sourceType = this.syncType(this.data.mapping.source);
-                    this.data.sourceIcon = (this.data.sourceType === "managed") ? "fa-database" : "fa-cubes";
-                    
-                    if(this.data.mapping.recon){
-                        this.data.recon = this.data.mapping.recon;
-                        if (this.data.recon.ended) {
-                            if(this.data.recon.state === "CANCELED"){
-                                this.data.syncCanceled = true;
-                                this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
-                            } else {
-                                this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
-                            }
-                            onReady();
+
+                    connectorUtils.getMappingDetails(this.data.sourceType , this.data.targetType).then(_.bind(function (details) {
+                        this.data.mapping.sourceConnector = details.sourceConnector;
+                        this.data.mapping.targetConnector = details.targetConnector;
+                        this.data.mapping.targetIcon = details.targetIcon.src;
+                        this.data.mapping.sourceIcon = details.sourceIcon.src;
+
+
+                        if (this.data.mapping.sourceConnector){
+                            this.data.mapping.sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.sourceConnector.connectorRef.connectorName));
                         } else {
-                            onReady(true);
+                            this.data.mapping.sourceConnector = {
+                                "displayName" : $.t("templates.connector.managedObjectType")
+                            };
                         }
-                    } else {
-                        onReady();
-                    }
+
+                        if (this.data.mapping.targetConnector){
+                            this.data.mapping.targetConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.targetConnector.connectorRef.connectorName));
+                        } else {
+                            this.data.mapping.targetConnector = {
+                                "displayName" : $.t("templates.connector.managedObjectType")
+                            };
+                        }
+
+                        if(this.data.mapping.recon){
+                            this.data.recon = this.data.mapping.recon;
+                            if (this.data.recon.ended) {
+                                if(this.data.recon.state === "CANCELED"){
+                                    this.data.syncCanceled = true;
+                                    this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
+                                } else {
+                                    this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
+                                }
+                                onReady();
+                            } else {
+                                onReady(true);
+                            }
+                        } else {
+                            onReady();
+                        }
+                    }, this));
+
                 }, this));
             } else {
                 this.setSubmenu();
+
                 if(callback){
                     callback();
                 }
@@ -190,9 +214,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             event.preventDefault();
             this.data.reconAvailable = false;
             this.setSyncInProgress();
-            
+
             var progress = reconProgress.init(this.$el,"#syncNowProgress","templates.mapping.syncComplete");
-            
+
             reconDelegate.triggerRecon(this.currentMapping().name, true, _.bind(function (reconStatus) {
                 progress.start(reconStatus);
                 this.data.recon = reconStatus;
@@ -201,7 +225,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             }, this)).then(_.bind(function(s){
                 this.data.reconAvailable = false;
                 this.data.recon = s;
-                
+
                 progress.end();
                 delete this.data.mapping;
                 this.child.render([this.currentMapping().name]);

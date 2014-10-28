@@ -32,6 +32,8 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm/system");
 
+    obj.connectorDelegateCache = {};
+
     obj.availableConnectors = function() {
         return obj.serviceCall({
             url: "?_action=availableConnectors",
@@ -63,10 +65,27 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
     };
 
     obj.currentConnectors = function() {
-        return obj.serviceCall({
-            url: "?_action=test",
-            type: "POST"
-        });
+        var deferred = $.Deferred(),
+            promise = deferred.promise();
+
+        if(obj.connectorDelegateCache.currentConnectors) {
+            deferred.resolve(obj.connectorDelegateCache.currentConnectors);
+        } else {
+            obj.serviceCall({
+                url: "?_action=test",
+                type: "POST"
+            }).then(function(result){
+                obj.connectorDelegateCache.currentConnectors = result;
+
+                deferred.resolve(result);
+            });
+        }
+
+        return promise;
+    };
+
+    obj.deleteCurrentConnectorsCache = function() {
+        delete obj.connectorDelegateCache.currentConnectors;
     };
 
     obj.connectorDefault = function(name, type) {

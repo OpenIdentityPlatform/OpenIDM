@@ -5,7 +5,7 @@
   background-color:#eee;
   position:relative;
 }
-  
+
 #resourceMappingBody.attached {
   z-index:3;
   -webkit-box-shadow: 0 10px 6px -6px #777;
@@ -138,7 +138,7 @@
 }
 
 .add-mapping-button {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .mapping-create-body {
@@ -207,6 +207,8 @@
 
   .mapping-body p {
     padding-bottom:5px;
+    width: 350px;
+    overflow: hidden;
   }
 }
 
@@ -219,20 +221,19 @@
 
   .mapping-icon {
     display: inline-block;
-    height:38px;
-    width:30px;
-    padding:25px 30px 10px 30px;
-    float:left;
+    height: 60px;
+    padding: 10px 0px 10px 0px;
+    float: left;
   }
 }
 
 .mapping-config-body:hover {
-    border-color: #888;
-    cursor:pointer;
+  border-color: #888;
+  cursor:pointer;
 }
 
 .left-icon {
-  margin-left:25px;
+  margin-left:5px;
 }
 
 .mapping-target,
@@ -251,7 +252,7 @@
   border-top:1px solid #ccc;
   height:40px;
   padding-right: 8px;
-  
+
   div.inline{
     padding-left:15px;
     margin-top: 10px;
@@ -337,42 +338,42 @@
 }
 
 input.addProperty {
-    margin-left: 0px;
+  margin-left: 0px;
 }
 
 #submenu { display:none; }
 #submenuClone {
-    margin-bottom: 15px;
-    border-left: 0px;
-    border-right: 0px;
-    
-    li.active {
-        border-bottom: 5px solid @color-active;
-    }
-    
-    li a {
-        text-decoration: none;
-        color: @inactive-menu-color;
-        font-weight: bold;
-    }
-    
-    li a:hover, .active a {
-        .rounded-corners(5px);
-        background-color: transparent;
-    }
-    
-    li a:hover {
-        background-color: transparent;
-        color: @color-active;
-    }
+  margin-bottom: 15px;
+  border-left: 0px;
+  border-right: 0px;
+
+  li.active {
+    border-bottom: 5px solid @color-active;
+  }
+
+  li a {
+    text-decoration: none;
+    color: @inactive-menu-color;
+    font-weight: bold;
+  }
+
+  li a:hover, .active a {
+    .rounded-corners(5px);
+    background-color: transparent;
+  }
+
+  li a:hover {
+    background-color: transparent;
+    color: @color-active;
+  }
 }
 
 .changesPending{
-    margin-top: 15px;
+  margin-top: 15px;
 }
 
 .syncStatus {
-    background-color: @background-color;
-    padding: 5px;
-    .rounded-corners
+  background-color: @background-color;
+  padding: 5px;
+  .rounded-corners
 }

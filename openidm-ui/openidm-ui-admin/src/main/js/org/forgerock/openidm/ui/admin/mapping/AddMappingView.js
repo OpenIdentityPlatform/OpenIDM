@@ -44,14 +44,22 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
         render: function(args, callback) {
             var connectorPromise,
                 managedPromise,
-                splitConfig;
+                iconPromise,
+                splitConfig,
+                tempIconClass;
 
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
+            iconPromise = connectorUtils.getIconList();
 
-            $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects){
-                _.each(connectors[0], _.bind(function(connector){
+            $.when(connectorPromise, managedPromise, iconPromise).then(_.bind(function(connectors, managedObjects, iconList){
+
+                _.each(connectors, _.bind(function(connector){
                     connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
+
+                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
+                    connector.iconClass = tempIconClass.iconClass;
+                    connector.iconSrc = tempIconClass.src;
 
                     if(connector.objectTypes) {
                         connector.objectTypes = _.sortBy(connector.objectTypes, function(objectType) {
@@ -71,11 +79,18 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                     connector.cleanEditName = splitConfig[2];
                 }, this));
 
-                this.data.currentConnectors = _.filter(connectors[0], function(connector) {
+                this.data.currentConnectors = _.filter(connectors, function(connector) {
                     return connector.ok === true;
                 }, this);
 
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
+
+                _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
+                    tempIconClass = connectorUtils.getIcon("managedobject", iconList);
+
+                    managedObject.iconClass = tempIconClass.iconClass;
+                    managedObject.iconSrc = tempIconClass.src;
+                }, this));
 
                 this.parentRender(_.bind(function(){
                     $("#submenu").hide();

@@ -18,7 +18,7 @@
     <div data-resource-type="connector" data-connector-title="{{cleanEditName}}" class="resource-body resource-body-connector">
         <div class="resource-type-body">
             <div class="resource-info">
-                <span><i class="fa fa-cubes fa-4x"></i></span>
+                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{displayName}}" />
                 <p class="resource-given-name">{{name}}</p>
                 <p class="resource-type-name">{{displayName}}</p>
                 <p class="resource-object-type">{{displayObjectType}}</p>
@@ -44,7 +44,7 @@
     <div data-resource-type="managed" data-managed-title="{{name}}" class="resource-body">
         <div class="resource-type-body managed-type">
             <div class="resource-info">
-                <span><i class="fa fa-database fa-4x"></i></span>
+                <img class="resource-large-icon {{iconClass}}" src="{{iconSrc}}" alt="{{t "templates.connector.managedObjectType"}}" />
                 <p class="resource-given-name">{{name}}</p>
                 <p class="resource-type-name">{{t "templates.connector.managedObjectType"}}</p>
             </div>

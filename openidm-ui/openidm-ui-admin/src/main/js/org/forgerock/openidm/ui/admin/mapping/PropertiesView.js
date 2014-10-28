@@ -421,7 +421,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                 }, this));
 
                 if(!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")){
-                    _.chain(currConnectors[0])
+                    _.chain(currConnectors)
                         .each(function(connector){
                             _.each(connector.objectTypes, function(objType){
                                 var objTypeMap = {
