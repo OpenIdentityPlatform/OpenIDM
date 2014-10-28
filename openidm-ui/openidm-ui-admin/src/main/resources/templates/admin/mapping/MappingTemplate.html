@@ -1,7 +1,7 @@
 <div id="mappingConfigHolder">
     <div class="mapping-config-body">
         <div class="mapping-body">
-            <span class="mapping-icon"><i class="fa fa-2x {{sourceIcon}}"></i></span>
+            <img class="mapping-icon left-icon" src="{{mapping.sourceIcon}}" alt="{{mapping.sourceConnector.displayName}}" />
             <div class="mapping-source">
                 <p class="mapping-header">{{t "templates.mapping.source"}}</p>
                 <p class="mapping-title">{{mapping.source}}</p>
@@ -12,7 +12,7 @@
                     <i class="fa fa-arrow-right"></i>
                 </div>
             </div>
-            <span class="mapping-icon left-icon"><i class="fa fa-2x {{targetIcon}}"></i></span>
+            <img class="mapping-icon left-icon" src="{{mapping.targetIcon}}" alt="{{mapping.targetConnector.displayName}}" />
             <div class="mapping-target">
                 <p class="mapping-header">{{t "templates.mapping.target"}}</p>
                 <p class="mapping-title">{{mapping.target}}</p>

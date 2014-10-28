@@ -381,9 +381,8 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         displayDetails: function(id, details) {
             if(details.resourceType === "connector") {
-                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-cubes", true);
-                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-database", false);
-
+                this.$el.find("#"+id +" .resource-small-icon").attr("src", details.iconSrc);
+                this.$el.find("#"+id +" .resource-small-icon").attr("alt", details.displayName);
                 this.$el.find("#"+id +" .resource-type-name").html(details.displayName);
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").show();
@@ -396,11 +395,10 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                     this.$el.find("#"+id +" .resource-object-type-select").append("<option value='"+value +"'>" +value  +"</option>");
                 }, this);
 
-            } else{
-                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-paper-plane", false);
-                this.$el.find("#"+id +" .resource-type-icon i").toggleClass("fa-database", true);
-
-                this.$el.find("#"+id +" .resource-type-name").html("Managed Object");
+            } else {
+                this.$el.find("#"+id +" .resource-small-icon").attr("src", details.iconSrc);
+                this.$el.find("#"+id +" .resource-small-icon").attr("alt", $.t("templates.connector.managedObjectType"));
+                this.$el.find("#"+id +" .resource-type-name").html($.t("templates.connector.managedObjectType"));
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").hide();
                 this.$el.find("#"+id +" .object-type-name").show();

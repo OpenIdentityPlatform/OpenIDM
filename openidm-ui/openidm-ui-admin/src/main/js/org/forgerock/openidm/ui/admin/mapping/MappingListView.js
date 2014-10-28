@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate"
-], function(AdminAbstractView, eventManager, configDelegate, constants, uiUtils, reconDelegate, dateUtil, syncDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
+    "org/forgerock/openidm/ui/admin/util/ConnectorUtils"
+], function(AdminAbstractView, eventManager, configDelegate, constants, uiUtils, reconDelegate, dateUtil, syncDelegate, connectorUtils) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
@@ -44,68 +45,87 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
         },
         mappingDetail: function(e){
             e.preventDefault();
-            
+
             if(!$(e.target).closest("button").hasClass("delete-button")){
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
             }
         },
         render: function(args, callback) {
-            var syncConfig = syncDelegate.mappingDetails();
+            var syncConfig = syncDelegate.mappingDetails(),
+                mappingDetails = [],
+                results;
 
-            syncConfig.then(_.bind(function(sync){
+            syncConfig.then(_.bind(function(sync) {
                 this.data.mappingConfig = sync.mappings;
                 this.cleanConfig = _.chain(sync.mappings)
-                                        .map(function(m){
-                                            return _.clone(_.omit(m,"recon"));
-                                        })
-                                        .value();
+                    .map(function (m) {
+                        return _.clone(_.omit(m, "recon"));
+                    })
+                    .value();
 
-                _.each(this.data.mappingConfig, function (sync){
+                _.each(this.data.mappingConfig, function (sync) {
                     sync.targetType = this.syncType(sync.target);
-
-                    if(sync.targetType === "managed") {
-                        sync.targetIcon = "fa-database";
-                    } else {
-                        sync.targetIcon = "fa-cubes";
-                    }
-
                     sync.sourceType = this.syncType(sync.source);
 
-                    if(sync.sourceType === "managed") {
-                        sync.sourceIcon = "fa-database";
-                    } else {
-                        sync.sourceIcon = "fa-cubes";
-                    }
+                    mappingDetails.push(connectorUtils.getMappingDetails(sync.sourceType, sync.targetType));
                 }, this);
 
-                this.parentRender(_.bind(function () {
-                    $('#mappingConfigHolder').sortable({
-                        items: '.mapping-config-body',
-                        start: _.bind(function(event, ui) {
-                            this.startIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item);
-                        }, this),
-                        stop: _.bind(function(event, ui){
-                            var stopIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item),
-                                tempRemoved;
-                            
-                            if(this.startIndex !== stopIndex){
-                                tempRemoved = this.cleanConfig.splice(this.startIndex, 1);
-                                this.cleanConfig.splice(stopIndex, 0, tempRemoved[0]);
-                                configDelegate.updateEntity("sync", {"mappings":this.cleanConfig}).then(_.bind(function() {
-                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                                }, this));
-                            }
+                $.when.apply($, mappingDetails).then(_.bind(function () {
+                    results = arguments;
 
-                        }, this)
-                    });
-                    
-                    this.showSyncStatus();
-                    
-                    if(callback){
-                        callback();
-                    }
+                    _.each(results, function (mappingInfo, index) {
+                        this.data.mappingConfig[index].targetIcon = mappingInfo.targetIcon.src;
+                        this.data.mappingConfig[index].sourceIcon = mappingInfo.sourceIcon.src;
+
+                        this.data.mappingConfig[index].targetConnector = mappingInfo.targetConnector;
+                        this.data.mappingConfig[index].sourceConnector = mappingInfo.sourceConnector;
+
+                        if (this.data.mappingConfig[index].sourceConnector){
+                            this.data.mappingConfig[index].sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].sourceConnector.connectorRef.connectorName));
+                        } else {
+                            this.data.mappingConfig[index].sourceConnector = {
+                                "displayName" : $.t("templates.connector.managedObjectType")
+                            };
+                        }
+
+                        if (this.data.mappingConfig[index].targetConnector){
+                            this.data.mappingConfig[index].targetConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].targetConnector.connectorRef.connectorName));
+                        } else {
+                            this.data.mappingConfig[index].targetConnector = {
+                                "displayName" : $.t("templates.connector.managedObjectType")
+                            };
+                        }
+                    }, this);
+
+                    this.parentRender(_.bind(function () {
+                        $('#mappingConfigHolder').sortable({
+                            items: '.mapping-config-body',
+                            start: _.bind(function (event, ui) {
+                                this.startIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item);
+                            }, this),
+                            stop: _.bind(function (event, ui) {
+                                var stopIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item),
+                                    tempRemoved;
+
+                                if (this.startIndex !== stopIndex) {
+                                    tempRemoved = this.cleanConfig.splice(this.startIndex, 1);
+                                    this.cleanConfig.splice(stopIndex, 0, tempRemoved[0]);
+                                    configDelegate.updateEntity("sync", {"mappings": this.cleanConfig}).then(_.bind(function () {
+                                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                                    }, this));
+                                }
+
+                            }, this)
+                        });
+
+                        this.showSyncStatus();
+
+                        if (callback) {
+                            callback();
+                        }
+                    }, this));
                 }, this));
-            },this));
+            }, this));
         },
         syncType: function(type) {
             var tempType = type.split("/");
@@ -149,7 +169,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                         txt = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(sync.recon.ended,"MMMM dd, yyyy HH:mm");
                     }
                 }
-                
+
                 el.text(txt);
             }, this);
         }

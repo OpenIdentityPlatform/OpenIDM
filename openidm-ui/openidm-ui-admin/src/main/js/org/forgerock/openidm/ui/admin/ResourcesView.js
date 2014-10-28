@@ -45,15 +45,22 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
             var connectorPromise,
                 managedPromise,
                 repoCheckPromise,
-                splitConfig;
+                iconPromise,
+                splitConfig,
+                tempIconClass;
 
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
+            iconPromise = connectorUtils.getIconList();
 
-            $.when(connectorPromise, managedPromise, repoCheckPromise).then(_.bind(function(connectors, managedObjects, configFiles){
-                _.each(connectors[0], _.bind(function(connector){
+            $.when(connectorPromise, managedPromise, repoCheckPromise, iconPromise).then(_.bind(function(connectors, managedObjects, configFiles, iconList){
+                _.each(connectors, _.bind(function(connector){
                     connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
+
+                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
+                    connector.iconClass = tempIconClass.iconClass;
+                    connector.iconSrc = tempIconClass.src;
 
                     splitConfig = connector.config.split("/");
 
@@ -61,8 +68,16 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                     connector.cleanEditName = splitConfig[2];
                 }, this));
 
-                this.data.currentConnectors = connectors[0];
+                this.data.currentConnectors = connectors;
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
+
+                _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
+                    tempIconClass = connectorUtils.getIcon("managedobject", iconList);
+
+                    managedObject.iconClass = tempIconClass.iconClass;
+                    managedObject.iconSrc = tempIconClass.src;
+                }, this));
+
 
                 this.data.currentRepo = _.find(configFiles[0].configurations, function(file){
                     return file.pid.search("repo.") !== -1;
@@ -99,6 +114,7 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
 
             uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), function(){
                 ConfigDelegate.deleteEntity("provisioner.openicf/" +selectedItems.attr("data-connector-title")).then(function(){
+                        ConnectorDelegate.deleteCurrentConnectorsCache();
                         selectedItems.remove();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
                     },
