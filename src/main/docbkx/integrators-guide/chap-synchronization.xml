@@ -1576,14 +1576,12 @@ $ <userinput>curl \
  --data '{"sourceQuery": {"_queryId" : "query-all-ids"}}' \
  "https://localhost:8443/openidm/recon?_action=recon&amp;mapping=managedUser_systemLdapAccounts"</screen>
   <para>
-   By default, a reconciliation operation runs both the source and target phase,
-   that is both the source and the target resources are queried. To specify that
-   either the source or target resource is not queried, set
-   <literal>runSourcePhase</literal> or <literal>runTargetPhase</literal> to
-   <literal>false</literal> in the mapping configuration
-   (<filename>conf/sync.json</filename> file). For example, to prevent the
-   target resource from being queried during the reconciliation operation
-   configured in the previous example, you would amend the mapping configuration
+   By default, a reconciliation operation runs both the source and target phase.
+   To avoid queries on the target resource, set
+   <literal>runTargetPhase</literal> to <literal>false</literal> in the mapping
+   configuration (<filename>conf/sync.json</filename> file). For example, to
+   prevent the target resource from being queried during the reconciliation
+   operation configured in the previous example, amend the mapping configuration
    as follows:
   </para>
   <programlisting>{
