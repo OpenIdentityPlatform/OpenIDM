@@ -53,8 +53,22 @@ PRGDIR=`dirname "$PRG"`
 [ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="${openidm.options}"
 
 # Set JDK Logger config file if it is present and an override has not been issued
+PROJECT_HOME=$OPENIDM_HOME
+OPTERR=0
+while getopts "p:" opt; do
+    case "$opt" in
+    p)
+        if [ "$OPTARG" != "" ]; then
+            PROJECT_HOME="$OPENIDM_HOME/$OPTARG"
+        fi
+        ;;
+    esac
+done
+OPTIND=1
 if [ -z "$LOGGING_CONFIG" ]; then
-  if [ -r "$OPENIDM_HOME"/conf/logging.properties ]; then
+  if [ -r "$PROJECT_HOME"/conf/logging.properties ]; then
+    LOGGING_CONFIG="-Djava.util.logging.config.file=$PROJECT_HOME/conf/logging.properties"
+  elif [ -r "$OPENIDM_HOME"/conf/logging.properties ]; then
     LOGGING_CONFIG="-Djava.util.logging.config.file=$OPENIDM_HOME/conf/logging.properties"
   else
     LOGGING_CONFIG="-Dnop"
@@ -81,6 +95,7 @@ fi
 CLASSPATH="$OPENIDM_HOME/bin/*:$OPENIDM_HOME/framework/*"
 
 echo "Using OPENIDM_HOME:   $OPENIDM_HOME"
+echo "Using PROJECT_HOME:   $PROJECT_HOME"
 echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
 echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 
