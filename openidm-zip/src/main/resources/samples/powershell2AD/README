@@ -31,7 +31,7 @@ http://technet.microsoft.com/en-us/library/hh852274.aspx
 These are the steps to follow to use the samples:
 
 1- install the OpenICF .Net connector server on a machine running an Active Directory Domain Controler
-or a Workstation where the Power Active Directory module is installed. See:
+or a Workstation where the MS Active Directory PowerShell module is installed. See:
 http://openidm.forgerock.org/doc/integrators-guide/index.html#install-.net-connector
 The user used by the script is the same as the user running the .Net Connector server
 
