@@ -248,8 +248,15 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
                         searchDelegate.searchResults(_this.mapping.source, autocompleteProps, request.term).always(response);
                     }
                 }).data( "ui-autocomplete" )._renderItem = function (ul, item) {
+                    var validDisplayProps = _.reject(autocompleteProps,function(p){ 
+                            return (p && !p.length) || !item[p]; 
+                        }),
+                        txt = _.chain(item)
+                                .pick(validDisplayProps)
+                                .values()
+                                .join(" / ");
                     return $( "<li>" )
-                        .append( "<a>" + Handlebars.Utils.escapeExpression(item[autocompleteProps[0]]) + "</a>" )
+                        .append( "<a>" + Handlebars.Utils.escapeExpression(txt) + "</a>" )
                         .appendTo( ul );
                 };
             }

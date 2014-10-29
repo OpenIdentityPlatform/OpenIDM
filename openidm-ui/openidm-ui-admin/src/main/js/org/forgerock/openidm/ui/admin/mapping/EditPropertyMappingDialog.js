@@ -204,10 +204,7 @@ define("org/forgerock/openidm/ui/admin/mapping/EditPropertyMappingDialog", [
                     .push(propertyObj);
             }
 
-            if (_.has(formContent, "source")) {
-                propertyObj.source = formContent.source;
-
-            }
+            propertyObj.source = formContent.source;
 
             if(this.transform_script_editor !== undefined) {
                 propertyObj.transform = this.transform_script_editor.generateScript();

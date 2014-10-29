@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, Handlebars, form2js, sessionStorage */
+/*global window,define, $, _, form2js */
 
 define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
@@ -117,13 +117,17 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             }, this));
         },
         render: function(args, callback) {
+            var syncConfig;
+            
+            this.route = { url: window.location.hash.replace(/^#/, '') };
+                
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
             //if this.data.mapping does not exist we know this view has not been loaded
             //if this.data.mapping.name is set and it has a different name we want to refresh this view
             //there are rare occasions when this.data.mapping exists but it has actually not been rendered yet hence the last condition
             if(!this.data.mapping || this.data.mapping.name !== args[0] || this.$el.find("#mappingContent").length === 0){
-                var syncConfig = syncDelegate.mappingDetails(args[0]);
+                syncConfig = syncDelegate.mappingDetails(args[0]);
 
                 syncConfig.then(_.bind(function(sync){
                     var onReady;
