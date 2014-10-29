@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
         data: {},
         syncNow: function(e){
             e.preventDefault();
-            $(e.target).prop('disabled',true);
+            $(e.target).closest("button").prop('disabled',true);
             MappingBaseView.syncNow(e);
         },
         renderReconResults:  function (selectedSituation) {
@@ -79,6 +79,8 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                 multiselect: false,
                                 multiboxonly: false,
                                 hoverrows: false,
+                                altRows:true,
+                                altclass: "analysisGridRowAlt",
                                 loadError : function(xhr,st,err) { 
                                     if(xhr.status === 404){
                                         configDelegate.createEntity("endpoint/reconResults", {
@@ -92,12 +94,18 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                 },
                                 loadComplete: function(data){
                                     $(this).data("rowData",data.result[0].rows);
+                                    $("td.ui-search-input input").attr("placeholder",$.t("templates.mapping.analysis.enterSearchTerms"));
                                 },
                                 beforeRequest: function(){
                                     var params = $("table.recon-grid", container).jqGrid('getGridParam','postData');
                                     params.search = params._search;
                                     delete params._search;
                                     $("table.recon-grid", container).setGridParam({ postData: params });
+                                    if(params.search){
+                                        $("div.recon-pager div", container).hide();
+                                    } else {
+                                        $("div.recon-pager div", container).show();
+                                    }
                                 },
                                 colModel: [
                                     {"name": "sourceObjectDisplay", "jsonmap": "sourceObject", "label": $.t("templates.mapping.source"), "sortable": false,
@@ -105,7 +113,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
                                             var translatedObject;
                                             if (sourceObject) {
                                                 translatedObject= syncDelegate.translateToTarget(sourceObject, _this.mapping);
-                                                return  _this.buildObjectRepresentation(translatedObject, _this.data.sourceProps);
+                                                return  _this.buildObjectRepresentation(translatedObject, _this.data.targetProps);
                                             } else if ($(this).attr("id") === "validGrid") {
                                                 return "<span class='errorMessage'>" + $.t("salesforce.sync.analysisGridOutOfSync") + "</span>";
                                             } else {
@@ -134,6 +142,10 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
 
                         }
                     }, this);
+                
+                if(selectedSituation){
+                    totalRecords = recon.situationSummary[selectedSituation];
+                }
 
                 this.data.reconAvailable = true;
                 this.data.allSituations = _.keys(this.data.recon.situationSummary).join(",");
@@ -154,12 +166,20 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
         buildObjectRepresentation: function(objToRep, props){
             var propVals = [];
             
-            _.each(props, _.bind(function(prop){
-                var txt = "<span class='bold'>" + prop + "</span>: ";
+            _.each(props, _.bind(function(prop, i){
+                var txt,
+                    objRepEl = $("<span>"),
+                    wrapper = $("<div>");
                 if(objToRep[prop]){
-                    txt += Handlebars.Utils.escapeExpression(objToRep[prop]);
+                    objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
                 }
-                propVals.push(txt);
+                if(i === 0){
+                    objRepEl.addClass("objectRepresentationHeader");
+                } else {
+                    objRepEl.addClass("objectRepresentation");
+                }
+                wrapper.append(objRepEl);
+                propVals.push(wrapper.html());
             }, this));
             
             return propVals.join("<br/>");
@@ -172,6 +192,7 @@ define("org/forgerock/openidm/ui/admin/sync/AnalysisView", [
             this.data.numRepresentativeProps = mappingUtils.numRepresentativeProps(this.mapping.name);
             this.data.sourceProps = _.pluck(this.mapping.properties,"source").slice(0,this.data.numRepresentativeProps);
             this.data.targetProps = _.pluck(this.mapping.properties,"target").slice(0,this.data.numRepresentativeProps);
+            
 
             this.data.reconAvailable = false;
             this.parentRender(_.bind(function() {

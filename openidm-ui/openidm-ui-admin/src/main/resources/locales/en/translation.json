@@ -710,7 +710,8 @@
                 "all": "All",
                 "view": "View",
                 "allSituations": "ALL SITUATIONS",
-                "clickToAnalyze": " to start analyzing relationships between Source and Target data."
+                "clickToAnalyze": " to start analyzing relationships between Source and Target data.",
+                "enterSearchTerms": "Enter Search Terms"
             }
         }
     },
