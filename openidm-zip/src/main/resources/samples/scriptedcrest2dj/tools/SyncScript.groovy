@@ -35,6 +35,8 @@ import org.forgerock.json.resource.RootContext
 import org.forgerock.json.resource.SortKey
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
+import org.identityconnectors.common.CollectionUtil
+import org.identityconnectors.common.StringUtil
 import org.identityconnectors.common.logging.Log
 import org.identityconnectors.framework.common.exceptions.ConnectorException
 import org.identityconnectors.framework.common.objects.AttributeUtil
@@ -82,16 +84,18 @@ switch (operation) {
                     handleResource: { Resource resource ->
                         lastToken = resource.id
 
-                        String resourceId = resource.content.targetDN
-                        resourceId = resourceId.substring(resourceId.indexOf('='), resourceId.indexOf(','))
+                        def content = resource.content.getObject();
+                        String resourceId = content.targetDN
+                        resourceId = resourceId.substring(resourceId.indexOf('=') + 1, resourceId.indexOf(','))
 
                         handler({
+
                             syncToken lastToken
-                            if ("add".equals(resource.content.changeType)) {
+                            if ("add".equals(content.changeType)) {
                                 CREATE()
-                            } else if ("modify".equals(resource.content.changeType)) {
+                            } else if ("modify".equals(content.changeType)) {
                                 UPDATE()
-                            } else if ("delete".equals(resource.content.changeType)) {
+                            } else if ("delete".equals(content.changeType)) {
                                 DELETE()
                                 object {
                                     uid resourceId
@@ -105,19 +109,24 @@ switch (operation) {
 
                             ReadRequest readRequest = Requests.newReadRequest(objectClassInfo.resourceContainer, resourceId)
                             try {
-                                connection.read(new RootContext(), readRequest)
+                                def changedResource = connection.read(new RootContext(), readRequest)
 
                                 object {
-                                    uid resource.id, resource.revision
+                                    if (StringUtil.isBlank(changedResource.revision)){
+                                        uid changedResource.id
+                                    } else {
+                                        uid changedResource.id, changedResource.revision
+                                    }
+
                                     setObjectClass objectClass
 
                                     objectClassInfo.attributes.each { key, value ->
                                         if (AttributeUtil.namesEqual(key, Name.NAME)) {
-                                            id resource.content.get(value.jsonName).required().asString()
-                                        } else if (null != resource.content.get(value.jsonName)) {
+                                            id changedResource.content.get(value.jsonName).required().asString()
+                                        } else if (null != changedResource.content.get(value.jsonName)) {
                                             //attribute key, converter(value.attributeInfo, value)
 
-                                            def attributeValue = resource.content.get(value.jsonName).getObject();
+                                            def attributeValue = changedResource.content.get(value.jsonName).getObject();
 
                                             if (attributeValue instanceof Collection) {
                                                 if (((Collection) attributeValue).isEmpty()) {
@@ -145,6 +154,8 @@ switch (operation) {
                                     id resourceId
                                     delegate.objectClass(objectClass)
                                 }
+                            } catch (Exception e){
+                                throw new ConnectorException(e.message, e)
                             }
                         })
                     },

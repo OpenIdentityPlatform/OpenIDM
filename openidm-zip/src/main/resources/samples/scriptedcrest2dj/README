@@ -284,6 +284,18 @@ OpenIDM Instructions:
           "_id": "group1"
         }
 
+Other Available Commands:
+    * This sample also supports running recon on users and groups.
+        curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
+        "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapUser_managedUser"
+
+        {"_id":"a72d6c6f-c019-4598-a199-52d9dcca9dae","state":"ACTIVE"}
+
+        curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
+        "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapGroup_managedGroup"
+
+        {"_id":"5d887e40-250a-4da7-af48-d2c9bc6c0b00","state":"ACTIVE"}
+
 This shows the basic CRUD operations on user and groups using Scripted CREST and the OpenDJ rest2ldap API. To read
 more documentation on the Groovy ScriptedCREST connector and for help with customization please see
 http://openicf.forgerock.org/connectors/groovy-connector-1.4.0.0/doc/groovy-connector-1.4.0.0/index.html
