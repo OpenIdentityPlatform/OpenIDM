@@ -134,7 +134,6 @@
                 },
                 "displayName": {
                     "type": "string",
-                    "required": true,
                     "nativeName": "displayName",
                     "nativeType": "string"
                 },
