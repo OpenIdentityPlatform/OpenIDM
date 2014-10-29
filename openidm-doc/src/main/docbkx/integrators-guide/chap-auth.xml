@@ -482,11 +482,14 @@ org.identityconnectors.ldap.LdapConnector {
    <para>
     OpenIDM supports a variety of modules, including those available from the
     Common Authentication Framework (CAF). The CAF modules available to
-    OpenIDM include <literal>OPENAM_SESSION</literal>,
-    <literal>IWA</literal>, and <literal>OPENID_CONNECT</literal>. OpenIDM also
-    provides two additional authentication modules, <literal>DELEGATED</literal>
+    OpenIDM include <literal>OPENAM_SESSION</literal>, and
+    <literal>IWA</literal>. OpenIDM also
+    provides three additional authentication modules, <literal>DELEGATED</literal>
     and <literal>CLIENT_CERT</literal>.
    </para>
+
+   <!-- Include OpenID Connect when a sample is available, or another statement
+   of support is made. -->
 
    <para>
     OpenIDM evaluates authentication modules in the order in which they are
@@ -498,7 +501,7 @@ org.identityconnectors.ldap.LdapConnector {
     <listitem>
      <para>
       The JSON Web Token session authentication module, which includes session
-      For more information
+      information. For more information
       on this common authentication module, see the <link xlink:show="new"
       xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
       <citetitle>Class JwtSessionModule</citetitle></link> Javadoc.
@@ -518,13 +521,71 @@ org.identityconnectors.ldap.LdapConnector {
     <term>DELEGATED</term>
     <listitem>
      <para>
-      Module that validates client requests by passing through to an OpenICF
-      connector. For OpenIDM ${docTargetVersion}, this is an alias for
-      <literal>MANAGED_USER</literal>, <literal>INTERNAL_USER</literal>, and
-      <literal>PASSTHROUGH</literal>.
+      Module that validates client requests by delegating to one of the 
+      following entities:
+      <itemizedlist>
+       <listitem>
+        <para>
+         <literal>MANAGED_USER</literal>, a managed user object
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>INTERNAL_USER</literal>, an internal user object
+        </para>
+       </listitem>
+       <listitem>
+        <para>
+         <literal>PASSTHROUGH</literal>, an OpenICF connector.
+        </para>
+       </listitem>
+      </itemizedlist>
      </para>
     </listitem>
    </varlistentry>
+   <varlistentry>
+    <term>OPENAM_SESSION</term>
+    <listitem>
+     <para>
+      The OPENAM_SESSION module allows you to protect a deployment of OpenIDM
+      with ForgeRock's <link xlink:show="new"
+      xlink:href="http://docs.forgerock.org/en/index.html?product=openam">
+      <citetitle>OpenAM Access Management</citetitle></link> product. For an
+      example of how you might use the OPENAM_SESSION module, see the
+      following: <link xlink:role="http://docbook.org/xlink/role/olink"
+      xlink:show="new" xlink:href="install-guide#more-sample-openam">
+      <citetitle>Sample - Configuring Authentication Management With OpenAM.
+      </citetitle></link>
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>IWA</term>
+    <listitem>
+     <para>
+      The IWA module supports Integrated Windows Authentication. In other words,
+      the IWA module supports the use of an LDAP connector for an Active
+      Directory server. For an example of how you can set that up with a
+      Kerberos server, see the following <link xlink:show="new"
+      xlink:href="integrators-guide#openidm-auth-kerberos"
+      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Kerberos
+      Configuration Example</citetitle></link>.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <!--          Waiting for OpenID sample, per OPENIDM-2477
+   <varlistentry>
+    <term>OPENID_CONNECT</term>
+    <listitem>
+     <para>
+      The OPENID_CONNECT module supports the use of <link xlink:show="new"
+      xlink:href="http://openid.net/connect">OpenID Connect 1.0</link>, which
+      is an authentication layer built on OAuth 2.0.
+     </para>
+    </listitem>
+   </varlistentry>
+                     when sample is available, add a link here             -->
   </variablelist>
 
  </section>
@@ -538,14 +599,6 @@ org.identityconnectors.ldap.LdapConnector {
    With delegated authentication, the username and password included with the
    REST request are validated against those stored in a remote system, such as
    an LDAP server.
-  </para>
-
-  <para>
-   Delegated authentication for OpenIDM ${docTargetVersion} includes the
-   functionality associated with the <literal>PASSTHROUGH</literal>,
-   <literal>MANAGED_USER</literal>, and <literal>INTERNAL_USER</literal>
-   modules. OpenIDM ${docTargetVersion} includes those modules as aliases
-   for the <literal>DELEGATED</literal> module.
   </para>
 
   <para>
