@@ -145,8 +145,8 @@ public class RouterActivityLogger implements ActivityLogger {
         activity.put(ROOT_ACTION_ID, root.getId());
         activity.put(PARENT_ACTION_ID, parent.getId());
         activity.put(REQUESTER, getRequester(context));
-        activity.put(BEFORE, JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
-        activity.put(AFTER, JsonUtil.jsonIsNull(after) ? null : after.getWrappedObject());
+        activity.put(BEFORE, before == null ? null : before.getObject());
+        activity.put(AFTER, after == null ? null : after.getObject());
         activity.put(STATUS, status == null ? null : status.toString());
 
         return activity;
