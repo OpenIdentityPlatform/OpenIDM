@@ -25,6 +25,7 @@
 
 import groovy.json.JsonOutput
 import org.forgerock.json.resource.Connection
+import org.forgerock.json.resource.QueryFilter
 import org.forgerock.json.resource.QueryRequest
 import org.forgerock.json.resource.QueryResult
 import org.forgerock.json.resource.QueryResultHandler
@@ -112,6 +113,8 @@ if (objectClassInfo != null) {
                         return AttributeUtil.getAsStringValue(value)
                     }
                 }] as VisitorParameter);
+    } else {
+        request.setQueryFilter(QueryFilter.alwaysTrue())
     }
 
     if (null != options.attributesToGet) {
