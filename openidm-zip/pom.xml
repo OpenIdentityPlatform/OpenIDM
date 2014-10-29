@@ -573,12 +573,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore-nio</artifactId>
             <version>4.3.2</version>
-         </dependency>
-         <dependency>
-            <groupId>org.forgerock.opendj</groupId>
-            <artifactId>opendj-ldap-sdk</artifactId>
-            <version>${opendj-ldap-sdk.version}</version>
-         </dependency>
+        </dependency>
 
     </dependencies>
     <build>
