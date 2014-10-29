@@ -21,9 +21,29 @@ if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
 set OPENIDM_OPTS=${openidm.options} -Dfile.encoding=UTF-8
 :noOpenIDMOpts
 
+rem Check for a project directory, default to OpenIDM home directory
+set PROJECT_HOME=%OPENIDM_HOME%
+set CMD_LINE_ARGS=-c bin/launcher.json
+:optLoop
+if "%1"=="" goto optDone
+set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
+if "%1"=="-p" goto optP
+shift
+goto optLoop
+:optP
+shift
+if "%1"=="" goto optDone
+set "PROJECT_HOME=%OPENIDM_HOME%\%1"
+goto optLoop
+:optDone
+
 rem Set JDK Logger config file if it is present and an override has not been issued
 if not "%LOGGING_CONFIG%" == "" goto noJuliConfig
 set LOGGING_CONFIG=-Dnop
+if not exist "%PROJECT_HOME%\conf\logging.properties" goto defaultJuliConfig
+set LOGGING_CONFIG=-Djava.util.logging.config.file="%PROJECT_HOME%\conf\logging.properties"
+goto noJuliConfig
+:defaultJuliConfig
 if not exist "%OPENIDM_HOME%\conf\logging.properties" goto noJuliConfig
 set LOGGING_CONFIG=-Djava.util.logging.config.file="%OPENIDM_HOME%\conf\logging.properties"
 :noJuliConfig
@@ -64,15 +84,6 @@ goto gotTitle
 :noTitle
 set _EXECJAVA=start %_RUNJAVA%
 :gotTitle
-
-rem Get remaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS=-c bin/launcher.json
-:setArgs
-if ""%1""=="""" goto doneSetArgs
-set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
-shift
-goto setArgs
-:doneSetArgs
 
 set MAINCLASS=org.forgerock.commons.launcher.Main
 
