@@ -570,12 +570,12 @@ openidm.create('workflow/processinstance', null, params);
    with the business key <literal>"newOrder"</literal>, as invoked in the
    previous example.
   </para>
-  <screen><?dbfo pgwide="1"?><userinput>$ curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;businessKey=newOrder"</userinput>
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&amp;processInstanceBusinessKey=newOrder"</userinput>
   </screen>  
   <para>
    Any Activiti properties can be queried using the same notation, for example,
@@ -584,7 +584,7 @@ openidm.create('workflow/processinstance', null, params);
    The following query returns all process instances that were started by the
    user <literal>openidm-admin</literal>:
   </para>
-  <screen><?dbfo pgwide="1"?><userinput>$ curl \
+  <screen><userinput>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
