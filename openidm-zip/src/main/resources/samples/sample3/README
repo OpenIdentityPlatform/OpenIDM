@@ -58,7 +58,7 @@ to retrieve and store the password in the managed user object in OpenIDM. This m
 impact configurations that support multiple external repos insofar as passwords
 will likely not be in sync immediately after a mysql -> managed recon. Despite
 creating any missing users in the managed repo during recon their passwords are
-empty so those same users sync'ed into the other external repos will have blank
+empty so those same users synced into the other external repos will have blank
 passwords. Some additional scripting may be required to handle this situation
 depending on the requirements of your deployment.
 
@@ -75,7 +75,7 @@ To try the example, follow these steps.
 
     $ /path/to/openidm/startup.sh -p samples/sample3
 
-    5. Populate the MySQL database with sample data.  You do this with either 5a or 5b below:
+    5. Populate the MySQL database with sample data. You do this with either 5a or 5b below:
 
        5a. Import the sample data definition language file into MySQL.
 
