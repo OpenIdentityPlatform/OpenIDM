@@ -7,8 +7,14 @@
 
     <script>
         var urlDetails = location.search,
-            urlArgs = urlDetails.split("&"),
-            urlName = urlArgs[0].match(/state=([^&]+)/)[1];
+                urlArgs = urlDetails.split("&"),
+                urlName = "";
+
+        for(var i = 0; i < urlArgs.length; i++) {
+            if(urlArgs[i].match(/state=([^&]+)/)) {
+                urlName = urlArgs[i].match(/state=([^&]+)/)[1];
+            }
+        }
 
         window.location =  window.location.protocol + "//" + window.location.host + window.location.pathname.replace('oauth', 'index')+"#connectors/edit/" +urlName +"/" +urlDetails.replace("?", "&");
     </script>

@@ -23,7 +23,11 @@
                 {{#if ok}}
                 <p class="resource-status resource-available"><i class="fa fa-check-circle-o "></i> {{t "templates.connector.activeState"}}</p>
                 {{else}}
+                {{#if enabled}}
                 <p title="{{error}}" class="resource-status resource-unavailable"><i class="fa fa-times-circle"></i> {{t "templates.connector.errorState"}}</p>
+                {{else}}
+                <p title="{{error}}" class="resource-status resource-disabled"><i class="fa fa-times-circle"></i> {{t "templates.auth.disabled"}}</p>
+                {{/if}}
                 {{/if}}
                 <a href="#connectors/edit/{{cleanUrlName}}/"><span class="pull-right resource-edit" title="Edit Connector"><i class="fa fa-pencil"></i></span></a>
                 <span class="pull-right resource-delete connector-delete" title="Delete Connector"><i class="fa fa-times-circle-o"></i></span>
