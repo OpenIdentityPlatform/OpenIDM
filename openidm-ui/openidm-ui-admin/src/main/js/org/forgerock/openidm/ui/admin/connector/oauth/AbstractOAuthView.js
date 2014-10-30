@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
 
         buildReturnUrl: function(id, name) {
             var urlBack = window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
-                builtUrl = this.$el.find("#OAuthurl").val()
+                builtUrl = this.getAuthUrl()
                     +"?scope="+this.getScopes()
                     +"&state=" +this.data.systemType +"_" +name
                     +"&redirect_uri=" +urlBack
@@ -48,14 +48,18 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
 
             return builtUrl;
         },
-        submitOAuth: function(mergedResult) {
+        submitOAuth: function(mergedResult, editConnector) {
             var name = mergedResult.name,
                 id = mergedResult.configurationProperties.clientId,
                 url = this.buildReturnUrl(id, name);
 
             mergedResult.configurationProperties.domain = window.location.protocol+"//"+window.location.host;
 
-            ConfigDelegate.createEntity(this.data.systemType +"/" + mergedResult.name, mergedResult).then(_.bind(function () {
+            if(this.cleanResult) {
+                mergedResult = this.cleanResult(mergedResult);
+            }
+
+            ConfigDelegate[editConnector ? "updateEntity" : "createEntity" ](this.data.systemType + "/" + mergedResult.name, mergedResult).then(_.bind(function () {
                 _.delay(function () {
                     window.location = url;
                 }, 1500);
@@ -66,17 +70,14 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView", [
             this.template = "templates/admin/connector/oauth/" +args.connectorType +".html";
 
             this.data.connectorDefaults = args.connectorDefaults;
-            this.data.oAuthReturned = args.oAuthReturned;
             this.data.editState = args.editState;
             this.data.systemType = args.systemType;
 
-            this.parentRender(_.bind(function() {
+            if(this.connectorSpecificChanges) {
+                this.connectorSpecificChanges(this.data.connectorDefaults);
+            }
 
-                if(args.connectorDefaults.configurationProperties.refreshToken === null) {
-                    if(this.data.oAuthReturned !== true) {
-                        this.$el.find("#secret").parent().remove();
-                    }
-                }
+            this.parentRender(_.bind(function() {
 
                 validatorsManager.bindValidators(this.$el);
 

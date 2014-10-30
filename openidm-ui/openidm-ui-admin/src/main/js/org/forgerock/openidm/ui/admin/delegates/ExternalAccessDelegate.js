@@ -28,19 +28,20 @@ define("org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate", [
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/external/rest");
+    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/oauthproxy");
 
-    obj.getToken = function(secret, id, authCode, redirectUri, tokenUrl) {
-        var googleDetails = "grant_type=authorization_code&code=" +authCode +"&client_id=" +id +"&client_secret=" +secret +"&redirect_uri=" +redirectUri,
+    obj.getToken = function(id, authCode, redirectUri, tokenUrl, connectorLocation) {
+        var googleDetails = "grant_type=authorization_code&code=" +authCode +"&client_id=" +id  +"&redirect_uri=" +redirectUri,
             restDetails = {
             "url" : tokenUrl,
             "method" : "POST",
             "body" : googleDetails,
-            "contentType" : "application/x-www-form-urlencoded"
+            "contentType" : "application/x-www-form-urlencoded",
+            "connectorLocation" : connectorLocation
         };
 
         return obj.serviceCall({
-            url: "?_action=call",
+            url: "?_action=getAuthZCode",
             type: "POST",
             data: JSON.stringify(restDetails)
         });

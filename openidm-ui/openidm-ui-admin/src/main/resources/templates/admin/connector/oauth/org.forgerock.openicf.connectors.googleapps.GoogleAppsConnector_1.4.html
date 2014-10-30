@@ -1,20 +1,22 @@
 <fieldset>
-    <legend><span>{{t "templates.connector.oAuthGeneral.base"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+    <legend><span>{{t "templates.connector.baseTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
     <div class="group-body">
         <div class="group-field-block group-lead">
             <div class="separate-message">
-                <label for="secret" class="light">{{t "templates.connector.oAuthGeneral.clientSecret"}}</label>
-                <input id="secret" {{#if oAuthReturned}}  data-validator-event="keyup blur" data-validator="required" {{else}} placeholder="*****" {{/if}} class="form-size-l" type="text" name="configurationProperties.clientSecret" required>
+                <label for="clientId" class="light">{{t "templates.connector.oAuthGeneral.clientId"}}</label>
+                <textarea id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
                 <span></span>
                 <div class="validation-message"></div>
             </div>
         </div>
-    </div>
-    <div class="group-body">
         <div class="group-field-block">
             <div class="separate-message">
-                <label for="secretId" class="light">{{t "templates.connector.oAuthGeneral.clientId"}}</label>
-                <textarea {{#if oAuthReturned}} disabled="true" {{/if}} id="clientId" name="configurationProperties.clientId" data-validator-event="keyup blur" data-validator="required">{{connectorDefaults.configurationProperties.clientId}}</textarea>
+                <label for="secret" class="light">{{t "templates.connector.oAuthGeneral.clientSecret"}}</label>
+                {{#if connectorDefaults.configurationProperties.clientSecret}}
+                <input id="secret" data-validator-event="keyup blur" data-validator="changed" placeholder="**********" class="form-size-l" type="password" name="configurationProperties.clientSecret">
+                {{else}}
+                <input id="secret" data-validator-event="keyup blur" data-validator="required" class="form-size-l" type="password" name="configurationProperties.clientSecret" required>
+                {{/if}}
                 <span></span>
                 <div class="validation-message"></div>
             </div>
@@ -23,5 +25,4 @@
     <input id="OAuthurl" type="hidden" value="https://accounts.google.com/o/oauth2/auth">
     <input id="OAuthTokenUrl" type="hidden" value="https://accounts.google.com/o/oauth2/token">
     <input id="clientDomain" type="hidden" name="configurationProperties.domain" value={{connectorDefaults.configurationProperties.domain}}>
-    <input id="clientRefreshToken" type="hidden" name="configurationProperties.refreshToken" value="{{connectorDefaults.configurationProperties.refreshToken}}">
 </fieldset>
