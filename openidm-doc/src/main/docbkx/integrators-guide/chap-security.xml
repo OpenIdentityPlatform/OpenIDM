@@ -1096,9 +1096,7 @@ $ <userinput>curl \
      Generate an obfuscated version of the password, by using the crypto bundle
      provided with OpenIDM:
     </para>
-    <screen>
-     <userinput>
-$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${project.version}?>.jar
+    <screen>$ <userinput>$ java -jar /path/to/openidm/bundle/openidm-crypto-<?eval ${project.version}?>.jar
      </userinput>
      <computeroutput>
 This utility helps obfuscate passwords to prevent casual observation.
@@ -1111,11 +1109,12 @@ CRYPT:a8b5a01ba48a306f300b62a1541734c7
    </listitem>
    <listitem>
     <para>
-     Paste the obfuscated password (<literal>OBF:xxxxxxx</literal>) and the
-     cryptographic key (<literal>CRYPT:xxxxxxx</literal>) into the
+     Paste either the obfuscated password (<literal>OBF:xxxxxxx</literal>) or
+     the encrypted password (<literal>CRYPT:xxxxxxx</literal>) into the
      <filename>conf/boot/boot.properties</filename> file. Comment out the
-     regular keystore password and remove the comment tags from the lines that
-     contain the obfuscated password and the cryptographic key:
+     regular keystore password and remove the comment tag, either from the line
+     that contains the obfuscated password or from the line that contains the
+     encrypted password:
     </para>
     <screen>
 $ <userinput>more conf/boot/boot.properties</userinput>
@@ -1125,9 +1124,9 @@ $ <userinput>more conf/boot/boot.properties</userinput>
 # openidm.keystore.password=changeit
 openidm.truststore.password=changeit
 
-# optionally use the cli encrypt to obfuscate the password and set
+# Optionally use the crypto bundle to obfuscate the password and set one of these:
 openidm.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0
-openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
+# openidm.keystore.password=CRYPT:a8b5a01ba48a306f300b62a1541734c7
 ...  </computeroutput>
     </screen>
    </listitem>
