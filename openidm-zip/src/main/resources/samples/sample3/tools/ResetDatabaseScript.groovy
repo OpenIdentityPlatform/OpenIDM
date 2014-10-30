@@ -55,7 +55,6 @@ try {
 
     sql.execute("DROP TABLE IF EXISTS car;")
     sql.execute("DROP TABLE IF EXISTS groups_users;")
-    sql.execute("DROP TABLE IF EXISTS email;")
     sql.execute("DROP TABLE IF EXISTS users;")
     sql.execute("DROP TABLE IF EXISTS groups;")
     sql.execute("DROP TABLE IF EXISTS organizations;")

@@ -71,39 +71,16 @@ To try the example, follow these steps.
 
     3. Set up MySQL to listen on localhost:3306, connecting as root:password.
 
-    4. Start OpenIDM with the configuration for sample 3.
+    4. Create the initial database OpenIDM will sync with.
+
+    mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
+
+    5. Start OpenIDM with the configuration for sample 3.
 
     $ /path/to/openidm/startup.sh -p samples/sample3
 
-    5. Populate the MySQL database with sample data. You do this with either 5a or 5b below:
-
-       5a. Import the sample data definition language file into MySQL.
-
-       $ ./bin/mysql -u root -p < /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
-       Enter password:
-       $ ./bin/mysql -u root -p
-       Enter password:
-       mysql> use hrdb;
-       mysql> select * from users;
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       | id | uid    | password                                 | firstname | lastname | fullname      | email                     | organization | timestamp           |
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       |  1 | bob    | e38ad214943daad1d64c102faec29de4afe9da3d | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-04-04 07:03:12 |
-       |  2 | rowley | 2aa60a8ff7fcd473d321e0146afd9e26df395147 | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-04-04 07:03:12 |
-       |  3 | louis  | 1119cfd37ee247357e034a08d844eea25f6fd20f | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2014-04-04 07:03:12 |
-       |  4 | john   | a1d7584daaca4738d499ad7082886b01117275d8 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-04-04 07:03:12 |
-       |  5 | jdoe   | edba955d0ea15fdef4f61726ef97e5af507430c0 | John      | Doe      | John Doe      | John.Doe@example.com      | ENG          | 2014-04-04 07:03:12 |
-       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
-       5 rows in set (0.01 sec)
-    
-       mysql> quit
-       Bye
-
-       * Note that these passwords are hashed, and not available to be read into OpenIDM as cleartext.
-       * sha1 is used to hash these passwords for compatibility reasons; in production, use more secure algorithms.
-
-       5b. Use REST to execute a custom script that, in this case, resets and populates the database.
-
+    6. Populate the MySQL database with sample data. Use REST to execute a custom script that, in this case, resets
+    and populates the database.  This script may be re-run at any time to reset the database.
        $ curl -k --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --header "Content-Type: application/json" --request POST "https://localhost:8443/openidm/system/scriptedsql?_action=script&scriptId=ResetDatabase"
        {
          "actions": [
@@ -113,11 +90,29 @@ To try the example, follow these steps.
          ]
        }
 
-    6. Run reconciliation:
+       At this point the MySQL database should be fully populated.
+       mysql> USE hrdb;
+       Database changed
+       mysql> SELECT * FROM users;
+       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+       | id | uid    | password                                 | firstname | lastname | fullname      | email                     | organization | timestamp           |
+       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+       |  1 | bob    | e38ad214943daad1d64c102faec29de4afe9da3d | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2014-10-30 08:55:41 |
+       |  2 | rowley | 2aa60a8ff7fcd473d321e0146afd9e26df395147 | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2014-10-30 08:55:41 |
+       |  3 | louis  | 1119cfd37ee247357e034a08d844eea25f6fd20f | Louis     | Balfour  | Louis Balfour | Louis.Balfor@example.com  | SALES        | 2014-10-30 08:55:41 |
+       |  4 | john   | a1d7584daaca4738d499ad7082886b01117275d8 | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2014-10-30 08:55:41 |
+       |  5 | jdoe   | edba955d0ea15fdef4f61726ef97e5af507430c0 | John      | Doe      | John Doe      | John.Doe@example.com      | ENG          | 2014-10-30 08:55:41 |
+       +----+--------+------------------------------------------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+       5 rows in set (0.00 sec)
+
+       * Note that these passwords are hashed, and not available to be read into OpenIDM as cleartext.
+       * sha1 is used to hash these passwords for compatibility reasons; in production, use more secure algorithms.
+
+    7. Run reconciliation:
 
     $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
-    7. Retrieve the list of users from OpenIDM's internal repository:
+    8. Retrieve the list of users from OpenIDM's internal repository:
 
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user/?_queryId=query-all&fields=_openidm_id,userName,sn,givenName&_prettyPrint=true"
     {
@@ -157,7 +152,7 @@ To try the example, follow these steps.
       "remainingPagedResults" : -1
     }
 
-    8. Query for an individual user (by userName):
+    9. Query for an individual user (by userName):
 
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/managed/user?_queryId=for-userName&uid=rowley&_prettyPrint=true"
     {
@@ -198,7 +193,21 @@ To try the example, follow these steps.
       "remainingPagedResults" : -1
     }
 
-    9. Show paging results with page size of 2
+    Note the "cars" list containing multiple objects.  This structure is displayed in the admin UI as well.  The name
+    "cars" was used to help differentiate what matters to the complex type versus what is required by OpenIDM/OpenICF
+    in the Groovy scripts.
+
+    In the database the 'car' table joins to the 'users' table via the cars.users_id column.  The Groovy scripts are
+    responsible for reading this data from MySQL and repackaging it in a way that OpenIDM can understand. Now with
+    support for complex types this data is passed through to OpenIDM in the same form: as a list of 'car' objects.
+    Likewise, data is synced from OpenIDM to MySQL in the same form.
+
+    Group membership (not shown here) is maintained with a traditional "join table" in MySQL ('groups_users'). OpenIDM
+    does not maintain group membership this way so the Groovy scripts do the work to translate between the two.  This
+    demonstrates another form of complex object though the sky is the limit.  Complex objects may also be nested to any
+    depth.
+
+    10. Show paging results with page size of 2
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id"
     {
       "result":[
@@ -215,7 +224,7 @@ To try the example, follow these steps.
       "remainingPagedResults":-1
     }
 
-    10. Use the pagedResultsCookie from the result in step 9 for the next query to retrieve the next result set. Make sure you encode the date:time.
+    11. Use the pagedResultsCookie from the result in step 9 for the next query to retrieve the next result set. Make sure you encode the date:time.
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
     {
       "result":[
