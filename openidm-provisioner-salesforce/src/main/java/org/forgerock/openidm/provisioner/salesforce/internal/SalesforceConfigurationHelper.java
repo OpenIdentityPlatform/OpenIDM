@@ -65,8 +65,8 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
     private JsonValue configurationProperties = json(object());
 
     private static final List<JsonPointer> PROPERTIES_TO_ENCRYPT = Arrays.asList(
-            new JsonPointer("/" + CONFIGURATION_PROPERTIES + "/clientSecret"),
-            new JsonPointer("/" + CONFIGURATION_PROPERTIES + "/refreshToken"));
+            new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, "clientSecret" } ),
+            new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, "refreshToken" } ));
 
     /**
      * Cryptographic service.
@@ -139,35 +139,32 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
      */
     @Override
     public JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException {
-        // create an encrypted and a decrypted copy of the configuration
-        JsonValue encrypted = params.copy();
-        JsonValue decrypted = params.copy();
+        JsonValue fullConfig = params.copy();
         try {
-            for (JsonPointer property : PROPERTIES_TO_ENCRYPT) {
-                if (JsonCrypto.isJsonCrypto(params.get(property))) {
-                    decrypted.put(property, cryptoService.decrypt(params.get(property)).getObject());
-                    encrypted.put(property, params.get(property).getObject());
-                } else {
-                    decrypted.put(property, params.get(property).getObject());
-                    encrypted.put(property, cryptoService.encrypt(params.get(property),
-                            ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
-                            IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
-                        .getObject());
+            JsonValue sourceProperties = params.get(CONFIGURATION_PROPERTIES);
+            JsonValue targetProperties = json(object());
+            for (String property : sourceProperties.keys()) {
+                if (configurationProperties.keys().contains(property)) {
+                    final Object propertyValue;
+                    if (PROPERTIES_TO_ENCRYPT.contains(new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, property }))
+                            && !JsonCrypto.isJsonCrypto(params.get(property))) {
+                        propertyValue = cryptoService.encrypt(sourceProperties.get(property),
+                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
+                                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
+                                .getObject();
+                    } else {
+                        propertyValue = sourceProperties.get(property).getObject();
+                    }
+                    targetProperties.put(property, propertyValue);
                 }
             }
+            fullConfig.put(CONFIGURATION_PROPERTIES, targetProperties.getObject());
         } catch (JsonCryptoException e) {
             throw new InternalServerErrorException(e);
         }
 
-        // use decrypted for validating/testing config
-        SalesforceConfiguration config = SalesforceConfiguration.parseConfiguration(decrypted.get("configurationProperties"));
-        config.validate();
-        SalesforceConnection connection = new SalesforceConnection(config);
-        connection.test();
-
-        // use encrypted for response
-        encrypted.put("objectTypes", SchemaHelper.getObjectSchema().getObject());
-        return encrypted;
+        fullConfig.put("objectTypes", SchemaHelper.getObjectSchema().getObject());
+        return fullConfig;
     }
 
     // --- MetaDataProvider implementation
