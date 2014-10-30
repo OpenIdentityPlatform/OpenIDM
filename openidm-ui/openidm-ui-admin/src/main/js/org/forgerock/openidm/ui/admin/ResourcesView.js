@@ -169,22 +169,25 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                 details;
 
             if(!clickedEle.hasClass("resource-delete") && !clickedEle.hasClass("fa-times-circle-o")) {
-                event.preventDefault();
 
-                if (!clickedEle.hasClass(".resource-body")) {
+                if (!clickedEle.hasClass("resource-body")) {
                     clickedEle = $(event.target).parents(".resource-body");
                 }
 
-                if (clickedEle.attr("data-resource-type") === "managed") {
-                    index = $("#resourceManagedContainer .resource-body").index(clickedEle);
-                    details = this.data.currentManagedObjects[index];
+                if(!clickedEle.hasClass("add-resource-body")) {
+                    event.preventDefault();
 
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
-                } else {
-                    index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
-                    details = this.data.currentConnectors[index];
+                    if (clickedEle.attr("data-resource-type") === "managed") {
+                        index = $("#resourceManagedContainer .resource-body").index(clickedEle);
+                        details = this.data.currentManagedObjects[index];
 
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
+                    } else {
+                        index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
+                        details = this.data.currentConnectors[index];
+
+                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
+                    }
                 }
             }
         }
