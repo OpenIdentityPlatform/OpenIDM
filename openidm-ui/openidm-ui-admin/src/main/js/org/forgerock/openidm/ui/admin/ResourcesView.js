@@ -102,6 +102,12 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                     });
                 }
 
+                if(this.$el.find(".resource-disabled").length !== 0) {
+                    this.$el.find(".resource-disabled").tooltip({
+                        tooltipClass: "resource-warning-tooltip"
+                    });
+                }
+
                 if (callback) {
                     callback();
                 }

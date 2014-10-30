@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
         },
         model : {
             setScript: null,
-            scriptData: null,
+            AscriptData: null,
             noValidation: false,
             disablePassedVariable: false,
             placeHolder: null,

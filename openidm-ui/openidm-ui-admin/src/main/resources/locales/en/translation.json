@@ -614,14 +614,17 @@
                 }
             },
             "salesforce" : {
-                "connectTimeout" : "Connect Timeout",
+                "callbackUrlMessage" : "Be sure your application is configured to use this Callback URL",
+                "listHeader" : "You must grant this application all of the following OAuth Scopes:",
+                "listItemOne" : "Access your basic information",
+                "listItemTwo" : "Access and manage your data",
+                "listItemThree" : "Perform requests on your behalf at any time",
+                "changeHeader" : "Note for new and recently-changed apps",
+                "changeDetails" : "When you create a new Connected App, or update your Connected App in Salesforce, it takes some time (at least five minutes) for the data to be propagated through all the Salesforce servers. If you are setting up Identity Connect with a Connected App that you have just created, or if you have recently changed the Callback URL of your Connected App, you might receive an error when you attempt to validate the consumer key and consumer secret. You should therefore wait at least five minutes after creating or updating your Connected App before you attempt to set up Identity Connect with that App.",
+                "needHelpKey" : "Need help locating your consumer key and secret?",
                 "loginUrl" : "Login URL",
-                "idleCheckInterval" : "Idle Check Interval",
-                "refreshToken" : "Refresh Token",
-                "clientSecret" : "Client Secret",
-                "clientId" : "Client ID",
-                "instanceUrl" : "Instance URL",
-                "version" : "API Version"
+                "clientSecret" : "Consumer Secret",
+                "clientId" : "Consumer Key"
             },
             "oAuthGeneral" : {
                 "base" : "Base OAuth Details",

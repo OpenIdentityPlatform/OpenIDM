@@ -21,7 +21,7 @@
 
                 <div class="group-field-block no-validation-block">
                     <label for="connectorEnabled" class="light">{{t "templates.connector.connectorEnabled"}}</label>
-                    <select id="connectorEnabled" class="form-size-s" name="enabled">
+                    <select data-validator="required" data-validator-event="changed" id="connectorEnabled" class="form-size-s" name="enabled">
                         {{#staticSelect enabled}}
                         <option value="true">{{t "common.form.true"}}</option>
                         <option value="false">{{t "common.form.false"}}</option>

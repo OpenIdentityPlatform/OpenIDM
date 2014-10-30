@@ -12,6 +12,14 @@
 define("config/validators/AdminValidators", [
 ], function(constants, eventManager) {
     var obj = {
+        "changed": {
+            "name": "Changed field",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                callback();
+            }
+        },
         "certificate": {
             "name": "Valid Certificate String",
             "dependencies": [
