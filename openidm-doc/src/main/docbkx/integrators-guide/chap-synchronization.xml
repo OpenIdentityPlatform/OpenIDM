@@ -2407,8 +2407,95 @@ $ <userinput>curl \
   </para>
  </section>
 
+ <section xml:id="querying-sync-logs">
+  <title>Querying the LiveSync Audit Log</title>
+  <para>
+   LiveSync and automatic sync operations are logged in the file
+   <filename>/path/to/openidm/audit/sync.csv</filename> and in the repository.
+   You can read the LiveSync audit logs over the REST interface, as outlined in
+   the following examples.
+  </para>
+  <para>
+   To return all LiveSync operations logged in the audit log, run a RESTful GET
+   on the <literal>audit/sync</literal> endpoint. For example:
+  </para>
+  <screen>$ <userinput>curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/sync"</userinput></screen>
+  <para>
+   Most of the fields in the synchronization audit log are self-explanatory.
+   Each distinct LiveSync operation is identified by its
+   <literal>actionId</literal>. The <literal>rootActionId</literal> is the ID
+   that was assigned to the incoming or initiating request - so if a
+   modification to a user entry triggers an automatic synchronization operation,
+   the sync operation is assigned an <literal>actionId</literal> and
+   <literal>rootActionId</literal> refers to the
+   original change operation. Each entry in the log is identified by a unique
+   <literal>_id</literal>.
+  </para>
+  <para>
+   To obtain information on a specific audit log entry, include its entry
+   <literal>_id</literal> in the URL. For example:
+  </para>
+  <screen>$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/sync/a311b656-508c-4f56-9df4-f907364184f1"</screen>
+  <para>
+   The following sample output shows the results of a read operation on a
+   specific LiveSync audit entry.
+  </para>
+  <programlisting language="javascript">{
+  "entries": [
+    {
+      "mapping": "systemAdAccounts_managedUser",
+      "targetObjectId": "7e5eb90b-f643-4858-803e-a01931f9c12e",
+      "sourceObjectId": "system/ad/account/rheath",
+      "situation": "CONFIRMED",
+      "actionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
+      "_id": "b3e3190c-9e9d-4cd1-8fec-01705ad54109",
+      "timestamp": "2014-10-30T14:48:58.415Z",
+      "rootActionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
+      "status": "SUCCESS",
+      "message": null,
+      "messageDetail": null,
+      "exception": "",
+      "action": "UPDATE"
+    },
+    {
+      "mapping": "managedUser_systemLdapAccounts",
+      "targetObjectId": "uid=rheath,ou=People,dc=example,dc=com",
+      "sourceObjectId": "managed/user/7e5eb90b-f643-4858-803e-a01931f9c12e",
+      "situation": "CONFIRMED",
+      "actionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
+      "_id": "105a39f7-f071-481a-ae82-e233e556cc5a",
+      "timestamp": "2014-10-30T14:48:58.402Z",
+      "rootActionId": "ea6a81e0-a98a-4e72-8c77-50b5756be1f6",
+      "status": "SUCCESS",
+      "message": null,
+      "messageDetail": null,
+      "exception": "",
+      "action": "UPDATE"
+    }
+  ]
+} </programlisting>
+  <para>
+   The output shows two records that originated from the same LiveSync action.
+   The first record indicates a change on the <literal>system/ad</literal>
+   entry, which triggered a LiveSync to update the corresponding
+   <literal>managed/user</literal> entry. The second record indicates an
+   automatic sync from <literal>managed/user</literal> to the corresponding
+   entry in <literal>system/ldap</literal>. Note that the
+   <literal>rootActionId</literal> is the same for both these records.
+  </para>
+ </section>
 
-  <section xml:id="livesync-retry-strategy">
+ <section xml:id="livesync-retry-strategy">
    <title>Configuring the LiveSync Retry Policy</title>
    <para>
     OpenIDM enables you to specify what should happen if a LiveSync operation
