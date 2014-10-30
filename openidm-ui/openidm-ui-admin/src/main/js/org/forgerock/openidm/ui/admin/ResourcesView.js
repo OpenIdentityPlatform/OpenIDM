@@ -38,7 +38,8 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         template: "templates/admin/ResourcesViewTemplate.html",
         events: {
             "click .connector-delete": "deleteConnections",
-            "click .managed-delete": "deleteManaged"
+            "click .managed-delete": "deleteManaged",
+            "click .resource-body" : "mappingDetail"
         },
         addMappingView: false,
         render: function(args, callback) {
@@ -160,6 +161,32 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
                     });
             },this), "340px");
+        },
+
+        mappingDetail: function(event){
+            var clickedEle = $(event.target),
+                index,
+                details;
+
+            if(!clickedEle.hasClass("resource-delete") && !clickedEle.hasClass("fa-times-circle-o")) {
+                event.preventDefault();
+
+                if (!clickedEle.hasClass(".resource-body")) {
+                    clickedEle = $(event.target).parents(".resource-body");
+                }
+
+                if (clickedEle.attr("data-resource-type") === "managed") {
+                    index = $("#resourceManagedContainer .resource-body").index(clickedEle);
+                    details = this.data.currentManagedObjects[index];
+
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
+                } else {
+                    index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
+                    details = this.data.currentConnectors[index];
+
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
+                }
+            }
         }
     });
 

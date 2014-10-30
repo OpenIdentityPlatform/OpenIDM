@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
             promise = deferred.promise();
 
         if(obj.connectorDelegateCache.currentConnectors) {
-            deferred.resolve(obj.connectorDelegateCache.currentConnectors);
+            deferred.resolve(_.clone(obj.connectorDelegateCache.currentConnectors));
         } else {
             obj.serviceCall({
                 url: "?_action=test",

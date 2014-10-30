@@ -44,16 +44,17 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             "click .mapping-config-body": "mappingDetail"
         },
         mappingDetail: function(e){
-            e.preventDefault();
+            if(!$(e.target).closest("button").hasClass("delete-button") && !$(e.target).hasClass("mapping-icon")){
+                e.preventDefault();
 
-            if(!$(e.target).closest("button").hasClass("delete-button")){
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
             }
         },
         render: function(args, callback) {
             var syncConfig = syncDelegate.mappingDetails(),
                 mappingDetails = [],
-                results;
+                results,
+                cleanName;
 
             syncConfig.then(_.bind(function(sync) {
                 this.data.mappingConfig = sync.mappings;
@@ -82,17 +83,29 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
                         if (this.data.mappingConfig[index].sourceConnector){
                             this.data.mappingConfig[index].sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].sourceConnector.connectorRef.connectorName));
+
+                            cleanName = this.data.mappingConfig[index].sourceConnector.config.split("/");
+                            cleanName = cleanName[1] +"_" +cleanName[2];
+
+                            this.data.mappingConfig[index].sourceConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
                             this.data.mappingConfig[index].sourceConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType")
+                                "displayName" : $.t("templates.connector.managedObjectType"),
+                                "url" : "#managed/edit/" +this.data.mappingConfig[index].source.split("/")[1] +"/"
                             };
                         }
 
                         if (this.data.mappingConfig[index].targetConnector){
                             this.data.mappingConfig[index].targetConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].targetConnector.connectorRef.connectorName));
+
+                            cleanName = this.data.mappingConfig[index].targetConnector.config.split("/");
+                            cleanName = cleanName[1] +"_" +cleanName[2];
+
+                            this.data.mappingConfig[index].targetConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
                             this.data.mappingConfig[index].targetConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType")
+                                "displayName" : $.t("templates.connector.managedObjectType"),
+                                "url" : "#managed/edit/" +this.data.mappingConfig[index].target.split("/")[1] +"/"
                             };
                         }
                     }, this);

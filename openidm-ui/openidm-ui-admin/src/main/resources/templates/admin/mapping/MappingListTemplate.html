@@ -11,7 +11,7 @@
     {{#each mappingConfig}}
     <div class="mapping-config-body" mapping="{{name}}">
         <div class="mapping-body">
-            <img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" />
+            <a href="{{sourceConnector.url}}"><img class="mapping-icon left-icon" src="{{sourceIcon}}" alt="{{sourceConnector.displayName}}" /></a>
             <div class="mapping-source">
                 <p class="mapping-header">{{t "templates.mapping.source"}}</p>
                 <p class="mapping-title">{{source}}</p>
@@ -22,7 +22,7 @@
                     <i class="fa fa-arrow-right"></i>
                 </div>
             </div>
-            <img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" />
+            <a href="{{targetConnector.url}}"><img class="mapping-icon left-icon" src="{{targetIcon}}" alt="{{targetConnector.displayName}}" /></a>
             <div class="mapping-target">
                 <p class="mapping-header">{{t "templates.mapping.target"}}</p>
                 <p class="mapping-title">{{target}}</p>

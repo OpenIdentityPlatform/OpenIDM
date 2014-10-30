@@ -1,7 +1,7 @@
 <div id="mappingConfigHolder">
     <div class="mapping-config-body">
         <div class="mapping-body">
-            <img class="mapping-icon left-icon" src="{{mapping.sourceIcon}}" alt="{{mapping.sourceConnector.displayName}}" />
+            <a href="{{mapping.sourceConnector.url}}"><img class="mapping-icon left-icon" src="{{mapping.sourceIcon}}" alt="{{mapping.sourceConnector.displayName}}" /></a>
             <div class="mapping-source">
                 <p class="mapping-header">{{t "templates.mapping.source"}}</p>
                 <p class="mapping-title">{{mapping.source}}</p>
@@ -12,7 +12,7 @@
                     <i class="fa fa-arrow-right"></i>
                 </div>
             </div>
-            <img class="mapping-icon left-icon" src="{{mapping.targetIcon}}" alt="{{mapping.targetConnector.displayName}}" />
+            <a href="{{mapping.targetConnector.url}}"><img class="mapping-icon left-icon" src="{{mapping.targetIcon}}" alt="{{mapping.targetConnector.displayName}}" /></a>
             <div class="mapping-target">
                 <p class="mapping-header">{{t "templates.mapping.target"}}</p>
                 <p class="mapping-title">{{mapping.target}}</p>
@@ -24,13 +24,13 @@
             <div class="float-right">
                 {{t "templates.mapping.syncStatus"}}: <span id="syncStatus" class="syncStatus"><a href="#">{{syncStatus}}</a></span>
                 <button id="syncNowButton" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
-                    <span class="fa fa-clock-o"></span>
-                    {{t "templates.mapping.syncNow"}}
-                </button> 
+                <span class="fa fa-clock-o"></span>
+                {{t "templates.mapping.syncNow"}}
+                </button>
                 <button id="stopSyncButton" type="button" title="{{t "templates.mapping.stopSync"}}" class="button" style="display:none;">
-                    <span class="fa fa-clock-o"></span>
-                    {{t "templates.mapping.stopSync"}}
-                </button> 
+                <span class="fa fa-clock-o"></span>
+                {{t "templates.mapping.stopSync"}}
+                </button>
             </div>
         </div>
     </div>

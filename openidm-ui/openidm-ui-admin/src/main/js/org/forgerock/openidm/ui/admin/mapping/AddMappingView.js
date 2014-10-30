@@ -38,7 +38,8 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {
-            "click .add-resource-button" : "addResourceMapping"
+            "click .add-resource-button" : "addResourceMapping",
+            "click .resource-body" : "mappingDetail"
         },
         addMappingView: false,
         render: function(args, callback) {
@@ -153,6 +154,32 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
             }
 
             MapResourceView.addMapping(resourceData);
+        },
+
+        mappingDetail: function(event){
+            var clickedEle = $(event.target),
+                index,
+                details;
+
+            if(!clickedEle.closest("button").hasClass("add-resource-button")) {
+                event.preventDefault();
+
+                if (!clickedEle.hasClass(".resource-body")) {
+                    clickedEle = $(event.target).parents(".resource-body");
+                }
+
+                if (clickedEle.attr("data-resource-type") === "managed") {
+                    index = $("#resourceManagedContainer .resource-body").index(clickedEle);
+                    details = this.data.currentManagedObjects[index];
+
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
+                } else {
+                    index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
+                    details = this.data.currentConnectors[index];
+
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
+                }
+            }
         }
     });
 

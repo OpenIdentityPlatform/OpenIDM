@@ -251,28 +251,15 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
 
             completeMapping.mappings.push(tempMapping);
 
-            //Need this check incase fresh IDM is started and no sync file is created yet
-            if(this.syncExist) {
-                ConfigDelegate.updateEntity("sync", completeMapping).then(_.bind(function() {
+            ConfigDelegate[this.syncExist ? "updateEntity" : "createEntity" ]("sync", completeMapping).then(_.bind(function() {
 
-                    if(callback) {
-                        callback();
-                    }
+                if(callback) {
+                    callback();
+                }
 
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
-                }, this));
-            } else {
-                ConfigDelegate.createEntity("sync", completeMapping).then(_.bind(function() {
-
-                    if(callback) {
-                        callback();
-                    }
-
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
-                }, this));
-            }
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [tempMapping.name]});
+            }, this));
         },
         findLinkedMapping: function() {
             var linksFound = _.filter(this.mappingList, function(mapping) {
