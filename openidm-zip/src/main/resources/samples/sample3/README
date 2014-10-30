@@ -193,18 +193,18 @@ To try the example, follow these steps.
       "remainingPagedResults" : -1
     }
 
-    Note the "cars" list containing multiple objects.  This structure is displayed in the admin UI as well.  The name
+    Note the "cars" list containing multiple objects. This structure is displayed in the admin UI as well. The name
     "cars" was used to help differentiate what matters to the complex type versus what is required by OpenIDM/OpenICF
     in the Groovy scripts.
 
-    In the database the 'car' table joins to the 'users' table via the cars.users_id column.  The Groovy scripts are
-    responsible for reading this data from MySQL and repackaging it in a way that OpenIDM can understand. Now with
+    In the database the 'car' table joins to the 'users' table via the cars.users_id column. The Groovy scripts are
+    responsible for reading this data from MySQL and repackaging it in a way that OpenIDM can understand. With
     support for complex types this data is passed through to OpenIDM in the same form: as a list of 'car' objects.
     Likewise, data is synced from OpenIDM to MySQL in the same form.
 
     Group membership (not shown here) is maintained with a traditional "join table" in MySQL ('groups_users'). OpenIDM
-    does not maintain group membership this way so the Groovy scripts do the work to translate between the two.  This
-    demonstrates another form of complex object though the sky is the limit.  Complex objects may also be nested to any
+    does not maintain group membership this way so the Groovy scripts do the work to translate between the two. This
+    demonstrates another form of complex object though the sky is the limit. Complex objects may also be nested to any
     depth.
 
     10. Show paging results with page size of 2
@@ -224,7 +224,7 @@ To try the example, follow these steps.
       "remainingPagedResults":-1
     }
 
-    11. Use the pagedResultsCookie from the result in step 9 for the next query to retrieve the next result set. Make sure you encode the date:time.
+    11. Use the pagedResultsCookie from the result in step 10 for the next query to retrieve the next result set. Make sure you encode the date:time.
     $ curl -k -u "openidm-admin:openidm-admin" --request GET "https://localhost:8443/openidm/system/scriptedsql/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2"
     {
       "result":[
