@@ -266,6 +266,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         try {
             Configuration config = null;
             if (parsedId.isFactoryConfig()) {
+                if (findExistingConfiguration(parsedId) != null && !allowExisting) {
+                    throw new PreconditionFailedException("Can not create a new factory configuration with ID "
+                            + parsedId + ", configuration for this ID already exists.");
+                }
                 String qualifiedFactoryPid = ConfigBootstrapHelper.qualifyPid(parsedId.factoryPid);
                 if ("org.forgerock.openidm.router".equalsIgnoreCase(qualifiedFactoryPid)) {
                     throw new BadRequestException("router config can not be factory config");
