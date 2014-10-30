@@ -1235,7 +1235,7 @@ $ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
      been assigned this role, and regenerates their effective assignments on the
      target resource. So, for example, if the role <literal>"ldap"</literal>
      gives a user an assignment on the resource "Active Directory", when that
-     role definition is deleted, a reconciliation operation runs to remove the
+     role definition is changed, a reconciliation operation runs to update the
      assignment for that user on the "Active Directory" resource.
     </para>
    </section>
