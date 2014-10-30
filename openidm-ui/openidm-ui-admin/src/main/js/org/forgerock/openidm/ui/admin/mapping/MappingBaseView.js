@@ -49,9 +49,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             "click #syncStatus a": "toggleSyncDetails"
         },
         mappingList: function(e){
-            e.preventDefault();
+            if(!$(e.target).closest("button").hasClass("button") && !$(e.target).parent().hasClass("syncStatus") && !$(e.target).hasClass("mapping-icon")){
+                e.preventDefault();
 
-            if(!$(e.target).closest("button").hasClass("button") && !$(e.target).parent().hasClass("syncStatus")){
                 delete this.data.mapping;
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "mappingListView"});
             }
@@ -117,7 +117,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             }, this));
         },
         render: function(args, callback) {
-            var syncConfig;
+            var syncConfig,
+                cleanName;
             
             this.route = { url: window.location.hash.replace(/^#/, '') };
                 
@@ -165,20 +166,31 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         this.data.mapping.targetIcon = details.targetIcon.src;
                         this.data.mapping.sourceIcon = details.sourceIcon.src;
 
-
                         if (this.data.mapping.sourceConnector){
                             this.data.mapping.sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.sourceConnector.connectorRef.connectorName));
+
+                            cleanName = this.data.mapping.sourceConnector.config.split("/");
+                            cleanName = cleanName[1] +"_" +cleanName[2];
+
+                            this.data.mapping.sourceConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
-                            this.data.mapping.sourceConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType")
+                            this.data.mapping.sourceConnector= {
+                                "displayName" : $.t("templates.connector.managedObjectType"),
+                                "url" : "#managed/edit/" +this.data.mapping.source.split("/")[1] +"/"
                             };
                         }
 
                         if (this.data.mapping.targetConnector){
                             this.data.mapping.targetConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mapping.targetConnector.connectorRef.connectorName));
+
+                            cleanName = this.data.mapping.targetConnector.config.split("/");
+                            cleanName = cleanName[1] +"_" +cleanName[2];
+
+                            this.data.mapping.targetConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
                             this.data.mapping.targetConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType")
+                                "displayName" : $.t("templates.connector.managedObjectType"),
+                                "url" : "#managed/edit/" +this.data.mapping.target.split("/")[1] +"/"
                             };
                         }
 
