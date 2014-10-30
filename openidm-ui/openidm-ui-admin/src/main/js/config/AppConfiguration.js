@@ -47,7 +47,8 @@ define("config/AppConfiguration", [
                     configuration: {
                         "org.identityconnectors.ldap.LdapConnector_1.1" : "org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView",
                         "org.identityconnectors.ldap.LdapConnector_1.4" : "org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView",
-                        "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector_1.4" : "org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView"
+                        "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector_1.4" : "org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView",
+                        "org.forgerock.openidm.salesforce.Salesforce_2.0" : "org/forgerock/openidm/ui/admin/connector/oauth/SalesforceTypeView"
                     }
                 },
                 {

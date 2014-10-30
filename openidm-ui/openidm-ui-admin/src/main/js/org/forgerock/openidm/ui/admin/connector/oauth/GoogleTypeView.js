@@ -26,8 +26,13 @@
 
 define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
     "org/forgerock/openidm/ui/admin/connector/oauth/AbstractOAuthView",
-    "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate"
-], function(AbstractOAuthView, ExternalAccessDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
+], function(AbstractOAuthView, ExternalAccessDelegate, router, ConfigDelegate, eventManager, constants, ConnectorDelegate) {
 
     var GoogleTypeView = AbstractOAuthView.extend({
         getScopes: function() {
@@ -39,11 +44,32 @@ define("org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView", [
             return googleScope;
         },
 
+        getAuthUrl : function() {
+            return $("#OAuthurl").val();
+        },
+
         getToken: function(mergedResult, oAuthCode) {
-            return ExternalAccessDelegate.getToken(mergedResult.configurationProperties.clientSecret,
-                mergedResult.configurationProperties.clientId, oAuthCode,
+
+            return ExternalAccessDelegate.getToken(mergedResult.configurationProperties.clientId,
+                oAuthCode,
                 window.location.protocol+"//"+window.location.host + "/admin/oauth.html",
-                "https://accounts.google.com/o/oauth2/token");
+                "https://accounts.google.com/o/oauth2/token",
+                mergedResult._id.replace("/", "_"));
+        },
+
+        setToken: function(refeshDetails, connectorDetails, connectorLocation, urlArgs) {
+            connectorDetails.configurationProperties.refreshToken = refeshDetails.refresh_token;
+
+            ConnectorDelegate.testConnector(connectorDetails).then(_.bind(function(testResult){
+                connectorDetails.objectTypes = testResult.objectTypes;
+                connectorDetails.enabled = true;
+
+                ConfigDelegate.updateEntity(connectorLocation, connectorDetails).then(_.bind(function () {
+                    _.delay(function () {
+                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                    }, 1500);
+                }, this));
+            }, this));
         }
     });
 
