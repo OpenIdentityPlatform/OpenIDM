@@ -32,34 +32,34 @@ SQL scripts. This example requires a fresh installation of OpenIDM.
 For documentation pertaining to this example see:
 http://openidm.forgerock.org/doc/install-guide/index.html#more-sample3
 
-This sample now also demonstrates the use of complex data types.  Complex types
-can be stored, retrieved and sync'ed like any other property of an object.  These
+This sample also demonstrates the use of complex data types. Complex types
+can be stored, retrieved and synced like any other property of an object. These
 types can be mapped to your external data sources in any way you choose but are
 generally stored in the managed data as JSON represented as a String. This may
 be customized further to do additional work with or transformation on that data.
 
 The sync.json script demonstrates the use of event hooks to perform an action. In
 this example there are two hooks, one for the onCreate event and another for onUpdate,
-both for the managed user to external repo user case.  In both events this sample
+both for the managed user to external repo user case. In both events this sample
 will log a statement to OpenIDM's log file (see the logs directory) when a managed
-user is created or updated in the external repo.  In both cases the script is
+user is created or updated in the external repo. In both cases the script is
 explicitly included in the sync.json file but could just as easily have referenced
-an external file for the script source instead.  For more information see:
+an external file for the script source instead. For more information see:
 
 http://openidm.forgerock.org/doc/webhelp/integrators-guide/appendix-scripting.html
 
-The scripted connector supports any number of custom scripted endpoints.  These are
-configured via the provisioner script and currently support only Groovy.  See
+The scripted connector supports any number of custom scripted endpoints. These are
+configured via the provisioner script and currently support only Groovy. See
 provisioner.openicf-scriptedsql.json and tools/ResetDatabaseScript.groovy for the
-sample implementation.  Step 5b below executes this script.
+sample implementation. Step 5b below executes this script.
 
 CAVEAT: Because MySQL cannot "un-hash" user passwords there is no way for a recon
-to retrieve and store the password in the managed user object in OpenIDM.  This may
+to retrieve and store the password in the managed user object in OpenIDM. This may
 impact configurations that support multiple external repos insofar as passwords
-will likely not be in sync immediately after a mysql -> managed recon.  Despite
+will likely not be in sync immediately after a mysql -> managed recon. Despite
 creating any missing users in the managed repo during recon their passwords are
 empty so those same users sync'ed into the other external repos will have blank
-passwords.  Some additional scripting may be required to handle this situation
+passwords. Some additional scripting may be required to handle this situation
 depending on the requirements of your deployment.
 
 
