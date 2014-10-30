@@ -36,7 +36,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             noBaseTemplate: true,
             events: {
                 "change input[type='radio']" : "scriptSelect",
-                "change .event-select" : "changeRenderMode"
+                "change .event-select" : "changeRenderMode",
+                "click #addPassedVariables" : "addPassedVariable",
+                "click #passedVariablesHolder .remove-btn" : "deletePassedVariable"
             },
             model : {
                 scriptData: null,
@@ -71,12 +73,19 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 this.data = _.pick(this.model, 'scriptData', 'eventName', 'noValidation', 'disablePassedVariable');
 
+                if (!this.model.disablePassedVariable && this.model.scriptData) {
+                    this.data.passedVariables = _.chain(args.scriptData)
+                        .omit("file", "name", "source", "type")
+                        .pairs()
+                        .value();
+                }
+
                 this.parentRender(_.bind(function() {
                     var mode;
 
                     mode = this.$el.find("select").val();
 
-                    if(mode === "text/javascript") {
+                    if (mode === "text/javascript") {
                         mode = "javascript";
                     }
 
@@ -89,22 +98,37 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                     this.cmBox.setSize(this.model.codeMirrorWidth, this.model.codeMirrorHeight);
 
-                    this.cmBox.on("focus", _.bind(function(cm, changeObject) {
+
+                    this.cmBox.on("focus", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onFocus, cm, changeObject);
                     }, this));
-
-                    this.cmBox.on("change", _.bind(function(cm, changeObject) {
+                    this.cmBox.on("change", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onChange, cm, changeObject);
                     }, this));
-
-                    this.cmBox.on("blur", _.bind(function(cm, changeObject) {
+                    this.cmBox.on("blur", _.bind(function (cm, changeObject) {
                         this.saveEvent(this.model.onBlur, cm, changeObject);
                     }, this));
 
-                    if(this.model.onChange){
-                        this.$el.find(".event-select").bind("change", function(){
+                    if (this.model.onFocus) {
+                        this.$el.find("input:radio, .scriptFilePath").bind("focus", _.bind(function () {
+                            this.model.onFocus();
+                        }, this));
+                    }
+                    if (this.model.onChange) {
+                            this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
                             this.model.onChange();
-                        });
+                        }, this));
+                    }
+                    if (this.model.onBlur) {
+                        this.$el.find("input:radio, .scriptFilePath").bind("blur", _.bind(function () {
+                            this.model.onBlur();
+                        }, this));
+                    }
+
+                    if(this.model.onChange){
+                        this.$el.find(".event-select").bind("change", _.bind(function(){
+                            this.model.onChange();
+                        }, this));
                     }
 
                     if(this.$el.find("input[name=scriptType]:checked").val() !== "inline-code") {
@@ -121,7 +145,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             saveEvent: function(callback, cm, changeObject) {
                 this.cmBox.save();
 
-                if(callback) {
+                if (callback) {
                     callback(cm, changeObject);
                 }
             },
