@@ -1,7 +1,7 @@
 <div class="sync-input-body">
     <form id="syncForm" class="form clearfix" autocomplete="off">
         <fieldset id="sessionModuleForm">
-            <legend><span>{{t "templates.sync.syncTitle"}}</span></legend>
+            <legend><span>{{t "templates.sync.syncTitle"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
             <div class="group-body">
                 <h3>{{t "templates.sync.currentPolicy"}}: <span id="policyPatternName"></span></h3>
                 <p id="policyPatternDesc"></p>
@@ -14,8 +14,18 @@
             </div>
         </fieldset>
 
+        <fieldset>
+            <legend><span>{{t "templates.sync.situationalScripts"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body" id="situationalQueries"></div>
+        </fieldset>
+
+        <fieldset>
+            <legend><span>{{t "templates.sync.reconciliationScript"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
+            <div class="group-body" id="reconQueryView"></div>
+        </fieldset>
+
         <fieldset id="syncWidget">
-            <legend><span>{{t "templates.sync.schedules"}}</span></legend>
+            <legend><span>{{t "templates.sync.schedules"}}</span><i class="fa fa-lg fa-minus-square-o"></i></legend>
             <div class="group-body">
                 <div id="schedules"></div>
                 <div id="addNew">

@@ -127,7 +127,20 @@ define("config/messages/AdminMessages", [
         "correlationQuerySaveSuccess": {
             msg: "config.messages.SyncMessages.correlationQuerySaved",
             type: "info"
+        },
+        "objectFiltersSaveSuccess": {
+            msg: "config.messages.SyncMessages.objectFiltersSaved",
+            type: "info"
+        },
+        "triggeredBySituationSaveSuccess": {
+            msg: "config.messages.SyncMessages.triggeredBySituationSaved",
+            type: "info"
+        },
+        "triggeredByReconSaveSuccess": {
+            msg: "config.messages.SyncMessages.triggeredByReconSaved",
+            type: "info"
         }
+
     };
 
     return obj;

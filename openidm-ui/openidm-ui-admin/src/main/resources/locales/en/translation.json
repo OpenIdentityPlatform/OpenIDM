@@ -81,7 +81,10 @@
                 "scheduleDeleted" : "The schedule has been deleted.",
                 "scheduleSaved" : "The schedule was successfully saved.",
                 "liveSyncSaved": "The LiveSync state has been saved.",
-                "correlationQuerySaved": "The correlation query has been saved."
+                "correlationQuerySaved": "The correlation query has been saved.",
+                "triggeredBySituationSaved": "The Triggered by Situation scripts have been saved.",
+                "objectFiltersSaved": "The Object Filter scripts have been saved.",
+                "triggeredByReconSaved": "The Triggered by Reconciliation scripts have been saved."
             }
         },
         "AppConfiguration" : {
@@ -202,6 +205,11 @@
             "javascript" : "Javascript",
             "groovy" : "Groovy"
         },
+        "mappingScripts": {
+            "allAdded": "All scripts events have been added",
+            "scriptEvents": "Script Events",
+            "addScript": "Add Script"
+        },
         "sync": {
             "sync": "Sync",
             "syncTitle": "Sync Configuration",
@@ -216,10 +224,13 @@
             "systemObjects2": "seconds.",
             "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature.",
             "liveSyncEnabled": "LiveSync schedule is enabled.",
-            "liveSyncDisabled": "LiveSync schedule is not enabled."
+            "liveSyncDisabled": "LiveSync schedule is not enabled.",
+            "situationalScripts":"Situational Event Scripts",
+            "reconciliationScript":"Reconciliation Script"
         },
         "correlation": {
             "correlation": "Correlation",
+            "objectFilters": "Object Filters",
             "associationRules": "Association Rules",
             "dataAssociationManagment": "Data Association Management",
             "noQuery": "No Correlation Query",

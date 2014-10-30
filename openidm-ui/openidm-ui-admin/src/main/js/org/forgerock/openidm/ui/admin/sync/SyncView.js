@@ -32,14 +32,26 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
-    "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog"
-], function(AdminAbstractView, MappingBaseView, eventManager, constants, ConfigDelegate, SchedulerDelegate, Scheduler, SituationPolicyDialog) {
+    "org/forgerock/openidm/ui/admin/sync/SituationPolicyDialog",
+    "org/forgerock/openidm/ui/admin/sync/SituationalScriptsView",
+    "org/forgerock/openidm/ui/admin/sync/ReconScriptsView"
+], function(AdminAbstractView,
+            MappingBaseView,
+            eventManager,
+            constants,
+            ConfigDelegate,
+            SchedulerDelegate,
+            Scheduler,
+            SituationPolicyDialog,
+            SituationalScriptsView,
+            ReconScriptsView) {
 
     var SyncView = AdminAbstractView.extend({
         template: "templates/admin/sync/SyncTemplate.html",
         element: "#mappingContent",
         noBaseTemplate: true,
         events: {
+            "click .sync-input-body fieldset legend" : "sectionHideShow",
             "click #situationalPolicyEditorButton": "configureSituationalPolicy",
             "click #addNew": "addReconciliation",
             "click .saveLiveSync": "saveLiveSync"
@@ -61,6 +73,9 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
             this.data.mappingName = this.mappingName = args[0];
 
             this.parentRender(_.bind(function() {
+                SituationalScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
+                ReconScriptsView.render({sync: this.sync, mapping: this.mapping, mappingName: this.data.mappingName});
+
                 MappingBaseView.moveSubmenu();
                 if (this.mapping.hasOwnProperty("enableSync")) {
                     this.$el.find(".liveSyncEnabled").prop('checked', this.mapping.enableSync);
@@ -137,7 +152,7 @@ define("org/forgerock/openidm/ui/admin/sync/SyncView", [
                     callback();
                 }
             }, this));
-         },
+        },
 
         saveLiveSync: function() {
             _.each(this.sync.mappings, function(map, key) {
