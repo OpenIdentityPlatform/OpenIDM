@@ -255,16 +255,59 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             event.preventDefault();
 
             var managedObject = this.setManagedObject(form2js('managedObjectForm', '.', true)),
-                promises = [];
+                nameCheck;
+
+            if(this.data.addState) {
+                nameCheck = this.checkManagedName(managedObject.name);
+
+                if(!nameCheck) {
+                    this.data.managedObjects.objects.push(managedObject);
+
+                    this.saveManagedObject(managedObject);
+                } else {
+                    this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
+                    this.$el.find("#managedErrorMessage").show();
+                    this.$el.find("#addEditManaged").prop("disabled", true);
+                }
+            } else {
+                if (managedObject.name === this.data.managedObjects.objects[this.data.currentManagedObjectIndex].name) {
+                    this.data.managedObjects.objects[this.data.currentManagedObjectIndex] = managedObject;
+
+                    this.saveManagedObject(managedObject);
+                } else {
+                    nameCheck = this.checkManagedName(managedObject.name);
+
+                    if(!nameCheck) {
+                        this.data.managedObjects.objects[this.data.currentManagedObjectIndex] = managedObject;
+
+                        this.saveManagedObject(managedObject);
+                    } else {
+                        this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
+                        this.$el.find("#managedErrorMessage").show();
+                        this.$el.find("#addEditManaged").prop("disabled", true);
+                    }
+                }
+            }
+        },
+
+        checkManagedName: function(name) {
+            var currentObjects = this.data.managedObjects.objects,
+                found = false;
+
+            _.each(currentObjects, function(managedObject){
+                if(managedObject.name === name){
+                    found = true;
+                }
+            }, this);
+
+            return found;
+        },
+
+        saveManagedObject: function(managedObject) {
+            var promises = [];
 
             if(managedObject.properties.length === 0) {
                 delete managedObject.properties;
-            }
-
-            if(!this.data.addState) {
-                this.data.managedObjects.objects[this.data.currentManagedObjectIndex] = managedObject;
-            } else {
-                this.data.managedObjects.objects.push(managedObject);
             }
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
@@ -281,7 +324,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
                 }, 1500);
             });
-
         },
 
         setManagedObject: function(managedObject) {

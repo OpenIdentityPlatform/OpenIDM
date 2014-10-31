@@ -188,7 +188,8 @@
             "addProperty" : "Add Property",
             "encrypted" : "Encrypted",
             "private" : "Private",
-            "virtual" : "Virtual"
+            "virtual" : "Virtual",
+            "duplicateNameError" : "Duplicate name detected. Please provide a unique name."
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",
