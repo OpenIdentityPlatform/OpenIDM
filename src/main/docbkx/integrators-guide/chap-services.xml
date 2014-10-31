@@ -161,24 +161,33 @@ Stopping OpenIDM (454)</screen>
        <literal>/path/to/openidm/conf</literal>.</para>  
     </listitem>
     <listitem>
-       <para>working location (<literal>-w</literal>)</para>
-       <para>The working location specifies the directory to which OpenIDM 
-       writes its cache. Specifying a working location separates the project 
-       from the cached data that the system needs to store. The working 
-       location includes everything that is in the default 
-       <literal>db</literal>, <literal>audit</literal>,
-       <literal>felix-cache</literal>, and <literal>logs</literal>
-       directories.</para>
-       <para>The following command specifies that OpenIDM writes its cached 
-       data to <filename>/Users/admin/openidm/storage</filename>:</para>
-       <screen>$ ./startup.sh -w /Users/admin/openidm/storage</screen>
-       <para>If an absolute path is not provided, the path is relative to the 
-       system property, <literal>user.dir</literal>. If no working location is 
-       specified, OpenIDM writes its cached data to the
-       <literal>openidm/db</literal>, <literal>openidm/audit</literal>,
-       <literal>openidm/felix-cache</literal> and <literal>openidm/logs</literal>
-       directories.</para>
-    </listitem>  
+     <para>working location (<literal>-w</literal>)</para>
+     <para>
+      The working location specifies the directory to which OpenIDM writes its
+      database cache and audit logs. The working location includes everything
+      that is in the default <literal>db</literal> and
+      <literal>audit</literal> directories.
+     </para>
+     <para>
+      The following command specifies that OpenIDM writes its database cache
+      and audit data to <filename>/Users/admin/openidm/storage</filename>:
+     </para>
+     <screen>$ ./startup.sh -w /Users/admin/openidm/storage</screen>
+     <para>
+      If an absolute path is not provided, the path is relative to the system
+      property, <literal>user.dir</literal>. If no working location is
+      specified, OpenIDM writes this data to the <literal>openidm/db</literal>
+      and <literal>openidm/audit</literal> directories.
+     </para>
+     <para>
+      Note that this property does not affect the location of the OpenIDM system
+      logs, or the Felix cache. To change the location of the OpenIDM logs, edit
+      the <filename>conf/logging.properties</filename> file. To change the
+      location of the Felix cache, edit the
+      <filename>conf/config.properties</filename> file. Instructions are
+      available in those respective files.
+     </para>
+    </listitem>
     <listitem>
        <para>startup configuration file (<literal>-c</literal>)</para>
        <para>A customizable startup configuration file (named 
