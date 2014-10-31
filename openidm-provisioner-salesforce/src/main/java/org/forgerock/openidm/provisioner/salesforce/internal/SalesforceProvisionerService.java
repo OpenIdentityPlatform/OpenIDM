@@ -642,7 +642,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     if (field.size() != 1) {
                         throw new IllegalArgumentException("Only one level JsonPointer supported");
                     }
-                    return "(" + field.leaf() + " IS NOT NULL)";
+                    return "(" + field.leaf() + " != null)";
                 }
             };
 
