@@ -3145,14 +3145,13 @@ Properties:
    >configureconnector</citetitle></link> section of the <citetitle>CLI
    Interface</citetitle> chapter.
   </para>
-
   <orderedlist>
    <para>
     You create a new connector configuration file in three stages:
    </para>
    <listitem>
     <para>
-     List available connectors.
+     List the available connectors.
     </para>
    </listitem>
    <listitem>
@@ -3166,18 +3165,16 @@ Properties:
     </para>
    </listitem>
   </orderedlist>
- 
   <para>
-   List available connectors using the following command.
+   List the available connectors by using the following command.
   </para>
- 
   <screen>$ curl \
  --cacert self-signed.crt \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --header "Content-Type: application/json" \
  --request POST \
- "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
+ "https://localhost:8443/openidm/system?_action=availableConnectors"</screen>
 
   <itemizedlist>
    <para>
@@ -3215,6 +3212,9 @@ Properties:
    </listitem>
    <listitem>
     <para>XML Connector</para>
+   </listitem>
+   <listitem>
+    <para>Salesforce Connector</para>
    </listitem>
   </itemizedlist>
 
@@ -3293,6 +3293,13 @@ Properties:
       "bundleName": "org.forgerock.openicf.connectors.xml-connector",
       "displayName": "XML Connector",
       "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+    },
+    {
+      "bundleVersion": "{provisioner.salesforcemodule.version}",
+      "systemType": "provisioner.salesforce",
+      "bundleName": "org.forgerock.openidm.salesforce",
+      "displayName": "Salesforce Connector",
+      "connectorName": "org.forgerock.openidm.salesforce.Salesforce"
     }
   ]
 }</programlisting>
@@ -3315,7 +3322,7 @@ Properties:
  "bundleName": "org.forgerock.openicf.connectors.xml-connector",
  "bundleVersion": "${openicf.xmlconnector.version}"}
  }' \
- "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</userinput></screen>
+ "https://localhost:8443/openidm/system?_action=createCoreConfig"</userinput></screen>
   <para>
    This command returns a core connector configuration, similar to the
    following:
@@ -3366,8 +3373,8 @@ Properties:
     it does not contain the required system-specific
     <literal>"configurationProperties"</literal>, such as the host name and port
     for web based connectors, or the "xmlFilePath" for the XML file-based
-    connectors. In addition, the configuration does not include the complete
-    list of <literal>"objectTypes"</literal> and
+    connector. In addition, the configuration does not include the complete list
+    of <literal>"objectTypes"</literal> and
     <literal>"operationOptions"</literal>.
   </para>
   <para>
@@ -3424,7 +3431,7 @@ Properties:
     "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
   }
 }' \
- "https://localhost:8443/openidm/system?_action=CREATECONFIGURATION"</screen>
+ "https://localhost:8443/openidm/system?_action=createFullConfig"</screen>
 
   <note>
    <para>
@@ -3436,24 +3443,23 @@ Properties:
     feeds.
    </para>
   </note>
-
-  <para>OpenIDM attempts to read the schema, if available, from the external
+  <para>
+   OpenIDM attempts to read the schema, if available, from the external
   resource in order to generate output. OpenIDM then iterates through schema
   objects and attributes, creating JSON representations for "objectTypes" and
-  "operationOptions" for supported objects and operations.</para>
-
+  "operationOptions" for supported objects and operations.
+  </para>
   <para>
    The output includes the basic <literal>--data</literal> input, along with
    <literal>operationOptions</literal> and <literal>objectTypes</literal>.
   </para>
-
   <para>
    Because OpenIDM produces a full property set for all attributes and all
    object types in the schema from the external resource, the resulting
    configuration can be large. For an LDAP server, OpenIDM can generate a
    configuration containing several tens of thousands of lines, for example.
    You might therefore want to reduce the schema to a minimum on the external
-   resource before you run the final command.
+   resource before you run the <literal>createFullConfig</literal> command.
   </para>
  </section>
 
