@@ -54,15 +54,11 @@ PRGDIR=`dirname "$PRG"`
 
 # Set JDK Logger config file if it is present and an override has not been issued
 PROJECT_HOME=$OPENIDM_HOME
-OPTERR=0
-while getopts "p:" opt; do
-    case "$opt" in
-    p)
-        if [ "$OPTARG" != "" ]; then
-            PROJECT_HOME="$OPENIDM_HOME/$OPTARG"
-        fi
-        ;;
-    esac
+while [ "$1" ]; do
+    if [ "$1" == "-p" ] && [ "$2" ]; then
+        PROJECT_HOME="$OPENIDM_HOME/$2"
+    fi
+    shift
 done
 OPTIND=1
 if [ -z "$LOGGING_CONFIG" ]; then
