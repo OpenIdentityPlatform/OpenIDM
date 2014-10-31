@@ -2408,16 +2408,16 @@ $ <userinput>curl \
  </section>
 
  <section xml:id="querying-sync-logs">
-  <title>Querying the LiveSync Audit Log</title>
+  <title>Querying the Synchronization Audit Log</title>
   <para>
    LiveSync and automatic sync operations are logged in the file
    <filename>/path/to/openidm/audit/sync.csv</filename> and in the repository.
-   You can read the LiveSync audit logs over the REST interface, as outlined in
-   the following examples.
+   You can read the synchronization audit logs over the REST interface, as
+   outlined in the following examples.
   </para>
   <para>
-   To return all LiveSync operations logged in the audit log, run a RESTful GET
-   on the <literal>audit/sync</literal> endpoint. For example:
+   To return all synchronization operations logged in the audit log, run a
+   RESTful GET on the <literal>audit/sync</literal> endpoint. For example:
   </para>
   <screen>$ <userinput>curl \
  --cacert self-signed.crt \
@@ -2427,7 +2427,7 @@ $ <userinput>curl \
  "https://localhost:8443/openidm/audit/sync"</userinput></screen>
   <para>
    Most of the fields in the synchronization audit log are self-explanatory.
-   Each distinct LiveSync operation is identified by its
+   Each distinct synchronization operation is identified by its
    <literal>actionId</literal>. The <literal>rootActionId</literal> is the ID
    that was assigned to the incoming or initiating request - so if a
    modification to a user entry triggers an automatic synchronization operation,
@@ -2448,7 +2448,7 @@ $ <userinput>curl \
  "https://localhost:8443/openidm/audit/sync/a311b656-508c-4f56-9df4-f907364184f1"</screen>
   <para>
    The following sample output shows the results of a read operation on a
-   specific LiveSync audit entry.
+   specific synchronization audit entry.
   </para>
   <programlisting language="javascript">{
   "entries": [
