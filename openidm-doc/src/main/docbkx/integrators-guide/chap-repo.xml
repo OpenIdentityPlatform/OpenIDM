@@ -723,10 +723,6 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
 
  </section>
 
- <!-- This section is a workaround, and should be deleted when (a) an SSL cert
- needs to be imported only once and (b) when it can be imported with the
-  OpenIDM native cli.sh keytool command -->
-
  <section xml:id="jdbc-repos-ssl">
   <title>Configuring SSL with a JDBC Repository</title>
 
