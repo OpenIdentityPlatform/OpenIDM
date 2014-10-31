@@ -732,43 +732,22 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
 
   <para>
    To configure SSL with a JDBC repository, you need to import the CA
-   certificate file for the server into two locations: the Java truststore
-   and the OpenIDM truststore. That certificate file could have a name like
-   <filename>ca-cert.pem</filename>. If you have a different genuine or
-   self-signed certificate file, substitute accordingly.
+   certificate file for the server into the OpenIDM truststore. That certificate
+   file could have a name like <filename>ca-cert.pem</filename>. If you have a
+   different genuine or self-signed certificate file, substitute accordingly.
   </para>
 
   <para>
-   To import the CA certificate file into both truststores, use the
+   To import the CA certificate file into the OpenIDM truststore, use the
    <command>keytool</command> command native to the Java environment, typically
    located in the <filename>/path/to/jre-version/bin</filename> directory. On
    some UNIX-based systems, <command>/usr/bin/keytool</command> may link
    to that command.
   </para>
 
-  <para>
-   You can find the Java truststore file, <filename>cacerts</filename>, in the
-   <filename>/path/to/jre-version/jre/lib/security</filename> directory. On
-   some UNIX-based systems, that may be linked to a location such as
-   <filename>/etc/pki/java/cacerts</filename>.
-  </para>
-
   <procedure xml:id="import-cacert-jdbc">
    <title>Preparing OpenIDM for SSL with a JDBC Repository</title>
-   <step>
-    <para>
-     Import the <filename>ca-cert.pem</filename> certificate into the Java
-     truststore file with the following command:
-    </para>
 
-    <screen>$ keytool \
- -importcert \
- -trustcacerts
- -file ca-cert.pem \
- -alias "DB cert" \
- -keystore /etc/pki/java/cacerts
-    </screen>
-   </step>
    <step>
     <para>
      Import the <filename>ca-cert.pem</filename> certificate into the OpenIDM
@@ -790,8 +769,8 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
     <para>
      Look for the <literal>"jdbcUrl"</literal> properties. You should see a
      <literal>jdbc</literal> URL. Add a
-     <literal>?characterEncoding=utf8&amp;useSSL=true</literal> to the end of
-     that URL.
+     <literal><?linebreak?>?characterEncoding=utf8&amp;useSSL=true</literal> to
+     the end of that URL.
     </para>
     <para>
      The <literal>"jdbcUrl"</literal> that you configure depends on your JDBC
@@ -822,6 +801,73 @@ openidm.query("managed/user", { "_queryId": "for-userName", "uid": "jdoe" });
 org.osgi.framework.bootdelegation=sun.*,com.sun.*,apple.*,com.apple.*,javax.net.ssl
     </screen>
    </step>
+   <step>
+    <para>
+     Open the <filename>/path/to/openidm/conf/system.properties</filename> file.
+     Add the following line to that file. If appropriate, substitute the path to
+     your own truststore:
+     <screen># Set the truststore
+javax.net.ssl.trustStore=/path/to/openidm/security/truststore</screen>
+    </para>
+    <para>
+     Even if you are setting up this instance of OpenIDM as part of a cluster,
+     you still need to configure this initial truststore. After this instance
+     joins a cluster, the SSL keys in this particular truststore are replaced.
+     For more information on clustering, see <link xlink:show="new"
+     xlink:href="integrators-guide#chap-cluster"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Configuring
+     OpenIDM to Work in a Cluster</citetitle></link>.
+    </para>
+   </step>
+   <step>
+    <stepalternatives>
+     <step>
+      <para>
+       If you are not using MySQL, you're done!
+      </para>
+     </step>
+     <step>
+      <para>
+       If you are including MySQL as a repository, you need to take the following
+       additional steps to add the client certificate and key to the OpenIDM
+       keystore:
+      </para>
+     </step>
+     <step>
+      <para>
+       Create the client certificate file, <filename>client.packet</filename>,
+       with the following command:
+      </para>
+      <screen>$ openssl \
+ pkcs12 \
+ -export \
+ -inkey client-key.pem \
+ -in client-cert.pem \
+ -out client.packet
+      </screen>
+      <para>
+       In this case, the <command>openssl</command> command imports a client key,
+       <filename>client-key.pem</filename>, with input data from the same file,
+       exporting output to a client certificate file named
+       <filename>client.packet</filename>, in PKCS12 format.
+      </para>
+     </step>
+     <step>
+      <para>
+       You can then add the client certificate to the OpenIDM keystore with the
+       following command:
+      </para>
+      <screen>$ keytool \
+ -importkeystore \
+ -srckeystore client.packet \
+ -srcstoretype pkcs12 \
+ -destkeystore /path/to/openidm/security/keystore.jceks \
+ -storetype JCEKS
+      </screen>
+     </step>
+    </stepalternatives>
+   </step>
+
   </procedure>
 
  </section>
