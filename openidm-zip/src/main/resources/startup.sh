@@ -54,13 +54,19 @@ PRGDIR=`dirname "$PRG"`
 
 # Set JDK Logger config file if it is present and an override has not been issued
 PROJECT_HOME=$OPENIDM_HOME
+CLOPTS=""
+JPDA=""
 while [ "$1" ]; do
-    if [ "$1" == "-p" ] && [ "$2" ]; then
-        PROJECT_HOME="$OPENIDM_HOME/$2"
+    if [ "$1" == "jpda" ]; then
+        JPDA=$1
+    else
+        if [ "$1" == "-p" ] && [ "$2" ]; then
+            PROJECT_HOME="$OPENIDM_HOME/$2"
+        fi
+        CLOPTS="$CLOPTS $1"
     fi
     shift
 done
-OPTIND=1
 if [ -z "$LOGGING_CONFIG" ]; then
   if [ -r "$PROJECT_HOME"/conf/logging.properties ]; then
     LOGGING_CONFIG="-Djava.util.logging.config.file=$PROJECT_HOME/conf/logging.properties"
@@ -71,7 +77,7 @@ if [ -z "$LOGGING_CONFIG" ]; then
   fi
 fi
 
-if [ "$1" = "jpda" ] ; then
+if [ "$JPDA" = "jpda" ] ; then
   if [ -z "$JPDA_TRANSPORT" ]; then
     JPDA_TRANSPORT="dt_socket"
   fi
@@ -107,7 +113,7 @@ exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Djava.awt.headless=true \
-	org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json "$@"
+	org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS
 
 # org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
 
