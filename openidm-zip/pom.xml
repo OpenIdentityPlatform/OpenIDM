@@ -203,11 +203,6 @@
             <artifactId>openidm-httpclient-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-salesforce</artifactId>
-            <version>${provisioner.salesforcemodule.version}</version>
-        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -716,7 +711,7 @@
             </dependencies>
         </profile>
         <profile>
-           <id>include-salesforce-module</id>
+           <id>commercial-build</id>
            <dependencies>
               <dependency>
                  <groupId>org.forgerock.openidm</groupId>
