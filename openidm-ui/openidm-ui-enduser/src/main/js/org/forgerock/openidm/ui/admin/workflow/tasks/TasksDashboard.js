@@ -43,10 +43,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
-        
-        render: function(params, args) {
-            //decide whether to display notification and profile 
-            this.data = {shouldDisplayNotifications: true }; // formerly: params.mode !== "openidm-admin"
+        data: {
+            shouldDisplayNotifications: true,
+            mode: "user"
+        },
+        render: function(args, callback) {
             
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
@@ -55,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             this.parentRender(function() {
                 var notificationsView;
                 
-                this.candidateTasks.render("all", $("#candidateTasks"));                
+                this.candidateTasks.render("all", $("#candidateTasks"));
                 this.myTasks.render("assigned", $("#myTasks"));
                 startProcessView.render();
                 
@@ -76,10 +77,10 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                         notificationsView.render({el: $("#notifications"), items: notifications});
                     });
                     
-                if (args && args[0] && args[0] !== '') {
-                    this.showDetails({id: args[0]});
+                if (callback) {
+                    callback();
                 }
-            });    
+            });
         },
         
         getDetailsRow: function() {

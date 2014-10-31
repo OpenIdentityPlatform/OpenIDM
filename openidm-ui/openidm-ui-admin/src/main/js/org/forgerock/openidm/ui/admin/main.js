@@ -26,7 +26,6 @@
 
 
 define("org/forgerock/openidm/ui/admin/main", [
-    "./MandatoryPasswordChangeDialog",
 
     "./delegates/ConnectorDelegate",
     "./delegates/SyncDelegate",

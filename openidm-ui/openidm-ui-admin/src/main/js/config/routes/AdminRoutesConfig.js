@@ -27,12 +27,6 @@ define("config/routes/AdminRoutesConfig", [
 ], function() {
 
     var obj = {
-        "mandatoryPasswordChangeDialog" : {
-            base: "resourcesView",
-            dialog: "org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog",
-            url: "resources/change_password/",
-            role: "ui-admin"
-        },
         "resourcesView" : {
             view: "org/forgerock/openidm/ui/admin/ResourcesView",
             role: "ui-admin",
@@ -127,6 +121,8 @@ define("config/routes/AdminRoutesConfig", [
             forceUpdate: true
         }
     };
+
+    obj.landingPage = obj.resourcesView;
 
     return obj;
 });

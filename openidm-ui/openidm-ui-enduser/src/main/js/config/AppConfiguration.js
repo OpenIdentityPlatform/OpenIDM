@@ -54,17 +54,18 @@ define("config/AppConfiguration", [
                     configuration: {
                         remoteConfig: true,
                         delegate: "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
-                    } 
+                    }
                 },
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                     configuration: {
                         processConfigurationFiles: [
                             "config/process/IDMConfig",
+                            "config/process/CommonIDMConfig",
                             "config/process/UserConfig",
                             "config/process/CommonConfig"
                         ]
-                    } 
+                    }
                 },
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/Router",
@@ -72,18 +73,19 @@ define("config/AppConfiguration", [
                         routes: {
                         },
                         loader: [
-                            {"routes":"config/routes/CommonRoutesConfig"}, 
+                            {"routes":"config/routes/CommonRoutesConfig"},
+                            {"routes":"config/routes/CommonIDMRoutesConfig"},
                             {"routes":"config/routes/AdminRoutesConfig"},
                             {"routes":"config/routes/UserRoutesConfig"},
                             {"routes":"config/routes/IDMRoutesConfig"}
                         ]
-                    } 
+                    }
                 },
                 {
                     moduleClass: "org/forgerock/commons/ui/common/main/ServiceInvoker",
                     configuration: {
                         defaultHeaders: {
-                        }                                         
+                        }
                     } 
                 },
                 {

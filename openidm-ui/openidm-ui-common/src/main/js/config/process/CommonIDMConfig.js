@@ -24,7 +24,7 @@
 
 /*global define, _, $, window */
 
-define("config/process/AdminConfig", [
+define("config/process/CommonIDMConfig", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
@@ -39,9 +39,9 @@ define("config/process/AdminConfig", [
             ],
             processDescription: function(event, router, conf) {
                 if (conf.globalData.userComponent === "repo/internal/user" && _.isString(conf.loggedUser.password)) {
-                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog });
+                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
                 } else {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.resourcesView});
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
                 }
             }
         }

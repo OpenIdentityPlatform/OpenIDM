@@ -22,29 +22,31 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, Backbone, _ */
+/*global define */
 
 /**
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/Dashboard", [
+    "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard"
-], function(eventManager, constants, conf, tasksDashboard) {
-    var Dashboard = Backbone.View.extend({
+], function(_, AbstractView, eventManager, constants, conf, tasksDashboard) {
+    var Dashboard = AbstractView.extend({
         
-        render: function(args) {
+        render: function(args, callback) {
             if (conf.loggedUser) {
                 var roles = conf.loggedUser.roles, data = {};
                 
                 if(_.indexOf(roles, 'openidm-admin') !== -1) {
-                    data.mode = "openidm-admin";
-                    tasksDashboard.render(data, args);
+                    tasksDashboard.data.mode = "openidm-admin";
+                    tasksDashboard.render([], callback);
                 } else {
-                    data.mode = "user";
-                    tasksDashboard.render(data, args);
+                    tasksDashboard.data.mode = "user";
+                    tasksDashboard.render([], callback);
                 }
                 
             }

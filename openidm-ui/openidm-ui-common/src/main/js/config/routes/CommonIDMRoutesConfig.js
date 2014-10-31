@@ -1,7 +1,7 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,23 +23,17 @@
  */
 
 /*global define*/
+define("config/routes/CommonIDMRoutesConfig", [
+], function() {
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/AdminRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/CommonIDMRoutesConfig",
-    "./routes/IDMRoutesConfig",
-    "./messages/CommonMessages",
-    "./messages/AdminMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./validators/UserValidators",
-    "./validators/AdminValidators",
-    "./AppConfiguration",
-    "./process/CommonIDMConfig",
-    "./process/IDMConfig",
-    "./process/CommonConfig",
-    "./process/UserConfig",
-    "./errorhandlers/CommonErrorHandlers"
-]);
+    var obj = {
+        "mandatoryPasswordChangeDialog" : {
+            base: "landingPage",
+            dialog: "org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog",
+            url: "change_password/",
+            role: "ui-admin"
+        }
+    };
+
+    return obj;
+});

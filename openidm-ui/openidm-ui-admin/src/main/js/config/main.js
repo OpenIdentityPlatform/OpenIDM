@@ -25,10 +25,11 @@
 /*global define*/
 
 define("config/main", [
-    "./process/AdminConfig",
+    "./process/CommonIDMConfig",
     "./process/CommonConfig",
 
     "./routes/AdminRoutesConfig",
+    "./routes/CommonIDMRoutesConfig",
     "./routes/CommonRoutesConfig",
 
     "./validators/CommonValidators",
@@ -37,5 +38,7 @@ define("config/main", [
     "./AppConfiguration",
 
     "./messages/CommonMessages",
-    "./messages/AdminMessages"
+    "./messages/AdminMessages",
+    "./errorhandlers/CommonErrorHandlers"
+
 ]);

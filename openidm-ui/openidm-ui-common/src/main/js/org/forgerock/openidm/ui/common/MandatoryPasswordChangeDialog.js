@@ -24,31 +24,32 @@
 
 /*global define, $, _, require */
 
-define("org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog", [
+define("org/forgerock/openidm/ui/common/MandatoryPasswordChangeDialog", [
     "org/forgerock/openidm/ui/common/delegates/InternalUserDelegate",
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/Router",
     "AuthnDelegate"
-], function(InternalUserDelegate, Dialog, validatorsManager, conf, eventManager, constants, authnDelegate) {
-    var MandatoryPasswordChangeDialog = Dialog.extend({    
+], function(InternalUserDelegate, Dialog, validatorsManager, conf, eventManager, constants, router, authnDelegate) {
+    var MandatoryPasswordChangeDialog = Dialog.extend({
         contentTemplate: "templates/admin/MandatoryPasswordChangeDialogTemplate.html",
-        baseTemplate: "templates/admin/AdminBaseTemplate.html",
         delegate: InternalUserDelegate,
         events: {
+            "click .dialogCloseCross img": "close",
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate",
             "click .dialogContainer": "stop",
             "customValidate": "customValidate"
         },
-                
+
         formSubmit: function(event) {
             event.preventDefault();
             
             var patchDefinitionObject = [], element;
-            if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {            
+            if(validatorsManager.formValidated(this.$el.find("#passwordChange"))) {
                 patchDefinitionObject.push({operation: "replace", field: "password", value: this.$el.find("input[name=password]").val()});
             }
             
@@ -67,6 +68,11 @@ define("org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog", [
         },
         
         render: function(args, callback) {
+            var landingView = require(router.configuration.routes.landingPage.view);
+            if (landingView.baseTemplate) {
+                this.baseTemplate = landingView.baseTemplate;
+            }
+
             this.actions = [];
 
             $("#dialogs").hide();
@@ -74,7 +80,6 @@ define("org/forgerock/openidm/ui/admin/MandatoryPasswordChangeDialog", [
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + conf.loggedUser._id, _.bind(function () {
                     $("#dialogs").show();
-                    $("#dialogs .dialogCloseCross").hide();
                     $("#dialogs .dialogActions").hide();
 
                     this.$el.find("[name=password]").focus();
