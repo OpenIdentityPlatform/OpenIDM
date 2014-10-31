@@ -109,9 +109,9 @@
     },
     "templates" : {
         "MandatoryChangePassword" : {
-            "title" : "Change Password Dialog",
-            "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure password.",
-            "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password."
+            "title" : "Change Your Password",
+            "mandatoryNewPassword" : "The current password is a default password. Please change this password to a more secure value.",
+            "enterNewPasswordToChange" : "Please enter a new password in the fields below."
         },
         "user" : {
             "LoginDialog" : {
@@ -730,10 +730,6 @@
         }
     },
     "common" : {
-        "config" : {
-            "password" : "Password",
-            "confirmPassword" : "Confirm Password"
-        },
         "form" : {
             "add" : "Add",
             "userView" : "User View",

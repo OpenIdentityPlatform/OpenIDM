@@ -25,6 +25,8 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/common/main", [
+    "./MandatoryPasswordChangeDialog",
+    
     "./delegates/ConfigDelegate",
     "./delegates/InternalUserDelegate",
     "./delegates/PolicyDelegate",

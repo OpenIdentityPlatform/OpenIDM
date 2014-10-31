@@ -36,7 +36,7 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-user,ui-admin",
             url: "dashboard/",
             forceUpdate: true
-        },     
+        },
         
         //for admin
         "adminUsers": {
@@ -82,6 +82,8 @@ define("config/routes/AdminRoutesConfig", [
             pattern: "tasks/?/"
         }
     };
-    
+
+    obj.landingPage = obj.dashboard;
+
     return obj;
 });
