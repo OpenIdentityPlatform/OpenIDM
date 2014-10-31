@@ -482,9 +482,9 @@ org.identityconnectors.ldap.LdapConnector {
    <para>
     OpenIDM supports a variety of modules, including those available from the
     Common Authentication Framework (CAF). The CAF modules available to
-    OpenIDM include <literal>OPENAM_SESSION</literal>, and
-    <literal>IWA</literal>. OpenIDM also
-    provides three additional authentication modules, <literal>DELEGATED</literal>
+    OpenIDM include <literal>JWT_SESSION</literal>,
+    <literal>OPENAM_SESSION</literal>, and <literal>IWA</literal>. OpenIDM also
+    provides two additional authentication modules: <literal>DELEGATED</literal>
     and <literal>CLIENT_CERT</literal>.
    </para>
 
@@ -500,11 +500,11 @@ org.identityconnectors.ldap.LdapConnector {
     <term>JWT_SESSION</term>
     <listitem>
      <para>
-      The JSON Web Token session authentication module, which includes session
-      information. For more information
-      on this common authentication module, see the <link xlink:show="new"
+      The JSON Web Token authentication module includes session information.
+      For details  on this common authentication module, see the following
+      Javadoc page: <link xlink:show="new"
       xlink:href="http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html">
-      <citetitle>Class JwtSessionModule</citetitle></link> Javadoc.
+      <citetitle>Class JwtSessionModule</citetitle></link>.
      </para>
     </listitem>
    </varlistentry>
@@ -513,7 +513,8 @@ org.identityconnectors.ldap.LdapConnector {
     <term>CLIENT_CERT</term>
     <listitem>
      <para>
-      Module for users who authenticate with a client certificate.
+      The client certificate module accommodates users who authenticate with a
+      client certificate.
      </para>
     </listitem>
    </varlistentry>
@@ -521,7 +522,7 @@ org.identityconnectors.ldap.LdapConnector {
     <term>DELEGATED</term>
     <listitem>
      <para>
-      Module that validates client requests by delegating to one of the 
+      The DELEGATED module validates client requests with the help of one of the
       following entities:
       <itemizedlist>
        <listitem>
