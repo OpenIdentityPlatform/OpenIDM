@@ -1040,7 +1040,8 @@ return isProcessOnUsersList(processDefinitionId);
       </member>
       <member>
        <literal>openidm/system</literal> - <literal>test, testConfig,
-       CREATECONFIGURATION, liveSync, authenticate</literal>
+       availableConnectors, createCoreConfig, createFullConfig, liveSync,
+       authenticate</literal>
       </member>
       <member>
        <literal>openidm/system/&lt;name&gt;</literal> - <literal>script,

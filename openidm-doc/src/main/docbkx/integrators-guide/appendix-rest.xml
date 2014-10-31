@@ -1158,19 +1158,19 @@ Content-Length: 89
        <entry>POST</entry>
        <entry>
         <para>
-         <literal>_action=availableConnectors"</literal> returns a list of the
+         <literal>_action=availableConnectors</literal> returns a list of the
          connectors that are available in <literal>openidm/connectors</literal>
          or in <literal>openidm/bundle</literal>.
         </para>
         <para>
-         <literal>_action=createCoreConfig"</literal> takes the supplied
+         <literal>_action=createCoreConfig</literal> takes the supplied
          connector reference (<literal>connectorRef</literal>) and adds the
          configuration properties required for that connector. This generates
          a core connector configuration that you can use to create a full
          configuration with the <literal>createFullConfig</literal> action.
         </para>
         <para>
-         <literal>_action=createFullConfig"</literal> generates a complete
+         <literal>_action=createFullConfig</literal> generates a complete
          connector configuration, using the configuration properties from the
          <literal>createCoreConfig</literal> action, and retrieving the object
          types and operation options from the resource, to complete the
