@@ -43,6 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
@@ -51,6 +52,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.shell.CustomCommandScope;
+import org.forgerock.openidm.util.FileUtil;
 
 /**
  * @author $author$
@@ -183,7 +185,11 @@ public class LocalCommandScope extends CustomCommandScope {
                     continue;
                 // TODO pretty print
                 try {
-                    mapper.readValue(subFile, Object.class);
+                    String json = FileUtil.readFile(subFile);
+                    JsonParser parser = mapper.getJsonFactory().createJsonParser(json);
+                    while (parser.nextToken() != null) {
+                        /* be happy */
+                    }
                     prettyPrint(session.getConsole(), subFile.getName(), null);
                 } catch (Exception e) {
                     prettyPrint(session.getConsole(), subFile.getName(), e);
