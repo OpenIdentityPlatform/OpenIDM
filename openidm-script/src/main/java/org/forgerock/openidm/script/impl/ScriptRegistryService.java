@@ -173,6 +173,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     private static final String SOURCE_SUBDIRECTORIES = "subdirectories";
     private static final String SOURCE_VISIBILITY = "visibility";
     private static final String SOURCE_TYPE = "type";
+    private static final String SOURCE_GLOBALS = "globals";
     
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
@@ -474,7 +475,20 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             }
         }
 
-        return super.takeScript(scriptConfig);
+        // Get and remove any defined globals
+        JsonValue globals = scriptConfig.get(SOURCE_GLOBALS);
+        scriptConfig.remove(SOURCE_GLOBALS);
+        
+        // Create the script entry
+        ScriptEntry scriptEntry = super.takeScript(scriptConfig);
+        
+        // Add the globals (if any) to the script bindings
+        if (!globals.isNull() && globals.isMap()) {
+            for (String key : globals.keys()) {
+                scriptEntry.put(key, globals.get(key));
+            }
+        }
+        return scriptEntry;
     }
     
     private static enum IdentityServerFunctions implements Function<Object> {
