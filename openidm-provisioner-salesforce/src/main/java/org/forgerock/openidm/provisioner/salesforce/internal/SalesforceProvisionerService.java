@@ -629,20 +629,26 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     private static final QueryFilterVisitor<String, Void> SALESFORCE_QUERY_FILTER_VISITOR =
             new SQLQueryFilterVisitor<Void>() {
 
-                @Override
-                public String visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
+                private String getField(JsonPointer field) {
                     if (field.size() != 1) {
                         throw new IllegalArgumentException("Only one level JsonPointer supported");
                     }
-                    return "(" + field.leaf() + " " + operand + " '" + String.valueOf(valueAssertion) + "')";
+
+                    if (Resource.FIELD_CONTENT_ID.equals(field.leaf())) {
+                        return "Id";
+                    } else {
+                        return field.leaf();
+                    }
+                }
+
+                @Override
+                public String visitValueAssertion(Void parameters, String operand, JsonPointer field, Object valueAssertion) {
+                    return "(" + getField(field) + " " + operand + " '" + String.valueOf(valueAssertion) + "')";
                 }
 
                 @Override
                 public String visitPresentFilter(Void parameters, JsonPointer field) {
-                    if (field.size() != 1) {
-                        throw new IllegalArgumentException("Only one level JsonPointer supported");
-                    }
-                    return "(" + field.leaf() + " != null)";
+                    return "(" + getField(field) + " != null)";
                 }
             };
 
