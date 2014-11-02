@@ -78,7 +78,7 @@ chmod a+x bin/${SCRIPT_NAME}
 
 echo
 echo "${SCRIPT_NAME} script has been created in ${OPENIDM_HOME}/bin"
-echo "To finish installation, copy the script in the /etc/init.d folder"
+echo "To finish installation, copy the script to the /etc/init.d folder"
 echo "and run the following command:"
 echo "chkconfig --add openidm"
 echo
