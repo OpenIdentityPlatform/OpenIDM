@@ -91,7 +91,6 @@ if [ "$JPDA" = "jpda" ] ; then
     JPDA_OPTS="-Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=$JPDA_TRANSPORT,address=$JPDA_ADDRESS,server=y,suspend=$JPDA_SUSPEND"
   fi
   OPENIDM_OPTS="$OPENIDM_OPTS $JPDA_OPTS"
-  shift
 fi
 
 CLASSPATH="$OPENIDM_HOME/bin/*:$OPENIDM_HOME/framework/*"
