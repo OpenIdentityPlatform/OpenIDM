@@ -1,5 +1,6 @@
 {
     "name": "google",
+    "enabled": false,
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",

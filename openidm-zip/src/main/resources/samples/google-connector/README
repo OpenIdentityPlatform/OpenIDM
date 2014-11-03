@@ -94,7 +94,7 @@
  Before we start the sample, we have to set the domain, clientId, clientSecret, and refreshToken in our
  provisioner.openicf-google.json.
 
- 1) Edit openidm/samples/google-connector/conf provisioner.openicf-google.json
+ 1) Edit openidm/samples/google-connector/conf/provisioner.openicf-google.json
     ...
     "configurationProperties": {
         "domain": "YOUR_DOMAIN",
@@ -103,6 +103,15 @@
         "refreshToken": "YOUR_CLIENT_REFRESH_TOKEN"
     },
     ...
+
+    Once those properties are set, the connector needs to be enabled by switching the following property
+    from "false" to "true" :
+
+    ...
+    "name": "google",
+    "enabled": true,
+    ...
+
 
  2) To run the sample, start OpenIDM with the configuration for google-connector:
     $ cd /path/to/openidm
@@ -191,6 +200,10 @@
             "_rev":"\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/RfZOwrjqrpRsO6PCGNfEp2H00Ds\""
         }
 
+ Note the complex data structure for the "emails" attribute. Google uses complex data structure for some attributes
+ like email, addresses, phone numbers, etc., which will also appear in some of the queries and result sets below.
+
+
  2) Lets go ahead and UPDATE the User before we READ, using the _id from step 1.
     Request:
         $ curl  --header "X-OpenIDM-Username: openidm-admin"
@@ -272,6 +285,8 @@
             "_id":"101643010677712061243",
             "_rev":"\"SHoRIPAZisvsSqsLJr3m3XS9Uw4/RfZOwrjqrpRsO6PCGNfEp2H00Ds\""
         }
+
+ Note again the complex data structure for "emails" and "phones".
 
  4) Lets CREATE a group that we can stick the user we created above in.
     Request:
@@ -361,17 +376,121 @@
         $ curl  --header "X-OpenIDM-Username: openidm-admin"
                 --header "X-OpenIDM-Password: openidm-admin"
                 --header "Content-Type: application/json"
-                --request POST "http://localhost:8080/openidm/system/google/__ACCOUNT__/101643010677712061243"
+                --request DELETE "http://localhost:8080/openidm/system/google/__ACCOUNT__/101643010677712061243"
     Response:
        {
            "_id":"101643010677712061243"
        }
 
+ ------------------------------------------------------------------------------------------------------
+                            Reconciling Google Users to Managed Users
+ ------------------------------------------------------------------------------------------------------
+
+ A sync.json is included with this sample which maps some user attributes from Google to Managed User entries.
+ To trigger a reconciliation with this mapping, simply issue the following command
+
+    Request :
+        $ curl  --header "X-OpenIDM-Username: openidm-admin"
+                --header "X-OpenIDM-Password: openidm-admin"
+                --header "Content-Type: application/json"
+                --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=sourceGoogle__ACCOUNT___managedUser"
+
+    Response :
+        {"_id":"efefd951-9153-46f6-9446-894805d85173","state":"ACTIVE"}
+
+  A quick look at the reconciliation entry will tell us what happened during the reconciliation process :
+
+    Request :
+        $ curl  --header "X-OpenIDM-Username: openidm-admin"
+                --header "X-OpenIDM-Password: openidm-admin"
+                --header "Content-Type: application/json"
+                --request GET "http://localhost:8080/openidm/recon/efefd951-9153-46f6-9446-894805d85173"
 
 
 
+    Response :
 
-
-
-
+        {
+          "_id" : "efefd951-9153-46f6-9446-894805d85173",
+          "mapping" : "sourceGoogle__ACCOUNT___managedUser",
+          "state" : "SUCCESS",
+          "stage" : "COMPLETED_SUCCESS",
+          "stageDescription" : "reconciliation completed.",
+          "progress" : {
+            "source" : {
+              "existing" : {
+                "processed" : 9,
+                "total" : "9"
+              }
+            },
+            "target" : {
+              "existing" : {
+                "processed" : 8,
+                "total" : "8"
+              },
+              "created" : 0
+            },
+            "links" : {
+              "existing" : {
+                "processed" : 8,
+                "total" : "8"
+              },
+              "created" : 0
+            }
+          },
+          "situationSummary" : {
+            "SOURCE_IGNORED" : 1,
+            "MISSING" : 0,
+            "FOUND" : 0,
+            "AMBIGUOUS" : 0,
+            "UNQUALIFIED" : 0,
+            "CONFIRMED" : 8,
+            "SOURCE_MISSING" : 0,
+            "ABSENT" : 0,
+            "TARGET_IGNORED" : 0,
+            "UNASSIGNED" : 0,
+            "FOUND_ALREADY_LINKED" : 0
+          },
+          "statusSummary" : {
+            "FAILURE" : 0,
+            "SUCCESS" : 9
+          },
+          "parameters" : {
+            "object" : {
+              "sourceQuery" : {
+                "resourceName" : "system/google/__ACCOUNT__",
+                "_queryId" : "query-all-ids"
+              },
+              "targetQuery" : {
+                "resourceName" : "managed/user",
+                "_queryId" : "query-all-ids"
+              }
+            },
+            "pointer" : {
+              "empty" : true
+            },
+            "transformers" : [ ],
+            "set" : false,
+            "collection" : false,
+            "map" : true,
+            "string" : false,
+            "wrappedObject" : {
+              "sourceQuery" : {
+                "resourceName" : "system/google/__ACCOUNT__",
+                "_queryId" : "query-all-ids"
+              },
+              "targetQuery" : {
+                "_queryId" : "query-all-ids",
+                "resourceName" : "managed/user"
+              }
+            },
+            "list" : false,
+            "number" : false,
+            "boolean" : false,
+            "null" : false
+          },
+          "started" : "2014-10-31T14:16:34.721Z",
+          "ended" : "2014-10-31T14:16:35.509Z",
+          "duration" : 788
+        }
 
