@@ -27,6 +27,8 @@ package org.forgerock.openidm.provisioner;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 
+import java.util.Map;
+
 /**
  * Helper methods which assist with generating connector configuration. These methods can be called
  * to validate connector configurations as well as check which connectors are available for configuration.
@@ -41,6 +43,8 @@ public interface ConnectorConfigurationHelper {
     static final String CONFIGURATION_PROPERTIES = "configurationProperties";
     /** the connector name (within connectorRef) */
     static final String CONNECTOR_NAME = "connectorName";
+    /** configuration property that holds the connector object type detail */
+    static final String OBJECT_TYPES = "objectTypes";
 
     /**
      * Return the provisioner type that is used to manage configuration/connectors created by this configuration helper.
@@ -52,13 +56,14 @@ public interface ConnectorConfigurationHelper {
     /**
      * Test the given configuration.
      *
+     *
      * @param params
      *            the configuration to test
      * @throws ResourceException
      *             when the test fails the {@link ResourceException#getDetail()}
      *             contains the detailed information.
      */
-    public void test(JsonValue params) throws ResourceException;
+    public Map<String, Object> test(JsonValue params) throws ResourceException;
 
     /**
      * Get available connectors from an installation
