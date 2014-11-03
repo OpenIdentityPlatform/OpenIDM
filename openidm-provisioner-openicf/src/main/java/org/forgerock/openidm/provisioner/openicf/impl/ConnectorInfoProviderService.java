@@ -86,6 +86,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
@@ -525,24 +526,61 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     @Override
-    public void test(JsonValue params) throws ResourceException {
+    public Map<String, Object> test(JsonValue params) throws ResourceException {
+        JsonValue jv = json(object());
+
+        jv.put("ok", false);
+        jv.put("name", params.get("name").required().asString());
+        params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).required();
+        params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).required();
+
+        ConnectorReference connectorReference = null;
         try {
-            params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).required();
-            params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).required();
-            ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
-            ConnectorInfo info = findConnectorInfo(ref);
-            if (null == info) {
-                throw new ServiceUnavailableException("Connector not found: "
-                        + ref.getConnectorKey());
-            }
-            APIConfiguration configuration = info.createDefaultAPIConfiguration();
-            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration, cryptoService);
-            testConnector(configuration);
-        } catch (ResourceException e) {
-            throw e;
-        } catch (Throwable t) {
-            throw new ServiceUnavailableException(t);
+            connectorReference = ConnectorUtil.getConnectorReference(params);
+        } catch (JsonValueException e) {
+            jv.put("error", "OpenICF Provisioner Service jsonConfiguration has errors: " + e.getMessage());
+            return jv.asMap();
         }
+
+        ConnectorInfo connectorInfo = findConnectorInfo(connectorReference);
+        if (null != connectorInfo) {
+            APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration, cryptoService);
+            ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
+            ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
+            if (null == facade && null != connectorInfoManager) {
+                try {
+                    facade = this.connectorFacadeFactory.newInstance(configuration);
+                } catch (Exception e) {
+                    logger.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
+                    jv.put("error", "OpenICF connector jsonConfiguration has errors: " + e.getMessage());
+                    return jv.asMap();
+                }
+            }
+
+            if (null == facade) {
+                jv.put("error", "OpenICF ConnectorFacade of " + connectorReference + " is not available");
+            } else if (facade.getSupportedOperations().contains(TestApiOp.class)) {
+                try {
+                    facade.test();
+                    jv.put("ok", true);
+                } catch (UnsupportedOperationException e) {
+                    jv.put("reason", "TEST UnsupportedOperation");
+                    jv.put("ok", true);
+                } catch (Throwable e) {
+                    jv.put("error", e.toString());
+                    // exception -- leave "ok" : false
+                }
+            } else {
+                jv.put("reason", "OpenICF connector of " + connectorReference + " does not support test.");
+                jv.put("ok", true);
+            }
+        } else if (connectorReference.getConnectorLocation().equals(ConnectorReference.ConnectorLocation.LOCAL)) {
+            jv.put("error", "OpenICF ConnectorInfo can not be loaded for " + connectorReference + " from #LOCAL");
+        } else {
+            jv.put("error", "OpenICF ConnectorInfo for " + connectorReference + " is not available yet.");
+        }
+        return jv.asMap();
     }
 
     // ----- Implementation of ConnectorInfoProvider interface

@@ -118,7 +118,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         /** Test a connector to see if the connection is available */
         test,
         /** Test an existing connector configuration */
-        testConfig,
+        testConfig {
+            @Override
+            boolean requiresConnectorConfigurationHelper(JsonValue requestContent) {
+                return true;
+            }
+        },
         /** Multi phase configuration event calls this to generate the response */
         createConfiguration {
             /**
@@ -231,11 +236,16 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             final ProvisionerService ps;
             final JsonValue content = request.getContent();
             final JsonValue id = content.get("id");
+            final JsonValue name = content.get("name");
             final SystemAction action = request.getActionAsEnum(SystemAction.class);
             String provisionerType = null;
 
             if (action.requiresConnectorConfigurationHelper(content)) {
-                provisionerType = getProvisionerType(content.get(CONNECTOR_REF).get(CONNECTOR_NAME).asString());
+                final String connectorName = content.get(CONNECTOR_REF).get(CONNECTOR_NAME).asString();
+                if (connectorName == null) {
+                    throw new NotFoundException("No connector name provided");
+                }
+                provisionerType = getProvisionerType(connectorName);
                 if (provisionerType == null || !connectorConfigurationHelpers.containsKey(provisionerType)) {
                     throw new ServiceUnavailableException("The required service is not available");
                 }
@@ -265,22 +275,31 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 if (!id.isNull()) {
                     throw new BadRequestException("A system ID must not be specified in the request");
                 }
-                ps = locateServiceForTest(config.get("name"));
-                if (ps == null) {
+                if (name.isNull()) {
                     throw new BadRequestException("Invalid configuration to test: no 'name' specified");
                 }
-                handler.handleResult(new JsonValue(ps.testConfig(config)));
+                ps = locateServiceForTest(name);
+                if (ps != null) {
+                    handler.handleResult(new JsonValue(ps.testConfig(config)));
+                } else {
+                    // service for config-name doesn't exist; test it using the ConnectorConfigurationHelper
+                    handler.handleResult(new JsonValue(helper.test(config)));
+                }
                 break;
             case test:
-                ps = locateServiceForTest(id);
-                if (ps != null) {
-                    handler.handleResult(new JsonValue(ps.getStatus(context)));
-                } else {
+                if (id.isNull()) {
                     List<Object> list = new ArrayList<Object>();
                     for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
                         list.add(entry.getValue().getStatus(context));
                     }
                     handler.handleResult(new JsonValue(list));
+                } else {
+                    ps = locateServiceForTest(id);
+                    if (ps == null) {
+                        throw new NotFoundException("System: " + id.asString() + " is not available.");
+                    } else {
+                        handler.handleResult(new JsonValue(ps.getStatus(context)));
+                    }
                 }
                 break;
             case activeSync:
@@ -305,7 +324,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 handler.handleResult(helper.generateConnectorCoreConfig(content));
                 break;
             case createFullConfig:
-                // state 3 - direct action to create full configuration
+                // stage 3 - direct action to create full configuration
                 handler.handleResult(helper.generateConnectorFullConfig(content));
                 break;
             default:
@@ -484,6 +503,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             }
         }
 
-        throw new NotFoundException("System: " + requestId.asString() + " is not available.");
+        return null;
     }
 }

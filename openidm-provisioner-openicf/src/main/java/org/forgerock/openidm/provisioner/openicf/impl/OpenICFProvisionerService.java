@@ -25,6 +25,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.forgerock.json.fluent.JsonValue.array;
 import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 import static org.forgerock.util.Iterables.filter;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
@@ -1960,18 +1961,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     public Map<String, Object> testConfig(JsonValue config) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        JsonValue jv = new JsonValue(result);
-        jv.add("name", systemIdentifier.getName());
-        jv.add("ok", false);
+        JsonValue jv = json(object());
+        jv.put("name", systemIdentifier.getName());
+        jv.put("ok", false);
         SimpleSystemIdentifier testIdentifier = null;
         ConnectorReference connectorReference = null;
         try {
             testIdentifier = new SimpleSystemIdentifier(config);
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
         } catch (JsonValueException e) {
-            jv.add("error", "OpenICF Provisioner Service jsonConfiguration has errors: " + e.getMessage());
-            return result;
+            jv.put("error", "OpenICF Provisioner Service jsonConfiguration has errors: " + e.getMessage());
+            return jv.asMap();
         }
 
         ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
@@ -1983,8 +1983,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
                 facade = connectorFacadeFactory.newInstance(ohb.getRuntimeAPIConfiguration());
             } catch (Exception e) {
-                jv.add("error", "OpenICF connector jsonConfiguration has errors: " + e.getMessage());
-                return result;
+                jv.put("error", "OpenICF connector jsonConfiguration has errors: " + e.getMessage());
+                return jv.asMap();
             }
 
             if (null != facade && facade.getSupportedOperations().contains(TestApiOp.class)) {
@@ -1994,20 +1994,20 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     jv.put("reason", "TEST UnsupportedOperation");
                 } catch (Throwable e) {
                     jv.put("error", e.getMessage());
-                    return result;
+                    return jv.asMap();
                 }
                 jv.put("ok", true);
             } else if (null == facade) {
-                jv.add("error", "OpenICF ConnectorFacade of " + connectorReference + " is not available");
+                jv.put("error", "OpenICF ConnectorFacade of " + connectorReference + " is not available");
             } else {
-                jv.add("error", "OpenICF connector of " + connectorReference + " does not support test.");
+                jv.put("error", "OpenICF connector of " + connectorReference + " does not support test.");
             }
         } else if (connectorReference.getConnectorLocation().equals(ConnectorReference.ConnectorLocation.LOCAL)) {
-            jv.add("error", "OpenICF ConnectorInfo can not be loaded for " + connectorReference + " from #LOCAL");
+            jv.put("error", "OpenICF ConnectorInfo can not be loaded for " + connectorReference + " from #LOCAL");
         } else {
-            jv.add("error", "OpenICF ConnectorInfo for " + connectorReference + " is not available yet.");
+            jv.put("error", "OpenICF ConnectorInfo for " + connectorReference + " is not available yet.");
         }
-        return result;
+        return jv.asMap();
     }
 
     /**
