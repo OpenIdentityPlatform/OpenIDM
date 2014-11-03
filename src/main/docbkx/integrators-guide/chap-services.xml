@@ -83,27 +83,9 @@
 ...
 $ rm -rf felix-cache/*</screen>
    </listitem>
-   <listitem>
-    <para>Disable <literal>ConsoleHandler</literal> logging before starting
-    OpenIDM by editing <filename>openidm/conf/logging.properties</filename>
-    to set <literal>java.util.logging.ConsoleHandler.level = OFF</literal>,
-    and to comment out other references to <literal>ConsoleHandler</literal>,
-    as shown in the following excerpt.</para>
-    <programlisting language="ini">
-# ConsoleHandler: A simple handler for writing formatted records to System.err
-#handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
-handlers=java.util.logging.FileHandler
-...
-# --- ConsoleHandler ---
-# Default: java.util.logging.ConsoleHandler.level = INFO
-java.util.logging.ConsoleHandler.level = OFF
-#java.util.logging.ConsoleHandler.formatter = ...
-#java.util.logging.ConsoleHandler.filter=...</programlisting>
-   </listitem>
-   <listitem>
-    <para>Remove the text-based OSGi console bundle,
-    <filename>bundle/org.apache.felix.shell.tui-<replaceable>version</replaceable>.jar</filename>.</para>
-   </listitem>
+
+   <!-- Info on console handler logging moved to logging chapter -->
+
    <listitem>
     <para>Start OpenIDM in the background.</para>
     <screen>$ ./startup.sh &amp;
@@ -123,6 +105,22 @@ $</screen>
   <screen>$ ./shutdown.sh
 ./shutdown.sh
 Stopping OpenIDM (454)</screen>
+
+  <para>
+   If you start OpenIDM in the background, and the job stops immediately after
+   startup, refer to the following troubleshooting tip:
+   <link xlink:role="http://docbook.org/xlink/role/olink"
+   xlink:show="new" xlink:href="integrators-guide#stops-when-backgrounded">
+   <citetitle>OpenIDM Stopped in Background</citetitle></link>.
+  </para>
+
+  <para>
+   If you want to disable <literal>ConsoleHandler</literal> logging, refer to
+   the chapter on <link xlink:href="integrators-guide#server-logs"
+   xlink:show="new" xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Configuring Server Logs</citetitle></link>.
+  </para>
+
  </section>
  
  <section xml:id="startup-configuration">
