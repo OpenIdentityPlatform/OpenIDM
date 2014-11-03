@@ -44,17 +44,25 @@
   To configure logging, edit the
   <filename>openidm/conf/logging.properties</filename> file.
  </para>
- <para>
-  The default configuration writes log messages in simple format to
-  <filename>openidm/logs/openidm*.log</filename> files, rotating files when the
-  size reaches 5 MB, and retaining up to 5 files. Also by default, OpenIDM
-  writes all system and custom log messages to the files.
- </para>
- <para>
-  You can update the configuration to attach loggers to individual packages,
-  setting the log level to one of the following values.
- </para>
- <programlisting language="none">
+
+ <section xml:id="log-messages">
+  <title>Log Message Files</title>
+
+  <para>
+   The default configuration writes log messages in simple format to
+   <filename>openidm/logs/openidm*.log</filename> files, rotating files when the
+   size reaches 5 MB, and retaining up to 5 files. Also by default, OpenIDM
+   writes all system and custom log messages to the files.
+  </para>
+ </section>
+
+ <section xml:id="log-levels">
+  <title>Logging Levels</title>
+  <para>
+   You can update the configuration to attach loggers to individual packages,
+   setting the log level to one of the following values.
+  </para>
+  <programlisting language="none">
 SEVERE (highest value)
 WARNING
 INFO
@@ -63,19 +71,44 @@ FINE
 FINER
 FINEST (lowest value)</programlisting>
 
- <para>
-  If you use <literal>logger</literal> functions in your JavaScript scripts, you
-  can set the log level for the scripts as follows:
- </para>
+  <para>
+   If you use <literal>logger</literal> functions in your JavaScript scripts, you
+   can set the log level for the scripts as follows:
+  </para>
 
- <literallayout class="monospaced"
+  <literallayout class="monospaced"
 >org.forgerock.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
 
- <para>
-  You can override the log level settings per script by using
- </para>
+  <para>
+   You can override the log level settings per script by using
+  </para>
 
- <literallayout class="monospaced"
+  <literallayout class="monospaced"
 >org.forgerock.script.javascript.JavaScript.<replaceable>script-name</replaceable>.level</literallayout>
+ </section>
+
+ <section xml:id="log-disabling">
+  <title>Disabling Logs</title>
+
+  <para>
+   You can also disable logs if desired. For example, before starting OpenIDM,
+   you can disable <literal>ConsoleHandler</literal> logging in the same
+   <filename>openidm/conf/logging.properties</filename> file.
+  </para>
+  <para>
+    Just set <literal>java.util.logging.ConsoleHandler.level = OFF</literal>,
+    and comment out other references to <literal>ConsoleHandler</literal>,
+    as shown in the following excerpt.</para>
+   <programlisting language="ini">
+   # ConsoleHandler: A simple handler for writing formatted records to System.err
+   #handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+   handlers=java.util.logging.FileHandler
+   ...
+   # --- ConsoleHandler ---
+   # Default: java.util.logging.ConsoleHandler.level = INFO
+   java.util.logging.ConsoleHandler.level = OFF
+   #java.util.logging.ConsoleHandler.formatter = ...
+   #java.util.logging.ConsoleHandler.filter=...</programlisting>
+ </section>
 
 </chapter>
