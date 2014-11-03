@@ -57,7 +57,8 @@
                 "includes":[
                     "**/openidm-cluster*.jar",
                     "**/openidm-httpcontext-*.jar",
-                    "**/groovy-all*.jar"
+                    "**/groovy-all*.jar",
+                    "**/org.restlet*.jar"
                 ],
                 "start-level":9,
                 "action":"install.start"
@@ -85,7 +86,8 @@
                     "**/pax-web-jetty-bundle*.jar",
                     "**/openidm-scheduler*.jar",
                     "**/groovy-all*.jar",
-                    "**/openidm-httpclient-fragment*.jar"
+                    "**/openidm-httpclient-fragment*.jar",
+                    "**/org.restlet*.jar"
                 ]
             },
             {
