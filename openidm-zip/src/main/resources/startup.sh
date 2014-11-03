@@ -57,10 +57,10 @@ PROJECT_HOME=$OPENIDM_HOME
 CLOPTS=""
 JPDA=""
 while [ "$1" ]; do
-    if [ "$1" == "jpda" ]; then
+    if [ "$1" = "jpda" ]; then
         JPDA=$1
     else
-        if [ "$1" == "-p" ] && [ "$2" ]; then
+        if [ "$1" = "-p" ] && [ "$2" ]; then
             PROJECT_HOME="$OPENIDM_HOME/$2"
         fi
         CLOPTS="$CLOPTS $1"
