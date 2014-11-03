@@ -347,7 +347,7 @@ public class SalesforceConfiguration {
     /**
      * {@inheritDoc}
      */
-    public void validate() {
+    public SalesforceConfiguration validate() {
         if (StringUtils.isBlank(clientId)) {
             throw new IllegalArgumentException("Parameter 'clientId' must not be blank.");
         }
@@ -366,6 +366,7 @@ public class SalesforceConfiguration {
         } else if (StringUtils.isBlank(getRefreshToken())) {
             throw new IllegalArgumentException("Parameter 'refreshToken' must not be blank.");
         }
+        return this;
     }
 
     public Form getAuthenticationForm() {

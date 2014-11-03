@@ -33,7 +33,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -64,10 +63,6 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
 
     private JsonValue configurationProperties = json(object());
 
-    private static final List<JsonPointer> PROPERTIES_TO_ENCRYPT = Arrays.asList(
-            new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, "clientSecret" } ),
-            new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, "refreshToken" } ));
-
     /**
      * Cryptographic service.
      */
@@ -76,7 +71,7 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
 
     @Activate
     void activate(ComponentContext context) throws Exception {
-        connectorData = SalesforceConnectorInfo.getConnectorInfo(context.getBundleContext().getBundle());
+        connectorData = SalesforceConnectorUtil.getConnectorInfo(context.getBundleContext().getBundle());
         configurationProperties = json(object(
                 field("clientId", null),
                 field("clientSecret", null),
@@ -106,12 +101,25 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
      * {@inheritDoc}
      */
     @Override
-    public void test(JsonValue params) throws ResourceException {
-        SalesforceConfiguration config = SalesforceConnection.mapper.convertValue(
-                params.get(CONFIGURATION_PROPERTIES).required().expect(Map.class).asMap(),
-                SalesforceConfiguration.class);
-        SalesforceConnection connection = new SalesforceConnection(config);
-        connection.test();
+    public Map<String, Object> test(JsonValue params) throws ResourceException {
+        JsonValue jv = json(object());
+
+        jv.put("ok", false);
+        jv.put("name", params.get("name").required().asString());
+        params.get(CONNECTOR_REF).required();
+        params.get(CONFIGURATION_PROPERTIES).required();
+
+        try {
+            // validate and test the configuration properties we were given
+            new SalesforceConnection(
+                    SalesforceConnectorUtil.parseConfiguration(params, cryptoService)
+                    .validate())
+                .test();
+            jv.put("ok", true);
+        } catch (Exception e) {
+            jv.put("error", e.getMessage());
+        }
+        return jv.asMap();
     }
 
     /**
@@ -146,12 +154,13 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
             for (String property : sourceProperties.keys()) {
                 if (configurationProperties.keys().contains(property)) {
                     final Object propertyValue;
-                    if (PROPERTIES_TO_ENCRYPT.contains(new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, property }))
+                    if (propertyShouldBeEncrypted(property)
                             && !JsonCrypto.isJsonCrypto(params.get(property))) {
                         propertyValue = cryptoService.encrypt(sourceProperties.get(property),
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER,
-                                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default"))
-                                .getObject();
+                                IdentityServer.getInstance().getProperty(
+                                    "openidm.config.crypto.alias", "openidm-config-default"))
+                            .getObject();
                     } else {
                         propertyValue = sourceProperties.get(property).getObject();
                     }
@@ -167,11 +176,17 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
         return fullConfig;
     }
 
+    private boolean propertyShouldBeEncrypted(String property) {
+        return SalesforceConnectorUtil.PROPERTIES_TO_ENCRYPT.contains(
+                new JsonPointer(new String[] { CONFIGURATION_PROPERTIES, property }));
+    }
+
     // --- MetaDataProvider implementation
 
     @Override
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) throws WaitForMetaData, NotConfiguration {
-        return PROPERTIES_TO_ENCRYPT;
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config)
+            throws WaitForMetaData, NotConfiguration {
+        return SalesforceConnectorUtil.PROPERTIES_TO_ENCRYPT;
     }
 
     @Override

@@ -56,6 +56,7 @@ import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
@@ -142,6 +143,12 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         this.activityLogger = NullActivityLogger.INSTANCE;
     }
 
+    /**
+     * Cryptographic service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected CryptoService cryptoService = null;
+
     private final ConcurrentMap<String, SObjectDescribe> schema = new ConcurrentHashMap<String, SObjectDescribe>();
 
     /* Internal routing objects to register and remove the routes. */
@@ -168,7 +175,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
 
         try {
-            config = parseConfiguration(jsonConfiguration.get("configurationProperties"));
+            config = SalesforceConnectorUtil.parseConfiguration(jsonConfiguration, cryptoService);
         } catch (Exception ex) {
             // Invalid configuration value, permanent error.
             logger.warn("Invlaid configuration - can not start Salesforce Connector: " + ex.getMessage(), ex);
@@ -244,11 +251,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
     }
 
-    private SalesforceConfiguration parseConfiguration(JsonValue config) {
-        return SalesforceConnection.mapper.convertValue(
-                config.required().expect(Map.class).asMap(), SalesforceConfiguration.class);
-    }
-
     private String getPartition(ServerContext context) throws ResourceException {
         Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
         if (null != variables && variables.containsKey("partition")) {
@@ -296,7 +298,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("name", systemIdentifier.getName());
         try {
-            parseConfiguration(config.get("configurationProperties")).validate();
+            SalesforceConnectorUtil.parseConfiguration(config, cryptoService).validate();
             map.put("ok", true);
         } catch (Exception e) {
             e.printStackTrace();
