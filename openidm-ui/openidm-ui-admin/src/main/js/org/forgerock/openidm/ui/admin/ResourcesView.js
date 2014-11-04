@@ -117,10 +117,13 @@ define("org/forgerock/openidm/ui/admin/ResourcesView", [
         },
 
         deleteConnections: function(event) {
-            var selectedItems = $(event.currentTarget).parents(".resource-body");
+            var selectedItems = $(event.currentTarget).parents(".resource-body"),
+                url;
 
             uiUtils.jqConfirm($.t("templates.connector.connectorDelete"), function(){
-                ConfigDelegate.deleteEntity("provisioner.openicf/" +selectedItems.attr("data-connector-title")).then(function(){
+                url = selectedItems.attr("data-connector-title").split("_");
+
+                ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
                         selectedItems.remove();
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
